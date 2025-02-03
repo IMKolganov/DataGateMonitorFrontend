@@ -1,0 +1,117 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { FaSync } from "react-icons/fa";
+import { ServerInfo, ConnectedClient } from "../components/types";
+import ServerInfoComponent from "../components/ServerInfo";
+import ClientsTable from "../components/ClientsTable";
+import VpnMap from "../components/VpnMap";
+import RefreshIntervalSetter from "../components/RefreshIntervalSetter";
+import ServiceControls from "../components/ServiceControls";
+import NextRefreshTimer from "../components/NextRefreshTimer";
+
+export function Dashboard() {
+  const [serverInfo, setServerInfo] = useState<ServerInfo | null>(null);
+  const [clients, setClients] = useState<ConnectedClient[]>([]);
+  const [serviceStatus, setServiceStatus] = useState<string>("Unknown");
+  const [nextRunTime, setNextRunTime] = useState<string>("N/A");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [refreshInterval, setRefreshInterval] = useState<number>(
+    Number(Cookies.get("refreshInterval")) || 60
+  );
+  const [nextRefreshTime, setNextRefreshTime] = useState<number>(Date.now() + refreshInterval * 1000);
+  const [ws, setWs] = useState<WebSocket | null>(null);
+
+  useEffect(() => {
+    fetchData();
+    connectWebSocket();
+
+    return () => ws?.close();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(fetchData, refreshInterval * 1000);
+    return () => clearInterval(interval);
+  }, [refreshInterval]);
+
+  const connectWebSocket = () => {
+    const socket = new WebSocket("ws://localhost:5580/OpenVpnServer/status-stream");
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setServiceStatus(data.status);
+      setNextRunTime(new Date(data.nextRunTime).toLocaleString());
+    };
+
+    socket.onclose = () => {
+      console.warn("WebSocket disconnected, retrying in 5 seconds...");
+      setTimeout(connectWebSocket, 5000);
+    };
+
+    setWs(socket);
+  };
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [serverRes, clientsRes] = await Promise.all([
+        axios.get<ServerInfo>("http://localhost:5580/OpenVpnServer/GetServerInfo"),
+        axios.get<ConnectedClient[]>("http://localhost:5580/OpenVpnServer/GetAllConnectedClients"),
+      ]);
+
+      setServerInfo(serverRes.data);
+      setClients(clientsRes.data || []);
+    } catch (error) {
+      console.error("Error fetching data", error);
+    } finally {
+      setLoading(false);
+      scheduleNextRefresh();
+    }
+  };
+
+  const scheduleNextRefresh = () => {
+    setNextRefreshTime(Date.now() + refreshInterval * 1000);
+  };
+
+  const handleRunNow = async () => {
+    try {
+      await axios.post("http://localhost:5580/OpenVpnServer/run-now");
+      fetchData();
+    } catch (error) {
+      console.error("Error running service manually", error);
+    }
+  };
+
+  return (
+    <div>
+      <h2>VPN Server:</h2>
+      <ServerInfoComponent serverInfo={serverInfo} />
+
+      <button className="btn secondary" onClick={fetchData} disabled={loading}>
+        <FaSync className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
+      </button>
+
+      <h2>VPN Clients:</h2>
+      <ClientsTable clients={clients} />
+
+      <h2>VPN Client Locations:</h2>
+      <VpnMap clients={clients} />
+
+      <RefreshIntervalSetter
+        refreshInterval={refreshInterval}
+        setRefreshInterval={setRefreshInterval}
+        onSave={scheduleNextRefresh}
+      />
+
+      <NextRefreshTimer nextRefreshTime={nextRefreshTime} onReset={scheduleNextRefresh} />
+
+      <ServiceControls
+        serviceStatus={serviceStatus}
+        nextRunTime={nextRunTime}
+        onRunNow={handleRunNow}
+      />
+    </div>
+  );
+}
+
+export default Dashboard;
