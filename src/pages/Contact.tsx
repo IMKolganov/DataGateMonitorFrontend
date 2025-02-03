@@ -6,7 +6,7 @@ const Contact: React.FC = () => {
       <h2>Contact</h2>
       <p>For inquiries, reach out via:</p>
       <ul>
-        <li>GitHub: <a href="https://github.com/imKolganov" target="_blank" rel="noopener noreferrer">imKolganov</a></li>
+        <li>GitHub: <a href="https://github.com/ΙΜKolganov" target="_blank" rel="noopener noreferrer">ΙΜKolganov</a></li>
         <li>Telegram: <a href="https://t.me/KolganovIvan" target="_blank" rel="noopener noreferrer">@KolganovIvan</a></li>
       </ul>
     </div>

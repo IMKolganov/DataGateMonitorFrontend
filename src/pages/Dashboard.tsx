@@ -10,7 +10,14 @@ import RefreshIntervalSetter from "../components/RefreshIntervalSetter";
 import ServiceControls from "../components/ServiceControls";
 import NextRefreshTimer from "../components/NextRefreshTimer";
 
+interface Config {
+  apiBaseUrl: string;
+  webSocketUrl: string;
+  defaultRefreshInterval: number;
+}
+
 export function Dashboard() {
+  const [config, setConfig] = useState<Config | null>(null);
   const [serverInfo, setServerInfo] = useState<ServerInfo | null>(null);
   const [clients, setClients] = useState<ConnectedClient[]>([]);
   const [serviceStatus, setServiceStatus] = useState<string>("Unknown");
@@ -23,19 +30,39 @@ export function Dashboard() {
   const [ws, setWs] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    fetchData();
-    connectWebSocket();
-
-    return () => ws?.close();
+    loadConfig();
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(fetchData, refreshInterval * 1000);
-    return () => clearInterval(interval);
-  }, [refreshInterval]);
+    if (config) {
+      fetchData();
+      connectWebSocket();
+    }
+    return () => ws?.close();
+  }, [config]);
+
+  useEffect(() => {
+    if (config) {
+      const interval = setInterval(fetchData, refreshInterval * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [refreshInterval, config]);
+
+  const loadConfig = async () => {
+    try {
+      const response = await fetch("/config.json");
+      const data: Config = await response.json();
+      setConfig(data);
+      setRefreshInterval(Number(Cookies.get("refreshInterval")) || data.defaultRefreshInterval);
+    } catch (error) {
+      console.error("Failed to load configuration:", error);
+    }
+  };
 
   const connectWebSocket = () => {
-    const socket = new WebSocket("ws://localhost:5581/OpenVpnServer/status-stream");
+    if (!config) return;
+
+    const socket = new WebSocket(config.webSocketUrl);
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -52,11 +79,13 @@ export function Dashboard() {
   };
 
   const fetchData = async () => {
+    if (!config) return;
+
     setLoading(true);
     try {
       const [serverRes, clientsRes] = await Promise.all([
-        axios.get<ServerInfo>("http://localhost:5581/OpenVpnServer/GetServerInfo"),
-        axios.get<ConnectedClient[]>("http://localhost:5581/OpenVpnServer/GetAllConnectedClients"),
+        axios.get<ServerInfo>(`${config.apiBaseUrl}/OpenVpnServer/GetServerInfo`),
+        axios.get<ConnectedClient[]>(`${config.apiBaseUrl}/OpenVpnServer/GetAllConnectedClients`),
       ]);
 
       setServerInfo(serverRes.data);
@@ -74,8 +103,10 @@ export function Dashboard() {
   };
 
   const handleRunNow = async () => {
+    if (!config) return;
+
     try {
-      await axios.post("http://localhost:5581/OpenVpnServer/run-now");
+      await axios.post(`${config.apiBaseUrl}/OpenVpnServer/run-now`);
       fetchData();
     } catch (error) {
       console.error("Error running service manually", error);

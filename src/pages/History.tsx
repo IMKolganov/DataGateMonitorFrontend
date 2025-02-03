@@ -5,19 +5,42 @@ import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
 import { FaSync } from "react-icons/fa";
 
+interface Config {
+  apiBaseUrl: string;
+}
+
 const History: React.FC = () => {
+  const [config, setConfig] = useState<Config | null>(null);
   const [clients, setClients] = useState<ConnectedClient[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchHistoryClients();
+    loadConfig();
   }, []);
 
+  useEffect(() => {
+    if (config) {
+      fetchHistoryClients();
+    }
+  }, [config]);
+
+  const loadConfig = async () => {
+    try {
+      const response = await fetch("/config.json");
+      const data: Config = await response.json();
+      setConfig(data);
+    } catch (error) {
+      console.error("Failed to load configuration:", error);
+    }
+  };
+
   const fetchHistoryClients = async () => {
+    if (!config) return;
+
     setLoading(true);
     try {
-      const response = await axios.get<ConnectedClient[]>("http://localhost:5580/OpenVpnServer/GetAllHistoryClients");
+      const response = await axios.get<ConnectedClient[]>(`${config.apiBaseUrl}/OpenVpnServer/GetAllHistoryClients`);
       setClients(response.data);
     } catch (error) {
       console.error("Error fetching history clients", error);

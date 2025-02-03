@@ -27,7 +27,7 @@ dotnet restore
 dotnet run
 ```
 By default, the server will be available at:
-📡 `http://localhost:5580`
+📡 `http://localhost:5581`
 
 ---
 
@@ -43,7 +43,7 @@ npm install
 ```sh
 npm start
 ```
-📌 Open `http://localhost:3000/` in your browser.
+📌 Open `http://localhost:5582/` in your browser.
 
 ---
 
@@ -67,7 +67,7 @@ The backend uses **`appsettings.json`** for API configuration:
 For frontend configuration, create a `.env` file in the `frontend` directory:
 
 ```sh
-REACT_APP_API_URL=http://localhost:5580
+REACT_APP_API_URL=http://localhost:5581
 ```
 
 ---
