@@ -35,7 +35,7 @@ export function Dashboard() {
   }, [refreshInterval]);
 
   const connectWebSocket = () => {
-    const socket = new WebSocket("ws://localhost:5580/OpenVpnServer/status-stream");
+    const socket = new WebSocket("ws://localhost:5581/OpenVpnServer/status-stream");
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -55,8 +55,8 @@ export function Dashboard() {
     setLoading(true);
     try {
       const [serverRes, clientsRes] = await Promise.all([
-        axios.get<ServerInfo>("http://localhost:5580/OpenVpnServer/GetServerInfo"),
-        axios.get<ConnectedClient[]>("http://localhost:5580/OpenVpnServer/GetAllConnectedClients"),
+        axios.get<ServerInfo>("http://localhost:5581/OpenVpnServer/GetServerInfo"),
+        axios.get<ConnectedClient[]>("http://localhost:5581/OpenVpnServer/GetAllConnectedClients"),
       ]);
 
       setServerInfo(serverRes.data);
@@ -75,7 +75,7 @@ export function Dashboard() {
 
   const handleRunNow = async () => {
     try {
-      await axios.post("http://localhost:5580/OpenVpnServer/run-now");
+      await axios.post("http://localhost:5581/OpenVpnServer/run-now");
       fetchData();
     } catch (error) {
       console.error("Error running service manually", error);
