@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { FaSync } from "react-icons/fa";
+import { FaSync, FaSave } from "react-icons/fa";
 import { ServerInfo, ConnectedClient } from "../components/types";
 import ServerInfoComponent from "../components/ServerInfo";
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
-import RefreshIntervalSetter from "../components/RefreshIntervalSetter";
 import ServiceControls from "../components/ServiceControls";
 import NextRefreshTimer from "../components/NextRefreshTimer";
 
@@ -113,26 +112,40 @@ export function Dashboard() {
     }
   };
 
+  const handleSaveInterval = () => {
+    Cookies.set("refreshInterval", String(refreshInterval), { expires: 365 });
+    scheduleNextRefresh();
+  };
+
   return (
     <div>
       <h2>VPN Server:</h2>
       <ServerInfoComponent serverInfo={serverInfo} />
 
-      <button className="btn secondary" onClick={fetchData} disabled={loading}>
-        <FaSync className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
-      </button>
-
       <h2>VPN Clients:</h2>
       <ClientsTable clients={clients} />
 
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px" }}>
+        <label>
+          Auto-refresh every (seconds):&nbsp;
+          <input
+            type="number"
+            className="input-number"
+            value={refreshInterval}
+            onChange={(e) => setRefreshInterval(Math.max(5, Number(e.target.value)))}
+            min="5"
+          />
+        </label>
+        <button className="btn primary" onClick={handleSaveInterval}>
+          <FaSave /> Set
+        </button>
+        <button className="btn secondary" onClick={fetchData} disabled={loading}>
+          <FaSync className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
+        </button>
+      </div>
+
       <h2>VPN Client Locations:</h2>
       <VpnMap clients={clients} />
-
-      <RefreshIntervalSetter
-        refreshInterval={refreshInterval}
-        setRefreshInterval={setRefreshInterval}
-        onSave={scheduleNextRefresh}
-      />
 
       <NextRefreshTimer nextRefreshTime={nextRefreshTime} onReset={scheduleNextRefresh} />
 

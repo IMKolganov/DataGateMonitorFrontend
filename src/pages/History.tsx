@@ -12,7 +12,7 @@ interface Config {
 const History: React.FC = () => {
   const [config, setConfig] = useState<Config | null>(null);
   const [clients, setClients] = useState<ConnectedClient[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,8 +37,9 @@ const History: React.FC = () => {
 
   const fetchHistoryClients = async () => {
     if (!config) return;
-
     setLoading(true);
+    setError(null);
+
     try {
       const response = await axios.get<ConnectedClient[]>(`${config.apiBaseUrl}/OpenVpnServer/GetAllHistoryClients`);
       setClients(response.data);
@@ -51,24 +52,29 @@ const History: React.FC = () => {
   };
 
   return (
-    <div>
+    <div style={{ padding: "20px" }}>
       <h2>VPN Connection History</h2>
 
-      <button className="btn secondary" onClick={fetchHistoryClients} disabled={loading}>
-        <FaSync className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
-      </button>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+        <button
+          className="btn secondary"
+          onClick={fetchHistoryClients}
+          disabled={loading}
+        >
+          <FaSync className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
+        </button>
+      </div>
 
-      {loading && <p>Loading...</p>}
       {error && <p className="error">{error}</p>}
 
-      {!loading && !error && clients.length > 0 ? (
+      {clients.length > 0 ? (
         <>
           <ClientsTable clients={clients} />
           <h2>Historical VPN Client Locations</h2>
           <VpnMap clients={clients} />
         </>
       ) : (
-        !loading && <p>No historical clients found.</p>
+        <p>{loading ? "Loading..." : "No historical clients found."}</p>
       )}
     </div>
   );
