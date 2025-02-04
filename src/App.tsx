@@ -5,6 +5,7 @@ import { Header } from "./components/Header";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import History from "./pages/History";
+import Certificates from "./pages/Certificates";
 
 import "./App.css";
 
@@ -18,6 +19,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/history" element={<History />} />
+            <Route path="/certificates" element={<Certificates />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>
