@@ -7,9 +7,7 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
-RUN npm install -g npm@latest
-
-# Install all dependencies (including devDependencies)
+# Устанавливаем зависимости
 RUN npm ci
 
 # Copy the rest of the app
@@ -21,10 +19,7 @@ ENV GENERATE_SOURCEMAP=false
 ENV DISABLE_ESLINT_PLUGIN=true
 ENV REACT_APP_FAST_REFRESH=false
 
-# use esbuild
-RUN npm install --save-dev react-scripts-esbuild
-
-# Build the app 
+# Build the app
 RUN npm run build
 
 # Remove node_modules and install only production dependencies
