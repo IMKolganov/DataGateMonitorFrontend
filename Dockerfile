@@ -7,7 +7,9 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
-# Устанавливаем зависимости
+RUN npm install -g npm@latest
+
+# Install all dependencies (including devDependencies)
 RUN npm ci
 
 # Copy the rest of the app
