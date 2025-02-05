@@ -54,7 +54,7 @@ const History: React.FC = () => {
   return (
     <div style={{ padding: "20px" }}>
       <h2>VPN Connection History</h2>
-
+      <div style={{borderTop: "1px solid #d1d5da",  marginTop: "5px", padding: "5px"}}></div>
       <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
         <button
           className="btn secondary"
@@ -67,15 +67,11 @@ const History: React.FC = () => {
 
       {error && <p className="error">{error}</p>}
 
-      {clients.length > 0 ? (
-        <>
-          <ClientsTable clients={clients} />
-          <h2>Historical VPN Client Locations</h2>
-          <VpnMap clients={clients} />
-        </>
-      ) : (
-        <p>{loading ? "Loading..." : "No historical clients found."}</p>
-      )}
+      <ClientsTable clients={clients} />
+      <h2>Historical VPN Client Locations</h2>
+      <div style={{borderTop: "1px solid #d1d5da"}}></div>
+      <VpnMap clients={clients} />
+
     </div>
   );
 };

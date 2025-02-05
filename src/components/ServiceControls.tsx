@@ -61,6 +61,7 @@ export default function ServiceControls({ serviceStatus, nextRunTime, onRunNow }
   return (
     <div className="service-status-container">
       <h2>Service Control</h2>
+      <div style={{borderTop: "1px solid #d1d5da" }}></div>
       <p>
         <strong>Service Status:</strong>{" "}
         <span style={{ color: getStatusColor() }}>{serviceStatus}</span>

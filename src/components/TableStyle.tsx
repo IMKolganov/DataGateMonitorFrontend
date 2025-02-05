@@ -1,22 +1,7 @@
-import React, { ReactNode } from "react";
-import { ThemeProvider, createTheme, styled } from "@mui/material/styles";
 import { DataGrid } from "@mui/x-data-grid";
+import { styled } from "@mui/material/styles";
 
-const githubDarkTheme = createTheme({
-  palette: {
-    mode: "dark",
-    background: {
-      default: "#0d1117",
-      paper: "#161b22",
-    },
-    text: {
-      primary: "#c9d1d9",
-      secondary: "#8b949e",
-    },
-  },
-});
-
-export const StyledDataGrid = styled(DataGrid)({
+const StyledDataGrid = styled(DataGrid)({
   fontFamily: "monospace",
   border: "none",
   "& .MuiDataGrid-columnHeaders": {
@@ -41,29 +26,32 @@ export const StyledDataGrid = styled(DataGrid)({
     color: "#c9d1d9",
     borderTop: "1px solid #30363d",
   },
+  "& .MuiDataGrid-root": {
+    overflow: "hidden",
+  },
+  "& .MuiDataGrid-virtualScroller": {
+    overflowX: "hidden",
+    overflowY: "auto",
+    scrollbarWidth: "thin",
+    scrollbarColor: "#30363d #0d1117",
+    "&::-webkit-scrollbar": {
+      width: "8px",
+      height: "8px",
+    },
+    "&::-webkit-scrollbar-track": {
+      backgroundColor: "#0d1117",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: "#30363d",
+      borderRadius: "4px",
+    },
+    "&::-webkit-scrollbar-thumb:hover": {
+      backgroundColor: "#484f58",
+    },
+  },
+  "& .MuiDataGrid-scrollbar": {
+    display: "none",
+  },
 });
 
-interface TableStyleProps {
-  children: ReactNode;
-}
-
-const TableStyle: React.FC<TableStyleProps> = ({ children }) => {
-  return (
-    <ThemeProvider theme={githubDarkTheme}>
-      <div
-        style={{
-          height: 500,
-          width: "100%",
-          backgroundColor: "#0d1117",
-          padding: "10px",
-          borderRadius: "8px",
-          overflow: "hidden",
-        }}
-      >
-        {children}
-      </div>
-    </ThemeProvider>
-  );
-};
-
-export default TableStyle;
+export default StyledDataGrid;

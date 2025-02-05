@@ -4,6 +4,7 @@ const About: React.FC = () => {
   return (
     <div>
       <h2>📡 About This Project</h2>
+      <div style={{borderTop: "1px solid #d1d5da"}}></div>
       <p>
         Welcome to the <strong>OpenVPN Gate Monitor</strong>! 🎯 This project is designed to help administrators and users
         monitor VPN connections effectively by providing real-time data about connected clients, their
@@ -19,14 +20,14 @@ const About: React.FC = () => {
       </ul>
       <p>
         This project was developed with passion and attention to detail by
-        <a href="https://github.com/ΙΜKolganov" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}> Ivan Kolganov</a>.
+        <a href="https://github.com/IMkolganov" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}> Ivan Kolganov</a>.
       </p>
       <p>
         <strong>📬 Contact the Developer:</strong>
       </p>
       <ul>
         <li>
-          💻 GitHub: <a href="https://github.com/ΙΜKolganov" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>ΙΜKolganov</a>
+          💻 GitHub: <a href="https://github.com/IMkolganov" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>IMkolganov</a>
         </li>
         <li>
           📲 Telegram: <a href="https://t.me/KolganovIvan" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>@KolganovIvan</a>

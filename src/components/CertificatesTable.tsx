@@ -1,7 +1,8 @@
 import React from "react";
 import { GridColDef } from "@mui/x-data-grid";
 import axios from "axios";
-import TableStyle, { StyledDataGrid } from "../components/TableStyle";
+import StyledDataGrid from "../components/TableStyle";
+import CustomThemeProvider from "../components/ThemeProvider";
 
 interface Certificate {
   commonName: string;
@@ -31,15 +32,11 @@ const renderStatus = (status: Certificate["status"]) => {
 };
 
 const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, onRevoke }) => {
-  if (!certificates || certificates.length === 0) {
-    return <p style={{ textAlign: "center", padding: "20px" }}>📭 No certificates found</p>;
-  }
-
   const handleRevoke = async (commonName: string) => {
     if (!window.confirm(`Are you sure you want to revoke certificate for ${commonName}?`)) return;
 
     try {
-      await axios.post(`/api/revoke`, { commonName });
+      await axios.get(`/api/RemoveCertificate?cnName=${commonName}`);
       onRevoke();
     } catch (error) {
       console.error("Failed to revoke certificate", error);
@@ -50,7 +47,8 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, onR
   const rows = certificates.map((cert, index) => ({
     id: index + 1,
     commonName: cert.commonName,
-    status: renderStatus(cert.status),
+    status: cert.status,
+    statusText: renderStatus(cert.status),
     expiryDate: new Date(cert.expiryDate).toLocaleDateString(),
     revokeDate: cert.revokeDate ? new Date(cert.revokeDate).toLocaleDateString() : "—",
     serialNumber: cert.serialNumber,
@@ -59,7 +57,7 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, onR
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "commonName", headerName: "Common Name", flex: 1 },
-    { field: "status", headerName: "Status", flex: 1 },
+    { field: "statusText", headerName: "Status", flex: 1 },
     { field: "expiryDate", headerName: "Expiry Date", flex: 1 },
     { field: "revokeDate", headerName: "Revoke Date", flex: 1 },
     { field: "serialNumber", headerName: "Serial Number", flex: 1 },
@@ -67,32 +65,48 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, onR
       field: "actions",
       headerName: "Actions",
       width: 150,
-      renderCell: (params) =>
-        //status 0 is active
-        params.row.status === 0? (
-          <button className="btn danger" onClick={() => handleRevoke(params.row.commonName)}>
-            Revoke
-          </button>
-        ) : (
-          <span style={{ color: "gray" }}>No actions</span>
-        ),
+      renderCell: (params) => {
+        if (params.row.status !== 0) {
+          return <span style={{ color: "gray" }}>No actions</span>;
+        }
+
+        return (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+              width: "100%",
+            }}
+          >
+            <button className="btn danger" onClick={() => handleRevoke(params.row.commonName)}>
+              Revoke
+            </button>
+          </div>
+        );
+      },
     },
   ];
 
   return (
-    <TableStyle>
-      <StyledDataGrid
-        rows={rows}
-        columns={columns}
-        pageSizeOptions={[5, 10, 20, 100]}
-        initialState={{
-          pagination: { paginationModel: { pageSize: 10 } },
-        }}
-        disableColumnFilter
-        disableColumnMenu
-        aria-hidden={false}
-      />
-    </TableStyle>
+    <CustomThemeProvider>
+      <div style={{ width: "100%", backgroundColor: "#0d1117", padding: "10px", borderRadius: "8px" }}>
+        <StyledDataGrid
+          rows={rows}
+          columns={columns}
+          pageSizeOptions={[5, 10, 20, 100]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 10 } },
+          }}
+          disableColumnFilter
+          disableColumnMenu
+          localeText={{
+            noRowsLabel: "📭 No certificates found",
+          }}
+        />
+      </div>
+    </CustomThemeProvider>
   );
 };
 

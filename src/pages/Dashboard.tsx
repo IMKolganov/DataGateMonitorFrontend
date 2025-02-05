@@ -123,6 +123,7 @@ export function Dashboard() {
       <ServerInfoComponent serverInfo={serverInfo} />
 
       <h2>VPN Clients:</h2>
+      <div style={{borderTop: "1px solid #d1d5da",  marginTop: "5px", padding: "5px"}}></div>
       <ClientsTable clients={clients} />
 
       <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px" }}>
@@ -145,6 +146,7 @@ export function Dashboard() {
       </div>
 
       <h2>VPN Client Locations:</h2>
+      <div style={{borderTop: "1px solid #d1d5da",  marginTop: "5px", padding: "5px"}}></div>
       <VpnMap clients={clients} />
 
       <NextRefreshTimer nextRefreshTime={nextRefreshTime} onReset={scheduleNextRefresh} />

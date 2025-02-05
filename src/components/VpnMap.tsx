@@ -63,21 +63,19 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients }) => {
 
   return (
     <div style={{ height: "650px", width: "100%", marginTop: "20px" }}>
-      <div style={{ marginBottom: "10px", textAlign: "right" }}>
-        <label className="dropdown">
-          <strong>Map Style:</strong>&nbsp;
-          <select
-            className="dropdown-select"
-            value={selectedLayer}
-            onChange={(e) => setSelectedLayer(e.target.value as keyof typeof tileLayers)}
-          >
-            {Object.keys(tileLayers).map((key) => (
-              <option key={key} value={key}>
-                {key}
-              </option>
-            ))}
-          </select>
-        </label>
+      <div style={{ marginBottom: "10px", textAlign: "right", display: "flex", alignItems: "center", gap: "10px" }}>
+        <strong>Map Style:</strong>
+        <select
+          className="btn secondary dropdown-select"
+          value={selectedLayer}
+          onChange={(e) => setSelectedLayer(e.target.value as keyof typeof tileLayers)}
+        >
+          {Object.keys(tileLayers).map((key) => (
+            <option key={key} value={key}>
+              {key}
+            </option>
+          ))}
+        </select>
       </div>
 
       <MapContainer style={{ height: "600px", width: "100%" }}>
