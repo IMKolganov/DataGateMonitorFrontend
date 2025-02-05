@@ -1,5 +1,5 @@
 # Step 1: Build React App
-FROM node:20-alpine AS build
+FROM node:20 AS build
 
 # Set working directory
 WORKDIR /app
@@ -7,11 +7,20 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
 
+# Обновляем npm до последней версии (если нужно)
+RUN npm install -g npm@latest
+
 # Install all dependencies (including devDependencies)
 RUN npm ci
 
 # Copy the rest of the app
 COPY . .
+
+# 🔹 Optimazi memory for Raspberry Pi 🔹
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+ENV GENERATE_SOURCEMAP=false
+ENV DISABLE_ESLINT_PLUGIN=true
+ENV REACT_APP_FAST_REFRESH=false
 
 # Build the app
 RUN npm run build
