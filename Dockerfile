@@ -4,15 +4,20 @@ FROM node:18-alpine AS build
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and install dependencies
+# Copy package.json and package-lock.json
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+
+# Install all dependencies (including devDependencies)
+RUN npm ci
 
 # Copy the rest of the app
 COPY . .
 
 # Build the app
 RUN npm run build
+
+# Remove node_modules and install only production dependencies
+RUN rm -rf node_modules && npm ci --omit=dev
 
 # Step 2: Serve with Nginx
 FROM nginx:alpine

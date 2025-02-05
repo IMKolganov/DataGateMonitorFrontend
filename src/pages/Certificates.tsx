@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import CertificatesTable from "../components/CertificatesTable";
-
 import { FaSync } from "react-icons/fa";
 
 interface Config {
@@ -20,28 +19,8 @@ const Certificates: React.FC = () => {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadConfig();
-  }, []);
-
-  useEffect(() => {
-    if (config) {
-      fetchCertificates();
-    }
-  }, [config]);
-
-  const loadConfig = async () => {
-    try {
-      const response = await fetch("/config.json");
-      const data: Config = await response.json();
-      setConfig(data);
-    } catch (error) {
-      console.error("Failed to load configuration:", error);
-    }
-  };
-
-  const fetchCertificates = async () => {
+  
+const fetchCertificates = useCallback(async () => {
     if (!config) return;
     setLoading(true);
     setError(null);
@@ -54,7 +33,30 @@ const Certificates: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  }, [config]);
+
+
+  useEffect(() => {
+    loadConfig();
+  }, []);
+
+  useEffect(() => {
+    if (config) {
+      fetchCertificates();
+    }
+  }, [config, fetchCertificates]);
+
+  const loadConfig = async () => {
+    try {
+      const response = await fetch("/config.json");
+      const data: Config = await response.json();
+      setConfig(data);
+    } catch (error) {
+      console.error("Failed to load configuration:", error);
+    }
   };
+
+
 
   return (
     <div style={{ padding: "20px" }}>
