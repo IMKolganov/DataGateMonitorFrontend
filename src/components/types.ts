@@ -2,8 +2,8 @@ export interface ServerInfo {
     id: number;
     sessionId: string;
     upSince: string;
-    localIp: string;
-    remoteIp: string;
+    serverLocalIp: string;
+    serverRemoteIp: string;
     bytesIn: number;
     bytesOut: number;
     version: string;

@@ -27,8 +27,8 @@ const ServerInfoComponent: React.FC<ServerInfoProps> = ({ serverInfo }) => {
         ? new Date(serverInfo.upSince).toLocaleString()
         : "N/A",
     },
-    { label: "Local IP Address", value: serverInfo.localIp || "N/A" },
-    { label: "Remote IP Address", value: serverInfo.remoteIp || "N/A" },
+    { label: "Local IP Address", value: serverInfo.serverLocalIp || "N/A" },
+    { label: "Remote IP Address", value: serverInfo.serverRemoteIp || "N/A" },
     { label: "OpenVPN Version", value: serverInfo.version || "Unknown" },
   ];
 
