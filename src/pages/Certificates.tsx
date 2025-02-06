@@ -79,7 +79,7 @@ const Certificates: React.FC = () => {
     if (!newCommonName.trim()) return alert("Please enter a common name.");
 
     try {
-      await axios.get(`${config?.apiBaseUrl}/AddCertificate?cnName=${newCommonName}`);
+      await axios.get(`${config?.apiBaseUrl}/OpenVpnCerts/AddCertificate?cnName=${newCommonName}`);
       setNewCommonName("");
       fetchCertificates();
     } catch (error) {

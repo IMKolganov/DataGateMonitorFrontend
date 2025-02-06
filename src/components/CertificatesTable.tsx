@@ -1,8 +1,12 @@
-import React from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { GridColDef } from "@mui/x-data-grid";
 import axios from "axios";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
+
+interface Config {
+  apiBaseUrl: string;
+}
 
 interface Certificate {
   commonName: string;
@@ -32,17 +36,35 @@ const renderStatus = (status: Certificate["status"]) => {
 };
 
 const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, onRevoke }) => {
-  const handleRevoke = async (commonName: string) => {
-    if (!window.confirm(`Are you sure you want to revoke certificate for ${commonName}?`)) return;
+  const [config, setConfig] = useState<Config | null>(null);
 
+  useEffect(() => {
+    loadConfig();
+  }, []);
+
+  const loadConfig = async () => {
     try {
-      await axios.get(`/api/RemoveCertificate?cnName=${commonName}`);
+      const response = await fetch("/config.json");
+      const data: Config = await response.json();
+      setConfig(data);
+    } catch (error) {
+      console.error("Failed to load configuration:", error);
+    }
+  };
+
+  const handleRevoke = useCallback(async (commonName: string) => {
+    if (!config) return;
+    if (!window.confirm(`Are you sure you want to revoke certificate for ${commonName}?`)) return;
+  
+    try {
+      await axios.get(`${config.apiBaseUrl}/api/OpenVpnCerts/RemoveCertificate?cnName=${commonName}`);
       onRevoke();
     } catch (error) {
       console.error("Failed to revoke certificate", error);
       alert("Error revoking certificate.");
     }
-  };
+  }, [config, onRevoke]);
+  
 
   const rows = certificates.map((cert, index) => ({
     id: index + 1,
