@@ -9,16 +9,20 @@ import useWebSocketService from "../hooks/useWebSocketService";
 
 const ServerList: React.FC = () => {
   const [servers, setServers] = useState<OpenVpnServerInfoResponse[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-  
+
   const { serviceStatus, nextRunTime, runServiceNow } = useWebSocketService();
 
   useEffect(() => {
-    if (serviceStatus !== "Unknown") {  // Ждём, пока WebSocket установит статус
+    loadServers();
+  }, []);
+
+  useEffect(() => {
+    if (serviceStatus !== "Unknown") {
       loadServers();
     }
-  }, [serviceStatus]); // Перезапускаем загрузку, когда статус становится известен
+  }, [serviceStatus]);
 
   const loadServers = async () => {
     setLoading(true);
@@ -36,7 +40,7 @@ const ServerList: React.FC = () => {
     if (!window.confirm("Are you sure you want to delete this server?")) return;
     try {
       await deleteServer(id);
-      setServers(servers.filter((server) => server.openVpnServer.id !== id));
+      setServers((prev) => prev.filter((server) => server.openVpnServer.id !== id));
     } catch (error) {
       console.error("Error deleting server:", error);
     }
@@ -59,15 +63,19 @@ const ServerList: React.FC = () => {
         <p>Loading servers...</p>
       ) : (
         <ul className="list">
-          {servers.map((server) => (
-            <ServerItem
-              key={server.openVpnServer.id}
-              server={server}
-              onView={(id) => navigate(`/server-details/${id}`)}
-              onEdit={(id) => navigate(`/servers/edit/${id}`)}
-              onDelete={handleDelete}
-            />
-          ))}
+          {servers.length > 0 ? (
+            servers.map((server) => (
+              <ServerItem
+                key={server.openVpnServer.id}
+                server={server}
+                onView={(id) => navigate(`/server-details/${id}`)}
+                onEdit={(id) => navigate(`/servers/edit/${id}`)}
+                onDelete={handleDelete}
+              />
+            ))
+          ) : (
+            <p>No servers available.</p>
+          )}
         </ul>
       )}
 
