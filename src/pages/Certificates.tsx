@@ -89,7 +89,7 @@ const Certificates: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div className="content-wrapper wide-table" style={{ padding: "20px" }}>
       <h2>VPN Certificates</h2>
       <div style={{borderTop: "1px solid #d1d5da"}}></div>
       <h3 style={{ color: "#da3633" }}>⚠ Warning</h3>

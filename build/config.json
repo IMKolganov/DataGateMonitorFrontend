@@ -1,5 +1,5 @@
 {
     "apiBaseUrl": "http://192.168.0.21:5581/api",
-    "webSocketUrl": "ws://192.168.0.21:5581/api/OpenVpnServer/status-stream",
+    "webSocketUrl": "ws://192.168.0.21:5581/api/OpenVpnServers/status-stream",
     "defaultRefreshInterval": 60
 }

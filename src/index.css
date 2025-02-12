@@ -190,6 +190,29 @@ code {
   color: #c9d1d9;
 }
 
+.btn.normal {
+  background: #1f6feb;
+  color: #ffffff;
+  border: 1px solid #1f6feb;
+}
+
+.btn.normal:hover {
+  background: #1158c7;
+  border-color: #0d419d;
+}
+
+.btn.warning {
+  background: #f0b400;
+  color: #24292f;
+  border: 1px solid #f0b400;
+}
+
+.btn.warning:hover {
+  background: #cf9a00;
+  border-color: #a17a00;
+}
+
+
 .btn.danger {
   background: #da3633;
   color: white;
