@@ -2,7 +2,7 @@ import React from "react";
 
 const Contact: React.FC = () => {
   return (
-    <div>
+    <div className="content-wrapper wide-table">
       <h2>Contact</h2>
       <div style={{borderTop: "1px solid #d1d5da"}}></div>
       <p>

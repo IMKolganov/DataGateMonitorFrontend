@@ -1,0 +1,125 @@
+.server-form--container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #c9d1d9;
+  }
+  
+  .server-form-header {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #ffffff;
+  }
+  
+  .server-form-description {
+    font-size: 14px;
+    color: #8b949e;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .server-form .form-group {
+    margin-bottom: 16px;
+    margin-right: 20px;
+  }
+  
+  .server-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  
+  .server-form input,
+  .server-form select {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    background-color: #0d1117;
+    color: #c9d1d9;
+    transition: border-color 0.2s ease;
+  }
+  
+  .server-form input:focus,
+  .server-form select:focus {
+    border-color: #58a6ff;
+    outline: none;
+  }
+  
+  .input-error {
+    border-color: #e74c3c;
+  }
+  
+  .error-message {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .back-button,
+  .submit-button {
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .back-button {
+    background-color: #0366d6;
+    color: #ffffff;
+  }
+  
+  .back-button:hover {
+    background-color: #024ea0;
+  }
+  
+  .submit-button {
+    background-color: #2ea043;
+    color: #ffffff;
+  }
+  
+  .submit-button:hover {
+    background-color: #249136;
+  }
+  
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    color: #c9d1d9;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #58a6ff;
+    border-top: 4px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  

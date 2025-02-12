@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { GridColDef } from "@mui/x-data-grid";
-import { ConnectedClient } from "./types";
-import { formatBytes } from "./utils";
+import { ConnectedClient } from "../utils/types";
+import { formatBytes } from "../utils/utils";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
 
