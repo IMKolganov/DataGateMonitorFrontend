@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../css/ServerForm.css";
+import { fetchConfig } from "../utils/api";
 
 const ServerForm: React.FC = () => {
   const navigate = useNavigate();
   const { serverId } = useParams<{ serverId?: string }>();
+  const [config, setConfig] = useState<{ apiBaseUrl: string } | null>(null);
 
   const [serverData, setServerData] = useState({
     Id: serverId ? parseInt(serverId) : 0,
@@ -25,15 +27,28 @@ const ServerForm: React.FC = () => {
   });
 
   useEffect(() => {
-    if (serverId) {
-      fetch(`http://localhost:5581/api/OpenVpnServers/GetServer/${serverId}`)
+    const loadConfig = async () => {
+      try {
+        const loadedConfig = await fetchConfig();
+        setConfig(loadedConfig);
+      } catch (error) {
+        console.error("Failed to load configuration:", error);
+      }
+    };
+
+    loadConfig();
+  }, []);
+
+  useEffect(() => {
+    if (config && serverId) {
+      fetch(`${config.apiBaseUrl}/OpenVpnServers/GetServer/${serverId}`)
         .then(response => {
           if (!response.ok) throw new Error("Failed to fetch server data");
           return response.json();
         })
         .then(data => {
           console.log("Received data:", data);
-  
+
           setServerData(prev => ({
             ...prev,
             Id: data.id,
@@ -49,7 +64,7 @@ const ServerForm: React.FC = () => {
         })
         .catch(error => console.error("Error loading server data:", error));
     }
-  }, [serverId]);
+  }, [config, serverId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -82,13 +97,13 @@ const ServerForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm() || !config) return;
 
     try {
       const isEditing = !!serverId;
       const url = isEditing
-        ? `http://localhost:5581/api/OpenVpnServers/UpdateServer`
-        : `http://localhost:5581/api/OpenVpnServers/AddServer`;
+        ? `${config.apiBaseUrl}/OpenVpnServers/UpdateServer`
+        : `${config.apiBaseUrl}/OpenVpnServers/AddServer`;
       const method = isEditing ? "POST" : "PUT";
 
       const response = await fetch(url, {

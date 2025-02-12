@@ -1,6 +1,6 @@
 // src/hooks/useWebSocketService.ts
 import { useState, useEffect } from "react";
-import { Config } from "../utils/types"; // Импорт типов
+import { Config } from "../utils/types";
 
 const useWebSocketService = () => {
   const [serviceStatus, setServiceStatus] = useState<string>("Unknown");
