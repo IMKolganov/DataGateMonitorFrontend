@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import CertificatesTable from "../components/CertificatesTable";
+import Loading from "../components/Loading";
 import { FaSync, FaArrowLeft } from "react-icons/fa";
 import { Config, Certificate, CertificateStatus } from "../utils/types";
 import "../css/Certificates.css";
@@ -11,7 +12,7 @@ const Certificates: React.FC = () => {
   const [config, setConfig] = useState<Config | null>(null);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ message: string; detail?: string } | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<CertificateStatus | null>(null);
   const [newCommonName, setNewCommonName] = useState<string>("");
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const Certificates: React.FC = () => {
       setConfig(data);
     } catch (error) {
       console.error("Failed to load configuration:", error);
+      setError({ message: "Failed to load configuration." });
     }
   };
 
@@ -48,9 +50,12 @@ const Certificates: React.FC = () => {
 
       const response = await axios.get<Certificate[]>(url);
       setCertificates(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching certificates", error);
-      setError("Failed to load certificates");
+      setError({
+        message: error.response?.data?.Message || "Failed to load certificates",
+        detail: error.response?.data?.Detail,
+      });
     } finally {
       setLoading(false);
     }
@@ -68,9 +73,12 @@ const Certificates: React.FC = () => {
       await axios.get(`${config.apiBaseUrl}/OpenVpnServerCerts/AddServerCertificate/${vpnServerId}?cnName=${newCommonName}`);
       setNewCommonName("");
       fetchCertificates();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to add certificate", error);
-      alert("Error adding certificate.");
+      setError({
+        message: error.response?.data?.Message || "Error adding certificate.",
+        detail: error.response?.data?.Detail,
+      });
     }
   };
 
@@ -78,14 +86,13 @@ const Certificates: React.FC = () => {
     <div className="content-wrapper wide-table">
       <h2>VPN Certificates for Server {vpnServerId}</h2>
       <div className="action-buttons">
-        <button className="btn secondary" onClick={() => navigate("/")}>
-          <FaArrowLeft className="icon" /> Back
+        <button className="btn secondary" onClick={() => navigate("/")}> 
+          <FaArrowLeft className="icon" /> Back 
         </button>
-        <button className="btn secondary" onClick={fetchCertificates} disabled={loading}>
-          <FaSync className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
+        <button className="btn secondary" onClick={fetchCertificates} disabled={loading}> 
+          <FaSync className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh 
         </button>
-
-        <select value={selectedStatus ?? ""} onChange={handleStatusChange} className="btn secondary">
+        <select value={selectedStatus ?? ""} onChange={handleStatusChange} className="btn secondary"> 
           <option value="">All</option>
           <option value={CertificateStatus.Active}>Active</option>
           <option value={CertificateStatus.Revoked}>Revoked</option>
@@ -94,9 +101,18 @@ const Certificates: React.FC = () => {
         </select>
       </div>
 
-      {error && <p className="error">{error}</p>}
-
-      <CertificatesTable certificates={certificates} vpnServerId={vpnServerId || ""} onRevoke={fetchCertificates} />
+      {loading ? (
+        <Loading />
+      ) : error ? (
+        <div className="error-message">
+          <p><strong>Error:</strong> {error.message}</p>
+          {error.detail && <p><strong>Details:</strong> {error.detail}</p>}
+        </div>
+      ) : (
+        certificates.length > 0 && (
+          <CertificatesTable certificates={certificates} vpnServerId={vpnServerId || ""} onRevoke={fetchCertificates} />
+        )
+      )}
 
       <h3>Add New Certificate</h3>
       <p className="certificate-description">
@@ -104,18 +120,17 @@ const Certificates: React.FC = () => {
       </p>
       
       <div className="add-certificate">
-        <input
-          type="text"
-          placeholder="Enter Common Name"
-          value={newCommonName}
-          onChange={(e) => setNewCommonName(e.target.value)}
-          className="input"
+        <input 
+          type="text" 
+          placeholder="Enter Common Name" 
+          value={newCommonName} 
+          onChange={(e) => setNewCommonName(e.target.value)} 
+          className="input" 
         />
-        <button className="btn primary" onClick={handleAddCertificate}>
-          Add Certificate
+        <button className="btn primary" onClick={handleAddCertificate}> 
+          Add Certificate 
         </button>
       </div>
-
     </div>
   );
 };
