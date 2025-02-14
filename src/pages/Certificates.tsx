@@ -1,45 +1,30 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import CertificatesTable from "../components/CertificatesTable";
-import { FaSync } from "react-icons/fa";
-import OpenVpnDisclaimer from "../components/OpenVpnDisclaimer";
-
-interface Config {
-  apiBaseUrl: string;
-}
-
-enum CertificateStatus {
-  Active = 0,
-  Revoked = 1,
-  Expired = 2,
-  Unknown = 3,
-}
-
-interface Certificate {
-  commonName: string;
-  status: number;
-  expiryDate: string;
-  revokeDate?: string | null;
-  serialNumber: string;
-}
+import { FaSync, FaArrowLeft } from "react-icons/fa";
+import { Config, Certificate, CertificateStatus } from "../utils/types";
+import "../css/Certificates.css";
 
 const Certificates: React.FC = () => {
+  const { vpnServerId } = useParams<{ vpnServerId: string }>();
   const [config, setConfig] = useState<Config | null>(null);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<CertificateStatus | null>(null);
   const [newCommonName, setNewCommonName] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadConfig();
   }, []);
 
   useEffect(() => {
-    if (config) {
+    if (config && vpnServerId) {
       fetchCertificates();
     }
-  }, [config, selectedStatus]);
+  }, [config, selectedStatus, vpnServerId]);
 
   const loadConfig = async () => {
     try {
@@ -52,14 +37,14 @@ const Certificates: React.FC = () => {
   };
 
   const fetchCertificates = useCallback(async () => {
-    if (!config) return;
+    if (!config || !vpnServerId) return;
     setLoading(true);
     setError(null);
 
     try {
       const url = selectedStatus !== null
-        ? `${config.apiBaseUrl}/OpenVpnCerts/GetAllVpnCertificatesByStatus?certificateStatus=${selectedStatus}`
-        : `${config.apiBaseUrl}/OpenVpnCerts/GetAllVpnCertificates`;
+        ? `${config.apiBaseUrl}/OpenVpnServerCerts/GetAllVpnServerCertificatesByStatus/${vpnServerId}?certificateStatus=${selectedStatus}`
+        : `${config.apiBaseUrl}/OpenVpnServerCerts/GetAllVpnServerCertificates/${vpnServerId}`;
 
       const response = await axios.get<Certificate[]>(url);
       setCertificates(response.data);
@@ -69,7 +54,7 @@ const Certificates: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [config, selectedStatus]);
+  }, [config, selectedStatus, vpnServerId]);
 
   const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedStatus(event.target.value ? Number(event.target.value) as CertificateStatus : null);
@@ -77,9 +62,10 @@ const Certificates: React.FC = () => {
 
   const handleAddCertificate = async () => {
     if (!newCommonName.trim()) return alert("Please enter a common name.");
+    if (!config || !vpnServerId) return;
 
     try {
-      await axios.get(`${config?.apiBaseUrl}/OpenVpnCerts/AddCertificate?cnName=${newCommonName}`);
+      await axios.get(`${config.apiBaseUrl}/OpenVpnServerCerts/AddServerCertificate/${vpnServerId}?cnName=${newCommonName}`);
       setNewCommonName("");
       fetchCertificates();
     } catch (error) {
@@ -89,19 +75,16 @@ const Certificates: React.FC = () => {
   };
 
   return (
-    <div className="content-wrapper wide-table" style={{ padding: "20px" }}>
-      <h2>VPN Certificates</h2>
-      <div style={{borderTop: "1px solid #d1d5da"}}></div>
-      <h3 style={{ color: "#da3633" }}>⚠ Warning</h3>
-      <p>
-        Using OpenVPN certificate management functions requires a solid understanding of VPN security and certificate issuance. 
-        <strong> Do not proceed unless you know what you are doing.</strong>
-      </p>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+    <div className="content-wrapper wide-table">
+      <h2>VPN Certificates for Server {vpnServerId}</h2>
+      <div className="action-buttons">
+        <button className="btn secondary" onClick={() => navigate("/")}>
+          <FaArrowLeft className="icon" /> Back
+        </button>
         <button className="btn secondary" onClick={fetchCertificates} disabled={loading}>
           <FaSync className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
         </button>
-  
+
         <select value={selectedStatus ?? ""} onChange={handleStatusChange} className="btn secondary">
           <option value="">All</option>
           <option value={CertificateStatus.Active}>Active</option>
@@ -110,8 +93,17 @@ const Certificates: React.FC = () => {
           <option value={CertificateStatus.Unknown}>Unknown</option>
         </select>
       </div>
-  
-      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+
+      {error && <p className="error">{error}</p>}
+
+      <CertificatesTable certificates={certificates} vpnServerId={vpnServerId || ""} onRevoke={fetchCertificates} />
+
+      <h3>Add New Certificate</h3>
+      <p className="certificate-description">
+        Enter the <strong>Common Name (CN)</strong> for the new certificate and click "Add Certificate".
+      </p>
+      
+      <div className="add-certificate">
         <input
           type="text"
           placeholder="Enter Common Name"
@@ -119,17 +111,13 @@ const Certificates: React.FC = () => {
           onChange={(e) => setNewCommonName(e.target.value)}
           className="input"
         />
-        <button className="btn primary" onClick={handleAddCertificate}>Add Certificate</button>
+        <button className="btn primary" onClick={handleAddCertificate}>
+          Add Certificate
+        </button>
       </div>
-  
-      {error ? <p className="error">{error}</p> : null}
 
-      <CertificatesTable certificates={certificates} onRevoke={fetchCertificates} />
-
-      <OpenVpnDisclaimer />
     </div>
   );
-  
 };
 
 export default Certificates;

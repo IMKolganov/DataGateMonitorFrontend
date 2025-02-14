@@ -66,4 +66,23 @@ export interface ServerInfo {
     webSocketUrl: string;
     defaultRefreshInterval: number;
   }
+  export enum CertificateStatus {
+    Active = 0,
+    Revoked = 1,
+    Expired = 2,
+    Unknown = 3,
+  }
   
+  export interface Certificate {
+    commonName: string;
+    status: number;
+    expiryDate: string;
+    revokeDate?: string | null;
+    serialNumber: string;
+  }
+  
+  export interface CertificatesTableProps {
+    certificates: Certificate[];
+    vpnServerId: string;
+    onRevoke: () => void;
+  }

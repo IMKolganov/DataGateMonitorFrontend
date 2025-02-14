@@ -26,8 +26,8 @@ function App() {
             <Route path="/servers/add" element={<ServerForm />} />
             <Route path="/servers/edit/:serverId" element={<ServerForm />} />
             <Route path="/server-details/:id" element={<ServerDetails />} />
+            <Route path="/server-details/:vpnServerId/certificates" element={<Certificates />} />
             <Route path="/history" element={<History />} />
-            <Route path="/certificates" element={<Certificates />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>

@@ -60,7 +60,10 @@ const ServerList: React.FC = () => {
       </div>
 
       {loading ? (
-        <p>Loading servers...</p>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading servers...</p>
+        </div>
       ) : (
         <ul className="list">
           {servers.length > 0 ? (

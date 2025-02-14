@@ -1,0 +1,24 @@
+.certificate-container {
+    padding: 20px;
+    max-width: 500px;
+    margin: 20px auto;
+    text-align: center;
+  }
+
+  .certificate-description {
+    font-size: 14px;
+    color: #b0b0b0;
+    margin-bottom: 15px;
+  }
+
+  .add-certificate {
+    display: flex;
+    justify-content: left;
+    gap: 10px;
+  }
+  
+  
+
+  
+
+  
