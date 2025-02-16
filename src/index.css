@@ -241,6 +241,11 @@ border-color: #0366d6;
 box-shadow: 0 0 4px rgba(3, 102, 214, 0.3);
 }
 
+.input:focus {
+  outline: none;
+  border-color: #0366d6;
+}
+
 .input-number:hover {
 border-color: #959da5;
 }
