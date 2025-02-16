@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../css/ServerDetails.css";
 import "../css/ServerList.css";
-import { FaSync, FaArrowLeft, FaKey, FaTerminal } from "react-icons/fa";
+import { FaSync, FaArrowLeft, FaKey, FaTerminal, FaCog } from "react-icons/fa";
 import { BsClock, BsHddNetwork } from "react-icons/bs";
 import { RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer } from "react-icons/io";
@@ -77,25 +77,16 @@ export function ServerDetails() {
 
   return (
     <div className="content-wrapper wide-table">
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "10px", paddingBottom: "25px" }}>
-        <button className="btn secondary" onClick={() => navigate("/")}>
-          <FaArrowLeft className="icon" /> Back
-        </button>
-        <button className="btn secondary" onClick={fetchData} disabled={loading}>
-          <FaSync className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
-        </button>
-        <button className="btn secondary" onClick={() => navigate(`/server-details/${id}/certificates`)}>
-          <FaKey className="icon" /> Manage Certificates
-        </button>
-        <button className="btn secondary" onClick={() => navigate(`/server-details/${id}/console`)}>
-          <FaTerminal className="icon" /> OpenVPN Console
-        </button>
-
-        <label className="square-toggle">
-          <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
-          <span className="toggle-slider"></span>
-          <span className="toggle-text">{isLive ? "Live" : "History"}</span>
-        </label>
+      <div className="header-bar">
+        <div className="left-buttons">
+          <button className="btn secondary" onClick={() => navigate("/")}> <FaArrowLeft className="icon" /> Back </button>
+          <button className="btn secondary" onClick={fetchData} disabled={loading}> <FaSync className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh </button>
+          <button className="btn secondary" onClick={() => navigate(`/server-details/${id}/certificates`)}> <FaKey className="icon" /> Manage Certificates </button>
+          <button className="btn secondary" onClick={() => navigate(`/server-details/${id}/console`)}> <FaTerminal className="icon" /> OpenVPN Console </button>
+        </div>
+        <div className="right-buttons">
+          <button className="btn secondary settings-button" onClick={() => navigate(`/server-details/${id}/settings`)}> <FaCog className="icon" /> Settings </button>
+        </div>
       </div>
 
       {loading ? (
@@ -115,54 +106,23 @@ export function ServerDetails() {
                   {serverInfo.openVpnServer.isOnline ? "Online" : "Offline"}
                 </div>
               </div>
-
               {serverInfo.openVpnServerStatusLog && (
                 <div className="server-details">
-                  <div className="detail-row">
-                    <BsClock className="detail-icon" />
-                    <span className="detail-label">Uptime:</span>
-                    <span>{serverInfo.openVpnServerStatusLog?.upSince ? new Date(serverInfo.openVpnServerStatusLog.upSince).toLocaleString() : "N/A"}</span>
-                  </div>
-                  <div className="detail-row">
-                    <RiHardDrive2Line className="detail-icon" />
-                    <span className="detail-label">Version:</span>
-                    <span>{serverInfo.openVpnServerStatusLog?.version || "Unknown"}</span>
-                  </div>
-                  <div className="detail-row">
-                    <BsHddNetwork className="detail-icon" />
-                    <span className="detail-label">Local IP:</span>
-                    <span>{serverInfo.openVpnServerStatusLog?.serverLocalIp || "N/A"}</span>
-                  </div>
-                  <div className="detail-row">
-                    <BsHddNetwork className="detail-icon" />
-                    <span className="detail-label">Remote IP:</span>
-                    <span>{serverInfo.openVpnServerStatusLog?.serverRemoteIp || "N/A"}</span>
-                  </div>
-                  <div className="detail-row">
-                    <IoIosSpeedometer className="detail-icon" />
-                    <span className="detail-label">Traffic IN:</span>
-                    <span>{toHumanReadableSize(serverInfo.openVpnServerStatusLog?.bytesIn || 0)}</span>
-                  </div>
-                  <div className="detail-row">
-                    <IoIosSpeedometer className="detail-icon" />
-                    <span className="detail-label">Traffic OUT:</span>
-                    <span>{toHumanReadableSize(serverInfo.openVpnServerStatusLog?.bytesOut || 0)}</span>
-                  </div>
-                  <div className="detail-row">
-                    <BsHddNetwork className="detail-icon" />
-                    <span className="detail-label">Session Id:</span>
-                    <span>{serverInfo.openVpnServerStatusLog?.sessionId || "N/A"}</span>
-                  </div>
+                  <div className="detail-row"><BsClock className="detail-icon" /><span className="detail-label">Uptime:</span><span>{serverInfo.openVpnServerStatusLog?.upSince ? new Date(serverInfo.openVpnServerStatusLog.upSince).toLocaleString() : "N/A"}</span></div>
+                  <div className="detail-row"><RiHardDrive2Line className="detail-icon" /><span className="detail-label">Version:</span><span>{serverInfo.openVpnServerStatusLog?.version || "Unknown"}</span></div>
+                  <div className="detail-row"><BsHddNetwork className="detail-icon" /><span className="detail-label">Local IP:</span><span>{serverInfo.openVpnServerStatusLog?.serverLocalIp || "N/A"}</span></div>
+                  <div className="detail-row"><BsHddNetwork className="detail-icon" /><span className="detail-label">Remote IP:</span><span>{serverInfo.openVpnServerStatusLog?.serverRemoteIp || "N/A"}</span></div>
+                  <div className="detail-row"><IoIosSpeedometer className="detail-icon" /><span className="detail-label">Traffic IN:</span><span>{toHumanReadableSize(serverInfo.openVpnServerStatusLog?.bytesIn || 0)}</span></div>
+                  <div className="detail-row"><IoIosSpeedometer className="detail-icon" /><span className="detail-label">Traffic OUT:</span><span>{toHumanReadableSize(serverInfo.openVpnServerStatusLog?.bytesOut || 0)}</span></div>
+                  <div className="detail-row"><BsHddNetwork className="detail-icon" /><span className="detail-label">Session Id:</span><span>{serverInfo.openVpnServerStatusLog?.sessionId || "N/A"}</span></div>
                 </div>
               )}
             </div>
           ) : (
             <p>No server information available.</p>
           )}
-
           <h3>VPN Clients ({isLive ? "Connected" : "Historical"})</h3>
           <ClientsTable clients={clients} />
-
           <h3>VPN Client Locations</h3>
           <VpnMap clients={clients} />
         </>
