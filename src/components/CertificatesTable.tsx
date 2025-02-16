@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { GridColDef } from "@mui/x-data-grid";
-import axios from "axios";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
-import { Config, Certificate, CertificatesTableProps } from "../utils/types";
+import { Certificate, CertificatesTableProps } from "../utils/types";
+import { revokeCertificate } from "../utils/api";
+import "../css/CertificatesTable.css";
 
 const renderStatus = (status: Certificate["status"]) => {
   switch (status) {
@@ -20,28 +21,15 @@ const renderStatus = (status: Certificate["status"]) => {
 };
 
 const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, vpnServerId, onRevoke }) => {
-  const [config, setConfig] = useState<Config | null>(null);
-
-  useEffect(() => {
-    loadConfig();
-  }, []);
-
-  const loadConfig = async () => {
-    try {
-      const response = await fetch("/config.json");
-      const data: Config = await response.json();
-      setConfig(data);
-    } catch (error) {
-      console.error("Failed to load configuration:", error);
-    }
-  };
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [serialNumberQuery, setSerialNumberQuery] = useState("");
 
   const handleRevoke = useCallback(async (commonName: string) => {
-    if (!config) return;
     if (!window.confirm(`Are you sure you want to revoke certificate for ${commonName}?`)) return;
 
     try {
-      await axios.get(`/api/OpenVpnServerCerts/RevokeCertificate/${vpnServerId}?cnName=${commonName}`);
+      await revokeCertificate(vpnServerId, commonName);
       onRevoke();
     } catch (error) {
       console.error("Failed to revoke certificate", error);
@@ -49,7 +37,13 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, vpn
     }
   }, [vpnServerId, onRevoke]);
 
-  const rows = certificates.map((cert, index) => ({
+  const filteredCertificates = certificates.filter(cert =>
+    cert.commonName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    (selectedStatus === "" || cert.status.toString() === selectedStatus) &&
+    cert.serialNumber.toLowerCase().includes(serialNumberQuery.toLowerCase())
+  );
+
+  const rows = filteredCertificates.map((cert, index) => ({
     id: index + 1,
     commonName: cert.commonName,
     status: cert.status,
@@ -72,19 +66,11 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, vpn
       width: 150,
       renderCell: (params) => {
         if (params.row.status !== 0) {
-          return <span style={{ color: "gray" }}>No actions</span>;
+          return <span className="no-actions">No actions</span>;
         }
 
         return (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-              width: "100%",
-            }}
-          >
+          <div className="action-container">
             <button className="btn danger" onClick={() => handleRevoke(params.row.commonName)}>
               Revoke
             </button>
@@ -96,7 +82,30 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, vpn
 
   return (
     <CustomThemeProvider>
-      <div style={{ width: "100%", backgroundColor: "#0d1117", padding: "10px", borderRadius: "8px" }}>
+      <div className="table-container">
+        <div className="filters">
+          <input
+            type="text"
+            placeholder="Search by Common Name"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="input"
+          />
+          <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} className="input">
+            <option value="">All Statuses</option>
+            <option value="0">✅ Active</option>
+            <option value="1">❌ Revoked</option>
+            <option value="2">⌛ Expired</option>
+            <option value="3">❓ Unknown</option>
+          </select>
+          <input
+            type="text"
+            placeholder="Search by Serial Number"
+            value={serialNumberQuery}
+            onChange={(e) => setSerialNumberQuery(e.target.value)}
+            className="input"
+          />
+        </div>
         <StyledDataGrid
           rows={rows}
           columns={columns}
