@@ -1,9 +1,8 @@
 import axios from "axios";
-import { OpenVpnServerInfoResponse, Config } from "./types";
+import { OpenVpnServerInfoResponse, Config, Certificate } from "./types";
 
 let API_BASE_URL: string | null = null;
 
-// Загружаем конфиг только один раз и сохраняем Promise
 let configPromise: Promise<Config> | null = null;
 
 export const fetchConfig = async (): Promise<Config> => {
@@ -69,4 +68,24 @@ export const runServiceNow = async (): Promise<void> => {
   await ensureApiBaseUrl();
   if (!API_BASE_URL) throw new Error("API base URL is not set");
   await axios.post(`${API_BASE_URL}/run-now`);
+};
+
+export const fetchCertificates = async (vpnServerId: string, status?: string): Promise<Certificate[]> => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
+  const url = status
+    ? `${API_BASE_URL}/OpenVpnServerCerts/GetAllVpnServerCertificatesByStatus/${vpnServerId}?certificateStatus=${status}`
+    : `${API_BASE_URL}/OpenVpnServerCerts/GetAllVpnServerCertificates/${vpnServerId}`;
+  const response = await axios.get<Certificate[]>(url);
+  return response.data;
+};
+
+export const revokeCertificate = async (vpnServerId: string, commonName: string) => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
+
+  await axios.post(`${API_BASE_URL}/OpenVpnServerCerts/RevokeServerCertificate`, {
+    vpnServerId,
+    cnName: commonName
+  });
 };
