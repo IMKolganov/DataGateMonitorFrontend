@@ -9,6 +9,7 @@ import Servers from "./pages/Servers";
 import ServerForm from "./pages/ServerForm";
 import ServerDetails from "./pages/ServerDetails";
 import Certificates from "./pages/Certificates";
+import ServerSettings from "./pages/ServerSettings";
 
 import "./App.css";
 
@@ -26,6 +27,7 @@ function App() {
             <Route path="/servers/add" element={<ServerForm />} />
             <Route path="/servers/edit/:serverId" element={<ServerForm />} />
             <Route path="/server-details/:id" element={<ServerDetails />} />
+            <Route path="/server-details/:vpnServerId/settings" element={<ServerSettings />} />
             <Route path="/server-details/:vpnServerId/certificates" element={<Certificates />} />
             <Route path="/history" element={<History />} />
             <Route path="/about" element={<About />} />

@@ -89,3 +89,26 @@ export const revokeCertificate = async (vpnServerId: string, commonName: string)
     cnName: commonName
   });
 };
+
+export const fetchServerSettings = async (vpnServerId: string): Promise<any> => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
+
+  const response = await axios.get(`${API_BASE_URL}/OpenVpnServerCerts/GetOpenVpnServerCertConf/${vpnServerId}`);
+  return response.data;
+};
+
+export const updateServerSettings = async (settings: any): Promise<void> => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
+
+  await axios.post(`${API_BASE_URL}/OpenVpnServerCerts/UpdateServerCertConfig`, settings);
+};
+
+export const fetchDatabasePath = async (): Promise<string> => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
+
+  const response = await axios.get(`${API_BASE_URL}/GeoIp/GetDatabasePath`);
+  return response.data;
+};

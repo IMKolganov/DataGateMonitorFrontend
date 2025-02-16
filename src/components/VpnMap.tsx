@@ -44,7 +44,7 @@ const tileLayers = {
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
     attribution: 'Tiles &copy; <a href="https://www.arcgis.com/">Esri</a>',
   },
-  "Google Maps Dark": {
+  "Google Maps": {
     url: "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}",
     attribution: '&copy; <a href="https://www.google.com/maps">Google Maps</a>',
   },
