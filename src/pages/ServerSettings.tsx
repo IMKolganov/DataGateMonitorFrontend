@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { FaSave } from "react-icons/fa";
 import { fetchServerSettings, updateServerSettings, fetchDatabasePath } from "../utils/api";
 
 import "../css/ServerSettings.css";
@@ -92,7 +93,7 @@ const ServerSettings: React.FC = () => {
       <h2>Server Settings</h2>
       <div className="settings-form">
         {Object.keys(settings)
-          .filter((key) => !hiddenFields.includes(key)) // Скрываем ненужные поля через JSX
+          .filter((key) => !hiddenFields.includes(key))
           .map((key) => (
             <div key={key} className="form-group">
               <label htmlFor={key} className="field-label">
@@ -111,9 +112,11 @@ const ServerSettings: React.FC = () => {
               />
             </div>
           ))}
-        <button className="btn primary" onClick={handleSave} disabled={loading}>
-          Save
-        </button>
+          <div className="action-buttons">
+            <button className="btn primary" onClick={handleSave} disabled={loading}>
+              <FaSave className="icon" /> Save
+            </button>
+          </div>
 
         
         {dbPath && (
@@ -132,8 +135,8 @@ const ServerSettings: React.FC = () => {
             </p>
             <p className="db-update">
               <strong>How to update:</strong> MaxMind updates this database **every week**. To update it manually,  
-              download the latest version from <a href="https://dev.maxmind.com/geoip/geolite2-free-geolocation-data" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}> MaxMind’s GeoLite2 Database</a>  
-              and replace the file at this path.
+              download the latest version from 
+              <a href="https://dev.maxmind.com/geoip/geolite2-free-geolocation-data" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}> MaxMind’s GeoLite2 Database</a> and replace the file at this path.
             </p>
           </div>
         )}
