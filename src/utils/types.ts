@@ -86,3 +86,23 @@ export interface ServerInfo {
     vpnServerId: string;
     onRevoke: () => void;
   }
+
+  export interface IssuedOvpnFile {
+    id: number;
+    serverId: number;
+    externalId: string;
+    commonName: string;
+    certId?: string;
+    fileName: string;
+    filePath: string;
+    issuedAt: string;
+    issuedTo: string;
+    pemFilePath: string;
+    certFilePath: string;
+    keyFilePath: string;
+    reqFilePath: string;
+    isRevoked: boolean;
+    message: string;
+    lastUpdate: string;
+    createDate: string;
+  }  
