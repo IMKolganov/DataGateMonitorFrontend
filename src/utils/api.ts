@@ -1,5 +1,5 @@
 import axios from "axios";
-import { OpenVpnServerInfoResponse, Config, Certificate } from "./types";
+import { OpenVpnServerInfoResponse, Config, Certificate, IssuedOvpnFile } from "./types";
 
 let API_BASE_URL: string | null = null;
 
@@ -90,6 +90,13 @@ export const revokeCertificate = async (vpnServerId: string, commonName: string)
   });
 };
 
+export const addCertificate = async (vpnServerId: string, commonName: string) => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
+
+  await axios.get(`${API_BASE_URL}/OpenVpnServerCerts/AddServerCertificate/${vpnServerId}?cnName=${commonName}`);
+};
+
 export const fetchServerSettings = async (vpnServerId: string): Promise<any> => {
   await ensureApiBaseUrl();
   if (!API_BASE_URL) throw new Error("API base URL is not set");
@@ -111,4 +118,28 @@ export const fetchDatabasePath = async (): Promise<string> => {
 
   const response = await axios.get(`${API_BASE_URL}/GeoIp/GetDatabasePath`);
   return response.data;
+};
+
+export const fetchOvpnFiles = async (vpnServerId: string): Promise<IssuedOvpnFile[]> => {
+  await ensureApiBaseUrl();
+  const response = await axios.get(`${API_BASE_URL}/OpenVpnFiles/GetAllOvpnFiles?vpnServerId=${vpnServerId}`);
+  return response.data;
+};
+
+export const addOvpnFile = async (vpnServerId: string, externalId: string, commonName: string, issuedTo: string = "openVpnClient") => {
+  await ensureApiBaseUrl();
+  await axios.post(`${API_BASE_URL}/OpenVpnFiles/AddOvpnFile`, {
+    vpnServerId,
+    externalId,
+    commonName,
+    issuedTo,
+  });
+};
+
+export const revokeOvpnFile = async (vpnServerId: string, externalId: string) => {
+  await ensureApiBaseUrl();
+  await axios.post(`${API_BASE_URL}/OpenVpnFiles/RevokeOvpnFile`, {
+    vpnServerId,
+    externalId,
+  });
 };
