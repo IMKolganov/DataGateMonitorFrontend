@@ -2,7 +2,7 @@ import axios from "axios";
 import { OpenVpnServerInfoResponse, Config, Certificate, IssuedOvpnFile } from "./types";
 
 let API_BASE_URL: string | null = null;
-
+let WS_BASE_URL: string | null = null;
 let configPromise: Promise<Config> | null = null;
 
 export const fetchConfig = async (): Promise<Config> => {
@@ -12,8 +12,14 @@ export const fetchConfig = async (): Promise<Config> => {
     try {
       const response = await fetch("/config.json");
       const config: Config = await response.json();
-      if (!config.apiBaseUrl) throw new Error("Invalid API base URL in config");
+
+      if (!config.apiBaseUrl || !config.wsBaseUrl) {
+        throw new Error("Invalid API or WebSocket base URL in config");
+      }
+
       API_BASE_URL = config.apiBaseUrl;
+      WS_BASE_URL = config.wsBaseUrl;
+
       return config;
     } catch (error) {
       console.error("Failed to load config:", error);
@@ -25,9 +31,16 @@ export const fetchConfig = async (): Promise<Config> => {
 };
 
 const ensureApiBaseUrl = async () => {
-  if (!API_BASE_URL) {
+  if (!API_BASE_URL || !WS_BASE_URL) {
     await fetchConfig();
   }
+};
+
+export const getWebSocketUrl = async (vpnServerId: string): Promise<string> => {
+  await ensureApiBaseUrl();
+  if (!WS_BASE_URL) throw new Error("WebSocket base URL is not set");
+
+  return `${WS_BASE_URL}/api/openvpn/ws/${vpnServerId}`;
 };
 
 export const fetchServers = async (): Promise<OpenVpnServerInfoResponse[]> => {
