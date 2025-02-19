@@ -13,9 +13,11 @@
     color: #dbdfe7;
     font-family: monospace;
     padding: 10px;
+    overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #555 #222;
 }
+
 
 .console-output::-webkit-scrollbar {
     width: 8px;
