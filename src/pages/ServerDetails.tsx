@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../css/ServerDetails.css";
-import "../css/ServerList.css";
+
 import { FaSync, FaArrowLeft, FaKey, FaTerminal, FaCog } from "react-icons/fa";
 import { BsClock, BsHddNetwork } from "react-icons/bs";
 import { RiHardDrive2Line } from "react-icons/ri";
