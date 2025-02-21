@@ -1,18 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 export function Header() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header className="header">
       <div className="logo">🔥 OpenVPN Gate Monitor</div>
+      <div
+        className={`burger-menu ${menuOpen ? "active" : ""}`}
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+
       <nav>
-        <ul className="nav-links">
-          <li><Link to="/servers">Servers</Link></li>
-          {/* <li><Link to="/dashboard">Dashboard</Link></li>
-          <li><Link to="/history">History</Link></li> */}
-          {/* <li><Link to="/certificates">Certificates</Link></li>           */}
-          <li><Link to="/about">About</Link></li>
-          <li><Link to="/contact">Contact</Link></li>
+        <ul className={`nav-links ${menuOpen ? "active" : ""}`}>
+          <li><Link to="/servers" onClick={() => setMenuOpen(false)}>Servers</Link></li>
+          <li><Link to="/about" onClick={() => setMenuOpen(false)}>About</Link></li>
+          <li><Link to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link></li>
         </ul>
       </nav>
     </header>

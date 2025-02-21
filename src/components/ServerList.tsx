@@ -6,6 +6,7 @@ import { OpenVpnServerInfoResponse } from "../utils/types";
 import ServerItem from "./ServerItem";
 import ServiceControls from "./ServiceControls";
 import useWebSocketService from "../hooks/useWebSocketService";
+import "../css/ServerList.css";
 
 const ServerList: React.FC = () => {
   const [servers, setServers] = useState<OpenVpnServerInfoResponse[]>([]);
