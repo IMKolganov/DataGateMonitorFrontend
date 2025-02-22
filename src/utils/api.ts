@@ -156,3 +156,36 @@ export const revokeOvpnFile = async (vpnServerId: string, externalId: string) =>
     externalId,
   });
 };
+
+export const getAllApplications = async () => {
+  await ensureApiBaseUrl();
+  try {
+    const response = await axios.get(`${API_BASE_URL}/applications/GetAllApplications`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch applications:", error);
+    throw error;
+  }
+};
+
+export const registerApplication = async (name: string) => {
+  await ensureApiBaseUrl();
+  try {
+    const response = await axios.post(`${API_BASE_URL}/applications/RegisterApplication`, { name });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to register application:", error);
+    throw error;
+  }
+};
+
+export const revokeApplication = async (clientId: string) => {
+  await ensureApiBaseUrl();
+  try {
+    const response = await axios.post(`${API_BASE_URL}/applications/RevokeApplication/${clientId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to revoke application:", error);
+    throw error;
+  }
+};

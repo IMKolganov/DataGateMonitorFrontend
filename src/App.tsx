@@ -11,6 +11,8 @@ import ServerDetails from "./pages/ServerDetails";
 import Certificates from "./pages/Certificates";
 import ServerSettings from "./pages/ServerSettings";
 import WebConsole from "./pages/WebConsole";
+import Settings from "./pages/Settings";
+import ApplicationSettings from "./pages/ApplicationSettings";
 
 import "./App.css";
 
@@ -25,6 +27,8 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/servers" element={<Servers />} />
             <Route path="/" element={<Servers />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/settings/applications" element={<ApplicationSettings />} />
             <Route path="/servers/add" element={<ServerForm />} />
             <Route path="/servers/edit/:serverId" element={<ServerForm />} />
             <Route path="/server-details/:id" element={<ServerDetails />} />
