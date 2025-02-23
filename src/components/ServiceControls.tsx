@@ -3,34 +3,44 @@ import { useEffect, useState } from "react";
 
 type Props = {
   serviceStatus: string;
+  errorMessage?: string | null;
   nextRunTime: string;
   onRunNow: () => void;
 };
 
-export default function ServiceControls({ serviceStatus, nextRunTime, onRunNow }: Props) {
+export default function ServiceControls({ serviceStatus, errorMessage, nextRunTime, onRunNow }: Props) {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      if (!nextRunTime) return;
-
-      const [datePart, timePart] = nextRunTime.split(", ");
-      const [day, month, year] = datePart.split(".");
-      const nextRunTimestamp = new Date(`${year}-${month}-${day}T${timePart}`).getTime();
-
-      if (isNaN(nextRunTimestamp)) {
+      if (!nextRunTime || nextRunTime === "N/A") {
+        console.warn("⚠️ No valid nextRunTime, skipping calculation.");
         setTimeLeft(null);
         return;
       }
-      const now = Date.now();
-      const difference = Math.max(0, Math.floor((nextRunTimestamp - now) / 1000));
+  
+      const parsedDate = new Date(nextRunTime);
+      const eventTime = parsedDate.getTime(); // Получаем UTC миллисекунды
+      const now = new Date().getTime(); // Текущее UTC время
+  
+      console.log("🕒 Now (UTC):", now);
+      console.log("🕒 Next Run (UTC):", parsedDate.toISOString(), "| eventTime (ms):", eventTime);
+      console.log("🕒 Time Difference:", eventTime - now, "ms");
+  
+      if (isNaN(eventTime)) {
+        console.error("🚨 ERROR: Failed to parse `nextRunTime`:", nextRunTime);
+        setTimeLeft(null);
+        return;
+      }
+  
+      const difference = Math.max(0, Math.floor((eventTime - now) / 1000));
       setTimeLeft(difference);
     };
-
+  
     calculateTimeLeft();
     const timer = setInterval(calculateTimeLeft, 1000);
     return () => clearInterval(timer);
-  }, [nextRunTime]);
+  }, [nextRunTime]);  
 
   const renderStatusDescription = () => {
     switch (serviceStatus) {
@@ -39,7 +49,7 @@ export default function ServiceControls({ serviceStatus, nextRunTime, onRunNow }
       case "Running":
         return "The service is actively querying the OpenVPN server and saving data to the database.";
       case "Error":
-        return "An error occurred while the service was running. Please check the logs for details.";
+        return `An error occurred while the service was running. Please check the logs for details. Error: ${errorMessage || "Unknown error"}`;
       default:
         return "Unknown service status.";
     }
@@ -58,24 +68,30 @@ export default function ServiceControls({ serviceStatus, nextRunTime, onRunNow }
     }
   };
 
+  const handleRunNow = async () => {
+    console.log("Running service now...");
+    await onRunNow();
+  };
+
   return (
     <div className="service-status-container">
       <h2>Service Control</h2>
-      <div style={{borderTop: "1px solid #d1d5da" }}></div>
+      <div style={{ borderTop: "1px solid #d1d5da" }}></div>
       <p>
         <strong>Service Status:</strong>{" "}
         <span style={{ color: getStatusColor() }}>{serviceStatus}</span>
       </p>
+      {serviceStatus === "Error" && (
+        <p style={{ color: "red" }}>
+          <strong>Error Message:</strong> {errorMessage || "No details available"}
+        </p>
+      )}
       <p className="description">{renderStatusDescription()}</p>
       <p>
-        <strong>Next Run:</strong> {nextRunTime} {timeLeft !== null ? ` - ${timeLeft}s` : " (Invalid Time)"}
+        <strong>Next Run:</strong> {new Date(nextRunTime).toLocaleString()} 
+        {timeLeft !== null ? ` - ${timeLeft}s` : " (Invalid Time)"}
       </p>
-      <p className="description">
-        This service periodically queries the OpenVPN server to collect data about connected clients
-        and stores this information in the database. Use the button below to manually trigger the service
-        and update the data immediately.
-      </p>
-      <button className="btn primary" onClick={onRunNow} disabled={serviceStatus === "Running"}>
+      <button className="btn primary" onClick={handleRunNow} disabled={serviceStatus === "Running"}>
         <FaPlay /> Run Now
       </button>
     </div>

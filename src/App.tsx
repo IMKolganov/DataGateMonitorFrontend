@@ -1,6 +1,5 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { Dashboard } from "./pages/Dashboard";
 import { Header } from "./components/Header";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -24,9 +23,8 @@ function App() {
         <main className="main-content">
           
           <Routes>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/servers" element={<Servers />} />
             <Route path="/" element={<Servers />} />
+            <Route path="/servers" element={<Servers />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/settings/applications" element={<ApplicationSettings />} />
             <Route path="/servers/add" element={<ServerForm />} />
