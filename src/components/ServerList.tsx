@@ -13,7 +13,7 @@ const ServerList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
-  const { serviceStatus, nextRunTime, runServiceNow } = useWebSocketService();
+  const { serviceStatus, errorMessage, nextRunTime, runServiceNow } = useWebSocketService();
 
   useEffect(() => {
     loadServers();
@@ -83,7 +83,12 @@ const ServerList: React.FC = () => {
         </ul>
       )}
 
-      <ServiceControls serviceStatus={serviceStatus} nextRunTime={nextRunTime} onRunNow={runServiceNow} />
+    <ServiceControls 
+      serviceStatus={serviceStatus} 
+      errorMessage={errorMessage} 
+      nextRunTime={nextRunTime} 
+      onRunNow={runServiceNow} 
+    />
     </div>
   );
 };
