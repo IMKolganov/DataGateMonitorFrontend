@@ -65,6 +65,11 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
       <button className="btn primary" onClick={onRunNow}>
         <FaPlay /> Sync All Now
       </button>
+      <p className="description">
+        This service periodically queries the OpenVPN server to collect data about connected clients
+        and stores this information in the database. Use the button below to manually trigger the service
+        and update the data immediately.
+      </p>
     </div>
   );
 }
