@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { FaArrowLeft } from "react-icons/fa";
 import "../css/Settings.css";
-import { FaArrowRight, FaArrowLeft, FaTrash, FaInfoCircle } from "react-icons/fa";
 
 export function Settings() {
   const navigate = useNavigate();

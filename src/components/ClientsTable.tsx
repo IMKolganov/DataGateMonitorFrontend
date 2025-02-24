@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { GridColDef } from "@mui/x-data-grid";
+import React from "react";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { ConnectedClient } from "../utils/types";
 import { formatBytes } from "../utils/utils";
 import StyledDataGrid from "../components/TableStyle";
@@ -7,11 +7,21 @@ import CustomThemeProvider from "../components/ThemeProvider";
 
 interface ClientsTableProps {
   clients: ConnectedClient[];
+  totalClients: number;
+  page: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
 }
 
-const ClientsTable: React.FC<ClientsTableProps> = ({ clients }) => {
-  const [paginationModel, setPaginationModel] = useState({ pageSize: 10, page: 0 });
-
+const ClientsTable: React.FC<ClientsTableProps> = ({
+  clients,
+  totalClients,
+  page,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+}) => {
   const rows = clients.map((client, index) => ({
     id: client.id || index + 1,
     commonName: client.commonName,
@@ -49,9 +59,14 @@ const ClientsTable: React.FC<ClientsTableProps> = ({ clients }) => {
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50, 100]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
+          paginationMode="server"
+          rowCount={totalClients}
+          paginationModel={{ pageSize, page }}
+          onPaginationModelChange={(newModel) => {
+            onPageChange(newModel.page);
+            onPageSizeChange(newModel.pageSize);
           }}
+          loading={clients.length === 0}
           disableColumnFilter
           disableColumnMenu
           localeText={{

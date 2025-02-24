@@ -6,51 +6,43 @@ import { FaSync, FaArrowLeft, FaKey, FaTerminal, FaCog } from "react-icons/fa";
 import { BsClock, BsHddNetwork } from "react-icons/bs";
 import { RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer } from "react-icons/io";
+
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
-import { fetchConfig, fetchServersWithStats, fetchConnectedClients, fetchHistoryClients } from "../utils/api";
-
-interface Config {
-  apiBaseUrl: string;
-}
+import { fetchServersWithStats, fetchConnectedClients, fetchHistoryClients } from "../utils/api";
 
 export function ServerDetails() {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const [config, setConfig] = useState<Config | null>(null);
   const [isLive, setIsLive] = useState<boolean>(true);
   const [serverInfo, setServerInfo] = useState<any>(null);
-  const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const loadConfig = async () => {
-      try {
-        const loadedConfig = await fetchConfig();
-        setConfig(loadedConfig);
-      } catch (error) {
-        console.error("Failed to load configuration:", error);
-      }
-    };
-    loadConfig();
-  }, []);
+  const [clients, setClients] = useState<any[]>([]);
+  const [totalClients, setTotalClients] = useState<number>(0);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    if (config && id) {
+    if (id) {
       fetchData();
     }
-  }, [config, isLive, id]);
+  }, [id, isLive, page, pageSize]);
 
   const fetchData = async () => {
-    if (!config || !id) return;
+    if (!id) return;
     setLoading(true);
 
     try {
       const serverRes = await fetchServersWithStats(id);
       setServerInfo(serverRes || {});
 
-      const clientsRes = isLive ? await fetchConnectedClients(id) : await fetchHistoryClients(id);
-      setClients(clientsRes || []);
+      const clientsRes = isLive
+        ? await fetchConnectedClients(id, page + 1, pageSize)
+        : await fetchHistoryClients(id, page + 1, pageSize);
+
+      setClients(clientsRes.openVpnServerClients || []);
+      setTotalClients(clientsRes.totalCount || 0);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -85,10 +77,10 @@ export function ServerDetails() {
             <FaTerminal className="icon" /> OpenVPN Console
           </button>
           <label className="square-toggle">
-          <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
-          <span className="toggle-slider"></span>
-          <span className="toggle-text">{isLive ? "Live" : "History"}</span>
-        </label>
+            <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
+            <span className="toggle-slider"></span>
+            <span className="toggle-text">{isLive ? "Live" : "History"}</span>
+          </label>
         </div>
         <div className="right-buttons">
           <button className="btn secondary settings-button" onClick={() => navigate(`/server-details/${id}/settings`)}>
@@ -96,7 +88,6 @@ export function ServerDetails() {
           </button>
         </div>
       </div>
-
 
       {loading ? (
         <div className="loading-container">
@@ -161,7 +152,14 @@ export function ServerDetails() {
           )}
 
           <h3>VPN Clients ({isLive ? "Connected" : "Historical"})</h3>
-          <ClientsTable clients={clients} />
+          <ClientsTable
+            clients={clients}
+            totalClients={totalClients}
+            page={page}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
 
           <h3>VPN Client Locations</h3>
           <VpnMap clients={clients} />
