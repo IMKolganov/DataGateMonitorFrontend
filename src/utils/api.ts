@@ -77,17 +77,21 @@ export const fetchServersWithStats = async (id: string): Promise<any> => {
   return response.data;
 };
 
-export const fetchConnectedClients = async (id: string): Promise<any[]> => {
+export const fetchConnectedClients = async (id: string, page: number, pageSize: number): Promise<any> => {
   await ensureApiBaseUrl();
   if (!API_BASE_URL) throw new Error("API base URL is not set");
-  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetAllConnectedClients/${id}`);
+  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetAllConnectedClients/${id}`, {
+    params: { page, pageSize },
+  });
   return response.data;
 };
 
-export const fetchHistoryClients = async (id: string): Promise<any[]> => {
+export const fetchHistoryClients = async (id: string, page: number, pageSize: number): Promise<any> => {
   await ensureApiBaseUrl();
   if (!API_BASE_URL) throw new Error("API base URL is not set");
-  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetAllHistoryClients/${id}`);
+  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetAllHistoryClients/${id}`, {
+    params: { page, pageSize },
+  });
   return response.data;
 };
 

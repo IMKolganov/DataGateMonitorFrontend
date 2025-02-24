@@ -58,7 +58,6 @@
   }
 
   .server-info {
-    display: flex;
     flex-direction: column;
   }
   
@@ -155,3 +154,17 @@
     background-color: rgba(231, 76, 60, 0.1);
   }
   
+
+  
+  .error-message {
+    background: #300;
+    color: #ff8080;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-top: 5px;
+  }
+  
+  .server-service{
+    margin-top: 10px;
+  }

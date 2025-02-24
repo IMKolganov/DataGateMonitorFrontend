@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Header } from "./components/Header";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import History from "./pages/History";
 import Servers from "./pages/Servers";
 import ServerForm from "./pages/ServerForm";
 import ServerDetails from "./pages/ServerDetails";
@@ -33,7 +32,6 @@ function App() {
             <Route path="/server-details/:vpnServerId/settings" element={<ServerSettings />} />
             <Route path="/server-details/:vpnServerId/certificates" element={<Certificates />} />
             <Route path="/server-details/:vpnServerId/console" element={<WebConsole />} />
-            <Route path="/history" element={<History />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>
