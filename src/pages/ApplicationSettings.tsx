@@ -78,6 +78,9 @@ export function ApplicationSettings() {
             <button className="btn secondary" onClick={() => navigate("/")}>
               <FaArrowLeft className="icon" /> Back
             </button>
+            <button className="btn secondary" onClick={handleRefresh} disabled={refreshing}>
+              <FaSync className={`icon ${refreshing ? "icon-spin" : ""}`} /> Refresh
+            </button>
           </div>
         </div>
       </div>
@@ -103,9 +106,6 @@ export function ApplicationSettings() {
             />
             <button className="btn primary" onClick={handleRegister} disabled={loading || !newAppName.trim()}>
               <FaPlus className="icon" /> Register app
-            </button>
-            <button className="btn secondary" onClick={handleRefresh} disabled={refreshing}>
-              <FaSync className={`icon ${refreshing ? "icon-spin" : ""}`} /> Refresh
             </button>
           </div>
 
