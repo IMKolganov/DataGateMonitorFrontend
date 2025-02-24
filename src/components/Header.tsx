@@ -19,6 +19,7 @@ export function Header() {
       <nav>
         <ul className={`nav-links ${menuOpen ? "active" : ""}`}>
           <li><Link to="/servers" onClick={() => setMenuOpen(false)}>Servers</Link></li>
+          <li><Link to="/settings" onClick={() => setMenuOpen(false)}>Settings</Link></li>
           <li><Link to="/about" onClick={() => setMenuOpen(false)}>About</Link></li>
           <li><Link to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link></li>
         </ul>

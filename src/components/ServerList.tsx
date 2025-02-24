@@ -2,34 +2,61 @@ import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { fetchServers, deleteServer } from "../utils/api";
-import { OpenVpnServerInfoResponse } from "../utils/types";
+import { OpenVpnServerInfoResponse, ServiceStatus } from "../utils/types";
 import ServerItem from "./ServerItem";
 import ServiceControls from "./ServiceControls";
 import useWebSocketService from "../hooks/useWebSocketService";
 import "../css/ServerList.css";
 
+interface ServerWithStatus extends OpenVpnServerInfoResponse {
+  serviceStatus: ServiceStatus;
+  errorMessage: string | null;
+  nextRunTime: string;
+}
+
 const ServerList: React.FC = () => {
-  const [servers, setServers] = useState<OpenVpnServerInfoResponse[]>([]);
+  const [servers, setServers] = useState<ServerWithStatus[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
-  const { serviceStatus, nextRunTime, runServiceNow } = useWebSocketService();
+  const { serviceData, runServiceNow } = useWebSocketService();
 
   useEffect(() => {
     loadServers();
   }, []);
 
   useEffect(() => {
-    if (serviceStatus !== "Unknown") {
-      loadServers();
+    if (Object.keys(serviceData).length > 0) {
+      setServers((prevServers) =>
+        prevServers.map((server) => {
+          const serverId = server.openVpnServer.id.toString();
+          const serviceInfo = serviceData[serverId];
+
+          return serviceInfo
+            ? {
+                ...server,
+                serviceStatus: serviceInfo.status,
+                errorMessage: serviceInfo.errorMessage,
+                nextRunTime: serviceInfo.nextRunTime,
+              }
+            : server;
+        })
+      );
     }
-  }, [serviceStatus]);
+  }, [serviceData]);
 
   const loadServers = async () => {
     setLoading(true);
     try {
       const data = await fetchServers();
-      setServers(data);
+      setServers(
+        data.map((server) => ({
+          ...server,
+          serviceStatus: ServiceStatus.Idle,
+          errorMessage: null,
+          nextRunTime: "N/A",
+        }))
+      );
     } catch (error) {
       console.error("Error fetching servers:", error);
     } finally {
@@ -50,13 +77,15 @@ const ServerList: React.FC = () => {
   return (
     <div>
       <div className="header-container">
-        <div className="action-buttons">
-          <button className="btn primary" onClick={() => navigate("/servers/add")}>
-            <FaPlus className="icon" /> Add Server
-          </button>
-          <button className="btn secondary" onClick={loadServers} disabled={loading}>
-            <FaSyncAlt className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
-          </button>
+        <div className="header-bar">
+          <div className="left-buttons">
+            <button className="btn primary" onClick={() => navigate("/servers/add")}>
+              <FaPlus className="icon" /> Add Server
+            </button>
+            <button className="btn secondary" onClick={loadServers} disabled={loading}>
+              <FaSyncAlt className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
+            </button>
+          </div>
         </div>
       </div>
 
@@ -72,6 +101,9 @@ const ServerList: React.FC = () => {
               <ServerItem
                 key={server.openVpnServer.id}
                 server={server}
+                serviceStatus={server.serviceStatus}
+                errorMessage={server.errorMessage}
+                nextRunTime={server.nextRunTime}
                 onView={(id) => navigate(`/server-details/${id}`)}
                 onEdit={(id) => navigate(`/servers/edit/${id}`)}
                 onDelete={handleDelete}
@@ -83,7 +115,7 @@ const ServerList: React.FC = () => {
         </ul>
       )}
 
-      <ServiceControls serviceStatus={serviceStatus} nextRunTime={nextRunTime} onRunNow={runServiceNow} />
+      <ServiceControls serviceData={serviceData} onRunNow={runServiceNow} />
     </div>
   );
 };

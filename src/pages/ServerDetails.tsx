@@ -6,55 +6,65 @@ import { FaSync, FaArrowLeft, FaKey, FaTerminal, FaCog } from "react-icons/fa";
 import { BsClock, BsHddNetwork } from "react-icons/bs";
 import { RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer } from "react-icons/io";
+
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
-import { fetchConfig, fetchServersWithStats, fetchConnectedClients, fetchHistoryClients } from "../utils/api";
-
-interface Config {
-  apiBaseUrl: string;
-}
+import { fetchServersWithStats, fetchConnectedClients, fetchHistoryClients } from "../utils/api";
 
 export function ServerDetails() {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const [config, setConfig] = useState<Config | null>(null);
   const [isLive, setIsLive] = useState<boolean>(true);
   const [serverInfo, setServerInfo] = useState<any>(null);
+  const [loadingServer, setLoadingServer] = useState(false);
+  const [loadingClients, setLoadingClients] = useState(false);
+
   const [clients, setClients] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [totalClients, setTotalClients] = useState<number>(0);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    const loadConfig = async () => {
-      try {
-        const loadedConfig = await fetchConfig();
-        setConfig(loadedConfig);
-      } catch (error) {
-        console.error("Failed to load configuration:", error);
-      }
-    };
-    loadConfig();
-  }, []);
-
-  useEffect(() => {
-    if (config && id) {
-      fetchData();
+    if (id) {
+      fetchServerData();
     }
-  }, [config, isLive, id]);
+  }, [id]);
 
-  const fetchData = async () => {
-    if (!config || !id) return;
-    setLoading(true);
+  useEffect(() => {
+    if (id) {
+      fetchClientsData();
+    }
+  }, [id, isLive, page, pageSize]);
+
+  const fetchServerData = async () => {
+    if (!id) return;
+    setLoadingServer(true);
 
     try {
       const serverRes = await fetchServersWithStats(id);
       setServerInfo(serverRes || {});
-
-      const clientsRes = isLive ? await fetchConnectedClients(id) : await fetchHistoryClients(id);
-      setClients(clientsRes || []);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching server details:", error);
     } finally {
-      setLoading(false);
+      setLoadingServer(false);
+    }
+  };
+
+  const fetchClientsData = async () => {
+    if (!id) return;
+    setLoadingClients(true);
+
+    try {
+      const clientsRes = isLive
+        ? await fetchConnectedClients(id, page + 1, pageSize)
+        : await fetchHistoryClients(id, page + 1, pageSize);
+
+      setClients(clientsRes.openVpnServerClients || []);
+      setTotalClients(clientsRes.totalCount || 0);
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+    } finally {
+      setLoadingClients(false);
     }
   };
 
@@ -75,8 +85,8 @@ export function ServerDetails() {
           <button className="btn secondary" onClick={() => navigate("/")}>
             <FaArrowLeft className="icon" /> Back
           </button>
-          <button className="btn secondary" onClick={fetchData} disabled={loading}>
-            <FaSync className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
+          <button className="btn secondary" onClick={fetchServerData} disabled={loadingServer}>
+            <FaSync className={`icon ${loadingServer ? "icon-spin" : ""}`} /> Refresh
           </button>
           <button className="btn secondary" onClick={() => navigate(`/server-details/${id}/certificates`)}>
             <FaKey className="icon" /> Manage Certificates
@@ -85,10 +95,10 @@ export function ServerDetails() {
             <FaTerminal className="icon" /> OpenVPN Console
           </button>
           <label className="square-toggle">
-          <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
-          <span className="toggle-slider"></span>
-          <span className="toggle-text">{isLive ? "Live" : "History"}</span>
-        </label>
+            <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
+            <span className="toggle-slider"></span>
+            <span className="toggle-text">{isLive ? "Live" : "History"}</span>
+          </label>
         </div>
         <div className="right-buttons">
           <button className="btn secondary settings-button" onClick={() => navigate(`/server-details/${id}/settings`)}>
@@ -97,8 +107,7 @@ export function ServerDetails() {
         </div>
       </div>
 
-
-      {loading ? (
+      {loadingServer ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Loading server details...</p>
@@ -161,7 +170,22 @@ export function ServerDetails() {
           )}
 
           <h3>VPN Clients ({isLive ? "Connected" : "Historical"})</h3>
-          <ClientsTable clients={clients} />
+
+          {loadingClients ? (
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Loading clients...</p>
+            </div>
+          ) : (
+            <ClientsTable
+              clients={clients}
+              totalClients={totalClients}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+            />
+          )}
 
           <h3>VPN Client Locations</h3>
           <VpnMap clients={clients} />

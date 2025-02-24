@@ -43,6 +43,26 @@ export const getWebSocketUrl = async (vpnServerId: string): Promise<string> => {
   return `${WS_BASE_URL}/api/openvpn/ws/${vpnServerId}`;
 };
 
+export const getWebSocketUrlForBackgroundService = async (): Promise<string> => {
+  await ensureApiBaseUrl();
+  if (!WS_BASE_URL) throw new Error("WebSocket base URL is not set");
+
+  return `${WS_BASE_URL}/api/OpenVpnServers/status-stream`;
+};
+
+export const runServiceNow = async (): Promise<void> => {
+  await fetchConfig();
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
+
+  try {
+    const response = await axios.post(`${API_BASE_URL}/OpenVpnServers/run-now`);
+    console.log("Service started:", response.data);
+  } catch (error) {
+    console.error("Failed to start service:", error);
+    throw error;
+  }
+};
+
 export const fetchServers = async (): Promise<OpenVpnServerInfoResponse[]> => {
   await ensureApiBaseUrl();
   if (!API_BASE_URL) throw new Error("API base URL is not set");
@@ -57,17 +77,21 @@ export const fetchServersWithStats = async (id: string): Promise<any> => {
   return response.data;
 };
 
-export const fetchConnectedClients = async (id: string): Promise<any[]> => {
+export const fetchConnectedClients = async (id: string, page: number, pageSize: number): Promise<any> => {
   await ensureApiBaseUrl();
   if (!API_BASE_URL) throw new Error("API base URL is not set");
-  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetAllConnectedClients/${id}`);
+  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetAllConnectedClients/${id}`, {
+    params: { page, pageSize },
+  });
   return response.data;
 };
 
-export const fetchHistoryClients = async (id: string): Promise<any[]> => {
+export const fetchHistoryClients = async (id: string, page: number, pageSize: number): Promise<any> => {
   await ensureApiBaseUrl();
   if (!API_BASE_URL) throw new Error("API base URL is not set");
-  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetAllHistoryClients/${id}`);
+  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetAllHistoryClients/${id}`, {
+    params: { page, pageSize },
+  });
   return response.data;
 };
 
@@ -75,12 +99,6 @@ export const deleteServer = async (id: number) => {
   await ensureApiBaseUrl();
   if (!API_BASE_URL) throw new Error("API base URL is not set");
   await axios.delete(`${API_BASE_URL}/OpenVpnServers/DeleteServer?vpnServerId=${id}`);
-};
-
-export const runServiceNow = async (): Promise<void> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-  await axios.post(`${API_BASE_URL}/run-now`);
 };
 
 export const fetchCertificates = async (vpnServerId: string, status?: string): Promise<Certificate[]> => {
@@ -155,4 +173,37 @@ export const revokeOvpnFile = async (vpnServerId: string, externalId: string) =>
     vpnServerId,
     externalId,
   });
+};
+
+export const getAllApplications = async () => {
+  await ensureApiBaseUrl();
+  try {
+    const response = await axios.get(`${API_BASE_URL}/applications/GetAllApplications`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch applications:", error);
+    throw error;
+  }
+};
+
+export const registerApplication = async (name: string) => {
+  await ensureApiBaseUrl();
+  try {
+    const response = await axios.post(`${API_BASE_URL}/applications/RegisterApplication`, { name });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to register application:", error);
+    throw error;
+  }
+};
+
+export const revokeApplication = async (clientId: string) => {
+  await ensureApiBaseUrl();
+  try {
+    const response = await axios.post(`${API_BASE_URL}/applications/RevokeApplication/${clientId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to revoke application:", error);
+    throw error;
+  }
 };

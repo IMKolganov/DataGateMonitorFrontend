@@ -1,0 +1,110 @@
+  .app-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .app-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #0d1117;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+
+  .app-register {
+    flex-wrap: wrap;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .app-register input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 5px;
+  }
+  
+  .app-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .app-table th,
+  .app-table td {
+    border: 1px solid #444;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .app-table th {
+    background: #222;
+  }
+  
+  .small-text {
+    font-size: 12px;
+    word-break: break-word;
+  }
+  
+  .copyable {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #00d4ff;
+  }
+  
+  .copy-btn:hover {
+    color: #fff;
+  }
+  
+  .copied-text {
+    color: #00ff00;
+    font-size: 12px;
+  }
+  
+  .status {
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 5px;
+  }
+  
+  .status.active {
+    background: #008000;
+    color: #fff;
+  }
+  
+  .status.revoked {
+    background: #800000;
+    color: #fff;
+  }
+  
+
+  .app-settings-description {
+    color: #8b949e;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  .app-warning {
+    color: #c9d1d9;
+    margin-bottom: 15px;
+  }
+  
+  .code-block {
+    background: #0d1117;
+    color: #c9d1d9;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    border: 1px solid #30363d;
+  }
+  
