@@ -16,7 +16,8 @@ export function ServerDetails() {
   const navigate = useNavigate();
   const [isLive, setIsLive] = useState<boolean>(true);
   const [serverInfo, setServerInfo] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingServer, setLoadingServer] = useState(false);
+  const [loadingClients, setLoadingClients] = useState(false);
 
   const [clients, setClients] = useState<any[]>([]);
   const [totalClients, setTotalClients] = useState<number>(0);
@@ -25,18 +26,35 @@ export function ServerDetails() {
 
   useEffect(() => {
     if (id) {
-      fetchData();
+      fetchServerData();
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchClientsData();
     }
   }, [id, isLive, page, pageSize]);
 
-  const fetchData = async () => {
+  const fetchServerData = async () => {
     if (!id) return;
-    setLoading(true);
+    setLoadingServer(true);
 
     try {
       const serverRes = await fetchServersWithStats(id);
       setServerInfo(serverRes || {});
+    } catch (error) {
+      console.error("Error fetching server details:", error);
+    } finally {
+      setLoadingServer(false);
+    }
+  };
 
+  const fetchClientsData = async () => {
+    if (!id) return;
+    setLoadingClients(true);
+
+    try {
       const clientsRes = isLive
         ? await fetchConnectedClients(id, page + 1, pageSize)
         : await fetchHistoryClients(id, page + 1, pageSize);
@@ -44,9 +62,9 @@ export function ServerDetails() {
       setClients(clientsRes.openVpnServerClients || []);
       setTotalClients(clientsRes.totalCount || 0);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching clients:", error);
     } finally {
-      setLoading(false);
+      setLoadingClients(false);
     }
   };
 
@@ -67,8 +85,8 @@ export function ServerDetails() {
           <button className="btn secondary" onClick={() => navigate("/")}>
             <FaArrowLeft className="icon" /> Back
           </button>
-          <button className="btn secondary" onClick={fetchData} disabled={loading}>
-            <FaSync className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
+          <button className="btn secondary" onClick={fetchServerData} disabled={loadingServer}>
+            <FaSync className={`icon ${loadingServer ? "icon-spin" : ""}`} /> Refresh
           </button>
           <button className="btn secondary" onClick={() => navigate(`/server-details/${id}/certificates`)}>
             <FaKey className="icon" /> Manage Certificates
@@ -89,7 +107,7 @@ export function ServerDetails() {
         </div>
       </div>
 
-      {loading ? (
+      {loadingServer ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Loading server details...</p>
@@ -152,14 +170,22 @@ export function ServerDetails() {
           )}
 
           <h3>VPN Clients ({isLive ? "Connected" : "Historical"})</h3>
-          <ClientsTable
-            clients={clients}
-            totalClients={totalClients}
-            page={page}
-            pageSize={pageSize}
-            onPageChange={setPage}
-            onPageSizeChange={setPageSize}
-          />
+
+          {loadingClients ? (
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Loading clients...</p>
+            </div>
+          ) : (
+            <ClientsTable
+              clients={clients}
+              totalClients={totalClients}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+            />
+          )}
 
           <h3>VPN Client Locations</h3>
           <VpnMap clients={clients} />
