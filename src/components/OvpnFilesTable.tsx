@@ -3,12 +3,15 @@ import { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
 import { IssuedOvpnFile } from "../utils/types";
-import { revokeOvpnFile } from "../utils/api";
-import Loading from "../components/Loading";
+import { revokeOvpnFile, downloadOvpnFile } from "../utils/api";
+import { FaDownload } from "react-icons/fa";
 
-const OvpnFilesTable: React.FC<{ ovpnFiles: IssuedOvpnFile[], vpnServerId: string, onRevoke: () => void, loading: boolean }> = ({ 
-  ovpnFiles, vpnServerId, onRevoke, loading 
-}) => {
+const OvpnFilesTable: React.FC<{ 
+  ovpnFiles: IssuedOvpnFile[], 
+  vpnServerId: string, 
+  onRevoke: () => void, 
+  loading: boolean 
+}> = ({ ovpnFiles, vpnServerId, onRevoke, loading }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [issuedToFilter, setIssuedToFilter] = useState("");
 
@@ -23,13 +26,22 @@ const OvpnFilesTable: React.FC<{ ovpnFiles: IssuedOvpnFile[], vpnServerId: strin
     }
   }, [vpnServerId, onRevoke]);
 
+  const handleDownload = async (issuedOvpnFileId: number) => {
+    try {
+      await downloadOvpnFile(issuedOvpnFileId, vpnServerId);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Error downloading file.");
+    }
+  };
+
   const filteredFiles = ovpnFiles.filter(file =>
     file.commonName.toLowerCase().includes(searchQuery.toLowerCase()) &&
     (issuedToFilter === "" || file.issuedTo.toLowerCase().includes(issuedToFilter.toLowerCase()))
   );
 
   const rows = filteredFiles.map((file, index) => ({
-    id: index + 1,
+    id: file.id,
     externalId: file.externalId,
     commonName: file.commonName,
     issuedTo: file.issuedTo,
@@ -44,11 +56,14 @@ const OvpnFilesTable: React.FC<{ ovpnFiles: IssuedOvpnFile[], vpnServerId: strin
     {
       field: "actions",
       headerName: "Actions",
-      width: 150,
+      width: 200,
       renderCell: (params) => (
         <div className="action-container">
           <button className="btn danger" onClick={() => handleRevoke(params.row.externalId)}>
             Revoke
+          </button>
+          <button className="btn secondary" onClick={() => handleDownload(params.row.id)}>
+            <FaDownload /> Download
           </button>
         </div>
       ),

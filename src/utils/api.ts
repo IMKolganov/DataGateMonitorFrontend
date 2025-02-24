@@ -207,3 +207,20 @@ export const revokeApplication = async (clientId: string) => {
     throw error;
   }
 };
+
+export const downloadOvpnFile = async (issuedOvpnFileId: number, vpnServerId: string) => {
+  await ensureApiBaseUrl();
+  const response = await axios.get(
+    `${API_BASE_URL}/OpenVpnFiles/DownloadOvpnFile/${issuedOvpnFileId}/${vpnServerId}`,
+    { responseType: "blob" }
+  );
+
+  const blob = new Blob([response.data], { type: "application/x-openvpn-profile" });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `client-${issuedOvpnFileId}.ovpn`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
