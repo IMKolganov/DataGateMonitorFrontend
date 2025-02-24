@@ -52,7 +52,7 @@ const ServerList: React.FC = () => {
       setServers(
         data.map((server) => ({
           ...server,
-          serviceStatus: ServiceStatus.Idle, // По умолчанию
+          serviceStatus: ServiceStatus.Idle,
           errorMessage: null,
           nextRunTime: "N/A",
         }))
@@ -77,13 +77,15 @@ const ServerList: React.FC = () => {
   return (
     <div>
       <div className="header-container">
-        <div className="action-buttons">
-          <button className="btn primary" onClick={() => navigate("/servers/add")}>
-            <FaPlus className="icon" /> Add Server
-          </button>
-          <button className="btn secondary" onClick={loadServers} disabled={loading}>
-            <FaSyncAlt className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
-          </button>
+        <div className="header-bar">
+          <div className="left-buttons">
+            <button className="btn primary" onClick={() => navigate("/servers/add")}>
+              <FaPlus className="icon" /> Add Server
+            </button>
+            <button className="btn secondary" onClick={loadServers} disabled={loading}>
+              <FaSyncAlt className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
+            </button>
+          </div>
         </div>
       </div>
 
