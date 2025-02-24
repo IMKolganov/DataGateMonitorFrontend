@@ -1,5 +1,5 @@
 import React from "react";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { GridColDef } from "@mui/x-data-grid";
 import { ConnectedClient } from "../utils/types";
 import { formatBytes } from "../utils/utils";
 import StyledDataGrid from "../components/TableStyle";
@@ -12,6 +12,7 @@ interface ClientsTableProps {
   pageSize: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
+  loading: boolean;
 }
 
 const ClientsTable: React.FC<ClientsTableProps> = ({
@@ -21,6 +22,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
   pageSize,
   onPageChange,
   onPageSizeChange,
+  loading,
 }) => {
   const rows = clients.map((client, index) => ({
     id: client.id || index + 1,
@@ -66,7 +68,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
             onPageChange(newModel.page);
             onPageSizeChange(newModel.pageSize);
           }}
-          loading={clients.length === 0}
+          loading={loading}
           disableColumnFilter
           disableColumnMenu
           localeText={{
