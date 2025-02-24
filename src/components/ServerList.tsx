@@ -106,16 +106,14 @@ const ServerList: React.FC = () => {
                 onEdit={(id) => navigate(`/servers/edit/${id}`)}
                 onDelete={handleDelete}
               />
-              
             ))
           ) : (
             <p>No servers available.</p>
           )}
-          <ServiceControls serviceData={serviceData[id]} onRunNow={runServiceNow} />
         </ul>
       )}
 
-      
+      <ServiceControls serviceData={serviceData} onRunNow={runServiceNow} />
     </div>
   );
 };
