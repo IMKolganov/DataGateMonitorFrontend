@@ -1,10 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchConfig, getWebSocketUrlForBackgroundService, runServiceNow } from "../utils/api";
+import { ServiceStatus } from "../utils/types";
+
+interface ServiceData {
+  status: ServiceStatus;
+  errorMessage: string | null;
+  nextRunTime: string;
+}
 
 const useWebSocketService = () => {
-  const [serviceStatus, setServiceStatus] = useState<string>("Unknown");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [nextRunTime, setNextRunTime] = useState<string>("N/A");
+  const [serviceData, setServiceData] = useState<Record<string, ServiceData>>({});
   const [ws, setWs] = useState<WebSocket | null>(null);
 
   useEffect(() => {
@@ -37,16 +42,28 @@ const useWebSocketService = () => {
         const data = JSON.parse(event.data);
         console.log("🔹 WebSocket received:", data);
 
-        setServiceStatus(data.status || "Unknown");
-        setErrorMessage(data.errorMessage || null);
-
-        if (!data.nextRunTime) {
-          console.warn("⚠️ WARNING: Server returned `nextRunTime` as null or undefined. Using 'N/A'");
-          setNextRunTime("N/A");
+        if (typeof data !== "object" || !data) {
+          console.warn("⚠️ WARNING: Unexpected WebSocket data format:", data);
           return;
         }
 
-        setNextRunTime(data.nextRunTime); // Просто сохраняем дату, не трогаем формат
+        const updatedServiceData: Record<string, ServiceData> = {};
+
+        Object.keys(data).forEach((key) => {
+          const service = data[key];
+          const status =
+            service.Status === 0 ? ServiceStatus.Idle :
+            service.Status === 1 ? ServiceStatus.Running :
+            ServiceStatus.Error;
+
+          updatedServiceData[key] = {
+            status,
+            errorMessage: service.ErrorMessage || null,
+            nextRunTime: service.NextRunTime || "N/A",
+          };
+        });
+
+        setServiceData(updatedServiceData);
       } catch (error) {
         console.error("❌ Error parsing WebSocket message:", error);
       }
@@ -60,7 +77,7 @@ const useWebSocketService = () => {
     setWs(socket);
   }, []);
 
-  return { serviceStatus, nextRunTime, errorMessage, runServiceNow };
+  return { serviceData, runServiceNow };
 };
 
 export default useWebSocketService;

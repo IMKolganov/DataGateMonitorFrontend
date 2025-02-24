@@ -107,3 +107,9 @@ export interface ServerInfo {
     lastUpdate: string;
     createDate: string;
   }  
+
+  export enum ServiceStatus {
+    Idle = "Idle",
+    Running = "Running",
+    Error = "Error",
+  }  
