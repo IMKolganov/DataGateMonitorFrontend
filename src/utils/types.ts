@@ -86,6 +86,7 @@ export interface ServerInfo {
     certificates: Certificate[];
     vpnServerId: string;
     onRevoke: () => void;
+    loading: boolean;
   }
 
   export interface IssuedOvpnFile {

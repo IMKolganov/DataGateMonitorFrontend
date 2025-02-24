@@ -4,8 +4,11 @@ import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
 import { IssuedOvpnFile } from "../utils/types";
 import { revokeOvpnFile } from "../utils/api";
+import Loading from "../components/Loading";
 
-const OvpnFilesTable: React.FC<{ ovpnFiles: IssuedOvpnFile[], vpnServerId: string, onRevoke: () => void }> = ({ ovpnFiles, vpnServerId, onRevoke }) => {
+const OvpnFilesTable: React.FC<{ ovpnFiles: IssuedOvpnFile[], vpnServerId: string, onRevoke: () => void, loading: boolean }> = ({ 
+  ovpnFiles, vpnServerId, onRevoke, loading 
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [issuedToFilter, setIssuedToFilter] = useState("");
 
@@ -83,6 +86,7 @@ const OvpnFilesTable: React.FC<{ ovpnFiles: IssuedOvpnFile[], vpnServerId: strin
           localeText={{
             noRowsLabel: "📭 No OVPN files found",
           }}
+          loading={loading}
         />
       </div>
     </CustomThemeProvider>
