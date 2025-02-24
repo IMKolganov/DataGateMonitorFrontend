@@ -3,12 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import "../css/ServerDetails.css";
 
 import { FaSync, FaArrowLeft, FaKey, FaTerminal, FaCog } from "react-icons/fa";
-import { BsClock, BsHddNetwork } from "react-icons/bs";
-import { RiHardDrive2Line } from "react-icons/ri";
-import { IoIosSpeedometer } from "react-icons/io";
 
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
+import ServerDetailsInfo from "../components/ServerDetailsInfo";
 import { fetchServersWithStats, fetchConnectedClients, fetchHistoryClients } from "../utils/api";
 
 export function ServerDetails() {
@@ -39,6 +37,7 @@ export function ServerDetails() {
   const fetchServerData = async () => {
     if (!id) return;
     setLoadingServer(true);
+    fetchClientsData();
 
     try {
       const serverRes = await fetchServersWithStats(id);
@@ -59,10 +58,12 @@ export function ServerDetails() {
         ? await fetchConnectedClients(id, page + 1, pageSize)
         : await fetchHistoryClients(id, page + 1, pageSize);
 
-      setClients(clientsRes.openVpnServerClients || []);
-      setTotalClients(clientsRes.totalCount || 0);
+      setClients(clientsRes?.openVpnServerClients || []);
+      setTotalClients(clientsRes?.totalCount || 0);
     } catch (error) {
       console.error("Error fetching clients:", error);
+      setClients([]);
+      setTotalClients(0);
     } finally {
       setLoadingClients(false);
     }
@@ -112,87 +113,24 @@ export function ServerDetails() {
           <div className="loading-spinner"></div>
           <p>Loading server details...</p>
         </div>
-      ) : id ? (
-        <>
-          {serverInfo && serverInfo.openVpnServer ? (
-            <div className="server-info">
-              <div className="server-header">
-                <div className="server-info">
-                  <strong className="server-name">{serverInfo.openVpnServer.serverName}</strong>
-                </div>
-                <div className={`server-status ${serverInfo.openVpnServer.isOnline ? "status-online" : "status-offline"}`}>
-                  {serverInfo.openVpnServer.isOnline ? "Online" : "Offline"}
-                </div>
-              </div>
-
-              {serverInfo.openVpnServerStatusLog && (
-                <div className="server-details">
-                  <div className="detail-row">
-                    <BsClock className="detail-icon" />
-                    <span className="detail-label">Uptime:</span>
-                    <span>{serverInfo.openVpnServerStatusLog?.upSince ? new Date(serverInfo.openVpnServerStatusLog.upSince).toLocaleString() : "N/A"}</span>
-                  </div>
-                  <div className="detail-row">
-                    <RiHardDrive2Line className="detail-icon" />
-                    <span className="detail-label">Version:</span>
-                    <span>{serverInfo.openVpnServerStatusLog?.version || "Unknown"}</span>
-                  </div>
-                  <div className="detail-row">
-                    <BsHddNetwork className="detail-icon" />
-                    <span className="detail-label">Local IP:</span>
-                    <span>{serverInfo.openVpnServerStatusLog?.serverLocalIp || "N/A"}</span>
-                  </div>
-                  <div className="detail-row">
-                    <BsHddNetwork className="detail-icon" />
-                    <span className="detail-label">Remote IP:</span>
-                    <span>{serverInfo.openVpnServerStatusLog?.serverRemoteIp || "N/A"}</span>
-                  </div>
-                  <div className="detail-row">
-                    <IoIosSpeedometer className="detail-icon" />
-                    <span className="detail-label">Traffic IN:</span>
-                    <span>{toHumanReadableSize(serverInfo.openVpnServerStatusLog?.bytesIn || 0)}</span>
-                  </div>
-                  <div className="detail-row">
-                    <IoIosSpeedometer className="detail-icon" />
-                    <span className="detail-label">Traffic OUT:</span>
-                    <span>{toHumanReadableSize(serverInfo.openVpnServerStatusLog?.bytesOut || 0)}</span>
-                  </div>
-                  <div className="detail-row">
-                    <BsHddNetwork className="detail-icon" />
-                    <span className="detail-label">Session Id:</span>
-                    <span>{serverInfo.openVpnServerStatusLog?.sessionId || "N/A"}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p>No server information available.</p>
-          )}
-
-          <h3>VPN Clients ({isLive ? "Connected" : "Historical"})</h3>
-
-          {loadingClients ? (
-            <div className="loading-container">
-              <div className="loading-spinner"></div>
-              <p>Loading clients...</p>
-            </div>
-          ) : (
-            <ClientsTable
-              clients={clients}
-              totalClients={totalClients}
-              page={page}
-              pageSize={pageSize}
-              onPageChange={setPage}
-              onPageSizeChange={setPageSize}
-            />
-          )}
-
-          <h3>VPN Client Locations</h3>
-          <VpnMap clients={clients} />
-        </>
       ) : (
-        <p style={{ textAlign: "center", marginTop: "20px", color: "red" }}>Invalid Server ID</p>
+        <ServerDetailsInfo serverInfo={serverInfo} toHumanReadableSize={toHumanReadableSize} />
       )}
+
+      <h3>VPN Clients ({isLive ? "Connected" : "Historical"})</h3>
+
+      <ClientsTable
+        clients={clients}
+        totalClients={totalClients}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+        loading={loadingClients}
+      />
+
+      <h3>VPN Client Locations</h3>
+      <VpnMap clients={clients} />
     </div>
   );
 }

@@ -140,7 +140,6 @@ const ServerItem: React.FC<Props> = ({ server, serviceStatus, errorMessage, next
         </button>
         <button
           className="btn danger"
-          disabled={server.openVpnServer.isOnline || serviceStatus === ServiceStatus.Running}
           onClick={() => onDelete(server.openVpnServer.id)}
         >
           <FaTrash className="icon" /> Delete

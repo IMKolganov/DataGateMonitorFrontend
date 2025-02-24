@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
@@ -20,7 +20,7 @@ const renderStatus = (status: Certificate["status"]) => {
   }
 };
 
-const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, vpnServerId, onRevoke }) => {
+const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, vpnServerId, onRevoke, loading }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [serialNumberQuery, setSerialNumberQuery] = useState("");
@@ -116,8 +116,9 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, vpn
           disableColumnFilter
           disableColumnMenu
           localeText={{
-            noRowsLabel: "📭 No certificates found",
+            noRowsLabel: loading ? "🔄 Loading certificates..." : "📭 No certificates found",
           }}
+          loading={loading}
         />
       </div>
     </CustomThemeProvider>
