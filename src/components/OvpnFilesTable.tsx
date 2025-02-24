@@ -40,19 +40,42 @@ const OvpnFilesTable: React.FC<{
     (issuedToFilter === "" || file.issuedTo.toLowerCase().includes(issuedToFilter.toLowerCase()))
   );
 
-  const rows = filteredFiles.map((file, index) => ({
+  const rows = filteredFiles.map((file) => ({
     id: file.id,
     externalId: file.externalId,
     commonName: file.commonName,
+    certId: file.certId || "—",
+    fileName: file.fileName,
+    filePath: file.filePath,
+    issuedAt: new Date(file.issuedAt).toLocaleString(),
     issuedTo: file.issuedTo,
-    issuedAt: new Date(file.issuedAt).toLocaleDateString(),
+    pemFilePath: file.pemFilePath || "—",
+    certFilePath: file.certFilePath || "—",
+    keyFilePath: file.keyFilePath || "—",
+    reqFilePath: file.reqFilePath || "—",
+    isRevoked: file.isRevoked ? "❌ Revoked" : "✅ Active",
+    message: file.message || "—",
+    lastUpdate: new Date(file.lastUpdate).toLocaleString(),
+    createDate: new Date(file.createDate).toLocaleString(),
   }));
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 70 },
+    { field: "externalId", headerName: "External ID", flex: 1 },
     { field: "commonName", headerName: "Common Name", flex: 1 },
-    { field: "issuedTo", headerName: "Issued To", flex: 1 },
+    { field: "certId", headerName: "Cert ID", flex: 1 },
+    { field: "fileName", headerName: "File Name", flex: 1 },
+    { field: "filePath", headerName: "File Path", flex: 1 },
     { field: "issuedAt", headerName: "Issued Date", flex: 1 },
+    { field: "issuedTo", headerName: "Issued To", flex: 1 },
+    { field: "pemFilePath", headerName: "PEM File Path", flex: 1 },
+    { field: "certFilePath", headerName: "Cert File Path", flex: 1 },
+    { field: "keyFilePath", headerName: "Key File Path", flex: 1 },
+    { field: "reqFilePath", headerName: "Req File Path", flex: 1 },
+    { field: "isRevoked", headerName: "Status", flex: 1 },
+    { field: "message", headerName: "Message", flex: 1 },
+    { field: "lastUpdate", headerName: "Last Update", flex: 1 },
+    { field: "createDate", headerName: "Created Date", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",

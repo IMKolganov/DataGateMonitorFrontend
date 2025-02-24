@@ -210,16 +210,27 @@ export const revokeApplication = async (clientId: string) => {
 
 export const downloadOvpnFile = async (issuedOvpnFileId: number, vpnServerId: string) => {
   await ensureApiBaseUrl();
+  
   const response = await axios.get(
     `${API_BASE_URL}/OpenVpnFiles/DownloadOvpnFile/${issuedOvpnFileId}/${vpnServerId}`,
     { responseType: "blob" }
   );
 
+  const contentDisposition = response.headers["content-disposition"];
+  let filename = `client-${issuedOvpnFileId}.ovpn`;
+
+  if (contentDisposition) {
+    const match = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^;"']+)/);
+    if (match && match[1]) {
+      filename = decodeURIComponent(match[1]);
+    }
+  }
+
   const blob = new Blob([response.data], { type: "application/x-openvpn-profile" });
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.setAttribute("download", `client-${issuedOvpnFileId}.ovpn`);
+  link.setAttribute("download", filename);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
