@@ -3,6 +3,8 @@ import { fetchCertificates, fetchOvpnFiles } from "../utils/api";
 import CertificatesTable from "../components/CertificatesTable";
 import OvpnFilesTable from "../components/OvpnFilesTable";
 import { Certificate, CertificateStatus } from "../utils/types";
+import AddOvpnFile from "../components/AddOvpnFile";
+import AddCertificate from "../components/AddCertificate";
 
 interface Props {
   vpnServerId: string;
@@ -42,10 +44,35 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
 
   return (
     <>
+      <div className="header-containe">
+        <div className="header-bar">
+          <div className="left-buttons">
+            <select value={selectedStatus ?? ""} onChange={(e) => setSelectedStatus(Number(e.target.value) || null)} className="btn secondary">
+              <option value="">All</option>
+              <option value={CertificateStatus.Active}>Active</option>
+              <option value={CertificateStatus.Revoked}>Revoked</option>
+              <option value={CertificateStatus.Expired}>Expired</option>
+              <option value={CertificateStatus.Unknown}>Unknown</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <h3>Issued OVPN Files</h3>
+      <h5>Make New OVPN File for Client</h5>
+      <p className="certificate-description">
+        Enter the <strong>Common Name (CN)</strong> and an <strong>External ID</strong> to generate a new OVPN file.
+      </p>
+
+      <AddOvpnFile vpnServerId={vpnServerId} onSuccess={fetchData} />
       <OvpnFilesTable ovpnFiles={ovpnFiles} vpnServerId={vpnServerId} onRevoke={fetchData} loading={loading} />
 
       <h3>Certificates</h3>
+      <h5>Add New Certificate</h5>
+      <p className="certificate-description">
+        Enter the <strong>Common Name (CN)</strong> for the new certificate and click "Add Certificate".
+      </p>
+      <AddCertificate vpnServerId={vpnServerId} onSuccess={fetchData} />
       <CertificatesTable certificates={certificates} vpnServerId={vpnServerId} onRevoke={fetchData} loading={loading} />
     </>
   );
