@@ -18,8 +18,12 @@
     flex-wrap: wrap;
   }
   
+  .message-success {
+    color: green;
+    margin-top: 10px;
+  }
   
-
-  
-
-  
+  .message-error {
+    color: red;
+    margin-top: 10px;
+  }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaSave } from "react-icons/fa";
+import { FaSave, FaArrowLeft } from "react-icons/fa";
 import { fetchServerSettings, updateServerSettings, fetchDatabasePath } from "../utils/api";
 
 import "../css/ServerSettings.css";
@@ -90,6 +90,13 @@ const ServerSettings: React.FC = () => {
 
   return (
     <div className="settings-container">
+      <div className="header-bar">
+        <div className="left-buttons">
+          <button className="btn secondary" onClick={() => navigate(`/server-details/${vpnServerId}`)}>
+            <FaArrowLeft className="icon" /> Back
+          </button>
+        </div>
+      </div>
       <h2>Server Settings</h2>
       <div className="settings-form">
         {Object.keys(settings)

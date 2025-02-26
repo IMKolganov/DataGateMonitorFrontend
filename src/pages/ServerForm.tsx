@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../css/ServerForm.css";
-import { fetchConfig } from "../utils/api";
+import { getServer, saveServer } from "../utils/api";
+import { FaArrowLeft, FaPlus } from "react-icons/fa";
 
 const ServerForm: React.FC = () => {
   const navigate = useNavigate();
   const { serverId } = useParams<{ serverId?: string }>();
-  const [config, setConfig] = useState<{ apiBaseUrl: string } | null>(null);
-
+  
   const [serverData, setServerData] = useState({
     Id: serverId ? parseInt(serverId) : 0,
     ServerName: "",
@@ -27,30 +27,10 @@ const ServerForm: React.FC = () => {
   });
 
   useEffect(() => {
-    const loadConfig = async () => {
-      try {
-        const loadedConfig = await fetchConfig();
-        setConfig(loadedConfig);
-      } catch (error) {
-        console.error("Failed to load configuration:", error);
-      }
-    };
-
-    loadConfig();
-  }, []);
-
-  useEffect(() => {
-    if (config && serverId) {
-      fetch(`${config.apiBaseUrl}/OpenVpnServers/GetServer/${serverId}`)
-        .then(response => {
-          if (!response.ok) throw new Error("Failed to fetch server data");
-          return response.json();
-        })
-        .then(data => {
-          console.log("Received data:", data);
-
-          setServerData(prev => ({
-            ...prev,
+    if (serverId) {
+      getServer(serverId)
+        .then((data) => {
+          setServerData({
             Id: data.id,
             ServerName: data.serverName || "",
             ManagementIp: data.managementIp || "",
@@ -60,15 +40,15 @@ const ServerForm: React.FC = () => {
             IsOnline: data.isOnline,
             LastUpdate: data.lastUpdate || new Date().toISOString(),
             CreateDate: data.createDate || new Date().toISOString(),
-          }));
+          });
         })
-        .catch(error => console.error("Error loading server data:", error));
+        .catch((error) => console.error("Error loading server data:", error));
     }
-  }, [config, serverId]);
+  }, [serverId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setServerData(prev => ({
+    setServerData((prev) => ({
       ...prev,
       [name]: name === "ManagementPort" ? Number(value) : value,
     }));
@@ -97,26 +77,11 @@ const ServerForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm() || !config) return;
+    if (!validateForm()) return;
 
     try {
-      const isEditing = !!serverId;
-      const url = isEditing
-        ? `${config.apiBaseUrl}/OpenVpnServers/UpdateServer`
-        : `${config.apiBaseUrl}/OpenVpnServers/AddServer`;
-      const method = isEditing ? "POST" : "PUT";
-
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(serverData),
-      });
-
-      if (!response.ok) {
-        throw new Error(isEditing ? "Failed to update server" : "Failed to add server");
-      }
-
-      alert(isEditing ? "Server updated successfully!" : "Server added successfully!");
+      await saveServer(serverData, !!serverId);
+      alert(serverId ? "Server updated successfully!" : "Server added successfully!");
       navigate("/");
     } catch (error) {
       console.error(serverId ? "Error updating server:" : "Error adding server:", error);
@@ -128,11 +93,6 @@ const ServerForm: React.FC = () => {
     <div className="content-wrapper wide-table">
       <div className="server-form-container">
         <h2 className="server-form-header">{serverId ? "Edit Server" : "Add New Server"}</h2>
-        <p className="server-form-description">
-          {serverId 
-            ? "Modify the server details below and click 'Update Server' to save changes." 
-            : "Please fill out the form below to add a new VPN server."}
-        </p>
         <form className="server-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="ServerName">Server Name *</label>
@@ -200,13 +160,19 @@ const ServerForm: React.FC = () => {
             />
           </div>
 
-          <div className="form-actions">
-            <button type="button" className="back-button" onClick={() => navigate("/")}>
-              Back
-            </button>
-            <button type="submit" className="submit-button">
-              {serverId ? "Update Server" : "Add Server"}
-            </button>
+          <div className="header-containe">
+            <div className="header-bar">
+              <div className="left-buttons">
+                <button className="btn secondary" onClick={() => navigate(`/`)}>
+                  <FaArrowLeft className="icon" /> Back
+                </button>                
+              </div>
+              <div className="right-buttons">
+                <button type="submit" className="submit-button">
+                  <FaPlus className="icon" /> {serverId ? "Update Server" : "Add Server"}
+                </button>
+              </div>
+            </div>
           </div>
         </form>
       </div>

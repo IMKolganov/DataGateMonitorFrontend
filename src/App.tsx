@@ -11,6 +11,7 @@ import ServerSettings from "./pages/ServerSettings";
 import WebConsole from "./pages/WebConsole";
 import Settings from "./pages/Settings";
 import ApplicationSettings from "./pages/ApplicationSettings";
+import OvpnFileConfigForm from "./pages/OvpnFileConfigForm"
 
 import "./App.css";
 
@@ -32,6 +33,8 @@ function App() {
             <Route path="/server-details/:vpnServerId/settings" element={<ServerSettings />} />
             <Route path="/server-details/:vpnServerId/certificates" element={<Certificates />} />
             <Route path="/server-details/:vpnServerId/console" element={<WebConsole />} />
+            <Route path="/server-details/ovpn-file-config/add" element={<OvpnFileConfigForm />} />
+            <Route path="/server-details/ovpn-file-config/:serverId" element={<OvpnFileConfigForm />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>

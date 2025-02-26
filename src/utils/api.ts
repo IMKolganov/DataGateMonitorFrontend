@@ -157,7 +157,7 @@ export const fetchOvpnFiles = async (vpnServerId: string): Promise<IssuedOvpnFil
   return response.data;
 };
 
-export const addOvpnFile = async (vpnServerId: string, externalId: string, commonName: string, issuedTo: string = "openVpnClient") => {
+export const addOvpnFile = async (vpnServerId: number, externalId: string, commonName: string, issuedTo: string = "openVpnClient") => {
   await ensureApiBaseUrl();
   await axios.post(`${API_BASE_URL}/OpenVpnFiles/AddOvpnFile`, {
     vpnServerId,
@@ -234,4 +234,54 @@ export const downloadOvpnFile = async (issuedOvpnFileId: number, vpnServerId: st
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+export const getServer = async (serverId: string) => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
+
+  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetServer/${serverId}`);
+  return response.data;
+};
+
+export const saveServer = async (serverData: any, isEditing: boolean) => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
+
+  const url = isEditing
+    ? `${API_BASE_URL}/OpenVpnServers/UpdateServer`
+    : `${API_BASE_URL}/OpenVpnServers/AddServer`;
+  const method = isEditing ? "POST" : "PUT";
+
+  const response = await axios({
+    method,
+    url,
+    headers: { "Content-Type": "application/json" },
+    data: serverData,
+  });
+
+  return response.data;
+};
+
+export const getOvpnFileConfig = async (serverId: string | number) => {
+  await ensureApiBaseUrl();
+  if (!serverId) throw new Error("Server ID is required");
+
+  const response = await axios.get(`${API_BASE_URL}/OpenVpnServerOvpnFileConfig/GetOvpnFileConfig/${serverId}`);
+
+  return response.data;
+};
+
+export const saveOvpnFileConfig = async (configData: any) => {
+  await ensureApiBaseUrl();
+  console.warn(configData);
+  if (!configData?.ServerId) throw new Error("VPN Server ID is required in configData");
+
+  const url = `${API_BASE_URL}/OpenVpnServerOvpnFileConfig/AddOrUpdateOvpnFileConfig`;
+
+  const response = await axios.post(url, configData, {
+    headers: { "Content-Type": "application/json" },
+  });
+
+  return response.data;
 };
