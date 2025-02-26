@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { addCertificate } from "../utils/api";
 import "../css/Certificates.css";
+import { FaPlus } from "react-icons/fa";
 
 interface Props {
   vpnServerId: string;
@@ -50,7 +51,7 @@ const AddCertificate: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
         className="input"
       />
       <button className="btn primary" onClick={handleAddCertificate} disabled={loading}>
-        {loading ? "Adding..." : "Add Certificate"}
+        <FaPlus className="icon" />{loading ? "Adding..." : "Add Certificate"}
       </button>
 
       {message && (

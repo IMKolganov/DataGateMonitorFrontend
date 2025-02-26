@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { addOvpnFile } from "../utils/api";
 import "../css/Certificates.css";
+import { FaPlus, FaCog } from "react-icons/fa";
+import { useParams, useNavigate } from "react-router-dom";
 
 interface Props {
   vpnServerId: string;
@@ -12,6 +14,8 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
   const [newExternalId, setNewExternalId] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const navigate = useNavigate();
+  
 
   const handleAddOvpnFile = async () => {
     if (!newCommonName.trim()) {
@@ -22,22 +26,31 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
       setMessage({ type: "error", text: "Please enter an External ID." });
       return;
     }
-    if (!vpnServerId) return;
+    if (!vpnServerId) {
+      setMessage({ type: "error", text: "VPN Server ID is missing." });
+      return;
+    }
 
     setLoading(true);
     setMessage(null);
 
     try {
-      await addOvpnFile(vpnServerId, newExternalId, newCommonName, "openVpnClient");
+      await addOvpnFile(Number(vpnServerId), newExternalId, newCommonName, "openVpnClient");
       setNewCommonName("");
       setNewExternalId("");
       setMessage({ type: "success", text: "OVPN file added successfully!" });
       onSuccess();
     } catch (error: any) {
       console.error("Failed to add OVPN file", error);
-      const errorMessage = error.response?.data?.Message || "Failed to add OVPN file.";
-      const errorDetail = error.response?.data?.Detail || "";
-      setMessage({ type: "error", text: `${errorMessage} ${errorDetail}` });
+      
+      let errorMessage = "Failed to add OVPN file.";
+      if (error.response?.data) {
+        const data = error.response.data;
+        errorMessage = data.Message || errorMessage;
+        if (data.Detail) errorMessage += ` Details: ${data.Detail}`;
+      }
+
+      setMessage({ type: "error", text: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -66,9 +79,12 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
         className="input"
       />
       <button className="btn primary" onClick={handleAddOvpnFile} disabled={loading}>
-        {loading ? "Adding..." : "Make new OVPN file"}
+        <FaPlus className="icon" />{loading ? "Adding..." : "Make new OVPN file"}
       </button>
-
+      <button className="btn secondary" onClick={() => navigate(`/server-details/ovpn-file-config/${vpnServerId}`)}>
+        <FaCog className="icon" />
+        {loading ? "Adding..." : "Change config OVPN file"}
+      </button>
       {message && (
         <p className={message.type === "success" ? "message-success" : "message-error"}>
           {message.text}

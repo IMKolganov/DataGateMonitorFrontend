@@ -96,7 +96,7 @@ export function WebConsole() {
       <h2>Web console:</h2>
       <div className="header-bar">
         <div className="left-buttons">
-          <button className="btn secondary" onClick={() => navigate("/")}>
+          <button className="btn secondary" onClick={() => navigate(`/server-details/${vpnServerId}`)}>
             <FaArrowLeft className="icon" /> Back
           </button>
         </div>
