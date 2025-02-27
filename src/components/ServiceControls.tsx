@@ -14,7 +14,6 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
       const nextRunTimes = Object.values(serviceData).map((s) => s.nextRunTime).filter((t) => t !== "N/A");
 
       if (nextRunTimes.length === 0) {
-        console.warn("⚠️ No valid nextRunTime, skipping calculation.");
         setTimeLeft(null);
         return;
       }
@@ -23,7 +22,6 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
       const now = new Date().getTime();
 
       if (isNaN(soonestTime)) {
-        console.error("🚨 ERROR: Failed to parse `nextRunTime`:", nextRunTimes);
         setTimeLeft(null);
         return;
       }

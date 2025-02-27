@@ -22,7 +22,7 @@ const useWebSocketService = () => {
         if (!isMounted) return;
         connectWebSocket(wsUrl);
       } catch (error) {
-        console.error("❌ Failed to initialize WebSocket:", error);
+        console.error("Failed to initialize WebSocket:", error);
       }
     };
 
@@ -40,10 +40,8 @@ const useWebSocketService = () => {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log("🔹 WebSocket received:", data);
 
         if (typeof data !== "object" || !data) {
-          console.warn("⚠️ WARNING: Unexpected WebSocket data format:", data);
           return;
         }
 
@@ -65,12 +63,11 @@ const useWebSocketService = () => {
 
         setServiceData(updatedServiceData);
       } catch (error) {
-        console.error("❌ Error parsing WebSocket message:", error);
+        console.error("Error parsing WebSocket message:", error);
       }
     };
 
     socket.onclose = () => {
-      console.warn("⚠️ WebSocket disconnected, retrying in 5 seconds...");
       setTimeout(() => connectWebSocket(wsUrl), 5000);
     };
 

@@ -44,20 +44,6 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
 
   return (
     <>
-      <div className="header-containe">
-        <div className="header-bar">
-          <div className="left-buttons">
-            <select value={selectedStatus ?? ""} onChange={(e) => setSelectedStatus(Number(e.target.value) || null)} className="btn secondary">
-              <option value="">All</option>
-              <option value={CertificateStatus.Active}>Active</option>
-              <option value={CertificateStatus.Revoked}>Revoked</option>
-              <option value={CertificateStatus.Expired}>Expired</option>
-              <option value={CertificateStatus.Unknown}>Unknown</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
       <h3>Issued OVPN Files</h3>
       <h5>Make New OVPN File for Client</h5>
       <p className="certificate-description">
