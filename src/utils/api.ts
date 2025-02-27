@@ -283,3 +283,22 @@ export const saveOvpnFileConfig = async (configData: any) => {
 
   return response.data;
 };
+
+export const getSetting = async (key: string) => {
+  await ensureApiBaseUrl();
+  if (!key) throw new Error("Setting key is required");
+
+  const response = await axios.get(`${API_BASE_URL}/Settings/Get`, { params: { key } });
+  return response.data;
+};
+
+export const setSetting = async (key: string, value: string, type: string) => {
+  await ensureApiBaseUrl();
+  if (!key || !value || !type) throw new Error("Key, value, and type are required for setting");
+
+  const response = await axios.post(`${API_BASE_URL}/Settings/Set`, null, {
+    params: { key, value, type },
+  });
+
+  return response.data;
+};
