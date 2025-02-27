@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import "../css/Settings.css";
-import { getSetting, setSetting } from "../utils/api"; // API-функции для работы с настройками
+import { getSetting, setSetting } from "../utils/api";
 
 export function Settings() {
   const navigate = useNavigate();
-  const [intervalType, setIntervalType] = useState<string>("seconds"); // seconds or minutes
-  const [intervalValue, setIntervalValue] = useState<number>(30); // Default: 30 seconds
+  const [intervalType, setIntervalType] = useState<string>("seconds");
+  const [intervalValue, setIntervalValue] = useState<number>(120);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,7 +85,7 @@ export function Settings() {
           min="1"
           className="input"
         />
-        <select value={intervalType} onChange={(e) => setIntervalType(e.target.value)} className="dropdown">
+        <select value={intervalType} onChange={(e) => setIntervalType(e.target.value)} className="btn secondary">
           <option value="seconds">Seconds</option>
           <option value="minutes">Minutes</option>
         </select>
