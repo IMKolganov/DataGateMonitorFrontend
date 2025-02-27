@@ -25,10 +25,19 @@ code {
 }
 
 .logo {
-  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
   font-weight: bold;
-  color: #00d4ff;
+  font-size: 18px;
+  color: white;
 }
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  margin-right: 8px;
+}
+
 
 .nav-links {
   list-style: none;

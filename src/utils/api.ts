@@ -56,7 +56,6 @@ export const runServiceNow = async (): Promise<void> => {
 
   try {
     const response = await axios.post(`${API_BASE_URL}/OpenVpnServers/run-now`);
-    console.log("Service started:", response.data);
   } catch (error) {
     console.error("Failed to start service:", error);
     throw error;
@@ -274,7 +273,6 @@ export const getOvpnFileConfig = async (serverId: string | number) => {
 
 export const saveOvpnFileConfig = async (configData: any) => {
   await ensureApiBaseUrl();
-  console.warn(configData);
   if (!configData?.ServerId) throw new Error("VPN Server ID is required in configData");
 
   const url = `${API_BASE_URL}/OpenVpnServerOvpnFileConfig/AddOrUpdateOvpnFileConfig`;

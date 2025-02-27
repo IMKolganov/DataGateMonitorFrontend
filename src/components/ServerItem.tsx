@@ -20,15 +20,13 @@ const formatUtcDate = (utcDateString: string | null | undefined) => {
   if (!utcDateString || utcDateString === "N/A") return "Not Scheduled";
 
   try {
-    // Убираем избыточные миллисекунды (оставляем только 3 знака после точки)
     const sanitizedUtcString = utcDateString.replace(/\.\d{6,}Z$/, ".000Z");
 
     const date = new Date(sanitizedUtcString);
     if (isNaN(date.getTime())) throw new Error("Invalid Date");
 
-    // Форматируем в `YYYY-MM-DD HH:mm:ss`
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Месяцы начинаются с 0
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
@@ -36,7 +34,7 @@ const formatUtcDate = (utcDateString: string | null | undefined) => {
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   } catch (error) {
-    console.error("❌ Error formatting date:", error);
+    console.error("Error formatting date:", error);
     return "Invalid Date";
   }
 };
