@@ -6,7 +6,10 @@ export function Header() {
 
   return (
     <header className="header">
-      <div className="logo">🔥 OpenVPN Gate Monitor</div>
+      <div className="logo">
+        <img src="/favicon.png" alt="Logo" className="logo-icon" />
+        OpenVPN Gate Monitor
+      </div>
       <div
         className={`burger-menu ${menuOpen ? "active" : ""}`}
         onClick={() => setMenuOpen(!menuOpen)}

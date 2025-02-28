@@ -75,7 +75,7 @@ export function ApplicationSettings() {
       </p>
         <div className="header-bar">
           <div className="left-buttons">
-            <button className="btn secondary" onClick={() => navigate("/")}>
+            <button className="btn secondary" onClick={() => navigate("/settings")}>
               <FaArrowLeft className="icon" /> Back
             </button>
             <button className="btn secondary" onClick={handleRefresh} disabled={refreshing}>

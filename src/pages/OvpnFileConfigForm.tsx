@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../css/ServerForm.css";
+import "../css/OvpnFileConfigForm.css";
 import { getOvpnFileConfig, saveOvpnFileConfig } from "../utils/api";
-import { FaPlus, FaArrowLeft } from "react-icons/fa";
+import { FaPlus, FaCopy, FaArrowLeft } from "react-icons/fa";
 
 const OvpnFileConfigForm: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ const OvpnFileConfigForm: React.FC = () => {
     VpnServerIp: "",
     VpnServerPort: "",
   });
+
+  const [copyStatus, setCopyStatus] = useState<"Copy" | "Copied!">("Copy");
 
   useEffect(() => {
     if (serverId) {
@@ -67,6 +70,17 @@ const OvpnFileConfigForm: React.FC = () => {
 
     setErrors(newErrors);
     return isValid;
+  };
+
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyStatus("Copied!");
+      setTimeout(() => setCopyStatus("Copy"), 2000);
+    } catch (err) {
+      console.error("Failed to copy text:", err);
+      setCopyStatus("Copy");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -132,14 +146,21 @@ const OvpnFileConfigForm: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="ConfigTemplate">Config Template</label>
-            <textarea
-              id="ConfigTemplate"
-              name="ConfigTemplate"
-              value={ovpnFileConfig.ConfigTemplate}
-              onChange={handleChange}
-              placeholder="Enter config template"
-            />
+            <div className="config-template-container">
+              <div className="toolbar">
+                <span>Config Template</span>
+                <button className="copy-button" type="button" onClick={() => handleCopy(ovpnFileConfig.ConfigTemplate)}>
+                  <FaCopy /> {copyStatus}
+                </button>
+              </div>
+              <textarea
+                id="ConfigTemplate"
+                name="ConfigTemplate"
+                value={ovpnFileConfig.ConfigTemplate}
+                onChange={handleChange}
+                placeholder="Enter config template"
+              />
+            </div>
           </div>
 
           <div className="header-containe">
