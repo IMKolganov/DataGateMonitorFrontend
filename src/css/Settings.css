@@ -43,10 +43,14 @@
   margin-top: 5px;
 }
 
-.interval-settings {
+.settings-item {
   display: flex;
   align-items: left;
   justify-content: left;
   gap: 10px;
   margin-top: 15px;
+}
+
+.input{
+  width: 100%;
 }
