@@ -1,9 +1,38 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { OpenVpnServerInfoResponse, Config, Certificate, IssuedOvpnFile } from "./types";
 
 let API_BASE_URL: string | null = null;
 let WS_BASE_URL: string | null = null;
 let configPromise: Promise<Config> | null = null;
+
+const apiRequest = async <T>(method: "get" | "post", url: string, config: AxiosRequestConfig = {}): Promise<T> => {
+  await ensureApiBaseUrl();
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    logout();
+    throw new Error("User is not authenticated");
+  }
+
+  try {
+    const response = await axios({
+      method,
+      url: `${API_BASE_URL}${url}`,
+      ...config,
+      headers: {
+        ...config.headers,
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      logout();
+    }
+    throw error;
+  }
+};
 
 export const fetchConfig = async (): Promise<Config> => {
   if (configPromise) return configPromise;
@@ -284,23 +313,14 @@ export const saveOvpnFileConfig = async (configData: any) => {
   return response.data;
 };
 
-export const getSetting = async (key: string) => {
-  await ensureApiBaseUrl();
+export const getSetting = async <T = { value: string }>(key: string): Promise<T> => {
   if (!key) throw new Error("Setting key is required");
-
-  const response = await axios.get(`${API_BASE_URL}/Settings/Get`, { params: { key } });
-  return response.data;
+  return apiRequest<T>("get", `/Settings/Get`, { params: { key } });
 };
 
 export const setSetting = async (key: string, value: string, type: string) => {
-  await ensureApiBaseUrl();
   if (!key || !value || !type) throw new Error("Key, value, and type are required for setting");
-
-  const response = await axios.post(`${API_BASE_URL}/Settings/Set`, null, {
-    params: { key, value, type },
-  });
-
-  return response.data;
+  return apiRequest("post", `/Settings/Set`, { params: { key, value, type } });
 };
 
 export const getGeoLiteDatabaseVersion = async () => {
