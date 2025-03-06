@@ -51,7 +51,7 @@ export const getWebSocketUrlForBackgroundService = async (): Promise<string> => 
 };
 
 export const runServiceNow = async (): Promise<void> => {
-  await fetchConfig();
+  await ensureApiBaseUrl();
   if (!API_BASE_URL) throw new Error("API base URL is not set");
 
   try {
@@ -301,4 +301,77 @@ export const setSetting = async (key: string, value: string, type: string) => {
   });
 
   return response.data;
+};
+
+export const getGeoLiteDatabaseVersion = async () => {
+  await ensureApiBaseUrl();
+  try {
+    const response = await axios.get(`${API_BASE_URL}/GeoLite/GetVersionDatabase`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch GeoLite database version:", error);
+    throw error;
+  }
+};
+
+export const updateGeoLiteDatabase = async () => {
+  await ensureApiBaseUrl();
+  try {
+    const response = await axios.post(`${API_BASE_URL}/GeoLite/UpdateDatabase`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update GeoLite database:", error);
+    throw error;
+  }
+};
+
+export const fetchToken = async (clientId: string, clientSecret: string): Promise<string> => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
+
+  try {
+    const response = await axios.post(`${API_BASE_URL}/Auth/token`, {
+      clientId,
+      clientSecret,
+    });
+
+    return response.data.token;
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      throw new Error("System application not found");
+    }
+    throw error;
+  }
+};
+
+export const setSecret = async (clientId: string, clientSecret: string): Promise<void> => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
+
+  try {
+    await axios.post(`${API_BASE_URL}/Auth/set-system-secret`, { clientId, clientSecret });
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      throw new Error("System application is already set");
+    }
+    throw error;
+  }
+};
+
+export const checkSystemStatus = async (): Promise<boolean> => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
+
+  try {
+    const response = await axios.get(`${API_BASE_URL}/Auth/system-secret-status`);
+    return response.data.systemSet;
+  } catch (error) {
+    console.error("Failed to check system status:", error);
+    throw error;
+  }
+};
+
+export const logout = () => {
+  localStorage.removeItem("token");
+  window.location.href = "/login";
 };
