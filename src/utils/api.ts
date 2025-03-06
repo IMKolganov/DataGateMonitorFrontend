@@ -302,3 +302,25 @@ export const setSetting = async (key: string, value: string, type: string) => {
 
   return response.data;
 };
+
+export const getGeoLiteDatabaseVersion = async () => {
+  await ensureApiBaseUrl();
+  try {
+    const response = await axios.get(`${API_BASE_URL}/GeoLite/GetVersionDatabase`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch GeoLite database version:", error);
+    throw error;
+  }
+};
+
+export const updateGeoLiteDatabase = async () => {
+  await ensureApiBaseUrl();
+  try {
+    const response = await axios.post(`${API_BASE_URL}/GeoLite/UpdateDatabase`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update GeoLite database:", error);
+    throw error;
+  }
+};

@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaSave, FaDatabase } from "react-icons/fa";
 import "../css/Settings.css";
-import { getSetting, setSetting } from "../utils/api";
+import { getSetting, setSetting, getGeoLiteDatabaseVersion, updateGeoLiteDatabase } from "../utils/api";
 
 export function Settings() {
   const navigate = useNavigate();
   const [intervalType, setIntervalType] = useState("seconds");
-  const [intervalValue, setIntervalValue] = useState<string>("");
-  const [geoIpAccountId, setGeoIpAccountId] = useState("");
-  const [geoIpDbPath, setGeoIpDbPath] = useState("");
-  const [geoIpDownloadUrl, setGeoIpDownloadUrl] = useState("");
-  const [geoIpLicenseKey, setGeoIpLicenseKey] = useState("");
+  const [intervalValue, setIntervalValue] = useState<string>("Fetching...");
+  const [geoIpAccountId, setGeoIpAccountId] = useState("Fetching...");
+  const [geoIpDbPath, setGeoIpDbPath] = useState("Fetching...");
+  const [geoIpDownloadUrl, setGeoIpDownloadUrl] = useState("Fetching...");
+  const [geoIpLicenseKey, setGeoIpLicenseKey] = useState("Fetching...");
+  const [geoLiteVersion, setGeoLiteVersion] = useState<string>("Fetching...");
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,7 +32,9 @@ export function Settings() {
         setGeoIpDownloadUrl(await getSetting("GeoIp_Download_Url").then(res => res?.value || ""));
         setGeoIpAccountId(await getSetting("GeoIp_Account_ID").then(res => res?.value || ""));
         setGeoIpLicenseKey(await getSetting("GeoIp_License_Key").then(res => res?.value || ""));
-
+        
+        const version = await getGeoLiteDatabaseVersion();
+        setGeoLiteVersion(version.version);
       } catch (err) {
         console.error("Error loading settings:", err);
         setError("Failed to load settings.");
@@ -40,14 +45,38 @@ export function Settings() {
     fetchSettings();
   }, []);
 
+
   const handleSave = async (key: string, value: string, type: string) => {
     try {
       setLoading(true);
       await setSetting(key, value, type);
+      setSuccessMessage(`${key} successfully updated.`);
       setError(null);
-    } catch (err) {
+      setErrorDetails(null);
+    } catch (err: any) {
       console.error(`Error saving ${key}:`, err);
       setError(`Failed to save ${key}.`);
+      setErrorDetails(err.response?.data?.error || err.message);
+      setSuccessMessage(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateGeoLite = async () => {
+    try {
+      setLoading(true);
+      await updateGeoLiteDatabase();
+      const version = await getGeoLiteDatabaseVersion();
+      setGeoLiteVersion(version.version);
+      setSuccessMessage("GeoLite database successfully updated.");
+      setError(null);
+      setErrorDetails(null);
+    } catch (err: any) {
+      console.error("Error updating GeoLite database:", err);
+      setError("Database update failed");
+      setErrorDetails(err.response?.data?.error || err.message);
+      setSuccessMessage(null);
     } finally {
       setLoading(false);
     }
@@ -75,41 +104,65 @@ export function Settings() {
           </p>
         </li>
       </ul>
+      
+      {successMessage && <p className="success-message">{successMessage}</p>}
+      {error && <p className="error-message">{error} <br />Details: {errorDetails}</p>}
 
       <h2>OpenVPN Polling Interval</h2>
+      <div style={{ borderTop: "1px solid #d1d5da" }}></div>
       <div className="settings-item">
         <input type="text" value={intervalValue} onChange={(e) => setIntervalValue(e.target.value)} className="input" />
         <select value={intervalType} onChange={(e) => setIntervalType(e.target.value)} className="btn secondary">
           <option value="seconds">Seconds</option>
           <option value="minutes">Minutes</option>
         </select>
-        <button className="btn primary" onClick={() => handleSave("OpenVPN_Polling_Interval", intervalValue, "string")} disabled={loading}>Save</button>
+        <button className="btn primary" onClick={() => handleSave("OpenVPN_Polling_Interval", intervalValue, "string")} disabled={loading}>
+          <FaSave className="icon" /> Save
+        </button>
       </div>
-
+      
       <h2>GeoIP Settings</h2>
+      <div style={{ borderTop: "1px solid #d1d5da" }}></div>
       <h4>GeoIP Database Path:</h4>
       <div className="settings-item">
         <input type="text" value={geoIpDbPath} onChange={(e) => setGeoIpDbPath(e.target.value)} className="input" />
-        <button className="btn primary" onClick={() => handleSave("GeoIp_Db_Path", geoIpDbPath, "string")} disabled={loading}>Save</button>
+        <button className="btn primary" onClick={() => handleSave("GeoIp_Db_Path", geoIpDbPath, "string")} disabled={loading}>
+          <FaSave className="icon" /> Save
+        </button>
       </div>
 
       <h4>GeoIP Download URL:</h4>
       <div className="settings-item">
         <input type="text" value={geoIpDownloadUrl} onChange={(e) => setGeoIpDownloadUrl(e.target.value)} className="input" />
-        <button className="btn primary" onClick={() => handleSave("GeoIp_Download_Url", geoIpDownloadUrl, "string")} disabled={loading}>Save</button>
+        <button className="btn primary" onClick={() => handleSave("GeoIp_Download_Url", geoIpDownloadUrl, "string")} disabled={loading}>
+          <FaSave className="icon" /> Save
+        </button>
       </div>
 
       <h4>GeoIP Account ID:</h4>
       <div className="settings-item">
         <input type="text" value={geoIpAccountId} onChange={(e) => setGeoIpAccountId(e.target.value)} className="input" />
-        <button className="btn primary" onClick={() => handleSave("GeoIp_Account_ID", geoIpAccountId, "string")} disabled={loading}>Save</button>
+        <button className="btn primary" onClick={() => handleSave("GeoIp_Account_ID", geoIpAccountId, "string")} disabled={loading}>
+          <FaSave className="icon" /> Save
+        </button>
       </div>
       <h4>GeoIP License Key:</h4>
       <div className="settings-item">
         <input type="text" value={geoIpLicenseKey} onChange={(e) => setGeoIpLicenseKey(e.target.value)} className="input" />
-        <button className="btn primary" onClick={() => handleSave("GeoIp_License_Key", geoIpLicenseKey, "string")} disabled={loading}>Save</button>
+        <button className="btn primary" onClick={() => handleSave("GeoIp_License_Key", geoIpLicenseKey, "string")} disabled={loading}>
+          <FaSave className="icon" /> Save
+        </button>
       </div>
-      {error && <p className="error-message">{error}</p>}
+
+      <h4>Current Version:</h4>
+      <div className="settings-item">
+        <input type="text" value={geoLiteVersion} className="input" />
+        <button className="btn primary" onClick={handleUpdateGeoLite} disabled={loading}>
+          <FaDatabase className="icon" />Update Database
+        </button>
+
+      </div>
+      <p className="settings-item-description">MaxMind API allows up to 30 database updates per day. Exceeding this limit may result in an error.</p>
     </div>
   );
 }
