@@ -156,13 +156,29 @@ export function Settings() {
 
       <h4>Current Version:</h4>
       <div className="settings-item">
-        <input type="text" value={geoLiteVersion} className="input" />
+        <input type="text" value={geoLiteVersion} className="input" readOnly />
         <button className="btn primary" onClick={handleUpdateGeoLite} disabled={loading}>
           <FaDatabase className="icon" />Update Database
         </button>
-
       </div>
       <p className="settings-item-description">MaxMind API allows up to 30 database updates per day. Exceeding this limit may result in an error.</p>
+
+      <div className="db-info">
+        <p className="db-description">
+          This settings points to the <strong>GeoLite2-City</strong> database file, which is used for IP geolocation in OpenVPN monitoring.  
+          The database is provided by <a href="https://www.maxmind.com" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>MaxMind</a> and contains mappings between IP addresses and geographic locations.
+        </p>
+        <p className="db-update">
+          <strong>How it works:</strong> When a client connects to the OpenVPN server, their IP address is checked against this database  
+          to determine the approximate country, city, and ISP. This information helps in security monitoring and analytics.
+        </p>
+        <p className="db-update">
+          <strong>How to update:</strong> MaxMind updates this database every week. To update it manually,  
+          download the latest version from 
+          <a href="https://dev.maxmind.com/geoip/geolite2-free-geolocation-data" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}> MaxMind’s GeoLite2 Database</a> and replace the file at this path.
+        </p>
+      </div>
+
     </div>
   );
 }
