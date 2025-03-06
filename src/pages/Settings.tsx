@@ -7,7 +7,7 @@ import { getSetting, setSetting, getGeoLiteDatabaseVersion, updateGeoLiteDatabas
 export function Settings() {
   const navigate = useNavigate();
   const [intervalType, setIntervalType] = useState("seconds");
-  const [intervalValue, setIntervalValue] = useState<string>("Fetching...");
+  const [intervalValue, setIntervalValue] = useState<number>(0);
   const [geoIpAccountId, setGeoIpAccountId] = useState("Fetching...");
   const [geoIpDbPath, setGeoIpDbPath] = useState("Fetching...");
   const [geoIpDownloadUrl, setGeoIpDownloadUrl] = useState("Fetching...");
@@ -25,7 +25,7 @@ export function Settings() {
         const intervalSetting = await getSetting("OpenVPN_Polling_Interval");
         const intervalUnit = await getSetting("OpenVPN_Polling_Interval_Unit");
         if (intervalSetting && intervalUnit) {
-          setIntervalValue(intervalSetting.value);
+          setIntervalValue(Number(intervalSetting.value));
           setIntervalType(intervalUnit.value);
         }
         setGeoIpDbPath(await getSetting("GeoIp_Db_Path").then(res => res?.value || ""));
@@ -46,10 +46,10 @@ export function Settings() {
   }, []);
 
 
-  const handleSave = async (key: string, value: string, type: string) => {
+  const handleSave = async (key: string, value: any, type: string) => {
     try {
       setLoading(true);
-      await setSetting(key, value, type);
+      await setSetting(key, type === "number" ? String(value) : value, type);
       setSuccessMessage(`${key} successfully updated.`);
       setError(null);
       setErrorDetails(null);
@@ -110,16 +110,19 @@ export function Settings() {
 
       <h2>OpenVPN Polling Interval</h2>
       <div style={{ borderTop: "1px solid #d1d5da" }}></div>
+      <h4>OpenVPN Polling Interval:</h4>
       <div className="settings-item">
-        <input type="text" value={intervalValue} onChange={(e) => setIntervalValue(e.target.value)} className="input" />
+        <input type="number" value={intervalValue} onChange={(e) => setIntervalValue(Number(e.target.value))} className="input" />
         <select value={intervalType} onChange={(e) => setIntervalType(e.target.value)} className="btn secondary">
           <option value="seconds">Seconds</option>
           <option value="minutes">Minutes</option>
         </select>
-        <button className="btn primary" onClick={() => handleSave("OpenVPN_Polling_Interval", intervalValue, "string")} disabled={loading}>
+        <button className="btn primary" onClick={() => handleSave("OpenVPN_Polling_Interval", intervalValue, "int")} disabled={loading}>
           <FaSave className="icon" /> Save
         </button>
       </div>
+      <p className="settings-item-description">0 = disabled</p>
+
       
       <h2>GeoIP Settings</h2>
       <div style={{ borderTop: "1px solid #d1d5da" }}></div>
