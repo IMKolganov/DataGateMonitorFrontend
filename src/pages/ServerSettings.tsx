@@ -33,12 +33,10 @@ const ServerSettings: React.FC = () => {
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [dbPath, setDbPath] = useState<string | null>(null);
 
   useEffect(() => {
     if (vpnServerId) {
       loadSettings(vpnServerId);
-      loadDatabasePath();
     }
   }, [vpnServerId]);
 
@@ -52,16 +50,6 @@ const ServerSettings: React.FC = () => {
       console.error("Error fetching settings:", err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadDatabasePath = async () => {
-    try {
-      const path = await fetchDatabasePath();
-      setDbPath(path);
-    } catch (err) {
-      console.error("Error fetching database path:", err);
-      setDbPath("Failed to fetch database path.");
     }
   };
 
@@ -124,29 +112,6 @@ const ServerSettings: React.FC = () => {
               <FaSave className="icon" /> Save
             </button>
           </div>
-
-        
-        {dbPath && (
-          <div className="db-info">
-            <h2>Geo Ip</h2>
-            <p className="db-path">
-              <strong>Database Path:</strong> {dbPath}
-            </p>
-            <p className="db-description">
-              This path points to the <strong>GeoLite2-City</strong> database file, which is used for **IP geolocation** in OpenVPN monitoring.  
-              The database is provided by <a href="https://www.maxmind.com" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>MaxMind</a> and contains mappings between **IP addresses and geographic locations**.
-            </p>
-            <p className="db-update">
-              <strong>How it works:</strong> When a client connects to the OpenVPN server, their **IP address is checked** against this database  
-              to determine the **approximate country, city, and ISP**. This information helps in security monitoring and analytics.
-            </p>
-            <p className="db-update">
-              <strong>How to update:</strong> MaxMind updates this database **every week**. To update it manually,  
-              download the latest version from 
-              <a href="https://dev.maxmind.com/geoip/geolite2-free-geolocation-data" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}> MaxMind’s GeoLite2 Database</a> and replace the file at this path.
-            </p>
-          </div>
-        )}
 
       </div>
     </div>

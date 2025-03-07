@@ -32,3 +32,9 @@ body, html {
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
   border: 1px solid #30363d;
 }
+
+.logo {
+  cursor: pointer;
+  color: #c9d1d9;
+  text-decoration: none;
+}
