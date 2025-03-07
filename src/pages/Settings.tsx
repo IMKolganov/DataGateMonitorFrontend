@@ -32,15 +32,22 @@ export function Settings() {
         setGeoIpDownloadUrl(await getSetting("GeoIp_Download_Url").then(res => res?.value || ""));
         setGeoIpAccountId(await getSetting("GeoIp_Account_ID").then(res => res?.value || ""));
         setGeoIpLicenseKey(await getSetting("GeoIp_License_Key").then(res => res?.value || ""));
-        
-        const version = await getGeoLiteDatabaseVersion();
-        setGeoLiteVersion(version.version);
+      
       } catch (err) {
         console.error("Error loading settings:", err);
         setError("Failed to load settings.");
       } finally {
         setLoading(false);
       }
+
+      try {
+        const version = await getGeoLiteDatabaseVersion();
+        setGeoLiteVersion(version.version);
+      } catch (err) {
+        console.error("Error loading settings:", err);
+        setError("Failed to load settings.");
+      } 
+
     }
     fetchSettings();
   }, []);
@@ -67,8 +74,6 @@ export function Settings() {
     try {
       setLoading(true);
       await updateGeoLiteDatabase();
-      const version = await getGeoLiteDatabaseVersion();
-      setGeoLiteVersion(version.version);
       setSuccessMessage("GeoLite database successfully updated.");
       setError(null);
       setErrorDetails(null);
@@ -79,6 +84,16 @@ export function Settings() {
       setSuccessMessage(null);
     } finally {
       setLoading(false);
+    }
+
+    try{
+      const version = await getGeoLiteDatabaseVersion();
+      setGeoLiteVersion(version.version);
+    } catch (err: any) {
+      console.error("Error updating GeoLite database:", err);
+      setError("Database update failed");
+      setErrorDetails(err.response?.data?.error || err.message);
+      setSuccessMessage(null);
     }
   };
 
