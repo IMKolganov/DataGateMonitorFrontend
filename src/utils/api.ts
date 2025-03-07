@@ -1,9 +1,42 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { OpenVpnServerInfoResponse, Config, Certificate, IssuedOvpnFile } from "./types";
 
 let API_BASE_URL: string | null = null;
 let WS_BASE_URL: string | null = null;
 let configPromise: Promise<Config> | null = null;
+
+const apiRequest = async <T>(
+  method: "get" | "post" | "put" | "delete",
+  url: string,
+  config: AxiosRequestConfig = {}
+): Promise<T> => {
+  await ensureApiBaseUrl();
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    logout();
+    throw new Error("User is not authenticated");
+  }
+
+  try {
+    const response = await axios({
+      method,
+      url: `${API_BASE_URL}${url}`,
+      ...config,
+      headers: {
+        ...config.headers,
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return config.responseType === "blob" ? (response as any) : response.data;
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      logout();
+    }
+    throw error;
+  }
+};
 
 export const fetchConfig = async (): Promise<Config> => {
   if (configPromise) return configPromise;
@@ -40,179 +73,136 @@ export const getWebSocketUrl = async (vpnServerId: string): Promise<string> => {
   await ensureApiBaseUrl();
   if (!WS_BASE_URL) throw new Error("WebSocket base URL is not set");
 
-  return `${WS_BASE_URL}/api/openvpn/ws/${vpnServerId}`;
+  const token = localStorage.getItem("token");
+  if (!token) {
+    logout();
+    throw new Error("User is not authenticated");
+  }
+
+  return `${WS_BASE_URL}/api/openvpn/ws/${vpnServerId}?access_token=${encodeURIComponent(token)}`;
 };
 
 export const getWebSocketUrlForBackgroundService = async (): Promise<string> => {
   await ensureApiBaseUrl();
   if (!WS_BASE_URL) throw new Error("WebSocket base URL is not set");
 
-  return `${WS_BASE_URL}/api/OpenVpnServers/status-stream`;
+  const token = localStorage.getItem("token");
+  if (!token) {
+    logout();
+    throw new Error("User is not authenticated");
+  }
+
+  return `${WS_BASE_URL}/api/OpenVpnServers/status-stream?access_token=${encodeURIComponent(token)}`;
 };
 
 export const runServiceNow = async (): Promise<void> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-
-  try {
-    const response = await axios.post(`${API_BASE_URL}/OpenVpnServers/run-now`);
-  } catch (error) {
-    console.error("Failed to start service:", error);
-    throw error;
-  }
+  await apiRequest<void>("post", "/OpenVpnServers/run-now");
 };
 
 export const fetchServers = async (): Promise<OpenVpnServerInfoResponse[]> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetAllServers`);
-  return response.data;
+  return apiRequest<OpenVpnServerInfoResponse[]>("get", "/OpenVpnServers/GetAllServers");
 };
 
 export const fetchServersWithStats = async (id: string): Promise<any> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetServerWithStats/${id}`);
-  return response.data;
+  return apiRequest<any>("get", `/OpenVpnServers/GetServerWithStats/${id}`);
 };
 
 export const fetchConnectedClients = async (id: string, page: number, pageSize: number): Promise<any> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetAllConnectedClients/${id}`, {
+  return apiRequest<any>("get", `/OpenVpnServers/GetAllConnectedClients/${id}`, {
     params: { page, pageSize },
   });
-  return response.data;
 };
 
 export const fetchHistoryClients = async (id: string, page: number, pageSize: number): Promise<any> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetAllHistoryClients/${id}`, {
+  return apiRequest<any>("get", `/OpenVpnServers/GetAllHistoryClients/${id}`, {
     params: { page, pageSize },
   });
-  return response.data;
 };
 
 export const deleteServer = async (id: number) => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-  await axios.delete(`${API_BASE_URL}/OpenVpnServers/DeleteServer?vpnServerId=${id}`);
+  return apiRequest<void>("delete", `/OpenVpnServers/DeleteServer`, {
+    params: { vpnServerId: id },
+  });
 };
 
 export const fetchCertificates = async (vpnServerId: string, status?: string): Promise<Certificate[]> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-  const url = status
-    ? `${API_BASE_URL}/OpenVpnServerCerts/GetAllVpnServerCertificatesByStatus/${vpnServerId}?certificateStatus=${status}`
-    : `${API_BASE_URL}/OpenVpnServerCerts/GetAllVpnServerCertificates/${vpnServerId}`;
-  const response = await axios.get<Certificate[]>(url);
-  return response.data;
+  const endpoint = status
+    ? `/OpenVpnServerCerts/GetAllVpnServerCertificatesByStatus/${vpnServerId}`
+    : `/OpenVpnServerCerts/GetAllVpnServerCertificates/${vpnServerId}`;
+
+  return apiRequest<Certificate[]>("get", endpoint, {
+    params: status ? { certificateStatus: status } : {},
+  });
 };
 
 export const revokeCertificate = async (vpnServerId: string, commonName: string) => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-
-  await axios.post(`${API_BASE_URL}/OpenVpnServerCerts/RevokeServerCertificate`, {
-    vpnServerId,
-    cnName: commonName
+  return apiRequest<void>("post", `/OpenVpnServerCerts/RevokeServerCertificate`, {
+    data: { vpnServerId, cnName: commonName },
   });
 };
 
 export const addCertificate = async (vpnServerId: string, commonName: string) => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-
-  await axios.get(`${API_BASE_URL}/OpenVpnServerCerts/AddServerCertificate/${vpnServerId}?cnName=${commonName}`);
+  return apiRequest<void>("get", `/OpenVpnServerCerts/AddServerCertificate/${vpnServerId}`, {
+    params: { cnName: commonName },
+  });
 };
 
 export const fetchServerSettings = async (vpnServerId: string): Promise<any> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-
-  const response = await axios.get(`${API_BASE_URL}/OpenVpnServerCerts/GetOpenVpnServerCertConf/${vpnServerId}`);
-  return response.data;
+  return apiRequest<any>("get", `/OpenVpnServerCerts/GetOpenVpnServerCertConf/${vpnServerId}`);
 };
 
-export const updateServerSettings = async (settings: any): Promise<void> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
 
-  await axios.post(`${API_BASE_URL}/OpenVpnServerCerts/UpdateServerCertConfig`, settings);
+export const updateServerSettings = async (settings: any): Promise<void> => {
+  return apiRequest<void>("post", "/OpenVpnServerCerts/UpdateServerCertConfig", {
+    data: settings,
+  });
 };
 
 export const fetchDatabasePath = async (): Promise<string> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-
-  const response = await axios.get(`${API_BASE_URL}/GeoIp/GetDatabasePath`);
-  return response.data;
+  return apiRequest<string>("get", "/GeoIp/GetDatabasePath");
 };
 
 export const fetchOvpnFiles = async (vpnServerId: string): Promise<IssuedOvpnFile[]> => {
-  await ensureApiBaseUrl();
-  const response = await axios.get(`${API_BASE_URL}/OpenVpnFiles/GetAllOvpnFiles?vpnServerId=${vpnServerId}`);
-  return response.data;
+  return apiRequest<IssuedOvpnFile[]>("get", "/OpenVpnFiles/GetAllOvpnFiles", {
+    params: { vpnServerId },
+  });
 };
 
 export const addOvpnFile = async (vpnServerId: number, externalId: string, commonName: string, issuedTo: string = "openVpnClient") => {
-  await ensureApiBaseUrl();
-  await axios.post(`${API_BASE_URL}/OpenVpnFiles/AddOvpnFile`, {
-    vpnServerId,
-    externalId,
-    commonName,
-    issuedTo,
+  return apiRequest<void>("post", "/OpenVpnFiles/AddOvpnFile", {
+    data: { vpnServerId, externalId, commonName, issuedTo },
   });
 };
 
 export const revokeOvpnFile = async (vpnServerId: string, externalId: string) => {
-  await ensureApiBaseUrl();
-  await axios.post(`${API_BASE_URL}/OpenVpnFiles/RevokeOvpnFile`, {
-    vpnServerId,
-    externalId,
+  return apiRequest<void>("post", "/OpenVpnFiles/RevokeOvpnFile", {
+    data: { vpnServerId, externalId },
   });
 };
 
 export const getAllApplications = async () => {
-  await ensureApiBaseUrl();
-  try {
-    const response = await axios.get(`${API_BASE_URL}/applications/GetAllApplications`);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch applications:", error);
-    throw error;
-  }
+  return apiRequest<any>("get", "/applications/GetAllApplications");
 };
 
 export const registerApplication = async (name: string) => {
-  await ensureApiBaseUrl();
-  try {
-    const response = await axios.post(`${API_BASE_URL}/applications/RegisterApplication`, { name });
-    return response.data;
-  } catch (error) {
-    console.error("Failed to register application:", error);
-    throw error;
-  }
+  return apiRequest<any>("post", "/applications/RegisterApplication", {
+    data: { name },
+  });
 };
 
 export const revokeApplication = async (clientId: string) => {
-  await ensureApiBaseUrl();
-  try {
-    const response = await axios.post(`${API_BASE_URL}/applications/RevokeApplication/${clientId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to revoke application:", error);
-    throw error;
-  }
+  return apiRequest<any>("post", `/applications/RevokeApplication/${clientId}`);
 };
 
 export const downloadOvpnFile = async (issuedOvpnFileId: number, vpnServerId: string) => {
   await ensureApiBaseUrl();
-  
-  const response = await axios.get(
-    `${API_BASE_URL}/OpenVpnFiles/DownloadOvpnFile/${issuedOvpnFileId}/${vpnServerId}`,
-    { responseType: "blob" }
+
+  const response = await apiRequest<AxiosResponse<Blob>>(
+    "get",
+    `/OpenVpnFiles/DownloadOvpnFile/${issuedOvpnFileId}/${vpnServerId}`,
+    {
+      responseType: "blob",
+    }
   );
 
   const contentDisposition = response.headers["content-disposition"];
@@ -236,93 +226,50 @@ export const downloadOvpnFile = async (issuedOvpnFileId: number, vpnServerId: st
 };
 
 export const getServer = async (serverId: string) => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-
-  const response = await axios.get(`${API_BASE_URL}/OpenVpnServers/GetServer/${serverId}`);
-  return response.data;
+  return apiRequest<any>("get", `/OpenVpnServers/GetServer/${serverId}`);
 };
 
 export const saveServer = async (serverData: any, isEditing: boolean) => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
+  const url = isEditing ? "/OpenVpnServers/UpdateServer" : "/OpenVpnServers/AddServer";
+  const method: "put" | "post" = isEditing ? "put" : "post";
 
-  const url = isEditing
-    ? `${API_BASE_URL}/OpenVpnServers/UpdateServer`
-    : `${API_BASE_URL}/OpenVpnServers/AddServer`;
-  const method = isEditing ? "POST" : "PUT";
-
-  const response = await axios({
-    method,
-    url,
+  return apiRequest<any>(method, url, {
     headers: { "Content-Type": "application/json" },
     data: serverData,
   });
-
-  return response.data;
 };
 
 export const getOvpnFileConfig = async (serverId: string | number) => {
-  await ensureApiBaseUrl();
   if (!serverId) throw new Error("Server ID is required");
 
-  const response = await axios.get(`${API_BASE_URL}/OpenVpnServerOvpnFileConfig/GetOvpnFileConfig/${serverId}`);
-
-  return response.data;
+  return apiRequest<any>("get", `/OpenVpnServerOvpnFileConfig/GetOvpnFileConfig/${serverId}`);
 };
 
 export const saveOvpnFileConfig = async (configData: any) => {
-  await ensureApiBaseUrl();
   if (!configData?.ServerId) throw new Error("VPN Server ID is required in configData");
 
-  const url = `${API_BASE_URL}/OpenVpnServerOvpnFileConfig/AddOrUpdateOvpnFileConfig`;
-
-  const response = await axios.post(url, configData, {
+  return apiRequest<any>("post", "/OpenVpnServerOvpnFileConfig/AddOrUpdateOvpnFileConfig", {
     headers: { "Content-Type": "application/json" },
+    data: configData,
   });
-
-  return response.data;
 };
 
-export const getSetting = async (key: string) => {
-  await ensureApiBaseUrl();
+export const getSetting = async <T = { value: string }>(key: string): Promise<T> => {
   if (!key) throw new Error("Setting key is required");
-
-  const response = await axios.get(`${API_BASE_URL}/Settings/Get`, { params: { key } });
-  return response.data;
+  return apiRequest<T>("get", `/Settings/Get`, { params: { key } });
 };
 
 export const setSetting = async (key: string, value: string, type: string) => {
-  await ensureApiBaseUrl();
   if (!key || !value || !type) throw new Error("Key, value, and type are required for setting");
-
-  const response = await axios.post(`${API_BASE_URL}/Settings/Set`, null, {
-    params: { key, value, type },
-  });
-
-  return response.data;
+  return apiRequest("post", `/Settings/Set`, { params: { key, value, type } });
 };
 
-export const getGeoLiteDatabaseVersion = async () => {
-  await ensureApiBaseUrl();
-  try {
-    const response = await axios.get(`${API_BASE_URL}/GeoLite/GetVersionDatabase`);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch GeoLite database version:", error);
-    throw error;
-  }
+export const getGeoLiteDatabaseVersion = async (): Promise<any> => {
+  return apiRequest<any>("get", "/GeoLite/GetVersionDatabase");
 };
 
-export const updateGeoLiteDatabase = async () => {
-  await ensureApiBaseUrl();
-  try {
-    const response = await axios.post(`${API_BASE_URL}/GeoLite/UpdateDatabase`);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to update GeoLite database:", error);
-    throw error;
-  }
+export const updateGeoLiteDatabase = async (): Promise<any> => {
+  return apiRequest<any>("post", "/GeoLite/UpdateDatabase");
 };
 
 export const fetchToken = async (clientId: string, clientSecret: string): Promise<string> => {
