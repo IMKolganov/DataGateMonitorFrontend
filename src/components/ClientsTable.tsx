@@ -1,9 +1,10 @@
 import React from "react";
 import { GridColDef } from "@mui/x-data-grid";
 import { ConnectedClient } from "../utils/types";
-import { formatBytes } from "../utils/utils";
+import { formatBytes, formatDateWithOffset } from "../utils/utils";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
+import moment from 'moment';
 
 interface ClientsTableProps {
   clients: ConnectedClient[];
@@ -31,7 +32,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
     localIp: client.localIp,
     bytesReceived: formatBytes(client.bytesReceived),
     bytesSent: formatBytes(client.bytesSent),
-    connectedSince: new Date(client.connectedSince).toLocaleString(),
+    connectedSince: formatDateWithOffset(new Date(client.connectedSince)),
     country: `${client.country}, ${client.region}, ${client.city}`,
   }));
 
