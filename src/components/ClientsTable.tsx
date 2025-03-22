@@ -4,7 +4,6 @@ import { ConnectedClient } from "../utils/types";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
-import moment from 'moment';
 
 interface ClientsTableProps {
   clients: ConnectedClient[];

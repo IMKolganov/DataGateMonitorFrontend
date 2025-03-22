@@ -58,7 +58,7 @@ export function ServerDetails() {
         ? await fetchConnectedClients(id, page + 1, pageSize)
         : await fetchHistoryClients(id, page + 1, pageSize);
 
-      setClients(clientsRes?.openVpnServerClients || []);
+      setClients(clientsRes?.clients || []);
       setTotalClients(clientsRes?.totalCount || 0);
     } catch (error) {
       console.error("Error fetching clients:", error);

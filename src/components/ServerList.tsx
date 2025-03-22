@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { fetchServers, deleteServer } from "../utils/api";
-import { OpenVpnServerInfoResponse, ServiceStatus } from "../utils/types";
+import { OpenVpnServerData, ServiceStatus } from "../utils/types";
 import ServerItem from "./ServerItem";
 import ServiceControls from "./ServiceControls";
 import useWebSocketService from "../hooks/useWebSocketService";
 import "../css/ServerList.css";
 
-interface ServerWithStatus extends OpenVpnServerInfoResponse {
+interface ServerWithStatus extends OpenVpnServerData {
   serviceStatus: ServiceStatus;
   errorMessage: string | null;
   nextRunTime: string;
@@ -29,7 +29,7 @@ const ServerList: React.FC = () => {
     if (Object.keys(serviceData).length > 0) {
       setServers((prevServers) =>
         prevServers.map((server) => {
-          const serverId = server.openVpnServer.id.toString();
+          const serverId = server.openVpnServerResponses.id.toString();
           const serviceInfo = serviceData[serverId];
 
           return serviceInfo
@@ -68,7 +68,7 @@ const ServerList: React.FC = () => {
     if (!window.confirm("Are you sure you want to delete this server?")) return;
     try {
       await deleteServer(id);
-      setServers((prev) => prev.filter((server) => server.openVpnServer.id !== id));
+      setServers((prev) => prev.filter((server) => server.openVpnServerResponses.id !== id));
     } catch (error) {
       console.error("Error deleting server:", error);
     }
@@ -99,7 +99,7 @@ const ServerList: React.FC = () => {
           {servers.length > 0 ? (
             servers.map((server) => (
               <ServerItem
-                key={server.openVpnServer.id}
+                key={server.openVpnServerResponses.id}
                 server={server}
                 serviceStatus={server.serviceStatus}
                 errorMessage={server.errorMessage}
