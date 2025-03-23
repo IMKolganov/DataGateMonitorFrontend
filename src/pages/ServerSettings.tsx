@@ -73,8 +73,6 @@ const ServerSettings: React.FC = () => {
   };
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p className="error">{error}</p>;
-  if (!settings) return <p>No settings found.</p>;
 
   return (
     <div className="settings-container">
@@ -85,37 +83,45 @@ const ServerSettings: React.FC = () => {
           </button>
         </div>
       </div>
-      <h2>Server Settings</h2>
-      <div className="settings-form">
-        {Object.keys(settings)
-          .filter((key) => !hiddenFields.includes(key))
-          .map((key) => (
-            <div key={key} className="form-group">
-              <label htmlFor={key} className="field-label">
-                {formatFieldName(key)}
-              </label>
-              <p className="field-description">
-                {fieldDescriptions[key] || "No description available."}
-              </p>
-              <input
-                type="text"
-                id={key}
-                name={key}
-                value={settings[key] || ""}
-                onChange={handleChange}
-                className="input"
-              />
+  
+      {error ? (
+        <p className="error">{error}</p>
+      ) : !settings ? (
+        <p>No settings found.</p>
+      ) : (
+        <>
+          <h2>Server Settings</h2>
+          <div className="settings-form">
+            {Object.keys(settings)
+              .filter((key) => !hiddenFields.includes(key))
+              .map((key) => (
+                <div key={key} className="form-group">
+                  <label htmlFor={key} className="field-label">
+                    {formatFieldName(key)}
+                  </label>
+                  <p className="field-description">
+                    {fieldDescriptions[key] || "No description available."}
+                  </p>
+                  <input
+                    type="text"
+                    id={key}
+                    name={key}
+                    value={settings[key] || ""}
+                    onChange={handleChange}
+                    className="input"
+                  />
+                </div>
+              ))}
+            <div className="action-buttons">
+              <button className="btn primary" onClick={handleSave} disabled={loading}>
+                <FaSave className="icon" /> Save
+              </button>
             </div>
-          ))}
-          <div className="action-buttons">
-            <button className="btn primary" onClick={handleSave} disabled={loading}>
-              <FaSave className="icon" /> Save
-            </button>
           </div>
-
-      </div>
+        </>
+      )}
     </div>
-  );
+  );  
 };
 
 export default ServerSettings;

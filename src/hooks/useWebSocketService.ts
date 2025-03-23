@@ -3,6 +3,7 @@ import { fetchConfig, getWebSocketUrlForBackgroundService, runServiceNow } from 
 import { ServiceStatus } from "../utils/types";
 
 interface ServiceData {
+  vpnServerId: number;
   status: ServiceStatus;
   errorMessage: string | null;
   nextRunTime: string;
@@ -55,6 +56,7 @@ const useWebSocketService = () => {
             ServiceStatus.Error;
 
           updatedServiceData[key] = {
+            vpnServerId: service.vpnServerId,
             status,
             errorMessage: service.ErrorMessage || null,
             nextRunTime: service.NextRunTime || "N/A",

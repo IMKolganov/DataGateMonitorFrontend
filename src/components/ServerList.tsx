@@ -9,6 +9,7 @@ import useWebSocketService from "../hooks/useWebSocketService";
 import "../css/ServerList.css";
 
 interface ServerWithStatus extends OpenVpnServerData {
+  vpnServerId: number;
   serviceStatus: ServiceStatus;
   errorMessage: string | null;
   nextRunTime: string;
@@ -35,6 +36,7 @@ const ServerList: React.FC = () => {
           return serviceInfo
             ? {
                 ...server,
+                vpnServerId: serviceInfo.vpnServerId,
                 serviceStatus: serviceInfo.status,
                 errorMessage: serviceInfo.errorMessage,
                 nextRunTime: serviceInfo.nextRunTime,
@@ -52,6 +54,7 @@ const ServerList: React.FC = () => {
       setServers(
         data.map((server) => ({
           ...server,
+          vpnServerId: 0,
           serviceStatus: ServiceStatus.Idle,
           errorMessage: null,
           nextRunTime: "N/A",
@@ -101,6 +104,7 @@ const ServerList: React.FC = () => {
               <ServerItem
                 key={server.openVpnServerResponses.id}
                 server={server}
+                vpnServerId={server.vpnServerId}
                 serviceStatus={server.serviceStatus}
                 errorMessage={server.errorMessage}
                 nextRunTime={server.nextRunTime}

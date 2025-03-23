@@ -153,9 +153,12 @@ export const addCertificate = async (vpnServerId: string, commonName: string) =>
 };
 
 export const fetchServerSettings = async (vpnServerId: string): Promise<any> => {
-  return apiRequest<any>("get", `/OpenVpnServerCerts/GetOpenVpnServerCertConf/${vpnServerId}`);
+  const response = await apiRequest<{ success: boolean; message: string; data: any }>(
+    "get",
+    `/OpenVpnServerCerts/GetOpenVpnServerCertConf/${vpnServerId}`
+  );
+  return response.data;
 };
-
 
 export const updateServerSettings = async (settings: any): Promise<void> => {
   return apiRequest<void>("post", "/OpenVpnServerCerts/UpdateServerCertConfig", {
@@ -260,9 +263,20 @@ export const saveOvpnFileConfig = async (configData: any) => {
   });
 };
 
-export const getSetting = async <T = { value: string }>(key: string): Promise<T> => {
+export const getSetting = async (key: string): Promise<{ key: string; value: string }> => {
   if (!key) throw new Error("Setting key is required");
-  return apiRequest<T>("get", `/Settings/Get`, { params: { key } });
+
+  const response = await apiRequest<{
+    success: boolean;
+    message: string;
+    data: { key: string; value: string };
+  }>("get", `/Settings/Get`, { params: { key } });
+
+  if (!response.success) {
+    throw new Error(response.message || "Unknown error");
+  }
+
+  return response.data;
 };
 
 export const setSetting = async (key: string, value: string, type: string) => {

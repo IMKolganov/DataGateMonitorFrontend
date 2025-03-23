@@ -8,6 +8,7 @@ import { IoIosSpeedometer } from "react-icons/io";
 
 interface Props {
   server: OpenVpnServerData;
+  vpnServerId: number;
   serviceStatus: ServiceStatus;
   errorMessage: string | null;
   nextRunTime: string;
@@ -73,7 +74,7 @@ const getStatusLabel = (status: ServiceStatus) => {
   }
 };
 
-const ServerItem: React.FC<Props> = ({ server, serviceStatus, errorMessage, nextRunTime, onView, onEdit, onDelete }) => {
+const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, errorMessage, nextRunTime, onView, onEdit, onDelete }) => {
   return (
     <li className="server-item">
       <div className="server-header">
