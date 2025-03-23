@@ -20,15 +20,20 @@ export function ApplicationSettings() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const loadApplications = async () => {
     setLoading(true);
+    setErrorMessage(null);
     try {
       await fetchConfig();
       const data = await getAllApplications();
+      if (!Array.isArray(data)) {
+        throw new Error("Unexpected response format");
+      }
       setApps(data);
-    } catch (error) {
-      console.error("Initialization failed:", error);
+    } catch (error: any) {
+      setErrorMessage(error.message || "Failed to load applications");
     } finally {
       setLoading(false);
     }
@@ -41,8 +46,12 @@ export function ApplicationSettings() {
   const handleRegister = async () => {
     if (!newAppName.trim()) return;
     setLoading(true);
+    setErrorMessage(null);
     try {
       const newApp = await registerApplication(newAppName);
+      if (!newApp || !newApp.clientId) {
+        throw new Error("Invalid response from server");
+      }
       setApps((prevApps) => [
         ...prevApps,
         {
@@ -52,12 +61,12 @@ export function ApplicationSettings() {
         },
       ]);
       setNewAppName("");
-    } catch (error) {
-      console.error("Failed to register application", error);
+    } catch (error: any) {
+      setErrorMessage(error.message || "Failed to register application");
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -84,10 +93,6 @@ export function ApplicationSettings() {
           </div>
         </div>
       </div>
-
-
-
-
       {loading ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>
@@ -108,7 +113,11 @@ export function ApplicationSettings() {
               <FaPlus className="icon" /> Register app
             </button>
           </div>
-
+          {errorMessage && (
+          <div>
+            <p className="error-message">❌ {errorMessage}</p>
+          </div>
+        )}
           <ApplicationTable applications={apps} refreshApps={loadApplications} />
           
         </>

@@ -189,7 +189,8 @@ export const revokeOvpnFile = async (vpnServerId: string, externalId: string) =>
 };
 
 export const getAllApplications = async () => {
-  return apiRequest<any>("get", "/applications/GetAllApplications");
+  const response = await apiRequest<{ data: any }>("get", `/applications/GetAllApplications`);
+  return response.data;
 };
 
 export const registerApplication = async (name: string) => {
