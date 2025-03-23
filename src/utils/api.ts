@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { OpenVpnServerInfoResponse, Config, Certificate, IssuedOvpnFile } from "./types";
+import { Config, Certificate, IssuedOvpnFile } from "./types";
 
 let API_BASE_URL: string | null = null;
 let WS_BASE_URL: string | null = null;
@@ -99,30 +99,33 @@ export const runServiceNow = async (): Promise<void> => {
   await apiRequest<void>("post", "/OpenVpnServers/run-now");
 };
 
-export const fetchServers = async (): Promise<OpenVpnServerInfoResponse[]> => {
-  return apiRequest<OpenVpnServerInfoResponse[]>("get", "/OpenVpnServers/GetAllServers");
-};
+export const fetchServers = async (): Promise<any[]> => {
+  const response = await apiRequest<{ data: any[] }>("get", "/OpenVpnServers/GetAllServersWithStatus");
+  return response.data;
+}
 
 export const fetchServersWithStats = async (id: string): Promise<any> => {
-  return apiRequest<any>("get", `/OpenVpnServers/GetServerWithStats/${id}`);
+  const response = await apiRequest<{ data: any }>("get", `/OpenVpnServers/GetServerWithStatus/${id}`);
+  return response.data;
 };
 
-export const fetchConnectedClients = async (id: string, page: number, pageSize: number): Promise<any> => {
-  return apiRequest<any>("get", `/OpenVpnServers/GetAllConnectedClients/${id}`, {
-    params: { page, pageSize },
+export const fetchConnectedClients = async (VpnServerId: string, page: number, pageSize: number): Promise<any> => {
+  const response = await apiRequest<{ data: any }>("get", `/OpenVpnServers/GetAllConnectedClients`, {
+    params: { VpnServerId, page, pageSize },
   });
+  return response.data;
 };
 
-export const fetchHistoryClients = async (id: string, page: number, pageSize: number): Promise<any> => {
-  return apiRequest<any>("get", `/OpenVpnServers/GetAllHistoryClients/${id}`, {
-    params: { page, pageSize },
+export const fetchHistoryClients = async (VpnServerId: string, page: number, pageSize: number): Promise<any> => {
+
+  const response = await apiRequest<{ data: any }>("get", `/OpenVpnServers/GetAllHistoryClients`, {
+    params: { VpnServerId, page, pageSize },
   });
+  return response.data;
 };
 
 export const deleteServer = async (id: number) => {
-  return apiRequest<void>("delete", `/OpenVpnServers/DeleteServer`, {
-    params: { vpnServerId: id },
-  });
+  return apiRequest<void>("delete", `/OpenVpnServers/DeleteServer/${id}`, );
 };
 
 export const fetchCertificates = async (vpnServerId: string, status?: string): Promise<Certificate[]> => {
@@ -148,9 +151,12 @@ export const addCertificate = async (vpnServerId: string, commonName: string) =>
 };
 
 export const fetchServerSettings = async (vpnServerId: string): Promise<any> => {
-  return apiRequest<any>("get", `/OpenVpnServerCerts/GetOpenVpnServerCertConf/${vpnServerId}`);
+  const response = await apiRequest<{ success: boolean; message: string; data: any }>(
+    "get",
+    `/OpenVpnServerCerts/GetOpenVpnServerCertConf/${vpnServerId}`
+  );
+  return response.data;
 };
-
 
 export const updateServerSettings = async (settings: any): Promise<void> => {
   return apiRequest<void>("post", "/OpenVpnServerCerts/UpdateServerCertConfig", {
@@ -181,7 +187,8 @@ export const revokeOvpnFile = async (vpnServerId: string, externalId: string) =>
 };
 
 export const getAllApplications = async () => {
-  return apiRequest<any>("get", "/applications/GetAllApplications");
+  const response = await apiRequest<{ data: any }>("get", `/applications/GetAllApplications`);
+  return response.data;
 };
 
 export const registerApplication = async (name: string) => {
@@ -225,8 +232,9 @@ export const downloadOvpnFile = async (issuedOvpnFileId: number, vpnServerId: st
   document.body.removeChild(link);
 };
 
-export const getServer = async (serverId: string) => {
-  return apiRequest<any>("get", `/OpenVpnServers/GetServer/${serverId}`);
+export const getServer = async (serverId: string): Promise<any> => {
+  const response = await apiRequest<{ data: any }>("get", `/OpenVpnServers/GetServer/${serverId}`);
+  return response.data;
 };
 
 export const saveServer = async (serverData: any, isEditing: boolean) => {
@@ -254,9 +262,20 @@ export const saveOvpnFileConfig = async (configData: any) => {
   });
 };
 
-export const getSetting = async <T = { value: string }>(key: string): Promise<T> => {
+export const getSetting = async (key: string): Promise<{ key: string; value: string }> => {
   if (!key) throw new Error("Setting key is required");
-  return apiRequest<T>("get", `/Settings/Get`, { params: { key } });
+
+  const response = await apiRequest<{
+    success: boolean;
+    message: string;
+    data: { key: string; value: string };
+  }>("get", `/Settings/Get`, { params: { key } });
+
+  if (!response.success) {
+    throw new Error(response.message || "Unknown error");
+  }
+
+  return response.data;
 };
 
 export const setSetting = async (key: string, value: string, type: string) => {

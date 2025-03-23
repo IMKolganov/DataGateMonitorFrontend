@@ -28,35 +28,25 @@ export interface ServerInfo {
     longitude: number;
     lastUpdated: string;
   }
-  export interface OpenVpnServer {
-    id: number;
-    serverName: string;
-    managementIp: string;
-    managementPort: number;
-    login: string;
-    password: string;
-    isOnline: boolean;
-    lastUpdate: string;
-    createDate: string;
-  }
-  
-  export interface OpenVpnServerStatusLog {
-    id: number;
-    vpnServerId: number;
-    sessionId: string;
-    upSince: string;
-    serverLocalIp: string;
-    serverRemoteIp: string;
-    bytesIn: number;
-    bytesOut: number;
-    version: string;
-    lastUpdate: string;
-    createDate: string;
-  }
-  
-  export interface OpenVpnServerInfoResponse {
-    openVpnServer: OpenVpnServer;
-    openVpnServerStatusLog?: OpenVpnServerStatusLog | null;
+
+  export interface OpenVpnServerData {
+    openVpnServerResponses: {
+      id: number;
+      serverName: string;
+      managementIp: string;
+      managementPort: number;
+      isOnline: boolean;
+    };
+    openVpnServerStatusLogResponse: {
+      vpnServerId: number;
+      sessionId: string;
+      upSince: string;
+      serverLocalIp: string;
+      serverRemoteIp: string;
+      bytesIn: number;
+      bytesOut: number;
+      version: string;
+    };
     totalBytesIn: number;
     totalBytesOut: number;
   }
