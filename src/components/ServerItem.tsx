@@ -1,5 +1,5 @@
 import React from "react";
-import { OpenVpnServerInfoResponse, ServiceStatus } from "../utils/types";
+import { OpenVpnServerData, ServiceStatus } from "../utils/types";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import { BsClock, BsHddNetwork } from "react-icons/bs";
 import { FaPlayCircle, FaPauseCircle, FaTimesCircle } from "react-icons/fa";
@@ -7,7 +7,8 @@ import { RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer } from "react-icons/io";
 
 interface Props {
-  server: OpenVpnServerInfoResponse;
+  server: OpenVpnServerData;
+  vpnServerId: number;
   serviceStatus: ServiceStatus;
   errorMessage: string | null;
   nextRunTime: string;
@@ -73,15 +74,15 @@ const getStatusLabel = (status: ServiceStatus) => {
   }
 };
 
-const ServerItem: React.FC<Props> = ({ server, serviceStatus, errorMessage, nextRunTime, onView, onEdit, onDelete }) => {
+const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, errorMessage, nextRunTime, onView, onEdit, onDelete }) => {
   return (
     <li className="server-item">
       <div className="server-header">
         <div className="server-info">
-          <strong className="server-name">{server.openVpnServer.serverName}</strong>
+          <strong className="server-name">{server.openVpnServerResponses.serverName}</strong>
         </div>
-        <div className={`server-status ${server.openVpnServer.isOnline ? "status-online" : "status-offline"}`}>
-          {server.openVpnServer.isOnline ? "✅ Online" : "❌ Offline"}
+        <div className={`server-status ${server.openVpnServerResponses.isOnline ? "status-online" : "status-offline"}`}>
+          {server.openVpnServerResponses.isOnline ? "✅ Online" : "❌ Offline"}
         </div>
       </div>
 
@@ -89,17 +90,17 @@ const ServerItem: React.FC<Props> = ({ server, serviceStatus, errorMessage, next
         <div className="detail-row">
           <BsClock className="detail-icon" />
           <span className="detail-label">Uptime:</span>
-          <span>{server.openVpnServerStatusLog?.upSince ? new Date(server.openVpnServerStatusLog.upSince).toLocaleString() : "N/A"}</span>
+          <span>{server.openVpnServerStatusLogResponse?.upSince ? new Date(server.openVpnServerStatusLogResponse.upSince).toLocaleString() : "N/A"}</span>
         </div>
         <div className="detail-row">
           <RiHardDrive2Line className="detail-icon" />
           <span className="detail-label">Version:</span>
-          <span>{server.openVpnServerStatusLog?.version || "Unknown"}</span>
+          <span>{server.openVpnServerStatusLogResponse?.version || "Unknown"}</span>
         </div>
         <div className="detail-row">
           <BsHddNetwork className="detail-icon" />
           <span className="detail-label">Management:</span>
-          <span>{server.openVpnServer.managementIp}:{server.openVpnServer.managementPort}</span>
+          <span>{server.openVpnServerResponses.managementIp}:{server.openVpnServerResponses.managementPort}</span>
         </div>
         <div className="detail-row">
           <IoIosSpeedometer className="detail-icon" />
@@ -130,15 +131,15 @@ const ServerItem: React.FC<Props> = ({ server, serviceStatus, errorMessage, next
       </div>
 
       <div className="server-actions">
-        <button className="btn normal" onClick={() => onView(server.openVpnServer.id)}>
+        <button className="btn normal" onClick={() => onView(server.openVpnServerResponses.id)}>
           <FaEye className="icon" /> View
         </button>
-        <button className="btn warning" onClick={() => onEdit(server.openVpnServer.id)}>
+        <button className="btn warning" onClick={() => onEdit(server.openVpnServerResponses.id)}>
           <FaEdit className="icon" /> Edit
         </button>
         <button
           className="btn danger"
-          onClick={() => onDelete(server.openVpnServer.id)}
+          onClick={() => onDelete(server.openVpnServerResponses.id)}
         >
           <FaTrash className="icon" /> Delete
         </button>

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { fetchToken, setSecret, checkSystemStatus } from "../utils/api";
 import { FaDoorOpen } from "react-icons/fa";
 import "../css/Login.css";
@@ -16,76 +15,132 @@ const Login = () => {
       try {
         const isSystemSet = await checkSystemStatus();
         setSystemSet(isSystemSet);
-      } catch {
-        setError("Failed to check system status.");
+      } catch (err: any) {
+        console.error("System status check error:", err);
+  
+        let detailedMessage = "Failed to check system status.";
+        if (err.response) {
+          detailedMessage += ` Server responded with status ${err.response.status}: ${err.response.statusText}`;
+          if (err.response.data) {
+            detailedMessage += ` - ${JSON.stringify(err.response.data)}`;
+          }
+        } else if (err.request) {
+          detailedMessage += " No response received from server.";
+        } else if (err.message) {
+          detailedMessage += ` ${err.message}`;
+        }
+  
+        if (err.config?.url) {
+          const fullUrl = err.config.baseURL
+            ? `${err.config.baseURL}${err.config.url}`
+            : err.config.url;
+  
+          detailedMessage += `<br/>Try opening ${fullUrl} in your browser.`;
+        }
+  
+        setError(detailedMessage);
       }
     };
-
+  
     checkStatus();
-  }, []);
+  }, []);  
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setError("");
     setLoading(true);
-
+  
     try {
       if (systemSet === false) {
         await setSecret(clientId, clientSecret);
         setSystemSet(true);
       }
-
-      let token = await fetchToken(clientId, clientSecret);
+  
+      const token = await fetchToken(clientId, clientSecret);
       localStorage.setItem("token", token);
       window.location.href = "/";
     } catch (err: any) {
-      setError(err.message);
+      console.error("Login error:", err);
+  
+      let detailedMessage = "Login failed.";
+      if (err.response) {
+        detailedMessage += ` Server responded with status ${err.response.status}: ${err.response.statusText}`;
+        if (err.response.data) {
+          detailedMessage += ` - ${JSON.stringify(err.response.data)}`;
+        }
+      } else if (err.request) {
+        detailedMessage += " No response received from server.";
+      } else if (err.message) {
+        detailedMessage += ` ${err.message}`;
+      }
+  
+      if (err.config?.url) {
+        const fullUrl = err.config.baseURL
+          ? `${err.config.baseURL}${err.config.url}`
+          : err.config.url;
+  
+        detailedMessage += `<br/>Try opening ${fullUrl} in your browser.`;
+      }
+  
+      setError(detailedMessage);
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   return (
     <div className="login-container">
       <div className="login-wrapper">
-
-
         <div className="login">
           <h2>Sign in</h2>
+          {error && (
+              <p
+                className="error-message"
+                dangerouslySetInnerHTML={{ __html: error }}
+              ></p>
+            )}
 
-          <div className="login-item">
-            <h4>Client ID:</h4>
-            <input
-              type="text"
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
-              className="input input-login"
-              placeholder="Client ID"
-            />
-          </div>
+          <form onSubmit={handleLogin}>
+            <div className="login-item">
+              <h4>Login:</h4>
+              <input
+                type="text"
+                name="username"
+                autoComplete="username"
+                value={clientId}
+                onChange={(e) => setClientId(e.target.value)}
+                className="input input-login"
+                placeholder="Login"
+              />
+            </div>
 
-          <div className="login-item">
-            <h4>Client Secret:</h4>
-            <input
-              type="password"
-              value={clientSecret}
-              onChange={(e) => setClientSecret(e.target.value)}
-              className="input input-login"
-              placeholder="Client Secret"
-            />
-          </div>
+            <div className="login-item">
+              <h4>Password:</h4>
+              <input
+                type="password"
+                name="password"
+                autoComplete="current-password"
+                value={clientSecret}
+                onChange={(e) => setClientSecret(e.target.value)}
+                className="input input-login"
+                placeholder="Password"
+              />
+            </div>
 
-          <div className="login-item right">
-            <button className="btn primary" onClick={handleLogin} disabled={loading}>
-              <FaDoorOpen className="icon" />
-              {loading ? "Loading..." : "Sign in"}
-            </button>
-          </div>
-
-          {error && <p className="error-message">{error}</p>}
+            <div className="login-item right">
+              <button className="btn primary" type="submit" disabled={loading}>
+                <FaDoorOpen className="icon" />
+                {loading ? "Loading..." : "Sign in"}
+              </button>
+            </div>
+          </form>
         </div>
 
         <div className="register-container">
-          <p>New to OpenVPN Gate Monitor? <a href="/register">Create an account</a></p>
+          <p>
+            New to OpenVPN Gate Monitor?{" "}
+            <a href="/register">Create an account</a>
+          </p>
         </div>
 
         <div className="footer">

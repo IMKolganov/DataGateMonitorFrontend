@@ -339,3 +339,15 @@ box-shadow: 0 0 4px rgba(3, 102, 214, 0.3);
   color: #6a737d;
   opacity: 1;
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #c9d1d9 !important;
+  background-color: #24292e !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+  background-clip: padding-box !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
