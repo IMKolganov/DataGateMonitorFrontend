@@ -125,9 +125,7 @@ export const fetchHistoryClients = async (VpnServerId: string, page: number, pag
 };
 
 export const deleteServer = async (id: number) => {
-  return apiRequest<void>("delete", `/OpenVpnServers/DeleteServer`, {
-    params: { vpnServerId: id },
-  });
+  return apiRequest<void>("delete", `/OpenVpnServers/DeleteServer/${id}`, );
 };
 
 export const fetchCertificates = async (vpnServerId: string, status?: string): Promise<Certificate[]> => {
