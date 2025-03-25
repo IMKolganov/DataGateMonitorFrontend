@@ -76,7 +76,7 @@ const ServerSettings: React.FC = () => {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="settings-container">
+    <div className="content-wrapper wide-table">
       <div className="header-bar">
         <div className="left-buttons">
           <button className="btn secondary" onClick={() => navigate(`/server-details/${vpnServerId}`)}>
