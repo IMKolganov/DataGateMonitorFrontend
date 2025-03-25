@@ -40,34 +40,31 @@ const useWebSocketService = () => {
 
     socket.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
-
-        if (typeof data !== "object" || !data) {
-          return;
-        }
-
+        const data: any[] = JSON.parse(event.data);
+    
+        if (!Array.isArray(data)) return;
+    
         const updatedServiceData: Record<string, ServiceData> = {};
-
-        Object.keys(data).forEach((key) => {
-          const service = data[key];
+    
+        data.forEach((service) => {
           const status =
             service.Status === 0 ? ServiceStatus.Idle :
             service.Status === 1 ? ServiceStatus.Running :
             ServiceStatus.Error;
-
-          updatedServiceData[key] = {
-            vpnServerId: service.vpnServerId,
+    
+          updatedServiceData[service.VpnServerId] = {
+            vpnServerId: service.VpnServerId,
             status,
             errorMessage: service.ErrorMessage || null,
             nextRunTime: service.NextRunTime || "N/A",
           };
         });
-
+    
         setServiceData(updatedServiceData);
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
       }
-    };
+    };    
 
     socket.onclose = () => {
       setTimeout(() => connectWebSocket(wsUrl), 5000);

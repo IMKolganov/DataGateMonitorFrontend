@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaSave, FaArrowLeft } from "react-icons/fa";
 import { fetchServerSettings, updateServerSettings, fetchDatabasePath } from "../utils/api";
+import { toast } from "react-toastify";
 
 import "../css/ServerSettings.css";
 
@@ -62,7 +63,7 @@ const ServerSettings: React.FC = () => {
     setLoading(true);
     try {
       await updateServerSettings({ vpnServerId: vpnServerId!, ...settings });
-      alert("Settings saved successfully");
+      toast.error("Settings saved successfully");
       navigate(-1);
     } catch (err) {
       setError("Failed to save settings.");

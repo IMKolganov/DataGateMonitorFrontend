@@ -109,7 +109,7 @@
   @media (min-width: 1024px) {
       .server-details {
           gap: 8px;
-          max-width: 800px;
+          max-width: 1024px;
       }
 
       .detail-row {
@@ -122,7 +122,21 @@
       }
   }
 
+  @media (min-width: 2024px) {
+    .server-details {
+        gap: 8px;
+        max-width: 2024px;
+    }
 
+    .detail-row {
+        gap: 4px;
+        padding: 2px 6px;
+    }
+
+    .server-actions {
+        max-width: 300px;
+    }
+}
   
   .server-actions {
     margin-top: 20px;

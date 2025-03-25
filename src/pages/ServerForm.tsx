@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import "../css/ServerForm.css";
 import { getServer, saveServer } from "../utils/api";
 import { FaArrowLeft, FaPlus } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const ServerForm: React.FC = () => {
   const navigate = useNavigate();
@@ -78,16 +79,16 @@ const ServerForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+  
     try {
       await saveServer(serverData, !!serverId);
-      alert(serverId ? "Server updated successfully!" : "Server added successfully!");
+      toast.success(serverId ? "Server updated successfully!" : "Server added successfully!");
       navigate("/");
     } catch (error) {
       console.error(serverId ? "Error updating server:" : "Error adding server:", error);
-      alert(serverId ? "Failed to update server." : "Failed to add server.");
+      toast.error(serverId ? "Failed to update server." : "Failed to add server.");
     }
-  };
+  };  
 
   return (
     <div className="content-wrapper wide-table">
@@ -163,7 +164,7 @@ const ServerForm: React.FC = () => {
           <div className="header-containe">
             <div className="header-bar">
               <div className="left-buttons">
-                <button className="btn secondary" onClick={() => navigate(`/`)}>
+                <button type="button" className="btn secondary" onClick={() => navigate(`/`)}>
                   <FaArrowLeft className="icon" /> Back
                 </button>                
               </div>

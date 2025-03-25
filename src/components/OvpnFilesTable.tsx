@@ -5,6 +5,7 @@ import CustomThemeProvider from "../components/ThemeProvider";
 import { IssuedOvpnFile } from "../utils/types";
 import { revokeOvpnFile, downloadOvpnFile } from "../utils/api";
 import { FaDownload } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const OvpnFilesTable: React.FC<{ 
   ovpnFiles: IssuedOvpnFile[], 
@@ -22,7 +23,7 @@ const OvpnFilesTable: React.FC<{
       onRevoke();
     } catch (error) {
       console.error("Failed to revoke OVPN file", error);
-      alert("Error revoking OVPN file.");
+      toast.error("Error revoking OVPN file.");
     }
   }, [vpnServerId, onRevoke]);
 
@@ -31,7 +32,7 @@ const OvpnFilesTable: React.FC<{
       await downloadOvpnFile(issuedOvpnFileId, vpnServerId);
     } catch (error) {
       console.error("Download failed:", error);
-      alert("Error downloading file.");
+      toast.error("Error downloading file.");
     }
   };
 

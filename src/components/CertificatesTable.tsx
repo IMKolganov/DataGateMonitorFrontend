@@ -5,6 +5,7 @@ import CustomThemeProvider from "../components/ThemeProvider";
 import { Certificate, CertificatesTableProps } from "../utils/types";
 import { revokeCertificate } from "../utils/api";
 import "../css/CertificatesTable.css";
+import { toast } from "react-toastify";
 
 const renderStatus = (status: Certificate["status"]) => {
   switch (status) {
@@ -33,7 +34,7 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, vpn
       onRevoke();
     } catch (error) {
       console.error("Failed to revoke certificate", error);
-      alert("Error revoking certificate.");
+      toast.error("Error revoking certificate.");
     }
   }, [vpnServerId, onRevoke]);
 

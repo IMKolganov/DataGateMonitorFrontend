@@ -13,6 +13,9 @@ import Settings from "./pages/Settings";
 import ApplicationSettings from "./pages/ApplicationSettings";
 import OvpnFileConfigForm from "./pages/OvpnFileConfigForm";
 import Login from "./pages/Login";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./css/ToastifyDark.css";
 
 import "./App.css";
 
@@ -60,6 +63,19 @@ function App() {
           />
         </Routes>
       </Router>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+
     </div>
   );
 }
