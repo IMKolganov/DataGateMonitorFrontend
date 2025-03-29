@@ -52,7 +52,7 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
   const fetchOvpn = useCallback(async () => {
     try {
       const response = await fetchOvpnFiles(vpnServerId);
-      const data = Array.isArray(response?.data) ? response.data : [];
+      const data = Array.isArray(response) ? response : [];
 
       if (data.length === 0) {
         setOvpnError({
