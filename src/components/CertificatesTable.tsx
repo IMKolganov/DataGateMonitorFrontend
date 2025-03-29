@@ -22,12 +22,6 @@ const renderStatus = (status: Certificate["status"]) => {
   }
 };
 
-const safeFormatDate = (input?: string | null): string => {
-  if (!input) return "—";
-  const date = new Date(input);
-  return isNaN(date.getTime()) ? "Invalid date" : formatDateWithOffset(date);
-};
-
 const CertificatesTable: React.FC<CertificatesTableProps> = ({
   certificates = [],
   vpnServerId,
@@ -67,8 +61,8 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
     commonName: cert.commonName || "N/A",
     status: cert.status ?? 3, // Default to "Unknown"
     statusText: renderStatus(cert.status),
-    expiryDate: safeFormatDate(cert.expiryDate),
-    revokeDate: safeFormatDate(cert.revokeDate),
+    expiryDate: formatDateWithOffset(cert.expiryDate),
+    revokeDate: formatDateWithOffset(cert.revokeDate),
     serialNumber: cert.serialNumber || "N/A",
   }));
 
