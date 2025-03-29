@@ -1,0 +1,35 @@
+/* Toast container */
+.Toastify__toast-container {
+    font-family: "Segoe UI", sans-serif;
+  }
+  
+  /* Dark background with light text */
+  .Toastify__toast--dark {
+    background: #161b22;
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  }
+  
+  /* Success (greenish like GitHub) */
+  .Toastify__toast--success {
+    background: #1f883d;
+    color: #ffffff;
+  }
+  
+  /* Error (reddish) */
+  .Toastify__toast--error {
+    background: #da3633;
+    color: #ffffff;
+  }
+  
+  /* Icon color override */
+  .Toastify__toast-icon {
+    color: inherit !important;
+  }
+  
+  /* Progress bar - subtle gray */
+  .Toastify__progress-bar {
+    background: #30363d;
+  }
+  
