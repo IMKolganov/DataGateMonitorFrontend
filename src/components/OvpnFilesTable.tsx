@@ -6,13 +6,20 @@ import { IssuedOvpnFile } from "../utils/types";
 import { revokeOvpnFile, downloadOvpnFile } from "../utils/api";
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { formatDateWithOffset } from "../utils/utils";
+
+const safeFormatDate = (input?: string | null): string => {
+  if (!input) return "—";
+  const date = new Date(input);
+  return isNaN(date.getTime()) ? "Invalid date" : formatDateWithOffset(date);
+};
 
 const OvpnFilesTable: React.FC<{ 
   ovpnFiles: IssuedOvpnFile[], 
   vpnServerId: string, 
   onRevoke: () => void, 
   loading: boolean 
-}> = ({ ovpnFiles, vpnServerId, onRevoke, loading }) => {
+}> = ({ ovpnFiles = [], vpnServerId, onRevoke, loading }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [issuedToFilter, setIssuedToFilter] = useState("");
 
@@ -37,27 +44,27 @@ const OvpnFilesTable: React.FC<{
   };
 
   const filteredFiles = ovpnFiles.filter(file =>
-    file.commonName.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    (issuedToFilter === "" || file.issuedTo.toLowerCase().includes(issuedToFilter.toLowerCase()))
+    (file.commonName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) &&
+    (issuedToFilter === "" || (file.issuedTo?.toLowerCase() || "").includes(issuedToFilter.toLowerCase()))
   );
 
   const rows = filteredFiles.map((file) => ({
-    id: file.id,
-    externalId: file.externalId,
-    commonName: file.commonName,
-    certId: file.certId || "—",
-    fileName: file.fileName,
-    filePath: file.filePath,
-    issuedAt: new Date(file.issuedAt).toLocaleString(),
-    issuedTo: file.issuedTo,
-    pemFilePath: file.pemFilePath || "—",
-    certFilePath: file.certFilePath || "—",
-    keyFilePath: file.keyFilePath || "—",
-    reqFilePath: file.reqFilePath || "—",
+    id: file.id ?? "—",
+    externalId: file.externalId ?? "—",
+    commonName: file.commonName ?? "—",
+    certId: file.certId ?? "—",
+    fileName: file.fileName ?? "—",
+    filePath: file.filePath ?? "—",
+    issuedAt: safeFormatDate(file.issuedAt),
+    issuedTo: file.issuedTo ?? "—",
+    pemFilePath: file.pemFilePath ?? "—",
+    certFilePath: file.certFilePath ?? "—",
+    keyFilePath: file.keyFilePath ?? "—",
+    reqFilePath: file.reqFilePath ?? "—",
     isRevoked: file.isRevoked ? "❌ Revoked" : "✅ Active",
-    message: file.message || "—",
-    lastUpdate: new Date(file.lastUpdate).toLocaleString(),
-    createDate: new Date(file.createDate).toLocaleString(),
+    message: file.message ?? "—",
+    lastUpdate: safeFormatDate(file.lastUpdate),
+    createDate: safeFormatDate(file.createDate),
   }));
 
   const columns: GridColDef[] = [
@@ -123,7 +130,7 @@ const OvpnFilesTable: React.FC<{
           disableColumnFilter
           disableColumnMenu
           localeText={{
-            noRowsLabel: "📭 No OVPN files found",
+            noRowsLabel: loading ? "🔄 Loading OVPN files..." : "📭 No OVPN files found",
           }}
           loading={loading}
         />

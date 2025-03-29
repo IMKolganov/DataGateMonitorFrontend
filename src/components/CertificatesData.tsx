@@ -24,49 +24,55 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
         vpnServerId,
         selectedStatus !== null ? String(selectedStatus) : undefined
       );
-  
-      if (!certs || certs.length === 0) {
+
+      const validCerts = Array.isArray(certs)
+        ? certs.filter(c => c.commonName && c.commonName.trim() !== "")
+        : [];
+
+      if (validCerts.length === 0) {
         setCertError({
           message: "No certificates found.",
-          detail: "The server returned an empty list of certificates.",
+          detail: "The server returned an empty or invalid certificate list.",
         });
       } else {
-        setCertificates(certs);
         setCertError(null);
       }
+
+      setCertificates(validCerts);
     } catch (error: any) {
       console.error("Error fetching certificates", error);
+      setCertificates([]);
       setCertError({
-        message: error.response?.data?.Message || "Failed to load certificates",
-        detail: error.response?.data?.Detail,
+        message: error?.response?.data?.Message || "Failed to load certificates",
+        detail: error?.response?.data?.Detail,
       });
     }
   }, [vpnServerId, selectedStatus]);
-  
+
   const fetchOvpn = useCallback(async () => {
     try {
       const response = await fetchOvpnFiles(vpnServerId);
-      const data = response?.data;
-  
-      if (!Array.isArray(data) || data.length === 0) {
+      const data = Array.isArray(response?.data) ? response.data : [];
+
+      if (data.length === 0) {
         setOvpnError({
           message: "No OVPN files found.",
           detail: "The server returned an empty list of OVPN files.",
         });
-        setOvpnFiles([]);
       } else {
-        setOvpnFiles(data);
         setOvpnError(null);
       }
+
+      setOvpnFiles(data);
     } catch (error: any) {
       console.error("Error fetching OVPN files", error);
-      setOvpnError({
-        message: error.response?.data?.Message || "Failed to load OVPN files",
-        detail: error.response?.data?.Detail,
-      });
       setOvpnFiles([]);
+      setOvpnError({
+        message: error?.response?.data?.Message || "Failed to load OVPN files",
+        detail: error?.response?.data?.Detail,
+      });
     }
-  }, [vpnServerId]);  
+  }, [vpnServerId]);
 
   const fetchData = useCallback(async () => {
     if (!vpnServerId) return;
@@ -96,7 +102,12 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
       </p>
 
       <AddOvpnFile vpnServerId={vpnServerId} onSuccess={fetchData} />
-      <OvpnFilesTable ovpnFiles={ovpnFiles} vpnServerId={vpnServerId} onRevoke={fetchData} loading={loading} />
+      <OvpnFilesTable
+        ovpnFiles={Array.isArray(ovpnFiles) ? ovpnFiles : []}
+        vpnServerId={vpnServerId}
+        onRevoke={fetchData}
+        loading={loading}
+      />
 
       {certError && (
         <p className="error-message">{certError.message}<br />{certError.detail}</p>
@@ -107,8 +118,14 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
       <p className="certificate-description">
         Enter the <strong>Common Name (CN)</strong> for the new certificate and click "Add Certificate".
       </p>
+
       <AddCertificate vpnServerId={vpnServerId} onSuccess={fetchData} />
-      <CertificatesTable certificates={certificates} vpnServerId={vpnServerId} onRevoke={fetchData} loading={loading} />
+      <CertificatesTable
+        certificates={Array.isArray(certificates) ? certificates : []}
+        vpnServerId={vpnServerId}
+        onRevoke={fetchData}
+        loading={loading}
+      />
     </>
   );
 };

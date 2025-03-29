@@ -6,6 +6,7 @@ import { Certificate, CertificatesTableProps } from "../utils/types";
 import { revokeCertificate } from "../utils/api";
 import "../css/CertificatesTable.css";
 import { toast } from "react-toastify";
+import { formatDateWithOffset } from "../utils/utils";
 
 const renderStatus = (status: Certificate["status"]) => {
   switch (status) {
@@ -21,7 +22,18 @@ const renderStatus = (status: Certificate["status"]) => {
   }
 };
 
-const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, vpnServerId, onRevoke, loading }) => {
+const safeFormatDate = (input?: string | null): string => {
+  if (!input) return "—";
+  const date = new Date(input);
+  return isNaN(date.getTime()) ? "Invalid date" : formatDateWithOffset(date);
+};
+
+const CertificatesTable: React.FC<CertificatesTableProps> = ({
+  certificates = [],
+  vpnServerId,
+  onRevoke,
+  loading
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [serialNumberQuery, setSerialNumberQuery] = useState("");
@@ -38,20 +50,26 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({ certificates, vpn
     }
   }, [vpnServerId, onRevoke]);
 
-  const filteredCertificates = certificates.filter(cert =>
-    cert.commonName.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    (selectedStatus === "" || cert.status.toString() === selectedStatus) &&
-    cert.serialNumber.toLowerCase().includes(serialNumberQuery.toLowerCase())
-  );
+  const filteredCertificates = certificates.filter(cert => {
+    const name = cert.commonName?.toLowerCase() || "";
+    const serial = cert.serialNumber?.toLowerCase() || "";
+    const status = cert.status?.toString() ?? "";
+
+    return (
+      name.includes(searchQuery.toLowerCase()) &&
+      (selectedStatus === "" || status === selectedStatus) &&
+      serial.includes(serialNumberQuery.toLowerCase())
+    );
+  });
 
   const rows = filteredCertificates.map((cert, index) => ({
     id: index + 1,
-    commonName: cert.commonName,
-    status: cert.status,
+    commonName: cert.commonName || "N/A",
+    status: cert.status ?? 3, // Default to "Unknown"
     statusText: renderStatus(cert.status),
-    expiryDate: new Date(cert.expiryDate).toLocaleDateString(),
-    revokeDate: cert.revokeDate ? new Date(cert.revokeDate).toLocaleDateString() : "—",
-    serialNumber: cert.serialNumber,
+    expiryDate: safeFormatDate(cert.expiryDate),
+    revokeDate: safeFormatDate(cert.revokeDate),
+    serialNumber: cert.serialNumber || "N/A",
   }));
 
   const columns: GridColDef[] = [
