@@ -61,10 +61,10 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
     commonName: cert.commonName || "N/A",
     status: cert.status ?? 3, // Default to "Unknown"
     statusText: renderStatus(cert.status),
-    expiryDate: formatDateWithOffset(cert.expiryDate),
-    revokeDate: formatDateWithOffset(cert.revokeDate),
+    expiryDate: cert.expiryDate ? formatDateWithOffset(new Date(cert.expiryDate)) : "N/A",
+    revokeDate: cert.revokeDate ? formatDateWithOffset(new Date(cert.revokeDate)) : "N/A",
     serialNumber: cert.serialNumber || "N/A",
-  }));
+  }));  
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 70 },
