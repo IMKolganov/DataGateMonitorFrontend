@@ -168,11 +168,10 @@ export const fetchDatabasePath = async (): Promise<string> => {
   return apiRequest<string>("get", "/GeoIp/GetDatabasePath");
 };
 
-export const fetchOvpnFiles = async (vpnServerId: string): Promise<IssuedOvpnFile[]> => {
-  return apiRequest<IssuedOvpnFile[]>("get", "/OpenVpnFiles/GetAllOvpnFiles", {
-    params: { vpnServerId },
-  });
-};
+export async function fetchOvpnFiles(vpnServerId: string) {
+  const response = await axios.get(`/OpenVpnFiles/GetAllOvpnFiles/${vpnServerId}`);
+  return response.data.data;
+}
 
 export const addOvpnFile = async (vpnServerId: number, externalId: string, commonName: string, issuedTo: string = "openVpnClient") => {
   return apiRequest<void>("post", "/OpenVpnFiles/AddOvpnFile", {
