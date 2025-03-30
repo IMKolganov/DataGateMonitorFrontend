@@ -14,6 +14,8 @@ import ApplicationSettings from "./pages/ApplicationSettings";
 import OvpnFileConfigForm from "./pages/OvpnFileConfigForm";
 import Login from "./pages/Login";
 import { ToastContainer } from "react-toastify";
+import GeneralSettings from "./pages/GeneralSettings";
+import GeoLiteDbSettings from "./pages/GeoLiteDbSettings";
 import "react-toastify/dist/ReactToastify.css";
 import "./css/ToastifyDark.css";
 
@@ -44,7 +46,16 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Servers />} />
                     <Route path="/servers" element={<Servers />} />
-                    <Route path="/settings" element={<Settings />} />
+
+
+                    <Route path="/settings" element={<Settings />}>
+                      <Route index element={<Navigate to="general" replace />} />
+                      <Route path="general" element={<GeneralSettings />} />
+                      <Route path="applications" element={<ApplicationSettings />} />
+                      <Route path="geolitedb" element={<GeoLiteDbSettings />} />
+                    </Route>
+
+
                     <Route path="/settings/applications" element={<ApplicationSettings />} />
                     <Route path="/servers/add" element={<ServerForm />} />
                     <Route path="/servers/edit/:serverId" element={<ServerForm />} />
