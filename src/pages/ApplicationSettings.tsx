@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getAllApplications, registerApplication, fetchConfig } from "../utils/api";
-import { useNavigate } from "react-router-dom";
+import { FaPlus, FaSync } from "react-icons/fa";
 import "../css/ApplicationSettings.css";
-import { FaPlus, FaSync, FaArrowLeft } from "react-icons/fa";
 import ApplicationTable from "../components/ApplicationTable";
 
 interface Application {
@@ -19,7 +18,6 @@ export function ApplicationSettings() {
   const [newAppName, setNewAppName] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const loadApplications = async () => {
@@ -66,33 +64,33 @@ export function ApplicationSettings() {
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   const handleRefresh = async () => {
+    if (refreshing) return;
     setRefreshing(true);
     await loadApplications();
     setRefreshing(false);
   };
 
   return (
-    <div className="content-wrapper">
+    <div>
       <h2>Application Settings</h2>
-      <div className="header-container">
+      <div style={{ borderTop: "1px solid #d1d5da" }}></div>
       <p className="app-settings-description">
-        Manage applications that require API access. Each registered application receives a unique <strong>Client ID</strong> and <strong>Client Secret</strong>.
+        Manage applications that require API access. Each registered application receives a unique{" "}
+        <strong>Client ID</strong> and <strong>Client Secret</strong>.
         These credentials can be used to authenticate API requests.
       </p>
-        <div className="header-bar">
-          <div className="left-buttons">
-            <button className="btn secondary" onClick={() => navigate("/settings")}>
-              <FaArrowLeft className="icon" /> Back
-            </button>
-            <button className="btn secondary" onClick={handleRefresh} disabled={refreshing}>
-              <FaSync className={`icon ${refreshing ? "icon-spin" : ""}`} /> Refresh
-            </button>
-          </div>
+
+      <div className="header-bar">
+        <div className="left-buttons">
+          <button className="btn secondary" onClick={handleRefresh} disabled={refreshing}>
+            <FaSync className={`icon ${refreshing ? "icon-spin" : ""}`} /> Refresh
+          </button>
         </div>
       </div>
+
       {loading ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>
@@ -109,35 +107,41 @@ export function ApplicationSettings() {
               disabled={loading}
               className="input"
             />
-            <button className="btn primary" onClick={handleRegister} disabled={loading || !newAppName.trim()}>
+            <button
+              className="btn primary"
+              onClick={handleRegister}
+              disabled={loading || !newAppName.trim()}
+            >
               <FaPlus className="icon" /> Register app
             </button>
           </div>
+
           {errorMessage && (
-          <div>
-            <p className="error-message">❌ {errorMessage}</p>
-          </div>
-        )}
+            <div>
+              <p className="error-message">❌ {errorMessage}</p>
+            </div>
+          )}
+
           <ApplicationTable applications={apps} refreshApps={loadApplications} />
-          
         </>
       )}
 
       <div className="app-warning">
-        <p>⚠️ <strong>Security Notice:</strong> The <code>clientSecret</code> is displayed only once upon creation. Make sure to store it securely!</p>
-        //todo: make it
+        <p>
+          ⚠️ <strong>Security Notice:</strong> The <code>clientSecret</code> is displayed only once
+          upon creation. Make sure to store it securely!
+        </p>
       </div>
 
       <h3>Example: Authenticate with API</h3>
       <pre className="code-block">
         {`curl -X POST https://api.example.com/auth/token \\
-          -H "Content-Type: application/json" \\
-          -d '{
-            "clientId": "your-client-id",
-            "clientSecret": "your-client-secret"
-          }'`}
+  -H "Content-Type: application/json" \\
+  -d '{
+    "clientId": "your-client-id",
+    "clientSecret": "your-client-secret"
+  }'`}
       </pre>
-
     </div>
   );
 }

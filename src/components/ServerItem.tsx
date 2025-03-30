@@ -1,10 +1,10 @@
 import React from "react";
 import { OpenVpnServerData, ServiceStatus } from "../utils/types";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
-import { BsClock, BsHddNetwork } from "react-icons/bs";
+import { BsClock, BsHddNetwork, BsPerson } from "react-icons/bs";
 import { FaPlayCircle, FaPauseCircle, FaTimesCircle } from "react-icons/fa";
 import { RiHardDrive2Line } from "react-icons/ri";
-import { IoIosSpeedometer } from "react-icons/io";
+import { IoIosSpeedometer, IoMdPerson } from "react-icons/io";
 
 interface Props {
   server: OpenVpnServerData;
@@ -111,6 +111,16 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
           <IoIosSpeedometer className="detail-icon" />
           <span className="detail-label">Total Traffic OUT:</span>
           <span>{toHumanReadableSize(server.totalBytesOut)}</span>
+        </div>
+        <div className="detail-row">
+          <IoMdPerson className="detail-icon" />
+          <span className="detail-label">Count Connected Clients:</span>
+          <span>{server.countConnectedClients}</span>
+        </div>
+        <div className="detail-row">
+          <BsPerson className="detail-icon" />
+          <span className="detail-label">Count Sessions:</span>
+          <span>{server.countSessions}</span>
         </div>
       </div>
 

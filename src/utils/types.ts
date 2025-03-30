@@ -47,6 +47,8 @@ export interface ServerInfo {
       bytesOut: number;
       version: string;
     };
+    countConnectedClients: number;
+    countSessions: number;
     totalBytesIn: number;
     totalBytesOut: number;
   }
