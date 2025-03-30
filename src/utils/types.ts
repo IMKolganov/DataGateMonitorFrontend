@@ -47,6 +47,8 @@ export interface ServerInfo {
       bytesOut: number;
       version: string;
     };
+    countConnectedClients: number;
+    countSessions: number;
     totalBytesIn: number;
     totalBytesOut: number;
   }
@@ -65,12 +67,17 @@ export interface ServerInfo {
   }
   
   export interface Certificate {
+    id: number;
+    vpnServerId: number;
     commonName: string;
+    certificateData: string;
+    issuedAt: string;
+    isRevoked: boolean;
     status: number;
     expiryDate: string;
     revokeDate?: string | null;
     serialNumber: string;
-  }
+  }  
   
   export interface CertificatesTableProps {
     certificates: Certificate[];

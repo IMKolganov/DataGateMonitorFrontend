@@ -11,7 +11,17 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const nextRunTimes = Object.values(serviceData).map((s) => s.nextRunTime).filter((t) => t !== "N/A");
+      const statuses = Object.values(serviceData).map((s) => s.status);
+      const isRunning = statuses.includes("Running");
+
+      if (isRunning) {
+        setTimeLeft(0);
+        return;
+      }
+
+      const nextRunTimes = Object.values(serviceData)
+        .map((s) => s.nextRunTime)
+        .filter((t) => t !== "N/A");
 
       if (nextRunTimes.length === 0) {
         setTimeLeft(null);

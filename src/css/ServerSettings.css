@@ -1,5 +1,5 @@
 .settings-container {
-  max-width: 800px;
+  max-width: auto;
   margin: 40px auto;
   background: linear-gradient(145deg, #161b22, #21262d);
   padding: 30px;

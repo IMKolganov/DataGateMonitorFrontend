@@ -128,16 +128,33 @@ export const deleteServer = async (id: number) => {
   return apiRequest<void>("delete", `/OpenVpnServers/DeleteServer/${id}`, );
 };
 
-export const fetchCertificates = async (vpnServerId: string, status?: string): Promise<Certificate[]> => {
+export const fetchCertificates = async (
+  vpnServerId: string,
+  status?: string
+): Promise<Certificate[]> => {
   const endpoint = status
     ? `/OpenVpnServerCerts/GetAllVpnServerCertificatesByStatus/${vpnServerId}`
     : `/OpenVpnServerCerts/GetAllVpnServerCertificates/${vpnServerId}`;
 
-  return apiRequest<Certificate[]>("get", endpoint, {
+  const response = await apiRequest<{
+    success: boolean;
+    message: string;
+    data: any[];
+  }>("get", endpoint, {
     params: status ? { certificateStatus: status } : {},
   });
-};
 
+  return response.data.map((raw) => {
+    const status = raw.status ?? (raw.isRevoked ? 1 : 0);
+    return {
+      ...raw,
+      status,
+      expiryDate: raw.expiryDate ?? null,
+      revokeDate: raw.revokeDate ?? null,
+      serialNumber: raw.serialNumber ?? "",
+    } as Certificate;
+  });
+};
 export const revokeCertificate = async (vpnServerId: string, commonName: string) => {
   return apiRequest<void>("post", `/OpenVpnServerCerts/RevokeServerCertificate`, {
     data: { vpnServerId, cnName: commonName },
@@ -168,10 +185,12 @@ export const fetchDatabasePath = async (): Promise<string> => {
   return apiRequest<string>("get", "/GeoIp/GetDatabasePath");
 };
 
-export const fetchOvpnFiles = async (vpnServerId: string): Promise<IssuedOvpnFile[]> => {
-  return apiRequest<IssuedOvpnFile[]>("get", "/OpenVpnFiles/GetAllOvpnFiles", {
-    params: { vpnServerId },
-  });
+export const fetchOvpnFiles = async (vpnServerId: string): Promise<any[]> => {
+  const response = await apiRequest<{ data: any[] }>(
+    "get",
+    `/OpenVpnFiles/GetAllOvpnFiles/${vpnServerId}`
+  );
+  return response.data;
 };
 
 export const addOvpnFile = async (vpnServerId: number, externalId: string, commonName: string, issuedTo: string = "openVpnClient") => {
