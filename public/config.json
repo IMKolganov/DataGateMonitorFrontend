@@ -1,6 +1,3 @@
 {
-    "apiBaseUrl": "http://localhost:5581/api",
-    "wsBaseUrl": "ws://localhost:5581",
-    "webSocketUrl": "ws://localhost:5581/api/OpenVpnServers/status-stream",
-    "defaultRefreshInterval": 60
-} 
+  "defaultRefreshInterval": 60
+}

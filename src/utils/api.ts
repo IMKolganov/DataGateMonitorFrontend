@@ -46,14 +46,19 @@ export const fetchConfig = async (): Promise<Config> => {
       const response = await fetch("/config.json");
       const config: Config = await response.json();
 
-      if (!config.apiBaseUrl || !config.wsBaseUrl) {
-        throw new Error("Invalid API or WebSocket base URL in config");
-      }
+      const origin = window.location.origin;
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const host = window.location.host;
 
-      API_BASE_URL = config.apiBaseUrl;
-      WS_BASE_URL = config.wsBaseUrl;
+      API_BASE_URL = `${origin}/api`;
+      WS_BASE_URL = `${protocol}//${host}`;
 
-      return config;
+      return {
+        ...config,
+        apiBaseUrl: API_BASE_URL,
+        wsBaseUrl: WS_BASE_URL,
+        webSocketUrl: `${WS_BASE_URL}/api/OpenVpnServers/status-stream`,
+      };
     } catch (error) {
       console.error("Failed to load config:", error);
       throw error;
