@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { fetchToken, setSecret, checkSystemStatus } from "../utils/api";
 import { FaDoorOpen } from "react-icons/fa";
 import "../css/Login.css";
+import { appVersion } from '../version';
 
 const Login = () => {
   const [clientId, setClientId] = useState("");
@@ -144,7 +145,7 @@ const Login = () => {
         </div>
 
         <div className="footer">
-          <p>© 2024 OpenVPN Gate Monitor</p>
+          <p>© 2024 OpenVPN Gate Monitor v. {appVersion}</p>
         </div>
       </div>
     </div>
