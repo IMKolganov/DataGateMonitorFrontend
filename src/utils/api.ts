@@ -56,8 +56,6 @@ export const fetchConfig = async (): Promise<Config> => {
       return {
         ...config,
         apiBaseUrl: API_BASE_URL,
-        wsBaseUrl: WS_BASE_URL,
-        webSocketUrl: `${WS_BASE_URL}/api/OpenVpnServers/status-stream`,
       };
     } catch (error) {
       console.error("Failed to load config:", error);
@@ -84,7 +82,7 @@ export const getWebSocketUrl = async (vpnServerId: string): Promise<string> => {
     throw new Error("User is not authenticated");
   }
 
-  return `${WS_BASE_URL}/api/openvpn/ws/${vpnServerId}?access_token=${encodeURIComponent(token)}`;
+  return `${WS_BASE_URL}/openvpn/ws/${vpnServerId}?access_token=${encodeURIComponent(token)}`;
 };
 
 export const getWebSocketUrlForBackgroundService = async (): Promise<string> => {
@@ -97,7 +95,7 @@ export const getWebSocketUrlForBackgroundService = async (): Promise<string> => 
     throw new Error("User is not authenticated");
   }
 
-  return `${WS_BASE_URL}/api/OpenVpnServers/status-stream?access_token=${encodeURIComponent(token)}`;
+  return `${WS_BASE_URL}/OpenVpnServers/status-stream?access_token=${encodeURIComponent(token)}`;
 };
 
 export const runServiceNow = async (): Promise<void> => {
@@ -271,10 +269,10 @@ export const saveServer = async (serverData: any, isEditing: boolean) => {
   });
 };
 
-export const getOvpnFileConfig = async (serverId: string | number) => {
-  if (!serverId) throw new Error("Server ID is required");
+export const getOvpnFileConfig = async (VpnServerId: string | number) => {
+  if (!VpnServerId) throw new Error("Server ID is required");
 
-  return apiRequest<any>("get", `/OpenVpnServerOvpnFileConfig/GetOvpnFileConfig/${serverId}`);
+  return apiRequest<any>("get", `/OpenVpnServerOvpnFileConfig/GetOvpnFileConfig/${VpnServerId}`);
 };
 
 export const saveOvpnFileConfig = async (configData: any) => {

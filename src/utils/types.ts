@@ -54,9 +54,6 @@ export interface ServerInfo {
   }
   
   export interface Config {
-    apiBaseUrl: string;
-    wsBaseUrl: string;
-    webSocketUrl: string;
     defaultRefreshInterval: number;
   }
   export enum CertificateStatus {

@@ -7,11 +7,11 @@ import { FaPlus, FaCopy, FaArrowLeft } from "react-icons/fa";
 
 const OvpnFileConfigForm: React.FC = () => {
   const navigate = useNavigate();
-  const { serverId } = useParams<{ serverId?: string }>();
+  const { vpnServerId } = useParams<{ vpnServerId?: string }>();
 
   const [ovpnFileConfig, setServerConfig] = useState({
     Id: 0,
-    ServerId: serverId ? Number(serverId) : 0,
+    VpnServerId: vpnServerId ? Number(vpnServerId) : 0,
     VpnServerIp: "",
     VpnServerPort: 1194,
     ConfigTemplate: "",
@@ -27,12 +27,12 @@ const OvpnFileConfigForm: React.FC = () => {
   const [copyStatus, setCopyStatus] = useState<"Copy" | "Copied!">("Copy");
 
   useEffect(() => {
-    if (serverId) {
-      getOvpnFileConfig(serverId)
+    if (vpnServerId) {
+      getOvpnFileConfig(vpnServerId)
         .then((data) => {
           setServerConfig({
             Id: data.id,
-            ServerId: data.serverId || Number(serverId),
+            VpnServerId: data.vpnServerId || Number(vpnServerId),
             VpnServerIp: data.vpnServerIp || "",
             VpnServerPort: Number(data.vpnServerPort) || 1194,
             ConfigTemplate: data.configTemplate || "",
@@ -45,7 +45,7 @@ const OvpnFileConfigForm: React.FC = () => {
           setErrors((prev) => ({ ...prev, apiError: "Failed to load VPN server configuration." }));
         });
     }
-  }, [serverId]);
+  }, [vpnServerId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -90,12 +90,12 @@ const OvpnFileConfigForm: React.FC = () => {
     try {
       const configToSend = {
         ...ovpnFileConfig,
-        ServerId: ovpnFileConfig.ServerId || Number(serverId) || 0,
+        ServerId: ovpnFileConfig.VpnServerId || Number(vpnServerId) || 0,
       };
 
       await saveOvpnFileConfig(configToSend);
       setErrors({ VpnServerIp: "", VpnServerPort: "" });
-      navigate(`/server-details/${serverId}/certificates`);
+      navigate(`/server-details/${vpnServerId}/certificates`);
     } catch (error: any) {
       console.error("Error saving server config:", error);
       let errorMessage = "Failed to save VPN server configuration.";
@@ -114,7 +114,7 @@ const OvpnFileConfigForm: React.FC = () => {
   return (
     <div className="content-wrapper wide-table">
       <div className="server-form-container">
-        <h2 className="server-form-header">{serverId ? "Edit Ovpn File Config" : "Add New Ovpn File Config"}</h2>
+        <h2 className="server-form-header">{vpnServerId ? "Edit Ovpn File Config" : "Add New Ovpn File Config"}</h2>
         {errors.apiError && <p className="error-message">{errors.apiError}</p>}
         <form className="server-form" onSubmit={handleSubmit}>
           <div className="form-group">
@@ -166,13 +166,13 @@ const OvpnFileConfigForm: React.FC = () => {
           <div className="header-containe">
             <div className="header-bar">
               <div className="left-buttons">
-                <button className="btn secondary" onClick={() => navigate(`/server-details/${serverId}/certificates`)}>
+                <button className="btn secondary" onClick={() => navigate(`/server-details/${vpnServerId}/certificates`)}>
                   <FaArrowLeft className="icon" /> Back
                 </button>                
               </div>
               <div className="right-buttons">
               <button type="submit" className="submit-button">
-                  <FaPlus className="icon" /> {serverId ? "Update Config" : "Add Config"}
+                  <FaPlus className="icon" /> {vpnServerId ? "Update Config" : "Add Config"}
               </button>
               </div>
             </div>
