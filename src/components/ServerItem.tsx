@@ -141,14 +141,14 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
       </div>
 
       <div className="server-actions">
-        <button className="btn normal" onClick={() => onView(server.openVpnServerResponses.id)}>
+        <button className="btn secondary" onClick={() => onView(server.openVpnServerResponses.id)}>
           <FaEye className="icon" /> View
         </button>
-        <button className="btn warning" onClick={() => onEdit(server.openVpnServerResponses.id)}>
+        <button className="btn secondary" onClick={() => onEdit(server.openVpnServerResponses.id)}>
           <FaEdit className="icon" /> Edit
         </button>
         <button
-          className="btn danger"
+          className="btn secondary"
           onClick={() => onDelete(server.openVpnServerResponses.id)}
         >
           <FaTrash className="icon" /> Delete
