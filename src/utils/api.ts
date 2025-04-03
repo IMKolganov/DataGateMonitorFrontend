@@ -269,10 +269,15 @@ export const saveServer = async (serverData: any, isEditing: boolean) => {
   });
 };
 
-export const getOvpnFileConfig = async (VpnServerId: string | number) => {
+export const getOvpnFileConfig = async (VpnServerId: string | number): Promise<any> => {
   if (!VpnServerId) throw new Error("Server ID is required");
 
-  return apiRequest<any>("get", `/OpenVpnServerOvpnFileConfig/GetOvpnFileConfig/${VpnServerId}`);
+  const response = await apiRequest<{ data: any }>(
+    "get",
+    `/OpenVpnServerOvpnFileConfig/GetOvpnFileConfig/${VpnServerId}`
+  );
+
+  return response.data;
 };
 
 export const saveOvpnFileConfig = async (configData: any) => {

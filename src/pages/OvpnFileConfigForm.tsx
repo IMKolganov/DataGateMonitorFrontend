@@ -4,19 +4,19 @@ import "../css/ServerForm.css";
 import "../css/OvpnFileConfigForm.css";
 import { getOvpnFileConfig, saveOvpnFileConfig } from "../utils/api";
 import { FaPlus, FaCopy, FaArrowLeft } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const OvpnFileConfigForm: React.FC = () => {
   const navigate = useNavigate();
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
+  const parsedVpnServerId = Number(vpnServerId) || 0;
 
   const [ovpnFileConfig, setServerConfig] = useState({
     Id: 0,
-    VpnServerId: vpnServerId ? Number(vpnServerId) : 0,
+    VpnServerId: parsedVpnServerId,
     VpnServerIp: "",
     VpnServerPort: 1194,
     ConfigTemplate: "",
-    LastUpdate: new Date().toISOString(),
-    CreateDate: new Date().toISOString(),
   });
 
   const [errors, setErrors] = useState<{ VpnServerIp: string; VpnServerPort: string; apiError?: string }>({
@@ -27,30 +27,27 @@ const OvpnFileConfigForm: React.FC = () => {
   const [copyStatus, setCopyStatus] = useState<"Copy" | "Copied!">("Copy");
 
   useEffect(() => {
-    if (!vpnServerId) return;
-
-    console.log("vpnServerId from URL:", vpnServerId);
-
-    getOvpnFileConfig(vpnServerId)
+    if (!parsedVpnServerId) return;
+  
+      getOvpnFileConfig(parsedVpnServerId)
       .then((data) => {
-        console.log("Loaded config:", data);
-
+        console.log("Loaded config data:", data);
+    
         setServerConfig((prev) => ({
           ...prev,
-          Id: data.id,
-          VpnServerId: data.vpnServerId ?? Number(vpnServerId),
+          VpnServerId: data.vpnServerId ?? parsedVpnServerId,
           VpnServerIp: data.vpnServerIp ?? "",
           VpnServerPort: Number(data.vpnServerPort) || 1194,
           ConfigTemplate: data.configTemplate ?? "",
-          LastUpdate: data.lastUpdate ?? prev.LastUpdate,
-          CreateDate: data.createDate ?? prev.CreateDate,
+          Id: data.id ?? 0,
         }));
       })
       .catch((error) => {
-        console.error("Error loading server config data:", error);
+        toast.error("Error loading config:", error);
         setErrors((prev) => ({ ...prev, apiError: "Failed to load VPN server configuration." }));
       });
-  }, [vpnServerId]);
+  }, [parsedVpnServerId]);
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -68,7 +65,11 @@ const OvpnFileConfigForm: React.FC = () => {
       newErrors.VpnServerIp = "VPN Server IP is required.";
       isValid = false;
     }
-    if (!ovpnFileConfig.VpnServerPort || ovpnFileConfig.VpnServerPort < 1 || ovpnFileConfig.VpnServerPort > 65535) {
+    if (
+      !ovpnFileConfig.VpnServerPort ||
+      ovpnFileConfig.VpnServerPort < 1 ||
+      ovpnFileConfig.VpnServerPort > 65535
+    ) {
       newErrors.VpnServerPort = "VPN Server Port must be between 1 and 65535.";
       isValid = false;
     }
@@ -83,7 +84,7 @@ const OvpnFileConfigForm: React.FC = () => {
       setCopyStatus("Copied!");
       setTimeout(() => setCopyStatus("Copy"), 2000);
     } catch (err) {
-      console.error("Failed to copy text:", err);
+      toast.error("Failed to copy text");
       setCopyStatus("Copy");
     }
   };
@@ -91,38 +92,37 @@ const OvpnFileConfigForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-  
+
     try {
       const configToSend = {
         ...ovpnFileConfig,
-        Id: ovpnFileConfig.Id ?? 0,
-        VpnServerId: ovpnFileConfig.VpnServerId || Number(vpnServerId) || 0,
+        VpnServerId: ovpnFileConfig.VpnServerId || parsedVpnServerId,
       };
-  
-      console.log("Submitting config:", configToSend);
-  
+
       await saveOvpnFileConfig(configToSend);
       setErrors({ VpnServerIp: "", VpnServerPort: "" });
-      navigate(`/server-details/${vpnServerId}/certificates`);
+      navigate(`/server-details/${parsedVpnServerId}/certificates`);
     } catch (error: any) {
-      console.error("Error saving server config:", error);
       let errorMessage = "Failed to save VPN server configuration.";
-  
+
       if (error.response?.data) {
         errorMessage = error.response.data.Message || errorMessage;
         if (error.response.data.Detail) {
           errorMessage += ` Details: ${error.response.data.Detail}`;
         }
       }
-  
+      toast.error("Error saving config:", error);
+
       setErrors((prev) => ({ ...prev, apiError: errorMessage }));
     }
-  };  
+  };
 
   return (
     <div className="content-wrapper wide-table">
       <div className="server-form-container">
-        <h2 className="server-form-header">{vpnServerId ? "Edit Ovpn File Config" : "Add New Ovpn File Config"}</h2>
+        <h2 className="server-form-header">
+          {vpnServerId ? "Edit Ovpn File Config" : "Add New Ovpn File Config"}
+        </h2>
         {errors.apiError && <p className="error-message">{errors.apiError}</p>}
         <form className="server-form" onSubmit={handleSubmit}>
           <div className="form-group">
@@ -174,7 +174,7 @@ const OvpnFileConfigForm: React.FC = () => {
           <div className="header-containe">
             <div className="header-bar">
               <div className="left-buttons">
-                <button className="btn secondary" onClick={() => navigate(`/server-details/${vpnServerId}/certificates`)}>
+                <button type="button" className="btn secondary" onClick={() => navigate(`/server-details/${parsedVpnServerId}/certificates`)}>
                   <FaArrowLeft className="icon" /> Back
                 </button>
               </div>
