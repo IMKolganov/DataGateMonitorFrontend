@@ -51,7 +51,7 @@ export const fetchConfig = async (): Promise<Config> => {
       const host = window.location.host;
 
       API_BASE_URL = `${origin}/api`;
-      WS_BASE_URL = `${protocol}//${host}`;
+      WS_BASE_URL = `${protocol}//${host}/api`;
 
       return {
         ...config,
@@ -276,7 +276,7 @@ export const getOvpnFileConfig = async (VpnServerId: string | number) => {
 };
 
 export const saveOvpnFileConfig = async (configData: any) => {
-  if (!configData?.ServerId) throw new Error("VPN Server ID is required in configData");
+  if (!configData?.VpnServerId) throw new Error("VPN Server ID is required in configData");
 
   return apiRequest<any>("post", "/OpenVpnServerOvpnFileConfig/AddOrUpdateOvpnFileConfig", {
     headers: { "Content-Type": "application/json" },

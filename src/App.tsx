@@ -64,7 +64,7 @@ function App() {
                     <Route path="/server-details/:vpnServerId/certificates" element={<Certificates />} />
                     <Route path="/server-details/:vpnServerId/console" element={<WebConsole />} />
                     <Route path="/server-details/ovpn-file-config/add" element={<OvpnFileConfigForm />} />
-                    <Route path="/server-details/ovpn-file-config/:serverId" element={<OvpnFileConfigForm />} />
+                    <Route path="/server-details/ovpn-file-config/:vpnServerId" element={<OvpnFileConfigForm />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/contact" element={<Contact />} />
                   </Routes>
