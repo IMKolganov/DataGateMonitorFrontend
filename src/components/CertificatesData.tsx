@@ -53,15 +53,8 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
     try {
       const response = await fetchOvpnFiles(vpnServerId);
       const data = Array.isArray(response) ? response : [];
-
-      if (data.length === 0) {
-        setOvpnError({
-          message: "No OVPN files found.",
-          detail: "The server returned an empty list of OVPN files.",
-        });
-      } else {
-        setOvpnError(null);
-      }
+      
+      setOvpnError(null);
 
       setOvpnFiles(data);
     } catch (error: any) {

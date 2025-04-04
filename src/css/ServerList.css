@@ -68,11 +68,6 @@
     margin-bottom: 4px;
   }
   
-  .server-status {
-    font-size: 14px;
-    color: #8b949e;
-  }
-  
   .server-details {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -147,6 +142,7 @@
   }
   
   .server-status {
+    white-space: nowrap;
     display: inline-block;
     padding: 3px 6px;
     margin: 0px 6px 0px 6px;
