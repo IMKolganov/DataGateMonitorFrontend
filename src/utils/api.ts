@@ -209,9 +209,9 @@ export const addOvpnFile = async (vpnServerId: number, externalId: string, commo
   });
 };
 
-export const revokeOvpnFile = async (vpnServerId: string, externalId: string) => {
+export const revokeOvpnFile = async (vpnServerId: string, commonName: string) => {
   return apiRequest<void>("post", "/OpenVpnFiles/RevokeOvpnFile", {
-    data: { vpnServerId, externalId },
+    data: { vpnServerId, commonName },
   });
 };
 
