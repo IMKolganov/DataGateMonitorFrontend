@@ -28,6 +28,7 @@ const OvpnFilesTable: React.FC<{
     try {
       await revokeOvpnFile(vpnServerId, commonName);
       onRevoke();
+      toast.success("OVPN file has been successfully revoked.");
     } catch (error) {
       console.error("Failed to revoke OVPN file", error);
       toast.error("Error revoking OVPN file.");
@@ -90,9 +91,11 @@ const OvpnFilesTable: React.FC<{
       width: 200,
       renderCell: (params) => (
         <div className="action-container">
-          <button className="btn danger" onClick={() => handleRevoke(params.row.commonName)}>
-            Revoke
-          </button>
+          {params.row.isRevoked === "✅ Active" && (
+            <button className="btn danger" onClick={() => handleRevoke(params.row.commonName)}>
+              Revoke
+            </button>
+          )}
           <button className="btn secondary" onClick={() => handleDownload(params.row.id)}>
             <FaDownload /> Download
           </button>
