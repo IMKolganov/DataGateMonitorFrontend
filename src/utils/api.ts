@@ -158,15 +158,22 @@ export const fetchCertificates = async (
     } as Certificate;
   });
 };
+
 export const revokeCertificate = async (vpnServerId: string, commonName: string) => {
   return apiRequest<void>("post", `/OpenVpnServerCerts/RevokeServerCertificate`, {
-    data: { vpnServerId, cnName: commonName },
+    data: {
+      vpnServerId,
+      commonName,
+    },
   });
 };
 
 export const addCertificate = async (vpnServerId: string, commonName: string) => {
-  return apiRequest<void>("get", `/OpenVpnServerCerts/AddServerCertificate/${vpnServerId}`, {
-    params: { cnName: commonName },
+  return apiRequest<void>("post", `/OpenVpnServerCerts/AddServerCertificate`, {
+    data: {
+      vpnServerId,
+      commonName,
+    },
   });
 };
 
