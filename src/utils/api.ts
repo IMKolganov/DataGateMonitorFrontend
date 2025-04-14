@@ -8,12 +8,14 @@ let configPromise: Promise<Config> | null = null;
 const apiRequest = async <T>(
   method: "get" | "post" | "put" | "delete",
   url: string,
-  config: AxiosRequestConfig = {}
+  config: AxiosRequestConfig = {},
+  skipAuth: boolean = false
 ): Promise<T> => {
   await ensureApiBaseUrl();
 
   const token = localStorage.getItem("token");
-  if (!token) {
+
+  if (!token && !skipAuth) {
     logout();
     throw new Error("User is not authenticated");
   }
@@ -25,13 +27,13 @@ const apiRequest = async <T>(
       ...config,
       headers: {
         ...config.headers,
-        Authorization: `Bearer ${token}`,
+        ...(skipAuth ? {} : { Authorization: `Bearer ${token}` }),
       },
     });
 
     return config.responseType === "blob" ? (response as any) : response.data;
   } catch (error: any) {
-    if (error.response?.status === 401) {
+    if (!skipAuth && error.response?.status === 401) {
       logout();
     }
     throw error;
@@ -221,13 +223,17 @@ export const getAllApplications = async () => {
 };
 
 export const registerApplication = async (name: string) => {
-  return apiRequest<any>("post", "/applications/RegisterApplication", {
+  const response = await apiRequest<any>("post", "/applications/RegisterApplication", {
     data: { name },
   });
+
+  return response.data;
 };
 
 export const revokeApplication = async (clientId: string) => {
-  return apiRequest<any>("post", `/applications/RevokeApplication/${clientId}`);
+  return apiRequest<any>("post", `/applications/RevokeApplication`, {
+    data: { clientId },
+  });
 };
 
 export const downloadOvpnFile = async (issuedOvpnFileId: number, vpnServerId: string) => {
@@ -326,50 +332,29 @@ export const updateGeoLiteDatabase = async (): Promise<any> => {
 };
 
 export const fetchToken = async (clientId: string, clientSecret: string): Promise<string> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
+  const response = await apiRequest<any>("post", "/Auth/token", {
+    data: { clientId, clientSecret },
+  }, true);
 
-  try {
-    const response = await axios.post(`${API_BASE_URL}/Auth/token`, {
-      clientId,
-      clientSecret,
-    });
-
-    return response.data.token;
-  } catch (error: any) {
-    if (error.response && error.response.status === 404) {
-      throw new Error("System application not found");
-    }
-    throw error;
-  }
+  return response.token;
 };
 
 export const setSecret = async (clientId: string, clientSecret: string): Promise<void> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-
   try {
-    await axios.post(`${API_BASE_URL}/Auth/set-system-secret`, { clientId, clientSecret });
+    await apiRequest<void>("post", "/Auth/set-system-secret", {
+      data: { clientId, clientSecret },
+    }, true);
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
+    if (error.response?.status === 400) {
       throw new Error("System application is already set");
     }
     throw error;
   }
 };
 
-export const checkSystemStatus = async (): Promise<boolean> => {
-  await ensureApiBaseUrl();
-  if (!API_BASE_URL) throw new Error("API base URL is not set");
-
-  try {
-    const response = await axios.get(`${API_BASE_URL}/Auth/system-secret-status`);
-    return response.data.systemSet;
-  } catch (error) {
-    console.error("Failed to check system status:", error);
-    throw error;
-  }
-};
+export const checkSystemStatus = () =>
+  apiRequest<{ systemSet: boolean }>("get", "/Auth/system-secret-status", {}, true)
+    .then(res => res.systemSet);
 
 export const logout = () => {
   localStorage.removeItem("token");

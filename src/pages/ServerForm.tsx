@@ -17,6 +17,7 @@ const ServerForm: React.FC = () => {
     Login: "",
     Password: "",
     IsOnline: false,
+    isDefault: false,
     LastUpdate: new Date().toISOString(),
     CreateDate: new Date().toISOString(),
   });
@@ -39,6 +40,7 @@ const ServerForm: React.FC = () => {
             Login: data.login || "",
             Password: data.password || "",
             IsOnline: data.isOnline,
+            isDefault: data.isDefault,
             LastUpdate: data.lastUpdate || new Date().toISOString(),
             CreateDate: data.createDate || new Date().toISOString(),
           });
@@ -88,6 +90,14 @@ const ServerForm: React.FC = () => {
       console.error(serverId ? "Error updating server:" : "Error adding server:", error);
       toast.error(serverId ? "Failed to update server." : "Failed to add server.");
     }
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setServerData((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
   };  
 
   return (
@@ -159,6 +169,23 @@ const ServerForm: React.FC = () => {
               onChange={handleChange}
               placeholder="Enter password (optional)"
             />
+          </div>
+
+          <div className="checkbox-container">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                name="isDefault"
+                checked={serverData.isDefault}
+                onChange={handleCheckboxChange}
+              />
+              <div className="checkbox-content">
+                <span className="checkbox-title">Default Server</span>
+                <span className="checkbox-description">
+                  Mark this server as the default entry point for clients connecting to your OpenVPN network.
+                </span>
+              </div>
+            </label>
           </div>
 
           <div className="header-containe">
