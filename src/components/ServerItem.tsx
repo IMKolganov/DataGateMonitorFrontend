@@ -1,7 +1,7 @@
 import React from "react";
 import { OpenVpnServerData, ServiceStatus } from "../utils/types";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
-import { BsClock, BsHddNetwork, BsPerson } from "react-icons/bs";
+import { BsClock, BsHddNetwork, BsPerson, BsFillBookmarkStarFill } from "react-icons/bs";
 import { FaPlayCircle, FaPauseCircle, FaTimesCircle } from "react-icons/fa";
 import { RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer, IoMdPerson } from "react-icons/io";
@@ -122,6 +122,14 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
           <span className="detail-label">Count Sessions:</span>
           <span>{server.countSessions}</span>
         </div>
+
+
+        {server.openVpnServerResponses.isDefault && (
+        <div className="detail-row">
+          <BsFillBookmarkStarFill className="detail-icon" />
+          <span className="detail-label">Default server</span>
+        </div>
+        )}
       </div>
 
       <div className="server-service">
