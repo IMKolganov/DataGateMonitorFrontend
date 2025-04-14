@@ -74,13 +74,15 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
       headerName: "Actions",
       width: 120,
       renderCell: (params) => (
-        <button
-          className="btn danger"
-          onClick={() => handleRevoke(params.row.clientId)}
-          disabled={loading || params.row.status === "Revoked ❌"}
-        >
-          <FaTrash className="icon" /> Revoke
-        </button>
+        <div className="action-container">
+          <button
+            className="btn danger"
+            onClick={() => handleRevoke(params.row.clientId)}
+            disabled={loading || params.row.status === "Revoked ❌"}
+          >
+            <FaTrash className="icon" /> Revoke
+          </button>
+        </div>
       ),
     },
   ];
