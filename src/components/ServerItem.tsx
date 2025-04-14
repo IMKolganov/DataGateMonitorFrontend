@@ -122,8 +122,6 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
           <span className="detail-label">Count Sessions:</span>
           <span>{server.countSessions}</span>
         </div>
-
-
         {server.openVpnServerResponses.isDefault && (
         <div className="detail-row">
           <BsFillBookmarkStarFill className="detail-icon" />
