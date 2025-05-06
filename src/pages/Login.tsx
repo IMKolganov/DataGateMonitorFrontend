@@ -19,16 +19,14 @@ const Login = () => {
       } catch (err: any) {
         console.error("System status check error:", err);
   
-        let detailedMessage = "Failed to check system status.";
+        let detailedMessage = "We couldn't connect to the server. Please make sure it's running.";
+  
         if (err.response) {
-          detailedMessage += ` Server responded with status ${err.response.status}: ${err.response.statusText}`;
-          if (err.response.data) {
-            detailedMessage += ` - ${JSON.stringify(err.response.data)}`;
-          }
+          detailedMessage += ` Server responded with status ${err.response.status} (${err.response.statusText}).`;
         } else if (err.request) {
-          detailedMessage += " No response received from server.";
+          detailedMessage += " The server did not respond.";
         } else if (err.message) {
-          detailedMessage += ` ${err.message}`;
+          detailedMessage += ` Error: ${err.message}`;
         }
   
         if (err.config?.url) {
@@ -36,7 +34,7 @@ const Login = () => {
             ? `${err.config.baseURL}${err.config.url}`
             : err.config.url;
   
-          detailedMessage += `<br/>Try opening ${fullUrl} in your browser.`;
+          detailedMessage += `<br/>You can also try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer" >${fullUrl}</a> in your browser.`;
         }
   
         setError(detailedMessage);
@@ -63,16 +61,17 @@ const Login = () => {
     } catch (err: any) {
       console.error("Login error:", err);
   
-      let detailedMessage = "Login failed.";
+      let detailedMessage = "We couldn't log you in. Please check your credentials and try again.";
+  
       if (err.response) {
-        detailedMessage += ` Server responded with status ${err.response.status}: ${err.response.statusText}`;
-        if (err.response.data) {
-          detailedMessage += ` - ${JSON.stringify(err.response.data)}`;
+        detailedMessage += ` Server responded with status ${err.response.status} (${err.response.statusText}).`;
+        if (err.response.data?.error) {
+          detailedMessage += ` Details: ${err.response.data.error}`;
         }
       } else if (err.request) {
-        detailedMessage += " No response received from server.";
+        detailedMessage += " The server did not respond.";
       } else if (err.message) {
-        detailedMessage += ` ${err.message}`;
+        detailedMessage += ` Error: ${err.message}`;
       }
   
       if (err.config?.url) {
@@ -80,7 +79,7 @@ const Login = () => {
           ? `${err.config.baseURL}${err.config.url}`
           : err.config.url;
   
-        detailedMessage += `<br/>Try opening ${fullUrl} in your browser.`;
+        detailedMessage += `<br/>You can also try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${fullUrl}</a> in your browser.`;
       }
   
       setError(detailedMessage);

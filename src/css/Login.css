@@ -83,3 +83,24 @@
     justify-content: flex-end;
     width: 100%;
   }
+
+  .error-message {
+    background-color: #24292e;
+    border: 1px solid #e74c3c;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    color: "#58a6ff"
+  }  
+  .error-message a {
+    color: #58a6ff; /* Красноватый, сочетается с ошибкой */
+    text-decoration: underline;
+    word-break: break-all; /* Чтобы длинные URL не ломали layout */
+    font-weight: 500;
+  }
+  
+  .error-message a:hover {
+    text-decoration: none;
+  }
+  
