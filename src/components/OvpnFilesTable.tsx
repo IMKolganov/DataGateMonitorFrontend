@@ -38,11 +38,11 @@ const OvpnFilesTable: React.FC<{
   const handleDownload = async (issuedOvpnFileId: number) => {
     try {
       await downloadOvpnFile(issuedOvpnFileId, vpnServerId);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Download failed:", error);
-      toast.error("Error downloading file.");
+      toast.error(error.message || "Error downloading file.");
     }
-  };
+  };  
 
   const filteredFiles = ovpnFiles.filter(file =>
     (file.commonName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) &&

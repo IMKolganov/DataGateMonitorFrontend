@@ -138,8 +138,8 @@ export const fetchCertificates = async (
   status?: string
 ): Promise<Certificate[]> => {
   const endpoint = status
-    ? `/OpenVpnServerCerts/GetAllVpnServerCertificatesByStatus/${vpnServerId}`
-    : `/OpenVpnServerCerts/GetAllVpnServerCertificates/${vpnServerId}`;
+    ? `/OpenVpnServerCerts/${vpnServerId}/GetAllVpnServerCertificatesByStatus`
+    : `/OpenVpnServerCerts/${vpnServerId}/GetAllCertificates`;
 
   const response = await apiRequest<{
     success: boolean;
@@ -162,7 +162,7 @@ export const fetchCertificates = async (
 };
 
 export const revokeCertificate = async (vpnServerId: string, commonName: string) => {
-  return apiRequest<void>("post", `/OpenVpnServerCerts/RevokeServerCertificate`, {
+  return apiRequest<void>("post", `/OpenVpnServerCerts/RevokeCertificate`, {
     data: {
       vpnServerId,
       commonName,
@@ -171,7 +171,7 @@ export const revokeCertificate = async (vpnServerId: string, commonName: string)
 };
 
 export const addCertificate = async (vpnServerId: string, commonName: string) => {
-  return apiRequest<void>("post", `/OpenVpnServerCerts/AddServerCertificate`, {
+  return apiRequest<void>("post", `/OpenVpnServerCerts/BuildCertificate`, {
     data: {
       vpnServerId,
       commonName,
@@ -239,32 +239,48 @@ export const revokeApplication = async (clientId: string) => {
 export const downloadOvpnFile = async (issuedOvpnFileId: number, vpnServerId: string) => {
   await ensureApiBaseUrl();
 
-  const response = await apiRequest<AxiosResponse<Blob>>(
-    "get",
-    `/OpenVpnFiles/DownloadOvpnFile/${issuedOvpnFileId}/${vpnServerId}`,
-    {
-      responseType: "blob",
-    }
-  );
+  try {
+    const response = await apiRequest<any>(
+      "post",
+      `/OpenVpnFiles/DownloadOvpnFile`,
+      {
+        data: {
+          issuedOvpnFileId,
+          vpnServerId,
+        }
+      }
+    );
 
-  const contentDisposition = response.headers["content-disposition"];
-  let filename = `client-${issuedOvpnFileId}.ovpn`;
+    const apiData = response;
 
-  if (contentDisposition) {
-    const match = contentDisposition.match(/filename\*?=['"]?(?:UTF-8'')?([^;"']+)/);
-    if (match && match[1]) {
-      filename = decodeURIComponent(match[1]);
+    if (!apiData.success) {
+      throw new Error(apiData.message || "Unknown server error");
     }
+
+    const { fileName, content } = apiData.data;
+
+    if (!content) {
+      throw new Error("File content is empty.");
+    }
+
+    const binaryString = atob(content);
+    const byteArray = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      byteArray[i] = binaryString.charCodeAt(i);
+    }
+
+    const blob = new Blob([byteArray], { type: "application/x-openvpn-profile" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", fileName || `client-${issuedOvpnFileId}.ovpn`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error: any) {
+    const message = error?.response?.data?.message || error.message || "Unknown error occurred";
+    throw new Error(`Download failed: ${message}`);
   }
-
-  const blob = new Blob([response.data], { type: "application/x-openvpn-profile" });
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", filename);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
 };
 
 export const getServer = async (serverId: string): Promise<any> => {
