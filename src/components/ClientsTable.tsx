@@ -27,6 +27,10 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
   const rows = clients.map((client, index) => ({
     id: client.id || index + 1,
     commonName: client.commonName,
+    externalId: client.externalId,
+    tgUsername: client.tgUsername,
+    tgFirstName: client.tgFirstName,
+    tgLastName: client.tgLastName,
     remoteIp: client.remoteIp,
     localIp: client.localIp,
     bytesReceived: formatBytes(client.bytesReceived),
@@ -38,12 +42,16 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "commonName", headerName: "Common Name", flex: 1 },
-    { field: "remoteIp", headerName: "Remote Address", flex: 1 },
-    { field: "localIp", headerName: "Local Address", flex: 1 },
-    { field: "bytesReceived", headerName: "Bytes Received", flex: 1 },
-    { field: "bytesSent", headerName: "Bytes Sent", flex: 1 },
-    { field: "connectedSince", headerName: "Connected Since", flex: 1 },
-    { field: "country", headerName: "Country", flex: 1 },
+    { field: "externalId", headerName: "External Id", flex:  0.6 },
+    { field: "tgUsername", headerName: "Telegram Username", flex:  0.6 },
+    { field: "tgFirstName", headerName: "Telegram FirstName", flex:  0.6 },
+    { field: "tgLastName", headerName: "Telegram LastName", flex:  0.6 },
+    { field: "remoteIp", headerName: "Remote Address", flex: 0.6 },
+    { field: "localIp", headerName: "Local Address", flex: 0.6 },
+    { field: "bytesReceived", headerName: "Bytes Received", flex: 0.6 },
+    { field: "bytesSent", headerName: "Bytes Sent", flex: 0.6 },
+    { field: "connectedSince", headerName: "Connected Since", flex: 0.7 },
+    { field: "country", headerName: "Country", flex: 0.6 },
   ];
 
   return (

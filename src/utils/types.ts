@@ -16,6 +16,10 @@ export interface ServerInfo {
     username: string;
     sessionId: string;
     commonName: string;
+    externalId: string,
+    tgUsername: string,
+    tgFirstName: string,
+    tgLastName: string,
     remoteIp: string;
     localIp: string;
     bytesReceived: number;
