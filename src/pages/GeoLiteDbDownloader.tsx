@@ -4,11 +4,17 @@ import { updateGeoLiteDatabase, getGeoLiteDatabaseVersion, getGeoLiteHubConnecti
 import * as signalR from "@microsoft/signalr";
 
 export function GeoLiteDbDownloader() {
-  const [progress, setProgress] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
   const [version, setVersion] = useState<string>("Unknown");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Progress info per step
+  const [currentStepTitle, setCurrentStepTitle] = useState<string | null>(null);
+  const [currentStepNumber, setCurrentStepNumber] = useState<number | null>(null);
+  const [totalSteps, setTotalSteps] = useState<number | null>(null);
+  const [stepProgress, setStepProgress] = useState<number | null>(null);
+
   const connectionRef = useRef<signalR.HubConnection | null>(null);
 
   useEffect(() => {
@@ -24,8 +30,16 @@ export function GeoLiteDbDownloader() {
         const connection = await getGeoLiteHubConnection();
         connectionRef.current = connection;
 
-        connection.on("GeoLiteDownloadProgress", (percent: number) => {
-          setProgress(percent);
+        connection.on("GeoLiteStepProgress", (data: {
+          step: number;
+          totalSteps: number;
+          title: string;
+          progress: number;
+        }) => {
+          setCurrentStepNumber(data.step);
+          setTotalSteps(data.totalSteps);
+          setCurrentStepTitle(data.title);
+          setStepProgress(data.progress);
         });
 
         await connection.start();
@@ -43,12 +57,17 @@ export function GeoLiteDbDownloader() {
 
   const handleUpdateGeoLite = async () => {
     try {
-      setProgress(0);
-      setLoading(true);
-      setSuccessMessage(null);
       setError(null);
+      setSuccessMessage(null);
+      setLoading(true);
+
+      setCurrentStepTitle(null);
+      setCurrentStepNumber(null);
+      setTotalSteps(null);
+      setStepProgress(0);
 
       await updateGeoLiteDatabase();
+
       const versionResponse = await getGeoLiteDatabaseVersion();
       setVersion(versionResponse.version);
       setSuccessMessage("GeoLite database successfully updated.");
@@ -69,11 +88,18 @@ export function GeoLiteDbDownloader() {
 
       <p>Current DB Version: {version}</p>
 
-      {progress !== null && (
-        <div className="progress-bar">
-          <div className="progress" style={{ width: `${progress}%` }}>
-            {progress.toFixed(0)}%
-          </div>
+      {currentStepNumber !== null && currentStepTitle && (
+        <div className="step-status">
+          <p>
+            Step {currentStepNumber}/{totalSteps}: {currentStepTitle}
+          </p>
+          {stepProgress !== null && (
+            <div className="progress-bar">
+              <div className="progress" style={{ width: `${stepProgress}%` }}>
+                {stepProgress.toFixed(0)}%
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -83,5 +109,3 @@ export function GeoLiteDbDownloader() {
     </div>
   );
 }
-
-export default GeoLiteDbDownloader;

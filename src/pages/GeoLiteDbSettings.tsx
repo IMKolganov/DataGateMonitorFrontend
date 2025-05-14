@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import "../css/Settings.css";
 import {
   getSetting,
@@ -19,44 +20,48 @@ export function GeoLiteDbSettings() {
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchSettings() {
-      try {
-        setInitialLoading(true);
-        setGeoIpDbPath(await getSetting("GeoIp_Db_Path").then(res => res?.value || ""));
-        setGeoIpDownloadUrl(await getSetting("GeoIp_Download_Url").then(res => res?.value || ""));
-        setGeoIpAccountId(await getSetting("GeoIp_Account_ID").then(res => res?.value || ""));
-        setGeoIpLicenseKey(await getSetting("GeoIp_License_Key").then(res => res?.value || ""));
-      } catch (err) {
-        console.error("Error loading GeoLite settings:", err);
-        setError("Failed to load settings.");
-      } finally {
-        setInitialLoading(false);
-      }
-
-      try {
-        const version = await getGeoLiteDatabaseVersion();
-      } catch (err) {
-        console.error("Error getting GeoLite version:", err);
-        setError("Failed to fetch GeoLite version.");
-      }
+  const fetchSettings = async () => {
+    try {
+      setInitialLoading(true);
+      setGeoIpDbPath(await getSetting("GeoIp_Db_Path").then(res => res?.value || ""));
+      setGeoIpDownloadUrl(await getSetting("GeoIp_Download_Url").then(res => res?.value || ""));
+      setGeoIpAccountId(await getSetting("GeoIp_Account_ID").then(res => res?.value || ""));
+      setGeoIpLicenseKey(await getSetting("GeoIp_License_Key").then(res => res?.value || ""));
+    } catch (err) {
+      console.error("Error loading GeoLite settings:", err);
+      setError("Failed to load settings.");
+    } finally {
+      setInitialLoading(false);
     }
 
+    try {
+      const version = await getGeoLiteDatabaseVersion();
+      // you may want to store/display this version if needed
+    } catch (err) {
+      console.error("Error getting GeoLite version:", err);
+      setError("Failed to fetch GeoLite version.");
+    }
+  };
+
+
+  useEffect(() => {
     fetchSettings();
   }, []);
 
   const handleSave = async (key: string, value: any, type: string) => {
     try {
       setLoading(true);
+
       await setSetting(key, type === "number" ? String(value) : value, type);
-      setSuccessMessage(`${key} successfully updated.`);
-      setError(null);
-      setErrorDetails(null);
+
+      toast.success(`${key} successfully updated.`);
+
+      await fetchSettings();
     } catch (err: any) {
       console.error(`Error saving ${key}:`, err);
-      setError(`Failed to save ${key}.`);
-      setErrorDetails(err.response?.data?.error || err.message);
-      setSuccessMessage(null);
+
+      const message = err.response?.data?.error || err.message || "Unknown error";
+      toast.error(`Failed to save ${key}: ${message}`);
     } finally {
       setLoading(false);
     }
@@ -75,14 +80,6 @@ export function GeoLiteDbSettings() {
     <div>
       <h2>GeoLite2 Settings</h2>
       <div style={{ borderTop: "1px solid #d1d5da" }}></div>
-      {successMessage && <p className="success-message">{successMessage}</p>}
-      {error && (
-        <p className="error-message">
-          {error}
-          <br />
-          Details: {errorDetails}
-        </p>
-      )}
 
       <div className="settings-group">
         <h4>GeoIP Database Path:</h4>
@@ -153,7 +150,8 @@ export function GeoLiteDbSettings() {
           </button>
         </div>
       </div>
-
+      <h2>GeoLite2 Downloader</h2>
+      <div style={{ borderTop: "1px solid #d1d5da" }}></div>
       <GeoLiteDbDownloader />
 
       <div className="db-info">

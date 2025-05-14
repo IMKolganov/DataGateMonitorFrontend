@@ -111,14 +111,11 @@ export const getGeoLiteHubConnection = async (): Promise<HubConnection> => {
 
   const token = localStorage.getItem("token");
   if (!token) {
-    console.warn("[getGeoLiteHubConnection] No token found");
     logout();
     throw new Error("User is not authenticated");
   }
 
   const url = `${window.location.origin}/api/hubs/geoLite`;
-  console.log(`[getGeoLiteHubConnection] Connecting to: ${url}`);
-  console.log(`[getGeoLiteHubConnection] Token: ${token.slice(0, 20)}...`);
 
   const connection = new HubConnectionBuilder()
     .withUrl(url, {
