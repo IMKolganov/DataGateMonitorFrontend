@@ -15,8 +15,8 @@ module.exports = function (app) {
     createProxyMiddleware({
       target,
       changeOrigin: true,
-      ws: true, // 👈 критично для WebSocket
-      logLevel: "debug", // 🔍 логируем
+      ws: true,
+      logLevel: "debug",
       onProxyReq: (proxyReq, req, res) => {
         proxyReq.setHeader("X-Forwarded-Host", req.headers.host || "localhost:5582");
         proxyReq.setHeader("X-Forwarded-Proto", req.protocol || "http");

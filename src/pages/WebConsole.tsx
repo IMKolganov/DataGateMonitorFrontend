@@ -97,18 +97,16 @@ export function WebConsole() {
   };
 
   return (
-    <div className="content-wrapper wide-table">
+    <div>
       <h2>Web console:</h2>
       <div className="header-bar">
         <div className="left-buttons">
-          <button className="btn secondary" onClick={() => navigate(`/server-details/${vpnServerId}`)}>
-            {FaArrowLeft({ className: "icon" })} Back
-          </button>
-        </div>
-        <div className="right-buttons">
           <button className="btn danger" onClick={clearConsole}>
             {FaTrash({ className: "icon" })} Clear Console
           </button>
+        </div>
+        <div className="right-buttons">
+
         </div>
       </div>
 

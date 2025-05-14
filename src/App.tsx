@@ -6,6 +6,7 @@ import Contact from "./pages/Contact";
 import Servers from "./pages/Servers";
 import ServerForm from "./pages/ServerForm";
 import ServerDetails from "./pages/ServerDetails";
+import GeneralServerDetails from "./pages/GeneralServerDetails";
 import Certificates from "./pages/Certificates";
 import ServerSettings from "./pages/ServerSettings";
 import WebConsole from "./pages/WebConsole";
@@ -59,12 +60,23 @@ function App() {
                     <Route path="/settings/applications" element={<ApplicationSettings />} />
                     <Route path="/servers/add" element={<ServerForm />} />
                     <Route path="/servers/edit/:serverId" element={<ServerForm />} />
-                    <Route path="/server-details/:id" element={<ServerDetails />} />
+
+
+
+                    <Route path="/server-details/:id" element={<ServerDetails />}>
+                      <Route index element={<GeneralServerDetails />} />
+                      <Route path="certificates" element={<Certificates />} />
+                      <Route path="console" element={<WebConsole />} />
+                      <Route path="settings" element={<ServerSettings />} />
+                    </Route>
+
+
+                    {/* <Route path="/server-details/:id" element={<ServerDetails />} />
                     <Route path="/server-details/:vpnServerId/settings" element={<ServerSettings />} />
                     <Route path="/server-details/:vpnServerId/certificates" element={<Certificates />} />
                     <Route path="/server-details/:vpnServerId/console" element={<WebConsole />} />
                     <Route path="/server-details/ovpn-file-config/add" element={<OvpnFileConfigForm />} />
-                    <Route path="/server-details/ovpn-file-config/:vpnServerId" element={<OvpnFileConfigForm />} />
+                    <Route path="/server-details/ovpn-file-config/:vpnServerId" element={<OvpnFileConfigForm />} /> */}
                     <Route path="/about" element={<About />} />
                     <Route path="/contact" element={<Contact />} />
                   </Routes>
