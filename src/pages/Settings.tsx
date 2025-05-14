@@ -41,13 +41,6 @@ export function Settings() {
         >
           GeoLite DB
         </NavLink>
-
-        <NavLink
-          to="/settings/signalr-test-page"
-          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-        >
-          SignalR Test Page
-        </NavLink>
       </div>
 
       <div className="tab-content">

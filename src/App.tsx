@@ -20,7 +20,6 @@ import "react-toastify/dist/ReactToastify.css";
 import "./css/ToastifyDark.css";
 
 import "./App.css";
-import SignalRTestPage from "./pages/SignalRTestPage";
 
 const isAuthenticated = () => !!localStorage.getItem("token");
 
@@ -54,7 +53,6 @@ function App() {
                       <Route path="general" element={<GeneralSettings />} />
                       <Route path="applications" element={<ApplicationSettings />} />
                       <Route path="geolitedb" element={<GeoLiteDbSettings />} />
-                      <Route path="signalr-test-page" element={<SignalRTestPage />} />
                     </Route>
 
 
