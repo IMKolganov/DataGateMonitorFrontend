@@ -1,10 +1,11 @@
 {
   "name": "open-vpn-gate-monitor-frontend",
-  "version": "0.1.1.9",
+  "version": "0.1.1.10",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@microsoft/signalr": "^8.0.7",
     "@mui/material": "^6.4.2",
     "@mui/x-data-grid": "^7.25.0",
     "@tanstack/react-table": "^8.20.6",
@@ -25,7 +26,7 @@
     "react-icons": "^5.4.0",
     "react-leaflet": "^4.2.1",
     "react-router-dom": "^7.1.4",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "react-toastify": "^11.0.5",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
