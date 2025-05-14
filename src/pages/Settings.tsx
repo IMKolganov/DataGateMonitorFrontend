@@ -16,31 +16,39 @@ export function Settings() {
         <div className="header-bar">
           <div className="left-buttons">
             <button className="btn secondary" onClick={() => navigate("/")}>
-              <FaArrowLeft className="icon" /> Back
+              {FaArrowLeft({ className: "icon" })} Back
             </button>
           </div>
         </div>
       </div>
 
-        <div className="tabs">
+      <div className="tabs">
         <NavLink
-            to="/settings/general"
-            className={({ isActive }) => isActive ? "tab active-tab" : "tab"}>
-            General
+          to="/settings/general"
+          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+        >
+          General
         </NavLink>
         <NavLink
-            to="/settings/applications"
-            className={({ isActive }) => isActive ? "tab active-tab" : "tab"}>
-            API Clients
+          to="/settings/applications"
+          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+        >
+          API Clients
         </NavLink>
         <NavLink
-            to="/settings/geolitedb"
-            className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-            >
-            GeoLite DB
+          to="/settings/geolitedb"
+          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+        >
+          GeoLite DB
         </NavLink>
-        </div>
 
+        <NavLink
+          to="/settings/signalr-test-page"
+          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+        >
+          SignalR Test Page
+        </NavLink>
+      </div>
 
       <div className="tab-content">
         <Outlet />

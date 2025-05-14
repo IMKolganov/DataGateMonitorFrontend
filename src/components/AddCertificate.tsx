@@ -51,7 +51,7 @@ const AddCertificate: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
         className="input"
       />
       <button className="btn primary" onClick={handleAddCertificate} disabled={loading}>
-        <FaPlus className="icon" />{loading ? "Adding..." : "Add Certificate"}
+        <span className="icon">{FaPlus({ className: "icon" })}</span>{loading ? "Adding..." : "Add Certificate"}
       </button>
 
       {message && (

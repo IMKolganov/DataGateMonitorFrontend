@@ -2,7 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../css/ServerDetails.css";
 
-import { FaSync, FaArrowLeft, FaKey, FaTerminal, FaCog } from "react-icons/fa";
+import {
+  FaSync,
+  FaArrowLeft,
+  FaKey,
+  FaTerminal,
+  FaCog
+} from "react-icons/fa";
 
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
@@ -84,16 +90,16 @@ export function ServerDetails() {
       <div className="header-bar">
         <div className="left-buttons">
           <button className="btn secondary" onClick={() => navigate("/")}>
-            <FaArrowLeft className="icon" /> Back
+            {FaArrowLeft({ className: "icon" })} Back
           </button>
           <button className="btn secondary" onClick={fetchServerData} disabled={loadingServer}>
-            <FaSync className={`icon ${loadingServer ? "icon-spin" : ""}`} /> Refresh
+            {FaSync({ className: `icon ${loadingServer ? "icon-spin" : ""}` })} Refresh
           </button>
           <button className="btn secondary" onClick={() => navigate(`/server-details/${id}/certificates`)}>
-            <FaKey className="icon" /> Manage Certificates
+            {FaKey({ className: "icon" })} Manage Certificates
           </button>
           <button className="btn secondary" onClick={() => navigate(`/server-details/${id}/console`)}>
-            <FaTerminal className="icon" /> OpenVPN Console
+            {FaTerminal({ className: "icon" })} OpenVPN Console
           </button>
           <label className="square-toggle">
             <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
@@ -103,7 +109,7 @@ export function ServerDetails() {
         </div>
         <div className="right-buttons">
           <button className="btn secondary settings-button" onClick={() => navigate(`/server-details/${id}/settings`)}>
-            <FaCog className="icon" /> Settings
+            {FaCog({ className: "icon" })} Settings
           </button>
         </div>
       </div>

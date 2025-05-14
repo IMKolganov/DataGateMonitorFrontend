@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchToken, setSecret, checkSystemStatus } from "../utils/api";
 import { FaDoorOpen } from "react-icons/fa";
 import "../css/Login.css";
@@ -18,9 +19,9 @@ const Login = () => {
         setSystemSet(isSystemSet);
       } catch (err: any) {
         console.error("System status check error:", err);
-  
+
         let detailedMessage = "We couldn't connect to the server. Please make sure it's running.";
-  
+
         if (err.response) {
           detailedMessage += ` Server responded with status ${err.response.status} (${err.response.statusText}).`;
         } else if (err.request) {
@@ -28,41 +29,41 @@ const Login = () => {
         } else if (err.message) {
           detailedMessage += ` Error: ${err.message}`;
         }
-  
+
         if (err.config?.url) {
           const fullUrl = err.config.baseURL
             ? `${err.config.baseURL}${err.config.url}`
             : err.config.url;
-  
+
           detailedMessage += `<br/>You can also try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer" >${fullUrl}</a> in your browser.`;
         }
-  
+
         setError(detailedMessage);
       }
     };
-  
+
     checkStatus();
-  }, []);  
+  }, []);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-  
+
     try {
       if (systemSet === false) {
         await setSecret(clientId, clientSecret);
         setSystemSet(true);
       }
-  
+
       const token = await fetchToken(clientId, clientSecret);
       localStorage.setItem("token", token);
       window.location.href = "/";
     } catch (err: any) {
       console.error("Login error:", err);
-  
+
       let detailedMessage = "We couldn't log you in. Please check your credentials and try again.";
-  
+
       if (err.response) {
         detailedMessage += ` Server responded with status ${err.response.status} (${err.response.statusText}).`;
         if (err.response.data?.error) {
@@ -73,20 +74,20 @@ const Login = () => {
       } else if (err.message) {
         detailedMessage += ` Error: ${err.message}`;
       }
-  
+
       if (err.config?.url) {
         const fullUrl = err.config.baseURL
           ? `${err.config.baseURL}${err.config.url}`
           : err.config.url;
-  
+
         detailedMessage += `<br/>You can also try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${fullUrl}</a> in your browser.`;
       }
-  
+
       setError(detailedMessage);
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   return (
     <div className="login-container">
@@ -94,11 +95,11 @@ const Login = () => {
         <div className="login">
           <h2>Sign in</h2>
           {error && (
-              <p
-                className="error-message"
-                dangerouslySetInnerHTML={{ __html: error }}
-              ></p>
-            )}
+            <p
+              className="error-message"
+              dangerouslySetInnerHTML={{ __html: error }}
+            ></p>
+          )}
 
           <form onSubmit={handleLogin}>
             <div className="login-item">
@@ -129,8 +130,7 @@ const Login = () => {
 
             <div className="login-item right">
               <button className="btn primary" type="submit" disabled={loading}>
-                <FaDoorOpen className="icon" />
-                {loading ? "Loading..." : "Sign in"}
+                {FaDoorOpen({ className: "icon" })} {loading ? "Loading..." : "Sign in"}
               </button>
             </div>
           </form>
@@ -138,8 +138,7 @@ const Login = () => {
 
         <div className="register-container">
           <p>
-            New to OpenVPN Gate Monitor?{" "}
-            <a href="/register">Create an account</a>
+            New to OpenVPN Gate Monitor? <a href="/register">Create an account</a>
           </p>
         </div>
 

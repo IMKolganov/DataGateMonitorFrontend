@@ -1,7 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { getAllApplications, registerApplication, fetchConfig } from "../utils/api";
+import React, { useState, useEffect } from "react";
 import { FaPlus, FaSync } from "react-icons/fa";
 import "../css/ApplicationSettings.css";
+import {
+  getAllApplications,
+  registerApplication,
+  fetchConfig
+} from "../utils/api";
 import ApplicationTable from "../components/ApplicationTable";
 
 interface Application {
@@ -86,7 +90,7 @@ export function ApplicationSettings() {
       <div className="header-bar">
         <div className="left-buttons">
           <button className="btn secondary" onClick={handleRefresh} disabled={refreshing}>
-            <FaSync className={`icon ${refreshing ? "icon-spin" : ""}`} /> Refresh
+            {FaSync({ className: `icon ${refreshing ? "icon-spin" : ""}` })} Refresh
           </button>
         </div>
       </div>
@@ -112,7 +116,7 @@ export function ApplicationSettings() {
               onClick={handleRegister}
               disabled={loading || !newAppName.trim()}
             >
-              <FaPlus className="icon" /> Register app
+              {FaPlus({ className: "icon" })} Register app
             </button>
           </div>
 

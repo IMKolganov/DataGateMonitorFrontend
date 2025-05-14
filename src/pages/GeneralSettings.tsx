@@ -93,7 +93,7 @@ export function GeneralSettings() {
           onClick={() => handleSave("OpenVPN_Polling_Interval", intervalValue, "int")}
           disabled={loading}
         >
-          <FaSave className="icon" /> Save
+          <span className="icon">{FaSave({ className: "icon" })}</span> Save
         </button>
       </div>
       <p className="settings-item-description">0 = disabled</p>

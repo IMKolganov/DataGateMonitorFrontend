@@ -83,10 +83,14 @@ const ServerList: React.FC = () => {
         <div className="header-bar">
           <div className="left-buttons">
             <button className="btn primary" onClick={() => navigate("/servers/add")}>
-              <FaPlus className="icon" /> Add Server
+              <span className="icon">{FaPlus({ className: "icon" })}</span> Add Server
             </button>
+
             <button className="btn secondary" onClick={loadServers} disabled={loading}>
-              <FaSyncAlt className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
+              <span className={`icon ${loading ? "icon-spin" : ""}`}>
+                {FaSyncAlt({ className: `icon ${loading ? "icon-spin" : ""}` })}
+              </span>
+              Refresh
             </button>
           </div>
         </div>

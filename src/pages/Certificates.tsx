@@ -17,10 +17,14 @@ const Certificates: React.FC = () => {
         <div className="header-bar">
           <div className="left-buttons">
             <button className="btn secondary" onClick={() => navigate(`/server-details/${vpnServerId}`)}>
-              <FaArrowLeft className="icon" /> Back
+              <span className="icon">{FaArrowLeft({ className: "icon" })}</span> Back
             </button>
+
             <button className="btn secondary" onClick={() => window.location.reload()} disabled={loadingAction}>
-              <FaSync className={`icon ${loadingAction ? "icon-spin" : ""}`} /> Refresh
+              <span className={`icon ${loadingAction ? "icon-spin" : ""}`}>
+                {FaSync({ className: `icon ${loadingAction ? "icon-spin" : ""}` })}
+              </span>
+              Refresh
             </button>
           </div>
         </div>

@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import "../css/Console.css";
-import { FaArrowRight, FaArrowLeft, FaTrash, FaInfoCircle } from "react-icons/fa";
+import {
+  FaArrowRight,
+  FaArrowLeft,
+  FaTrash,
+  FaInfoCircle
+} from "react-icons/fa";
 import { useParams, useNavigate } from "react-router-dom";
 import { getWebSocketUrl } from "../utils/api";
 import { saveHistoryToDB, loadHistoryFromDB, clearHistoryDB } from "../utils/consoleStorage";
@@ -97,12 +102,12 @@ export function WebConsole() {
       <div className="header-bar">
         <div className="left-buttons">
           <button className="btn secondary" onClick={() => navigate(`/server-details/${vpnServerId}`)}>
-            <FaArrowLeft className="icon" /> Back
+            {FaArrowLeft({ className: "icon" })} Back
           </button>
         </div>
         <div className="right-buttons">
           <button className="btn danger" onClick={clearConsole}>
-            <FaTrash className="icon" /> Clear Console
+            {FaTrash({ className: "icon" })} Clear Console
           </button>
         </div>
       </div>
@@ -124,13 +129,13 @@ export function WebConsole() {
             className="input"
           />
           <button className="btn primary" onClick={sendCommand}>
-            Send <FaArrowRight />
+            Send {FaArrowRight({ className: "icon" })}
           </button>
         </div>
       </div>
 
       <div className="console-info">
-        <h3><FaInfoCircle /> Important Information</h3>
+        <h3>{FaInfoCircle({ className: "icon" })} Important Information</h3>
         <p>
           This web console provides access to the <strong>OpenVPN Management Interface</strong>.
           Be careful when executing commands, as incorrect usage can affect VPN operations.
@@ -140,8 +145,12 @@ export function WebConsole() {
         </p>
         <ul>
           <li>
-            <a href="https://openvpn.net/community-resources/management-interface/" 
-              target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>
+            <a
+              href="https://openvpn.net/community-resources/management-interface/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#58a6ff" }}
+            >
               OpenVPN Management Interface Guide
             </a>
           </li>

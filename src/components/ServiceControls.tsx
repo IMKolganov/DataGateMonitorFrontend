@@ -71,7 +71,7 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
         <strong>Next Run:</strong> {timeLeft !== null ? `${timeLeft}s` : "N/A"}
       </p>
       <button className="btn primary" onClick={onRunNow}>
-        <FaPlay /> Sync All Now
+        {FaPlay({ className: "icon" })} Sync All Now
       </button>
       <p className="description">
         This service periodically queries the OpenVPN server to collect data about connected clients
