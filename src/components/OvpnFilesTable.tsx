@@ -4,36 +4,41 @@ import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
 import { IssuedOvpnFile } from "../utils/types";
 import { revokeOvpnFile, downloadOvpnFile } from "../utils/api";
-import { FaDownload } from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";  // Важно проверить типы импорта
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../utils/utils";
 
 const safeFormatDate = (input?: string | null): string => {
-  if (!input) return "—";
+  if (!input) return "";
   const date = new Date(input);
   return isNaN(date.getTime()) ? "Invalid date" : formatDateWithOffset(date);
 };
 
-const OvpnFilesTable: React.FC<{ 
-  ovpnFiles: IssuedOvpnFile[], 
-  vpnServerId: string, 
-  onRevoke: () => void, 
-  loading: boolean 
-}> = ({ ovpnFiles = [], vpnServerId, onRevoke, loading }) => {
+interface Props {
+  ovpnFiles: IssuedOvpnFile[];
+  vpnServerId: string;
+  onRevoke: () => void;
+  loading: boolean;
+}
+
+const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loading }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [issuedToFilter, setIssuedToFilter] = useState("");
 
-  const handleRevoke = useCallback(async (commonName: string) => {
-    if (!window.confirm(`Are you sure you want to revoke OVPN file ${commonName}?`)) return;
-    try {
-      await revokeOvpnFile(vpnServerId, commonName);
-      onRevoke();
-      toast.success("OVPN file has been successfully revoked.");
-    } catch (error) {
-      console.error("Failed to revoke OVPN file", error);
-      toast.error("Error revoking OVPN file.");
-    }
-  }, [vpnServerId, onRevoke]);
+  const handleRevoke = useCallback(
+    async (commonName: string) => {
+      if (!window.confirm(`Are you sure you want to revoke OVPN file ${commonName}?`)) return;
+      try {
+        await revokeOvpnFile(vpnServerId, commonName);
+        onRevoke();
+        toast.success("OVPN file has been successfully revoked.");
+      } catch (error) {
+        console.error("Failed to revoke OVPN file", error);
+        toast.error("Error revoking OVPN file.");
+      }
+    },
+    [vpnServerId, onRevoke]
+  );
 
   const handleDownload = async (issuedOvpnFileId: number) => {
     try {
@@ -42,25 +47,26 @@ const OvpnFilesTable: React.FC<{
       console.error("Download failed:", error);
       toast.error(error.message || "Error downloading file.");
     }
-  };  
+  };
 
-  const filteredFiles = ovpnFiles.filter(file =>
-    (file.commonName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) &&
-    (issuedToFilter === "" || (file.issuedTo?.toLowerCase() || "").includes(issuedToFilter.toLowerCase()))
+  const filteredFiles = ovpnFiles.filter(
+    (file) =>
+      (file.commonName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) &&
+      (issuedToFilter === "" || (file.issuedTo?.toLowerCase() || "").includes(issuedToFilter.toLowerCase()))
   );
 
   const rows = filteredFiles.map((file) => ({
-    id: file.id ?? "—",
-    externalId: file.externalId ?? "—",
-    commonName: file.commonName ?? "—",
-    fileName: file.fileName ?? "—",
-    filePath: file.filePath ?? "—",
+    id: file.id,
+    externalId: file.externalId || "",
+    commonName: file.commonName || "",
+    fileName: file.fileName || "",
+    filePath: file.filePath || "",
     issuedAt: safeFormatDate(file.issuedAt),
-    issuedTo: file.issuedTo ?? "—",
-    certFilePath: file.certFilePath ?? "—",
-    keyFilePath: file.keyFilePath ?? "—",
-    isRevoked: file.isRevoked ? "❌ Revoked" : "✅ Active",
-    message: file.message ?? "—",
+    issuedTo: file.issuedTo || "",
+    certFilePath: file.certFilePath || "",
+    keyFilePath: file.keyFilePath || "",
+    isRevoked: file.isRevoked,
+    message: file.message || "",
     lastUpdate: safeFormatDate(file.lastUpdate),
     createDate: safeFormatDate(file.createDate),
   }));
@@ -75,7 +81,12 @@ const OvpnFilesTable: React.FC<{
     { field: "issuedTo", headerName: "Issued To", flex: 1 },
     { field: "certFilePath", headerName: "Cert File Path", flex: 1 },
     { field: "keyFilePath", headerName: "Key File Path", flex: 1 },
-    { field: "isRevoked", headerName: "Status", flex: 1 },
+    {
+      field: "isRevoked",
+      headerName: "Status",
+      flex: 1,
+      renderCell: (params) => (params.value ? "❌ Revoked" : "✅ Active"),
+    },
     { field: "message", headerName: "Message", flex: 1 },
     { field: "lastUpdate", headerName: "Last Update", flex: 1 },
     { field: "createDate", headerName: "Created Date", flex: 1 },
@@ -83,15 +94,16 @@ const OvpnFilesTable: React.FC<{
       field: "actions",
       headerName: "Actions",
       width: 200,
+      sortable: false,
       renderCell: (params) => (
         <div className="action-container">
-          {params.row.isRevoked === "✅ Active" && (
+          {!params.row.isRevoked && (
             <button className="btn danger" onClick={() => handleRevoke(params.row.commonName)}>
               Revoke
             </button>
           )}
           <button className="btn secondary" onClick={() => handleDownload(params.row.id)}>
-            <FaDownload /> Download
+            {FaDownload({ className: "icon" })} Download
           </button>
         </div>
       ),
@@ -117,6 +129,7 @@ const OvpnFilesTable: React.FC<{
             className="input"
           />
         </div>
+
         <StyledDataGrid
           rows={rows}
           columns={columns}
