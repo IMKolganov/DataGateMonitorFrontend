@@ -33,7 +33,7 @@ export function Header() {
           <li><Link to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link></li>
           <li className="separator">|</li>
           <li><button className="btn secondary" onClick={logout}>
-            <FaDoorClosed className="icon" /> Logout
+            {FaDoorClosed({ className: "icon" })} Logout
           </button></li> 
         </ul>
       </nav>

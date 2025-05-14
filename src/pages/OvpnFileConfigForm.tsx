@@ -28,11 +28,9 @@ const OvpnFileConfigForm: React.FC = () => {
 
   useEffect(() => {
     if (!parsedVpnServerId) return;
-  
-      getOvpnFileConfig(parsedVpnServerId)
+
+    getOvpnFileConfig(parsedVpnServerId)
       .then((data) => {
-        console.log("Loaded config data:", data);
-    
         setServerConfig((prev) => ({
           ...prev,
           VpnServerId: data.vpnServerId ?? parsedVpnServerId,
@@ -47,7 +45,6 @@ const OvpnFileConfigForm: React.FC = () => {
         setErrors((prev) => ({ ...prev, apiError: "Failed to load VPN server configuration." }));
       });
   }, [parsedVpnServerId]);
-  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -104,7 +101,6 @@ const OvpnFileConfigForm: React.FC = () => {
       navigate(`/server-details/${parsedVpnServerId}/certificates`);
     } catch (error: any) {
       let errorMessage = "Failed to save VPN server configuration.";
-
       if (error.response?.data) {
         errorMessage = error.response.data.Message || errorMessage;
         if (error.response.data.Detail) {
@@ -112,7 +108,6 @@ const OvpnFileConfigForm: React.FC = () => {
         }
       }
       toast.error("Error saving config:", error);
-
       setErrors((prev) => ({ ...prev, apiError: errorMessage }));
     }
   };
@@ -158,7 +153,7 @@ const OvpnFileConfigForm: React.FC = () => {
               <div className="toolbar">
                 <span>Config Template</span>
                 <button className="copy-button" type="button" onClick={() => handleCopy(ovpnFileConfig.ConfigTemplate)}>
-                  <FaCopy /> {copyStatus}
+                  {FaCopy({})} {copyStatus}
                 </button>
               </div>
               <textarea
@@ -175,12 +170,12 @@ const OvpnFileConfigForm: React.FC = () => {
             <div className="header-bar">
               <div className="left-buttons">
                 <button type="button" className="btn secondary" onClick={() => navigate(`/server-details/${parsedVpnServerId}/certificates`)}>
-                  <FaArrowLeft className="icon" /> Back
+                  {FaArrowLeft({ className: "icon" })} Back
                 </button>
               </div>
               <div className="right-buttons">
                 <button type="submit" className="submit-button">
-                  <FaPlus className="icon" /> {vpnServerId ? "Update Config" : "Add Config"}
+                  {FaPlus({ className: "icon" })} {vpnServerId ? "Update Config" : "Add Config"}
                 </button>
               </div>
             </div>

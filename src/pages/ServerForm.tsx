@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 const ServerForm: React.FC = () => {
   const navigate = useNavigate();
   const { serverId } = useParams<{ serverId?: string }>();
-  
+
   const [serverData, setServerData] = useState({
     Id: serverId ? parseInt(serverId) : 0,
     ServerName: "",
@@ -81,7 +81,7 @@ const ServerForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-  
+
     try {
       await saveServer(serverData, !!serverId);
       toast.success(serverId ? "Server updated successfully!" : "Server added successfully!");
@@ -98,7 +98,7 @@ const ServerForm: React.FC = () => {
       ...prev,
       [name]: checked,
     }));
-  };  
+  };
 
   return (
     <div className="content-wrapper wide-table">
@@ -192,12 +192,12 @@ const ServerForm: React.FC = () => {
             <div className="header-bar">
               <div className="left-buttons">
                 <button type="button" className="btn secondary" onClick={() => navigate(`/`)}>
-                  <FaArrowLeft className="icon" /> Back
-                </button>                
+                  {FaArrowLeft({ className: "icon" })} Back
+                </button>
               </div>
               <div className="right-buttons">
                 <button type="submit" className="submit-button">
-                  <FaPlus className="icon" /> {serverId ? "Update Server" : "Add Server"}
+                  {FaPlus({ className: "icon" })} {serverId ? "Update Server" : "Add Server"}
                 </button>
               </div>
             </div>

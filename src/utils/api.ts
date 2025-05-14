@@ -1,5 +1,11 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { Config, Certificate, IssuedOvpnFile } from "./types";
+import {
+  HubConnectionBuilder,
+  LogLevel,
+  HttpTransportType,
+  HubConnection
+} from "@microsoft/signalr";
 
 let API_BASE_URL: string | null = null;
 let WS_BASE_URL: string | null = null;
@@ -99,6 +105,29 @@ export const getWebSocketUrlForBackgroundService = async (): Promise<string> => 
 
   return `${WS_BASE_URL}/OpenVpnServers/status-stream?access_token=${encodeURIComponent(token)}`;
 };
+
+export const getGeoLiteHubConnection = async (): Promise<HubConnection> => {
+  await ensureApiBaseUrl();
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    logout();
+    throw new Error("User is not authenticated");
+  }
+
+  const url = `${window.location.origin}/api/hubs/geoLite`;
+
+  const connection = new HubConnectionBuilder()
+    .withUrl(url, {
+      accessTokenFactory: () => token,
+      transport: HttpTransportType.WebSockets,
+    })
+    .withAutomaticReconnect()
+    .build();
+
+  return connection;
+};
+
 
 export const runServiceNow = async (): Promise<void> => {
   await apiRequest<void>("post", "/OpenVpnServers/run-now");
@@ -339,8 +368,9 @@ export const setSetting = async (key: string, value: string, type: string) => {
   return apiRequest("post", `/Settings/Set`, { params: { key, value, type } });
 };
 
-export const getGeoLiteDatabaseVersion = async (): Promise<any> => {
-  return apiRequest<any>("get", "/GeoLite/GetVersionDatabase");
+export const getGeoLiteDatabaseVersion = async (): Promise<{ version: string }> => {
+  const response = await apiRequest<{ version: string }>("get", "/GeoLite/GetVersionDatabase");
+  return response;
 };
 
 export const updateGeoLiteDatabase = async (): Promise<any> => {

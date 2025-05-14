@@ -61,7 +61,7 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <span style={{ fontSize: "12px" }}>{params.value}</span>
           <button onClick={() => handleCopy(params.value)} className="copy-btn">
-            <FaCopy />
+            {FaCopy({ className: "icon" })}
           </button>
           {copied === params.value && <span className="copied-text">✔ Copied!</span>}
         </div>
@@ -80,7 +80,7 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
             onClick={() => handleRevoke(params.row.clientId)}
             disabled={loading || params.row.status === "Revoked ❌"}
           >
-            <FaTrash className="icon" /> Revoke
+            {FaTrash({ className: "icon" })} Revoke
           </button>
         </div>
       ),

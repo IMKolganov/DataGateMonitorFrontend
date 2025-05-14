@@ -1,5 +1,5 @@
 {
-  "short_name": "Gate Monitor",
+  "short_name": "OpenVPN Gate Monitor",
   "name": "OpenVPN Gate Monitor",
   "icons": [
     {
@@ -20,6 +20,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#161b22",
-  "background_color": "#0d1117"
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
 }

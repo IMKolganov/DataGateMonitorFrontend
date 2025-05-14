@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaSave, FaArrowLeft } from "react-icons/fa";
-import { fetchServerSettings, updateServerSettings, fetchDatabasePath } from "../utils/api";
+import { fetchServerSettings, updateServerSettings } from "../utils/api";
 import { toast } from "react-toastify";
 
 import "../css/ServerSettings.css";
@@ -80,11 +80,11 @@ const ServerSettings: React.FC = () => {
       <div className="header-bar">
         <div className="left-buttons">
           <button className="btn secondary" onClick={() => navigate(`/server-details/${vpnServerId}`)}>
-            <FaArrowLeft className="icon" /> Back
+            {FaArrowLeft({ className: "icon" })} Back
           </button>
         </div>
       </div>
-  
+
       {error ? (
         <p className="error">{error}</p>
       ) : !settings ? (
@@ -115,14 +115,14 @@ const ServerSettings: React.FC = () => {
               ))}
             <div className="action-buttons">
               <button className="btn primary" onClick={handleSave} disabled={loading}>
-                <FaSave className="icon" /> Save
+                {FaSave({ className: "icon" })} Save
               </button>
             </div>
           </div>
         </>
       )}
     </div>
-  );  
+  );
 };
 
 export default ServerSettings;

@@ -1,8 +1,19 @@
 import React from "react";
 import { OpenVpnServerData, ServiceStatus } from "../utils/types";
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
-import { BsClock, BsHddNetwork, BsPerson, BsFillBookmarkStarFill } from "react-icons/bs";
-import { FaPlayCircle, FaPauseCircle, FaTimesCircle } from "react-icons/fa";
+import {
+  FaEye,
+  FaEdit,
+  FaTrash,
+  FaPlayCircle,
+  FaPauseCircle,
+  FaTimesCircle
+} from "react-icons/fa";
+import {
+  BsClock,
+  BsHddNetwork,
+  BsPerson,
+  BsFillBookmarkStarFill
+} from "react-icons/bs";
 import { RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer, IoMdPerson } from "react-icons/io";
 
@@ -40,7 +51,6 @@ const formatUtcDate = (utcDateString: string | null | undefined) => {
   }
 };
 
-
 const toHumanReadableSize = (bytes: number): string => {
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   let i = 0;
@@ -51,25 +61,31 @@ const toHumanReadableSize = (bytes: number): string => {
   return `${bytes.toFixed(2)} ${sizes[i]}`;
 };
 
-
-
 const getStatusLabel = (status: ServiceStatus) => {
   switch (status) {
     case ServiceStatus.Running:
       return (
-        <span className="status-indicator running"> <FaPlayCircle className="status-icon" />  Status Name: Running</span>
+        <span className="status-indicator running">
+          {FaPlayCircle({ className: "status-icon" })} Status Name: Running
+        </span>
       );
     case ServiceStatus.Idle:
       return (
-        <span className="status-indicator idle"> <FaPauseCircle className="status-icon" /> Status Name: Idle</span>
+        <span className="status-indicator idle">
+          {FaPauseCircle({ className: "status-icon" })} Status Name: Idle
+        </span>
       );
     case ServiceStatus.Error:
       return (
-        <span className="status-indicator error"> <FaTimesCircle className="status-icon" /> Status Name: Error</span>
+        <span className="status-indicator error">
+          {FaTimesCircle({ className: "status-icon" })} Status Name: Error
+        </span>
       );
     default:
       return (
-        <span className="status-indicator unknown"> <FaTimesCircle className="status-icon" /> Status Name: ❓ Unknown</span>
+        <span className="status-indicator unknown">
+          {FaTimesCircle({ className: "status-icon" })} Status Name: ❓ Unknown
+        </span>
       );
   }
 };
@@ -88,45 +104,47 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
 
       <div className="server-details">
         <div className="detail-row">
-          <BsClock className="detail-icon" />
+          {BsClock({ className: "detail-icon" })}
           <span className="detail-label">Uptime:</span>
           <span>{server.openVpnServerStatusLogResponse?.upSince ? new Date(server.openVpnServerStatusLogResponse.upSince).toLocaleString() : "N/A"}</span>
         </div>
         <div className="detail-row">
-          <RiHardDrive2Line className="detail-icon" />
+          {RiHardDrive2Line({ className: "detail-icon" })}
           <span className="detail-label">Version:</span>
           <span>{server.openVpnServerStatusLogResponse?.version || "Unknown"}</span>
         </div>
         <div className="detail-row">
-          <BsHddNetwork className="detail-icon" />
+          {BsHddNetwork({ className: "detail-icon" })}
           <span className="detail-label">Management:</span>
           <span>{server.openVpnServerResponses.managementIp}:{server.openVpnServerResponses.managementPort}</span>
         </div>
         <div className="detail-row">
-          <IoIosSpeedometer className="detail-icon" />
+          {IoIosSpeedometer({ className: "detail-icon" })}
           <span className="detail-label">Total Traffic IN:</span>
           <span>{toHumanReadableSize(server.totalBytesIn)}</span>
         </div>
         <div className="detail-row">
-          <IoIosSpeedometer className="detail-icon" />
+          {IoIosSpeedometer({ className: "detail-icon" })}
           <span className="detail-label">Total Traffic OUT:</span>
           <span>{toHumanReadableSize(server.totalBytesOut)}</span>
         </div>
         <div className="detail-row">
-          <IoMdPerson className="detail-icon" />
+          {IoMdPerson({ className: "detail-icon" })}
           <span className="detail-label">Count Connected Clients:</span>
           <span>{server.countConnectedClients}</span>
         </div>
         <div className="detail-row">
-          <BsPerson className="detail-icon" />
+          {BsPerson({ className: "detail-icon" })}
           <span className="detail-label">Count Sessions:</span>
           <span>{server.countSessions}</span>
         </div>
         {server.openVpnServerResponses.isDefault && (
-        <div className="detail-row">
-          <BsFillBookmarkStarFill className="detail-icon" />
-          <span className="detail-label">Default server</span>
-        </div>
+          <div className="detail-row">
+            <span className="detail-icon">
+              {BsFillBookmarkStarFill({ className: "detail-icon" })}
+            </span>
+            <span className="detail-label">Default server</span>
+          </div>
         )}
       </div>
 
@@ -135,7 +153,7 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
           {getStatusLabel(serviceStatus)}
         </div>
         <div className="detail-row">
-          <BsClock className="detail-icon" />
+          {BsClock({ className: "detail-icon" })}
           <span className="detail-label">Next Run Time:</span>
           <span>{formatUtcDate(nextRunTime)}</span>
         </div>
@@ -148,16 +166,16 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
 
       <div className="server-actions">
         <button className="btn secondary" onClick={() => onView(server.openVpnServerResponses.id)}>
-          <FaEye className="icon" /> View
+          {FaEye({ className: "icon" })} View
         </button>
         <button className="btn secondary" onClick={() => onEdit(server.openVpnServerResponses.id)}>
-          <FaEdit className="icon" /> Edit
+          {FaEdit({ className: "icon" })} Edit
         </button>
         <button
           className="btn secondary"
           onClick={() => onDelete(server.openVpnServerResponses.id)}
         >
-          <FaTrash className="icon" /> Delete
+          {FaTrash({ className: "icon" })} Delete
         </button>
       </div>
     </li>

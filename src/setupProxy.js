@@ -11,11 +11,16 @@ module.exports = function (app) {
   console.log(`[Proxy] ➜ Proxying '/api' to ${target}`);
 
   app.use(
-    '/api',
+    "/api",
     createProxyMiddleware({
       target,
       changeOrigin: true,
-      ws: true,
+      ws: true, // 👈 критично для WebSocket
+      logLevel: "debug", // 🔍 логируем
+      onProxyReq: (proxyReq, req, res) => {
+        proxyReq.setHeader("X-Forwarded-Host", req.headers.host || "localhost:5582");
+        proxyReq.setHeader("X-Forwarded-Proto", req.protocol || "http");
+      },
     })
   );
 };

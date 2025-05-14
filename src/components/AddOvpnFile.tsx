@@ -79,10 +79,10 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
         className="input"
       />
       <button className="btn primary" onClick={handleAddOvpnFile} disabled={loading}>
-        <FaPlus className="icon" />{loading ? "Adding..." : "Make new OVPN file"}
+        {FaPlus({ className: "icon" })}{loading ? "Adding..." : "Make new OVPN file"}
       </button>
       <button className="btn secondary" onClick={() => navigate(`/server-details/ovpn-file-config/${vpnServerId}`)}>
-        <FaCog className="icon" />
+        {FaCog({ className: "icon" })}
         {loading ? "Adding..." : "Change config OVPN file"}
       </button>
       {message && (
