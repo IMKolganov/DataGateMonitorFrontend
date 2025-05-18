@@ -8,7 +8,7 @@ export function ServerDetails() {
   const { id } = useParams<{ id: string }>();
 
   return (
-    <div className="content-wrapper wide-table">
+    <div>
       <h2>Server Details</h2>
 
       <div className="header-container">
@@ -23,23 +23,30 @@ export function ServerDetails() {
 
       <div className="tabs">
         <NavLink
-          to={`/server-details/${id}`}
+          to={`/servers/${id}`}
           end
           className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
         >
           General
         </NavLink>
         <NavLink
-          to={`/server-details/${id}/certificates`}
+          to={`/servers/${id}/certificates`}
           className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
         >
           Manage Certificates
         </NavLink>
         <NavLink
-          to={`/server-details/${id}/console`}
+          to={`/servers/${id}/console`}
           className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
         >
           Web console
+        </NavLink>
+
+        <NavLink
+          to={`/servers/${id}/empty-tab`}
+          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+        >
+          Empty tab
         </NavLink>
       </div>
 

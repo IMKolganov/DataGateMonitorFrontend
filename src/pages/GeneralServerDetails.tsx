@@ -4,27 +4,28 @@ import "../css/ServerDetails.css";
 
 import {
   FaSync,
-  FaArrowLeft,
-  FaKey,
-  FaTerminal,
   FaCog
 } from "react-icons/fa";
 
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
 import ServerDetailsInfo from "../components/ServerDetailsInfo";
-import { fetchServersWithStats, fetchConnectedClients, fetchHistoryClients } from "../utils/api";
+import {
+  fetchServersWithStats,
+  fetchConnectedClients,
+  fetchHistoryClients
+} from "../utils/api";
 
 export function GeneralServerDetails() {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const [isLive, setIsLive] = useState<boolean>(true);
+  const [isLive, setIsLive] = useState(true);
   const [serverInfo, setServerInfo] = useState<any>(null);
   const [loadingServer, setLoadingServer] = useState(false);
   const [loadingClients, setLoadingClients] = useState(false);
 
   const [clients, setClients] = useState<any[]>([]);
-  const [totalClients, setTotalClients] = useState<number>(0);
+  const [totalClients, setTotalClients] = useState(0);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -86,7 +87,7 @@ export function GeneralServerDetails() {
   };
 
   return (
-    <div>
+    <div style={{ width: "100%", minWidth: 0 }}>
       <div className="header-bar">
         <div className="left-buttons">
           <button className="btn secondary" onClick={fetchServerData} disabled={loadingServer}>
@@ -99,7 +100,10 @@ export function GeneralServerDetails() {
           </label>
         </div>
         <div className="right-buttons">
-          <button className="btn secondary settings-button" onClick={() => navigate(`/server-details/${id}/settings`)}>
+          <button
+            className="btn secondary settings-button"
+            onClick={() => navigate(`/server-details/${id}/settings`)}
+          >
             {FaCog({ className: "icon" })} Settings
           </button>
         </div>
@@ -116,15 +120,18 @@ export function GeneralServerDetails() {
 
       <h3>VPN Clients ({isLive ? "Connected" : "Historical"})</h3>
 
-      <ClientsTable
-        clients={clients}
-        totalClients={totalClients}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-        loading={loadingClients}
-      />
+      {/* ✅ фиксированная ширина контейнера */}
+      <div style={{ width: "100%", minWidth: 0 }}>
+        <ClientsTable
+          clients={clients}
+          totalClients={totalClients}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          loading={loadingClients}
+        />
+      </div>
 
       <h3>VPN Client Locations</h3>
       <VpnMap clients={clients} />

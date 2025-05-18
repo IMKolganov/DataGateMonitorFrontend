@@ -73,9 +73,10 @@ export function WebConsole() {
     };
   }, [vpnServerId]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+useEffect(() => {
+  if (messages.length === 0) return;
+  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [messages]);
 
   const sendCommand = () => {
     if (ws.current && command.trim() !== "") {

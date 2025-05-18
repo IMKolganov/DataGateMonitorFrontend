@@ -75,3 +75,12 @@ a {
     cursor: pointer;
     text-decoration: underline;
   }
+
+.console-container {
+  overflow: hidden;
+}
+
+.console-output {
+  max-height: 100%;
+  overflow-y: auto;
+}
