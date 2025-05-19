@@ -10,7 +10,7 @@ import Settings from "./pages/Settings";
 import ApplicationSettings from "./pages/ApplicationSettings";
 import GeneralTab from "./pages/GeneralServerDetails";
 import CertificatesTab from "./pages/Certificates";
-import ConsoleTab from "./pages/WebConsole";
+import WebConsole from "./pages/WebConsole";
 import EmptyTab from "./pages/EmptyTab";
 import Login from "./pages/Login";
 import { ToastContainer } from "react-toastify";
@@ -50,7 +50,7 @@ function App() {
                       <Route path=":id" element={<ServerDetails />}>
                         <Route index element={<GeneralTab />} />
                         <Route path="certificates" element={<CertificatesTab />} />
-                        <Route path="console" element={<ConsoleTab />} />
+                        <Route path="console" element={<WebConsole />} />
                         <Route path="empty-tab" element={<EmptyTab />} />
                       </Route>
                     </Route>

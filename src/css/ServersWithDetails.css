@@ -8,7 +8,7 @@
 
 .server-list-panel {
   width: 500px;
-  height: 100%;
+  height: 98%;
   overflow-y: auto;
   padding: 1rem;
   background-color: #161b22;
@@ -24,7 +24,7 @@
 }
 
 .toggle-panel {
-  width: 40px;
+  width: 43px;
   align-items: center;
   justify-content: center;
 }
@@ -34,4 +34,5 @@
   overflow-y: auto;
   padding: 1rem;
   background-color: #161b22;
+  width: 100%;
 }

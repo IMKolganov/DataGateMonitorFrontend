@@ -87,6 +87,11 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize })
           <span className="detail-label">Count sessions:</span>
           <span>{serverInfo.countSessions}</span>
         </div>
+        <div className="detail-row">
+          {BsPerson({ className: "detail-icon" })}
+          <span className="detail-label">API url:</span>
+          <span>{serverInfo.openVpnServerResponses.apiUrl}</span>
+        </div>
 
         {serverInfo.openVpnServerResponses.isDefault && (
           <div className="detail-row">
@@ -94,6 +99,7 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize })
             <span className="detail-label">Default server</span>
           </div>
         )}
+
       </div>
     </div>
   );

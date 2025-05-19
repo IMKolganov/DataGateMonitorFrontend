@@ -6,7 +6,7 @@ import { CertificateStatus } from "../utils/types";
 import "../css/Certificates.css";
 
 const Certificates: React.FC = () => {
-  const { vpnServerId } = useParams<{ vpnServerId: string }>();
+  const { id: vpnServerId } = useParams<{ id?: string }>();
   const [selectedStatus, setSelectedStatus] = useState<CertificateStatus | null>(null);
   const [loadingAction, setLoadingAction] = useState<boolean>(false);
   const navigate = useNavigate();

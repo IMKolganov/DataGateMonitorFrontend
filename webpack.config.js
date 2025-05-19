@@ -25,5 +25,10 @@ module.exports = {
         target: 'es2015'
       })
     ]
+  },
+  devServer: {
+    client: {
+      webSocketURL: false
+    }
   }
 };

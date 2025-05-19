@@ -11,7 +11,7 @@ import { getWebSocketUrl } from "../utils/api";
 import { saveHistoryToDB, loadHistoryFromDB, clearHistoryDB } from "../utils/consoleStorage";
 
 export function WebConsole() {
-  const { vpnServerId } = useParams<{ vpnServerId?: string }>();
+  const { id: vpnServerId } = useParams<{ id?: string }>();
   const [messages, setMessages] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const ws = useRef<WebSocket | null>(null);
