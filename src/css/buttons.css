@@ -1,0 +1,122 @@
+/* buttons.css */
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.1s;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+}
+
+.btn.primary {
+  background: #238636;
+  color: white;
+  border-color: #2ea043;
+}
+
+.btn.primary:hover {
+  background: #2ea043;
+  border-color: #2ea043;
+}
+
+.btn.secondary {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+}
+
+.btn.secondary:hover {
+  background: #30363d;
+  color: #c9d1d9;
+}
+
+.btn.normal {
+  background: #1f6feb;
+  color: #ffffff;
+  border: 1px solid #1f6feb;
+}
+
+.btn.normal:hover {
+  background: #1158c7;
+  border-color: #0d419d;
+}
+
+.btn.warning {
+  background: #f0b400;
+  color: #24292f;
+  border: 1px solid #f0b400;
+}
+
+.btn.warning:hover {
+  background: #cf9a00;
+  border-color: #a17a00;
+}
+
+
+.btn.danger {
+  background: #da3633;
+  color: white;
+  border-color: #f85149;
+}
+
+.btn.danger:hover {
+  background: #f85149;
+}
+
+.input-number {
+  width: 100px;
+  padding: 4px 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #c9d1d9;
+  background-color: #24292e;
+  border: 1px solid #d1d5da;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.input-number:focus {
+border-color: #0366d6;
+box-shadow: 0 0 4px rgba(3, 102, 214, 0.3);
+}
+
+.input:focus {
+  outline: none;
+  border-color: #0366d6;
+}
+
+.input-number:hover {
+  border-color: #959da5;
+}
+
+.input-number::-webkit-inner-spin-button,
+.input-number::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input-number:disabled {
+  background-color: #f6f8fa;
+  border-color: #d1d5da;
+  color: #959da5;
+  cursor: not-allowed;
+}
+/* buttons.css */

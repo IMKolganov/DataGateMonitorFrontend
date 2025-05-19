@@ -100,12 +100,12 @@ export function GeneralServerDetails() {
           </label>
         </div>
         <div className="right-buttons">
-          <button
+          {/* <button
             className="btn secondary settings-button"
             onClick={() => navigate(`/server-details/${id}/settings`)}
           >
             {FaCog({ className: "icon" })} Settings
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -120,7 +120,6 @@ export function GeneralServerDetails() {
 
       <h3>VPN Clients ({isLive ? "Connected" : "Historical"})</h3>
 
-      {/* ✅ фиксированная ширина контейнера */}
       <div style={{ width: "100%", minWidth: 0 }}>
         <ClientsTable
           clients={clients}

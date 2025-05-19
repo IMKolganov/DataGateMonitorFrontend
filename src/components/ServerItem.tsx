@@ -108,26 +108,7 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
           <span className="detail-label">Uptime:</span>
           <span>{server.openVpnServerStatusLogResponse?.upSince ? new Date(server.openVpnServerStatusLogResponse.upSince).toLocaleString() : "N/A"}</span>
         </div>
-        <div className="detail-row">
-          {RiHardDrive2Line({ className: "detail-icon" })}
-          <span className="detail-label">Version:</span>
-          <span>{server.openVpnServerStatusLogResponse?.version || "Unknown"}</span>
-        </div>
-        <div className="detail-row">
-          {BsHddNetwork({ className: "detail-icon" })}
-          <span className="detail-label">Management:</span>
-          <span>{server.openVpnServerResponses.managementIp}:{server.openVpnServerResponses.managementPort}</span>
-        </div>
-        <div className="detail-row">
-          {IoIosSpeedometer({ className: "detail-icon" })}
-          <span className="detail-label">Total Traffic IN:</span>
-          <span>{toHumanReadableSize(server.totalBytesIn)}</span>
-        </div>
-        <div className="detail-row">
-          {IoIosSpeedometer({ className: "detail-icon" })}
-          <span className="detail-label">Total Traffic OUT:</span>
-          <span>{toHumanReadableSize(server.totalBytesOut)}</span>
-        </div>
+
         <div className="detail-row">
           {IoMdPerson({ className: "detail-icon" })}
           <span className="detail-label">Count Connected Clients:</span>

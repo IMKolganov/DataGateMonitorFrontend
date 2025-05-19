@@ -1,18 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import ServerList from "../components/ServerList";
 import "../css/ServersWithDetails.css";
 
-export function ServersWithDetails() {
+function ServersWithDetails() {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <div className="servers-with-details-container">
-      <div className="server-list-panel">
-        <div className="header-bar">
-          <button className="btn primary">+ Add Server</button>
-          <button className="btn secondary">⟳ Refresh</button>
-        </div>
-        <h3>VPN Servers:</h3>
-        <ServerList />
+      <div className="server-list-panel toggle-panel">
+        <button
+          className="btn secondary"
+          onClick={() => setCollapsed(!collapsed)}
+        >
+          {collapsed ? "➡" : "⬅"}
+        </button>
+      </div>
+
+      <div className={`server-list-panel ${collapsed ? "collapsed" : ""}`}>
+        {!collapsed && <ServerList />}
       </div>
 
       <div className="server-details-panel">
@@ -21,4 +27,5 @@ export function ServersWithDetails() {
     </div>
   );
 }
+
 export default ServersWithDetails;
