@@ -18,6 +18,7 @@ const ServerForm: React.FC = () => {
     Password: "",
     IsOnline: false,
     isDefault: false,
+    ApiUrl: "",
     LastUpdate: new Date().toISOString(),
     CreateDate: new Date().toISOString(),
   });
@@ -41,6 +42,7 @@ const ServerForm: React.FC = () => {
             Password: data.password || "",
             IsOnline: data.isOnline,
             isDefault: data.isDefault,
+            ApiUrl: data.apiUrl || "",
             LastUpdate: data.lastUpdate || new Date().toISOString(),
             CreateDate: data.createDate || new Date().toISOString(),
           });
@@ -171,7 +173,7 @@ const ServerForm: React.FC = () => {
             />
           </div>
 
-          <div className="checkbox-container">
+          <div className="form-group checkbox-container">
             <label className="checkbox-label">
               <input
                 type="checkbox"
@@ -186,6 +188,18 @@ const ServerForm: React.FC = () => {
                 </span>
               </div>
             </label>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="ApiUrl">API url</label>
+            <input
+              type="text"
+              id="ApiUrl"
+              name="ApiUrl"
+              value={serverData.ApiUrl}
+              onChange={handleChange}
+              placeholder="Enter API url (optional)"
+            />
           </div>
 
           <div className="header-containe">

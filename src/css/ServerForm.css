@@ -32,6 +32,7 @@
   .server-form label {
     margin-bottom: 8px;
     font-weight: bold;
+    margin-left: 5px;
   }
   
   .server-form input:not([type="checkbox"]),

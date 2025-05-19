@@ -19,7 +19,7 @@ body, html {
 .main-content {
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 2px;
 }
 
 .content-wrapper {
@@ -27,7 +27,7 @@ body, html {
   padding: 30px;
   border-radius: 8px;
   width: 80%;
-
+  margin: 0 auto;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
   border: 1px solid #30363d;
 }
