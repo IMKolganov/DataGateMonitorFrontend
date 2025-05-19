@@ -5,6 +5,7 @@ import "./index.css";
 import "./css/buttons.css";
 import "./css/tab.css";
 import "./css/input.css";
+import "./css/scrollbars.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
