@@ -1,6 +1,6 @@
 {
   "name": "open-vpn-gate-monitor-frontend",
-  "version": "0.1.1.11",
+  "version": "0.1.1.13",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -32,12 +32,11 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "cross-env REACT_APP_VERSION=$npm_package_version react-scripts start",
+    "start": "cross-env REACT_APP_VERSION=$npm_package_version REACT_APP_PROXY_TARGET=http://localhost:5581 react-scripts start",
     "build": "cross-env REACT_APP_VERSION=$npm_package_version react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://localhost:5581",
   "eslintConfig": {
     "extends": [
       "react-app",

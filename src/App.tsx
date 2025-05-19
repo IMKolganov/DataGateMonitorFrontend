@@ -3,15 +3,15 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import { Header } from "./components/Header";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import Servers from "./pages/Servers";
+import ServersWithDetails from "./pages/ServersWithDetails";
 import ServerForm from "./pages/ServerForm";
 import ServerDetails from "./pages/ServerDetails";
-import Certificates from "./pages/Certificates";
-import ServerSettings from "./pages/ServerSettings";
-import WebConsole from "./pages/WebConsole";
 import Settings from "./pages/Settings";
 import ApplicationSettings from "./pages/ApplicationSettings";
-import OvpnFileConfigForm from "./pages/OvpnFileConfigForm";
+import GeneralTab from "./pages/GeneralServerDetails";
+import CertificatesTab from "./pages/Certificates";
+import ConsoleTab from "./pages/WebConsole";
+import EmptyTab from "./pages/EmptyTab";
 import Login from "./pages/Login";
 import { ToastContainer } from "react-toastify";
 import GeneralSettings from "./pages/GeneralSettings";
@@ -44,9 +44,16 @@ function App() {
                 <Header />
                 <main className="main-content">
                   <Routes>
-                    <Route path="/" element={<Servers />} />
-                    <Route path="/servers" element={<Servers />} />
+                    <Route path="/" element={<Navigate to="/servers" replace />} />
 
+                    <Route path="/servers" element={<ServersWithDetails />}>
+                      <Route path=":id" element={<ServerDetails />}>
+                        <Route index element={<GeneralTab />} />
+                        <Route path="certificates" element={<CertificatesTab />} />
+                        <Route path="console" element={<ConsoleTab />} />
+                        <Route path="empty-tab" element={<EmptyTab />} />
+                      </Route>
+                    </Route>
 
                     <Route path="/settings" element={<Settings />}>
                       <Route index element={<Navigate to="general" replace />} />
@@ -59,12 +66,6 @@ function App() {
                     <Route path="/settings/applications" element={<ApplicationSettings />} />
                     <Route path="/servers/add" element={<ServerForm />} />
                     <Route path="/servers/edit/:serverId" element={<ServerForm />} />
-                    <Route path="/server-details/:id" element={<ServerDetails />} />
-                    <Route path="/server-details/:vpnServerId/settings" element={<ServerSettings />} />
-                    <Route path="/server-details/:vpnServerId/certificates" element={<Certificates />} />
-                    <Route path="/server-details/:vpnServerId/console" element={<WebConsole />} />
-                    <Route path="/server-details/ovpn-file-config/add" element={<OvpnFileConfigForm />} />
-                    <Route path="/server-details/ovpn-file-config/:vpnServerId" element={<OvpnFileConfigForm />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/contact" element={<Contact />} />
                   </Routes>

@@ -112,7 +112,7 @@ const ServerList: React.FC = () => {
                 serviceStatus={server.serviceStatus}
                 errorMessage={server.errorMessage}
                 nextRunTime={server.nextRunTime}
-                onView={(id) => navigate(`/server-details/${id}`)}
+                onView={(id) => navigate(`/servers/${id}`)}
                 onEdit={(id) => navigate(`/servers/edit/${id}`)}
                 onDelete={handleDelete}
               />

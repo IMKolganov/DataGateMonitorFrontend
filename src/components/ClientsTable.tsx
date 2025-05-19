@@ -59,6 +59,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
       <div
         style={{
           width: "100%",
+          minWidth: 0,
           backgroundColor: "#0d1117",
           padding: "10px",
           borderRadius: "8px",
@@ -85,6 +86,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
         />
       </div>
     </CustomThemeProvider>
+
   );
 };
 

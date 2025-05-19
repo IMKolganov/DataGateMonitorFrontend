@@ -11,7 +11,7 @@ const Certificates: React.FC = () => {
   const [loadingAction, setLoadingAction] = useState<boolean>(false);
   const navigate = useNavigate();
   return (
-    <div className="content-wrapper wide-table">
+    <div>
       <h2>VPN Certificates & OVPN Files for Server {vpnServerId}</h2>
       <div className="header-containe">
         <div className="header-bar">
