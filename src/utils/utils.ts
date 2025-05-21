@@ -20,3 +20,6 @@ export const formatBytes = (bytes?: number): string => {
     const offsetSign = offsetMinutes > 0 ? "-" : "+";
     return `${date.toISOString().replace("T", " ").slice(0, -5)} ${offsetSign}${offsetHours}00`;
   };
+
+  export const cleanDate = (date: string | null): string | null =>
+  date === "0001-01-01T00:00:00" || date === null ? null : date;

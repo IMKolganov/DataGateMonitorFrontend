@@ -6,6 +6,8 @@ import {
   HttpTransportType,
   HubConnection
 } from "@microsoft/signalr";
+import { cleanDate } from "../utils/utils";
+
 
 let API_BASE_URL: string | null = null;
 let WS_BASE_URL: string | null = null;
@@ -170,21 +172,36 @@ export const fetchCertificates = async (
     ? `/OpenVpnServerCerts/${vpnServerId}/GetAllVpnServerCertificatesByStatus`
     : `/OpenVpnServerCerts/${vpnServerId}/GetAllCertificates`;
 
-  const response = await apiRequest<{
+  const apiResponse = await apiRequest<{
     success: boolean;
     message: string;
-    data: any[];
+    data: {
+      serverCertificates: any[];
+    };
   }>("get", endpoint, {
     params: status ? { certificateStatus: status } : {},
   });
 
-  return response.data.map((raw) => {
+  const certs = apiResponse.data?.serverCertificates;
+
+  if (!Array.isArray(certs)) {
+    console.error("serverCertificates is not an array:", certs);
+    return [];
+  }
+
+  return certs.map((raw) => {
     const status = raw.status ?? (raw.isRevoked ? 1 : 0);
+
+    const cleanRevokeDate =
+      raw.revokeDate === "0001-01-01T00:00:00" || raw.revokeDate === null
+        ? null
+        : raw.revokeDate;
+
     return {
       ...raw,
       status,
       expiryDate: raw.expiryDate ?? null,
-      revokeDate: raw.revokeDate ?? null,
+      revokeDate: cleanDate(raw.revokeDate),
       serialNumber: raw.serialNumber ?? "",
     } as Certificate;
   });
