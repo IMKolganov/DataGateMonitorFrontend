@@ -1,5 +1,6 @@
 import React from "react";
-import type { OpenVpnServerData, ServiceStatus } from "../utils/types";
+import { ServiceStatus } from "../utils/types";
+import type { OpenVpnServerData } from "../utils/types";
 import {
   FaEye,
   FaEdit,
@@ -10,12 +11,10 @@ import {
 } from "react-icons/fa";
 import {
   BsClock,
-  BsHddNetwork,
   BsPerson,
   BsFillBookmarkStarFill
 } from "react-icons/bs";
-import { RiHardDrive2Line } from "react-icons/ri";
-import { IoIosSpeedometer, IoMdPerson } from "react-icons/io";
+import { IoMdPerson } from "react-icons/io";
 
 interface Props {
   server: OpenVpnServerData;
@@ -85,7 +84,7 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
     <li className="server-item">
       <div className="server-header">
         <div className="server-info">
-          <strong className="server-name">{server.openVpnServerResponses.serverName}</strong>
+          <strong className="server-name">({vpnServerId}) {server.openVpnServerResponses.serverName}</strong>
         </div>
         <div className={`server-status ${server.openVpnServerResponses.isOnline ? "status-online" : "status-offline"}`}>
           {server.openVpnServerResponses.isOnline ? "✅ Online" : "❌ Offline"}

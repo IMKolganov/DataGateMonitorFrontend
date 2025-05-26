@@ -2,13 +2,21 @@ import React, { useEffect, useState, useCallback } from "react";
 import { fetchCertificates, fetchOvpnFiles } from "../utils/api";
 import CertificatesTable from "../components/CertificatesTable";
 import OvpnFilesTable from "../components/OvpnFilesTable";
-import type { Certificate, CertificateStatus } from "../utils/types";
+import type { Certificate } from "../utils/types";
+import { CertificateStatus } from "../utils/types";
 import AddOvpnFile from "../components/AddOvpnFile";
 import AddCertificate from "../components/AddCertificate";
 
 interface Props {
   vpnServerId: string;
 }
+
+const statusLabels: Record<CertificateStatus, string> = {
+  [CertificateStatus.Active]: "Active",
+  [CertificateStatus.Revoked]: "Revoked",
+  [CertificateStatus.Expired]: "Expired",
+  [CertificateStatus.Unknown]: "Unknown",
+};
 
 const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -53,9 +61,8 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
     try {
       const response = await fetchOvpnFiles(vpnServerId);
       const data = Array.isArray(response) ? response : [];
-      
-      setOvpnError(null);
 
+      setOvpnError(null);
       setOvpnFiles(data);
     } catch (error: any) {
       console.error("Error fetching OVPN files", error);
@@ -85,7 +92,11 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
   return (
     <>
       {ovpnError && (
-        <p className="error-message">{ovpnError.message}<br />{ovpnError.detail}</p>
+        <p className="error-message">
+          {ovpnError.message}
+          <br />
+          {ovpnError.detail}
+        </p>
       )}
 
       <h3>Issued OVPN Files</h3>
@@ -103,10 +114,34 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
       />
 
       {certError && (
-        <p className="error-message">{certError.message}<br />{certError.detail}</p>
+        <p className="error-message">
+          {certError.message}
+          <br />
+          {certError.detail}
+        </p>
       )}
 
       <h3>Certificates</h3>
+      <h5>Filter by Certificate Status</h5>
+      <div className="settings-item">
+        <select
+          className="input"
+          value={selectedStatus ?? ""}
+          onChange={(e) =>
+            setSelectedStatus(
+              e.target.value === "" ? null : Number(e.target.value) as CertificateStatus
+            )
+          }
+        >
+          <option value="">All</option>
+          {Object.entries(statusLabels).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <h5>Add New Certificate</h5>
       <p className="certificate-description">
         Enter the <strong>Common Name (CN)</strong> for the new certificate and click "Add Certificate".

@@ -13,9 +13,11 @@ export default defineConfig({
         target: 'http://localhost:5581',
         changeOrigin: true,
         secure: false,
-        // rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
+  },
+  preview: {
+    port: Number(process.env.VITE_PORT) || 5582,
   },
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
