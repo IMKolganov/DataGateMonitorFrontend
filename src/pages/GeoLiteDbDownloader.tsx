@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaDatabase } from "react-icons/fa";
 import { updateGeoLiteDatabase, getGeoLiteDatabaseVersion, getGeoLiteHubConnection } from "../utils/api";
 import * as signalR from "@microsoft/signalr";
@@ -64,7 +64,7 @@ export function GeoLiteDbDownloader() {
       } catch (err) {
         console.error("❌ SignalR connection error:", err);
       } finally {
-        setIsFetching(false); // ✅ закончили
+        setIsFetching(false);
       }
     };
 

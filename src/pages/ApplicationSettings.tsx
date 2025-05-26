@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FaPlus, FaSync } from "react-icons/fa";
 import "../css/ApplicationSettings.css";
 import {

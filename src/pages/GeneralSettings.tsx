@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FaSave } from "react-icons/fa";
 import "../css/Settings.css";
 import { getSetting, setSetting } from "../utils/api";

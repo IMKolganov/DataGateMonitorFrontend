@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from "react";
-import { GridColDef } from "@mui/x-data-grid";
+import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
-import { Certificate, CertificatesTableProps } from "../utils/types";
+import type { Certificate, CertificatesTableProps } from "../utils/types";
 import { revokeCertificate } from "../utils/api";
 import "../css/CertificatesTable.css";
 import { toast } from "react-toastify";

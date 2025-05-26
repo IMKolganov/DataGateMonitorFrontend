@@ -1,5 +1,5 @@
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 const githubDarkTheme = createTheme({
   palette: {

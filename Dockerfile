@@ -1,4 +1,4 @@
-# Step 1: Build React App
+# Step 1: Build Vite App
 FROM node:20 AS build
 
 # Set working directory
@@ -12,32 +12,30 @@ RUN npm ci
 # Copy the rest of the app
 COPY . .
 
-# Optimize memory for Raspberry Pi
+# Optimize memory for Raspberry Pi (optional)
 ENV NODE_OPTIONS="--max-old-space-size=1024"
 ENV GENERATE_SOURCEMAP=false
-ENV DISABLE_ESLINT_PLUGIN=true
-ENV REACT_APP_FAST_REFRESH=false
 
-# Build React app
+# Build the app
 RUN npm run build
 
-# Optional: remove node_modules and devDeps
+# Optional: remove node_modules and dev dependencies
 RUN rm -rf node_modules && npm ci --omit=dev
 
 # Step 2: Serve with Nginx
 FROM nginx:alpine
 
-# Copy built React app
-COPY --from=build /app/build /usr/share/nginx/html
+# Copy built app from Vite's output folder
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy Nginx config template and entrypoint
+# Copy nginx config and entrypoint
 COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
 COPY entrypoint.sh /entrypoint.sh
 
-# 🔧 Convert CRLF to LF just in case
+# Normalize line endings (in case on Windows)
 RUN sed -i 's/\r$//' /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 
-# Use custom entrypoint to render nginx config dynamically
+# Use entrypoint that renders nginx config from template
 ENTRYPOINT ["/entrypoint.sh"]

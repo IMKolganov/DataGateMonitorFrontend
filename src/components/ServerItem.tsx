@@ -1,5 +1,6 @@
 import React from "react";
-import { OpenVpnServerData, ServiceStatus } from "../utils/types";
+import { ServiceStatus } from "../utils/types";
+import type { OpenVpnServerData } from "../utils/types";
 import {
   FaEye,
   FaEdit,
@@ -10,12 +11,10 @@ import {
 } from "react-icons/fa";
 import {
   BsClock,
-  BsHddNetwork,
   BsPerson,
   BsFillBookmarkStarFill
 } from "react-icons/bs";
-import { RiHardDrive2Line } from "react-icons/ri";
-import { IoIosSpeedometer, IoMdPerson } from "react-icons/io";
+import { IoMdPerson } from "react-icons/io";
 
 interface Props {
   server: OpenVpnServerData;
@@ -49,16 +48,6 @@ const formatUtcDate = (utcDateString: string | null | undefined) => {
     console.error("Error formatting date:", error);
     return "Invalid Date";
   }
-};
-
-const toHumanReadableSize = (bytes: number): string => {
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  let i = 0;
-  while (bytes >= 1024 && i < sizes.length - 1) {
-    bytes /= 1024;
-    i++;
-  }
-  return `${bytes.toFixed(2)} ${sizes[i]}`;
 };
 
 const getStatusLabel = (status: ServiceStatus) => {
@@ -95,7 +84,7 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
     <li className="server-item">
       <div className="server-header">
         <div className="server-info">
-          <strong className="server-name">{server.openVpnServerResponses.serverName}</strong>
+          <strong className="server-name">({vpnServerId}) {server.openVpnServerResponses.serverName}</strong>
         </div>
         <div className={`server-status ${server.openVpnServerResponses.isOnline ? "status-online" : "status-offline"}`}>
           {server.openVpnServerResponses.isOnline ? "✅ Online" : "❌ Offline"}

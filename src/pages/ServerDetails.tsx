@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate, NavLink, Outlet, useParams } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import "../css/ServerDetails.css";

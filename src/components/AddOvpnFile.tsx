@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { addOvpnFile } from "../utils/api";
 import "../css/Certificates.css";
 import { FaPlus, FaCog } from "react-icons/fa";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   vpnServerId: string;

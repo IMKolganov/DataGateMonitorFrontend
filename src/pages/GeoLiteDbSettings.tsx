@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "../css/Settings.css";
 import {
@@ -7,7 +7,7 @@ import {
   getGeoLiteDatabaseVersion
 } from "../utils/api";
 import { FaSave } from "react-icons/fa";
-import { GeoLiteDbDownloader } from "./GeoLiteDbDownloader"; // <--- Импорт добавлен
+import { GeoLiteDbDownloader } from "./GeoLiteDbDownloader";
 
 export function GeoLiteDbSettings() {
   const [geoIpAccountId, setGeoIpAccountId] = useState("Fetching...");
@@ -16,9 +16,6 @@ export function GeoLiteDbSettings() {
   const [geoIpLicenseKey, setGeoIpLicenseKey] = useState("Fetching...");
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorDetails, setErrorDetails] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchSettings = async () => {
     try {
@@ -29,17 +26,17 @@ export function GeoLiteDbSettings() {
       setGeoIpLicenseKey(await getSetting("GeoIp_License_Key").then(res => res?.value || ""));
     } catch (err) {
       console.error("Error loading GeoLite settings:", err);
-      setError("Failed to load settings.");
+      toast.error("Failed to load settings.");
     } finally {
       setInitialLoading(false);
     }
 
     try {
-      const version = await getGeoLiteDatabaseVersion();
+      await getGeoLiteDatabaseVersion();
       // you may want to store/display this version if needed
     } catch (err) {
       console.error("Error getting GeoLite version:", err);
-      setError("Failed to fetch GeoLite version.");
+      toast.error("Failed to fetch GeoLite version.");
     }
   };
 

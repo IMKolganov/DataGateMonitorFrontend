@@ -1,12 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import "../css/Console.css";
 import {
   FaArrowRight,
-  FaArrowLeft,
   FaTrash,
   FaInfoCircle
 } from "react-icons/fa";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getWebSocketUrl } from "../utils/api";
 import { saveHistoryToDB, loadHistoryFromDB, clearHistoryDB } from "../utils/consoleStorage";
 
@@ -16,7 +15,6 @@ export function WebConsole() {
   const [command, setCommand] = useState("");
   const ws = useRef<WebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
   const isConnected = useRef(false);
 
   useEffect(() => {
