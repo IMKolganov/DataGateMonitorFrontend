@@ -8,8 +8,9 @@ import { toast } from "react-toastify";
 
 const OvpnFileConfigForm: React.FC = () => {
   const navigate = useNavigate();
-  const { vpnServerId } = useParams<{ vpnServerId?: string }>();
-  const parsedVpnServerId = Number(vpnServerId) || 0;
+  const { id } = useParams<{ id?: string }>();
+  const parsedVpnServerId = Number(id) || 0;
+
 
   const [ovpnFileConfig, setServerConfig] = useState({
     Id: 0,
@@ -113,11 +114,25 @@ const OvpnFileConfigForm: React.FC = () => {
   };
 
   return (
-    <div className="content-wrapper wide-table">
+    <div>
       <div className="server-form-container">
         <h2 className="server-form-header">
-          {vpnServerId ? "Edit Ovpn File Config" : "Add New Ovpn File Config"}
+          {id ? "Edit Ovpn File Config" : "Add New Ovpn File Config"}
         </h2>
+          <div className="header-containe">
+            <div className="header-bar">
+              <div className="left-buttons">
+                <button type="button" className="btn secondary" onClick={() => navigate(`/servers/${parsedVpnServerId}/certificates`)}>
+                  {FaArrowLeft({ className: "icon" })} Back
+                </button>
+              </div>
+              <div className="right-buttons">
+                <button type="submit" className="submit-button">
+                  {FaPlus({ className: "icon" })} {id ? "Update Config" : "Add Config"}
+                </button>
+              </div>
+            </div>
+          </div>
         {errors.apiError && <p className="error-message">{errors.apiError}</p>}
         <form className="server-form" onSubmit={handleSubmit}>
           <div className="form-group">
@@ -165,22 +180,62 @@ const OvpnFileConfigForm: React.FC = () => {
               />
             </div>
           </div>
-
-          <div className="header-containe">
-            <div className="header-bar">
-              <div className="left-buttons">
-                <button type="button" className="btn secondary" onClick={() => navigate(`/servers/${parsedVpnServerId}/certificates`)}>
-                  {FaArrowLeft({ className: "icon" })} Back
-                </button>
-              </div>
-              <div className="right-buttons">
-                <button type="submit" className="submit-button">
-                  {FaPlus({ className: "icon" })} {vpnServerId ? "Update Config" : "Add Config"}
-                </button>
-              </div>
-            </div>
-          </div>
         </form>
+<div className="form-hint-container">
+  <h4>What are these settings?</h4>
+  <p>
+    <strong>VPN Server IP</strong> — the public IP address or domain name of your OpenVPN server. This value is inserted
+    into the generated .ovpn configuration file, allowing clients to connect to the correct server.
+  </p>
+  <p>
+    <strong>VPN Server Port</strong> — the port your OpenVPN server is configured to listen on (usually <code>1194</code>).
+    This must match the <code>port</code> directive in your <code>server.conf</code> (or <code>openvpn.conf</code>) file.
+  </p>
+  <p>
+    ⚠️ If the IP or port are incorrect, VPN clients will not be able to connect.
+  </p>
+  <h4>What is the OpenVPN Config Template?</h4>
+  <p>
+    The <strong>Config Template</strong> defines how the generated <code>.ovpn</code> file will look.
+    You can include dynamic placeholders like <code>{"{{server_ip}}"}</code>, <code>{"{{client_cert}}"}</code>, etc.
+  </p>
+
+  <p>These placeholders will be replaced with actual values when generating client configs:</p>
+
+  <pre className="ovpn-template-sample">
+{`client
+dev tun
+proto tcp
+remote {{server_ip}} {{server_port}}
+resolv-retry infinite
+nobind
+remote-cert-tls server
+tls-version-min 1.2
+cipher AES-256-CBC
+auth SHA256
+auth-nocache
+verb 3
+<ca>
+{{ca_cert}}
+</ca>
+<cert>
+{{client_cert}}
+</cert>
+<key>
+{{client_key}}
+</key>
+<tls-crypt>
+{{tls_auth_key}}
+</tls-crypt>`}
+  </pre>
+
+  <p>
+    ⚠️ Do not remove or change the placeholders unless you understand their purpose.
+    Each one is automatically replaced with correct values for the selected VPN server and user certificate.
+  </p>
+</div>
+
+
       </div>
     </div>
   );

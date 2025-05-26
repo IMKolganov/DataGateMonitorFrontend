@@ -43,10 +43,10 @@ export function ServerDetails() {
         </NavLink>
 
         <NavLink
-          to={`/servers/${id}/empty-tab`}
+          to={`/servers/${id}/ovpn-file-config`}
           className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
         >
-          Empty tab
+          Configurations
         </NavLink>
       </div>
 

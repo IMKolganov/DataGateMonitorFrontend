@@ -11,7 +11,6 @@ import ApplicationSettings from "./pages/ApplicationSettings";
 import GeneralTab from "./pages/GeneralServerDetails";
 import CertificatesTab from "./pages/Certificates";
 import WebConsole from "./pages/WebConsole";
-import EmptyTab from "./pages/EmptyTab";
 import Login from "./pages/Login";
 import { ToastContainer } from "react-toastify";
 import GeneralSettings from "./pages/GeneralSettings";
@@ -20,6 +19,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./css/ToastifyDark.css";
 
 import "./App.css";
+import OvpnFileConfigForm from "./pages/OvpnFileConfigForm";
 
 const isAuthenticated = () => !!localStorage.getItem("token");
 
@@ -50,8 +50,8 @@ function App() {
                       <Route path=":id" element={<ServerDetails />}>
                         <Route index element={<GeneralTab />} />
                         <Route path="certificates" element={<CertificatesTab />} />
+                        <Route path="ovpn-file-config" element={<OvpnFileConfigForm />} />
                         <Route path="console" element={<WebConsole />} />
-                        <Route path="empty-tab" element={<EmptyTab />} />
                       </Route>
                     </Route>
 
