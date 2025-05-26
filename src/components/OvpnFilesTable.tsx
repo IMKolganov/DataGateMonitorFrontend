@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from "react";
-import { GridColDef } from "@mui/x-data-grid";
+import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
-import { IssuedOvpnFile } from "../utils/types";
+import type { IssuedOvpnFile } from "../utils/types";
 import { revokeOvpnFile, downloadOvpnFile } from "../utils/api";
 import { FaDownload } from "react-icons/fa";  // Важно проверить типы импорта
 import { toast } from "react-toastify";

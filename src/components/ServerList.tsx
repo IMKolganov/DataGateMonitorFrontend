@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { fetchServers, deleteServer } from "../utils/api";
-import { OpenVpnServerData, ServiceStatus } from "../utils/types";
+import type { OpenVpnServerData, ServiceStatus } from "../utils/types";
 import ServerItem from "./ServerItem";
 import ServiceControls from "./ServiceControls";
 import useWebSocketService from "../hooks/useWebSocketService";

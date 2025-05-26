@@ -1,5 +1,6 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-import { Config, Certificate, IssuedOvpnFile } from "./types";
+import axios from "axios";
+import type { AxiosRequestConfig, AxiosResponse } from "axios";
+import type { Config, Certificate, IssuedOvpnFile } from "../utils/types";
 import {
   HubConnectionBuilder,
   LogLevel,

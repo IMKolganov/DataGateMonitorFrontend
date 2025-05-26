@@ -1,5 +1,5 @@
 import React from "react";
-import { OpenVpnServerData, ServiceStatus } from "../utils/types";
+import type { OpenVpnServerData, ServiceStatus } from "../utils/types";
 import {
   FaEye,
   FaEdit,

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaSync, FaArrowLeft } from "react-icons/fa";
 import CertificatesData from "../components/CertificatesData";
-import { CertificateStatus } from "../utils/types";
+import type { CertificateStatus } from "../utils/types";
 import { getServer } from "../utils/api";
 import "../css/Certificates.css";
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { fetchCertificates, fetchOvpnFiles } from "../utils/api";
 import CertificatesTable from "../components/CertificatesTable";
 import OvpnFilesTable from "../components/OvpnFilesTable";
-import { Certificate, CertificateStatus } from "../utils/types";
+import type { Certificate, CertificateStatus } from "../utils/types";
 import AddOvpnFile from "../components/AddOvpnFile";
 import AddCertificate from "../components/AddCertificate";
 
