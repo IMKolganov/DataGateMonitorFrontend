@@ -79,7 +79,7 @@ const ServerSettings: React.FC = () => {
     <div className="content-wrapper wide-table">
       <div className="header-bar">
         <div className="left-buttons">
-          <button className="btn secondary" onClick={() => navigate(`/server-details/${vpnServerId}`)}>
+          <button className="btn secondary" onClick={() => navigate(`/servers/${vpnServerId}`)}>
             {FaArrowLeft({ className: "icon" })} Back
           </button>
         </div>

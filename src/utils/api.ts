@@ -329,8 +329,8 @@ export const downloadOvpnFile = async (issuedOvpnFileId: number, vpnServerId: st
   }
 };
 
-export const getServer = async (serverId: string): Promise<any> => {
-  const response = await apiRequest<{ data: any }>("get", `/OpenVpnServers/GetServer/${serverId}`);
+export const getServer = async (id: string): Promise<any> => {
+  const response = await apiRequest<{ data: any }>("get", `/OpenVpnServers/GetServer/${id}`);
   return response.data;
 };
 

@@ -102,7 +102,7 @@ export function GeneralServerDetails() {
         <div className="right-buttons">
           {/* <button
             className="btn secondary settings-button"
-            onClick={() => navigate(`/server-details/${id}/settings`)}
+            onClick={() => navigate(`/servers/${id}/settings`)}
           >
             {FaCog({ className: "icon" })} Settings
           </button> */}

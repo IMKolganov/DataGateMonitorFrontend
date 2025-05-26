@@ -1,33 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaSync, FaArrowLeft } from "react-icons/fa";
 import CertificatesData from "../components/CertificatesData";
 import { CertificateStatus } from "../utils/types";
+import { getServer } from "../utils/api";
 import "../css/Certificates.css";
 
 const Certificates: React.FC = () => {
   const { id: vpnServerId } = useParams<{ id?: string }>();
-  const [selectedStatus, setSelectedStatus] = useState<CertificateStatus | null>(null);
-  const [loadingAction, setLoadingAction] = useState<boolean>(false);
-  const navigate = useNavigate();
+  const [vpnServerName, setVpnServerName] = useState<string>("");
+
+  useEffect(() => {
+    const fetchServer = async () => {
+      if (!vpnServerId) return;
+      try {
+        const server = await getServer(vpnServerId);
+        setVpnServerName(server.serverName || "(unknown)");
+      } catch (error) {
+        console.error("Failed to load VPN server:", error);
+        setVpnServerName("(unknown)");
+      }
+    };
+
+    fetchServer();
+  }, [vpnServerId]);
+
   return (
     <div>
-      <h2>VPN Certificates & OVPN Files for Server {vpnServerId}</h2>
+      <h2>VPN Certificates & OVPN Files for Server {vpnServerName || vpnServerId}</h2>
       <div className="header-containe">
-        <div className="header-bar">
-          <div className="left-buttons">
-            <button className="btn secondary" onClick={() => navigate(`/server-details/${vpnServerId}`)}>
-              <span className="icon">{FaArrowLeft({ className: "icon" })}</span> Back
-            </button>
-
-            <button className="btn secondary" onClick={() => window.location.reload()} disabled={loadingAction}>
-              <span className={`icon ${loadingAction ? "icon-spin" : ""}`}>
-                {FaSync({ className: `icon ${loadingAction ? "icon-spin" : ""}` })}
-              </span>
-              Refresh
-            </button>
-          </div>
-        </div>
       </div>
       <CertificatesData vpnServerId={vpnServerId || ""} />
     </div>

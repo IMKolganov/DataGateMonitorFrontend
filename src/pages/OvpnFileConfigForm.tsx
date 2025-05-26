@@ -98,7 +98,7 @@ const OvpnFileConfigForm: React.FC = () => {
 
       await saveOvpnFileConfig(configToSend);
       setErrors({ VpnServerIp: "", VpnServerPort: "" });
-      navigate(`/server-details/${parsedVpnServerId}/certificates`);
+      navigate(`/servers/${parsedVpnServerId}/certificates`);
     } catch (error: any) {
       let errorMessage = "Failed to save VPN server configuration.";
       if (error.response?.data) {
@@ -169,7 +169,7 @@ const OvpnFileConfigForm: React.FC = () => {
           <div className="header-containe">
             <div className="header-bar">
               <div className="left-buttons">
-                <button type="button" className="btn secondary" onClick={() => navigate(`/server-details/${parsedVpnServerId}/certificates`)}>
+                <button type="button" className="btn secondary" onClick={() => navigate(`/servers/${parsedVpnServerId}/certificates`)}>
                   {FaArrowLeft({ className: "icon" })} Back
                 </button>
               </div>
