@@ -1,9 +1,8 @@
 import axios from "axios";
-import type { AxiosRequestConfig, AxiosResponse } from "axios";
-import type { Config, Certificate, IssuedOvpnFile } from "../utils/types";
+import type { AxiosRequestConfig } from "axios";
+import type { Config, Certificate } from "../utils/types";
 import {
   HubConnectionBuilder,
-  LogLevel,
   HttpTransportType,
   HubConnection
 } from "@microsoft/signalr";
@@ -193,10 +192,10 @@ export const fetchCertificates = async (
   return certs.map((raw) => {
     const status = raw.status ?? (raw.isRevoked ? 1 : 0);
 
-    const cleanRevokeDate =
-      raw.revokeDate === "0001-01-01T00:00:00" || raw.revokeDate === null
-        ? null
-        : raw.revokeDate;
+    // const cleanRevokeDate =
+    //   raw.revokeDate === "0001-01-01T00:00:00" || raw.revokeDate === null
+    //     ? null
+    //     : raw.revokeDate;
 
     return {
       ...raw,

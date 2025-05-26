@@ -51,16 +51,6 @@ const formatUtcDate = (utcDateString: string | null | undefined) => {
   }
 };
 
-const toHumanReadableSize = (bytes: number): string => {
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  let i = 0;
-  while (bytes >= 1024 && i < sizes.length - 1) {
-    bytes /= 1024;
-    i++;
-  }
-  return `${bytes.toFixed(2)} ${sizes[i]}`;
-};
-
 const getStatusLabel = (status: ServiceStatus) => {
   switch (status) {
     case ServiceStatus.Running:

@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import type { ReactNode } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { Header } from "./components/Header";
 import About from "./pages/About";

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { FaSync, FaArrowLeft } from "react-icons/fa";
+import { useParams } from "react-router-dom";
 import CertificatesData from "../components/CertificatesData";
-import type { CertificateStatus } from "../utils/types";
 import { getServer } from "../utils/api";
 import "../css/Certificates.css";
 

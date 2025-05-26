@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import "../css/ServerDetails.css";
 
-import {
-  FaSync,
-  FaCog
-} from "react-icons/fa";
+import { FaSync } from "react-icons/fa";
 
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
@@ -18,7 +15,6 @@ import {
 
 export function GeneralServerDetails() {
   const { id } = useParams<{ id?: string }>();
-  const navigate = useNavigate();
   const [isLive, setIsLive] = useState(true);
   const [serverInfo, setServerInfo] = useState<any>(null);
   const [loadingServer, setLoadingServer] = useState(false);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "../css/Settings.css";
 import {
@@ -16,8 +16,6 @@ export function GeoLiteDbSettings() {
   const [geoIpLicenseKey, setGeoIpLicenseKey] = useState("Fetching...");
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fetchSettings = async () => {
@@ -35,7 +33,7 @@ export function GeoLiteDbSettings() {
     }
 
     try {
-      const version = await getGeoLiteDatabaseVersion();
+      await getGeoLiteDatabaseVersion();
       // you may want to store/display this version if needed
     } catch (err) {
       console.error("Error getting GeoLite version:", err);

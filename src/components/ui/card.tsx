@@ -1,5 +1,5 @@
 // card.tsx
-import { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 export function Card({ children, className, onClick, ...props }: { children: ReactNode; className?: string; onClick?: () => void }) {
   return (

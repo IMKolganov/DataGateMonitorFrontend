@@ -1,5 +1,7 @@
 // tabs.tsx
-import React, { ReactNode, useState } from "react";
+// tabs.tsx
+import React, { useState } from "react";
+import type { ReactNode } from 'react';
 
 export function Tabs({ defaultValue, children, className }: { defaultValue: string; children: ReactNode[]; className?: string }) {
   const [activeTab, setActiveTab] = useState(defaultValue);

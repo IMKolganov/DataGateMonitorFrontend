@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchConfig, getWebSocketUrlForBackgroundService, runServiceNow } from "../utils/api";
-import { ServiceStatus } from "../utils/types";
+import type { ServiceStatus } from "../utils/types";
 
 interface ServiceData {
   vpnServerId: number;

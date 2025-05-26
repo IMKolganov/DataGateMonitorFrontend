@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import ServerList from "../components/ServerList";
 import "../css/ServersWithDetails.css";

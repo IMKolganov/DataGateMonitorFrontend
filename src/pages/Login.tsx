@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import { fetchToken, setSecret, checkSystemStatus } from "../utils/api";
 import { FaDoorOpen } from "react-icons/fa";
 import "../css/Login.css";
