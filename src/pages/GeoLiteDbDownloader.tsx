@@ -22,7 +22,7 @@ export function GeoLiteDbDownloader() {
 
   useEffect(() => {
     const fetchVersionAndConnect = async () => {
-      setIsFetching(true); // ⏳ начинаем загрузку
+      setIsFetching(true);
       try {
         const versionResponse = await getGeoLiteDatabaseVersion();
         setVersion(versionResponse.version);
