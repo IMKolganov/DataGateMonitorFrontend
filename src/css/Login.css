@@ -94,9 +94,9 @@
     color: "#58a6ff"
   }  
   .error-message a {
-    color: #58a6ff; /* Красноватый, сочетается с ошибкой */
+    color: #58a6ff;
     text-decoration: underline;
-    word-break: break-all; /* Чтобы длинные URL не ломали layout */
+    word-break: break-all;
     font-weight: 500;
   }
   

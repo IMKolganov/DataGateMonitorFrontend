@@ -4,7 +4,7 @@ import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
 import type { IssuedOvpnFile } from "../utils/types";
 import { revokeOvpnFile, downloadOvpnFile } from "../utils/api";
-import { FaDownload } from "react-icons/fa";  // Важно проверить типы импорта
+import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../utils/utils";
 
