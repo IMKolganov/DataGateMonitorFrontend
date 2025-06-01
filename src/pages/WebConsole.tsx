@@ -30,6 +30,11 @@ export function WebConsole() {
   useEffect(() => {
     if (!vpnServerId) return;
 
+    if (connectionRef.current && connectionRef.current.state !== "Disconnected") {
+      console.info("SignalR already connected or connecting, skipping setup");
+      return;
+    }
+
     const setupSignalR = async () => {
       try {
         const url = await getSignalRUrl(vpnServerId);
