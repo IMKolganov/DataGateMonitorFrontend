@@ -91,7 +91,7 @@ export const getSignalRUrl = async (vpnServerId: string): Promise<string> => {
     throw new Error("User is not authenticated");
   }
 
-  return `${API_BASE_URL}/hub/frontend?serverId=${vpnServerId}&access_token=${encodeURIComponent(token)}`;
+  return `${API_BASE_URL}/hubs/frontend?serverId=${vpnServerId}&access_token=${encodeURIComponent(token)}`;
 };
 
 export const getWebSocketUrlForBackgroundService = async (): Promise<string> => {

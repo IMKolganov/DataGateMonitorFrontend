@@ -1,16 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import "../css/Console.css";
-import {
-  FaArrowRight,
-  FaTrash,
-  FaInfoCircle
-} from "react-icons/fa";
+import { FaArrowRight, FaTrash, FaInfoCircle } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { getSignalRUrl } from "../utils/api";
 import {
   HubConnectionBuilder,
   HubConnection,
-  HttpTransportType
+  HttpTransportType,
+  LogLevel
 } from "@microsoft/signalr";
 import { saveHistoryToDB, loadHistoryFromDB, clearHistoryDB } from "../utils/consoleStorage";
 
@@ -37,9 +34,8 @@ export function WebConsole() {
       try {
         const url = await getSignalRUrl(vpnServerId);
         const connection = new HubConnectionBuilder()
-          .withUrl(url, {
-            transport: HttpTransportType.WebSockets
-          })
+          .withUrl(url, { transport: HttpTransportType.WebSockets })
+          .configureLogging(LogLevel.Information)
           .withAutomaticReconnect()
           .build();
 
@@ -53,23 +49,28 @@ export function WebConsole() {
           });
         });
 
-        connection.onreconnected(() => {
+        connection.onreconnected(async () => {
           setMessages(prev => [...prev, "✅ Reconnected to OpenVPN"]);
+          const history = await loadHistoryFromDB(vpnServerId);
+          setMessages(history);
         });
 
-        connection.onreconnecting(() => {
+        connection.onreconnecting(error => {
+          console.warn("Reconnecting:", error);
           setMessages(prev => [...prev, "⚠️ Reconnecting to OpenVPN..."]);
         });
 
-        connection.onclose(() => {
+        connection.onclose(error => {
+          console.error("Connection closed:", error);
           setMessages(prev => [...prev, "❌ Connection closed."]);
         });
 
         await connection.start();
+        console.info("SignalR connected, state:", connection.state);
         setMessages(prev => [...prev, "✅ Connected to OpenVPN"]);
-      } catch (err) {
+      } catch (err: any) {
         console.error("SignalR connection error:", err);
-        setMessages(prev => [...prev, "❌ Failed to connect to OpenVPN"]);
+        setMessages(prev => [...prev, `❌ Failed to connect to OpenVPN: ${err.message}`]);
       }
     };
 
@@ -96,7 +97,6 @@ export function WebConsole() {
     });
 
     const connection = connectionRef.current;
-
     if (!connection || connection.state !== "Connected") {
       setMessages(prev => [...prev, "❌ Cannot send command: not connected"]);
       setCommand("");
@@ -104,7 +104,7 @@ export function WebConsole() {
     }
 
     try {
-      await connection.send("SendCommand", command);
+      await connection.send("SendCommand", parseInt(vpnServerId!), command);
     } catch (error: any) {
       console.error("Failed to send command:", error);
       setMessages(prev => [...prev, `❌ Failed to send command: ${error.message}`]);
