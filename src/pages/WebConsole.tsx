@@ -41,9 +41,20 @@ export function WebConsole() {
 
         connectionRef.current = connection;
 
+        connection.off("ReceiveCommandResult");
+        connection.off("ReceiveMessage");
+
         connection.on("ReceiveCommandResult", (data: string) => {
           setMessages(prev => {
             const updated = [...prev, data];
+            saveHistoryToDB(vpnServerId, updated);
+            return updated;
+          });
+        });
+
+        connection.on("ReceiveMessage", (msg: string) => {
+          setMessages(prev => {
+            const updated = [...prev, msg];
             saveHistoryToDB(vpnServerId, updated);
             return updated;
           });
