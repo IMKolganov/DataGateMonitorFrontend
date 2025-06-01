@@ -8,7 +8,6 @@ import {
 } from "@microsoft/signalr";
 import { cleanDate } from "../utils/utils";
 
-
 let API_BASE_URL: string | null = null;
 let WS_BASE_URL: string | null = null;
 let configPromise: Promise<Config> | null = null;
@@ -82,9 +81,9 @@ const ensureApiBaseUrl = async () => {
   }
 };
 
-export const getWebSocketUrl = async (vpnServerId: string): Promise<string> => {
+export const getSignalRUrl = async (vpnServerId: string): Promise<string> => {
   await ensureApiBaseUrl();
-  if (!WS_BASE_URL) throw new Error("WebSocket base URL is not set");
+  if (!API_BASE_URL) throw new Error("API base URL is not set");
 
   const token = localStorage.getItem("token");
   if (!token) {
@@ -92,7 +91,7 @@ export const getWebSocketUrl = async (vpnServerId: string): Promise<string> => {
     throw new Error("User is not authenticated");
   }
 
-  return `${WS_BASE_URL}/openvpn/ws/${vpnServerId}?access_token=${encodeURIComponent(token)}`;
+  return `${API_BASE_URL}/hub/frontend?serverId=${vpnServerId}&access_token=${encodeURIComponent(token)}`;
 };
 
 export const getWebSocketUrlForBackgroundService = async (): Promise<string> => {
