@@ -48,7 +48,7 @@ function App() {
                     <Route path="/" element={<Navigate to="/servers" replace />} />
 
                     <Route path="/servers" element={<ServersWithDetails />}>
-                      <Route path=":id" element={<ServerDetails />}>
+                      <Route path=":vpnServerId" element={<ServerDetails />}>
                         <Route index element={<GeneralTab />} />
                         <Route path="certificates" element={<CertificatesTab />} />
                         <Route path="ovpn-file-config" element={<OvpnFileConfigForm />} />

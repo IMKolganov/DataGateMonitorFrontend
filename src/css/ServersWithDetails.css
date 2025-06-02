@@ -36,3 +36,10 @@
   background-color: #161b22;
   width: 100%;
 }
+
+.server-details-panel-mobile{
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  background-color: #161b22;
+}

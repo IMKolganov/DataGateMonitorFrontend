@@ -12,7 +12,7 @@ import {
 import { saveHistoryToDB, loadHistoryFromDB, clearHistoryDB } from "../utils/consoleStorage";
 
 export function WebConsole() {
-  const { id: vpnServerId } = useParams<{ id?: string }>();
+  const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const [messages, setMessages] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const connectionRef = useRef<HubConnection | null>(null);

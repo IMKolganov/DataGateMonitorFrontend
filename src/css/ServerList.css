@@ -147,3 +147,22 @@
   .server-service{
     margin-top: 10px;
   }
+
+  .server-item.clickable {
+    cursor: pointer;
+  }
+
+  .server-item.clickable:hover {
+    border-color: #959da5;
+    box-shadow: 0 0 8px rgba(88, 166, 255, 0.4);
+  }
+
+
+  .server-item.selected {
+  border-color: #959da5;
+  background-color: #0d1117;
+  box-shadow: 0 0 12px rgba(88, 166, 255, 0.5);
+}
+.server-item-content {
+  width: 100%;
+}

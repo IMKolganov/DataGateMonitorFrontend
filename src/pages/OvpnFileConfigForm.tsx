@@ -8,8 +8,8 @@ import { toast } from "react-toastify";
 
 const OvpnFileConfigForm: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id?: string }>();
-  const parsedVpnServerId = Number(id) || 0;
+  const { vpnServerId } = useParams<{ vpnServerId?: string }>();
+  const parsedVpnServerId = Number(vpnServerId) || 0;
 
 
   const [ovpnFileConfig, setServerConfig] = useState({
@@ -117,7 +117,7 @@ const OvpnFileConfigForm: React.FC = () => {
     <div>
       <div className="server-form-container">
         <h2 className="server-form-header">
-          {id ? "Edit Ovpn File Config" : "Add New Ovpn File Config"}
+          {vpnServerId ? "Edit Ovpn File Config" : "Add New Ovpn File Config"}
         </h2>
           <div className="header-containe">
             <div className="header-bar">
@@ -128,7 +128,7 @@ const OvpnFileConfigForm: React.FC = () => {
               </div>
               <div className="right-buttons">
                 <button type="submit" className="submit-button">
-                  {FaPlus({ className: "icon" })} {id ? "Update Config" : "Add Config"}
+                  {FaPlus({ className: "icon" })} {vpnServerId ? "Update Config" : "Add Config"}
                 </button>
               </div>
             </div>

@@ -422,3 +422,8 @@ export const logout = () => {
   localStorage.removeItem("token");
   window.location.href = "/login";
 };
+
+export const getTelegramBotUsers = async () => {
+  const response = await apiRequest<{ data: any }>("get", `/TelegramBotUser/GetAllUsers`);
+  return response.data;
+};
