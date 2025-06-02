@@ -1,25 +1,26 @@
 import { useEffect, useState, useRef } from "react";
 import "../css/Console.css";
-import {
-  FaArrowRight,
-  FaTrash,
-  FaInfoCircle
-} from "react-icons/fa";
+import { FaArrowRight, FaTrash, FaInfoCircle } from "react-icons/fa";
 import { useParams } from "react-router-dom";
-import { getWebSocketUrl } from "../utils/api";
+import { getSignalRUrl } from "../utils/api";
+import {
+  HubConnectionBuilder,
+  HubConnection,
+  HttpTransportType,
+  LogLevel
+} from "@microsoft/signalr";
 import { saveHistoryToDB, loadHistoryFromDB, clearHistoryDB } from "../utils/consoleStorage";
 
 export function WebConsole() {
   const { id: vpnServerId } = useParams<{ id?: string }>();
   const [messages, setMessages] = useState<string[]>([]);
   const [command, setCommand] = useState("");
-  const ws = useRef<WebSocket | null>(null);
+  const connectionRef = useRef<HubConnection | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const isConnected = useRef(false);
 
   useEffect(() => {
     if (!vpnServerId) return;
-    
+
     (async () => {
       const history = await loadHistoryFromDB(vpnServerId);
       setMessages(history);
@@ -29,64 +30,104 @@ export function WebConsole() {
   useEffect(() => {
     if (!vpnServerId) return;
 
-    const connectWebSocket = async () => {
+    if (connectionRef.current && connectionRef.current.state !== "Disconnected") {
+      console.info("SignalR already connected or connecting, skipping setup");
+      return;
+    }
+
+    const setupSignalR = async () => {
       try {
-        const WS_URL = await getWebSocketUrl(vpnServerId);
-        ws.current = new WebSocket(WS_URL);
+        const url = await getSignalRUrl(vpnServerId);
+        const connection = new HubConnectionBuilder()
+          .withUrl(url, { transport: HttpTransportType.WebSockets })
+          .configureLogging(LogLevel.Information)
+          .withAutomaticReconnect()
+          .build();
 
-        ws.current.onopen = () => {
-          if (!isConnected.current) {
-            setMessages((prev) => [...prev, "✅ Connected to OpenVPN Telnet"]);
-            isConnected.current = true;
-          }
-        };
+        connectionRef.current = connection;
 
-        ws.current.onmessage = (event) => {
-          setMessages((prev) => {
-            const updatedMessages = [...prev, event.data];
+        connection.off("ReceiveCommandResult");
+        connection.off("ReceiveMessage");
 
-            saveHistoryToDB(vpnServerId, updatedMessages);
-            return updatedMessages;
+        connection.on("ReceiveCommandResult", (data: string) => {
+          setMessages(prev => {
+            const updated = [...prev, data];
+            saveHistoryToDB(vpnServerId, updated);
+            return updated;
           });
-        };
+        });
 
-        ws.current.onclose = () => {
-          if (isConnected.current) {
-            setMessages((prev) => [...prev, "❌ Connection closed. Reconnecting..."]);
-            isConnected.current = false;
-            setTimeout(connectWebSocket, 5000);
-          }
-        };
-      } catch (error) {
-        console.error("WebSocket connection failed:", error);
+        connection.on("ReceiveMessage", (msg: string) => {
+          setMessages(prev => {
+            const updated = [...prev, msg];
+            saveHistoryToDB(vpnServerId, updated);
+            return updated;
+          });
+        });
+
+        connection.onreconnected(async () => {
+          setMessages(prev => [...prev, "✅ Reconnected to OpenVPN"]);
+          const history = await loadHistoryFromDB(vpnServerId);
+          setMessages(history);
+        });
+
+        connection.onreconnecting(error => {
+          console.warn("Reconnecting:", error);
+          setMessages(prev => [...prev, "⚠️ Reconnecting to OpenVPN..."]);
+        });
+
+        connection.onclose(error => {
+          console.error("Connection closed:", error);
+          setMessages(prev => [...prev, "❌ Connection closed."]);
+        });
+
+        await connection.start();
+        console.info("SignalR connected, state:", connection.state);
+        setMessages(prev => [...prev, "✅ Connected to OpenVPN"]);
+      } catch (err: any) {
+        console.error("SignalR connection error:", err);
+        setMessages(prev => [...prev, `❌ Failed to connect to OpenVPN: ${err.message}`]);
       }
     };
 
-    ws.current?.close();
-    connectWebSocket();
+    setupSignalR();
 
     return () => {
-      ws.current?.close();
-      ws.current = null;
+      connectionRef.current?.stop();
+      connectionRef.current = null;
     };
   }, [vpnServerId]);
 
-useEffect(() => {
-  if (messages.length === 0) return;
-  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-}, [messages]);
+  useEffect(() => {
+    if (messages.length === 0) return;
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  const sendCommand = () => {
-    if (ws.current && command.trim() !== "") {
-      ws.current.send(command);
-      setMessages((prev) => {
-        const updatedMessages = [...prev, `> ${command}`];
+  const sendCommand = async () => {
+    if (command.trim() === "") return;
 
-        saveHistoryToDB(vpnServerId!, updatedMessages);
-        return updatedMessages;
-      });
+    setMessages(prev => {
+      const updated = [...prev, `> ${command}`];
+      saveHistoryToDB(vpnServerId!, updated);
+      return updated;
+    });
+
+    const connection = connectionRef.current;
+    if (!connection || connection.state !== "Connected") {
+      setMessages(prev => [...prev, "❌ Cannot send command: not connected"]);
       setCommand("");
+      return;
     }
+
+    try {
+      console.log("Command sent:", command);
+      await connection.send("SendCommand", command);
+    } catch (error: any) {
+      console.error("Failed to send command:", error);
+      setMessages(prev => [...prev, `❌ Failed to send command: ${error.message}`]);
+    }
+
+    setCommand("");
   };
 
   const clearConsole = async () => {
@@ -103,9 +144,6 @@ useEffect(() => {
           <button className="btn danger" onClick={clearConsole}>
             {FaTrash({ className: "icon" })} Clear Console
           </button>
-        </div>
-        <div className="right-buttons">
-
         </div>
       </div>
 
