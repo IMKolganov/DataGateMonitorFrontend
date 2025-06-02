@@ -15,6 +15,7 @@ import Login from "./pages/Login";
 import { ToastContainer } from "react-toastify";
 import GeneralSettings from "./pages/GeneralSettings";
 import GeoLiteDbSettings from "./pages/GeoLiteDbSettings";
+import TelegramBotSettings from "./pages/TelegramBotSettings";
 import "react-toastify/dist/ReactToastify.css";
 import "./css/ToastifyDark.css";
 
@@ -60,6 +61,7 @@ function App() {
                       <Route path="general" element={<GeneralSettings />} />
                       <Route path="applications" element={<ApplicationSettings />} />
                       <Route path="geolitedb" element={<GeoLiteDbSettings />} />
+                      <Route path="telegrambot" element={<TelegramBotSettings />} />
                     </Route>
 
 

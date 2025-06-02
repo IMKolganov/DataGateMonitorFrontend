@@ -37,8 +37,6 @@ export interface ServerInfo {
     openVpnServerResponses: {
       id: number;
       serverName: string;
-      managementIp: string;
-      managementPort: number;
       isOnline: boolean;
       isDefault: boolean;
       apiUrl: string;

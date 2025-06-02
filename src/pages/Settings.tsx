@@ -41,6 +41,12 @@ export function Settings() {
         >
           GeoLite DB
         </NavLink>
+        <NavLink
+          to="/settings/telegrambot"
+          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+        >
+          Telegram Bot
+        </NavLink>
       </div>
 
       <div className="tab-content">

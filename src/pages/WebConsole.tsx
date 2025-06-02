@@ -120,9 +120,8 @@ export function WebConsole() {
     }
 
     try {
-      await connection.send("SendCommand", command);
-      console.log("Connecting to server ID:", vpnServerId);
       console.log("Command sent:", command);
+      await connection.send("SendCommand", command);
     } catch (error: any) {
       console.error("Failed to send command:", error);
       setMessages(prev => [...prev, `❌ Failed to send command: ${error.message}`]);

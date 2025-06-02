@@ -12,10 +12,6 @@ const ServerForm: React.FC = () => {
   const [serverData, setServerData] = useState({
     Id: serverId ? parseInt(serverId) : 0,
     ServerName: "",
-    ManagementIp: "",
-    ManagementPort: 1194,
-    Login: "",
-    Password: "",
     IsOnline: false,
     isDefault: false,
     ApiUrl: "",
@@ -24,9 +20,7 @@ const ServerForm: React.FC = () => {
   });
 
   const [errors, setErrors] = useState({
-    ServerName: "",
-    ManagementIp: "",
-    ManagementPort: "",
+    ServerName: ""
   });
 
   useEffect(() => {
@@ -36,10 +30,6 @@ const ServerForm: React.FC = () => {
           setServerData({
             Id: data.id,
             ServerName: data.serverName || "",
-            ManagementIp: data.managementIp || "",
-            ManagementPort: Number(data.managementPort) || 1194,
-            Login: data.login || "",
-            Password: data.password || "",
             IsOnline: data.isOnline,
             isDefault: data.isDefault,
             ApiUrl: data.apiUrl || "",
@@ -55,24 +45,16 @@ const ServerForm: React.FC = () => {
     const { name, value } = e.target;
     setServerData((prev) => ({
       ...prev,
-      [name]: name === "ManagementPort" ? Number(value) : value,
+      [name]: value,
     }));
   };
 
   const validateForm = () => {
     let isValid = true;
-    const newErrors = { ServerName: "", ManagementIp: "", ManagementPort: "" };
+    const newErrors = { ServerName: "" };
 
     if (!serverData.ServerName.trim()) {
       newErrors.ServerName = "Server name is required.";
-      isValid = false;
-    }
-    if (!serverData.ManagementIp.trim()) {
-      newErrors.ManagementIp = "Management IP is required.";
-      isValid = false;
-    }
-    if (!serverData.ManagementPort || serverData.ManagementPort < 1 || serverData.ManagementPort > 65535) {
-      newErrors.ManagementPort = "Management Port must be between 1 and 65535.";
       isValid = false;
     }
 
@@ -119,58 +101,6 @@ const ServerForm: React.FC = () => {
               placeholder="Enter server name"
             />
             {errors.ServerName && <p className="error-message">{errors.ServerName}</p>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="ManagementIp">Management IP *</label>
-            <input
-              type="text"
-              id="ManagementIp"
-              name="ManagementIp"
-              value={serverData.ManagementIp}
-              onChange={handleChange}
-              className={errors.ManagementIp ? "input-error" : ""}
-              placeholder="Enter Management IP address"
-            />
-            {errors.ManagementIp && <p className="error-message">{errors.ManagementIp}</p>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="ManagementPort">Management Port *</label>
-            <input
-              type="number"
-              id="ManagementPort"
-              name="ManagementPort"
-              value={serverData.ManagementPort}
-              onChange={handleChange}
-              className={errors.ManagementPort ? "input-error" : ""}
-              placeholder="Enter Management Port"
-            />
-            {errors.ManagementPort && <p className="error-message">{errors.ManagementPort}</p>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="Login">Login</label>
-            <input
-              type="text"
-              id="Login"
-              name="Login"
-              value={serverData.Login}
-              onChange={handleChange}
-              placeholder="Enter login (optional)"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="Password">Password</label>
-            <input
-              type="password"
-              id="Password"
-              name="Password"
-              value={serverData.Password}
-              onChange={handleChange}
-              placeholder="Enter password (optional)"
-            />
           </div>
 
           <div className="form-group checkbox-container">
