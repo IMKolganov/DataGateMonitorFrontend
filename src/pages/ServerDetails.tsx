@@ -65,6 +65,20 @@ export function ServerDetails() {
         >
           Configurations
         </NavLink>
+
+        <NavLink
+          to={`/servers/${vpnServerId}/statistics`}
+          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+        >
+          Statistics
+        </NavLink>
+
+        <NavLink
+          to={`/servers/${vpnServerId}/events`}
+          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+        >
+          Events
+        </NavLink>
       </div>
 
       <div className="tab-content">

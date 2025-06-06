@@ -127,7 +127,7 @@ const OvpnFileConfigForm: React.FC = () => {
                 </button>
               </div>
               <div className="right-buttons">
-                <button type="submit" className="submit-button">
+                <button type="button" className="btn secondary" onClick={handleSubmit}>
                   {FaPlus({ className: "icon" })} {vpnServerId ? "Update Config" : "Add Config"}
                 </button>
               </div>
