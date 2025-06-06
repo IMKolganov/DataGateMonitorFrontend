@@ -128,7 +128,7 @@ const OvpnFileConfigForm: React.FC = () => {
       ) : (
         <div className="server-form-container">
           <h2 className="server-form-header">
-            {vpnServerId ? "Edit Ovpn File Config" : "Add New Ovpn File Config"}
+            {vpnServerId ? "Edit OpenVPN File Config" : "Add New Ovpn File Config"}
           </h2>
           <div className="header-containe">
             <div className="header-bar">
