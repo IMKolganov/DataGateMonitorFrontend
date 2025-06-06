@@ -6,8 +6,23 @@ import { getServer } from "../utils/api";
 
 export function ServerDetails() {
   const navigate = useNavigate();
-  const { vpnServerId } = useParams<{ vpnServerId: string }>();
+  const { vpnServerId = "" } = useParams<{ vpnServerId: string }>();
   const [vpnServerName, setVpnServerName] = useState<string>("");
+
+  const tabs = [
+    { label: "General", path: "" },
+    { label: "Manage Certificates", path: "certificates" },
+    { label: "Web console", path: "console" },
+    { label: "Configurations", path: "ovpn-file-config" },
+    { label: "Statistics", path: "statistics" },
+    { label: "Events", path: "events" },
+  ];
+
+  const currentPath = location.pathname.split(`/servers/${vpnServerId}/`)[1] || "";
+
+  const handleTabSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    navigate(`/servers/${vpnServerId}/${e.target.value}`);
+  };
 
   useEffect(() => {
     const fetchServer = async () => {
@@ -38,48 +53,32 @@ export function ServerDetails() {
         </div>
       </div>
 
-      <div className="tabs">
-        <NavLink
-          to={`/servers/${vpnServerId}`}
-          end
-          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-        >
-          General
-        </NavLink>
-        <NavLink
-          to={`/servers/${vpnServerId}/certificates`}
-          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-        >
-          Manage Certificates
-        </NavLink>
-        <NavLink
-          to={`/servers/${vpnServerId}/console`}
-          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-        >
-          Web console
-        </NavLink>
-
-        <NavLink
-          to={`/servers/${vpnServerId}/ovpn-file-config`}
-          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-        >
-          Configurations
-        </NavLink>
-
-        <NavLink
-          to={`/servers/${vpnServerId}/statistics`}
-          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-        >
-          Statistics
-        </NavLink>
-
-        <NavLink
-          to={`/servers/${vpnServerId}/events`}
-          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-        >
-          Events
-        </NavLink>
+      {/* Desktop tabs */}
+      <div className="tabs desktop-tabs">
+        {tabs.map((tab) => (
+          <NavLink
+            key={tab.path}
+            to={`/servers/${vpnServerId}/${tab.path}`}
+            end={tab.path === ""}
+            className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+          >
+            {tab.label}
+          </NavLink>
+        ))}
       </div>
+
+      {/* Mobile dropdown */}
+      <select
+        className="tabs-dropdown mobile-tabs"
+        value={currentPath}
+        onChange={handleTabSelect}
+      >
+        {tabs.map((tab) => (
+          <option key={tab.path} value={tab.path}>
+            {tab.label}
+          </option>
+        ))}
+      </select>
 
       <div className="tab-content">
         <Outlet />
@@ -87,5 +86,4 @@ export function ServerDetails() {
     </div>
   );
 }
-
 export default ServerDetails;

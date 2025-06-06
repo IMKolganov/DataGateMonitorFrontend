@@ -87,3 +87,29 @@
     transform: rotate(360deg);
   }
 }
+
+.desktop-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #333;
+}
+.mobile-tabs {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .desktop-tabs {
+    display: none;
+  }
+
+  .mobile-tabs {
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: #161b22;
+    color: #ccc;
+    border: 1px solid #333;
+  }
+}
