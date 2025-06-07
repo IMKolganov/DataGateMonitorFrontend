@@ -250,14 +250,14 @@ export const fetchOvpnFiles = async (vpnServerId: string): Promise<any[]> => {
   return response.data;
 };
 
-export const addOvpnFile = async (vpnServerId: number, externalId: string, commonName: string, issuedTo: string = "openVpnClient") => {
-  return apiRequest<void>("post", "/OpenVpnFiles/AddOvpnFile", {
+export const addClientOvpnFile = async (vpnServerId: number, externalId: string, commonName: string, issuedTo: string = "openVpnClient") => {
+  return apiRequest<void>("post", "/OpenVpnFiles/AddClientOvpnFile", {
     data: { vpnServerId, externalId, commonName, issuedTo },
   });
 };
 
-export const revokeOvpnFile = async (vpnServerId: string, commonName: string) => {
-  return apiRequest<void>("post", "/OpenVpnFiles/RevokeOvpnFile", {
+export const revokeClientOvpnFile = async (vpnServerId: string, commonName: string) => {
+  return apiRequest<void>("post", "/OpenVpnFiles/RevokeClientOvpnFile", {
     data: { vpnServerId, commonName },
   });
 };
@@ -281,13 +281,13 @@ export const revokeApplication = async (clientId: string) => {
   });
 };
 
-export const downloadOvpnFile = async (issuedOvpnFileId: number, vpnServerId: string) => {
+export const downloadClientOvpnFile = async (issuedOvpnFileId: number, vpnServerId: string) => {
   await ensureApiBaseUrl();
 
   try {
     const response = await apiRequest<any>(
       "post",
-      `/OpenVpnFiles/DownloadOvpnFile`,
+      `/OpenVpnFiles/DownloadClientOvpnFile`,
       {
         data: {
           issuedOvpnFileId,
