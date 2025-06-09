@@ -8,9 +8,10 @@ import { toast } from "react-toastify";
 
 const OvpnFileConfigForm: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams<{ id?: string }>();
-  const parsedVpnServerId = Number(id) || 0;
+  const { vpnServerId } = useParams<{ vpnServerId?: string }>();
+  const parsedVpnServerId = Number(vpnServerId) || 0;
 
+  const [loading, setLoading] = useState(true);
 
   const [ovpnFileConfig, setServerConfig] = useState({
     Id: 0,
@@ -28,7 +29,10 @@ const OvpnFileConfigForm: React.FC = () => {
   const [copyStatus, setCopyStatus] = useState<"Copy" | "Copied!">("Copy");
 
   useEffect(() => {
-    if (!parsedVpnServerId) return;
+    if (!parsedVpnServerId) {
+      setLoading(false);
+      return;
+    }
 
     getOvpnFileConfig(parsedVpnServerId)
       .then((data) => {
@@ -44,7 +48,8 @@ const OvpnFileConfigForm: React.FC = () => {
       .catch((error) => {
         toast.error("Error loading config:", error);
         setErrors((prev) => ({ ...prev, apiError: "Failed to load VPN server configuration." }));
-      });
+      })
+      .finally(() => setLoading(false));
   }, [parsedVpnServerId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -115,94 +120,102 @@ const OvpnFileConfigForm: React.FC = () => {
 
   return (
     <div>
-      <div className="server-form-container">
-        <h2 className="server-form-header">
-          {id ? "Edit Ovpn File Config" : "Add New Ovpn File Config"}
-        </h2>
+      {loading ? (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading configuration...</p>
+        </div>
+      ) : (
+        <div className="server-form-container">
+          <h2 className="server-form-header">
+            {vpnServerId ? "Edit OpenVPN File Config" : "Add New Ovpn File Config"}
+          </h2>
           <div className="header-containe">
             <div className="header-bar">
               <div className="left-buttons">
-                <button type="button" className="btn secondary" onClick={() => navigate(`/servers/${parsedVpnServerId}/certificates`)}>
+                <button
+                  type="button"
+                  className="btn secondary"
+                  onClick={() => navigate(`/servers/${parsedVpnServerId}/certificates`)}
+                >
                   {FaArrowLeft({ className: "icon" })} Back
                 </button>
               </div>
               <div className="right-buttons">
-                <button type="submit" className="submit-button">
-                  {FaPlus({ className: "icon" })} {id ? "Update Config" : "Add Config"}
+                <button type="button" className="btn secondary" onClick={handleSubmit}>
+                  {FaPlus({ className: "icon" })} {vpnServerId ? "Update Config" : "Add Config"}
                 </button>
               </div>
             </div>
           </div>
-        {errors.apiError && <p className="error-message">{errors.apiError}</p>}
-        <form className="server-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="VpnServerIp">VPN Server IP *</label>
-            <input
-              type="text"
-              id="VpnServerIp"
-              name="VpnServerIp"
-              value={ovpnFileConfig.VpnServerIp}
-              onChange={handleChange}
-              className={errors.VpnServerIp ? "input-error" : ""}
-              placeholder="Enter VPN Server IP"
-            />
-            {errors.VpnServerIp && <p className="error-message">{errors.VpnServerIp}</p>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="VpnServerPort">VPN Server Port *</label>
-            <input
-              type="number"
-              id="VpnServerPort"
-              name="VpnServerPort"
-              value={ovpnFileConfig.VpnServerPort}
-              onChange={handleChange}
-              className={errors.VpnServerPort ? "input-error" : ""}
-              placeholder="Enter VPN Server Port"
-            />
-            {errors.VpnServerPort && <p className="error-message">{errors.VpnServerPort}</p>}
-          </div>
-
-          <div className="form-group">
-            <div className="config-template-container">
-              <div className="toolbar">
-                <span>Config Template</span>
-                <button className="copy-button" type="button" onClick={() => handleCopy(ovpnFileConfig.ConfigTemplate)}>
-                  {FaCopy({})} {copyStatus}
-                </button>
-              </div>
-              <textarea
-                id="ConfigTemplate"
-                name="ConfigTemplate"
-                value={ovpnFileConfig.ConfigTemplate}
+          {errors.apiError && <p className="error-message">{errors.apiError}</p>}
+          <form className="server-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="VpnServerIp">VPN Server IP *</label>
+              <input
+                type="text"
+                id="VpnServerIp"
+                name="VpnServerIp"
+                value={ovpnFileConfig.VpnServerIp}
                 onChange={handleChange}
-                placeholder="Enter config template"
+                className={errors.VpnServerIp ? "input-error" : ""}
+                placeholder="Enter VPN Server IP"
               />
+              {errors.VpnServerIp && <p className="error-message">{errors.VpnServerIp}</p>}
             </div>
-          </div>
-        </form>
-<div className="form-hint-container">
-  <h4>What are these settings?</h4>
-  <p>
-    <strong>VPN Server IP</strong> — the public IP address or domain name of your OpenVPN server. This value is inserted
-    into the generated .ovpn configuration file, allowing clients to connect to the correct server.
-  </p>
-  <p>
-    <strong>VPN Server Port</strong> — the port your OpenVPN server is configured to listen on (usually <code>1194</code>).
-    This must match the <code>port</code> directive in your <code>server.conf</code> (or <code>openvpn.conf</code>) file.
-  </p>
-  <p>
-    ⚠️ If the IP or port are incorrect, VPN clients will not be able to connect.
-  </p>
-  <h4>What is the OpenVPN Config Template?</h4>
-  <p>
-    The <strong>Config Template</strong> defines how the generated <code>.ovpn</code> file will look.
-    You can include dynamic placeholders like <code>{"{{server_ip}}"}</code>, <code>{"{{client_cert}}"}</code>, etc.
-  </p>
 
-  <p>These placeholders will be replaced with actual values when generating client configs:</p>
+            <div className="form-group">
+              <label htmlFor="VpnServerPort">VPN Server Port *</label>
+              <input
+                type="number"
+                id="VpnServerPort"
+                name="VpnServerPort"
+                value={ovpnFileConfig.VpnServerPort}
+                onChange={handleChange}
+                className={errors.VpnServerPort ? "input-error" : ""}
+                placeholder="Enter VPN Server Port"
+              />
+              {errors.VpnServerPort && <p className="error-message">{errors.VpnServerPort}</p>}
+            </div>
 
-  <pre className="ovpn-template-sample">
+            <div className="form-group">
+              <div className="config-template-container">
+                <div className="toolbar">
+                  <span>Config Template</span>
+                  <button className="copy-button" type="button" onClick={() => handleCopy(ovpnFileConfig.ConfigTemplate)}>
+                    {FaCopy({})} {copyStatus}
+                  </button>
+                </div>
+                <textarea
+                  id="ConfigTemplate"
+                  name="ConfigTemplate"
+                  value={ovpnFileConfig.ConfigTemplate}
+                  onChange={handleChange}
+                  placeholder="Enter config template"
+                />
+              </div>
+            </div>
+          </form>
+
+          <div className="form-hint-container">
+            <h4>What are these settings?</h4>
+            <p>
+              <strong>VPN Server IP</strong> — the public IP address or domain name of your OpenVPN server. This value is
+              inserted into the generated .ovpn configuration file, allowing clients to connect to the correct server.
+            </p>
+            <p>
+              <strong>VPN Server Port</strong> — the port your OpenVPN server is configured to listen on (usually <code>1194</code>).
+              This must match the <code>port</code> directive in your <code>server.conf</code> (or <code>openvpn.conf</code>) file.
+            </p>
+            <p>⚠️ If the IP or port are incorrect, VPN clients will not be able to connect.</p>
+
+            <h4>What is the OpenVPN Config Template?</h4>
+            <p>
+              The <strong>Config Template</strong> defines how the generated <code>.ovpn</code> file will look.
+              You can include dynamic placeholders like <code>{"{{server_ip}}"}</code>, <code>{"{{client_cert}}"}</code>, etc.
+            </p>
+            <p>These placeholders will be replaced with actual values when generating client configs:</p>
+            <pre className="ovpn-template-sample">
 {`client
 dev tun
 proto tcp
@@ -227,16 +240,14 @@ verb 3
 <tls-crypt>
 {{tls_auth_key}}
 </tls-crypt>`}
-  </pre>
-
-  <p>
-    ⚠️ Do not remove or change the placeholders unless you understand their purpose.
-    Each one is automatically replaced with correct values for the selected VPN server and user certificate.
-  </p>
-</div>
-
-
-      </div>
+            </pre>
+            <p>
+              ⚠️ Do not remove or change the placeholders unless you understand their purpose.
+              Each one is automatically replaced with correct values for the selected VPN server and user certificate.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

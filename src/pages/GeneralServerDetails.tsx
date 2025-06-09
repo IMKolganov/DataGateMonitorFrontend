@@ -14,7 +14,7 @@ import {
 } from "../utils/api";
 
 export function GeneralServerDetails() {
-  const { id } = useParams<{ id?: string }>();
+  const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const [isLive, setIsLive] = useState(true);
   const [serverInfo, setServerInfo] = useState<any>(null);
   const [loadingServer, setLoadingServer] = useState(false);
@@ -26,24 +26,24 @@ export function GeneralServerDetails() {
   const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    if (id) {
+    if (vpnServerId) {
       fetchServerData();
     }
-  }, [id]);
+  }, [vpnServerId]);
 
   useEffect(() => {
-    if (id) {
+    if (vpnServerId) {
       fetchClientsData();
     }
-  }, [id, isLive, page, pageSize]);
+  }, [vpnServerId, isLive, page, pageSize]);
 
   const fetchServerData = async () => {
-    if (!id) return;
+    if (!vpnServerId) return;
     setLoadingServer(true);
     fetchClientsData();
 
     try {
-      const serverRes = await fetchServersWithStats(id);
+      const serverRes = await fetchServersWithStats(vpnServerId);
       setServerInfo(serverRes || {});
     } catch (error) {
       console.error("Error fetching server details:", error);
@@ -53,13 +53,13 @@ export function GeneralServerDetails() {
   };
 
   const fetchClientsData = async () => {
-    if (!id) return;
+    if (!vpnServerId) return;
     setLoadingClients(true);
 
     try {
       const clientsRes = isLive
-        ? await fetchConnectedClients(id, page + 1, pageSize)
-        : await fetchHistoryClients(id, page + 1, pageSize);
+        ? await fetchConnectedClients(vpnServerId, page + 1, pageSize)
+        : await fetchHistoryClients(vpnServerId, page + 1, pageSize);
 
       setClients(clientsRes?.clients || []);
       setTotalClients(clientsRes?.totalCount || 0);

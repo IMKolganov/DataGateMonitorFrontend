@@ -29,21 +29,12 @@ interface Props {
 
 const formatUtcDate = (utcDateString: string | null | undefined) => {
   if (!utcDateString || utcDateString === "N/A") return "Not Scheduled";
-
   try {
-    const sanitizedUtcString = utcDateString.replace(/\.\d{6,}Z$/, ".000Z");
-
-    const date = new Date(sanitizedUtcString);
+    const sanitized = utcDateString.replace(/\.\d{6,}Z$/, ".000Z");
+    const date = new Date(sanitized);
     if (isNaN(date.getTime())) throw new Error("Invalid Date");
 
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}`;
   } catch (error) {
     console.error("Error formatting date:", error);
     return "Invalid Date";
@@ -80,11 +71,14 @@ const getStatusLabel = (status: ServiceStatus) => {
 };
 
 const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, errorMessage, nextRunTime, onView, onEdit, onDelete }) => {
+  const id = server.openVpnServerResponses.id;
   return (
-    <li className="server-item">
+    <div className="server-item-content">
       <div className="server-header">
         <div className="server-info">
-          <strong className="server-name">({vpnServerId}) {server.openVpnServerResponses.serverName}</strong>
+          <strong className="server-name">
+            ({vpnServerId !== 0 ? vpnServerId : id}) {server.openVpnServerResponses.serverName}
+          </strong>
         </div>
         <div className={`server-status ${server.openVpnServerResponses.isOnline ? "status-online" : "status-offline"}`}>
           {server.openVpnServerResponses.isOnline ? "✅ Online" : "❌ Offline"}
@@ -103,25 +97,23 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
           <span className="detail-label">Count Connected Clients:</span>
           <span>{server.countConnectedClients}</span>
         </div>
+
         <div className="detail-row">
           {BsPerson({ className: "detail-icon" })}
           <span className="detail-label">Count Sessions:</span>
           <span>{server.countSessions}</span>
         </div>
+
         {server.openVpnServerResponses.isDefault && (
           <div className="detail-row">
-            <span className="detail-icon">
-              {BsFillBookmarkStarFill({ className: "detail-icon" })}
-            </span>
+            {BsFillBookmarkStarFill({ className: "detail-icon" })}
             <span className="detail-label">Default server</span>
           </div>
         )}
       </div>
 
       <div className="server-service">
-        <div className="detail-row">
-          {getStatusLabel(serviceStatus)}
-        </div>
+        <div className="detail-row">{getStatusLabel(serviceStatus)}</div>
         <div className="detail-row">
           {BsClock({ className: "detail-icon" })}
           <span className="detail-label">Next Run Time:</span>
@@ -135,20 +127,35 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
       </div>
 
       <div className="server-actions">
-        <button className="btn secondary" onClick={() => onView(server.openVpnServerResponses.id)}>
+        <button
+          className="btn secondary"
+          onClick={(e) => {
+            e.stopPropagation();
+            onView(id);
+          }}
+        >
           {FaEye({ className: "icon" })} View
         </button>
-        <button className="btn secondary" onClick={() => onEdit(server.openVpnServerResponses.id)}>
+        <button
+          className="btn secondary"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(id);
+          }}
+        >
           {FaEdit({ className: "icon" })} Edit
         </button>
         <button
           className="btn secondary"
-          onClick={() => onDelete(server.openVpnServerResponses.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(id);
+          }}
         >
           {FaTrash({ className: "icon" })} Delete
         </button>
       </div>
-    </li>
+    </div>
   );
 };
 

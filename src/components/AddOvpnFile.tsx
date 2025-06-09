@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { addOvpnFile } from "../utils/api";
+import { addClientOvpnFile } from "../utils/api";
 import "../css/Certificates.css";
 import { FaPlus, FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -35,7 +35,7 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
     setMessage(null);
 
     try {
-      await addOvpnFile(Number(vpnServerId), newExternalId, newCommonName, "openVpnClient");
+      await addClientOvpnFile(Number(vpnServerId), newExternalId, newCommonName, "openVpnClient");
       setNewCommonName("");
       setNewExternalId("");
       setMessage({ type: "success", text: "OVPN file added successfully!" });

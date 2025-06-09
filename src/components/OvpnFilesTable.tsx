@@ -3,7 +3,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
 import type { IssuedOvpnFile } from "../utils/types";
-import { revokeOvpnFile, downloadOvpnFile } from "../utils/api";
+import { revokeClientOvpnFile, downloadClientOvpnFile } from "../utils/api";
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../utils/utils";
@@ -29,7 +29,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
     async (commonName: string) => {
       if (!window.confirm(`Are you sure you want to revoke OVPN file ${commonName}?`)) return;
       try {
-        await revokeOvpnFile(vpnServerId, commonName);
+        await revokeClientOvpnFile(vpnServerId, commonName);
         onRevoke();
         toast.success("OVPN file has been successfully revoked.");
       } catch (error) {
@@ -42,7 +42,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
 
   const handleDownload = async (issuedOvpnFileId: number) => {
     try {
-      await downloadOvpnFile(issuedOvpnFileId, vpnServerId);
+      await downloadClientOvpnFile(issuedOvpnFileId, vpnServerId);
     } catch (error: any) {
       console.error("Download failed:", error);
       toast.error(error.message || "Error downloading file.");

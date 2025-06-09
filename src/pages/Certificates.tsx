@@ -5,7 +5,7 @@ import { getServer } from "../utils/api";
 import "../css/Certificates.css";
 
 const Certificates: React.FC = () => {
-  const { id: vpnServerId } = useParams<{ id?: string }>();
+  const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const [vpnServerName, setVpnServerName] = useState<string>("");
 
   useEffect(() => {

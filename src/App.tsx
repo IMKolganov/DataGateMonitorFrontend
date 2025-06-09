@@ -11,6 +11,8 @@ import ApplicationSettings from "./pages/ApplicationSettings";
 import GeneralTab from "./pages/GeneralServerDetails";
 import CertificatesTab from "./pages/Certificates";
 import WebConsole from "./pages/WebConsole";
+import Statistics from "./pages/Statistics";
+import Events from "./pages/Events";
 import Login from "./pages/Login";
 import { ToastContainer } from "react-toastify";
 import GeneralSettings from "./pages/GeneralSettings";
@@ -48,11 +50,13 @@ function App() {
                     <Route path="/" element={<Navigate to="/servers" replace />} />
 
                     <Route path="/servers" element={<ServersWithDetails />}>
-                      <Route path=":id" element={<ServerDetails />}>
+                      <Route path=":vpnServerId" element={<ServerDetails />}>
                         <Route index element={<GeneralTab />} />
                         <Route path="certificates" element={<CertificatesTab />} />
                         <Route path="ovpn-file-config" element={<OvpnFileConfigForm />} />
                         <Route path="console" element={<WebConsole />} />
+                        <Route path="statistics" element={<Statistics />} />
+                        <Route path="events" element={<Events />} />
                       </Route>
                     </Route>
 
@@ -63,7 +67,6 @@ function App() {
                       <Route path="geolitedb" element={<GeoLiteDbSettings />} />
                       <Route path="telegrambot" element={<TelegramBotSettings />} />
                     </Route>
-
 
                     <Route path="/settings/applications" element={<ApplicationSettings />} />
                     <Route path="/servers/add" element={<ServerForm />} />

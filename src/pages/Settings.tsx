@@ -1,10 +1,24 @@
-import { useNavigate, NavLink, Outlet } from "react-router-dom";
+import { useNavigate, NavLink, Outlet, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import "../css/Settings.css";
-import { appVersion } from '../version';
+import { appVersion } from "../version";
 
 export function Settings() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const tabs = [
+    { label: "General", path: "general" },
+    { label: "API Clients", path: "applications" },
+    { label: "GeoLite DB", path: "geolitedb" },
+    { label: "Telegram Bot", path: "telegrambot" },
+  ];
+
+  const currentTab = location.pathname.split("/settings/")[1] || "general";
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    navigate(`/settings/${e.target.value}`);
+  };
 
   return (
     <div className="content-wrapper wide-table settings">
@@ -22,36 +36,36 @@ export function Settings() {
         </div>
       </div>
 
-      <div className="tabs">
-        <NavLink
-          to="/settings/general"
-          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-        >
-          General
-        </NavLink>
-        <NavLink
-          to="/settings/applications"
-          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-        >
-          API Clients
-        </NavLink>
-        <NavLink
-          to="/settings/geolitedb"
-          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-        >
-          GeoLite DB
-        </NavLink>
-        <NavLink
-          to="/settings/telegrambot"
-          className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-        >
-          Telegram Bot
-        </NavLink>
+      {/* Desktop tabs */}
+      <div className="tabs desktop-tabs">
+        {tabs.map((tab) => (
+          <NavLink
+            key={tab.path}
+            to={`/settings/${tab.path}`}
+            className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+          >
+            {tab.label}
+          </NavLink>
+        ))}
       </div>
+
+      {/* Mobile dropdown */}
+      <select
+        className="tabs-dropdown mobile-tabs"
+        value={currentTab}
+        onChange={handleSelectChange}
+      >
+        {tabs.map((tab) => (
+          <option key={tab.path} value={tab.path}>
+            {tab.label}
+          </option>
+        ))}
+      </select>
 
       <div className="tab-content">
         <Outlet />
       </div>
+
       <div className="footer">
         <p>© 2024 OpenVPN Gate Monitor v. {appVersion}</p>
       </div>

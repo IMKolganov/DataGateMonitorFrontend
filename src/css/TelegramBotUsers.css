@@ -1,0 +1,26 @@
+.app-warning {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  color: #c9d1d9;
+  font-size: 14px;
+}
+
+.app-warning ul,
+.app-warning ol {
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.app-warning code {
+  background: #30363d;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.app-warning a {
+  color: #58a6ff;
+  text-decoration: underline;
+}

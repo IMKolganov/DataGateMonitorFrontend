@@ -1,7 +1,7 @@
 {
   "name": "open-vpn-gate-monitor-frontend-vite",
   "private": true,
-  "version": "0.1.1.19",
+  "version": "0.1.2.20",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -23,6 +23,7 @@
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
     "react-leaflet": "^5.0.0",
+    "react-responsive": "^10.0.1",
     "react-router-dom": "^7.6.1",
     "react-toastify": "^11.0.5"
   },
