@@ -5,6 +5,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import ServersWithDetails from "./pages/ServersWithDetails";
 import ServerForm from "./pages/ServerForm";
+import NotFound from "./pages/NotFound";
 import ServerDetails from "./pages/ServerDetails";
 import Settings from "./pages/Settings";
 import ApplicationSettings from "./pages/ApplicationSettings";
@@ -73,6 +74,8 @@ function App() {
                     <Route path="/servers/edit/:serverId" element={<ServerForm />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/contact" element={<Contact />} />
+
+                    <Route path="*" element={<NotFound />} />
                   </Routes>
                 </main>
               </PrivateRoute>

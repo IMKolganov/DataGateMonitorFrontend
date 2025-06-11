@@ -26,10 +26,10 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
   const [issuedToFilter, setIssuedToFilter] = useState("");
 
   const handleRevoke = useCallback(
-    async (commonName: string) => {
+    async (ovpnFileId: number, commonName: string) => {
       if (!window.confirm(`Are you sure you want to revoke OVPN file ${commonName}?`)) return;
       try {
-        await revokeClientOvpnFile(vpnServerId, commonName);
+        await revokeClientOvpnFile(Number(vpnServerId), ovpnFileId, commonName);
         onRevoke();
         toast.success("OVPN file has been successfully revoked.");
       } catch (error) {
@@ -98,7 +98,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       renderCell: (params) => (
         <div className="action-container">
           {!params.row.isRevoked && (
-            <button className="btn danger" onClick={() => handleRevoke(params.row.commonName)}>
+            <button className="btn danger" onClick={() => handleRevoke(params.row.id, params.row.commonName)}>
               Revoke
             </button>
           )}
