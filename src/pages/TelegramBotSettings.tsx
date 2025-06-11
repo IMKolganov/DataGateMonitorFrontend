@@ -13,6 +13,8 @@ interface TelegramBotUser {
   lastName?: string;
   createDate: string;
   lastUpdate: string;
+  isAdmin: boolean;
+  isBlocked: boolean;
 }
 
 export function TelegramBotSettings() {
@@ -25,8 +27,11 @@ export function TelegramBotSettings() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const response = await getTelegramBotUsers();
-      setUsers(response.data.telegramBotUsers);
+      const data = await getTelegramBotUsers();
+      if (!data?.telegramBotUsers || !Array.isArray(data.telegramBotUsers)) {
+        throw new Error("Unexpected response format");
+      }
+      setUsers(data.telegramBotUsers);
     } catch (error: any) {
       setErrorMessage(error.message || "Failed to load Telegram bot users");
     } finally {
@@ -74,7 +79,7 @@ export function TelegramBotSettings() {
             </div>
           )}
 
-          <TelegramBotUsersTable users={users} />
+          <TelegramBotUsersTable users={users} refreshUsers={loadUsers} />
         </>
       )}
 
