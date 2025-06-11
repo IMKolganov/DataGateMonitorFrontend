@@ -451,3 +451,10 @@ export const unsetAdmin = async (telegramId: number) => {
     data: { telegramId },
   });
 };
+
+export const fetchEvents = async (VpnServerId: string, page: number, pageSize: number): Promise<any> => {
+  const response = await apiRequest<{ data: any }>("get", `/OpenVpnServerEvent/GetEventByVpnServerId`, {
+    params: { VpnServerId, page, pageSize },
+  });
+  return response.data;
+};
