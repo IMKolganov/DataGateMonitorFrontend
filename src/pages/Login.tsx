@@ -3,6 +3,7 @@ import { fetchToken, setSecret, checkSystemStatus } from "../utils/api";
 import { FaDoorOpen } from "react-icons/fa";
 import "../css/Login.css";
 import { appVersion } from '../version';
+import { scheduleAutoLogout } from "../utils/jwt-utils";
 
 const Login = () => {
   const [clientId, setClientId] = useState("");
@@ -58,6 +59,7 @@ const Login = () => {
       const token = await fetchToken(clientId, clientSecret);
       localStorage.setItem("token", token);
       window.location.href = "/";
+      scheduleAutoLogout(token);
     } catch (err: any) {
       console.error("Login error:", err);
 
