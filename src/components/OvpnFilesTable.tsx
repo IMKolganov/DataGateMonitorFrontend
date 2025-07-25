@@ -15,7 +15,7 @@ const safeFormatDate = (input?: string | null): string => {
 };
 
 interface Props {
-  ovpnFiles: IssuedOvpnFile[];
+  ovpnFiles: { issuedOvpnFile: IssuedOvpnFile }[];
   vpnServerId: string;
   onRevoke: () => void;
   loading: boolean;
@@ -49,26 +49,28 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
     }
   };
 
-  const filteredFiles = ovpnFiles.filter(
-    (file) =>
-      (file.commonName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) &&
-      (issuedToFilter === "" || (file.issuedTo?.toLowerCase() || "").includes(issuedToFilter.toLowerCase()))
-  );
+  const filteredFiles = ovpnFiles
+    .filter((x) => x.issuedOvpnFile?.id != null)
+    .filter(
+      (x) =>
+        (x.issuedOvpnFile.commonName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) &&
+        (issuedToFilter === "" || (x.issuedOvpnFile.issuedTo?.toLowerCase() || "").includes(issuedToFilter.toLowerCase()))
+    );
 
-  const rows = filteredFiles.map((file) => ({
-    id: file.id,
-    externalId: file.externalId || "",
-    commonName: file.commonName || "",
-    fileName: file.fileName || "",
-    filePath: file.filePath || "",
-    issuedAt: safeFormatDate(file.issuedAt),
-    issuedTo: file.issuedTo || "",
-    certFilePath: file.certFilePath || "",
-    keyFilePath: file.keyFilePath || "",
-    isRevoked: file.isRevoked,
-    message: file.message || "",
-    lastUpdate: safeFormatDate(file.lastUpdate),
-    createDate: safeFormatDate(file.createDate),
+  const rows = filteredFiles.map(({ issuedOvpnFile }, index) => ({
+    id: issuedOvpnFile.id ?? `${issuedOvpnFile.commonName}-${index}`,
+    externalId: issuedOvpnFile.externalId || "",
+    commonName: issuedOvpnFile.commonName || "",
+    fileName: issuedOvpnFile.fileName || "",
+    filePath: issuedOvpnFile.filePath || "",
+    issuedAt: safeFormatDate(issuedOvpnFile.issuedAt),
+    issuedTo: issuedOvpnFile.issuedTo || "",
+    certFilePath: issuedOvpnFile.certFilePath || "",
+    keyFilePath: issuedOvpnFile.keyFilePath || "",
+    isRevoked: issuedOvpnFile.isRevoked,
+    message: issuedOvpnFile.message || "",
+    lastUpdate: safeFormatDate(issuedOvpnFile.lastUpdate),
+    createDate: safeFormatDate(issuedOvpnFile.createDate),
   }));
 
   const columns: GridColDef[] = [
@@ -131,6 +133,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
         </div>
 
         <StyledDataGrid
+          getRowId={(row) => row.id}
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 100]}

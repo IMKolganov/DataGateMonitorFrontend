@@ -122,7 +122,7 @@ const ServerList: React.FC = () => {
                 <li
                   key={id}
                   className={`server-item clickable ${selectedServerId === id ? "selected" : ""}`}
-                  onClick={() => navigate(`/servers/${id}`)}
+                  onClick={() => navigate(`/servers/${id}/`)}
                 >
                   <ServerItem
                     server={server}
@@ -132,9 +132,9 @@ const ServerList: React.FC = () => {
                     nextRunTime={server.nextRunTime}
                     onView={(id) => {
                       if (isMobile) {
-                        navigate(`/servers/${id}`);
+                        navigate(`/servers/${id}/`);
                       } else {
-                        navigate(`/servers/${id}`, { replace: true });
+                        navigate(`/servers/${id}/`, { replace: true });
                       }
                     }}
                     onEdit={(id) => navigate(`/servers/edit/${id}`)}
