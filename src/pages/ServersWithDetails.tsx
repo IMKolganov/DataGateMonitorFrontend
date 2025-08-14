@@ -39,7 +39,6 @@ function ServersWithDetails() {
           </div>
         )}
       </div>
-
       <div className="footer">
         <p>© 2024 OpenVPN Gate Monitor v. {appVersion}</p>
       </div>
