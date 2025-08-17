@@ -3,7 +3,7 @@ import type { OverviewSeriesResponse } from "../../utils/api";
 export default function ApiJsonPanel({ data }: { data: OverviewSeriesResponse }) {
   const json = JSON.stringify(data, null, 2);
   return (
-    <div style={{ border: "1px solid #30363d", borderRadius: 12, background: "#0b1320", padding: 12 }}>
+    <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <div style={{ fontWeight: 700 }}>API response {data?.summary ? "(live or fallback)" : ""}</div>
         <button
