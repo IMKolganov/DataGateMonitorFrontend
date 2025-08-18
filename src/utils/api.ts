@@ -145,7 +145,7 @@ export const fetchServersWithStats = async (id: string): Promise<any> => {
 };
 
 export const fetchConnectedClients = async (VpnServerId: string, page: number, pageSize: number): Promise<any> => {
-  const response = await apiRequest<{ data: any }>("get", `/OpenVpnServers/GetAllConnectedClients`, {
+  const response = await apiRequest<{ data: any }>("get", `/OpenVpnServerClients/GetAllConnectedClients`, {
     params: { VpnServerId, page, pageSize },
   });
   return response.data;
@@ -153,7 +153,7 @@ export const fetchConnectedClients = async (VpnServerId: string, page: number, p
 
 export const fetchHistoryClients = async (VpnServerId: string, page: number, pageSize: number): Promise<any> => {
 
-  const response = await apiRequest<{ data: any }>("get", `/OpenVpnServers/GetAllHistoryClients`, {
+  const response = await apiRequest<{ data: any }>("get", `/OpenVpnServerClients/GetAllHistoryClients`, {
     params: { VpnServerId, page, pageSize },
   });
   return response.data;
@@ -457,4 +457,70 @@ export const fetchEvents = async (VpnServerId: string, page: number, pageSize: n
     params: { VpnServerId, page, pageSize },
   });
   return response.data;
+};
+
+
+export type OverviewGrouping = "auto" | "hours" | "days" | "months" | "years";
+
+export type OverviewSeriesRow = {
+  ts: string;                 // ISO-8601 (UTC)
+  activeClients: number;
+  trafficInBytes: number;
+  trafficOutBytes: number;
+  trafficTotalBytes: number;
+};
+
+export type OverviewSeriesMeta = {
+  from: string;               // ISO-8601
+  to: string;                 // ISO-8601
+  grouping: Exclude<OverviewGrouping, "auto">;
+  timezone: string;
+  trafficUnit: "bytes";       // <-- like on backend
+  vpnServerId?: number | null;
+};
+
+export type OverviewSeriesSummary = {
+  totalTrafficInBytes: number;
+  totalTrafficOutBytes: number;
+  peakActiveClients: number;
+};
+
+export type OverviewSeriesResponse = {
+  meta: OverviewSeriesMeta;
+  summary: OverviewSeriesSummary;
+  series: OverviewSeriesRow[];
+};
+
+export type FetchOverviewSeriesParams = {
+  from: Date;
+  to: Date;
+  grouping?: OverviewGrouping;   // default "auto"
+  vpnServerId?: number | null;
+  externalId?: string | null;
+};
+
+// always serialize as UTC ISO (…Z)
+const toUtcIso = (d: Date | string | number) => {
+  const dt = d instanceof Date ? d : new Date(d);
+  return dt.toISOString();
+};
+
+export const fetchOverviewSeries = async (
+  params: FetchOverviewSeriesParams
+): Promise<OverviewSeriesResponse> => {
+  const { from, to, grouping = "auto", vpnServerId, externalId } = params;
+
+  const qs = new URLSearchParams();
+  qs.set("from", toUtcIso(from));
+  qs.set("to", toUtcIso(to));
+  qs.set("grouping", grouping);
+  if (vpnServerId != null) qs.set("vpnServerId", String(vpnServerId));
+  if (externalId && externalId.trim()) qs.set("externalId", externalId.trim());
+
+  const resp = await apiRequest<OverviewSeriesResponse>(
+    "get",
+    `/OpenVpnServerClients/overview/series?${qs.toString()}`
+  );
+
+  return (resp as any).data ?? resp;
 };
