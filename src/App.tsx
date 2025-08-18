@@ -19,6 +19,7 @@ import { ToastContainer } from "react-toastify";
 import GeneralSettings from "./pages/GeneralSettings";
 import GeoLiteDbSettings from "./pages/GeoLiteDbSettings";
 import TelegramBotSettings from "./pages/TelegramBotSettings";
+import ServersOverview from "./pages/ServersOverview"; 
 import "react-toastify/dist/ReactToastify.css";
 import "./css/ToastifyDark.css";
 
@@ -51,6 +52,7 @@ function App() {
                     <Route path="/" element={<Navigate to="/servers" replace />} />
 
                     <Route path="/servers" element={<ServersWithDetails />}>
+                      <Route index element={<ServersOverview />} />
                       <Route path=":vpnServerId" element={<ServerDetails />}>
                         <Route index element={<GeneralTab />} />
                         <Route path="certificates" element={<CertificatesTab />} />
