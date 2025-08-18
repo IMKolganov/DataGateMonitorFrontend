@@ -499,22 +499,10 @@ export type FetchOverviewSeriesParams = {
   externalId?: string | null;
 };
 
-// Date -> "YYYY-MM-DDTHH:mm:ss±HH:mm" (с локальным смещением)
-const toOffsetIso = (d: Date) => {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const y = d.getFullYear();
-  const m = pad(d.getMonth() + 1);
-  const day = pad(d.getDate());
-  const hh = pad(d.getHours());
-  const mm = pad(d.getMinutes());
-  const ss = pad(d.getSeconds());
-
-  const tzMin = -d.getTimezoneOffset();          // minutes east of UTC
-  const sign = tzMin >= 0 ? "+" : "-";
-  const tzH = pad(Math.floor(Math.abs(tzMin) / 60));
-  const tzM = pad(Math.abs(tzMin) % 60);
-
-  return `${y}-${m}-${day}T${hh}:${mm}:${ss}${sign}${tzH}:${tzM}`;
+// always serialize as UTC ISO (…Z)
+const toUtcIso = (d: Date | string | number) => {
+  const dt = d instanceof Date ? d : new Date(d);
+  return dt.toISOString();
 };
 
 export const fetchOverviewSeries = async (
@@ -523,17 +511,16 @@ export const fetchOverviewSeries = async (
   const { from, to, grouping = "auto", vpnServerId, externalId } = params;
 
   const qs = new URLSearchParams();
-  qs.set("from", toOffsetIso(from));
-  qs.set("to", toOffsetIso(to));
+  qs.set("from", toUtcIso(from));
+  qs.set("to", toUtcIso(to));
   qs.set("grouping", grouping);
   if (vpnServerId != null) qs.set("vpnServerId", String(vpnServerId));
   if (externalId && externalId.trim()) qs.set("externalId", externalId.trim());
 
-  // apiRequest, как у тебя, уже префиксует /api → оставляем без него здесь
   const resp = await apiRequest<OverviewSeriesResponse>(
     "get",
     `/OpenVpnServerClients/overview/series?${qs.toString()}`
   );
 
-  return (resp as any).data ?? resp; // если apiRequest возвращает AxiosResponse
+  return (resp as any).data ?? resp;
 };
