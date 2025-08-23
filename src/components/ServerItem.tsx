@@ -22,6 +22,10 @@ interface Props {
   serviceStatus: ServiceStatus;
   errorMessage: string | null;
   nextRunTime: string;
+
+  wsCountConnectedClients?: number | null;
+  wsCountSessions?: number | null;
+
   onView: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
@@ -70,8 +74,26 @@ const getStatusLabel = (status: ServiceStatus) => {
   }
 };
 
-const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, errorMessage, nextRunTime, onView, onEdit, onDelete }) => {
+const ServerItem: React.FC<Props> = ({
+  server,
+  vpnServerId,
+  serviceStatus,
+  errorMessage,
+  nextRunTime,
+  wsCountConnectedClients,
+  wsCountSessions,
+  onView,
+  onEdit,
+  onDelete
+}) => {
   const id = server.openVpnServerResponses.id;
+
+  // Prefer WS values, fallback to REST values
+  const connectedClients =
+    wsCountConnectedClients ?? server.countConnectedClients ?? 0;
+  const sessions =
+    wsCountSessions ?? server.countSessions ?? 0;
+
   return (
     <div className="server-item-content">
       <div className="server-header">
@@ -95,13 +117,13 @@ const ServerItem: React.FC<Props> = ({ server, vpnServerId, serviceStatus, error
         <div className="detail-row">
           {IoMdPerson({ className: "detail-icon" })}
           <span className="detail-label">Count Connected Clients:</span>
-          <span>{server.countConnectedClients}</span>
+          <span>{connectedClients}</span>
         </div>
 
         <div className="detail-row">
           {BsPerson({ className: "detail-icon" })}
           <span className="detail-label">Count Sessions:</span>
-          <span>{server.countSessions}</span>
+          <span>{sessions}</span>
         </div>
 
         {server.openVpnServerResponses.isDefault && (
