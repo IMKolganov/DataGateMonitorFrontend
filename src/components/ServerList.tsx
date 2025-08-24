@@ -15,7 +15,10 @@ interface ServerWithStatus extends OpenVpnServerData {
   serviceStatus: ServiceStatus;
   errorMessage: string | null;
   nextRunTime: string;
+  wsCountConnectedClients?: number;
+  wsCountSessions?: number;
 }
+
 
 const ServerList: React.FC = () => {
   const [servers, setServers] = useState<ServerWithStatus[]>([]);
@@ -52,6 +55,8 @@ const ServerList: React.FC = () => {
                 serviceStatus: serviceInfo.status,
                 errorMessage: serviceInfo.errorMessage,
                 nextRunTime: serviceInfo.nextRunTime,
+                wsCountConnectedClients: serviceInfo.countConnectedClients,
+                wsCountSessions: serviceInfo.countSessions,
               }
             : server;
         })
@@ -130,6 +135,8 @@ const ServerList: React.FC = () => {
                     serviceStatus={server.serviceStatus}
                     errorMessage={server.errorMessage}
                     nextRunTime={server.nextRunTime}
+                    wsCountConnectedClients={server.wsCountConnectedClients}
+                    wsCountSessions={server.wsCountSessions}
                     onView={(id) => {
                       if (isMobile) {
                         navigate(`/servers/${id}/`);

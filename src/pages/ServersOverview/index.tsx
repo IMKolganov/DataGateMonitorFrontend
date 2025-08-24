@@ -4,6 +4,7 @@ import { fetchOverviewSeries, type OverviewSeriesResponse } from "../../utils/ap
 import StatsCards from "./StatsCards";
 import OverviewChart from "./OverviewChart";
 import ApiJsonPanel from "./ApiJsonPanel";
+import GeoMap from "./GeoMap";
 import {
   addDays, endOfToday, startOfToday,
   toChartPoints, buildFallbackOverviewResponse,
@@ -99,7 +100,9 @@ export default function ServersOverview() {
       <OverviewChart data={chartData} loading={loading} error={error} />
 
       {/* API JSON */}
-      <ApiJsonPanel data={jsonForPanel} />
+      {/* <ApiJsonPanel data={jsonForPanel} /> */}
+
+      <GeoMap />
     </div>
   );
 }
