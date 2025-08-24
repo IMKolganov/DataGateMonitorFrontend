@@ -524,3 +524,43 @@ export const fetchOverviewSeries = async (
 
   return (resp as any).data ?? resp;
 };
+
+
+export type GeoPointAggDto = {
+  country: string | null;
+  region: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  sessionsCount: number;
+  totalBytesIn: number;
+  totalBytesOut: number;
+};
+
+export type FetchGeoPointsParams = {
+  from: Date | string;
+  to: Date | string;
+  vpnServerId?: number | null;
+  externalId?: string | null;
+  onlyWithCoordinates?: boolean;
+};
+
+export const fetchGeoPoints = async (
+  params: FetchGeoPointsParams
+): Promise<GeoPointAggDto[]> => {
+  const { from, to, vpnServerId, externalId, onlyWithCoordinates = true } = params;
+
+  const qs = new URLSearchParams();
+  qs.set("from", toUtcIso(from));
+  qs.set("to", toUtcIso(to));
+  qs.set("onlyWithCoordinates", String(onlyWithCoordinates));
+
+  if (vpnServerId != null) qs.set("vpnServerId", String(vpnServerId));
+  if (externalId && externalId.trim()) qs.set("externalId", externalId.trim());
+
+  const resp = await apiRequest<GeoPointAggDto[]>(
+    "get",
+    `/OpenVpnServerClients/overview/points?${qs.toString()}`
+  );
+
+  return (resp as any).data ?? resp;
+};
