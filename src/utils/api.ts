@@ -524,3 +524,88 @@ export const fetchOverviewSeries = async (
 
   return (resp as any).data ?? resp;
 };
+
+
+export type GeoPointAggDto = {
+  country: string | null;
+  region: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  sessionsCount: number;
+  totalBytesIn: number;
+  totalBytesOut: number;
+};
+
+export type FetchGeoPointsParams = {
+  from: Date | string;
+  to: Date | string;
+  vpnServerId?: number | null;
+  externalId?: string | null;
+  onlyWithCoordinates?: boolean;
+};
+
+export const fetchGeoPoints = async (
+  params: FetchGeoPointsParams
+): Promise<GeoPointAggDto[]> => {
+  const { from, to, vpnServerId, externalId, onlyWithCoordinates = true } = params;
+
+  const qs = new URLSearchParams();
+  qs.set("from", toUtcIso(from));
+  qs.set("to", toUtcIso(to));
+  qs.set("onlyWithCoordinates", String(onlyWithCoordinates));
+
+  if (vpnServerId != null) qs.set("vpnServerId", String(vpnServerId));
+  if (externalId && externalId.trim()) qs.set("externalId", externalId.trim());
+
+  const resp = await apiRequest<GeoPointAggDto[]>(
+    "get",
+    `/OpenVpnServerClients/overview/points?${qs.toString()}`
+  );
+
+  return (resp as any).data ?? resp;
+};
+
+export type OverviewTotalsResponse = {
+  meta: {
+    from: string;        // ISO
+    to: string;          // ISO
+    grouping: string;    // "none"
+    timezone: string;    // "UTC"
+    trafficUnit: string; // "bytes"
+    vpnServerId?: number | null;
+  };
+  totals: {
+    sessionsCount: number;
+    usersCount: number;          // unique ExternalId
+    trafficInBytes: number;
+    trafficOutBytes: number;
+    trafficTotalBytes: number;
+  };
+};
+
+export type FetchOverviewTotalsParams = {
+  from: Date | string;
+  to: Date | string;
+  vpnServerId?: number | null;
+  externalId?: string | null;
+};
+
+export const fetchOverviewTotals = async (
+  params: FetchOverviewTotalsParams
+): Promise<OverviewTotalsResponse> => {
+  const { from, to, vpnServerId, externalId } = params;
+
+  const qs = new URLSearchParams();
+  qs.set("from", toUtcIso(from));
+  qs.set("to", toUtcIso(to));
+  if (vpnServerId != null) qs.set("vpnServerId", String(vpnServerId));
+  if (externalId && externalId.trim()) qs.set("externalId", externalId.trim());
+
+  const resp = await apiRequest<OverviewTotalsResponse>(
+    "get",
+    `/OpenVpnOverview/overview/totals?${qs.toString()}`
+  );
+
+  // axios/fetch compatibility
+  return (resp as any).data ?? resp;
+};

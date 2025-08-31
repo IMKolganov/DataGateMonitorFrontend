@@ -27,7 +27,7 @@ export function GeoLiteDbDownloader() {
         const versionResponse = await getGeoLiteDatabaseVersion();
         setVersion(versionResponse.version);
       } catch (err: any) {
-        console.error("Failed to fetch version:", err);
+        toast.error("Failed to fetch version:" + (err?.response?.data?.error || err.message || "Unknown error"));
       }
 
       try {
@@ -81,7 +81,6 @@ export function GeoLiteDbDownloader() {
       setRequestInProgress(true);
       await updateGeoLiteDatabase();
     } catch (err: any) {
-      console.error("Update failed:", err);
       toast.error(err?.response?.data?.error || err.message || "Unknown error");
       setRequestInProgress(false);
     }
