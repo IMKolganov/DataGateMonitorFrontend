@@ -39,8 +39,7 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
       await revokeCertificate(vpnServerId, commonName);
       onRevoke();
     } catch (error) {
-      console.error("Failed to revoke certificate", error);
-      toast.error("Error revoking certificate.");
+      toast.error("Failed to revoke certificate.");
     }
   }, [vpnServerId, onRevoke]);
 

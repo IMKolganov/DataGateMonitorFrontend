@@ -1,3 +1,4 @@
+// vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { readFileSync } from 'fs';
@@ -9,12 +10,13 @@ export default defineConfig({
   server: {
     port: Number(process.env.VITE_PORT) || 5582,
     proxy: {
-      '/api': {
+      '/api/hubs': {
         target: 'http://localhost:5581',
         changeOrigin: true,
         secure: false,
+        ws: true,
       },
-      '/api/hubs': {
+      '/api': {
         target: 'http://localhost:5581',
         changeOrigin: true,
         secure: false,
