@@ -1,5 +1,5 @@
 import type { Grouping } from "../../components/DateRangeFilter";
-import type { ChartPoint, ServerInfo } from "./types";
+import type { ChartPoint } from "./types";
 import type {
   OverviewSeriesResponse,
   OverviewSeriesRow,

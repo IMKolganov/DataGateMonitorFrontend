@@ -38,7 +38,8 @@ const ServerList: React.FC = () => {
 
   useEffect(() => {
     if (Object.keys(serviceData).length > 0) {
-      const normalizedServiceData: Record<number, typeof serviceData[string]> = {};
+      type ServiceDataValue = (typeof serviceData)[keyof typeof serviceData];
+      const normalizedServiceData: Record<number, ServiceDataValue> = {};
       for (const [key, value] of Object.entries(serviceData)) {
         normalizedServiceData[parseInt(key)] = value;
       }
