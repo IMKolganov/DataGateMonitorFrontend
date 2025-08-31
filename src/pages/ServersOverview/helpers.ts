@@ -38,7 +38,6 @@ export function toChartPoints(
   }));
 }
 
-/* ---- fallback (локальный мок, форма как у бэкенда) ---- */
 export function buildFallbackOverviewResponse(opts: {
   from: Date; to: Date; grouping: Grouping;
   totals: { servers: number; clients: number; totalIn: number; totalOut: number; sessions: number };
