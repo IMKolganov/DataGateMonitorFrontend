@@ -140,10 +140,3 @@ export function buildFallbackOverviewResponse(opts: {
     series,
   };
 }
-
-/* ---- mock data for totals ---- */
-export const mockServers: ServerInfo[] = [
-  { id: 1, name: "Default server", uptime: "2025-08-13T19:21:06", version: "2.6.3", localIp: "10.51.28.1", remoteIp: "213.133.91.43", trafficInBytes: 2.87 * 1024 * 1024, trafficOutBytes: 42.64 * 1024 * 1024, totalTrafficInBytes: 52.53 * 1024 * 1024, totalTrafficOutBytes: 108.67 * 1024 * 1024, connectedClients: 0, sessionsCount: 56, apiUrl: "http://192.168.0.3:5010/", isDefault: true },
-  { id: 2, name: "Edge node EU-1",   uptime: "2025-08-13T09:05:12", version: "2.6.3", localIp: "10.51.29.1", remoteIp: "88.198.10.22", trafficInBytes: 12.3 * 1024 * 1024, trafficOutBytes: 9.7 * 1024 * 1024, totalTrafficInBytes: 812.5 * 1024 * 1024, totalTrafficOutBytes: 1_204.9 * 1024 * 1024, connectedClients: 4, sessionsCount: 312, apiUrl: "http://192.168.0.4:5010/", isDefault: false },
-  { id: 3, name: "Edge node US-1",   uptime: "2025-08-12T22:10:00", version: "2.6.2", localIp: "10.51.30.1", remoteIp: "66.55.120.11", trafficInBytes: 5.2 * 1024 * 1024,  trafficOutBytes: 7.9 * 1024 * 1024, totalTrafficInBytes: 340.1 * 1024 * 1024, totalTrafficOutBytes: 502.7 * 1024 * 1024, connectedClients: 2, sessionsCount: 144, apiUrl: "http://192.168.0.5:5010/", isDefault: false },
-];

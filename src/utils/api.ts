@@ -564,3 +564,48 @@ export const fetchGeoPoints = async (
 
   return (resp as any).data ?? resp;
 };
+
+export type OverviewTotalsResponse = {
+  meta: {
+    from: string;        // ISO
+    to: string;          // ISO
+    grouping: string;    // "none"
+    timezone: string;    // "UTC"
+    trafficUnit: string; // "bytes"
+    vpnServerId?: number | null;
+  };
+  totals: {
+    sessionsCount: number;
+    usersCount: number;          // unique ExternalId
+    trafficInBytes: number;
+    trafficOutBytes: number;
+    trafficTotalBytes: number;
+  };
+};
+
+export type FetchOverviewTotalsParams = {
+  from: Date | string;
+  to: Date | string;
+  vpnServerId?: number | null;
+  externalId?: string | null;
+};
+
+export const fetchOverviewTotals = async (
+  params: FetchOverviewTotalsParams
+): Promise<OverviewTotalsResponse> => {
+  const { from, to, vpnServerId, externalId } = params;
+
+  const qs = new URLSearchParams();
+  qs.set("from", toUtcIso(from));
+  qs.set("to", toUtcIso(to));
+  if (vpnServerId != null) qs.set("vpnServerId", String(vpnServerId));
+  if (externalId && externalId.trim()) qs.set("externalId", externalId.trim());
+
+  const resp = await apiRequest<OverviewTotalsResponse>(
+    "get",
+    `/OpenVpnOverview/overview/totals?${qs.toString()}`
+  );
+
+  // axios/fetch compatibility
+  return (resp as any).data ?? resp;
+};

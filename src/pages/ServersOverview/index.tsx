@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "react-toastify";
 import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
 import { fetchOverviewSeries, type OverviewSeriesResponse } from "../../utils/api";
+import { fetchOverviewTotals, type OverviewTotalsResponse } from "../../utils/api";
 import StatsCards from "./StatsCards";
 import OverviewChart from "./OverviewChart";
 import GeoMap from "./GeoMap";
@@ -8,65 +10,117 @@ import {
   addDays, endOfToday, startOfToday,
   toChartPoints, buildFallbackOverviewResponse,
 } from "./helpers";
-import { mockServers } from "./helpers";
 import type { ChartPoint } from "./types";
 
 export default function ServersOverview() {
-  const totals = useMemo(() => {
-    const serversCount = mockServers.length;
-    const clients = mockServers.reduce((s, x) => s + x.connectedClients, 0);
-    const currentIn = mockServers.reduce((s, x) => s + x.trafficInBytes, 0);
-    const currentOut = mockServers.reduce((s, x) => s + x.trafficOutBytes, 0);
-    const totalIn = mockServers.reduce((s, x) => s + x.totalTrafficInBytes, 0);
-    const totalOut = mockServers.reduce((s, x) => s + x.totalTrafficOutBytes, 0);
-    const sessions = mockServers.reduce((s, x) => s + x.sessionsCount, 0);
-    const defaults = mockServers.filter((x) => x.isDefault).length;
-    return { servers: serversCount, clients, currentIn, currentOut, totalIn, totalOut, sessions, defaults };
-  }, []);
+  // dedupe toast spam
+  const lastErrorKey = useRef<string>("");
+
+  const showErrorToast = (prefix: string, err: unknown) => {
+    const message =
+      (err as any)?.message ||
+      (typeof err === "string" ? err : "") ||
+      "Unexpected error";
+    const key = `${prefix}:${message}`;
+    if (lastErrorKey.current !== key) {
+      lastErrorKey.current = key;
+      toast.error(`${prefix}: ${message}`);
+      setTimeout(() => {
+        if (lastErrorKey.current === key) lastErrorKey.current = "";
+      }, 3000);
+    }
+  };
 
   // filters
   const [from, setFrom] = useState<Date>(addDays(startOfToday(), -6));
   const [to,   setTo]   = useState<Date>(endOfToday());
   const [grouping, setGrouping] = useState<Grouping>("auto");
 
-  // backend state
+  // backend state: series
   const [apiData, setApiData] = useState<OverviewSeriesResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState<string | null>(null);
+  const [loadingSeries, setLoadingSeries] = useState(false);
 
-  // fetch on filters change
+  // backend state: totals
+  const [totalsResp, setTotalsResp] = useState<OverviewTotalsResponse | null>(null);
+  const [loadingTotals, setLoadingTotals] = useState(false);
+
+  // fetch series on filters change
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        setLoading(true);
-        setError(null);
+        setLoadingSeries(true);
         const data = await fetchOverviewSeries({
           from, to, grouping,
           vpnServerId: undefined,
           externalId: undefined,
         });
         if (!cancelled) setApiData(data);
-      } catch (e: any) {
+      } catch (e) {
         if (!cancelled) {
-          setError(e?.message ?? "Failed to load data");
-          setApiData(null);
+          showErrorToast("Series load error", e);
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setLoadingSeries(false);
       }
     })();
     return () => { cancelled = true; };
   }, [from, to, grouping]);
 
-  // chart data: prefer backend, else fallback
+  // fetch totals on filters change
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoadingTotals(true);
+        const t = await fetchOverviewTotals({
+          from, to,
+          vpnServerId: undefined,
+          externalId: undefined,
+        });
+        if (!cancelled) setTotalsResp(t);
+      } catch (e) {
+        if (!cancelled) {
+          showErrorToast("Totals load error", e);
+        }
+      } finally {
+        if (!cancelled) setLoadingTotals(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [from, to]);
+
+  // chart data: prefer backend series; else synthesize from totals (or zeros)
   const chartData: ChartPoint[] = useMemo(() => {
     if (apiData?.series?.length) {
       return toChartPoints(apiData.series, apiData.meta.grouping);
     }
-    const fb = buildFallbackOverviewResponse({ from, to, grouping, totals });
+
+    const totalsForFallback = totalsResp
+      ? {
+          servers: 0,
+          clients: 0,
+          currentIn: 0,
+          currentOut: 0,
+          totalIn: totalsResp.totals.trafficInBytes,
+          totalOut: totalsResp.totals.trafficOutBytes,
+          sessions: totalsResp.totals.sessionsCount,
+          defaults: 0,
+        }
+      : {
+          servers: 0,
+          clients: 0,
+          currentIn: 0,
+          currentOut: 0,
+          totalIn: 0,
+          totalOut: 0,
+          sessions: 0,
+          defaults: 0,
+        };
+
+    const fb = buildFallbackOverviewResponse({ from, to, grouping, totals: totalsForFallback });
     return toChartPoints(fb.series, fb.meta.grouping);
-  }, [apiData, from, to, grouping, totals]);
+  }, [apiData, totalsResp, from, to, grouping]);
 
   const onFilterChange = (c: DateRangeChange) => {
     setFrom(c.from);
@@ -74,22 +128,32 @@ export default function ServersOverview() {
     setGrouping(c.grouping);
   };
 
+  // only totals go to cards
+  const totalsForCards = useMemo(() => {
+    return totalsResp?.totals ?? {
+      sessionsCount: 0,
+      usersCount: 0,
+      trafficInBytes: 0,
+      trafficOutBytes: 0,
+      trafficTotalBytes: 0,
+    };
+  }, [totalsResp]);
+
   return (
     <div style={{ padding: 16, backgroundColor: "#161b22", color: "#c9d1d9", minHeight: "100vh" }}>
       {/* Header */}
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
         <h2 style={{ margin: 0 }}>All Servers Overview</h2>
-        <span style={{ opacity: 0.7 }}>({totals.servers} servers)</span>
       </div>
-
-      {/* Totals */}
-      <StatsCards totals={totals} />
 
       {/* Date range filter */}
       <DateRangeFilter from={from} to={to} grouping={grouping} onChange={onFilterChange} />
 
+      {/* Totals */}
+      <StatsCards totals={totalsForCards} loading={loadingTotals} />
+
       {/* Chart */}
-      <OverviewChart data={chartData} loading={loading} error={error} />
+      <OverviewChart data={chartData} loading={loadingSeries} error={null} />
 
       <GeoMap from={from} to={to} />
     </div>
