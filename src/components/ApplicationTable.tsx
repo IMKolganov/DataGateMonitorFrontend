@@ -4,6 +4,7 @@ import { FaTrash, FaCopy } from "react-icons/fa";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
 import { revokeApplication } from "../utils/api";
+import { toast } from "react-toastify";
 
 interface Application {
   clientId: string;
@@ -28,7 +29,7 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
       await revokeApplication(clientId);
       refreshApps();
     } catch (error) {
-      console.error("Failed to revoke application:", error);
+      toast.error("Failed to revoke application.");
     } finally {
       setLoading(false);
     }

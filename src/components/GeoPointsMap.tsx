@@ -6,6 +6,7 @@ import L from "leaflet";
 import Cookies from "js-cookie";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+import { toast } from "react-toastify";
 
 import { fetchGeoPoints, type GeoPointAggDto } from "../utils/api";
 
@@ -18,7 +19,6 @@ type GeoPointsMapProps = {
   center?: [number, number];
   zoom?: number;
   serverLocation?: [number, number] | null;
-  apiBaseUrl?: string; // e.g. "http://localhost:5581"
 };
 
 // Static server icon
@@ -90,7 +90,6 @@ function formatBytes(value?: number | null, decimals = 1): string {
     n /= 1024;
     i++;
   }
-  // For plain bytes keep 0 decimals; otherwise use provided decimals
   const d = i === 0 ? 0 : decimals;
   return `${n.toFixed(d)} ${units[i]}`;
 }
@@ -104,10 +103,9 @@ function iconForTraffic(totalBytes: number): L.Icon {
   if (totalBytes <= TEN_GB)                 return ICONS.red;
   if (totalBytes <= HUNDRED_GB)             return ICONS.violet;
   if (totalBytes <= FIVE_HUNDRED_GB)        return ICONS.yellow;
-  if (totalBytes <= ONE_TB)                 return ICONS.black;  // ≤ 1 TB
-  return ICONS.black; // > 1 TB now also black to avoid gold ~ yellow
+  if (totalBytes <= ONE_TB)                 return ICONS.black;
+  return ICONS.black; // > 1 TB
 }
-
 
 export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
   from,
@@ -118,14 +116,11 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
   center = [45, 37],
   zoom = 4,
   serverLocation = null,
-  apiBaseUrl,
 }) => {
   const [selectedLayer, setSelectedLayer] = useState<keyof typeof tileLayers>(
     (Cookies.get("selectedMapLayer") as keyof typeof tileLayers) || "Carto Dark"
   );
   const [points, setPoints] = useState<GeoPointAggDto[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -140,19 +135,15 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
         vpnServerId,
         externalId,
         onlyWithCoordinates,
-        apiBaseUrl,
       }),
-    [from, to, vpnServerId, externalId, onlyWithCoordinates, apiBaseUrl]
+    [from, to, vpnServerId, externalId, onlyWithCoordinates]
   );
 
   useEffect(() => {
-    // Abort previous request if any
+    // Cancel previous request, if any
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-
-    setLoading(true);
-    setError(null);
 
     fetchGeoPoints({
       from,
@@ -160,12 +151,21 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
       vpnServerId: vpnServerId ?? undefined,
       externalId: externalId ?? undefined,
       onlyWithCoordinates,
+      // Pass signal if your API supports AbortController
+      // @ts-expect-error library typing may not include `signal`
+      signal: controller.signal,
     })
       .then((data) => setPoints(data))
       .catch((e) => {
-        if ((e as any).name !== "AbortError") setError(String(e));
-      })
-      .finally(() => setLoading(false));
+        // Ignore abort errors; show toast for real failures
+        if ((e as any).name !== "AbortError") {
+          const message = String(e);
+          toast.error(`Failed to load geo points: ${message}`, {
+            autoClose: 4500,
+            closeOnClick: true,
+          });
+        }
+      });
 
     return () => controller.abort();
   }, [depsKey]);
@@ -208,16 +208,11 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
           </select>
         </div>
 
-        <div style={{ fontSize: 12, opacity: 0.8 }}>
-          {loading
-            ? "Loading points…"
-            : error
-            ? `Error: ${error}`
-            : `Points: ${points.length}`}
-        </div>
+        {/* No loading/error/count indicators here by design */}
+        <div />
       </div>
 
-      <MapContainer style={{ height: 600, width: "100%" }}>
+      <MapContainer style={{ height: 600, width: "100%" }} center={center} zoom={zoom}>
         <ChangeView center={center} zoom={zoom} />
         <TileLayer
           url={tileLayers[selectedLayer].url}
@@ -246,7 +241,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                 icon={icon}
               >
                 <Popup>
-                <div style={{ minWidth: 220 }}>
+                  <div style={{ minWidth: 220 }}>
                     <strong>{p.country ?? "Unknown country"}</strong>
                     <br />
                     {p.region ?? "Unknown region"}
@@ -255,13 +250,12 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                     <hr />
                     👥 Sessions: {p.sessionsCount}
                     <br />
-                    {/* Use human-readable formatting */}
                     📥 In: {formatBytes(p.totalBytesIn)}
                     <br />
                     📤 Out: {formatBytes(p.totalBytesOut)}
                     <br />
                     🎯 Total: {formatBytes(total)}
-                </div>
+                  </div>
                 </Popup>
               </Marker>
             );
@@ -270,7 +264,16 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
         {bounds && <FitBounds bounds={bounds} />}
       </MapContainer>
 
-        <div style={{ marginTop: 8, fontSize: 12, opacity: 0.85, display: "flex", gap: 12, flexWrap: "wrap" }}>
+      <div
+        style={{
+          marginTop: 8,
+          fontSize: 12,
+          opacity: 0.85,
+          display: "flex",
+          gap: 12,
+          flexWrap: "wrap",
+        }}
+      >
         <LegendItem colorUrl={ICONS.grey.options.iconUrl as string}   label="0 B" />
         <LegendItem colorUrl={ICONS.blue.options.iconUrl as string}   label="≤ 1 MB" />
         <LegendItem colorUrl={ICONS.green.options.iconUrl as string}  label="≤ 50 MB" />
@@ -280,8 +283,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
         <LegendItem colorUrl={ICONS.yellow.options.iconUrl as string} label="≤ 500 GB" />
         <LegendItem colorUrl={ICONS.black.options.iconUrl as string}  label="≤ 1 TB" />
         <LegendItem colorUrl={ICONS.black.options.iconUrl as string}  label="> 1 TB" />
-        </div>
-
+      </div>
     </div>
   );
 };

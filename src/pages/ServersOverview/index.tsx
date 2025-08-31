@@ -3,7 +3,6 @@ import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../comp
 import { fetchOverviewSeries, type OverviewSeriesResponse } from "../../utils/api";
 import StatsCards from "./StatsCards";
 import OverviewChart from "./OverviewChart";
-import ApiJsonPanel from "./ApiJsonPanel";
 import GeoMap from "./GeoMap";
 import {
   addDays, endOfToday, startOfToday,
@@ -13,7 +12,6 @@ import { mockServers } from "./helpers";
 import type { ChartPoint } from "./types";
 
 export default function ServersOverview() {
-  // aggregate totals from mockServers (пока вместо бэка по серверам)
   const totals = useMemo(() => {
     const serversCount = mockServers.length;
     const clients = mockServers.reduce((s, x) => s + x.connectedClients, 0);
@@ -70,12 +68,6 @@ export default function ServersOverview() {
     return toChartPoints(fb.series, fb.meta.grouping);
   }, [apiData, from, to, grouping, totals]);
 
-  // panel JSON – реальный или фоллбек
-  const jsonForPanel: OverviewSeriesResponse = useMemo(() => {
-    if (apiData) return apiData;
-    return buildFallbackOverviewResponse({ from, to, grouping, totals });
-  }, [apiData, from, to, grouping, totals]);
-
   const onFilterChange = (c: DateRangeChange) => {
     setFrom(c.from);
     setTo(c.to);
@@ -99,10 +91,7 @@ export default function ServersOverview() {
       {/* Chart */}
       <OverviewChart data={chartData} loading={loading} error={error} />
 
-      {/* API JSON */}
-      {/* <ApiJsonPanel data={jsonForPanel} /> */}
-
-      <GeoMap />
+      <GeoMap from={from} to={to} />
     </div>
   );
 }
