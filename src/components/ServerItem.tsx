@@ -169,6 +169,7 @@ const ServerItem: React.FC<Props> = ({
         </button>
         <button
           className="btn secondary"
+          disabled
           onClick={(e) => {
             e.stopPropagation();
             onDelete(id);
