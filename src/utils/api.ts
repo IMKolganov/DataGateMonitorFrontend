@@ -590,6 +590,7 @@ export type FetchOverviewTotalsParams = {
   externalId?: string | null;
 };
 
+// utils/api.ts
 export const fetchOverviewTotals = async (
   params: FetchOverviewTotalsParams
 ): Promise<OverviewTotalsResponse> => {
@@ -603,9 +604,8 @@ export const fetchOverviewTotals = async (
 
   const resp = await apiRequest<OverviewTotalsResponse>(
     "get",
-    `/OpenVpnOverview/overview/totals?${qs.toString()}`
+    `/OpenVpnServerClients/overview/summary?${qs.toString()}`
   );
 
-  // axios/fetch compatibility
   return (resp as any).data ?? resp;
 };
