@@ -80,6 +80,44 @@
   background: #f85149;
 }
 
+.btn:disabled,
+.btn[disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+  background: #21262d;   /* тот же secondary фон */
+  border-color: #30363d; /* стандартная граница */
+  color: #484f58;        /* глушёный текст/иконка, как в GitHub dark */
+}
+
+.btn.primary:disabled,
+.btn.primary[disabled] {
+  background: #2ea043; 
+  border-color: #2ea043;
+  color: #484f58; /* тусклый текст */
+}
+
+.btn.normal:disabled,
+.btn.normal[disabled] {
+  background: #1f6feb;
+  border-color: #1f6feb;
+  color: #484f58;
+}
+
+.btn.warning:disabled,
+.btn.warning[disabled] {
+  background: #f0b400;
+  border-color: #f0b400;
+  color: #484f58;
+}
+
+.btn.danger:disabled,
+.btn.danger[disabled] {
+  background: #da3633;
+  border-color: #f85149;
+  color: #484f58;
+}
+
+
 .input-number {
   width: 100px;
   padding: 4px 6px;
