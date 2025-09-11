@@ -11,7 +11,9 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [systemSet, setSystemSet] = useState<boolean | null>(null);
-
+  // Disable submit until both fields are non-empty and not loading
+  const canSubmit = clientId.trim().length > 0 && clientSecret.trim().length > 0;
+  
   useEffect(() => {
     const checkStatus = async () => {
       try {
@@ -112,6 +114,7 @@ const Login = () => {
                 value={clientId}
                 onChange={(e) => setClientId(e.target.value)}
                 className="input input-login"
+                required
                 placeholder="Login"
               />
             </div>
@@ -125,12 +128,17 @@ const Login = () => {
                 value={clientSecret}
                 onChange={(e) => setClientSecret(e.target.value)}
                 className="input input-login"
+                required
                 placeholder="Password"
               />
             </div>
 
             <div className="login-item right">
-              <button className="btn primary" type="submit" disabled={loading}>
+              <button
+                className="btn primary"
+                type="submit"
+                disabled={loading || !canSubmit}
+              >
                 {FaDoorOpen({ className: "icon" })} {loading ? "Loading..." : "Sign in"}
               </button>
             </div>
