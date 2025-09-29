@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
 import { fetchOverviewSeries, type OverviewSeriesResponse } from "../../utils/api";
@@ -6,13 +7,24 @@ import { fetchOverviewTotals, type OverviewTotalsResponse } from "../../utils/ap
 import StatsCards from "./StatsCards";
 import OverviewChart from "./OverviewChart";
 import GeoMap from "./GeoMap";
-import {
-  addDays, endOfToday, startOfToday,
-  toChartPoints, buildFallbackOverviewResponse,
-} from "./helpers";
+import { addDays, endOfToday, startOfToday, toChartPoints, buildFallbackOverviewResponse } from "./helpers";
 import type { ChartPoint } from "./types";
 
 export default function ServersOverview() {
+  // Read params for scoping: works for /servers and /servers/:vpnServerId/statistics/:externalId?
+  const { vpnServerId: vpnServerIdParam, externalId: externalIdParam } = useParams<{
+    vpnServerId?: string;
+    externalId?: string;
+  }>();
+
+  const vpnServerId = useMemo(() => {
+    if (!vpnServerIdParam) return undefined;
+    const n = Number(vpnServerIdParam);
+    return Number.isFinite(n) ? n : undefined;
+  }, [vpnServerIdParam]);
+
+  const externalId = externalIdParam || undefined;
+
   // dedupe toast spam
   const lastErrorKey = useRef<string>("");
 
@@ -33,7 +45,7 @@ export default function ServersOverview() {
 
   // filters
   const [from, setFrom] = useState<Date>(addDays(startOfToday(), -6));
-  const [to,   setTo]   = useState<Date>(endOfToday());
+  const [to, setTo] = useState<Date>(endOfToday());
   const [grouping, setGrouping] = useState<Grouping>("auto");
 
   // backend state: series
@@ -44,53 +56,52 @@ export default function ServersOverview() {
   const [totalsResp, setTotalsResp] = useState<OverviewTotalsResponse | null>(null);
   const [loadingTotals, setLoadingTotals] = useState(false);
 
-  // fetch series on filters change
+  // fetch series
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         setLoadingSeries(true);
         const data = await fetchOverviewSeries({
-          from, to, grouping,
-          vpnServerId: undefined,
-          externalId: undefined,
+          from,
+          to,
+          grouping,
+          vpnServerId,     // number | undefined
+          externalId,      // string | undefined
         });
         if (!cancelled) setApiData(data);
       } catch (e) {
-        if (!cancelled) {
-          showErrorToast("Series load error", e);
-        }
+        if (!cancelled) showErrorToast("Series load error", e);
       } finally {
         if (!cancelled) setLoadingSeries(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [from, to, grouping]);
+  }, [from, to, grouping, vpnServerId, externalId]);
 
-  // fetch totals on filters change
+  // fetch totals
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         setLoadingTotals(true);
         const t = await fetchOverviewTotals({
-          from, to,
-          vpnServerId: undefined,
-          externalId: undefined,
+          from,
+          to,
+          vpnServerId,
+          externalId,
         });
         if (!cancelled) setTotalsResp(t);
       } catch (e) {
-        if (!cancelled) {
-          showErrorToast("Totals load error", e);
-        }
+        if (!cancelled) showErrorToast("Totals load error", e);
       } finally {
         if (!cancelled) setLoadingTotals(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [from, to]);
+  }, [from, to, vpnServerId, externalId]);
 
-  // chart data: prefer backend series; else synthesize from totals (or zeros)
+  // chart data with fallback
   const chartData: ChartPoint[] = useMemo(() => {
     if (apiData?.series?.length) {
       return toChartPoints(apiData.series, apiData.meta.grouping);
@@ -128,7 +139,6 @@ export default function ServersOverview() {
     setGrouping(c.grouping);
   };
 
-  // only totals go to cards
   const totalsForCards = useMemo(() => {
     return totalsResp?.totals ?? {
       sessionsCount: 0,
@@ -139,23 +149,24 @@ export default function ServersOverview() {
     };
   }, [totalsResp]);
 
+  const title = vpnServerId
+    ? externalId
+      ? `Server Statistics (server #${vpnServerId}, externalId: ${externalId})`
+      : `Server Statistics (server #${vpnServerId})`
+    : "All Servers Overview";
+
   return (
     <div style={{ padding: 16, backgroundColor: "#161b22", color: "#c9d1d9", minHeight: "100vh" }}>
-      {/* Header */}
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
-        <h2 style={{ margin: 0 }}>All Servers Overview</h2>
+        <h2 style={{ margin: 0 }}>{title}</h2>
       </div>
 
-      {/* Date range filter */}
       <DateRangeFilter from={from} to={to} grouping={grouping} onChange={onFilterChange} />
-
-      {/* Totals */}
       <StatsCards totals={totalsForCards} loading={loadingTotals} />
-
-      {/* Chart */}
       <OverviewChart data={chartData} loading={loadingSeries} error={null} />
 
-      <GeoMap from={from} to={to} />
+      {/* If GeoMap supports scoping, pass both vpnServerId and externalId */}
+      <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} externalId={externalId ?? null} />
     </div>
   );
 }
