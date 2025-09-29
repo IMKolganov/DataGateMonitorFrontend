@@ -52,13 +52,25 @@ function App() {
                     <Route path="/" element={<Navigate to="/servers" replace />} />
 
                     <Route path="/servers" element={<ServersWithDetails />}>
+                      {/* Index overview */}
                       <Route index element={<ServersOverview />} />
+
+                      {/* Global statistics by externalId */}
+                      <Route path="statistics/:externalId" element={<ServersOverview />} />
+
+                      {/* Per-server details */}
                       <Route path=":vpnServerId" element={<ServerDetails />}>
                         <Route index element={<GeneralTab />} />
                         <Route path="certificates" element={<CertificatesTab />} />
                         <Route path="ovpn-file-config" element={<OvpnFileConfigForm />} />
                         <Route path="console" element={<WebConsole />} />
-                        <Route path="statistics" element={<Statistics />} />
+
+                        {/* Server statistics with optional externalId */}
+                        <Route path="statistics">
+                          <Route index element={<ServersOverview />} />
+                          <Route path=":externalId" element={<ServersOverview />} />
+                        </Route>
+
                         <Route path="events" element={<Events />} />
                       </Route>
                     </Route>
