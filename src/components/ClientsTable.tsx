@@ -4,6 +4,7 @@ import type { ConnectedClient } from "../utils/types";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
+import { Link, useParams } from "react-router-dom";
 
 interface ClientsTableProps {
   clients: ConnectedClient[];
@@ -24,6 +25,9 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
   onPageSizeChange,
   loading,
 }) => {
+  // Get current vpnServerId from URL to build correct link
+  const { vpnServerId } = useParams<{ vpnServerId: string }>();
+
   const rows = clients.map((client, index) => ({
     id: client.id || index + 1,
     commonName: client.commonName,
@@ -42,10 +46,28 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "commonName", headerName: "Common Name", flex: 1 },
-    { field: "externalId", headerName: "External Id", flex:  0.6 },
-    { field: "tgUsername", headerName: "Telegram Username", flex:  0.6 },
-    { field: "tgFirstName", headerName: "Telegram FirstName", flex:  0.6 },
-    { field: "tgLastName", headerName: "Telegram LastName", flex:  0.6 },
+    {
+      field: "externalId",
+      headerName: "External Id",
+      flex: 0.6,
+      renderCell: (params) => {
+        const externalId = params.value as string;
+        if (!externalId) return null;
+        // If we are inside /servers/:vpnServerId -> link with vpnServerId
+        // Else -> global statistics link
+        const url = vpnServerId
+          ? `/servers/${vpnServerId}/statistics/${externalId}`
+          : `/servers/statistics/${externalId}`;
+        return (
+          <Link to={url} style={{ color: "#58a6ff", textDecoration: "none" }}>
+            {externalId}
+          </Link>
+        );
+      },
+    },
+    { field: "tgUsername", headerName: "Telegram Username", flex: 0.6 },
+    { field: "tgFirstName", headerName: "Telegram FirstName", flex: 0.6 },
+    { field: "tgLastName", headerName: "Telegram LastName", flex: 0.6 },
     { field: "remoteIp", headerName: "Remote Address", flex: 0.6 },
     { field: "localIp", headerName: "Local Address", flex: 0.6 },
     { field: "bytesReceived", headerName: "Bytes Received", flex: 0.6 },
@@ -86,7 +108,6 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
         />
       </div>
     </CustomThemeProvider>
-
   );
 };
 
