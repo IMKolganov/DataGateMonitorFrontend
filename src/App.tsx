@@ -12,7 +12,6 @@ import ApplicationSettings from "./pages/ApplicationSettings";
 import GeneralTab from "./pages/GeneralServerDetails";
 import CertificatesTab from "./pages/Certificates";
 import WebConsole from "./pages/WebConsole";
-import Statistics from "./pages/Statistics";
 import Events from "./pages/Events";
 import Login from "./pages/Login";
 import { ToastContainer } from "react-toastify";
