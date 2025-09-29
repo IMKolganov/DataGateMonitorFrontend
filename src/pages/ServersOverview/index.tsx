@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
 import { fetchOverviewSeries, type OverviewSeriesResponse } from "../../utils/api";
@@ -13,6 +14,14 @@ import {
 import type { ChartPoint } from "./types";
 
 export default function ServersOverview() {
+  // Read server id from route to support both /servers and /servers/:vpnServerId/statistics
+  const { vpnServerId: vpnServerIdParam } = useParams<{ vpnServerId?: string }>();
+  const vpnServerId = useMemo(() => {
+    if (!vpnServerIdParam) return undefined;
+    const n = Number(vpnServerIdParam);
+    return Number.isFinite(n) ? n : undefined;
+  }, [vpnServerIdParam]);
+
   // dedupe toast spam
   const lastErrorKey = useRef<string>("");
 
@@ -44,51 +53,50 @@ export default function ServersOverview() {
   const [totalsResp, setTotalsResp] = useState<OverviewTotalsResponse | null>(null);
   const [loadingTotals, setLoadingTotals] = useState(false);
 
-  // fetch series on filters change
+  // fetch series on filters or server scope change
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         setLoadingSeries(true);
         const data = await fetchOverviewSeries({
-          from, to, grouping,
-          vpnServerId: undefined,
+          from,
+          to,
+          grouping,
+          vpnServerId,       // scope by server when present
           externalId: undefined,
         });
         if (!cancelled) setApiData(data);
       } catch (e) {
-        if (!cancelled) {
-          showErrorToast("Series load error", e);
-        }
+        if (!cancelled) showErrorToast("Series load error", e);
       } finally {
         if (!cancelled) setLoadingSeries(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [from, to, grouping]);
+  }, [from, to, grouping, vpnServerId]);
 
-  // fetch totals on filters change
+  // fetch totals on filters or server scope change
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         setLoadingTotals(true);
         const t = await fetchOverviewTotals({
-          from, to,
-          vpnServerId: undefined,
+          from,
+          to,
+          vpnServerId,       // scope by server when present
           externalId: undefined,
         });
         if (!cancelled) setTotalsResp(t);
       } catch (e) {
-        if (!cancelled) {
-          showErrorToast("Totals load error", e);
-        }
+        if (!cancelled) showErrorToast("Totals load error", e);
       } finally {
         if (!cancelled) setLoadingTotals(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [from, to]);
+  }, [from, to, vpnServerId]);
 
   // chart data: prefer backend series; else synthesize from totals (or zeros)
   const chartData: ChartPoint[] = useMemo(() => {
@@ -139,11 +147,13 @@ export default function ServersOverview() {
     };
   }, [totalsResp]);
 
+  const title = vpnServerId ? "Server Statistics" : "All Servers Overview";
+
   return (
     <div style={{ padding: 16, backgroundColor: "#161b22", color: "#c9d1d9", minHeight: "100vh" }}>
       {/* Header */}
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
-        <h2 style={{ margin: 0 }}>All Servers Overview</h2>
+        <h2 style={{ margin: 0 }}>{title}</h2>
       </div>
 
       {/* Date range filter */}
@@ -155,7 +165,8 @@ export default function ServersOverview() {
       {/* Chart */}
       <OverviewChart data={chartData} loading={loadingSeries} error={null} />
 
-      <GeoMap from={from} to={to} />
+      {/* Map: pass vpnServerId if your GeoMap supports it */}
+      <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} />
     </div>
   );
 }
