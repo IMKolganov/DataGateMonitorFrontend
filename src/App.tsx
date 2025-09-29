@@ -52,13 +52,17 @@ function App() {
                     <Route path="/" element={<Navigate to="/servers" replace />} />
 
                     <Route path="/servers" element={<ServersWithDetails />}>
+                      {/* Page-wide overview: /servers */}
                       <Route index element={<ServersOverview />} />
+
+                      {/* Details layout: /servers/:vpnServerId/... */}
                       <Route path=":vpnServerId" element={<ServerDetails />}>
                         <Route index element={<GeneralTab />} />
                         <Route path="certificates" element={<CertificatesTab />} />
                         <Route path="ovpn-file-config" element={<OvpnFileConfigForm />} />
                         <Route path="console" element={<WebConsole />} />
-                        <Route path="statistics" element={<Statistics />} />
+                        {/* Same component reused as a tab: /servers/:vpnServerId/statistics */}
+                        <Route path="statistics" element={<ServersOverview />} />
                         <Route path="events" element={<Events />} />
                       </Route>
                     </Route>
