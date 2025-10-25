@@ -7,18 +7,6 @@ import type { OverviewUserItem } from "../utils/types";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
 import { fetchOverviewUsers } from "../utils/api/OpenVpnServerClients";
 
-type OverviewUserRow = {
-  id: string;
-  externalId: string;
-  vpnServerId: number | null;
-  sessions: number;
-  trafficIn: string;
-  trafficOut: string;
-  trafficTotal: string;
-  firstSeen: string;
-  lastSeen: string;
-};
-
 export interface OverviewUsersTableProps {
   from: Date;
   to: Date;
