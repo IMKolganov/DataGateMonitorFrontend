@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchToken, setSecret, checkSystemStatus } from "../utils/api";
+import { fetchToken, setSecret, checkSystemStatus } from "../utils/api/Auth";
 import { FaDoorOpen } from "react-icons/fa";
 import "../css/Login.css";
 import { appVersion } from '../version';

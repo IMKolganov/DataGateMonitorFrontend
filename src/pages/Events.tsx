@@ -5,7 +5,7 @@ import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaSync } from "react-icons/fa";
-import { fetchEvents } from "../utils/api";
+import { fetchEvents } from "../utils/api/OpenVpnServerEvent";
 import { formatDateWithOffset } from "../utils/utils";
 
 interface VpnEvent {
