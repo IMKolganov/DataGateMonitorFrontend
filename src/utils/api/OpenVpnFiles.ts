@@ -1,48 +1,52 @@
 import { apiRequest } from "../api";
 
 export const fetchOvpnFiles = async (vpnServerId: string): Promise<any[]> => {
-  const response = await apiRequest<{ data: any[] }>(
+  const res = await apiRequest<any[]>(
     "get",
     `/OpenVpnFiles/GetAllOvpnFiles/${vpnServerId}`
   );
-  return response.data;
+  return res.data;
 };
 
-
-export const addClientOvpnFile = async (vpnServerId: number, externalId: string, commonName: string, issuedTo: string = "openVpnClient") => {
-  return apiRequest<void>("post", "/OpenVpnFiles/AddClientOvpnFile", {
+export const addClientOvpnFile = async (
+  vpnServerId: number,
+  externalId: string,
+  commonName: string,
+  issuedTo: string = "openVpnClient"
+): Promise<void> => {
+  await apiRequest<null>("post", "/OpenVpnFiles/AddClientOvpnFile", {
     data: { vpnServerId, externalId, commonName, issuedTo },
   });
 };
 
-export const revokeClientOvpnFile = async (  vpnServerId: number,  ovpnFileId: number,  commonName: string) => {
-  return apiRequest<void>("post", "/OpenVpnFiles/RevokeClientOvpnFile", {
+export const revokeClientOvpnFile = async (
+  vpnServerId: number,
+  ovpnFileId: number,
+  commonName: string
+): Promise<void> => {
+  await apiRequest<null>("post", "/OpenVpnFiles/RevokeClientOvpnFile", {
     data: { vpnServerId, ovpnFileId, commonName },
   });
 };
 
-export const downloadClientOvpnFile = async (issuedOvpnFileId: number, vpnServerId: string) => {
-  await ensureApiBaseUrl();
-
+export const downloadClientOvpnFile = async (
+  issuedOvpnFileId: number,
+  vpnServerId: string
+): Promise<void> => {
   try {
-    const response = await apiRequest<any>(
+    const res = await apiRequest<{ fileName: string; content: string }>(
       "post",
       `/OpenVpnFiles/DownloadClientOvpnFile`,
       {
-        data: {
-          issuedOvpnFileId,
-          vpnServerId,
-        }
+        data: { issuedOvpnFileId, vpnServerId },
       }
     );
 
-    const apiData = response;
-
-    if (!apiData.success) {
-      throw new Error(apiData.message || "Unknown server error");
+    if (!res.success) {
+      throw new Error(res.message || "Unknown server error");
     }
 
-    const { fileName, content } = apiData.data;
+    const { fileName, content } = res.data;
 
     if (!content) {
       throw new Error("File content is empty.");
