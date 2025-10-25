@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { addClientOvpnFile } from "../utils/api";
+import { addClientOvpnFile } from "../utils/api/OpenVpnFiles";
 import "../css/Certificates.css";
 import { FaPlus, FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";

@@ -3,7 +3,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
 import type { Certificate, CertificatesTableProps } from "../utils/types";
-import { revokeCertificate } from "../utils/api";
+import { revokeCertificate } from "../utils/api/OpenVpnServerCerts";
 import "../css/CertificatesTable.css";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../utils/utils";

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlus } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
-import { fetchServers, deleteServer } from "../utils/api";
+import { fetchServers, deleteServer } from "../utils/api/OpenVpnServers";
 import { ServiceStatus } from "../utils/types";
 import type { OpenVpnServerData } from "../utils/types";
 import ServerItem from "./ServerItem";

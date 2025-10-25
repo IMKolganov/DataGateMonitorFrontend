@@ -3,7 +3,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
 import type { IssuedOvpnFile } from "../utils/types";
-import { revokeClientOvpnFile, downloadClientOvpnFile } from "../utils/api";
+import { revokeClientOvpnFile, downloadClientOvpnFile } from "../utils/api/OpenVpnFiles";
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../utils/utils";

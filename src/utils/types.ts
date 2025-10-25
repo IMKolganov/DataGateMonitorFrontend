@@ -111,4 +111,97 @@ export interface ServerInfo {
     Idle = "Idle",
     Running = "Running",
     Error = "Error",
-  }  
+  }
+
+export type GeoPointAggDto = {
+  country: string | null;
+  region: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  sessionsCount: number;
+  totalBytesIn: number;
+  totalBytesOut: number;
+};
+
+export type FetchGeoPointsParams = {
+  from: Date | string;
+  to: Date | string;
+  vpnServerId?: number | null;
+  externalId?: string | null;
+  onlyWithCoordinates?: boolean;
+};
+
+export type OverviewTotalsResponse = {
+  meta: {
+    from: string;        // ISO
+    to: string;          // ISO
+    grouping: string;    // "none"
+    timezone: string;    // "UTC"
+    trafficUnit: string; // "bytes"
+    vpnServerId?: number | null;
+  };
+  totals: {
+    sessionsCount: number;
+    usersCount: number;          // unique ExternalId
+    trafficInBytes: number;
+    trafficOutBytes: number;
+    trafficTotalBytes: number;
+  };
+};
+
+export type FetchOverviewTotalsParams = {
+  from: Date | string;
+  to: Date | string;
+  vpnServerId?: number | null;
+  externalId?: string | null;
+};
+
+export type OverviewGrouping = "auto" | "hours" | "days" | "months" | "years";
+
+export type OverviewSeriesRow = {
+  ts: string;                 // ISO-8601 (UTC)
+  activeClients: number;
+  trafficInBytes: number;
+  trafficOutBytes: number;
+  trafficTotalBytes: number;
+};
+
+export type OverviewSeriesMeta = {
+  from: string;               // ISO-8601
+  to: string;                 // ISO-8601
+  grouping: Exclude<OverviewGrouping, "auto">;
+  timezone: string;
+  trafficUnit: "bytes";       // <-- like on backend
+  vpnServerId?: number | null;
+};
+
+export type OverviewSeriesSummary = {
+  totalTrafficInBytes: number;
+  totalTrafficOutBytes: number;
+  peakActiveClients: number;
+};
+
+export type OverviewSeriesResponse = {
+  meta: OverviewSeriesMeta;
+  summary: OverviewSeriesSummary;
+  series: OverviewSeriesRow[];
+};
+
+export type FetchOverviewSeriesParams = {
+  from: Date;
+  to: Date;
+  grouping?: OverviewGrouping;   // default "auto"
+  vpnServerId?: number | null;
+  externalId?: string | null;
+};
+
+export interface OverviewUserItem {
+  externalId?: string | null;
+  vpnServerId?: number | null; // null when mixed
+  sessions: number;
+  trafficInBytes: number;
+  trafficOutBytes: number;
+  trafficTotalBytes: number;
+  firstSeen: string; // ISO date string (DateTimeOffset)
+  lastSeen: string;  // ISO date string (DateTimeOffset)
+}
