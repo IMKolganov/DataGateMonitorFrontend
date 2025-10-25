@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import type { GridColDef, GridValueFormatterParams } from "@mui/x-data-grid";
+import type { GridColDef } from "@mui/x-data-grid";
 import { Link, useParams } from "react-router-dom";
 import StyledDataGrid from "./TableStyle";
 import CustomThemeProvider from "./ThemeProvider";
@@ -105,8 +105,7 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
       field: "vpnServerId",
       headerName: "Server",
       flex: 0.5,
-      valueFormatter: (params: GridValueFormatterParams<number | null, OverviewUserRow>) =>
-        params.value == null ? "mixed" : String(params.value),
+      renderCell: (params) => (params.value == null ? "mixed" : String(params.value)),
     },
     { field: "sessions", headerName: "Sessions", flex: 0.45 },
     { field: "trafficIn", headerName: "Traffic In", flex: 0.6 },
