@@ -7,8 +7,8 @@ import Cookies from "js-cookie";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { toast } from "react-toastify";
-
-import { fetchGeoPoints, type GeoPointAggDto } from "../utils/api";
+import { fetchGeoPoints } from "../utils/api/OpenVpnServerClients";
+import type { GeoPointAggDto } from "../utils/types";
 
 type GeoPointsMapProps = {
   from: Date | string;

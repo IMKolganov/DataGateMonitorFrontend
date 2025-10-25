@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaSave } from "react-icons/fa";
 import "../css/Settings.css";
-import { getSetting, setSetting } from "../utils/api";
+import { getSetting, setSetting } from "../utils/api/Settings";
 
 export function GeneralSettings() {
   const [intervalType, setIntervalType] = useState("seconds");

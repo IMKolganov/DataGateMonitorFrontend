@@ -38,7 +38,7 @@ export default function OverviewChart({
             formatter={(value: any, name: string) => (name === "Traffic, MB" ? [`${value} MB`, name] : [value, name])}
           />
           <Legend wrapperStyle={{ color: "#c9d1d9" }} />
-          <Area yAxisId="left"  type="monotone" dataKey="active" name="Active clients" stroke="#58a6ff" fill="url(#fillActive)" strokeWidth={2} dot={false} />
+          <Area yAxisId="left"  type="monotone" dataKey="active" name="Sessions" stroke="#58a6ff" fill="url(#fillActive)" strokeWidth={2} dot={false} />
           <Area yAxisId="right" type="monotone" dataKey="mb"     name="Traffic, MB"    stroke="#3fb950" fill="url(#fillMb)"    strokeWidth={2} dot={false} />
         </AreaChart>
       </ResponsiveContainer>
