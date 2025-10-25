@@ -1,23 +1,33 @@
 import { apiRequest } from "../api";
 
-export const getSetting = async (key: string): Promise<{ key: string; value: string }> => {
+export const getSetting = async (
+  key: string
+): Promise<{ key: string; value: string }> => {
   if (!key) throw new Error("Setting key is required");
 
-  const response = await apiRequest<{
-    success: boolean;
-    message: string;
-    data: { key: string; value: string };
-  }>("get", `/Settings/Get`, { params: { key } });
+  const res = await apiRequest<{ key: string; value: string }>(
+    "get",
+    "/Settings/Get",
+    { params: { key } }
+  );
 
-  if (!response.success) {
-    throw new Error(response.message || "Unknown error");
+  if (!res.success) {
+    throw new Error(res.message || "Unknown error");
   }
 
-  return response.data;
+  return res.data;
 };
 
+export const setSetting = async (
+  key: string,
+  value: string,
+  type: string
+): Promise<void> => {
+  if (!key || !value || !type) {
+    throw new Error("Key, value, and type are required for setting");
+  }
 
-export const setSetting = async (key: string, value: string, type: string) => {
-  if (!key || !value || !type) throw new Error("Key, value, and type are required for setting");
-  return apiRequest("post", `/Settings/Set`, { params: { key, value, type } });
+  await apiRequest<null>("post", "/Settings/Set", {
+    params: { key, value, type },
+  });
 };
