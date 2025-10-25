@@ -84,3 +84,22 @@ const toUtcIso = (d: Date | string | number) => {
   const dt = d instanceof Date ? d : new Date(d);
   return dt.toISOString();
 };
+
+
+export const fetchOverviewUsers = async (
+  params: { from: Date | string | number; to: Date | string | number; vpnServerId?: number; externalId?: string }
+): Promise<OverviewUserItem[]> => {
+  const { from, to, vpnServerId, externalId } = params;
+
+  const qs = new URLSearchParams();
+  qs.set("from", toUtcIso(from));
+  qs.set("to", toUtcIso(to));
+  if (vpnServerId != null) qs.set("vpnServerId", String(vpnServerId));
+  if (externalId && externalId.trim()) qs.set("externalId", externalId.trim());
+
+  const res = await apiRequest<OverviewUserItem[]>(
+    "get",
+    `/OpenVpnServerClients/overview/users?${qs.toString()}`
+  );
+  return res.data;
+};

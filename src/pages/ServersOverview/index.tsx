@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
+
+import { OverviewUsersTable } from "../../components/OverviewUsersTable";
 import { fetchOverviewSeries, fetchOverviewTotals } from "../../utils/api/OpenVpnServerClients";
 import { type OverviewTotalsResponse, type OverviewSeriesResponse } from "../../utils/types";
 import StatsCards from "./StatsCards";
@@ -164,6 +166,13 @@ export default function ServersOverview() {
       <DateRangeFilter from={from} to={to} grouping={grouping} onChange={onFilterChange} />
       <StatsCards totals={totalsForCards} loading={loadingTotals} />
       <OverviewChart data={chartData} loading={loadingSeries} error={null} />
+
+      <OverviewUsersTable
+        from={from}
+        to={to}
+        vpnServerId={vpnServerId ?? null}
+        externalId={externalId ?? null}
+      />
 
       {/* If GeoMap supports scoping, pass both vpnServerId and externalId */}
       <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} externalId={externalId ?? null} />
