@@ -194,3 +194,14 @@ export type FetchOverviewSeriesParams = {
   vpnServerId?: number | null;
   externalId?: string | null;
 };
+
+export interface OverviewUserItem {
+  externalId?: string | null;
+  vpnServerId?: number | null; // null when mixed
+  sessions: number;
+  trafficInBytes: number;
+  trafficOutBytes: number;
+  trafficTotalBytes: number;
+  firstSeen: string; // ISO date string (DateTimeOffset)
+  lastSeen: string;  // ISO date string (DateTimeOffset)
+}
