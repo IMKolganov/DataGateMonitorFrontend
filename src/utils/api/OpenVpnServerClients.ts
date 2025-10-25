@@ -5,7 +5,8 @@ import type {
   OverviewSeriesResponse,
   FetchOverviewSeriesParams,
   GeoPointAggDto,
-  OverviewTotalsResponse
+  OverviewTotalsResponse,
+  OverviewUserItem
 } from "../types";
 
 export const fetchConnectedClients = async (VpnServerId: string, page: number, pageSize: number): Promise<any> => {
