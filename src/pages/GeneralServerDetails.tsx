@@ -1,17 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "../css/ServerDetails.css";
-
 import { FaSync } from "react-icons/fa";
-
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
 import ServerDetailsInfo from "../components/ServerDetailsInfo";
-import {
-  fetchServersWithStats,
-  fetchConnectedClients,
-  fetchHistoryClients
-} from "../utils/api";
+import { fetchConnectedClients,  fetchHistoryClients} from "../utils/api/OpenVpnServerClients";
+import { fetchServersWithStats } from "../utils/api/OpenVpnServers";
 
 export function GeneralServerDetails() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();

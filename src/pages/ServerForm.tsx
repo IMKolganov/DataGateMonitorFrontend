@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../css/ServerForm.css";
-import { getServer, saveServer } from "../utils/api";
+import { getServer, saveServer } from "../utils/api/OpenVpnServers";
 import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 

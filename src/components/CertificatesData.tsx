@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { fetchCertificates, fetchOvpnFiles } from "../utils/api";
+import { fetchOvpnFiles } from "../utils/api/OpenVpnFiles";
+import { fetchCertificates } from "../utils/api/OpenVpnServerCerts";
 import CertificatesTable from "../components/CertificatesTable";
 import OvpnFilesTable from "../components/OvpnFilesTable";
 import type { Certificate } from "../utils/types";

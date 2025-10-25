@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { addCertificate } from "../utils/api";
+import { addCertificate } from "../utils/api/OpenVpnServerCerts";
 import "../css/Certificates.css";
 import { FaPlus } from "react-icons/fa";
 

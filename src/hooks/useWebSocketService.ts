@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { fetchConfig, getWebSocketUrlForBackgroundService, runServiceNow } from "../utils/api";
+import { fetchConfig, getWebSocketUrlForBackgroundService } from "../utils/api";
+import { runServiceNow } from "../utils/api/OpenVpnServers";
 import { ServiceStatus } from "../utils/types";
 
 interface ServiceData {

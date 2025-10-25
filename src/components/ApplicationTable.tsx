@@ -3,7 +3,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { FaTrash, FaCopy } from "react-icons/fa";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
-import { revokeApplication } from "../utils/api";
+import { revokeApplication } from "../utils/api/Applications";
 import { toast } from "react-toastify";
 
 interface Application {

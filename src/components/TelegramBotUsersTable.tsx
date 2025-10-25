@@ -7,7 +7,7 @@ import {
   unblockUser,
   setAdmin,
   unsetAdmin,
-} from "../utils/api";
+} from "../utils/api/TelegramBotUser";
 import { FaBan, FaUserShield } from "react-icons/fa";
 
 interface TelegramBotUser {
