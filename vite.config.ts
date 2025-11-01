@@ -2,12 +2,17 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { readFileSync } from 'fs';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 export default defineConfig({
-  plugins: [react()],
-  server: {
+  plugins: [
+    react(),
+    // optional: open stats at the end
+    visualizer({ filename: 'stats.html', gzipSize: true, brotliSize: true })
+  ],
+    server: {
     port: Number(process.env.VITE_PORT) || 5582,
     proxy: {
       '/api/hubs': {
