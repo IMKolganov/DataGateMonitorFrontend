@@ -1,102 +1,90 @@
-import React, { useEffect, useState, useCallback } from "react";
-// import { fetchOvpnFiles } from "../utils/api/OpenVpnFiles";
-// import { fetchCertificates } from "../utils/api/OpenVpnServerCerts";
+// src/pages/CertificatesData.tsx
+// comments in English only
+import React, { useMemo, useState } from "react";
 import CertificatesTable from "../components/CertificatesTable";
 import OvpnFilesTable from "../components/OvpnFilesTable";
-// import type { Certificate } from "../utils/types";
-// import { CertificateStatus } from "../utils/types";
 import AddOvpnFile from "../components/AddOvpnFile";
 import AddCertificate from "../components/AddCertificate";
+
+import {
+  useGetApiOpenVpnFilesGetAllVpnServerId,
+} from "../api/orval/open-vpn-files/open-vpn-files";
+
+import {
+  useGetApiOpenVpnCertsVpnServerIdGetAll,
+} from "../api/orval/open-vpn-server-certs/open-vpn-server-certs";
+
+import type {
+  GetAllCertificatesResponseApiResponse,
+  OvpnFilesResponseApiResponse,
+} from "../api/orval/model";
 
 interface Props {
   vpnServerId: string;
 }
 
-// const statusLabels: Record<CertificateStatus, string> = {
-//   [CertificateStatus.Active]: "Active",
-//   [CertificateStatus.Revoked]: "Revoked",
-//   [CertificateStatus.Expired]: "Expired",
-//   [CertificateStatus.Unknown]: "Unknown",
-// };
+enum CertificateStatus {
+  Active = 0,
+  Revoked = 1,
+  Expired = 2,
+  Unknown = 3,
+}
+
+const statusLabels: Record<CertificateStatus, string> = {
+  [CertificateStatus.Active]: "Active",
+  [CertificateStatus.Revoked]: "Revoked",
+  [CertificateStatus.Expired]: "Expired",
+  [CertificateStatus.Unknown]: "Unknown",
+};
+
+// helper: normalize different shapes safely
+function pickArray(payload: any): any[] {
+  if (!payload) return [];
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.data)) return payload.data;
+  if (Array.isArray(payload.items)) return payload.items;
+  if (Array.isArray(payload.certificates)) return payload.certificates;
+  if (Array.isArray(payload.ovpnFiles)) return payload.ovpnFiles;
+  return [];
+}
 
 const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
-  const [ovpnFiles, setOvpnFiles] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [certError, setCertError] = useState<{ message: string; detail?: string } | null>(null);
-  const [ovpnError, setOvpnError] = useState<{ message: string; detail?: string } | null>(null);
+  const numericId = useMemo(() => Number(vpnServerId), [vpnServerId]);
   const [selectedStatus, setSelectedStatus] = useState<CertificateStatus | null>(null);
 
-  const fetchCerts = useCallback(async () => {
-    try {
-      const certs = await fetchCertificates(
-        vpnServerId,
-        selectedStatus !== null ? String(selectedStatus) : undefined
-      );
+  // OVPN files
+  const filesQuery = useGetApiOpenVpnFilesGetAllVpnServerId(numericId, {
+    query: {
+      enabled: Number.isFinite(numericId),
+      staleTime: 10_000,
+      retry: 1,
+      // react-query v5: no `keepPreviousData`; rely on caching via staleTime
+    },
+  });
 
-      const validCerts = Array.isArray(certs)
-        ? certs.filter(c => c.commonName && c.commonName.trim() !== "")
-        : [];
+  const ovpnFiles = pickArray(filesQuery.data as OvpnFilesResponseApiResponse);
 
-      if (validCerts.length === 0) {
-        setCertError({
-          message: "No certificates found.",
-          detail: "The server returned an empty or invalid certificate list.",
-        });
-      } else {
-        setCertError(null);
-      }
+  // Certificates
+  const certsQuery = useGetApiOpenVpnCertsVpnServerIdGetAll(numericId, {
+    query: {
+      enabled: Number.isFinite(numericId),
+      staleTime: 10_000,
+      retry: 1,
+    },
+  });
 
-      setCertificates(validCerts);
-    } catch (error: any) {
-      console.error("Error fetching certificates", error);
-      setCertificates([]);
-      setCertError({
-        message: error?.response?.data?.Message || "Failed to load certificates",
-        detail: error?.response?.data?.Detail,
-      });
-    }
-  }, [vpnServerId, selectedStatus]);
-
-  const fetchOvpn = useCallback(async () => {
-    try {
-      const response = await fetchOvpnFiles(vpnServerId);
-      const data = Array.isArray(response) ? response : [];
-
-      setOvpnError(null);
-      setOvpnFiles(data);
-    } catch (error: any) {
-      console.error("Error fetching OVPN files", error);
-      setOvpnFiles([]);
-      setOvpnError({
-        message: error?.response?.data?.Message || "Failed to load OVPN files",
-        detail: error?.response?.data?.Detail,
-      });
-    }
-  }, [vpnServerId]);
-
-  const fetchData = useCallback(async () => {
-    if (!vpnServerId) return;
-    setLoading(true);
-    setCertError(null);
-    setOvpnError(null);
-
-    await Promise.allSettled([fetchCerts(), fetchOvpn()]);
-
-    setLoading(false);
-  }, [vpnServerId, fetchCerts, fetchOvpn]);
-
-  useEffect(() => {
-    fetchData();
-  }, [vpnServerId, selectedStatus]);
+  const allCertificates = pickArray(certsQuery.data as GetAllCertificatesResponseApiResponse);
+  const certificates = selectedStatus === null
+    ? allCertificates
+    : allCertificates.filter((c: any) => c?.status === selectedStatus);
 
   return (
     <>
-      {ovpnError && (
+      {filesQuery.isError && (
         <p className="error-message">
-          {ovpnError.message}
+          Failed to load OVPN files
           <br />
-          {ovpnError.detail}
+          {(filesQuery.error as any)?.message ?? ""}
         </p>
       )}
 
@@ -106,19 +94,19 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
         Enter the <strong>Common Name (CN)</strong> and an <strong>External ID</strong> to generate a new OVPN file.
       </p>
 
-      <AddOvpnFile vpnServerId={vpnServerId} onSuccess={fetchData} />
+      <AddOvpnFile vpnServerId={vpnServerId} onSuccess={() => filesQuery.refetch()} />
       <OvpnFilesTable
-        ovpnFiles={Array.isArray(ovpnFiles) ? ovpnFiles : []}
+        ovpnFiles={ovpnFiles}
         vpnServerId={vpnServerId}
-        onRevoke={fetchData}
-        loading={loading}
+        onRevoke={() => filesQuery.refetch()}
+        loading={filesQuery.isFetching}
       />
 
-      {certError && (
+      {certsQuery.isError && (
         <p className="error-message">
-          {certError.message}
+          Failed to load certificates
           <br />
-          {certError.detail}
+          {(certsQuery.error as any)?.message ?? ""}
         </p>
       )}
 
@@ -130,15 +118,13 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
           value={selectedStatus ?? ""}
           onChange={(e) =>
             setSelectedStatus(
-              e.target.value === "" ? null : Number(e.target.value) as CertificateStatus
+              e.target.value === "" ? null : (Number(e.target.value) as CertificateStatus)
             )
           }
         >
           <option value="">All</option>
           {Object.entries(statusLabels).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
+            <option key={value} value={value}>{label}</option>
           ))}
         </select>
       </div>
@@ -148,12 +134,12 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
         Enter the <strong>Common Name (CN)</strong> for the new certificate and click "Add Certificate".
       </p>
 
-      <AddCertificate vpnServerId={vpnServerId} onSuccess={fetchData} />
+      <AddCertificate vpnServerId={vpnServerId} onSuccess={() => certsQuery.refetch()} />
       <CertificatesTable
-        certificates={Array.isArray(certificates) ? certificates : []}
+        certificates={certificates}
         vpnServerId={vpnServerId}
-        onRevoke={fetchData}
-        loading={loading}
+        onRevoke={() => certsQuery.refetch()}
+        loading={certsQuery.isFetching}
       />
     </>
   );
