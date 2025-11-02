@@ -3,7 +3,7 @@ import { FaSync } from "react-icons/fa";
 import "../css/Settings.css";
 import "../css/TelegramBotUsers.css";
 import TelegramBotUsersTable from "../components/TelegramBotUsersTable";
-import { getTelegramBotUsers } from "../utils/api/TelegramBotUser";
+// import { getTelegramBotUsers } from "../utils/api/TelegramBotUser";
 
 interface TelegramBotUser {
   id: number;

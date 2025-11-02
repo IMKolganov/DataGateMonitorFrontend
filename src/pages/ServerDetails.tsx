@@ -2,7 +2,7 @@ import { useNavigate, NavLink, Outlet, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import "../css/ServerDetails.css";
-import { getServer } from "../utils/api/OpenVpnServers";
+// import { getServer } from "../utils/api/OpenVpnServers";
 
 export function ServerDetails() {
   const navigate = useNavigate();

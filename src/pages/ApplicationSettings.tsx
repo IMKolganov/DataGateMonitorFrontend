@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { FaPlus, FaSync } from "react-icons/fa";
 import "../css/ApplicationSettings.css";
-import { getAllApplications, registerApplication} from "../utils/api/Applications";
-import { fetchConfig } from "../utils/api";
+// import { getAllApplications, registerApplication} from "../utils/api/Applications";
+// import { fetchConfig } from "../utils/api";
 import ApplicationTable from "../components/ApplicationTable";
 
 interface Application {

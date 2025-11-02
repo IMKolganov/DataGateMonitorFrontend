@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { logout } from "../utils/api";
+// import { logout } from "../utils/api";
 import "../css/Header.css";
 import { FaDoorClosed } from "react-icons/fa";
 

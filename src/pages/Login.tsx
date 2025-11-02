@@ -1,29 +1,43 @@
 import React, { useState, useEffect } from "react";
-import { fetchToken, setSecret, checkSystemStatus } from "../utils/api/Auth";
+import {
+  getApiAuthSystemSecretStatus,
+  postApiAuthSetSystemSecret,
+  postApiAuthToken,
+} from "../api/orval/auth/auth";
+import type {
+  SetSecretRequest,
+  TokenRequest,
+  SystemSecretStatusResponse,
+  TokenResponse,
+} from "../api/orval/model";
 import { FaDoorOpen } from "react-icons/fa";
 import "../css/Login.css";
-import { appVersion } from '../version';
+import { appVersion } from "../version";
 import { scheduleAutoLogout } from "../utils/jwt-utils";
 
-const Login = () => {
+const Login: React.FC = () => {
   const [clientId, setClientId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [statusReady, setStatusReady] = useState(false);
   const [systemSet, setSystemSet] = useState<boolean | null>(null);
-  // Disable submit until both fields are non-empty and not loading
-  const canSubmit = clientId.trim().length > 0 && clientSecret.trim().length > 0;
-  
+
+  const canSubmit =
+    clientId.trim().length > 0 &&
+    clientSecret.trim().length > 0 &&
+    !loading &&
+    statusReady;
+
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const isSystemSet = await checkSystemStatus();
-        setSystemSet(isSystemSet);
+        const status = (await getApiAuthSystemSecretStatus()) as SystemSecretStatusResponse;
+        const isSet = status?.systemSet === true;
+        setSystemSet(isSet);
       } catch (err: any) {
-        console.error("System status check error:", err);
-
-        let detailedMessage = "We couldn't connect to the server. Please make sure it's running.";
-
+        let detailedMessage =
+          "We couldn't connect to the server. Please make sure it's running.";
         if (err.response) {
           detailedMessage += ` Server responded with status ${err.response.status} (${err.response.statusText}).`;
         } else if (err.request) {
@@ -31,16 +45,15 @@ const Login = () => {
         } else if (err.message) {
           detailedMessage += ` Error: ${err.message}`;
         }
-
         if (err.config?.url) {
           const fullUrl = err.config.baseURL
             ? `${err.config.baseURL}${err.config.url}`
             : err.config.url;
-
-          detailedMessage += `<br/>You can also try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer" >${fullUrl}</a> in your browser.`;
+          detailedMessage += `<br/>You can also try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${fullUrl}</a> in your browser.`;
         }
-
         setError(detailedMessage);
+      } finally {
+        setStatusReady(true);
       }
     };
 
@@ -53,20 +66,40 @@ const Login = () => {
     setLoading(true);
 
     try {
-      if (systemSet === false) {
-        await setSecret(clientId, clientSecret);
-        setSystemSet(true);
+      const latest = (await getApiAuthSystemSecretStatus()) as SystemSecretStatusResponse;
+      const latestIsSet = latest?.systemSet === true;
+      setSystemSet(latestIsSet);
+
+      if (!latestIsSet) {
+        const body: SetSecretRequest = { clientId, clientSecret };
+        try {
+          await postApiAuthSetSystemSecret(body);
+        } catch (err: any) {
+          const msg: string =
+            err?.response?.data?.message ??
+            err?.response?.data ??
+            err?.message ??
+            "";
+          if (!/already\s+set/i.test(msg)) {
+            throw err;
+          }
+        }
       }
 
-      const token = await fetchToken(clientId, clientSecret);
+      const tokenReq: TokenRequest = { clientId, clientSecret };
+      const tokenPayload = (await postApiAuthToken(tokenReq)) as TokenResponse;
+      const token = tokenPayload?.token;
+
+      if (!token) {
+        throw new Error("No token returned by API.");
+      }
+
       localStorage.setItem("token", token);
-      window.location.href = "/";
       scheduleAutoLogout(token);
+      window.location.href = "/";
     } catch (err: any) {
-      console.error("Login error:", err);
-
-      let detailedMessage = "We couldn't log you in. Please check your credentials and try again.";
-
+      let detailedMessage =
+        "We couldn't log you in. Please check your credentials and try again.";
       if (err.response) {
         detailedMessage += ` Server responded with status ${err.response.status} (${err.response.statusText}).`;
         if (err.response.data?.error) {
@@ -82,7 +115,6 @@ const Login = () => {
         const fullUrl = err.config.baseURL
           ? `${err.config.baseURL}${err.config.url}`
           : err.config.url;
-
         detailedMessage += `<br/>You can also try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${fullUrl}</a> in your browser.`;
       }
 
@@ -134,11 +166,7 @@ const Login = () => {
             </div>
 
             <div className="login-item right">
-              <button
-                className="btn primary"
-                type="submit"
-                disabled={loading || !canSubmit}
-              >
+              <button className="btn primary" type="submit" disabled={!canSubmit}>
                 {FaDoorOpen({ className: "icon" })} {loading ? "Loading..." : "Sign in"}
               </button>
             </div>

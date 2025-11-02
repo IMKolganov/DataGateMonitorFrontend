@@ -1,4 +1,4 @@
-import type { OverviewSeriesResponse } from "../../utils/types";
+// import type { OverviewSeriesResponse } from "../../utils/types";
 
 export default function ApiJsonPanel({ data }: { data: OverviewSeriesResponse }) {
   const json = JSON.stringify(data, null, 2);

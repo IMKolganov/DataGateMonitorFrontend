@@ -1,24 +1,36 @@
 import React from "react";
-import { ServiceStatus } from "../utils/types";
-import type { OpenVpnServerData } from "../utils/types";
 import {
   FaEye,
   FaEdit,
   FaTrash,
   FaPlayCircle,
   FaPauseCircle,
-  FaTimesCircle
+  FaTimesCircle,
 } from "react-icons/fa";
-import {
-  BsClock,
-  BsPerson,
-  BsFillBookmarkStarFill
-} from "react-icons/bs";
+import { BsClock, BsPerson, BsFillBookmarkStarFill } from "react-icons/bs";
 import { IoMdPerson } from "react-icons/io";
 
+// take types directly from orval by inferring the item shape of getAllWithStatus()
+import { getApiOpenVpnServersGetAllWithStatus } from "../api/orval/open-vpn-servers/open-vpn-servers";
+// import type { ServiceStatus } from "../utils/types"; // only enum, if он тоже есть в orval — можешь заменить импорт на orval
+
+// Infer the item type from the orval call result:
+// data: { openVpnServerWithStatuses: Array<OrvalServerItem> }
+type GetAllWithStatusResp = Awaited<ReturnType<typeof getApiOpenVpnServersGetAllWithStatus>>;
+type OrvalServerItem =
+  GetAllWithStatusResp extends Promise<any>
+    ? never
+    : GetAllWithStatusResp extends { data: infer D }
+      ? D extends { openVpnServerWithStatuses: infer A }
+        ? A extends Array<infer T>
+          ? T
+          : never
+        : never
+      : never;
+
 interface Props {
-  server: OpenVpnServerData;
-  vpnServerId: number;
+  server: OrvalServerItem;             // строго из orval
+  vpnServerId: number;                 // приходит из родителя
   serviceStatus: ServiceStatus;
   errorMessage: string | null;
   nextRunTime: string;
@@ -31,16 +43,18 @@ interface Props {
   onDelete: (id: number) => void;
 }
 
-const formatUtcDate = (utcDateString: string | null | undefined) => {
-  if (!utcDateString || utcDateString === "N/A") return "Not Scheduled";
+// Safe UTC formatting
+const formatUtcDate = (utc: string | null | undefined) => {
+  if (!utc || utc === "N/A") return "Not Scheduled";
   try {
-    const sanitized = utcDateString.replace(/\.\d{6,}Z$/, ".000Z");
-    const date = new Date(sanitized);
-    if (isNaN(date.getTime())) throw new Error("Invalid Date");
-
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}`;
-  } catch (error) {
-    console.error("Error formatting date:", error);
+    const sanitized = utc.replace(/\.\d{6,}Z$/, ".000Z");
+    const d = new Date(sanitized);
+    if (isNaN(d.getTime())) return "Invalid Date";
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
+      d.getHours(),
+    )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  } catch {
     return "Invalid Date";
   }
 };
@@ -50,25 +64,25 @@ const getStatusLabel = (status: ServiceStatus) => {
     case ServiceStatus.Running:
       return (
         <span className="status-indicator running">
-          {FaPlayCircle({ className: "status-icon" })} Status Name: Running
+          <FaPlayCircle className="status-icon" /> Status Name: Running
         </span>
       );
     case ServiceStatus.Idle:
       return (
         <span className="status-indicator idle">
-          {FaPauseCircle({ className: "status-icon" })} Status Name: Idle
+          <FaPauseCircle className="status-icon" /> Status Name: Idle
         </span>
       );
     case ServiceStatus.Error:
       return (
         <span className="status-indicator error">
-          {FaTimesCircle({ className: "status-icon" })} Status Name: Error
+          <FaTimesCircle className="status-icon" /> Status Name: Error
         </span>
       );
     default:
       return (
         <span className="status-indicator unknown">
-          {FaTimesCircle({ className: "status-icon" })} Status Name: ❓ Unknown
+          <FaTimesCircle className="status-icon" /> Status Name: ❓ Unknown
         </span>
       );
   }
@@ -84,51 +98,74 @@ const ServerItem: React.FC<Props> = ({
   wsCountSessions,
   onView,
   onEdit,
-  onDelete
+  onDelete,
 }) => {
-  const id = server.openVpnServerResponses.id;
+  // orval shape from your debug:
+  // {
+  //   openVpnServerResponses: { openVpnServer: { id, serverName, isOnline, isDefault, ... } },
+  //   openVpnServerStatusLogResponse: { vpnServerId, upSince, ... },
+  //   countConnectedClients, countSessions, ...
+  // }
+  const openVpnServer =
+    (server as any)?.openVpnServerResponses?.openVpnServer ??
+    (server as any)?.openVpnServerResponses ??
+    undefined;
 
-  // Prefer WS values, fallback to REST values
-  const connectedClients =
-    wsCountConnectedClients ?? server.countConnectedClients ?? 0;
-  const sessions =
-    wsCountSessions ?? server.countSessions ?? 0;
+  // Normalize id: prefer model id; if 0 or missing — fallback to status.vpnServerId; else prop
+  const resolvedId: number =
+    Number(openVpnServer?.id) && Number(openVpnServer?.id) !== 0
+      ? Number(openVpnServer.id)
+      : Number((server as any)?.openVpnServerStatusLogResponse?.vpnServerId) ||
+        Number(vpnServerId);
+
+  const name: string = openVpnServer?.serverName ?? "";
+  const isOnline: boolean = !!openVpnServer?.isOnline;
+  const isDefault: boolean = !!openVpnServer?.isDefault;
+
+  // Prefer WS numbers, fallback to REST numbers
+  const connectedClients: number =
+    (wsCountConnectedClients ?? (server as any)?.countConnectedClients ?? 0) as number;
+  const sessions: number =
+    (wsCountSessions ?? (server as any)?.countSessions ?? 0) as number;
+
+  const upSince: string | null | undefined =
+    (server as any)?.openVpnServerStatusLogResponse?.upSince ?? null;
 
   return (
     <div className="server-item-content">
       <div className="server-header">
         <div className="server-info">
           <strong className="server-name">
-            ({vpnServerId !== 0 ? vpnServerId : id}) {server.openVpnServerResponses.serverName}
+            ({vpnServerId !== 0 ? vpnServerId : resolvedId}) {name}
           </strong>
         </div>
-        <div className={`server-status ${server.openVpnServerResponses.isOnline ? "status-online" : "status-offline"}`}>
-          {server.openVpnServerResponses.isOnline ? "✅ Online" : "❌ Offline"}
+        <div className={`server-status ${isOnline ? "status-online" : "status-offline"}`}>
+          {isOnline ? "✅ Online" : "❌ Offline"}
         </div>
       </div>
 
       <div className="server-details">
         <div className="detail-row">
-          {BsClock({ className: "detail-icon" })}
+          <BsClock className="detail-icon" />
           <span className="detail-label">Uptime:</span>
-          <span>{server.openVpnServerStatusLogResponse?.upSince ? new Date(server.openVpnServerStatusLogResponse.upSince).toLocaleString() : "N/A"}</span>
+          <span>{upSince ? new Date(upSince).toLocaleString() : "N/A"}</span>
         </div>
 
         <div className="detail-row">
-          {IoMdPerson({ className: "detail-icon" })}
+          <IoMdPerson className="detail-icon" />
           <span className="detail-label">Count Connected Clients:</span>
           <span>{connectedClients}</span>
         </div>
 
         <div className="detail-row">
-          {BsPerson({ className: "detail-icon" })}
+          <BsPerson className="detail-icon" />
           <span className="detail-label">Count Sessions:</span>
           <span>{sessions}</span>
         </div>
 
-        {server.openVpnServerResponses.isDefault && (
+        {isDefault && (
           <div className="detail-row">
-            {BsFillBookmarkStarFill({ className: "detail-icon" })}
+            <BsFillBookmarkStarFill className="detail-icon" />
             <span className="detail-label">Default server</span>
           </div>
         )}
@@ -137,7 +174,7 @@ const ServerItem: React.FC<Props> = ({
       <div className="server-service">
         <div className="detail-row">{getStatusLabel(serviceStatus)}</div>
         <div className="detail-row">
-          {BsClock({ className: "detail-icon" })}
+          <BsClock className="detail-icon" />
           <span className="detail-label">Next Run Time:</span>
           <span>{formatUtcDate(nextRunTime)}</span>
         </div>
@@ -153,29 +190,28 @@ const ServerItem: React.FC<Props> = ({
           className="btn secondary"
           onClick={(e) => {
             e.stopPropagation();
-            onView(id);
+            onView(resolvedId);
           }}
         >
-          {FaEye({ className: "icon" })} View
+          <FaEye className="icon" /> View
         </button>
         <button
           className="btn secondary"
           onClick={(e) => {
             e.stopPropagation();
-            onEdit(id);
+            onEdit(resolvedId);
           }}
         >
-          {FaEdit({ className: "icon" })} Edit
+          <FaEdit className="icon" /> Edit
         </button>
         <button
           className="btn secondary"
-          disabled
           onClick={(e) => {
             e.stopPropagation();
-            onDelete(id);
+            onDelete(resolvedId);
           }}
         >
-          {FaTrash({ className: "icon" })} Delete
+        <FaTrash className="icon" /> Delete
         </button>
       </div>
     </div>

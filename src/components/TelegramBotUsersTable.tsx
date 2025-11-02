@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "./TableStyle";
 import CustomThemeProvider from "./ThemeProvider";
-import {
-  blockUser,
-  unblockUser,
-  setAdmin,
-  unsetAdmin,
-} from "../utils/api/TelegramBotUser";
+// import {
+//   blockUser,
+//   unblockUser,
+//   setAdmin,
+//   unsetAdmin,
+// } from "../utils/api/TelegramBotUser";
 import { FaBan, FaUserShield } from "react-icons/fa";
 
 interface TelegramBotUser {

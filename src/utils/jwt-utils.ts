@@ -1,5 +1,5 @@
 import { jwtDecode } from "jwt-decode";
-import { logout } from "./api";
+// import { logout } from "./api";
 
 export function scheduleAutoLogout(token: string) {
   try {
