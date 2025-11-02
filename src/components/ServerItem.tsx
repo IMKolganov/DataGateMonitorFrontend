@@ -12,26 +12,24 @@ import { IoMdPerson } from "react-icons/io";
 
 // take types directly from orval by inferring the item shape of getAllWithStatus()
 import { getApiOpenVpnServersGetAllWithStatus } from "../api/orval/open-vpn-servers/open-vpn-servers";
-// import type { ServiceStatus } from "../utils/types"; // only enum, if он тоже есть в orval — можешь заменить импорт на orval
+import type { ServiceStatus } from "../api/orval/model/serviceStatus";
 
 // Infer the item type from the orval call result:
 // data: { openVpnServerWithStatuses: Array<OrvalServerItem> }
 type GetAllWithStatusResp = Awaited<ReturnType<typeof getApiOpenVpnServersGetAllWithStatus>>;
 type OrvalServerItem =
-  GetAllWithStatusResp extends Promise<any>
-    ? never
-    : GetAllWithStatusResp extends { data: infer D }
-      ? D extends { openVpnServerWithStatuses: infer A }
-        ? A extends Array<infer T>
-          ? T
-          : never
+  GetAllWithStatusResp extends { data: infer D }
+    ? D extends { openVpnServerWithStatuses: infer A }
+      ? A extends Array<infer T>
+        ? T
         : never
-      : never;
+      : never
+    : never;
 
 interface Props {
-  server: OrvalServerItem;             // строго из orval
-  vpnServerId: number;                 // приходит из родителя
-  serviceStatus: ServiceStatus;
+  server: OrvalServerItem;             // strictly from orval
+  vpnServerId: number;                 // passed from parent
+  serviceStatus: ServiceStatus;        // 0 | 1 | 2
   errorMessage: string | null;
   nextRunTime: string;
 
@@ -59,33 +57,35 @@ const formatUtcDate = (utc: string | null | undefined) => {
   }
 };
 
+// Map numeric status (0|1|2) to JSX label
 const getStatusLabel = (status: ServiceStatus) => {
-  switch (status) {
-    case ServiceStatus.Running:
-      return (
-        <span className="status-indicator running">
-          <FaPlayCircle className="status-icon" /> Status Name: Running
-        </span>
-      );
-    case ServiceStatus.Idle:
-      return (
-        <span className="status-indicator idle">
-          <FaPauseCircle className="status-icon" /> Status Name: Idle
-        </span>
-      );
-    case ServiceStatus.Error:
-      return (
-        <span className="status-indicator error">
-          <FaTimesCircle className="status-icon" /> Status Name: Error
-        </span>
-      );
-    default:
-      return (
-        <span className="status-indicator unknown">
-          <FaTimesCircle className="status-icon" /> Status Name: ❓ Unknown
-        </span>
-      );
+  const s = Number(status);
+  if (s === 1) {
+    return (
+      <span className="status-indicator running">
+        <FaPlayCircle className="status-icon" /> Status Name: Running
+      </span>
+    );
   }
+  if (s === 0) {
+    return (
+      <span className="status-indicator idle">
+        <FaPauseCircle className="status-icon" /> Status Name: Idle
+      </span>
+    );
+  }
+  if (s === 2) {
+    return (
+      <span className="status-indicator error">
+        <FaTimesCircle className="status-icon" /> Status Name: Error
+      </span>
+    );
+  }
+  return (
+    <span className="status-indicator unknown">
+      <FaTimesCircle className="status-icon" /> Status Name: ❓ Unknown
+    </span>
+  );
 };
 
 const ServerItem: React.FC<Props> = ({
@@ -211,7 +211,7 @@ const ServerItem: React.FC<Props> = ({
             onDelete(resolvedId);
           }}
         >
-        <FaTrash className="icon" /> Delete
+          <FaTrash className="icon" /> Delete
         </button>
       </div>
     </div>

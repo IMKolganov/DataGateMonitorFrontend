@@ -1,17 +1,21 @@
 // hooks/useWebSocketService.ts
 import { useState, useEffect, useRef } from "react";
-// import { fetchConfig, getWebSocketUrlForBackgroundService } from "../utils/api";
 import { postApiOpenVpnServersRunNow } from "../api/orval/open-vpn-servers/open-vpn-servers";
-// import { ServiceStatus } from "../utils/types";
+import { fetchConfig, getWebSocketUrlForBackgroundService } from "../api/apirequest";
+import type { ServiceStatus } from "../api/orval/model/serviceStatus";
 
 interface ServiceData {
   vpnServerId: number;
-  status: ServiceStatus;
+  status: ServiceStatus; // 0 | 1 | 2 from orval
   errorMessage: string | null;
   nextRunTime: string;
   countConnectedClients?: number;
   countSessions?: number;
 }
+
+// Optional: helper to convert numeric status to label
+export const statusLabel = (s: ServiceStatus) =>
+  s === 0 ? "idle" : s === 1 ? "running" : "error";
 
 const useWebSocketService = () => {
   const [serviceData, setServiceData] = useState<Record<number, ServiceData>>({});
@@ -43,12 +47,10 @@ const useWebSocketService = () => {
           const updated: Record<number, ServiceData> = {};
 
           arr.forEach((s: any) => {
+            // orval ServiceStatus is 0|1|2; coerce unknowns to 2 ("error")
+            const numericStatus = Number(s.Status);
             const status: ServiceStatus =
-              s.Status === 0
-                ? ServiceStatus.Idle
-                : s.Status === 1
-                ? ServiceStatus.Running
-                : ServiceStatus.Error;
+              (numericStatus === 0 ? 0 : numericStatus === 1 ? 1 : 2) as ServiceStatus;
 
             const cc = Number(s.CountConnectedClients);
             const cs = Number(s.CountSessions);
@@ -64,7 +66,7 @@ const useWebSocketService = () => {
           });
 
           if (!alive) return;
-          setServiceData(updated);
+          setServiceData(updated); // or merge if server sends partial updates
         } catch (error) {
           console.error("Error parsing WebSocket message:", error);
         }

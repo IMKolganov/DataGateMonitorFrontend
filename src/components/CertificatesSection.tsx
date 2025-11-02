@@ -9,11 +9,11 @@ interface Props {
 }
 
 const statusLabels: Record<CertificateStatus, string> = {
-  [CertificateStatus.Active]: "Active",
-  [CertificateStatus.Revoked]: "Revoked",
-  [CertificateStatus.Expired]: "Expired",
-  [CertificateStatus.Unknown]: "Unknown",
-};
+//   [CertificateStatus.Active]: "Active",
+//   [CertificateStatus.Revoked]: "Revoked",
+//   [CertificateStatus.Expired]: "Expired",
+//   [CertificateStatus.Unknown]: "Unknown",
+// };
 
 const CertificatesSection: React.FC<Props> = ({ vpnServerId }) => {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
