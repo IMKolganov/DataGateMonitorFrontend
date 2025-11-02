@@ -16,6 +16,12 @@ import type {
   GetApiOpenVpnClientsGetAllHistoryParams,
 } from "../api/orval/model";
 
+// server orval hooks
+import {
+  useGetApiOpenVpnServersGetServerWithStatusVpnServerId,
+  useGetApiOpenVpnServersGetVpnServerId,
+} from "../api/orval/open-vpn-servers/open-vpn-servers";
+
 type ConnectedClientsResponse = {
   clients: any[];
   totalCount: number;
@@ -25,22 +31,22 @@ export function GeneralServerDetails() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
 
   const [isLive, setIsLive] = useState(true);
-  const [serverInfo, setServerInfo] = useState<any>(null);
-  const [loadingServer, setLoadingServer] = useState(false);
 
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
+  // parse numeric id
   const numericServerId = useMemo(
     () => (vpnServerId ? Number(vpnServerId) : undefined),
     [vpnServerId]
   );
 
+  // -------- Clients (connected/history) --------
   const connectedParams = useMemo(
     () =>
       ({
         vpnServerId: numericServerId,
-        pageNumber: page + 1,
+        pageNumber: page + 1, // API is usually 1-based
         pageSize,
       }) as GetApiOpenVpnClientsGetAllConnectedParams,
     [numericServerId, page, pageSize]
@@ -54,6 +60,9 @@ export function GeneralServerDetails() {
       enabled: !!numericServerId && isLive,
       keepPreviousData: true,
       staleTime: 10_000,
+      retry: 1,
+      onSuccess: (d) => console.debug("[clients connected] success:", d),
+      onError: (e) => console.debug("[clients connected] error:", e),
     },
   });
 
@@ -62,6 +71,9 @@ export function GeneralServerDetails() {
       enabled: !!numericServerId && !isLive,
       keepPreviousData: true,
       staleTime: 10_000,
+      retry: 1,
+      onSuccess: (d) => console.debug("[clients history] success:", d),
+      onError: (e) => console.debug("[clients history] error:", e),
     },
   });
 
@@ -76,24 +88,89 @@ export function GeneralServerDetails() {
   const totalClients =
     typeof clientsPayload.totalCount === "number" ? clientsPayload.totalCount : 0;
 
-  // Optional: load server info (stub)
+  // -------- Server info (with-status preferred, fallback to basic get) --------
+  const serverWithStatusQuery = useGetApiOpenVpnServersGetServerWithStatusVpnServerId(
+    numericServerId ?? 0,
+    {
+      query: {
+        enabled: Number.isFinite(numericServerId),
+        staleTime: 30_000,
+        retry: 1,
+        onSuccess: (d) => console.debug("[server with-status] success:", d),
+        onError: (e) => console.debug("[server with-status] error:", e),
+      },
+    }
+  );
+
+  const serverBasicQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId ?? 0, {
+    query: {
+      enabled: Number.isFinite(numericServerId) && !serverWithStatusQuery.data,
+      staleTime: 30_000,
+      retry: 1,
+      onSuccess: (d) => console.debug("[server basic] success:", d),
+      onError: (e) => console.debug("[server basic] error:", e),
+    },
+  });
+
+  const loadingServer = serverWithStatusQuery.isFetching || serverBasicQuery.isFetching;
+
+  // Normalize to shape expected by <ServerDetailsInfo />
+  const serverInfo = useMemo(() => {
+    // A) Already combined payload from with-status
+    const s: any = serverWithStatusQuery.data;
+    if (s && (s.openVpnServerResponses || s.openVpnServerStatusLogResponse)) {
+      return s;
+    }
+
+    // B) Basic get/{id} -> wrap into expected fields
+    const b: any = serverBasicQuery.data;
+    if (b?.openVpnServer) {
+      const ov = b.openVpnServer;
+      return {
+        openVpnServerResponses: {
+          serverName: ov.serverName,
+          isOnline: !!ov.isOnline,
+          isDefault: !!ov.isDefault,
+          apiUrl: ov.apiUrl ?? "",
+        },
+        openVpnServerStatusLogResponse: {
+          upSince: null,
+          version: null,
+          serverLocalIp: null,
+          serverRemoteIp: null,
+          bytesIn: 0,
+          bytesOut: 0,
+          sessionId: null,
+        },
+        totalBytesIn: 0,
+        totalBytesOut: 0,
+        countConnectedClients: 0,
+        countSessions: 0,
+      };
+    }
+
+    return null;
+  }, [serverWithStatusQuery.data, serverBasicQuery.data]);
+
+  // logging for visibility
   useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      if (!numericServerId) return;
-      setLoadingServer(true);
-      try {
-        // TODO: replace with servers orval hook when available
-        if (!cancelled) setServerInfo(null);
-      } finally {
-        if (!cancelled) setLoadingServer(false);
-      }
-    };
-    run();
-    return () => {
-      cancelled = true;
-    };
+    console.debug("[GeneralServerDetails] numericServerId =", numericServerId);
   }, [numericServerId]);
+
+  // Manual refresh (refetch what is currently active)
+  const handleRefresh = () => {
+    if (isLive) connectedQuery.refetch();
+    else historyQuery.refetch();
+
+    // refresh server
+    serverWithStatusQuery.refetch();
+    serverBasicQuery.refetch();
+  };
+
+  // Reset page when toggling live/history
+  useEffect(() => {
+    setPage(0);
+  }, [isLive]);
 
   const toHumanReadableSize = (bytes: number): string => {
     const sizes = ["B", "KB", "MB", "GB", "TB"];
@@ -105,15 +182,6 @@ export function GeneralServerDetails() {
     }
     return `${val.toFixed(2)} ${sizes[i]}`;
   };
-
-  const handleRefresh = () => {
-    if (isLive) connectedQuery.refetch();
-    else historyQuery.refetch();
-  };
-
-  useEffect(() => {
-    setPage(0);
-  }, [isLive]);
 
   return (
     <div style={{ width: "100%", minWidth: 0 }}>
@@ -145,7 +213,20 @@ export function GeneralServerDetails() {
         <ServerDetailsInfo serverInfo={serverInfo} toHumanReadableSize={toHumanReadableSize} />
       ) : (
         <div style={{ marginBottom: 12, opacity: 0.8, fontSize: 14 }}>
+          {/* add some debug to see why it's empty */}
           Server info is not available yet.
+          <pre style={{ marginTop: 8, whiteSpace: "pre-wrap", fontSize: 12, opacity: 0.8 }}>
+            {JSON.stringify(
+              {
+                withStatusEnabled: Number.isFinite(numericServerId),
+                withStatusHasData: !!serverWithStatusQuery.data,
+                basicEnabled: Number.isFinite(numericServerId) && !serverWithStatusQuery.data,
+                basicHasData: !!serverBasicQuery.data,
+              },
+              null,
+              2
+            )}
+          </pre>
         </div>
       )}
 
