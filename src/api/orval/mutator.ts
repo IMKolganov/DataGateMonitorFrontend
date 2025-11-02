@@ -1,10 +1,15 @@
-//api/orval/mutator.ts
-import { apiRequest } from '../apirequest';
+// api/orval/mutator.ts
+import { apiRequest, type ApiResponse } from '../apirequest';
 
 type LowerHttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch';
 type AnyHttpMethod = LowerHttpMethod | Uppercase<LowerHttpMethod>;
 
-export const ogmMutator = async <TData>(config: {
+// Unwrap ApiResponse<T> -> T
+type UnwrapApiResponse<T> =
+  T extends ApiResponse<infer D> ? D :
+  T extends { data: infer D } ? D : T;
+
+export const ogmMutator = async <TApiResponse>(config: {
   url: string;
   method: AnyHttpMethod;
   data?: any;
@@ -14,12 +19,12 @@ export const ogmMutator = async <TData>(config: {
 }) => {
   const method = (config.method as string).toLowerCase() as LowerHttpMethod;
 
-  const res = await apiRequest<TData>(method, config.url, {
+  const res = await apiRequest<any>(method, config.url, {
     data: config.data,
     headers: config.headers,
     params: config.params,
     signal: config.signal,
   });
 
-  return (res as any).data as TData;
+  return (res?.data ?? res) as UnwrapApiResponse<TApiResponse>;
 };

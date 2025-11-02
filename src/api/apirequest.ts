@@ -4,7 +4,14 @@ import type { AxiosRequestConfig } from "axios";
 
 export interface Config {
   defaultRefreshInterval: number;
+  apiBaseUrl?: string; // <- optional, чтобы не ругался TS
 }
+
+export type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+  errorMessage?: string | null;
+};
 
 let API_BASE_URL: string | null = null;
 let WS_BASE_URL: string | null = null;
@@ -12,7 +19,6 @@ let configPromise: Promise<Config> | null = null;
 
 // Helper: detect auth endpoints to avoid redirect loops
 const isAuthEndpoint = (u: string) => /\/api\/auth(\/|$)/i.test(u);
-
 
 export const apiRequest = async <T>(
   method: "get" | "post" | "put" | "delete" | "patch",
@@ -26,9 +32,13 @@ export const apiRequest = async <T>(
 
   // If token is required but missing -> soft logout (no reload loop)
   if (!token && !skipAuth && !isAuthEndpoint(url)) {
-    softLogout(); // мягкий логаут (без петли)
+    softLogout();
     throw new Error("User is not authenticated");
   }
+
+  // Build headers safely: add Authorization only if token exists AND not skipAuth
+  const authHeader =
+    !skipAuth && token ? { Authorization: `Bearer ${token}` } : {};
 
   try {
     const response = await axios({
@@ -37,7 +47,7 @@ export const apiRequest = async <T>(
       ...config,
       headers: {
         ...config.headers,
-        ...(skipAuth ? {} : { Authorization: `Bearer ${token}` }),
+        ...authHeader, // <- безопасно
       },
     });
 
@@ -46,18 +56,13 @@ export const apiRequest = async <T>(
     const status = error?.response?.status;
     const pathname = window.location.pathname;
 
-    // Do not redirect on 401 when:
-    // 1) skipAuth is true (public call),
-    // 2) it's an auth endpoint (login/secret/status),
-    // 3) we're already on /login (avoid reload loop)
     if (
       status === 401 &&
       !skipAuth &&
       !isAuthEndpoint(url) &&
       pathname !== "/login"
     ) {
-      logout(); // safe redirect to /login if not already there
-      // Note: no return here, we still rethrow so callers see the error if needed
+      logout();
     }
 
     throw error;
@@ -82,7 +87,7 @@ export const fetchConfig = async (): Promise<Config> => {
 
       return {
         ...cfg,
-        apiBaseUrl: API_BASE_URL,
+        apiBaseUrl: API_BASE_URL ?? undefined,
       };
     } catch (error) {
       console.error("Failed to load config:", error);
@@ -99,20 +104,29 @@ export const ensureApiBaseUrl = async () => {
   }
 };
 
-// Soft logout: clear token and navigate only if not on /login
 export const logout = () => {
   localStorage.removeItem("token");
   if (window.location.pathname !== "/login") {
-    // Use assign to avoid keeping the previous page in history
     window.location.assign("/login");
   }
 };
 
-// Used when we only need to clear token without forcing navigation on /login
 const softLogout = () => {
   localStorage.removeItem("token");
-  // If we are not on login, go there; if already there, do nothing
   if (window.location.pathname !== "/login") {
     window.location.assign("/login");
   }
+};
+
+export const getWebSocketUrlForBackgroundService = async (): Promise<string> => {
+  await ensureApiBaseUrl();
+  if (!WS_BASE_URL) throw new Error("WebSocket base URL is not set");
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    logout();
+    throw new Error("User is not authenticated");
+  }
+
+  return `${WS_BASE_URL}/OpenVpnServers/status-stream?access_token=${encodeURIComponent(token)}`;
 };
