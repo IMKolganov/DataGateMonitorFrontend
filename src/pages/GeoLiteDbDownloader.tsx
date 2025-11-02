@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { FaDatabase } from "react-icons/fa";
-import { updateGeoLiteDatabase, getGeoLiteDatabaseVersion } from "../utils/api/GeoLite";
-import { getGeoLiteHubConnection } from "../utils/api";
+// import { updateGeoLiteDatabase, getGeoLiteDatabaseVersion } from "../utils/api/GeoLite";
+// import { getGeoLiteHubConnection } from "../utils/api";
 
 import * as signalR from "@microsoft/signalr";
 import { toast } from "react-toastify";

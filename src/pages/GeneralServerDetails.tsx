@@ -5,8 +5,8 @@ import { FaSync } from "react-icons/fa";
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
 import ServerDetailsInfo from "../components/ServerDetailsInfo";
-import { fetchConnectedClients,  fetchHistoryClients} from "../utils/api/OpenVpnServerClients";
-import { fetchServersWithStats } from "../utils/api/OpenVpnServers";
+// import { fetchConnectedClients,  fetchHistoryClients} from "../utils/api/OpenVpnServerClients";
+// import { fetchServersWithStats } from "../utils/api/OpenVpnServers";
 
 export function GeneralServerDetails() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import CertificatesData from "../components/CertificatesData";
-import { getServer } from "../utils/api/OpenVpnServers";
+// import { getServer } from "../utils/api/OpenVpnServers";
 import "../css/Certificates.css";
 
 const Certificates: React.FC = () => {

@@ -3,9 +3,9 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { Link, useParams } from "react-router-dom";
 import StyledDataGrid from "./TableStyle";
 import CustomThemeProvider from "./ThemeProvider";
-import type { OverviewUserItem } from "../utils/types";
+// import type { OverviewUserItem } from "../utils/types";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
-import { fetchOverviewUsers } from "../utils/api/OpenVpnServerClients";
+// import { fetchOverviewUsers } from "../utils/api/OpenVpnServerClients";
 
 export interface OverviewUsersTableProps {
   from: Date;

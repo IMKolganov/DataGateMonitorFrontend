@@ -1,7 +1,8 @@
+// hooks/useWebSocketService.ts
 import { useState, useEffect, useRef } from "react";
-import { fetchConfig, getWebSocketUrlForBackgroundService } from "../utils/api";
-import { runServiceNow } from "../utils/api/OpenVpnServers";
-import { ServiceStatus } from "../utils/types";
+// import { fetchConfig, getWebSocketUrlForBackgroundService } from "../utils/api";
+import { postApiOpenVpnServersRunNow } from "../api/orval/open-vpn-servers/open-vpn-servers";
+// import { ServiceStatus } from "../utils/types";
 
 interface ServiceData {
   vpnServerId: number;
@@ -43,9 +44,11 @@ const useWebSocketService = () => {
 
           arr.forEach((s: any) => {
             const status: ServiceStatus =
-              s.Status === 0 ? ServiceStatus.Idle :
-              s.Status === 1 ? ServiceStatus.Running :
-              ServiceStatus.Error;
+              s.Status === 0
+                ? ServiceStatus.Idle
+                : s.Status === 1
+                ? ServiceStatus.Running
+                : ServiceStatus.Error;
 
             const cc = Number(s.CountConnectedClients);
             const cs = Number(s.CountSessions);
@@ -61,7 +64,6 @@ const useWebSocketService = () => {
           });
 
           if (!alive) return;
-          // Replace snapshot (server sends the full list each tick)
           setServiceData(updated);
         } catch (error) {
           console.error("Error parsing WebSocket message:", error);
@@ -70,12 +72,11 @@ const useWebSocketService = () => {
 
       socket.onclose = () => {
         if (!alive) return;
-        // simple retry
         reconnectTimerRef.current = setTimeout(() => connectWebSocket(wsUrl), 5000);
       };
 
       socket.onerror = (e) => {
-        console.error("WS error", e);
+        console.error("WebSocket error:", e);
       };
     };
 
@@ -86,10 +87,23 @@ const useWebSocketService = () => {
       if (reconnectTimerRef.current) {
         clearTimeout(reconnectTimerRef.current);
       }
-      // Close the local socket; don't rely on stale state
-      try { socket?.close(); } catch {}
+      try {
+        socket?.close();
+      } catch {}
     };
   }, []);
+
+  // new helper: run background job manually
+  const runServiceNow = async () => {
+    try {
+      const response = await postApiOpenVpnServersRunNow();
+      console.info("Manual background service run triggered:", response);
+      return response;
+    } catch (error) {
+      console.error("Failed to trigger RunNow:", error);
+      throw error;
+    }
+  };
 
   return { serviceData, runServiceNow };
 };

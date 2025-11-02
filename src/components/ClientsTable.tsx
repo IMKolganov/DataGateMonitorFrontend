@@ -1,6 +1,6 @@
 import React from "react";
 import type { GridColDef } from "@mui/x-data-grid";
-import type { ConnectedClient } from "../utils/types";
+// import type { ConnectedClient } from "../utils/types";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";

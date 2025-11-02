@@ -1,4 +1,5 @@
 // src/components/GeoPointsMap.tsx
+// comments in English only
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -7,8 +8,8 @@ import Cookies from "js-cookie";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { toast } from "react-toastify";
-import { fetchGeoPoints } from "../utils/api/OpenVpnServerClients";
 import type { GeoPointAggDto } from "../utils/types";
+import { getApiOpenVpnClientsOverviewPoints } from "../api/orval/open-vpn-server-clients/open-vpn-server-clients";
 
 type GeoPointsMapProps = {
   from: Date | string;
@@ -80,7 +81,6 @@ const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }
   return null;
 };
 
-/** Human-readable bytes (KB/MB/GB, base 1024) */
 function formatBytes(value?: number | null, decimals = 1): string {
   if (!value || value <= 0) return "0 B";
   const units = ["B", "KB", "MB", "GB", "TB", "PB"];
@@ -94,7 +94,6 @@ function formatBytes(value?: number | null, decimals = 1): string {
   return `${n.toFixed(d)} ${units[i]}`;
 }
 
-// Decide marker color by total traffic (in + out)
 function iconForTraffic(totalBytes: number): L.Icon {
   if (!totalBytes || totalBytes <= 0)       return ICONS.grey;
   if (totalBytes <= ONE_MB)                 return ICONS.blue;
@@ -105,6 +104,16 @@ function iconForTraffic(totalBytes: number): L.Icon {
   if (totalBytes <= FIVE_HUNDRED_GB)        return ICONS.yellow;
   if (totalBytes <= ONE_TB)                 return ICONS.black;
   return ICONS.black; // > 1 TB
+}
+
+// Normalize ApiResponse<T> or plain T
+function unwrap<T>(resp: any): T {
+  return (resp?.data as T) ?? (resp as T);
+}
+
+// Ensure ISO8601 string for API
+function toIso(v: Date | string): string {
+  return v instanceof Date ? v.toISOString() : new Date(v).toISOString();
 }
 
 export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
@@ -130,8 +139,8 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
   const depsKey = useMemo(
     () =>
       JSON.stringify({
-        from,
-        to,
+        from: toIso(from),
+        to: toIso(to),
         vpnServerId,
         externalId,
         onlyWithCoordinates,
@@ -145,21 +154,23 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
     const controller = new AbortController();
     abortRef.current = controller;
 
-    fetchGeoPoints({
-      from,
-      to,
-      vpnServerId: vpnServerId ?? undefined,
-      externalId: externalId ?? undefined,
-      onlyWithCoordinates,
-      // Pass signal if your API supports AbortController
-      // @ts-expect-error library typing may not include `signal`
-      signal: controller.signal,
-    })
-      .then((data) => setPoints(data))
+    getApiOpenVpnClientsOverviewPoints(
+      {
+        from: toIso(from),
+        to: toIso(to),
+        vpnServerId: vpnServerId ?? undefined,
+        externalId: externalId ?? undefined,
+        onlyWithCoordinates,
+      },
+      controller.signal
+    )
+      .then((resp) => {
+        const data = unwrap<{ points?: GeoPointAggDto[] }>(resp);
+        setPoints(Array.isArray(data?.points) ? data.points : []);
+      })
       .catch((e) => {
-        // Ignore abort errors; show toast for real failures
         if ((e as any).name !== "AbortError") {
-          const message = String(e);
+          const message = String((e as any)?.message ?? e);
           toast.error(`Failed to load geo points: ${message}`, {
             autoClose: 4500,
             closeOnClick: true,
@@ -208,7 +219,6 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
           </select>
         </div>
 
-        {/* No loading/error/count indicators here by design */}
         <div />
       </div>
 

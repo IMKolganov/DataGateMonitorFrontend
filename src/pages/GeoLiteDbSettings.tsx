@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "../css/Settings.css";
-import {  getSetting,  setSetting } from "../utils/api/Settings";
-import {  getGeoLiteDatabaseVersion} from "../utils/api/GeoLite";
+// import {  getSetting,  setSetting } from "../utils/api/Settings";
+// import {  getGeoLiteDatabaseVersion} from "../utils/api/GeoLite";
 import { FaSave } from "react-icons/fa";
 import { GeoLiteDbDownloader } from "./GeoLiteDbDownloader";
 
