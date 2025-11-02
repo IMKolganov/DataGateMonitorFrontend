@@ -8,8 +8,14 @@ import Cookies from "js-cookie";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { toast } from "react-toastify";
-import type { GeoPointAggDto } from "../utils/types";
-import { getApiOpenVpnClientsOverviewPoints } from "../api/orval/open-vpn-server-clients/open-vpn-server-clients";
+
+import {
+  getApiOpenVpnClientsOverviewPoints,
+} from "../api/orval/open-vpn-server-clients/open-vpn-server-clients";
+import type {
+  GeoPointAggDto,
+  GetApiOpenVpnClientsOverviewPointsParams,
+} from "../api/orval/model";
 
 type GeoPointsMapProps = {
   from: Date | string;
@@ -106,14 +112,18 @@ function iconForTraffic(totalBytes: number): L.Icon {
   return ICONS.black; // > 1 TB
 }
 
-// Normalize ApiResponse<T> or plain T
-function unwrap<T>(resp: any): T {
-  return (resp?.data as T) ?? (resp as T);
-}
-
 // Ensure ISO8601 string for API
 function toIso(v: Date | string): string {
   return v instanceof Date ? v.toISOString() : new Date(v).toISOString();
+}
+
+// Try to pick array of points from different response shapes
+function pickPoints(result: unknown): GeoPointAggDto[] {
+  const r = result as any;
+  // prefer `points`, fallback to `geoPointAgg`
+  if (Array.isArray(r?.points)) return r.points as GeoPointAggDto[];
+  if (Array.isArray(r?.geoPointAgg)) return r.geoPointAgg as GeoPointAggDto[];
+  return [];
 }
 
 export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
@@ -136,6 +146,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
     Cookies.set("selectedMapLayer", selectedLayer, { expires: 365 });
   }, [selectedLayer]);
 
+  // Single memo key for effect deps
   const depsKey = useMemo(
     () =>
       JSON.stringify({
@@ -154,23 +165,28 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
     const controller = new AbortController();
     abortRef.current = controller;
 
-    getApiOpenVpnClientsOverviewPoints(
-      {
-        from: toIso(from),
-        to: toIso(to),
-        vpnServerId: vpnServerId ?? undefined,
-        externalId: externalId ?? undefined,
-        onlyWithCoordinates,
-      },
-      controller.signal
-    )
+    const params: GetApiOpenVpnClientsOverviewPointsParams = {
+      // PascalCase param names as per orval model
+      From: toIso(from),
+      To: toIso(to),
+      VpnServerId: vpnServerId ?? undefined,
+      ExternalId: externalId ?? undefined,
+      OnlyWithCoordinates: onlyWithCoordinates,
+    };
+
+    console.debug("[GeoPointsMap] request params:", params);
+
+    getApiOpenVpnClientsOverviewPoints(params, controller.signal)
       .then((resp) => {
-        const data = unwrap<{ points?: GeoPointAggDto[] }>(resp);
-        setPoints(Array.isArray(data?.points) ? data.points : []);
+        // ogmMutator already returns unwrapped payload
+        const next = pickPoints(resp);
+        console.debug("[GeoPointsMap] received points:", next.length);
+        setPoints(next);
       })
       .catch((e) => {
         if ((e as any).name !== "AbortError") {
           const message = String((e as any)?.message ?? e);
+          console.debug("[GeoPointsMap] error:", message);
           toast.error(`Failed to load geo points: ${message}`, {
             autoClose: 4500,
             closeOnClick: true,
@@ -258,7 +274,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                     <br />
                     📍 {p.latitude}, {p.longitude}
                     <hr />
-                    👥 Sessions: {p.sessionsCount}
+                    👥 Sessions: {p.sessionsCount ?? 0}
                     <br />
                     📥 In: {formatBytes(p.totalBytesIn)}
                     <br />

@@ -10,20 +10,30 @@ interface Props {
 }
 
 const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize }) => {
-  if (!serverInfo?.openVpnServerStatusLogResponse) return <p>No server information available.</p>;
+  if (!serverInfo) return <p>No server information available.</p>;
+
+  // поддерживаем обе формы
+  const server =
+    serverInfo.openVpnServerResponses ??
+    (serverInfo.openVpnServer ? {
+      serverName: serverInfo.openVpnServer.serverName,
+      isOnline: !!serverInfo.openVpnServer.isOnline,
+      isDefault: !!serverInfo.openVpnServer.isDefault,
+      apiUrl: serverInfo.openVpnServer.apiUrl ?? "",
+    } : null);
+
+  const status = serverInfo.openVpnServerStatusLogResponse ?? null;
+
+  if (!server) return <p>No server information available.</p>;
 
   return (
     <div className="server-info">
       <div className="server-header">
         <div className="server-info">
-          <strong className="server-name">{serverInfo.openVpnServerResponses.serverName}</strong>
+          <strong className="server-name">{server.serverName ?? "(unknown)"}</strong>
         </div>
-        <div
-          className={`server-status ${
-            serverInfo.openVpnServerResponses.isOnline ? "status-online" : "status-offline"
-          }`}
-        >
-          {serverInfo.openVpnServerResponses.isOnline ? "Online" : "Offline"}
+        <div className={`server-status ${server.isOnline ? "status-online" : "status-offline"}`}>
+          {server.isOnline ? "Online" : "Offline"}
         </div>
       </div>
 
@@ -32,75 +42,82 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize })
           {BsClock({ className: "detail-icon" })}
           <span className="detail-label">Uptime:</span>
           <span>
-            {serverInfo.openVpnServerStatusLogResponse.upSince
-              ? new Date(serverInfo.openVpnServerStatusLogResponse.upSince).toLocaleString()
-              : "N/A"}
+            {status?.upSince ? new Date(status.upSince).toLocaleString() : "N/A"}
           </span>
         </div>
+
         <div className="detail-row">
           {RiHardDrive2Line({ className: "detail-icon" })}
           <span className="detail-label">Version:</span>
-          <span>{serverInfo.openVpnServerStatusLogResponse.version || "Unknown"}</span>
+          <span>{status?.version || "Unknown"}</span>
         </div>
+
         <div className="detail-row">
           {BsHddNetwork({ className: "detail-icon" })}
           <span className="detail-label">Local IP:</span>
-          <span>{serverInfo.openVpnServerStatusLogResponse.serverLocalIp || "N/A"}</span>
+          <span>{status?.serverLocalIp || "N/A"}</span>
         </div>
+
         <div className="detail-row">
           {BsHddNetwork({ className: "detail-icon" })}
           <span className="detail-label">Remote IP:</span>
-          <span>{serverInfo.openVpnServerStatusLogResponse.serverRemoteIp || "N/A"}</span>
+          <span>{status?.serverRemoteIp || "N/A"}</span>
         </div>
+
         <div className="detail-row">
           {IoIosSpeedometer({ className: "detail-icon" })}
           <span className="detail-label">Traffic IN:</span>
-          <span>{toHumanReadableSize(serverInfo.openVpnServerStatusLogResponse.bytesIn || 0)}</span>
+          <span>{toHumanReadableSize(status?.bytesIn || 0)}</span>
         </div>
+
         <div className="detail-row">
           {IoIosSpeedometer({ className: "detail-icon" })}
           <span className="detail-label">Traffic OUT:</span>
-          <span>{toHumanReadableSize(serverInfo.openVpnServerStatusLogResponse.bytesOut || 0)}</span>
+          <span>{toHumanReadableSize(status?.bytesOut || 0)}</span>
         </div>
+
         <div className="detail-row">
           {BsHddNetwork({ className: "detail-icon" })}
           <span className="detail-label">Server session Id:</span>
-          <span>{serverInfo.openVpnServerStatusLogResponse.sessionId || "N/A"}</span>
+          <span>{status?.sessionId || "N/A"}</span>
         </div>
 
         <div className="detail-row">
           {IoIosSpeedometer({ className: "detail-icon" })}
           <span className="detail-label">Total Traffic IN:</span>
-          <span>{toHumanReadableSize(serverInfo.totalBytesIn)}</span>
+          <span>{toHumanReadableSize(serverInfo.totalBytesIn ?? 0)}</span>
         </div>
+
         <div className="detail-row">
           {IoIosSpeedometer({ className: "detail-icon" })}
           <span className="detail-label">Total Traffic OUT:</span>
-          <span>{toHumanReadableSize(serverInfo.totalBytesOut)}</span>
+          <span>{toHumanReadableSize(serverInfo.totalBytesOut ?? 0)}</span>
         </div>
+
         <div className="detail-row">
           {IoMdPerson({ className: "detail-icon" })}
           <span className="detail-label">Count connected clients:</span>
-          <span>{serverInfo.countConnectedClients}</span>
+          <span>{serverInfo.countConnectedClients ?? 0}</span>
         </div>
+
         <div className="detail-row">
           {BsPerson({ className: "detail-icon" })}
           <span className="detail-label">Count sessions:</span>
-          <span>{serverInfo.countSessions}</span>
+          <span>{serverInfo.countSessions ?? 0}</span>
         </div>
+
         <div className="detail-row">
           {BsPerson({ className: "detail-icon" })}
           <span className="detail-label">API url:</span>
-          <span>{serverInfo.openVpnServerResponses.apiUrl}</span>
+          <span>{server.apiUrl || "N/A"}</span>
         </div>
 
-        {serverInfo.openVpnServerResponses.isDefault && (
+        {server.isDefault && (
           <div className="detail-row">
             {BsFillBookmarkStarFill({ className: "detail-icon" })}
             <span className="detail-label">Default server</span>
           </div>
         )}
-
       </div>
     </div>
   );

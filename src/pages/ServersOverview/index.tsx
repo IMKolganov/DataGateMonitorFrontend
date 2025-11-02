@@ -1,19 +1,42 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+// src/pages/servers/ServersOverview.tsx
+import { useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
 
+import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
 import { OverviewUsersTable } from "../../components/OverviewUsersTable";
-// import { fetchOverviewSeries, fetchOverviewTotals } from "../../utils/api/OpenVpnServerClients";
-// import { type OverviewTotalsResponse, type OverviewSeriesResponse } from "../../utils/types";
+
 import StatsCards from "./StatsCards";
 import OverviewChart from "./OverviewChart";
 import GeoMap from "./GeoMap";
 import { addDays, endOfToday, startOfToday, toChartPoints, buildFallbackOverviewResponse } from "./helpers";
-import type { ChartPoint } from "./types";
+import type { ChartPoint, Totals } from "./types"; // <-- убедись, что Totals описан в ./types
+
+import { keepPreviousData } from "@tanstack/react-query"; // <-- v5 replacement
+
+// orval hooks & types
+import {
+  useGetApiOpenVpnClientsOverviewSeries,
+  useGetApiOpenVpnClientsOverviewSummary,
+} from "../../api/orval/open-vpn-server-clients/open-vpn-server-clients";
+import type {
+  OverviewSeriesResponse,
+  OverviewTotalsResponse,
+  GetApiOpenVpnClientsOverviewSeriesParams,
+  GetApiOpenVpnClientsOverviewSummaryParams,
+} from "../../api/orval/model";
+import { OverviewGrouping } from "../../api/orval/model";
+
+// UI -> API enum mapping (числовой enum из orval)
+const UI_TO_API_GROUPING: Record<Grouping, (typeof OverviewGrouping)[keyof typeof OverviewGrouping]> = {
+  auto: OverviewGrouping.NUMBER_0,
+  hour: OverviewGrouping.NUMBER_1,
+  day:  OverviewGrouping.NUMBER_2,
+};
+
+const toApiGrouping = (g: Grouping) => UI_TO_API_GROUPING[g];
 
 export default function ServersOverview() {
-  // Read params for scoping: works for /servers and /servers/:vpnServerId/statistics/:externalId?
   const { vpnServerId: vpnServerIdParam, externalId: externalIdParam } = useParams<{
     vpnServerId?: string;
     externalId?: string;
@@ -27,7 +50,6 @@ export default function ServersOverview() {
 
   const externalId = externalIdParam || undefined;
 
-  // dedupe toast spam
   const lastErrorKey = useRef<string>("");
 
   const showErrorToast = (prefix: string, err: unknown) => {
@@ -50,60 +72,56 @@ export default function ServersOverview() {
   const [to, setTo] = useState<Date>(endOfToday());
   const [grouping, setGrouping] = useState<Grouping>("auto");
 
-  // backend state: series
-  const [apiData, setApiData] = useState<OverviewSeriesResponse | null>(null);
-  const [loadingSeries, setLoadingSeries] = useState(false);
+  // PascalCase поля для orval-моделей
+  const seriesParams: GetApiOpenVpnClientsOverviewSeriesParams = useMemo(
+    () => ({
+      From: from.toISOString(),
+      To: to.toISOString(),
+      Grouping: toApiGrouping(grouping),
+      VpnServerId: vpnServerId,
+      ExternalId: externalId,
+    }),
+    [from, to, grouping, vpnServerId, externalId]
+  );
 
-  // backend state: totals
-  const [totalsResp, setTotalsResp] = useState<OverviewTotalsResponse | null>(null);
-  const [loadingTotals, setLoadingTotals] = useState(false);
+  const totalsParams: GetApiOpenVpnClientsOverviewSummaryParams = useMemo(
+    () => ({
+      From: from.toISOString(),
+      To: to.toISOString(),
+      VpnServerId: vpnServerId,
+      ExternalId: externalId,
+    }),
+    [from, to, vpnServerId, externalId]
+  );
 
-  // fetch series
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        setLoadingSeries(true);
-        const data = await fetchOverviewSeries({
-          from,
-          to,
-          grouping,
-          vpnServerId,     // number | undefined
-          externalId,      // string | undefined
-        });
-        if (!cancelled) setApiData(data);
-      } catch (e) {
-        if (!cancelled) showErrorToast("Series load error", e);
-      } finally {
-        if (!cancelled) setLoadingSeries(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [from, to, grouping, vpnServerId, externalId]);
+  // Queries (ogmMutator уже распаковывает ApiResponse)
+  const seriesQuery = useGetApiOpenVpnClientsOverviewSeries(seriesParams, {
+    query: {
+      enabled: true,
+      staleTime: 10_000,
+      retry: 1,
+      placeholderData: keepPreviousData, // <-- вместо keepPreviousData: true
+      onError: (e) => showErrorToast("Series load error", e),
+    },
+  });
 
-  // fetch totals
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        setLoadingTotals(true);
-        const t = await fetchOverviewTotals({
-          from,
-          to,
-          vpnServerId,
-          externalId,
-        });
-        if (!cancelled) setTotalsResp(t);
-      } catch (e) {
-        if (!cancelled) showErrorToast("Totals load error", e);
-      } finally {
-        if (!cancelled) setLoadingTotals(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [from, to, vpnServerId, externalId]);
+  const totalsQuery = useGetApiOpenVpnClientsOverviewSummary(totalsParams, {
+    query: {
+      enabled: true,
+      staleTime: 10_000,
+      retry: 1,
+      placeholderData: keepPreviousData, // <-- вместо keepPreviousData: true
+      onError: (e) => showErrorToast("Totals load error", e),
+    },
+  });
 
-  // chart data with fallback
+  const apiData = seriesQuery.data as OverviewSeriesResponse | undefined;
+  const totalsResp = totalsQuery.data as OverviewTotalsResponse | undefined;
+
+  const loadingSeries = seriesQuery.isFetching;
+  const loadingTotals = totalsQuery.isFetching;
+
+  // Chart data with fallback
   const chartData: ChartPoint[] = useMemo(() => {
     if (apiData?.series?.length) {
       return toChartPoints(apiData.series, apiData.meta.grouping);
@@ -115,9 +133,9 @@ export default function ServersOverview() {
           clients: 0,
           currentIn: 0,
           currentOut: 0,
-          totalIn: totalsResp.totals.trafficInBytes,
-          totalOut: totalsResp.totals.trafficOutBytes,
-          sessions: totalsResp.totals.sessionsCount,
+          totalIn: totalsResp.totals.trafficInBytes ?? 0,
+          totalOut: totalsResp.totals.trafficOutBytes ?? 0,
+          sessions: totalsResp.totals.sessionsCount ?? 0,
           defaults: 0,
         }
       : {
@@ -141,13 +159,22 @@ export default function ServersOverview() {
     setGrouping(c.grouping);
   };
 
-  const totalsForCards = useMemo(() => {
-    return totalsResp?.totals ?? {
-      sessionsCount: 0,
-      usersCount: 0,
-      trafficInBytes: 0,
-      trafficOutBytes: 0,
-      trafficTotalBytes: 0,
+  // ✅ Приводим к строгому типу Totals (все поля — number)
+  const totalsForCards: Totals = useMemo(() => {
+    const sessionsCount = totalsResp?.totals.sessionsCount ?? 0;
+    const usersCount = totalsResp?.totals.usersCount ?? 0;
+    const trafficInBytes = totalsResp?.totals.trafficInBytes ?? 0;
+    const trafficOutBytes = totalsResp?.totals.trafficOutBytes ?? 0;
+    const trafficTotalBytes =
+      totalsResp?.totals.trafficTotalBytes ??
+      (trafficInBytes + trafficOutBytes);
+
+    return {
+      sessionsCount,
+      usersCount,
+      trafficInBytes,
+      trafficOutBytes,
+      trafficTotalBytes,
     };
   }, [totalsResp]);
 
@@ -174,7 +201,6 @@ export default function ServersOverview() {
         externalId={externalId ?? null}
       />
 
-      {/* If GeoMap supports scoping, pass both vpnServerId and externalId */}
       <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} externalId={externalId ?? null} />
     </div>
   );
