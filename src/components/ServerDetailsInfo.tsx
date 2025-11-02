@@ -1,3 +1,4 @@
+// src/components/ServerDetailsInfo.tsx
 import React from "react";
 import { BsClock, BsHddNetwork, BsFillBookmarkStarFill, BsPerson } from "react-icons/bs";
 import { RiHardDrive2Line } from "react-icons/ri";
