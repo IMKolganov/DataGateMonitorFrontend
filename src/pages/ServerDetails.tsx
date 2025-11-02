@@ -1,13 +1,24 @@
-import { useNavigate, NavLink, Outlet, useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+// src/pages/ServerDetails.tsx
+import { useNavigate, NavLink, Outlet, useParams, useLocation } from "react-router-dom";
+import { useMemo } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import "../css/ServerDetails.css";
-// import { getServer } from "../utils/api/OpenVpnServers";
+
+// orval
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/open-vpn-servers/open-vpn-servers";
+import type { OpenVpnServerResponse } from "../api/orval/model";
+
+// Helper to unwrap ApiResponse<T>
+function unwrap<T>(resp: any): T | undefined {
+  if (!resp) return undefined;
+  if (typeof resp === "object" && "data" in resp) return resp.data as T;
+  return resp as T;
+}
 
 export function ServerDetails() {
   const navigate = useNavigate();
   const { vpnServerId = "" } = useParams<{ vpnServerId: string }>();
-  const [vpnServerName, setVpnServerName] = useState<string>("");
+  const location = useLocation();
 
   const tabs = [
     { label: "General", path: "" },
@@ -18,30 +29,32 @@ export function ServerDetails() {
     { label: "Events", path: "events" },
   ];
 
-  const currentPath = location.pathname.split(`/servers/${vpnServerId}/`)[1] || "";
+  // current subpath after /servers/:vpnServerId/
+  const currentPath =
+    location.pathname.split(`/servers/${vpnServerId}/`)[1] ?? "";
 
-  const handleTabSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    navigate(`/servers/${vpnServerId}/${e.target.value}`);
-  };
+  const numericId = useMemo(
+    () => (vpnServerId ? Number(vpnServerId) : undefined),
+    [vpnServerId]
+  );
 
-  useEffect(() => {
-    const fetchServer = async () => {
-      if (!vpnServerId) return;
-      try {
-        const server = await getServer(vpnServerId);
-        setVpnServerName(server.serverName || "(unknown)");
-      } catch (error) {
-        console.error("Failed to load VPN server:", error);
-        setVpnServerName("(unknown)");
-      }
-    };
+  const serverQuery = useGetApiOpenVpnServersGetVpnServerId(numericId ?? 0, {
+    query: {
+      enabled: Number.isFinite(numericId as number),
+      staleTime: 10_000,
+      retry: 1,
+    },
+  });
 
-    fetchServer();
-  }, [vpnServerId]);
+  const payload = unwrap<OpenVpnServerResponse>(serverQuery.data);
+  const vpnServerName = payload?.openVpnServer?.serverName ?? "(unknown)";
 
   return (
     <div>
-      <h2>Server Details for Server {vpnServerName || vpnServerId}</h2>
+      <h2>
+        Server Details for Server{" "}
+        {serverQuery.isLoading ? "…" : vpnServerName || vpnServerId}
+      </h2>
 
       <div className="header-container">
         <div className="header-bar">
@@ -71,7 +84,7 @@ export function ServerDetails() {
       <select
         className="tabs-dropdown mobile-tabs"
         value={currentPath}
-        onChange={handleTabSelect}
+        onChange={(e) => navigate(`/servers/${vpnServerId}/${e.target.value}`)}
       >
         {tabs.map((tab) => (
           <option key={tab.path} value={tab.path}>
@@ -86,4 +99,5 @@ export function ServerDetails() {
     </div>
   );
 }
+
 export default ServerDetails;
