@@ -2,8 +2,7 @@ import React, { useState, useCallback } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
-// import type { IssuedOvpnFile } from "../utils/types";
-// import { revokeClientOvpnFile, downloadClientOvpnFile } from "../utils/api/OpenVpnFiles";
+import type { IssuedOvpnFileDto } from "../api/orval/model";
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../utils/utils";
@@ -15,7 +14,7 @@ const safeFormatDate = (input?: string | null): string => {
 };
 
 interface Props {
-  ovpnFiles: { issuedOvpnFile: IssuedOvpnFile }[];
+  ovpnFiles: { issuedOvpnFile: IssuedOvpnFileDto }[];
   vpnServerId: string;
   onRevoke: () => void;
   loading: boolean;
