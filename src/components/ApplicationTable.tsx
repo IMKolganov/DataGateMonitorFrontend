@@ -1,54 +1,67 @@
-import React, { useState } from "react";
+// src/components/ApplicationTable.tsx
+import React, { useState, useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaTrash, FaCopy } from "react-icons/fa";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
-// import { revokeApplication } from "../utils/api/Applications";
 import { toast } from "react-toastify";
 
-interface Application {
-  clientId: string;
-  name: string;
-  clientSecret: string;
-  isRevoked: boolean;
-  createDate: string;
-}
+import type { ApplicationDto, RevokeApplicationRequest } from "../api/orval/model";
+import { usePostApiApplicationsRevoke } from "../api/orval/applications/applications";
 
 interface ApplicationTableProps {
-  applications: Application[];
+  applications: ApplicationDto[];
   refreshApps: () => void;
 }
 
 const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refreshApps }) => {
   const [copied, setCopied] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+
+  const revokeMutation = usePostApiApplicationsRevoke({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Application revoked");
+        refreshApps();
+      },
+      onError: (e: any) => {
+        toast.error(
+          e?.response?.data?.error ||
+            e?.response?.data?.message ||
+            e?.message ||
+            "Failed to revoke application."
+        );
+      },
+    },
+  });
+
+  const loading = revokeMutation.isPending;
 
   const handleRevoke = async (clientId: string) => {
-    setLoading(true);
-    try {
-      await revokeApplication(clientId);
-      refreshApps();
-    } catch (error) {
-      toast.error("Failed to revoke application.");
-    } finally {
-      setLoading(false);
-    }
+    const body: RevokeApplicationRequest = { clientId };
+    await revokeMutation.mutateAsync({ data: body });
   };
 
-  const handleCopy = (text: string) => {
+  const handleCopy = (text?: string | null) => {
+    if (!text) return;
     navigator.clipboard.writeText(text);
     setCopied(text);
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const rows = applications.map((app, index) => ({
-    id: index + 1,
-    clientId: app.clientId,
-    name: app.name,
-    clientSecret: app.clientSecret,
-    createDate: new Date(app.createDate).toLocaleString(),
-    status: app.isRevoked ? "Revoked ❌" : "Active ✅",
-  }));
+  const rows = useMemo(
+    () =>
+      (applications ?? []).map((app, index) => ({
+        id: index + 1,
+        clientId: String(app.clientId ?? ""),
+        name: String(app.name ?? ""),
+        clientSecret: app.clientSecret ?? "",
+        createDate: app.createDate
+          ? new Date(app.createDate).toLocaleString()
+          : "",
+        status: "unknown",//app.isRevoked ? "Revoked ❌" : "Active ✅",
+      })),
+    [applications]
+  );
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 70 },
@@ -58,33 +71,50 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
       field: "clientSecret",
       headerName: "Client Secret",
       flex: 1,
-      renderCell: (params) => (
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <span style={{ fontSize: "12px" }}>{params.value}</span>
-          <button onClick={() => handleCopy(params.value)} className="copy-btn">
-            {FaCopy({ className: "icon" })}
-          </button>
-          {copied === params.value && <span className="copied-text">✔ Copied!</span>}
-        </div>
-      ),
+      renderCell: (params) => {
+        const value: string = params.value || "";
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 12 }}>
+              {value ? value : "—"}
+            </span>
+            <button
+              onClick={() => handleCopy(value)}
+              className="copy-btn"
+              disabled={!value}
+              title={!value ? "Secret is not available (shown only once on create)" : "Copy"}
+            >
+              {FaCopy({ className: "icon" })}
+            </button>
+            {copied === value && value && (
+              <span className="copied-text">✔ Copied!</span>
+            )}
+          </div>
+        );
+      },
     },
     { field: "createDate", headerName: "Created", flex: 1 },
     { field: "status", headerName: "Status", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",
-      width: 120,
-      renderCell: (params) => (
-        <div className="action-container">
-          <button
-            className="btn danger"
-            onClick={() => handleRevoke(params.row.clientId)}
-            disabled={loading || params.row.status === "Revoked ❌"}
-          >
-            {FaTrash({ className: "icon" })} Revoke
-          </button>
-        </div>
-      ),
+      width: 130,
+      renderCell: (params) => {
+        const clientId: string = params.row.clientId;
+        const isRevoked = params.row.status === "Revoked ❌";
+        return (
+          <div className="action-container">
+            <button
+              className="btn danger"
+              onClick={() => handleRevoke(clientId)}
+              disabled={loading || isRevoked}
+              title={isRevoked ? "Already revoked" : "Revoke application"}
+            >
+              {FaTrash({ className: "icon" })} Revoke
+            </button>
+          </div>
+        );
+      },
     },
   ];
 
@@ -94,8 +124,8 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
         style={{
           width: "100%",
           backgroundColor: "#0d1117",
-          padding: "10px",
-          borderRadius: "8px",
+          padding: 10,
+          borderRadius: 8,
           overflow: "hidden",
         }}
       >
@@ -103,14 +133,10 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50, 100]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
-          }}
+          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           disableColumnFilter
           disableColumnMenu
-          localeText={{
-            noRowsLabel: "📭 No applications registered",
-          }}
+          localeText={{ noRowsLabel: "📭 No applications registered" }}
         />
       </div>
     </CustomThemeProvider>
