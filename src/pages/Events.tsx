@@ -229,6 +229,34 @@ const Events: React.FC = () => {
               localeText={{ noRowsLabel: "📭 No events logged" }}
             />
           </div>
+          <div>
+            <h2>About Server Events</h2>
+            <p>
+              This dashboard displays real-time OpenVPN server events triggered by hook scripts configured in the server’s configuration file.
+              These events are emitted when the VPN server processes a client connection, disconnect, address assignment, or TLS verification.
+            </p>
+
+            <p>📂 <strong>Scripts responsible for event generation and when they fire:</strong></p>
+            <ul>
+              <li><strong>client-connect.sh</strong> — executed when a client has successfully completed login/authentication and a virtual tunnel is about to be set up. (<a href="https://community.openvpn.net/openvpn/wiki/ClientConnectDisconnect#clientconnect" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>ClientConnect/ClientDisconnect documentation</a>)</li>
+              <li><strong>client-disconnect.sh</strong> — executed when a client disconnects, either voluntarily or on timeout. (<a href="https://community.openvpn.net/openvpn/wiki/ClientConnectDisconnect#clientdisconnect" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>ClientConnect/ClientDisconnect documentation</a>)</li>
+              <li><strong>learn-address.sh</strong> — executed when OpenVPN adds/removes or updates a client address in the routing table (e.g., after assignment of a VPN-address). (<a href="https://github.com/OpenVPN/openvpn/blob/master/doc/man-sections/script-options.rst#learn-address"target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>learn-address option documentation</a>)</li>
+              <li><strong>tls-verify.sh</strong> — executed after the TLS handshake, before full client connection is accepted (if configured). (<a href="https://openvpn.net/community-resources/reference-manual-for-openvpn-2-6/#tls-verify" target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>tls-verify option in reference manual</a>)</li>
+              <li><strong>log-authfail.sh</strong> — executed on authentication failure (client certificate or user/pass) when configured via auth-user-pass-verify or similar. (<a href="https://engineering.freeagent.com/2017/05/22/external-authentication-scripts-in-openvpn-the-right-way/"target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>External authentication scripts article</a>)</li>
+              <li><strong>log-watcher.sh</strong> — a custom watcher script triggered by changes in log files or by other hooks (not a built-in OpenVPN hook, but commonly used for monitoring connection/disconnection logs).</li>
+            </ul>
+
+            <p>⚙️ <strong>Why these scripts matter:</strong></p>
+            <p>
+              • They provide real-time events whenever clients connect, disconnect, are assigned addresses, or fail authentication.  
+              • The backend consumes these scripts’ outputs (environment variables, arguments) and logs structured events (with fields like ID, Type, Common Name, IPs, Duration, Traffic).  
+              • This dashboard uses that logged data to display a detailed view of client activity.
+            </p>
+
+            <p>
+              The data is collected automatically via scripts configured on the VPN server. On each relevant hook the script logs required metadata, the backend processes it, and this dashboard fetches the records via the API endpoint to provide a full overview of VPN client activity.
+            </p>
+          </div>
       </div>
     </CustomThemeProvider>
   );
