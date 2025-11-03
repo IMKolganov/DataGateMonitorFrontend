@@ -1,20 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react";
 import CertificatesTable from "../components/CertificatesTable";
 import AddCertificate from "../components/AddCertificate";
-// import type { Certificate } from "../utils/types";
-// import { CertificateStatus } from "../utils/types";
+// import type { CertificateStatus } from "../api/orval/model";
 
 interface Props {
   vpnServerId: string;
 }
 
-// const statusLabels: Record<CertificateStatus, string> = {
-//   [CertificateStatus.Active]: "Active",
-//   [CertificateStatus.Revoked]: "Revoked",
-//   [CertificateStatus.Expired]: "Expired",
-//   [CertificateStatus.Unknown]: "Unknown",
-// };
-
+const statusLabels: Record<number, string> = {
+  0: "Valid",
+  1: "Revoked",
+  2: "Expired",
+  3: "Unknown",
+};
 const CertificatesSection: React.FC<Props> = ({ vpnServerId }) => {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<CertificateStatus | null>(null);
