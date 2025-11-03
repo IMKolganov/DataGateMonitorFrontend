@@ -1,9 +1,9 @@
 import type { Grouping } from "../../components/DateRangeFilter";
 import type { ChartPoint } from "./types";
-// import type {
-//   OverviewSeriesResponse,
-//   OverviewSeriesRow,
-// } from "../../utils/types";
+import type {
+  OverviewSeriesResponse,
+  OverviewSeriesRowDto,
+} from "../../api/orval/model";
 
 /* ---- time helpers ---- */
 export function startOfToday() { const n = new Date(); n.setHours(0,0,0,0); return n; }
@@ -20,22 +20,28 @@ export function formatBytes(v: number): string {
 }
 
 export function formatLabel(d: Date, mode: Exclude<Grouping,"auto">): string {
-  if (mode === "hours")  return d.toLocaleTimeString(undefined, { hour: "2-digit", day: "2-digit", month: "short" });
-  if (mode === "days")   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  if (mode === "months") return d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+  if (mode === "hours")
+    return d.toLocaleTimeString(undefined, { hour: "2-digit", day: "2-digit", month: "short" });
+  if (mode === "days")
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (mode === "months")
+    return d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
   return String(d.getFullYear());
 }
 
 /* ---- build chart from API ---- */
 export function toChartPoints(
-  rows: OverviewSeriesRow[],
+  rows: OverviewSeriesRowDto[],
   mode: Exclude<Grouping,"auto">
 ): ChartPoint[] {
-  return rows.map(r => ({
-    label: formatLabel(new Date(r.ts), mode),
-    active: r.activeClients,
-    mb: Math.round(r.trafficTotalBytes / (1024 * 1024)),
-  }));
+  return rows.map(r => {
+    const totalBytes = r.trafficTotalBytes ?? 0;
+    return {
+      label: formatLabel(new Date(r.ts), mode),
+      active: r.activeClients ?? 0,
+      mb: Math.round(totalBytes / (1024 * 1024)),
+    };
+  });
 }
 
 export function buildFallbackOverviewResponse(opts: {
@@ -50,17 +56,17 @@ export function buildFallbackOverviewResponse(opts: {
 
   const mode: Exclude<Grouping,"auto"> =
     grouping === "auto"
-      ? span <= 2 * dayMs ? "hours"
-      : span <= 180 * dayMs ? "days"
-      : span <= 36 * 30 * dayMs ? "months"
-      : "years"
+      ? (span <= 2 * dayMs ? "hours"
+         : span <= 180 * dayMs ? "days"
+         : span <= 36 * 30 * dayMs ? "months"
+         : "years")
       : grouping;
 
   const baseMb = (totals.totalIn + totals.totalOut) / (1024 * 1024);
   const wave = (i: number, amp: number) =>
     Math.max(0, Math.round(amp + amp * 0.35 * Math.sin(i / 1.7) + (i % 3) - 1));
 
-  const series: OverviewSeriesResponse["series"] = [];
+  const series: OverviewSeriesRowDto[] = [];
 
   if (mode === "hours") {
     const cur = new Date(start); cur.setMinutes(0,0,0); let i=0;
@@ -135,7 +141,7 @@ export function buildFallbackOverviewResponse(opts: {
     summary: {
       totalTrafficInBytes: totals.totalIn,
       totalTrafficOutBytes: totals.totalOut,
-      peakActiveClients: Math.max(0, ...series.map(s => s.activeClients)),
+      peakActiveClients: Math.max(0, ...series.map(s => (s.activeClients ?? 0))),
     },
     series,
   };

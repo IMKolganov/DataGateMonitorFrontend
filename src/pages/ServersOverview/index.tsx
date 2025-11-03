@@ -1,5 +1,5 @@
 // src/pages/servers/ServersOverview.tsx
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -10,7 +10,7 @@ import StatsCards from "./StatsCards";
 import OverviewChart from "./OverviewChart";
 import GeoMap from "./GeoMap";
 import { addDays, endOfToday, startOfToday, toChartPoints, buildFallbackOverviewResponse } from "./helpers";
-import type { ChartPoint } from "./types"; 
+import type { ChartPoint } from "./types";
 
 import { keepPreviousData } from "@tanstack/react-query";
 
@@ -24,17 +24,55 @@ import type {
   OverviewTotalsResponse,
   GetApiOpenVpnClientsOverviewSeriesParams,
   GetApiOpenVpnClientsOverviewSummaryParams,
-  TotalsPayloadDto,
 } from "../../api/orval/model";
 import { OverviewGrouping } from "../../api/orval/model";
 
-const UI_TO_API_GROUPING: Record<Grouping, (typeof OverviewGrouping)[keyof typeof OverviewGrouping]> = {
-  auto: OverviewGrouping.NUMBER_0,
-  hour: OverviewGrouping.NUMBER_1,
-  day:  OverviewGrouping.NUMBER_2,
+const UI_TO_API_GROUPING: Record<
+  Grouping,
+  (typeof OverviewGrouping)[keyof typeof OverviewGrouping]
+> = {
+  auto:   OverviewGrouping.NUMBER_0,
+  hours:  OverviewGrouping.NUMBER_1,
+  days:   OverviewGrouping.NUMBER_2,
+  months: OverviewGrouping.NUMBER_3,
+  years:  OverviewGrouping.NUMBER_4,
 };
 
 const toApiGrouping = (g: Grouping) => UI_TO_API_GROUPING[g];
+
+// Strict totals for UI
+type SafeTotals = {
+  sessionsCount: number;
+  usersCount: number;
+  trafficInBytes: number;
+  trafficOutBytes: number;
+  trafficTotalBytes: number;
+};
+
+function makeSafeTotals(resp?: OverviewTotalsResponse): SafeTotals {
+  const sessionsCount = resp?.totals?.sessionsCount ?? 0;
+  const usersCount = resp?.totals?.usersCount ?? 0;
+  const trafficInBytes = resp?.totals?.trafficInBytes ?? 0;
+  const trafficOutBytes = resp?.totals?.trafficOutBytes ?? 0;
+  const trafficTotalBytes =
+    resp?.totals?.trafficTotalBytes ?? (trafficInBytes + trafficOutBytes);
+
+  return { sessionsCount, usersCount, trafficInBytes, trafficOutBytes, trafficTotalBytes };
+}
+
+function normalizeGrouping(
+  g: string | null | undefined
+): "hours" | "days" | "months" | "years" {
+  switch (g) {
+    case "hours":
+    case "days":
+    case "months":
+    case "years":
+      return g;
+    default:
+      return "days";
+  }
+}
 
 export default function ServersOverview() {
   const { vpnServerId: vpnServerIdParam, externalId: externalIdParam } = useParams<{
@@ -93,13 +131,13 @@ export default function ServersOverview() {
     [from, to, vpnServerId, externalId]
   );
 
+  // NOTE: no onError inside options.query — not supported by the generated types
   const seriesQuery = useGetApiOpenVpnClientsOverviewSeries(seriesParams, {
     query: {
       enabled: true,
       staleTime: 10_000,
       retry: 1,
       placeholderData: keepPreviousData,
-      onError: (e) => showErrorToast("Series load error", e),
     },
   });
 
@@ -109,9 +147,17 @@ export default function ServersOverview() {
       staleTime: 10_000,
       retry: 1,
       placeholderData: keepPreviousData,
-      onError: (e) => showErrorToast("Totals load error", e),
     },
   });
+
+  // Toast errors via effects
+  useEffect(() => {
+    if (seriesQuery.isError) showErrorToast("Series load error", seriesQuery.error as unknown);
+  }, [seriesQuery.isError, seriesQuery.error]);
+
+  useEffect(() => {
+    if (totalsQuery.isError) showErrorToast("Totals load error", totalsQuery.error as unknown);
+  }, [totalsQuery.isError, totalsQuery.error]);
 
   const apiData = seriesQuery.data as OverviewSeriesResponse | undefined;
   const totalsResp = totalsQuery.data as OverviewTotalsResponse | undefined;
@@ -119,37 +165,29 @@ export default function ServersOverview() {
   const loadingSeries = seriesQuery.isFetching;
   const loadingTotals = totalsQuery.isFetching;
 
-  // Chart data with fallback
+  const safeTotals = useMemo(() => makeSafeTotals(totalsResp), [totalsResp]);
+
   const chartData: ChartPoint[] = useMemo(() => {
-    if (apiData?.series?.length) {
-      return toChartPoints(apiData.series, apiData.meta.grouping);
+    const hasSeries = Array.isArray(apiData?.series) && apiData!.series.length > 0;
+    if (hasSeries) {
+      const g = normalizeGrouping(apiData?.meta?.grouping);
+      return toChartPoints(apiData!.series!, g);
     }
 
-    const totalsForFallback = totalsResp
-      ? {
-          servers: 0,
-          clients: 0,
-          currentIn: 0,
-          currentOut: 0,
-          totalIn: totalsResp.totals.trafficInBytes ?? 0,
-          totalOut: totalsResp.totals.trafficOutBytes ?? 0,
-          sessions: totalsResp.totals.sessionsCount ?? 0,
-          defaults: 0,
-        }
-      : {
-          servers: 0,
-          clients: 0,
-          currentIn: 0,
-          currentOut: 0,
-          totalIn: 0,
-          totalOut: 0,
-          sessions: 0,
-          defaults: 0,
-        };
+    const totalsForFallback = {
+      servers: 0,
+      clients: 0,
+      currentIn: 0,
+      currentOut: 0,
+      totalIn: safeTotals.trafficInBytes,
+      totalOut: safeTotals.trafficOutBytes,
+      sessions: safeTotals.sessionsCount,
+      defaults: 0,
+    };
 
     const fb = buildFallbackOverviewResponse({ from, to, grouping, totals: totalsForFallback });
     return toChartPoints(fb.series, fb.meta.grouping);
-  }, [apiData, totalsResp, from, to, grouping]);
+  }, [apiData, from, to, grouping, safeTotals]);
 
   const onFilterChange = (c: DateRangeChange) => {
     setFrom(c.from);
@@ -157,23 +195,7 @@ export default function ServersOverview() {
     setGrouping(c.grouping);
   };
 
-  const totalsForCards: TotalsPayloadDto = useMemo(() => {
-    const sessionsCount = totalsResp?.totals.sessionsCount ?? 0;
-    const usersCount = totalsResp?.totals.usersCount ?? 0;
-    const trafficInBytes = totalsResp?.totals.trafficInBytes ?? 0;
-    const trafficOutBytes = totalsResp?.totals.trafficOutBytes ?? 0;
-    const trafficTotalBytes =
-      totalsResp?.totals.trafficTotalBytes ??
-      (trafficInBytes + trafficOutBytes);
-
-    return {
-      sessionsCount,
-      usersCount,
-      trafficInBytes,
-      trafficOutBytes,
-      trafficTotalBytes,
-    };
-  }, [totalsResp]);
+  const totalsForCards = useMemo(() => safeTotals, [safeTotals]);
 
   const title = vpnServerId
     ? externalId

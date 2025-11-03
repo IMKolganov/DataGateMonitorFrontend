@@ -1,5 +1,4 @@
 // src/pages/TelegramBotSettings.tsx
-// comments in English only
 import { useMemo, useState } from "react";
 import { FaSync } from "react-icons/fa";
 import "../css/Settings.css";
@@ -9,23 +8,31 @@ import TelegramBotUsersTable from "../components/TelegramBotUsersTable";
 // orval-generated
 import { useGetApiTgbotUsersGetAll } from "../api/orval/telegram-bot-user/telegram-bot-user";
 import type {
-  GetAllTelegramUsersResponseApiResponse,
   GetAllTelegramUsersResponse,
   TelegramBotUserDto,
 } from "../api/orval/model";
 
+// helper for mixed Orval return types (ApiResponse<T> or plain T)
+type ApiEnvelope<T> = { data?: T; success?: boolean; message?: string };
+
+function unwrapMaybeApiResponse<T>(v: T | ApiEnvelope<T> | undefined): T | undefined {
+  if (!v) return undefined;
+  if (typeof v === "object" && v !== null && "data" in (v as any)) {
+    return (v as ApiEnvelope<T>).data as T;
+  }
+  return v as T;
+}
+
 export function TelegramBotSettings() {
-  // Fetch with orval hook (ogmMutator unwraps ApiResponse<T> -> T)
-  const qUsers = useGetApiTgbotUsersGetAll<GetAllTelegramUsersResponseApiResponse>();
+  const qUsers = useGetApiTgbotUsersGetAll();
 
   const [manualRefreshing, setManualRefreshing] = useState(false);
 
-  // Normalize to array of TelegramBotUserDto (keep null-safety from schema)
+  // Normalize to array of TelegramBotUserDto (handles both T and {data:T})
   const users: TelegramBotUserDto[] = useMemo(() => {
-    const payload: GetAllTelegramUsersResponse | undefined = qUsers.data;
+    const payload = unwrapMaybeApiResponse<GetAllTelegramUsersResponse>(qUsers.data as any);
     return (payload?.telegramBotUsers ?? []) as TelegramBotUserDto[];
   }, [qUsers.data]);
-
 
   // Refresh via react-query
   const handleRefresh = async () => {
@@ -58,7 +65,7 @@ export function TelegramBotSettings() {
       <div className="header-bar">
         <div className="left-buttons">
           <button className="btn secondary" onClick={handleRefresh} disabled={refreshing}>
-            {FaSync({ className: `icon ${refreshing ? "icon-spin" : ""}` })} Refresh
+            <FaSync className={`icon ${refreshing ? "icon-spin" : ""}`} /> Refresh
           </button>
         </div>
       </div>
@@ -91,20 +98,25 @@ export function TelegramBotSettings() {
 
         <h4>How does it work?</h4>
         <p>
-          The bot interacts with this dashboard via a secured API. Upon startup, it authenticates using a
-          <code>clientId</code> and <code>clientSecret</code>, which must be generated in the <strong>Application Settings</strong> tab.
-          These credentials are sent to the dashboard’s <code>/api/Auth/token</code> endpoint to obtain a JWT token.
-          That token is then used to securely communicate with the backend API.
+          The bot interacts with this dashboard via a secured API. Upon startup, it authenticates using a{" "}
+          <code>clientId</code> and <code>clientSecret</code>, which must be generated in the{" "}
+          <strong>Application Settings</strong> tab. These credentials are sent to the dashboard’s{" "}
+          <code>/api/Auth/token</code> endpoint to obtain a JWT token. That token is then used to securely communicate
+          with the backend API.
         </p>
 
         <p>
           When a Telegram user sends a command like <code>/start</code>, the bot checks if the user is allowed and then
-          fetches their VPN configuration file from the backend. The file is sent directly in the Telegram chat as an attachment.
+          fetches their VPN configuration file from the backend. The file is sent directly in the Telegram chat as an
+          attachment.
         </p>
 
         <h4>How to run the bot</h4>
         <ol>
-          <li>Clone the repository: <code>git clone https://github.com/IMKolganov/DataGateVPNBot</code></li>
+          <li>
+            Clone the repository:{" "}
+            <code>git clone https://github.com/IMKolganov/DataGateVPNBot</code>
+          </li>
           <li>Build and run the bot using Docker (example included below)</li>
           <li>
             Make sure you’ve:
@@ -112,14 +124,19 @@ export function TelegramBotSettings() {
               <li>Registered the application in the dashboard</li>
               <li>
                 Generated and supplied a Telegram bot token from{" "}
-                <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer">
+                <a
+                  href="https://t.me/BotFather"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   BotFather
                 </a>
               </li>
             </ul>
           </li>
           <li>
-            The bot will start listening on the specified port (default <code>8443</code>) and handle user requests automatically.
+            The bot will start listening on the specified port (default{" "}
+            <code>8443</code>) and handle user requests automatically.
           </li>
         </ol>
 
@@ -159,7 +176,11 @@ telegrambot:
         <h4>Source Code</h4>
         <p>
           👉 Full bot source code and instructions are available here:&nbsp;
-          <a href="https://github.com/IMKolganov/DataGateVPNBot" target="_blank" rel="noopener noreferrer">
+          <a
+            href="https://github.com/IMKolganov/DataGateVPNBot"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             github.com/IMKolganov/DataGateVPNBot
           </a>
         </p>
