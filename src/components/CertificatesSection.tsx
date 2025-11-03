@@ -8,7 +8,7 @@ interface Props {
   vpnServerId: string;
 }
 
-const statusLabels: Record<CertificateStatus, string> = {
+// const statusLabels: Record<CertificateStatus, string> = {
 //   [CertificateStatus.Active]: "Active",
 //   [CertificateStatus.Revoked]: "Revoked",
 //   [CertificateStatus.Expired]: "Expired",

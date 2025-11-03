@@ -12,7 +12,6 @@ interface Props {
 const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize }) => {
   if (!serverInfo) return <p>No server information available.</p>;
 
-  // поддерживаем обе формы
   const server =
     serverInfo.openVpnServerResponses ??
     (serverInfo.openVpnServer ? {

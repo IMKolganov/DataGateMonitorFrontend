@@ -4,7 +4,7 @@ import type { AxiosRequestConfig } from "axios";
 
 export interface Config {
   defaultRefreshInterval: number;
-  apiBaseUrl?: string; // <- optional, чтобы не ругался TS
+  apiBaseUrl?: string;
 }
 
 export type ApiResponse<T> = {
@@ -47,7 +47,7 @@ export const apiRequest = async <T>(
       ...config,
       headers: {
         ...config.headers,
-        ...authHeader, // <- безопасно
+        ...authHeader,
       },
     });
 

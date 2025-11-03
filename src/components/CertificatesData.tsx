@@ -1,5 +1,4 @@
 // src/pages/CertificatesData.tsx
-// comments in English only
 import React, { useMemo, useState } from "react";
 import CertificatesTable from "../components/CertificatesTable";
 import OvpnFilesTable from "../components/OvpnFilesTable";

@@ -1,5 +1,4 @@
 // src/components/OverviewUsersTable.tsx
-// comments in English only
 import React, { useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { Link, useParams } from "react-router-dom";
