@@ -119,7 +119,6 @@ const OvpnFileConfigForm: React.FC = () => {
 
     try {
       const payload: AddOrUpdateOvpnFileConfigRequest = {
-        id: ovpnFileConfig.Id || 0,
         vpnServerId: ovpnFileConfig.VpnServerId || parsedVpnServerId,
         vpnServerIp: ovpnFileConfig.VpnServerIp.trim(),
         vpnServerPort: ovpnFileConfig.VpnServerPort,
