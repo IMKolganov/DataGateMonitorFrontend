@@ -78,7 +78,7 @@ function normalize<TItem = Item>(raw: Resp): Normalized<TItem> {
   const totalCount: number =
     typeof events?.totalCount === "number" ? events.totalCount :
     typeof top?.totalCount === "number" ? top.totalCount :
-    items.length;
+    items?.length;
 
   const page: number | undefined =
     typeof events?.page === "number" ? events.page :
@@ -117,8 +117,11 @@ const Events: React.FC = () => {
   } = useGetApiOpenVpnEventsGetByServer<Resp>(params, {
     query: {
       enabled: !!Number(vpnServerId),
-      keepPreviousData: true,
-      // Optional: staleTime: 0,
+      // v5 way to keep previous page data during refetch
+      placeholderData: (prev) => prev as Resp,
+      // optionally tune caching:
+      // staleTime: 0,
+      // gcTime: 5 * 60 * 1000,
     },
   });
 
@@ -200,24 +203,32 @@ const Events: React.FC = () => {
 
         <h2>Server Events:</h2>
 
-        <div style={{ marginTop: "1rem" }}>
-          <StyledDataGrid
-            rows={rows}
-            columns={columns}
-            pageSizeOptions={[5, 10, 20, 50]}
-            paginationMode="server"
-            rowCount={normalized.totalCount}
-            paginationModel={{ page, pageSize }}
-            onPaginationModelChange={(model) => {
-              setPage(model.page);
-              setPageSize(model.pageSize);
-            }}
-            loading={isFetching}
-            disableColumnFilter
-            disableColumnMenu
-            localeText={{ noRowsLabel: "📭 No events logged" }}
-          />
-        </div>
+          <div
+            style={{
+              width: "100%",
+              minWidth: 0,
+              backgroundColor: "#0d1117",
+              padding: "10px",
+              borderRadius: "8px",
+              overflow: "hidden",
+            }}>          
+            <StyledDataGrid
+              rows={rows}
+              columns={columns}
+              pageSizeOptions={[5, 10, 20, 50]}
+              paginationMode="server"
+              rowCount={normalized.totalCount}
+              paginationModel={{ page, pageSize }}
+              onPaginationModelChange={(model) => {
+                setPage(model.page);
+                setPageSize(model.pageSize);
+              }}
+              loading={isFetching}
+              disableColumnFilter
+              disableColumnMenu
+              localeText={{ noRowsLabel: "📭 No events logged" }}
+            />
+          </div>
       </div>
     </CustomThemeProvider>
   );
