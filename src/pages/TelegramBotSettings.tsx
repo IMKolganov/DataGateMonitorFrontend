@@ -1,54 +1,51 @@
-import { useState, useEffect } from "react";
+// src/pages/TelegramBotSettings.tsx
+// comments in English only
+import { useMemo, useState } from "react";
 import { FaSync } from "react-icons/fa";
 import "../css/Settings.css";
 import "../css/TelegramBotUsers.css";
 import TelegramBotUsersTable from "../components/TelegramBotUsersTable";
-// import { getTelegramBotUsers } from "../utils/api/TelegramBotUser";
 
-interface TelegramBotUser {
-  id: number;
-  telegramId: number;
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  createDate: string;
-  lastUpdate: string;
-  isAdmin: boolean;
-  isBlocked: boolean;
-}
+// orval-generated
+import { useGetApiTgbotUsersGetAll } from "../api/orval/telegram-bot-user/telegram-bot-user";
+import type {
+  GetAllTelegramUsersResponseApiResponse,
+  GetAllTelegramUsersResponse,
+  TelegramBotUserDto,
+} from "../api/orval/model";
 
 export function TelegramBotSettings() {
-  const [users, setUsers] = useState<TelegramBotUser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Fetch with orval hook (ogmMutator unwraps ApiResponse<T> -> T)
+  const qUsers = useGetApiTgbotUsersGetAll<GetAllTelegramUsersResponseApiResponse>();
 
-  const loadUsers = async () => {
-    setLoading(true);
-    setErrorMessage(null);
+  const [manualRefreshing, setManualRefreshing] = useState(false);
+
+  // Normalize to array of TelegramBotUserDto (keep null-safety from schema)
+  const users: TelegramBotUserDto[] = useMemo(() => {
+    const payload: GetAllTelegramUsersResponse | undefined = qUsers.data;
+    return (payload?.telegramBotUsers ?? []) as TelegramBotUserDto[];
+  }, [qUsers.data]);
+
+
+  // Refresh via react-query
+  const handleRefresh = async () => {
+    if (qUsers.isFetching || manualRefreshing) return;
+    setManualRefreshing(true);
     try {
-      const data = await getTelegramBotUsers();
-      if (!data?.telegramBotUsers || !Array.isArray(data.telegramBotUsers)) {
-        throw new Error("Unexpected response format");
-      }
-      setUsers(data.telegramBotUsers);
-    } catch (error: any) {
-      setErrorMessage(error.message || "Failed to load Telegram bot users");
+      await qUsers.refetch();
     } finally {
-      setLoading(false);
+      setManualRefreshing(false);
     }
   };
 
-  const handleRefresh = async () => {
-    if (refreshing) return;
-    setRefreshing(true);
-    await loadUsers();
-    setRefreshing(false);
-  };
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
+  const anyLoading = qUsers.isLoading || qUsers.isFetching;
+  const refreshing = manualRefreshing || qUsers.isFetching;
+  const errorMessage =
+    qUsers.error instanceof Error
+      ? qUsers.error.message
+      : qUsers.error
+      ? "Failed to load Telegram bot users"
+      : null;
 
   return (
     <div>
@@ -66,7 +63,7 @@ export function TelegramBotSettings() {
         </div>
       </div>
 
-      {loading ? (
+      {anyLoading ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Loading users...</p>
@@ -79,7 +76,8 @@ export function TelegramBotSettings() {
             </div>
           )}
 
-          <TelegramBotUsersTable users={users} refreshUsers={loadUsers} />
+          {/* Make sure TelegramBotUsersTable props are typed as TelegramBotUserDto[] */}
+          <TelegramBotUsersTable users={users} refreshUsers={handleRefresh} />
         </>
       )}
 
@@ -112,7 +110,12 @@ export function TelegramBotSettings() {
             Make sure you’ve:
             <ul>
               <li>Registered the application in the dashboard</li>
-              <li>Generated and supplied a Telegram bot token from <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer">BotFather</a></li>
+              <li>
+                Generated and supplied a Telegram bot token from{" "}
+                <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer">
+                  BotFather
+                </a>
+              </li>
             </ul>
           </li>
           <li>
@@ -156,11 +159,7 @@ telegrambot:
         <h4>Source Code</h4>
         <p>
           👉 Full bot source code and instructions are available here:&nbsp;
-          <a
-            href="https://github.com/IMKolganov/DataGateVPNBot"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://github.com/IMKolganov/DataGateVPNBot" target="_blank" rel="noopener noreferrer">
             github.com/IMKolganov/DataGateVPNBot
           </a>
         </p>
