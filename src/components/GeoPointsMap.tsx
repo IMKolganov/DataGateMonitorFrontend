@@ -178,20 +178,31 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
 
     getApiOpenVpnClientsOverviewPoints(params, controller.signal)
       .then((resp) => {
-        // ogmMutator already returns unwrapped payload
         const next = pickPoints(resp);
         console.debug("[GeoPointsMap] received points:", next.length);
         setPoints(next);
       })
-      .catch((e) => {
-        if ((e as any).name !== "AbortError") {
-          const message = String((e as any)?.message ?? e);
-          console.debug("[GeoPointsMap] error:", message);
-          toast.error(`Failed to load geo points: ${message}`, {
-            autoClose: 4500,
-            closeOnClick: true,
-          });
+      .catch((e: any) => {
+        // axios cancellation falls here as "CanceledError" / message "canceled" / code "ERR_CANCELED"
+        const isAbortLike =
+          e?.name === "AbortError" ||
+          e?.name === "CanceledError" ||
+          e?.code === "ERR_CANCELED" ||
+          e?.message === "canceled" ||
+          abortRef.current?.signal.aborted;
+
+        if (isAbortLike) {
+          // swallow expected cancellations
+          console.debug("[GeoPointsMap] request canceled");
+          return;
         }
+
+        const message = String(e?.message ?? e);
+        console.debug("[GeoPointsMap] error:", message);
+        toast.error(`Failed to load geo points: ${message}`, {
+          autoClose: 4500,
+          closeOnClick: true,
+        });
       });
 
     return () => controller.abort();
