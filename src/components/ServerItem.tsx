@@ -9,27 +9,33 @@ import {
 } from "react-icons/fa";
 import { BsClock, BsPerson, BsFillBookmarkStarFill } from "react-icons/bs";
 import { IoMdPerson } from "react-icons/io";
-
-// take types directly from orval by inferring the item shape of getAllWithStatus()
-import { getApiOpenVpnServersGetAllWithStatus } from "../api/orval/open-vpn-servers/open-vpn-servers";
 import type { ServiceStatus } from "../api/orval/model/serviceStatus";
 
-// Infer the item type from the orval call result:
-// data: { openVpnServerWithStatuses: Array<OrvalServerItem> }
-type GetAllWithStatusResp = Awaited<ReturnType<typeof getApiOpenVpnServersGetAllWithStatus>>;
-type OrvalServerItem =
-  GetAllWithStatusResp extends { data: infer D }
-    ? D extends { openVpnServerWithStatuses: infer A }
-      ? A extends Array<infer T>
-        ? T
-        : never
-      : never
-    : never;
+// Minimal item shape required by this component
+type OrvalServerItem = {
+  openVpnServerResponses?: {
+    openVpnServer?: {
+      id?: number;
+      serverName?: string;
+      isOnline?: boolean;
+      isDefault?: boolean;
+    };
+    id?: number;
+  } | any;
+  openVpnServerStatusLogResponse?: {
+    vpnServerId?: number;
+    upSince?: string;
+  };
+  countConnectedClients?: number;
+  countSessions?: number;
+  // allow unknown extra fields
+  [k: string]: any;
+};
 
 interface Props {
-  server: OrvalServerItem;             // strictly from orval
-  vpnServerId: number;                 // passed from parent
-  serviceStatus: ServiceStatus;        // 0 | 1 | 2
+  server: OrvalServerItem;      // strictly the item this component expects
+  vpnServerId: number;          // passed from parent
+  serviceStatus: ServiceStatus; // 0 | 1 | 2 or string-compatible
   errorMessage: string | null;
   nextRunTime: string;
 
@@ -57,7 +63,7 @@ const formatUtcDate = (utc: string | null | undefined) => {
   }
 };
 
-// Map numeric status (0|1|2) to JSX label
+// Map numeric status (0|1|2) or string to JSX label
 const getStatusLabel = (status: ServiceStatus) => {
   const s = Number(status);
   if (s === 1) {
@@ -100,12 +106,6 @@ const ServerItem: React.FC<Props> = ({
   onEdit,
   onDelete,
 }) => {
-  // orval shape from your debug:
-  // {
-  //   openVpnServerResponses: { openVpnServer: { id, serverName, isOnline, isDefault, ... } },
-  //   openVpnServerStatusLogResponse: { vpnServerId, upSince, ... },
-  //   countConnectedClients, countSessions, ...
-  // }
   const openVpnServer =
     (server as any)?.openVpnServerResponses?.openVpnServer ??
     (server as any)?.openVpnServerResponses ??
@@ -124,7 +124,9 @@ const ServerItem: React.FC<Props> = ({
 
   // Prefer WS numbers, fallback to REST numbers
   const connectedClients: number =
-    (wsCountConnectedClients ?? (server as any)?.countConnectedClients ?? 0) as number;
+    (wsCountConnectedClients ??
+      (server as any)?.countConnectedClients ??
+      0) as number;
   const sessions: number =
     (wsCountSessions ?? (server as any)?.countSessions ?? 0) as number;
 
