@@ -1,4 +1,3 @@
-// English comments only
 export default {
   ogm: {
     // Your OpenAPI YAML

@@ -10,9 +10,9 @@ import StatsCards from "./StatsCards";
 import OverviewChart from "./OverviewChart";
 import GeoMap from "./GeoMap";
 import { addDays, endOfToday, startOfToday, toChartPoints, buildFallbackOverviewResponse } from "./helpers";
-import type { ChartPoint, Totals } from "./types"; // <-- убедись, что Totals описан в ./types
+import type { ChartPoint } from "./types"; 
 
-import { keepPreviousData } from "@tanstack/react-query"; // <-- v5 replacement
+import { keepPreviousData } from "@tanstack/react-query";
 
 // orval hooks & types
 import {
@@ -24,10 +24,10 @@ import type {
   OverviewTotalsResponse,
   GetApiOpenVpnClientsOverviewSeriesParams,
   GetApiOpenVpnClientsOverviewSummaryParams,
+  TotalsPayloadDto,
 } from "../../api/orval/model";
 import { OverviewGrouping } from "../../api/orval/model";
 
-// UI -> API enum mapping (числовой enum из orval)
 const UI_TO_API_GROUPING: Record<Grouping, (typeof OverviewGrouping)[keyof typeof OverviewGrouping]> = {
   auto: OverviewGrouping.NUMBER_0,
   hour: OverviewGrouping.NUMBER_1,
@@ -72,7 +72,6 @@ export default function ServersOverview() {
   const [to, setTo] = useState<Date>(endOfToday());
   const [grouping, setGrouping] = useState<Grouping>("auto");
 
-  // PascalCase поля для orval-моделей
   const seriesParams: GetApiOpenVpnClientsOverviewSeriesParams = useMemo(
     () => ({
       From: from.toISOString(),
@@ -94,13 +93,12 @@ export default function ServersOverview() {
     [from, to, vpnServerId, externalId]
   );
 
-  // Queries (ogmMutator уже распаковывает ApiResponse)
   const seriesQuery = useGetApiOpenVpnClientsOverviewSeries(seriesParams, {
     query: {
       enabled: true,
       staleTime: 10_000,
       retry: 1,
-      placeholderData: keepPreviousData, // <-- вместо keepPreviousData: true
+      placeholderData: keepPreviousData,
       onError: (e) => showErrorToast("Series load error", e),
     },
   });
@@ -110,7 +108,7 @@ export default function ServersOverview() {
       enabled: true,
       staleTime: 10_000,
       retry: 1,
-      placeholderData: keepPreviousData, // <-- вместо keepPreviousData: true
+      placeholderData: keepPreviousData,
       onError: (e) => showErrorToast("Totals load error", e),
     },
   });
@@ -159,8 +157,7 @@ export default function ServersOverview() {
     setGrouping(c.grouping);
   };
 
-  // ✅ Приводим к строгому типу Totals (все поля — number)
-  const totalsForCards: Totals = useMemo(() => {
+  const totalsForCards: TotalsPayloadDto = useMemo(() => {
     const sessionsCount = totalsResp?.totals.sessionsCount ?? 0;
     const usersCount = totalsResp?.totals.usersCount ?? 0;
     const trafficInBytes = totalsResp?.totals.trafficInBytes ?? 0;

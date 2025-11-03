@@ -1,5 +1,4 @@
 // src/pages/Events.tsx
-// comments in English only
 import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import StyledDataGrid from "../components/TableStyle";
