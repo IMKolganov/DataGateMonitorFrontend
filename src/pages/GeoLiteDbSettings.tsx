@@ -5,50 +5,37 @@ import "../css/Settings.css";
 import { FaSave } from "react-icons/fa";
 import { GeoLiteDbDownloader } from "./GeoLiteDbDownloader";
 
-// orval-generated imports (adjust paths if needed)
+// orval-generated imports
 import {
   useGetApiSettingsGet,
   usePostApiSettingsSet,
 } from "../api/orval/settings/settings";
 import type {
-  GetApiSettingsGetParams,
   PostApiSettingsSetParams,
-  SettingResponseApiResponse,
+  SettingResponse,
+  GetVersionDatabaseResponse,
 } from "../api/orval/model";
 
 import { useGetApiGeoLiteGetVerionDb } from "../api/orval/geo-lite/geo-lite";
-import type { GetVersionDatabaseResponseApiResponse } from "../api/orval/model";
 
 export function GeoLiteDbSettings() {
-  // Local editable state
-  const [geoIpAccountId, setGeoIpAccountId] = useState("Fetching...");
-  const [geoIpDbPath, setGeoIpDbPath] = useState("Fetching...");
-  const [geoIpDownloadUrl, setGeoIpDownloadUrl] = useState("Fetching...");
-  const [geoIpLicenseKey, setGeoIpLicenseKey] = useState("Fetching...");
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [geoIpAccountId, setGeoIpAccountId] = useState<string>("Fetching...");
+  const [geoIpDbPath, setGeoIpDbPath] = useState<string>("Fetching...");
+  const [geoIpDownloadUrl, setGeoIpDownloadUrl] = useState<string>("Fetching...");
+  const [geoIpLicenseKey, setGeoIpLicenseKey] = useState<string>("Fetching...");
+  const [initialLoading, setInitialLoading] = useState<boolean>(true);
 
-  // Read settings via orval hooks
-  const qDbPath = useGetApiSettingsGet<SettingResponseApiResponse, unknown>(
-    { key: "GeoIp_Db_Path" } as GetApiSettingsGetParams
-  );
-  const qDownloadUrl = useGetApiSettingsGet<SettingResponseApiResponse, unknown>(
-    { key: "GeoIp_Download_Url" } as GetApiSettingsGetParams
-  );
-  const qAccountId = useGetApiSettingsGet<SettingResponseApiResponse, unknown>(
-    { key: "GeoIp_Account_ID" } as GetApiSettingsGetParams
-  );
-  const qLicenseKey = useGetApiSettingsGet<SettingResponseApiResponse, unknown>(
-    { key: "GeoIp_License_Key" } as GetApiSettingsGetParams
-  );
+  // Use PascalCase keys in params and inner models for data type
+    const qDbPath       = useGetApiSettingsGet<SettingResponse>({ Key: "GeoIp_Db_Path" });
+    const qDownloadUrl  = useGetApiSettingsGet<SettingResponse>({ Key: "GeoIp_Download_Url" });
+    const qAccountId    = useGetApiSettingsGet<SettingResponse>({ Key: "GeoIp_Account_ID" });
+    const qLicenseKey   = useGetApiSettingsGet<SettingResponse>({ Key: "GeoIp_License_Key" });
 
-  // Optional: GeoLite DB version
-  const qDbVersion =
-    useGetApiGeoLiteGetVerionDb<GetVersionDatabaseResponseApiResponse>();
+  // DB version (inner model)
+  const qDbVersion = useGetApiGeoLiteGetVerionDb<GetVersionDatabaseResponse>();
 
-  // Write mutations via orval
   const mSetSetting = usePostApiSettingsSet();
 
-  // Sync remote -> local editable fields once on load
   useEffect(() => {
     const allSettled =
       qDbPath.isFetched &&
@@ -58,13 +45,14 @@ export function GeoLiteDbSettings() {
 
     if (!allSettled) return;
 
-    const safeValue = (resp: SettingResponseApiResponse | undefined) =>
-      resp?.data?.value ?? "";
+    // With ogmMutator unwrapping, .data is the inner model already
+    const safe = (resp: SettingResponse | undefined): string =>
+      String(resp?.value ?? "");
 
-    setGeoIpDbPath(safeValue(qDbPath.data));
-    setGeoIpDownloadUrl(safeValue(qDownloadUrl.data));
-    setGeoIpAccountId(safeValue(qAccountId.data));
-    setGeoIpLicenseKey(safeValue(qLicenseKey.data));
+    setGeoIpDbPath(safe(qDbPath.data));
+    setGeoIpDownloadUrl(safe(qDownloadUrl.data));
+    setGeoIpAccountId(safe(qAccountId.data));
+    setGeoIpLicenseKey(safe(qLicenseKey.data));
 
     setInitialLoading(false);
   }, [
@@ -78,7 +66,7 @@ export function GeoLiteDbSettings() {
     qLicenseKey.data,
   ]);
 
-  // Save handler using generated model
+  // Save handler
   const handleSave = async (
     key: string,
     value: string,
@@ -87,14 +75,13 @@ export function GeoLiteDbSettings() {
     try {
       await mSetSetting.mutateAsync({
         params: {
-          key,
-          value: type === "number" ? String(value) : value,
-          type,
+          Key: key,                   // <-- PascalCase
+          Value: String(value),       // <-- PascalCase
+          Type: type,                 // <-- PascalCase
         } as PostApiSettingsSetParams,
       });
 
       toast.success(`${key} successfully updated.`);
-      // Refetch just the affected key
       switch (key) {
         case "GeoIp_Db_Path":
           qDbPath.refetch();
@@ -115,7 +102,6 @@ export function GeoLiteDbSettings() {
     }
   };
 
-  // Compute flags/strings BEFORE render; no early return
   const anyLoading =
     initialLoading ||
     qDbPath.isLoading ||
@@ -123,15 +109,13 @@ export function GeoLiteDbSettings() {
     qAccountId.isLoading ||
     qLicenseKey.isLoading;
 
-  const versionText = qDbVersion.data?.version ?? "";
+  const versionText = qDbVersion.data?.databaseVersion ?? ""; // <-- correct field
 
   return (
     <div>
       <h2>
         GeoLite2 Settings{" "}
-        {versionText ? (
-          <small style={{ opacity: 0.6 }}>— DB {versionText}</small>
-        ) : null}
+        {versionText ? <small style={{ opacity: 0.6 }}>— DB {versionText}</small> : null}
       </h2>
       <div style={{ borderTop: "1px solid #d1d5da" }}></div>
 

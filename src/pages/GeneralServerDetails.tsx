@@ -1,11 +1,11 @@
 // src/pages/GeneralServerDetails.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useParams } from "react-router-dom";
 import "../css/ServerDetails.css";
 import { FaSync } from "react-icons/fa";
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
-import ServerDetailsInfoDefault from "../components/ServerDetailsInfo"; // default export
+import ServerDetailsInfoDefault from "../components/ServerDetailsInfo";
 
 import {
   useGetApiOpenVpnClientsGetAllConnected,
@@ -14,24 +14,20 @@ import {
 import type {
   GetApiOpenVpnClientsGetAllConnectedParams,
   GetApiOpenVpnClientsGetAllHistoryParams,
+  ConnectedClientsResponse,
+  VpnClientInfoResponse,
 } from "../api/orval/model";
 
 import {
   useGetApiOpenVpnServersGetServerWithStatusVpnServerId,
   useGetApiOpenVpnServersGetVpnServerId,
 } from "../api/orval/open-vpn-servers/open-vpn-servers";
-import type { ComponentType } from "react";
 
-// explicit component type to avoid IntrinsicAttributes error
+// explicit type to avoid IntrinsicAttributes error
 const ServerDetailsInfo = ServerDetailsInfoDefault as ComponentType<{
   serverInfo: any;
   toHumanReadableSize: (bytes: number) => string;
 }>;
-
-type ConnectedClientsResponse = {
-  clients: any[];
-  totalCount: number;
-};
 
 export function GeneralServerDetails() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
@@ -46,7 +42,6 @@ export function GeneralServerDetails() {
   );
 
   // -------- Clients (connected/history) --------
-  // NOTE: Page — not PageNumber (per your generated types)
   const connectedParams: GetApiOpenVpnClientsGetAllConnectedParams = useMemo(
     () => ({
       VpnServerId: numericServerId ?? 0,
@@ -65,7 +60,6 @@ export function GeneralServerDetails() {
     [numericServerId, page, pageSize]
   );
 
-  // ogmMutator уже разворачивает ApiResponse -> data, поэтому TData не задаём
   const connectedQuery = useGetApiOpenVpnClientsGetAllConnected(connectedParams, {
     query: {
       enabled: Number.isFinite(numericServerId) && isLive,
@@ -85,14 +79,13 @@ export function GeneralServerDetails() {
   const loadingClients =
     (isLive ? connectedQuery.isFetching : historyQuery.isFetching) ?? false;
 
-  // безопасно читаем данные независимо от точного типа из orval
-  const clientsPayload: ConnectedClientsResponse =
-    ((isLive ? connectedQuery.data : historyQuery.data) as any) ??
-    ({ clients: [], totalCount: 0 } as ConnectedClientsResponse);
+  const activeClientsResponse: ConnectedClientsResponse | undefined = isLive
+    ? connectedQuery.data
+    : historyQuery.data;
 
-  const clients = Array.isArray(clientsPayload.clients) ? clientsPayload.clients : [];
-  const totalClients =
-    typeof clientsPayload.totalCount === "number" ? clientsPayload.totalCount : 0;
+  const clients: VpnClientInfoResponse[] =
+    (activeClientsResponse?.clients ?? []) as VpnClientInfoResponse[];
+  const totalClients = activeClientsResponse?.totalCount ?? 0;
 
   // -------- Server info (with-status preferred, fallback to basic get) --------
   const serverWithStatusQuery = useGetApiOpenVpnServersGetServerWithStatusVpnServerId(
@@ -116,11 +109,9 @@ export function GeneralServerDetails() {
 
   const loadingServer = serverWithStatusQuery.isFetching || serverBasicQuery.isFetching;
 
-  // normalize with real shape:
-  // { openVpnServerWithStatus: { openVpnServerResponses: { openVpnServer: {...} }, openVpnServerStatusLogResponse: {...}, totals... } }
+  // normalize shape for ServerDetailsInfo
   const serverInfo = useMemo(() => {
     const ws: any = serverWithStatusQuery.data;
-
     if (ws?.openVpnServerWithStatus) {
       const w = ws.openVpnServerWithStatus;
 
@@ -149,7 +140,6 @@ export function GeneralServerDetails() {
       };
     }
 
-    // fallback: basic get
     const b: any = serverBasicQuery.data;
     if (b?.openVpnServer) {
       const ov = b.openVpnServer;
@@ -179,12 +169,6 @@ export function GeneralServerDetails() {
     return null;
   }, [serverWithStatusQuery.data, serverBasicQuery.data]);
 
-  useEffect(() => {
-    console.debug("[GeneralServerDetails] numericServerId =", numericServerId);
-    console.debug("[GeneralServerDetails] with-status data =", serverWithStatusQuery.data);
-    console.debug("[GeneralServerDetails] normalized serverInfo =", serverInfo);
-  }, [numericServerId, serverWithStatusQuery.data, serverInfo]);
-
   const handleRefresh = () => {
     if (isLive) connectedQuery.refetch();
     else historyQuery.refetch();
@@ -197,7 +181,7 @@ export function GeneralServerDetails() {
     setPage(0);
   }, [isLive]);
 
-  const toHumanReadableSize = (bytes: number): string => {
+  const toHumanReadableSize = (bytes: number = 0): string => {
     const sizes = ["B", "KB", "MB", "GB", "TB"];
     let i = 0;
     let val = bytes;
@@ -239,18 +223,6 @@ export function GeneralServerDetails() {
       ) : (
         <div style={{ marginBottom: 12, opacity: 0.8, fontSize: 14 }}>
           Server info is not available yet.
-          <pre style={{ marginTop: 8, whiteSpace: "pre-wrap", fontSize: 12, opacity: 0.8 }}>
-            {JSON.stringify(
-              {
-                withStatusEnabled: Number.isFinite(numericServerId),
-                withStatusHasData: !!serverWithStatusQuery.data,
-                basicEnabled: Number.isFinite(numericServerId) && !serverWithStatusQuery.data,
-                basicHasData: !!serverBasicQuery.data,
-              },
-              null,
-              2
-            )}
-          </pre>
         </div>
       )}
 

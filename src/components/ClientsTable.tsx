@@ -1,12 +1,17 @@
+// src/components/ClientsTable.tsx
 import React from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
 import { Link, useParams } from "react-router-dom";
+import type { VpnClientInfoResponse } from "../api/orval/model";
+
+// Single client item from ConnectedClientsResponse.clients
+type ClientDto = VpnClientInfoResponse;
 
 interface ClientsTableProps {
-  clients: ConnectedClient[];
+  clients: ClientDto[];
   totalClients: number;
   page: number;
   pageSize: number;
@@ -24,22 +29,23 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
   onPageSizeChange,
   loading,
 }) => {
-  // Get current vpnServerId from URL to build correct link
-  const { vpnServerId } = useParams<{ vpnServerId: string }>();
+  const { vpnServerId } = useParams<{ vpnServerId?: string }>();
 
   const rows = clients.map((client, index) => ({
-    id: client.id || index + 1,
-    commonName: client.commonName,
-    externalId: client.externalId,
-    tgUsername: client.tgUsername,
-    tgFirstName: client.tgFirstName,
-    tgLastName: client.tgLastName,
-    remoteIp: client.remoteIp,
-    localIp: client.localIp,
-    bytesReceived: formatBytes(client.bytesReceived),
-    bytesSent: formatBytes(client.bytesSent),
-    connectedSince: formatDateWithOffset(new Date(client.connectedSince)),
-    country: `${client.country}, ${client.region}, ${client.city}`,
+    id: client.id ?? index + 1,
+    commonName: client.commonName ?? "",
+    externalId: client.externalId ?? "",
+    tgUsername: client.tgUsername ?? "",
+    tgFirstName: client.tgFirstName ?? "",
+    tgLastName: client.tgLastName ?? "",
+    remoteIp: client.remoteIp ?? "",
+    localIp: client.localIp ?? "",
+    bytesReceived: formatBytes(client.bytesReceived ?? 0),
+    bytesSent: formatBytes(client.bytesSent ?? 0),
+    connectedSince: client.connectedSince
+      ? formatDateWithOffset(new Date(client.connectedSince))
+      : "",
+    country: [client.country, client.region, client.city].filter(Boolean).join(", "),
   }));
 
   const columns: GridColDef[] = [
@@ -50,10 +56,8 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
       headerName: "External Id",
       flex: 0.6,
       renderCell: (params) => {
-        const externalId = params.value as string;
+        const externalId = params.value as string | undefined;
         if (!externalId) return null;
-        // If we are inside /servers/:vpnServerId -> link with vpnServerId
-        // Else -> global statistics link
         const url = vpnServerId
           ? `/servers/${vpnServerId}/statistics/${externalId}`
           : `/servers/statistics/${externalId}`;
@@ -94,9 +98,9 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
           paginationMode="server"
           rowCount={totalClients}
           paginationModel={{ pageSize, page }}
-          onPaginationModelChange={(newModel) => {
-            onPageChange(newModel.page);
-            onPageSizeChange(newModel.pageSize);
+          onPaginationModelChange={(m) => {
+            onPageChange(m.page);
+            onPageSizeChange(m.pageSize);
           }}
           loading={loading}
           disableColumnFilter

@@ -186,7 +186,7 @@ export default function ServersOverview() {
     };
 
     const fb = buildFallbackOverviewResponse({ from, to, grouping, totals: totalsForFallback });
-    return toChartPoints(fb.series, fb.meta.grouping);
+    return toChartPoints(fb.series ?? [], fb.meta.grouping);
   }, [apiData, from, to, grouping, safeTotals]);
 
   const onFilterChange = (c: DateRangeChange) => {
