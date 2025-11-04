@@ -15,12 +15,10 @@ import {
   deleteApiOpenVpnServersDeleteVpnServerId,
 } from "../api/orval/open-vpn-servers/open-vpn-servers";
 
-// Local status type (keep UI-only)
-type ServiceStatus = "Running" | "Idle" | "Error" | "Unknown";
-
 import { type ServiceEntry } from "../types/ServiceEntry";
 
-// Minimal backend item shape we actually read
+type ServiceStatus = "Running" | "Idle" | "Error" | "Unknown";
+
 type ApiServerItem = {
   openVpnServerResponses?: { openVpnServer?: any; id?: number } | any;
   openVpnServerStatusLogResponse?: { vpnServerId?: number; upSince?: string };
@@ -39,61 +37,35 @@ type ApiServerItem = {
   server?: any;
 };
 
-// Augmented item we keep in state (UI fields + flattened id)
 type ServerWithStatus = {
-  openVpnServerResponses: any; // keeps .id valid for legacy UI shape
+  openVpnServerResponses: any;
   vpnServerId: number;
   serviceStatus: ServiceStatus;
   errorMessage: string | null;
   nextRunTime: string;
   wsCountConnectedClients?: number;
   wsCountSessions?: number;
-  __raw?: ApiServerItem; // keep original raw item for ServerItem
+  __raw?: ApiServerItem;
 };
 
-// Small helpers to be resilient to different ApiResponse shapes
 function unwrap<T>(resp: any): T | undefined {
   return resp?.data ?? resp;
 }
 
 function unwrapList<T = any>(resp: any): T[] {
   const data = unwrap<any>(resp);
-
-  // Observed backend shape
   if (Array.isArray(data?.openVpnServerWithStatuses)) return data.openVpnServerWithStatuses;
-
-  // Other common shapes (fallbacks)
   if (Array.isArray(data)) return data;
   if (Array.isArray(data?.servers)) return data.servers;
   if (Array.isArray(data?.items)) return data.items;
   if (Array.isArray(data?.openVpnServerResponses)) return data.openVpnServerResponses;
-
-  // Some backends return { data: { data: [] } }
   if (Array.isArray(resp?.data?.data)) return resp.data.data;
-
   return [];
 }
-
-// Simple debug panel to see raw data on the page (dev only)
-const DebugPanel: React.FC<{ label: string; value: any }> = ({ label, value }) => {
-  // Vite: use import.meta.env instead of process.env
-  if (import.meta.env.PROD) return null;
-  return (
-    <details style={{ marginTop: 16 }}>
-      <summary style={{ cursor: "pointer" }}>🔎 Debug: {label}</summary>
-      <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", fontSize: 12 }}>
-        {JSON.stringify(value, null, 2)}
-      </pre>
-    </details>
-  );
-};
 
 const ServerList: React.FC = () => {
   const [servers, setServers] = useState<ServerWithStatus[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [lastRawResponse, setLastRawResponse] = useState<any>(null);
-  const [lastUnwrappedList, setLastUnwrappedList] = useState<any>(null);
-  const [lastError, setLastError] = useState<any>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -109,7 +81,6 @@ const ServerList: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Merge WS snapshot onto current list
   useEffect(() => {
     if (!serviceData || Object.keys(serviceData).length === 0) return;
 
@@ -121,8 +92,8 @@ const ServerList: React.FC = () => {
       if (!Number.isNaN(id)) normalized[id] = value as ServiceDataValue;
     }
 
-    setServers((prev: ServerWithStatus[]): ServerWithStatus[] =>
-      prev.map((server): ServerWithStatus => {
+    setServers((prev) =>
+      prev.map((server) => {
         const id = (server as any).openVpnServerResponses?.id as number;
         const s = normalized[id];
         if (!s) return server;
@@ -140,36 +111,24 @@ const ServerList: React.FC = () => {
     );
   }, [serviceData]);
 
-  // Load servers via orval
   const loadServers = async () => {
     setLoading(true);
-    setLastError(null);
-
     try {
       const resp = await getApiOpenVpnServersGetAllWithStatus();
-
-      // Keep raw response for debug panel
-      setLastRawResponse(resp);
-
       const list = unwrapList<ApiServerItem>(resp);
-      setLastUnwrappedList(list);
 
       const mapped: ServerWithStatus[] = list
         .map((x) => {
           const srvWrap: any = x?.openVpnServerResponses;
           const srv: any = srvWrap?.openVpnServer ?? srvWrap ?? x?.server ?? x;
 
-          // Primary id (may be 0 in payload)
           let resolvedId = Number(srv?.id ?? x?.id ?? x?.vpnServerId ?? 0);
-
-          // If zero/missing — fallback to status.vpnServerId
           if (!resolvedId) {
             const statusId = Number(x?.openVpnServerStatusLogResponse?.vpnServerId);
             if (statusId) resolvedId = statusId;
           }
           if (!resolvedId) return null;
 
-          // Flatten to keep existing UI contract: openVpnServerResponses.id must be valid
           const openVpnServerResponses = {
             ...(srv ?? {}),
             ...(srvWrap ?? {}),
@@ -201,7 +160,7 @@ const ServerList: React.FC = () => {
             (x?.sessions as number) ??
             undefined;
 
-          const uiServer: ServerWithStatus = {
+          return {
             openVpnServerResponses,
             vpnServerId: resolvedId,
             serviceStatus: status,
@@ -211,15 +170,12 @@ const ServerList: React.FC = () => {
             wsCountSessions,
             __raw: x,
           };
-
-          return uiServer;
         })
         .filter(Boolean) as ServerWithStatus[];
 
       setServers(mapped);
-    } catch (err) {
+    } catch {
       setServers([]);
-      setLastError(String(err));
     } finally {
       setLoading(false);
     }
@@ -229,25 +185,18 @@ const ServerList: React.FC = () => {
     if (!window.confirm("Are you sure you want to delete this server?")) return;
     try {
       await deleteApiOpenVpnServersDeleteVpnServerId(id);
-      setServers((prev: ServerWithStatus[]): ServerWithStatus[] =>
-        prev.filter((s) => ((s as any).openVpnServerResponses?.id as number) !== id)
-      );
+      setServers((prev) => prev.filter((s) => ((s as any).openVpnServerResponses?.id as number) !== id));
     } catch {
       // ignore
     }
   };
 
-  // normalize serviceData for ServiceControls (strict typing)
-  const normalizedServiceControlsData: Record<string, ServiceEntry> = Object
-    .entries(serviceData ?? {})
-    .reduce((acc, [k, v]) => {
+  const normalizedServiceControlsData: Record<string, ServiceEntry> = Object.entries(serviceData ?? {}).reduce(
+    (acc, [k, v]) => {
       const val: any = v ?? {};
-
       const statusMap: Record<number, ServiceStatus> = { 1: "Running", 0: "Idle", 2: "Error" };
       const status: string =
-        typeof val.status === "number"
-          ? statusMap[val.status] ?? "Unknown"
-          : (val.status ?? "Unknown");
+        typeof val.status === "number" ? statusMap[val.status] ?? "Unknown" : (val.status ?? "Unknown");
 
       const nextRunTime: string = typeof val.nextRunTime === "string" ? val.nextRunTime : "N/A";
       const errorMessage: string | null = typeof val.errorMessage === "string" ? val.errorMessage : null;
@@ -262,10 +211,10 @@ const ServerList: React.FC = () => {
         countConnectedClients: Number.isFinite(cc) ? cc : undefined,
         countSessions: Number.isFinite(cs) ? cs : undefined,
       };
-
       return acc;
-    }, {} as Record<string, ServiceEntry>);
-
+    },
+    {} as Record<string, ServiceEntry>
+  );
 
   return (
     <div>
@@ -303,7 +252,6 @@ const ServerList: React.FC = () => {
                   onClick={() => navigate(`/servers/${id}/`)}
                 >
                   <ServerItem
-                    // pass original raw item; its type is defined in ServerItem.tsx
                     server={(server.__raw as any) ?? server.openVpnServerResponses}
                     vpnServerId={server.vpnServerId}
                     serviceStatus={server.serviceStatus as any}
@@ -327,16 +275,7 @@ const ServerList: React.FC = () => {
         </ul>
       )}
 
-      {/* Debug panels (only show in development) */}
-      <DebugPanel label="Last fetch raw response" value={lastRawResponse} />
-      <DebugPanel label="Unwrapped list" value={lastUnwrappedList} />
-      <DebugPanel label="Mapped servers" value={servers} />
-      {lastError && <DebugPanel label="Last error" value={lastError} />}
-
-      <ServiceControls
-        serviceData={normalizedServiceControlsData}
-        onRunNow={runServiceNow}
-      />
+      <ServiceControls serviceData={normalizedServiceControlsData} onRunNow={runServiceNow} />
     </div>
   );
 };
