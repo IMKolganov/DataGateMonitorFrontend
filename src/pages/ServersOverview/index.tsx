@@ -27,6 +27,8 @@ import type {
 } from "../../api/orval/model";
 import { OverviewGrouping } from "../../api/orval/model";
 
+
+
 const UI_TO_API_GROUPING: Record<
   Grouping,
   (typeof OverviewGrouping)[keyof typeof OverviewGrouping]
@@ -60,9 +62,11 @@ function makeSafeTotals(resp?: OverviewTotalsResponse): SafeTotals {
   return { sessionsCount, usersCount, trafficInBytes, trafficOutBytes, trafficTotalBytes };
 }
 
+type NormalizedGrouping = "hours" | "days" | "months" | "years";
+
 function normalizeGrouping(
   g: string | null | undefined
-): "hours" | "days" | "months" | "years" {
+): NormalizedGrouping {
   switch (g) {
     case "hours":
     case "days":
@@ -168,8 +172,9 @@ export default function ServersOverview() {
   const safeTotals = useMemo(() => makeSafeTotals(totalsResp), [totalsResp]);
 
   const chartData: ChartPoint[] = useMemo(() => {
-    const hasSeries = Array.isArray(apiData?.series) && apiData!.series.length > 0;
+    const hasSeries = Array.isArray(apiData?.series) && apiData.series.length > 0;
     if (hasSeries) {
+      // normalize API meta grouping safely
       const g = normalizeGrouping(apiData?.meta?.grouping);
       return toChartPoints(apiData!.series!, g);
     }
@@ -186,7 +191,9 @@ export default function ServersOverview() {
     };
 
     const fb = buildFallbackOverviewResponse({ from, to, grouping, totals: totalsForFallback });
-    return toChartPoints(fb.series ?? [], fb.meta.grouping);
+
+    const fbGrouping = normalizeGrouping(fb?.meta?.grouping);
+    return toChartPoints(fb.series ?? [], fbGrouping);
   }, [apiData, from, to, grouping, safeTotals]);
 
   const onFilterChange = (c: DateRangeChange) => {

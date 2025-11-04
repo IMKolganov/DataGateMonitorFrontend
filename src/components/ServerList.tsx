@@ -1,3 +1,4 @@
+// src/components/ServerList.tsx
 import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlus } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -16,6 +17,8 @@ import {
 
 // Local status type (keep UI-only)
 type ServiceStatus = "Running" | "Idle" | "Error" | "Unknown";
+
+import { type ServiceEntry } from "../types/ServiceEntry";
 
 // Minimal backend item shape we actually read
 type ApiServerItem = {
@@ -234,18 +237,35 @@ const ServerList: React.FC = () => {
     }
   };
 
-  // normalize serviceData for ServiceControls (string keys, status as string)
-  const normalizedServiceControlsData = Object.fromEntries(
-    Object.entries(serviceData ?? {}).map(([k, v]) => {
+  // normalize serviceData for ServiceControls (strict typing)
+  const normalizedServiceControlsData: Record<string, ServiceEntry> = Object
+    .entries(serviceData ?? {})
+    .reduce((acc, [k, v]) => {
       const val: any = v ?? {};
-      // turn numeric/enum status into string for UI if needed
-      const statusStr =
+
+      const statusMap: Record<number, ServiceStatus> = { 1: "Running", 0: "Idle", 2: "Error" };
+      const status: string =
         typeof val.status === "number"
-          ? ({ 1: "Running", 0: "Idle", 2: "Error" } as Record<number, string>)[val.status] ?? "Unknown"
+          ? statusMap[val.status] ?? "Unknown"
           : (val.status ?? "Unknown");
-      return [String(k), { ...val, status: statusStr }];
-    })
-  ) as Record<string, unknown>;
+
+      const nextRunTime: string = typeof val.nextRunTime === "string" ? val.nextRunTime : "N/A";
+      const errorMessage: string | null = typeof val.errorMessage === "string" ? val.errorMessage : null;
+
+      const cc = Number(val.countConnectedClients);
+      const cs = Number(val.countSessions);
+
+      acc[String(k)] = {
+        status,
+        nextRunTime,
+        errorMessage,
+        countConnectedClients: Number.isFinite(cc) ? cc : undefined,
+        countSessions: Number.isFinite(cs) ? cs : undefined,
+      };
+
+      return acc;
+    }, {} as Record<string, ServiceEntry>);
+
 
   return (
     <div>

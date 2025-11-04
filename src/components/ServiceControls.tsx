@@ -1,3 +1,4 @@
+// src/components/ServiceControls.tsx
 import { FaPlay } from "react-icons/fa";
 import { useEffect, useMemo, useState } from "react";
 

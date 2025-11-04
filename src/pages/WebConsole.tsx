@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import "../css/Console.css";
 import { FaArrowRight, FaTrash, FaInfoCircle } from "react-icons/fa";
 import { useParams } from "react-router-dom";
-// import { getSignalRUrl } from "../utils/api";
 import {
   HubConnectionBuilder,
   HubConnection,

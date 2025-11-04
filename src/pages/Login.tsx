@@ -21,7 +21,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [statusReady, setStatusReady] = useState(false);
-  const [systemSet, setSystemSet] = useState<boolean | null>(null);
+  const [, setSystemSet] = useState<boolean | null>(null);
 
   const canSubmit =
     clientId.trim().length > 0 &&

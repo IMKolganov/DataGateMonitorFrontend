@@ -46,13 +46,14 @@ export function GeoLiteDbSettings() {
     if (!allSettled) return;
 
     // With ogmMutator unwrapping, .data is the inner model already
-    const safe = (resp: SettingResponse | undefined): string =>
+    const safeValue = (resp: SettingResponse | undefined): string =>
       String(resp?.value ?? "");
 
-    setGeoIpDbPath(safe(qDbPath.data));
-    setGeoIpDownloadUrl(safe(qDownloadUrl.data));
-    setGeoIpAccountId(safe(qAccountId.data));
-    setGeoIpLicenseKey(safe(qLicenseKey.data));
+
+    setGeoIpDbPath(safeValue(qDbPath.data));
+    setGeoIpDownloadUrl(safeValue(qDownloadUrl.data));
+    setGeoIpAccountId(safeValue(qAccountId.data));
+    setGeoIpLicenseKey(safeValue(qLicenseKey.data));
 
     setInitialLoading(false);
   }, [
