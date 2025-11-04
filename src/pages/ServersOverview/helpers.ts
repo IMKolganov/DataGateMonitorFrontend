@@ -32,16 +32,24 @@ export function formatLabel(d: Date, mode: Exclude<Grouping,"auto">): string {
 /* ---- build chart from API ---- */
 export function toChartPoints(
   rows: OverviewSeriesRowDto[],
-  mode: Exclude<Grouping,"auto">
+  mode: Exclude<Grouping, "auto">
 ): ChartPoint[] {
-  return rows.map(r => {
-    const totalBytes = r.trafficTotalBytes ?? 0;
-    return {
-      label: formatLabel(new Date(r.ts), mode),
-      active: r.activeClients ?? 0,
-      mb: Math.round(totalBytes / (1024 * 1024)),
-    };
-  });
+  return rows
+    // type guard: keep only rows with a valid ts
+    .filter((r): r is OverviewSeriesRowDto & { ts: string } => typeof r.ts === "string" && r.ts.length > 0)
+    .map((r) => {
+      // fallback if server didn't precompute total
+      const totalBytes =
+        r.trafficTotalBytes ?? ((r.trafficInBytes ?? 0) + (r.trafficOutBytes ?? 0));
+
+      const date = new Date(r.ts); // ts is guaranteed here
+
+      return {
+        label: formatLabel(date, mode),
+        active: r.activeClients ?? 0,
+        mb: Math.round(totalBytes / (1024 * 1024)),
+      };
+    });
 }
 
 export function buildFallbackOverviewResponse(opts: {
