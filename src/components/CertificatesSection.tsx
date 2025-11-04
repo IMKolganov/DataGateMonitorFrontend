@@ -1,7 +1,18 @@
-import React, { useCallback, useEffect, useState } from "react";
+// src/sections/CertificatesSection.tsx
+// comments in English only
+import React, { useEffect, useMemo, useState } from "react";
 import CertificatesTable from "../components/CertificatesTable";
 import AddCertificate from "../components/AddCertificate";
-// import type { CertificateStatus } from "../api/orval/model";
+
+// orval
+import {
+  useGetApiOpenVpnCertsVpnServerIdGetAll,
+} from "../api/orval/open-vpn-server-certs/open-vpn-server-certs";
+import type {
+  GetAllCertificatesResponse,
+  ServerCertificate,
+  CertificateStatus, // enum: 0=Valid, 1=Revoked, 2=Expired, 3=Unknown
+} from "../api/orval/model";
 
 interface Props {
   vpnServerId: string;
@@ -13,54 +24,67 @@ const statusLabels: Record<number, string> = {
   2: "Expired",
   3: "Unknown",
 };
+
 const CertificatesSection: React.FC<Props> = ({ vpnServerId }) => {
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<CertificateStatus | null>(null);
-  const [loading, setLoading] = useState(false);
   const [certError, setCertError] = useState<{ message: string; detail?: string } | null>(null);
 
-  const fetchCerts = useCallback(async () => {
-    try {
-      const certs = await fetchCertificates(
-        vpnServerId,
-        selectedStatus !== null ? String(selectedStatus) : undefined
-      );
+  const numericId = Number(vpnServerId);
 
-      const validCerts = Array.isArray(certs)
-        ? certs.filter(c => c.commonName && c.commonName.trim() !== "")
-        : [];
+  const {
+    data,
+    isLoading,
+    error,
+    refetch,
+  } = useGetApiOpenVpnCertsVpnServerIdGetAll(numericId, {
+    query: {
+      enabled: Number.isFinite(numericId) && numericId > 0,
+      refetchOnWindowFocus: false,
+    },
+  });
 
-      if (validCerts.length === 0) {
-        setCertError({
-          message: "No certificates found.",
-          detail: "The server returned an empty or invalid certificate list.",
-        });
-      } else {
-        setCertError(null);
-      }
+  // Safely extract array from unwrapped response
+  const rawCerts: ServerCertificate[] = useMemo(() => {
+    const payload: GetAllCertificatesResponse | undefined = data as GetAllCertificatesResponse | undefined;
+    const arr = payload?.serverCertificates ?? null;
+    return Array.isArray(arr) ? arr : [];
+  }, [data]);
 
-      setCertificates(validCerts);
-    } catch (error: any) {
-      console.error("Error fetching certificates", error);
-      setCertificates([]);
-      setCertError({
-        message: error?.response?.data?.Message || "Failed to load certificates",
-        detail: error?.response?.data?.Detail,
-      });
-    }
-  }, [vpnServerId, selectedStatus]);
+  // Apply UI filters
+  const certificates: ServerCertificate[] = useMemo(() => {
+    const filtered =
+      selectedStatus === null
+        ? rawCerts
+        : rawCerts.filter(c => c.status === selectedStatus);
 
-  const reload = useCallback(async () => {
-    if (!vpnServerId) return;
-    setLoading(true);
-    setCertError(null);
-    await Promise.allSettled([fetchCerts()]);
-    setLoading(false);
-  }, [vpnServerId, fetchCerts]);
+    return filtered.filter(c => typeof c.commonName === "string" && c.commonName.trim() !== "");
+  }, [rawCerts, selectedStatus]);
 
+  // Derive UI error from query state + empty result
   useEffect(() => {
-    reload();
-  }, [vpnServerId, selectedStatus, reload]);
+    if (error) {
+      const anyErr: any = error as any;
+      setCertError({
+        message:
+          anyErr?.response?.data?.Message ||
+          anyErr?.message ||
+          "Failed to load certificates",
+        detail: anyErr?.response?.data?.Detail,
+      });
+      return;
+    }
+
+    if (!isLoading && certificates.length === 0) {
+      setCertError({
+        message: "No certificates found.",
+        detail: "The server returned an empty or invalid certificate list.",
+      });
+    } else {
+      setCertError(null);
+    }
+  }, [error, isLoading, certificates.length]);
+
+  const reload = () => refetch();
 
   return (
     <>
@@ -80,7 +104,9 @@ const CertificatesSection: React.FC<Props> = ({ vpnServerId }) => {
           className="input"
           value={selectedStatus ?? ""}
           onChange={(e) =>
-            setSelectedStatus(e.target.value === "" ? null : (Number(e.target.value) as CertificateStatus))
+            setSelectedStatus(
+              e.target.value === "" ? null : (Number(e.target.value) as CertificateStatus),
+            )
           }
         >
           <option value="">All</option>
@@ -100,10 +126,10 @@ const CertificatesSection: React.FC<Props> = ({ vpnServerId }) => {
       <AddCertificate vpnServerId={vpnServerId} onSuccess={reload} />
 
       <CertificatesTable
-        certificates={Array.isArray(certificates) ? certificates : []}
+        certificates={certificates}
         vpnServerId={vpnServerId}
         onRevoke={reload}
-        loading={loading}
+        loading={isLoading}
       />
     </>
   );

@@ -123,7 +123,7 @@ export function GeoLiteDbSettings() {
     qAccountId.isLoading ||
     qLicenseKey.isLoading;
 
-  const versionText = qDbVersion.data?.data?.version ?? "";
+  const versionText = qDbVersion.data?.version ?? "";
 
   return (
     <div>

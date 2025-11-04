@@ -5,7 +5,7 @@ import "../css/ServerDetails.css";
 import { FaSync } from "react-icons/fa";
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
-import ServerDetailsInfo from "../components/ServerDetailsInfo";
+import ServerDetailsInfoDefault from "../components/ServerDetailsInfo"; // default export
 
 import {
   useGetApiOpenVpnClientsGetAllConnected,
@@ -16,11 +16,17 @@ import type {
   GetApiOpenVpnClientsGetAllHistoryParams,
 } from "../api/orval/model";
 
-// server orval hooks
 import {
   useGetApiOpenVpnServersGetServerWithStatusVpnServerId,
   useGetApiOpenVpnServersGetVpnServerId,
 } from "../api/orval/open-vpn-servers/open-vpn-servers";
+import type { ComponentType } from "react";
+
+// explicit component type to avoid IntrinsicAttributes error
+const ServerDetailsInfo = ServerDetailsInfoDefault as ComponentType<{
+  serverInfo: any;
+  toHumanReadableSize: (bytes: number) => string;
+}>;
 
 type ConnectedClientsResponse = {
   clients: any[];
@@ -31,57 +37,57 @@ export function GeneralServerDetails() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
 
   const [isLive, setIsLive] = useState(true);
-
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  // parse numeric id
   const numericServerId = useMemo(
     () => (vpnServerId ? Number(vpnServerId) : undefined),
     [vpnServerId]
   );
 
   // -------- Clients (connected/history) --------
-  const connectedParams = useMemo(
-    () =>
-      ({
-        vpnServerId: numericServerId,
-        pageNumber: page + 1, // API is usually 1-based
-        pageSize,
-      }) as GetApiOpenVpnClientsGetAllConnectedParams,
+  // NOTE: Page — not PageNumber (per your generated types)
+  const connectedParams: GetApiOpenVpnClientsGetAllConnectedParams = useMemo(
+    () => ({
+      VpnServerId: numericServerId ?? 0,
+      Page: page + 1,
+      PageSize: pageSize,
+    }),
     [numericServerId, page, pageSize]
   );
 
-  const historyParams = connectedParams as GetApiOpenVpnClientsGetAllHistoryParams;
+  const historyParams: GetApiOpenVpnClientsGetAllHistoryParams = useMemo(
+    () => ({
+      VpnServerId: numericServerId ?? 0,
+      Page: page + 1,
+      PageSize: pageSize,
+    }),
+    [numericServerId, page, pageSize]
+  );
 
-  // Queries for clients (already unwrapped by ogmMutator)
+  // ogmMutator уже разворачивает ApiResponse -> data, поэтому TData не задаём
   const connectedQuery = useGetApiOpenVpnClientsGetAllConnected(connectedParams, {
     query: {
-      enabled: !!numericServerId && isLive,
-      keepPreviousData: true,
+      enabled: Number.isFinite(numericServerId) && isLive,
       staleTime: 10_000,
       retry: 1,
-      onSuccess: (d) => console.debug("[clients connected] success:", d),
-      onError: (e) => console.debug("[clients connected] error:", e),
     },
   });
 
   const historyQuery = useGetApiOpenVpnClientsGetAllHistory(historyParams, {
     query: {
-      enabled: !!numericServerId && !isLive,
-      keepPreviousData: true,
+      enabled: Number.isFinite(numericServerId) && !isLive,
       staleTime: 10_000,
       retry: 1,
-      onSuccess: (d) => console.debug("[clients history] success:", d),
-      onError: (e) => console.debug("[clients history] error:", e),
     },
   });
 
   const loadingClients =
     (isLive ? connectedQuery.isFetching : historyQuery.isFetching) ?? false;
 
+  // безопасно читаем данные независимо от точного типа из orval
   const clientsPayload: ConnectedClientsResponse =
-    (isLive ? connectedQuery.data : historyQuery.data) ??
+    ((isLive ? connectedQuery.data : historyQuery.data) as any) ??
     ({ clients: [], totalCount: 0 } as ConnectedClientsResponse);
 
   const clients = Array.isArray(clientsPayload.clients) ? clientsPayload.clients : [];
@@ -96,8 +102,6 @@ export function GeneralServerDetails() {
         enabled: Number.isFinite(numericServerId),
         staleTime: 30_000,
         retry: 1,
-        onSuccess: (d) => console.debug("[server with-status] success:", d),
-        onError: (e) => console.debug("[server with-status] error:", e),
       },
     }
   );
@@ -107,22 +111,45 @@ export function GeneralServerDetails() {
       enabled: Number.isFinite(numericServerId) && !serverWithStatusQuery.data,
       staleTime: 30_000,
       retry: 1,
-      onSuccess: (d) => console.debug("[server basic] success:", d),
-      onError: (e) => console.debug("[server basic] error:", e),
     },
   });
 
   const loadingServer = serverWithStatusQuery.isFetching || serverBasicQuery.isFetching;
 
-  // Normalize to shape expected by <ServerDetailsInfo />
+  // normalize with real shape:
+  // { openVpnServerWithStatus: { openVpnServerResponses: { openVpnServer: {...} }, openVpnServerStatusLogResponse: {...}, totals... } }
   const serverInfo = useMemo(() => {
-    // A) Already combined payload from with-status
-    const s: any = serverWithStatusQuery.data;
-    if (s && (s.openVpnServerResponses || s.openVpnServerStatusLogResponse)) {
-      return s;
+    const ws: any = serverWithStatusQuery.data;
+
+    if (ws?.openVpnServerWithStatus) {
+      const w = ws.openVpnServerWithStatus;
+
+      const ov =
+        w?.openVpnServerResponses?.openVpnServer ??
+        w?.openVpnServer ??
+        w?.server ??
+        null;
+
+      const flatServer = ov
+        ? {
+            serverName: ov.serverName,
+            isOnline: !!ov.isOnline,
+            isDefault: !!ov.isDefault,
+            apiUrl: ov.apiUrl ?? "",
+          }
+        : null;
+
+      return {
+        openVpnServerResponses: flatServer,
+        openVpnServerStatusLogResponse: w?.openVpnServerStatusLogResponse ?? null,
+        totalBytesIn: w?.totalBytesIn ?? 0,
+        totalBytesOut: w?.totalBytesOut ?? 0,
+        countConnectedClients: w?.countConnectedClients ?? 0,
+        countSessions: w?.countSessions ?? 0,
+      };
     }
 
-    // B) Basic get/{id} -> wrap into expected fields
+    // fallback: basic get
     const b: any = serverBasicQuery.data;
     if (b?.openVpnServer) {
       const ov = b.openVpnServer;
@@ -152,22 +179,20 @@ export function GeneralServerDetails() {
     return null;
   }, [serverWithStatusQuery.data, serverBasicQuery.data]);
 
-  // logging for visibility
   useEffect(() => {
     console.debug("[GeneralServerDetails] numericServerId =", numericServerId);
-  }, [numericServerId]);
+    console.debug("[GeneralServerDetails] with-status data =", serverWithStatusQuery.data);
+    console.debug("[GeneralServerDetails] normalized serverInfo =", serverInfo);
+  }, [numericServerId, serverWithStatusQuery.data, serverInfo]);
 
-  // Manual refresh (refetch what is currently active)
   const handleRefresh = () => {
     if (isLive) connectedQuery.refetch();
     else historyQuery.refetch();
 
-    // refresh server
     serverWithStatusQuery.refetch();
     serverBasicQuery.refetch();
   };
 
-  // Reset page when toggling live/history
   useEffect(() => {
     setPage(0);
   }, [isLive]);
@@ -201,7 +226,7 @@ export function GeneralServerDetails() {
             <span className="toggle-text">{isLive ? "Live" : "History"}</span>
           </label>
         </div>
-        <div className="right-buttons">{/* reserved for future actions */}</div>
+        <div className="right-buttons">{/* reserved */}</div>
       </div>
 
       {loadingServer ? (
@@ -213,7 +238,6 @@ export function GeneralServerDetails() {
         <ServerDetailsInfo serverInfo={serverInfo} toHumanReadableSize={toHumanReadableSize} />
       ) : (
         <div style={{ marginBottom: 12, opacity: 0.8, fontSize: 14 }}>
-          {/* add some debug to see why it's empty */}
           Server info is not available yet.
           <pre style={{ marginTop: 8, whiteSpace: "pre-wrap", fontSize: 12, opacity: 0.8 }}>
             {JSON.stringify(

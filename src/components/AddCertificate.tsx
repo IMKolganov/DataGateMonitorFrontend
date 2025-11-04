@@ -1,7 +1,11 @@
+// src/components/AddCertificate.tsx
 import React, { useState } from "react";
-// import { addCertificate } from "../utils/api/OpenVpnServerCerts";
 import "../css/Certificates.css";
 import { FaPlus } from "react-icons/fa";
+
+// orval
+import { postApiOpenVpnCertsBuild } from "../api/orval/open-vpn-server-certs/open-vpn-server-certs";
+import type { BuildCertificateRequest } from "../api/orval/model";
 
 interface Props {
   vpnServerId: string;
@@ -14,7 +18,8 @@ const AddCertificate: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const handleAddCertificate = async () => {
-    if (!newCertCommonName.trim()) {
+    const cn = newCertCommonName.trim();
+    if (!cn) {
       setMessage({ type: "error", text: "Please enter a Common Name." });
       return;
     }
@@ -24,19 +29,30 @@ const AddCertificate: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
     setMessage(null);
 
     try {
-      await addCertificate(vpnServerId, newCertCommonName);
+      // Direct call expects BuildCertificateRequest (NOT { data: ... })
+      const req: BuildCertificateRequest = {
+        vpnServerId: Number(vpnServerId),
+        commonName: cn,
+      };
+      await postApiOpenVpnCertsBuild(req);
+
       setNewCertCommonName("");
       setMessage({ type: "success", text: "Certificate added successfully!" });
       onSuccess();
     } catch (error: any) {
-      console.error("Failed to add certificate", error);
-      const errorMessage = error.response?.data?.Message || "Failed to add certificate.";
-      const errorDetail = error.response?.data?.Detail || "";
-      setMessage({ type: "error", text: `${errorMessage} ${errorDetail}` });
+      // Try to extract backend-friendly message
+      const msg =
+        error?.response?.data?.Message ||
+        error?.message ||
+        "Failed to add certificate.";
+      const detail = error?.response?.data?.Detail || "";
+      setMessage({ type: "error", text: `${msg}${detail ? ` ${detail}` : ""}` });
     } finally {
       setLoading(false);
     }
   };
+
+  const canSubmit = !!newCertCommonName.trim() && !loading;
 
   return (
     <div className="add-certificate">
@@ -48,10 +64,15 @@ const AddCertificate: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
           setNewCertCommonName(e.target.value);
           setMessage(null);
         }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && canSubmit) handleAddCertificate();
+        }}
         className="input"
       />
-      <button className="btn primary" onClick={handleAddCertificate} disabled={loading}>
-        <span className="icon">{FaPlus({ className: "icon" })}</span>{loading ? "Adding..." : "Add Certificate"}
+
+      <button className="btn primary" onClick={handleAddCertificate} disabled={!canSubmit}>
+        <span className="icon"><FaPlus className="icon" /></span>
+        {loading ? "Adding..." : "Add Certificate"}
       </button>
 
       {message && (
