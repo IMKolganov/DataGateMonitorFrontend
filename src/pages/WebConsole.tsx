@@ -9,6 +9,7 @@ import {
   LogLevel
 } from "@microsoft/signalr";
 import { saveHistoryToDB, loadHistoryFromDB, clearHistoryDB } from "../utils/consoleStorage";
+import { getSignalRUrl, getAccessTokenOrLogout } from "../utils/signalr-url";
 
 export function WebConsole() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
@@ -36,13 +37,15 @@ export function WebConsole() {
 
     const setupSignalR = async () => {
       try {
-        const url = await getSignalRUrl(vpnServerId);
+        const url = getSignalRUrl(vpnServerId);
         const connection = new HubConnectionBuilder()
-          .withUrl(url, { transport: HttpTransportType.WebSockets })
-          .configureLogging(LogLevel.Information)
-          .withAutomaticReconnect()
-          .build();
-
+            .withUrl(url, {
+              transport: HttpTransportType.WebSockets,
+              accessTokenFactory: () => getAccessTokenOrLogout(),
+            })
+            .configureLogging(LogLevel.Information)
+            .withAutomaticReconnect()
+            .build();
         connectionRef.current = connection;
 
         connection.off("ReceiveCommandResult");
