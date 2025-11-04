@@ -80,8 +80,8 @@ export function GeneralServerDetails() {
     (isLive ? connectedQuery.isFetching : historyQuery.isFetching) ?? false;
 
   const activeClientsResponse: ConnectedClientsResponse | undefined = isLive
-    ? connectedQuery.data
-    : historyQuery.data;
+    ? (connectedQuery.data?.data as ConnectedClientsResponse | undefined)
+    : (historyQuery.data?.data as ConnectedClientsResponse | undefined);
 
   const clients: VpnClientInfoResponse[] =
     (activeClientsResponse?.clients ?? []) as VpnClientInfoResponse[];
