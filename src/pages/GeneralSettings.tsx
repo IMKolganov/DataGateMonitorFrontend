@@ -36,6 +36,15 @@ export function GeneralSettings() {
     []
   );
 
+  function pickSettingValue(resp: unknown): string | undefined {
+  const r = resp as any;
+  // common shapes we might see
+  return r?.value
+    ?? r?.data?.value
+    ?? r?.data?.setting?.value
+    ?? r?.setting?.value;
+  }
+
   const {
     data: intervalResp,
     isFetching: isFetchingInterval,
@@ -66,14 +75,17 @@ export function GeneralSettings() {
 
   // When responses arrive, hydrate local UI state
   useEffect(() => {
-    const val = Number(intervalResp?.value ?? intervalResp?.data?.value);
+    // safely extract value from either shape
+    const intervalRaw = pickSettingValue(intervalResp);
+    const val = Number(intervalRaw);
     if (!Number.isNaN(val)) setIntervalValue(val);
 
-    const unitRaw = String(unitResp?.value ?? unitResp?.data?.value ?? "").toLowerCase();
+    const unitRaw = (pickSettingValue(unitResp) ?? "").toLowerCase();
     if (ALLOWED_UNITS.includes(unitRaw as Unit)) {
       setIntervalType(unitRaw as Unit);
     }
   }, [intervalResp, unitResp]);
+
 
   // Orval mutation for setting values
   const setSettingMutation = usePostApiSettingsSet();
@@ -138,11 +150,9 @@ export function GeneralSettings() {
   return (
     <div>
       {successMessage && <p className="success-message">{successMessage}</p>}
-      {anyLoadError && (
+      {errorDetails && !anyLoadError && (
         <p className="error-message">
-          Failed to load settings.
-          <br />
-          Details: {(anyLoadError as Error)?.message}
+          {errorDetails}
         </p>
       )}
       {errorDetails && !anyLoadError && (

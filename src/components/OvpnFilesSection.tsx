@@ -1,69 +1,109 @@
 // src/sections/OvpnFilesSection.tsx
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useMemo, useCallback } from "react";
 import OvpnFilesTable from "../components/OvpnFilesTable";
 import AddOvpnFile from "../components/AddOvpnFile";
 
+// orval hooks
+import {
+  useGetApiOpenVpnFilesGetAllVpnServerId,
+  useGetApiOpenVpnFilesGetAllVpnServerIdExternalId,
+} from "../api/orval/open-vpn-files/open-vpn-files";
+
 interface Props {
-  vpnServerId: string;
-  externalId?: string; // optional: when provided, fetch by externalId
-  isRevoked?: boolean; // optional filter, default false
+  vpnServerId: string;          // comes as string in props
+  externalId?: string;          // optional: when provided, fetch by externalId (server-scoped)
+  isRevoked?: boolean;          // optional filter, default false
 }
 
 const OvpnFilesSection: React.FC<Props> = ({ vpnServerId, externalId, isRevoked = false }) => {
-  const [ovpnFiles, setOvpnFiles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [ovpnError, setOvpnError] = useState<{ message: string; detail?: string } | null>(null);
+  // Parse server id once
+  const serverIdNum = useMemo(() => {
+    const n = Number(vpnServerId);
+    return Number.isFinite(n) ? n : 0;
+  }, [vpnServerId]);
 
-  const fetchOvpn = useCallback(async () => {
-    // Decide which API to call based on presence of externalId
-    const loader = externalId
-      ? () => fetchOvpnFilesByExternalId(vpnServerId, externalId, isRevoked)
-      : () => fetchOvpnFiles(vpnServerId);
+  const hasServerId = serverIdNum > 0;
+  const ext = (externalId ?? "").trim();
+  const hasExternalId = ext.length > 0;
 
-    try {
-      const response = await loader();
-      const data = Array.isArray(response) ? response : [];
-      setOvpnFiles(data);
-      setOvpnError(null);
-    } catch (error: any) {
-      console.error("Error fetching OVPN files", error);
-      setOvpnFiles([]);
-      setOvpnError({
-        message: error?.response?.data?.Message || "Failed to load OVPN files",
-        detail: error?.response?.data?.Detail,
-      });
-    }
-  }, [vpnServerId, externalId, isRevoked]);
+  // When externalId supplied -> use `/get-all/{serverId}/{externalId}`; otherwise `/get-all/{serverId}`
+  const {
+    data: dataByServer,
+    error: errorByServer,
+    isLoading: loadingByServer,
+    refetch: refetchByServer,
+  } = useGetApiOpenVpnFilesGetAllVpnServerId(serverIdNum, {
+    query: {
+      enabled: hasServerId && !hasExternalId,
+      // keep previous data on param flip to avoid flicker
+      placeholderData: (prev) => prev,
+    },
+  });
 
-  const reload = useCallback(async () => {
-    if (!vpnServerId) return;
-    if (externalId !== undefined && externalId.trim() === "") return; // avoid empty externalId
-    setLoading(true);
-    setOvpnError(null);
-    await Promise.allSettled([fetchOvpn()]);
-    setLoading(false);
-  }, [vpnServerId, externalId, fetchOvpn]);
+  const {
+    data: dataByExternal,
+    error: errorByExternal,
+    isLoading: loadingByExternal,
+    refetch: refetchByExternal,
+  } = useGetApiOpenVpnFilesGetAllVpnServerIdExternalId(serverIdNum, ext, {
+    query: {
+      enabled: hasServerId && hasExternalId,
+      placeholderData: (prev) => prev,
+    },
+  });
 
-  useEffect(() => {
-    reload();
-  }, [vpnServerId, externalId, isRevoked, reload]);
+  // Normalized array: hooks in this project return unwrapped data via ogmMutator.
+  // It may be either an array or an object like { ovpnFiles: [...] } — handle both.
+  const ovpnFiles = useMemo(() => {
+    const raw = hasExternalId ? dataByExternal : dataByServer;
+    const list =
+      Array.isArray(raw)
+        ? raw
+        : Array.isArray((raw as any)?.ovpnFiles)
+          ? (raw as any).ovpnFiles
+          : [];
+    return isRevoked ? list.filter((x: any) => x?.isRevoked === true) : list;
+  }, [hasExternalId, dataByExternal, dataByServer, isRevoked]);
+
+  const loading = loadingByServer || loadingByExternal;
+
+  // Prefer meaningful error from whichever query was used
+  const ovpnError = (errorByExternal ?? errorByServer) as any | undefined;
+  const normalizedError =
+    ovpnError
+      ? {
+          message:
+            ovpnError?.response?.data?.Message ||
+            ovpnError?.message ||
+            "Failed to load OVPN files",
+          detail: ovpnError?.response?.data?.Detail,
+        }
+      : null;
+
+  const reload = useCallback(() => {
+    return hasExternalId ? refetchByExternal() : refetchByServer();
+  }, [hasExternalId, refetchByExternal, refetchByServer]);
 
   return (
     <>
-      {ovpnError && (
+      {normalizedError && (
         <p className="error-message">
-          {ovpnError.message}
+          {normalizedError.message}
           <br />
-          {ovpnError.detail}
+          {normalizedError.detail}
         </p>
       )}
 
       <h3>
         Issued OVPN Files{" "}
-        {externalId ? (
-          <small>(filtered by External ID: <code>{externalId}</code>, revoked: {String(isRevoked)})</small>
+        {hasExternalId ? (
+          <small>
+            (filtered by External ID: <code>{ext}</code>, revoked: {String(isRevoked)})
+          </small>
         ) : (
-          <small>(server: <code>{vpnServerId}</code>)</small>
+          <small>
+            (server: <code>{vpnServerId}</code>)
+          </small>
         )}
       </h3>
 
@@ -72,6 +112,7 @@ const OvpnFilesSection: React.FC<Props> = ({ vpnServerId, externalId, isRevoked 
         Enter the <strong>Common Name (CN)</strong> and an <strong>External ID</strong> to generate a new OVPN file.
       </p>
 
+      {/* After successful create we refetch the active query */}
       <AddOvpnFile vpnServerId={vpnServerId} onSuccess={reload} />
 
       <OvpnFilesTable
