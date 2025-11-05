@@ -27,6 +27,7 @@ import {
 const ServerDetailsInfo = ServerDetailsInfoDefault as ComponentType<{
   serverInfo: any;
   toHumanReadableSize: (bytes: number) => string;
+  loading?: boolean;
 }>;
 
 export function GeneralServerDetails() {
@@ -213,18 +214,11 @@ export function GeneralServerDetails() {
         <div className="right-buttons">{/* reserved */}</div>
       </div>
 
-      {loadingServer ? (
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading server details...</p>
-        </div>
-      ) : serverInfo ? (
-        <ServerDetailsInfo serverInfo={serverInfo} toHumanReadableSize={toHumanReadableSize} />
-      ) : (
-        <div style={{ marginBottom: 12, opacity: 0.8, fontSize: 14 }}>
-          Server info is not available yet.
-        </div>
-      )}
+      <ServerDetailsInfo
+        serverInfo={serverInfo}
+        toHumanReadableSize={toHumanReadableSize}
+        loading={loadingServer}
+      />
 
       <h3>
         VPN Clients ({isLive ? "Connected" : "Historical"}){" "}
