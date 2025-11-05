@@ -5,9 +5,11 @@
  * OpenAPI spec version: v1
  */
 
-export interface OverviewUserItem {
+export interface OverviewUserDto {
   /** @nullable */
   externalId?: string | null;
+  /** @nullable */
+  displayName?: string | null;
   /** @nullable */
   vpnServerId?: number | null;
   sessions?: number;

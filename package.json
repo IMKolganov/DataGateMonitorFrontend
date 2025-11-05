@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "gen:api": "orval --config orval.config.ts"
+    "gen:api": "orval --config orval.config.ts",
+    "orval": "orval --config orval.config.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

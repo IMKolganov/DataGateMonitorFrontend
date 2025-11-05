@@ -176,3 +176,5 @@ export * from "./usersResponseApiResponse";
 export * from "./vpnClientInfoResponse";
 export * from "./vpnServerEventResponse";
 export * from "./vpnServerEventResponseApiResponse";
+export * from "./overviewUserDto";
+export * from "./vpnClientInfoDto";

@@ -4,10 +4,10 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
-import type { VpnClientInfoResponse } from "./vpnClientInfoResponse";
+import type { VpnClientInfoDto } from "./vpnClientInfoDto";
 
 export interface ConnectedClientsResponse {
   totalCount?: number;
   /** @nullable */
-  clients?: VpnClientInfoResponse[] | null;
+  clients?: VpnClientInfoDto[] | null;
 }
