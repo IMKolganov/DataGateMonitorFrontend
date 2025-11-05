@@ -5,10 +5,10 @@ import { formatBytes, formatDateWithOffset } from "../utils/utils";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
 import { Link, useParams } from "react-router-dom";
-import type { VpnClientInfoResponse } from "../api/orval/model";
+import type { VpnClientInfoDto } from "../api/orval/model";
 
 // Single client item from ConnectedClientsResponse.clients
-type ClientDto = VpnClientInfoResponse;
+type ClientDto = VpnClientInfoDto;
 
 interface ClientsTableProps {
   clients: ClientDto[];
@@ -35,9 +35,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
     id: client.id ?? index + 1,
     commonName: client.commonName ?? "",
     externalId: client.externalId ?? "",
-    tgUsername: client.tgUsername ?? "",
-    tgFirstName: client.tgFirstName ?? "",
-    tgLastName: client.tgLastName ?? "",
+    displayName: client.displayName ?? "",
     remoteIp: client.remoteIp ?? "",
     localIp: client.localIp ?? "",
     bytesReceived: formatBytes(client.bytesReceived ?? 0),
@@ -50,11 +48,11 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 70 },
-    { field: "commonName", headerName: "Common Name", flex: 1 },
+    { field: "commonName", headerName: "Common Name", flex: 0.7 },
     {
       field: "externalId",
       headerName: "External Id",
-      flex: 0.6,
+      flex: 0.5,
       renderCell: (params) => {
         const externalId = params.value as string | undefined;
         if (!externalId) return null;
@@ -68,15 +66,13 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
         );
       },
     },
-    { field: "tgUsername", headerName: "Telegram Username", flex: 0.6 },
-    { field: "tgFirstName", headerName: "Telegram FirstName", flex: 0.6 },
-    { field: "tgLastName", headerName: "Telegram LastName", flex: 0.6 },
+    { field: "displayName", headerName: "Display Name", flex: 0.6 },
     { field: "remoteIp", headerName: "Remote Address", flex: 0.6 },
-    { field: "localIp", headerName: "Local Address", flex: 0.6 },
-    { field: "bytesReceived", headerName: "Bytes Received", flex: 0.6 },
-    { field: "bytesSent", headerName: "Bytes Sent", flex: 0.6 },
-    { field: "connectedSince", headerName: "Connected Since", flex: 0.7 },
-    { field: "country", headerName: "Country", flex: 0.6 },
+    { field: "localIp", headerName: "Local Address", flex: 0.5 },
+    { field: "bytesReceived", headerName: "Bytes Received", flex: 0.4 },
+    { field: "bytesSent", headerName: "Bytes Sent", flex: 0.4 },
+    { field: "connectedSince", headerName: "Connected Since", flex: 0.5 },
+    { field: "country", headerName: "Country", flex: 1 },
   ];
 
   return (

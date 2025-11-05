@@ -5,17 +5,13 @@
  * OpenAPI spec version: v1
  */
 
-export interface VpnClientInfoResponse {
+export interface VpnClientInfoDto {
   id?: number;
   vpnServerId?: number;
   /** @nullable */
   externalId?: string | null;
   /** @nullable */
-  tgUsername?: string | null;
-  /** @nullable */
-  tgFirstName?: string | null;
-  /** @nullable */
-  tgLastName?: string | null;
+  displayName?: string | null;
   sessionId?: string;
   /** @nullable */
   commonName?: string | null;

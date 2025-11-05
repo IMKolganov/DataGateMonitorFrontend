@@ -15,7 +15,7 @@ import type {
   GetApiOpenVpnClientsGetAllConnectedParams,
   GetApiOpenVpnClientsGetAllHistoryParams,
   ConnectedClientsResponse,
-  VpnClientInfoResponse,
+  VpnClientInfoDto,
 } from "../api/orval/model";
 
 import {
@@ -84,8 +84,8 @@ export function GeneralServerDetails() {
     ? (connectedQuery.data as ConnectedClientsResponse | undefined)
     : (historyQuery.data as ConnectedClientsResponse | undefined);
 
-  const clients: VpnClientInfoResponse[] =
-    (activeClientsResponse?.clients ?? []) as VpnClientInfoResponse[];
+  const clients: VpnClientInfoDto[] =
+    (activeClientsResponse?.clients ?? []) as VpnClientInfoDto[];
   const totalClients = activeClientsResponse?.totalCount ?? 0;
 
   // -------- Server info (with-status preferred, fallback to basic get) --------
