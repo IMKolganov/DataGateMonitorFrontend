@@ -14,7 +14,7 @@ export default defineConfig({
       template: "treemap", // visualize bundle size
       gzipSize: true,
       brotliSize: true,
-      open: true, // auto-open after build
+      open: false, // auto-open after build
     }),
   ],
 
