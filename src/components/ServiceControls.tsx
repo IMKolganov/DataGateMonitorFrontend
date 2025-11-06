@@ -1,112 +1,110 @@
 // src/components/ServiceControls.tsx
+// comments in English only
 import { FaPlay } from "react-icons/fa";
 import { useEffect, useMemo, useState } from "react";
-
-type ServiceEntry = {
-  status: string;
-  errorMessage: string | null;
-  nextRunTime: string;
-
-  countConnectedClients?: number;
-  countSessions?: number;
-};
+import type { ServiceStatusDto } from "../api/orval/model/serviceStatusDto";
+import type { ServiceStatus } from "../api/orval/model/serviceStatus";
 
 type Props = {
-  serviceData: Record<string, ServiceEntry>;
+  serviceData: Record<number, ServiceStatusDto>;
   onRunNow: () => void;
 };
 
-export default function ServiceControls({ serviceData, onRunNow }: Props) {
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+function toLabel(s?: ServiceStatus): "Idle" | "Running" | "Error" {
+  // orval ServiceStatus expected: 0 | 1 | 2
+  if (s === 1) return "Running";
+  if (s === 2) return "Error";
+  return "Idle";
+}
 
-  const { totalClients, totalSessions } = useMemo(() => {
+function isValidNextRun(x?: string): boolean {
+  if (!x || x === "N/A") return false;
+  const ms = new Date(x).getTime();
+  return Number.isFinite(ms);
+}
+
+export default function ServiceControls({ serviceData, onRunNow }: Props) {
+  const entries = useMemo(() => Object.values(serviceData), [serviceData]);
+
+  const totals = useMemo(() => {
     let clients = 0;
     let sessions = 0;
-
-    for (const s of Object.values(serviceData)) {
-      const cc = Number(s.countConnectedClients);
-      const cs = Number(s.countSessions);
-      if (Number.isFinite(cc)) clients += cc;
-      if (Number.isFinite(cs)) sessions += cs;
+    for (const s of entries) {
+      if (typeof s.countConnectedClients === "number") clients += s.countConnectedClients;
+      if (typeof s.countSessions === "number") sessions += s.countSessions;
     }
+    return { clients, sessions };
+  }, [entries]);
 
-    return { totalClients: clients, totalSessions: sessions };
-  }, [serviceData]);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   useEffect(() => {
-    const calculateTimeLeft = () => {
-      const statuses = Object.values(serviceData).map((s) => s.status);
-      const isRunning = statuses.includes("Running");
-
-      if (isRunning) {
+    const tick = () => {
+      const anyRunning = entries.some((e) => toLabel(e.status) === "Running");
+      if (anyRunning) {
         setTimeLeft(0);
         return;
       }
 
-      const nextRunTimes = Object.values(serviceData)
-        .map((s) => s.nextRunTime)
-        .filter((t) => t !== "N/A");
+      const validTimes = entries
+        .map((e) => e.nextRunTime)
+        .filter(isValidNextRun)
+        .map((t) => new Date(String(t)).getTime());
 
-      if (nextRunTimes.length === 0) {
+      if (validTimes.length === 0) {
         setTimeLeft(null);
         return;
       }
 
-      const soonestTime = Math.min(...nextRunTimes.map((t) => new Date(t).getTime()));
-      const now = Date.now();
-
-      if (isNaN(soonestTime)) {
-        setTimeLeft(null);
-        return;
-      }
-
-      setTimeLeft(Math.max(0, Math.floor((soonestTime - now) / 1000)));
+      const soonest = Math.min(...validTimes);
+      const diffSec = Math.max(0, Math.floor((soonest - Date.now()) / 1000));
+      setTimeLeft(diffSec);
     };
 
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
-    return () => clearInterval(timer);
-  }, [serviceData]);
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [entries]);
 
-  const renderStatusDescription = () => {
-    const statuses = Object.values(serviceData).map((s) => s.status);
-    if (statuses.includes("Running")) return "The service is currently running.";
-    if (statuses.includes("Error")) return "There is an error with the service.";
+  const statusDescription = useMemo(() => {
+    if (entries.some((e) => toLabel(e.status) === "Running")) return "The service is currently running.";
+    if (entries.some((e) => toLabel(e.status) === "Error")) return "There is an error with the service.";
     return "The service is idle.";
-  };
+  }, [entries]);
 
-  const getStatusColor = () => {
-    const statuses = Object.values(serviceData).map((s) => s.status);
-    if (statuses.includes("Running")) return "#1E90FF";
-    if (statuses.includes("Error")) return "red";
+  const statusColor = useMemo(() => {
+    if (entries.some((e) => toLabel(e.status) === "Running")) return "#1E90FF";
+    if (entries.some((e) => toLabel(e.status) === "Error")) return "red";
     return "green";
-  };
+  }, [entries]);
 
   return (
     <div className="service-status-container">
       <h2>Service Control</h2>
-      <div style={{ borderTop: "1px solid #d1d5da" }}></div>
+      <div style={{ borderTop: "1px solid #d1d5da" }} />
 
       <p>
         <strong>Service Status:</strong>{" "}
-        <span style={{ color: getStatusColor() }}>{renderStatusDescription()}</span>
-      </p>
-      <p>
-        <strong>Next Run:</strong> {timeLeft !== null ? `${timeLeft}s` : "N/A"}
+        <span style={{ color: statusColor }}>{statusDescription}</span>
       </p>
 
       <p>
-        <strong>Total Connected Clients:</strong> {totalClients}
+        <strong>Next Run:</strong>{" "}
+        {timeLeft !== null ? `${timeLeft}s` : "N/A"}
+      </p>
+
+      <p>
+        <strong>Total Connected Clients:</strong> {totals.clients}
       </p>
       <p>
-        <strong>Total Sessions:</strong> {totalSessions.toLocaleString()}
+        <strong>Total Sessions:</strong> {totals.sessions.toLocaleString()}
       </p>
 
       <button className="btn primary" onClick={onRunNow}>
-        {FaPlay({ className: "icon" })} Sync All Now
+        <FaPlay className="icon" /> Sync All Now
       </button>
 
-      <p className="description">
+      <p className="description" style={{ marginTop: 12 }}>
         This service periodically queries the OpenVPN server to collect data about connected clients
         and stores this information in the database. Use the button below to manually trigger the service
         and update the data immediately.

@@ -8,5 +8,5 @@ import type { IssuedOvpnFileDto } from "./issuedOvpnFileDto";
 
 export interface OvpnFilesResponse {
   /** @nullable */
-  issuedOvpnFile?: IssuedOvpnFileDto[] | null;
+  issuedOvpnFiles?: IssuedOvpnFileDto[] | null;
 }

@@ -3,7 +3,7 @@ import React, { useState, useCallback } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
-import type { ServerCertificate as Certificate, RevokeCertificateRequest } from "../api/orval/model";
+import type { MonitorServerCertificate as Certificate, RevokeCertificateRequest } from "../api/orval/model";
 import { postApiOpenVpnCertsRevoke } from "../api/orval/open-vpn-server-certs/open-vpn-server-certs";
 import "../css/CertificatesTable.css";
 import { toast } from "react-toastify";

@@ -128,5 +128,5 @@ export const getWebSocketUrlForBackgroundService = async (): Promise<string> => 
     throw new Error("User is not authenticated");
   }
 
-  return `${WS_BASE_URL}/OpenVpnServers/status-stream?access_token=${encodeURIComponent(token)}`;
+  return `${WS_BASE_URL}/api/open-vpn-servers/status-stream?access_token=${encodeURIComponent(token)}`;
 };

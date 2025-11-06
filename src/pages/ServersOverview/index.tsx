@@ -172,11 +172,11 @@ export default function ServersOverview() {
   const safeTotals = useMemo(() => makeSafeTotals(totalsResp), [totalsResp]);
 
   const chartData: ChartPoint[] = useMemo(() => {
-    const hasSeries = Array.isArray(apiData?.series) && apiData.series.length > 0;
+    const hasSeries = Array.isArray(apiData?.overviewSeriesRows) && apiData.overviewSeriesRows.length > 0;
     if (hasSeries) {
       // normalize API meta grouping safely
       const g = normalizeGrouping(apiData?.meta?.grouping);
-      return toChartPoints(apiData!.series!, g);
+      return toChartPoints(apiData!.overviewSeriesRows!, g);
     }
 
     const totalsForFallback = {
@@ -193,7 +193,7 @@ export default function ServersOverview() {
     const fb = buildFallbackOverviewResponse({ from, to, grouping, totals: totalsForFallback });
 
     const fbGrouping = normalizeGrouping(fb?.meta?.grouping);
-    return toChartPoints(fb.series ?? [], fbGrouping);
+    return toChartPoints(fb.overviewSeriesRows ?? [], fbGrouping);
   }, [apiData, from, to, grouping, safeTotals]);
 
   const onFilterChange = (c: DateRangeChange) => {

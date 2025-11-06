@@ -9,5 +9,5 @@ import type { VpnClientInfoDto } from "./vpnClientInfoDto";
 export interface ConnectedClientsResponse {
   totalCount?: number;
   /** @nullable */
-  clients?: VpnClientInfoDto[] | null;
+  vpnClients?: VpnClientInfoDto[] | null;
 }

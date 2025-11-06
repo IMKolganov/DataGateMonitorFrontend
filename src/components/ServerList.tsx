@@ -1,4 +1,5 @@
 // src/components/ServerList.tsx
+// comments in English only
 import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlus } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -15,15 +16,14 @@ import {
   deleteApiOpenVpnServersDeleteVpnServerId,
 } from "../api/orval/open-vpn-servers/open-vpn-servers";
 
-import { type ServiceEntry } from "../types/ServiceEntry";
-
-type ServiceStatus = "Running" | "Idle" | "Error" | "Unknown";
+import { ServiceStatus } from "../api/orval/model";
+import type { ServiceStatusDto } from "../api/orval/model";
 
 type ApiServerItem = {
   openVpnServerResponses?: { openVpnServer?: any; id?: number } | any;
   openVpnServerStatusLogResponse?: { vpnServerId?: number; upSince?: string };
-  status?: ServiceStatus;
-  serviceStatus?: ServiceStatus;
+  status?: ServiceStatus | number | string;
+  serviceStatus?: ServiceStatus | number | string;
   nextRunTime?: string;
   schedulerNextRun?: string;
   errorMessage?: string;
@@ -63,6 +63,40 @@ function unwrapList<T = any>(resp: any): T[] {
   return [];
 }
 
+// Orval-generated numeric enum values
+const { NUMBER_0, NUMBER_1, NUMBER_2 } = (ServiceStatus as unknown) as {
+  NUMBER_0: ServiceStatus;
+  NUMBER_1: ServiceStatus;
+  NUMBER_2: ServiceStatus;
+};
+
+// Domain mapping (adjust if backend uses different meanings):
+// 0 = Idle, 1 = Running, 2 = Error
+const stringToNumberStatus: Record<string, ServiceStatus> = {
+  idle: NUMBER_0,
+  running: NUMBER_1,
+  error: NUMBER_2,
+  // tolerate alternative casings
+  "0": NUMBER_0,
+  "1": NUMBER_1,
+  "2": NUMBER_2,
+};
+
+// Coerce any input into ServiceStatus (0|1|2). Fallback to 0 (Idle).
+const coerceStatus = (input: unknown): ServiceStatus => {
+  if (typeof input === "number") {
+    if (input === NUMBER_0 || input === NUMBER_1 || input === NUMBER_2) return input as ServiceStatus;
+    // unknown number -> default
+    return NUMBER_0;
+  }
+  if (typeof input === "string") {
+    const hit = stringToNumberStatus[input.toLowerCase()];
+    return hit ?? NUMBER_0;
+  }
+  // already typed or undefined -> default
+  return (input as ServiceStatus) ?? NUMBER_0;
+};
+
 const ServerList: React.FC = () => {
   const [servers, setServers] = useState<ServerWithStatus[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -101,7 +135,7 @@ const ServerList: React.FC = () => {
         return {
           ...server,
           vpnServerId: (s as any).vpnServerId ?? server.vpnServerId,
-          serviceStatus: ((s as any).status as ServiceStatus) ?? server.serviceStatus ?? "Idle",
+          serviceStatus: coerceStatus((s as any).status ?? server.serviceStatus),
           errorMessage: (s as any).errorMessage ?? server.errorMessage ?? null,
           nextRunTime: (s as any).nextRunTime ?? server.nextRunTime ?? "N/A",
           wsCountConnectedClients: (s as any).countConnectedClients ?? server.wsCountConnectedClients,
@@ -136,9 +170,8 @@ const ServerList: React.FC = () => {
           };
 
           const status: ServiceStatus =
-            (x?.serviceStatus as ServiceStatus) ??
-            (x?.status as ServiceStatus) ??
-            "Idle";
+            coerceStatus(x?.serviceStatus) ??
+            coerceStatus(x?.status);
 
           const nextRunTime: string =
             (x?.nextRunTime as string) ??
@@ -191,30 +224,39 @@ const ServerList: React.FC = () => {
     }
   };
 
-  const normalizedServiceControlsData: Record<string, ServiceEntry> = Object.entries(serviceData ?? {}).reduce(
-    (acc, [k, v]) => {
-      const val: any = v ?? {};
-      const statusMap: Record<number, ServiceStatus> = { 1: "Running", 0: "Idle", 2: "Error" };
-      const status: string =
-        typeof val.status === "number" ? statusMap[val.status] ?? "Unknown" : (val.status ?? "Unknown");
+  // Build exactly Record<number, ServiceStatusDto> for ServiceControls
+  const normalizedServiceControlsData: Record<number, ServiceStatusDto> =
+    Object.entries(serviceData ?? {}).reduce((acc, [k, v]) => {
+      const id = Number(k);
+      if (!Number.isFinite(id)) return acc;
 
-      const nextRunTime: string = typeof val.nextRunTime === "string" ? val.nextRunTime : "N/A";
-      const errorMessage: string | null = typeof val.errorMessage === "string" ? val.errorMessage : null;
+      const val: any = v ?? {};
+
+      const status: ServiceStatus = coerceStatus(val.status);
+
+      const nextRunTime =
+        typeof val.nextRunTime === "string" && val.nextRunTime.length > 0
+          ? val.nextRunTime
+          : undefined;
+
+      const errorMessage =
+        typeof val.errorMessage === "string" && val.errorMessage.length > 0
+          ? val.errorMessage
+          : undefined;
 
       const cc = Number(val.countConnectedClients);
       const cs = Number(val.countSessions);
 
-      acc[String(k)] = {
+      acc[id] = {
         status,
         nextRunTime,
         errorMessage,
         countConnectedClients: Number.isFinite(cc) ? cc : undefined,
         countSessions: Number.isFinite(cs) ? cs : undefined,
       };
+
       return acc;
-    },
-    {} as Record<string, ServiceEntry>
-  );
+    }, {} as Record<number, ServiceStatusDto>);
 
   return (
     <div>
@@ -254,6 +296,7 @@ const ServerList: React.FC = () => {
                   <ServerItem
                     server={(server.__raw as any) ?? server.openVpnServerResponses}
                     vpnServerId={server.vpnServerId}
+                    // Keep as any if ServerItem expects other shape
                     serviceStatus={server.serviceStatus as any}
                     errorMessage={server.errorMessage}
                     nextRunTime={server.nextRunTime}
