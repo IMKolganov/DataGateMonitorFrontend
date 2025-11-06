@@ -8,5 +8,5 @@ import type { GeoPointAggDto } from "./geoPointAggDto";
 
 export interface OverviewPointsResponse {
   /** @nullable */
-  geoPointAgg?: GeoPointAggDto[] | null;
+  geoPointAggs?: GeoPointAggDto[] | null;
 }

@@ -6,7 +6,7 @@
  */
 import type { CertificateStatus } from "./certificateStatus";
 
-export interface ServerCertificate {
+export interface MonitorServerCertificate {
   vpnServerId?: number;
   /** @nullable */
   commonName?: string | null;

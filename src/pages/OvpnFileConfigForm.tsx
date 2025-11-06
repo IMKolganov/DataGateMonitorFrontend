@@ -48,7 +48,6 @@ const OvpnFileConfigForm: React.FC = () => {
     {
       query: {
         enabled: parsedVpnServerId > 0, // skip for "create new" w/o id
-        // tune as you wish
         staleTime: 0,
         retry: 1,
       },
@@ -57,6 +56,21 @@ const OvpnFileConfigForm: React.FC = () => {
 
   // mutation for save
   const saveMutation = usePostApiOpenVpnConfigsAddUpdate();
+
+  // small helper to extract readable error messages
+  const getErrorMessage = (err: unknown): string => {
+    const anyErr = err as any;
+    const resp = anyErr?.response?.data ?? anyErr?.data ?? anyErr;
+    if (resp) {
+      if (typeof resp === "string") return resp;
+      const msg = resp.message ?? resp.Message;
+      const detail = resp.detail ?? resp.Detail;
+      if (msg && detail) return `${msg} Details: ${detail}`;
+      if (msg) return msg;
+      if (detail) return detail;
+    }
+    return anyErr?.message ?? "Unknown error";
+  };
 
   // when data arrives, map to local PascalCase state
   useEffect(() => {
@@ -70,6 +84,15 @@ const OvpnFileConfigForm: React.FC = () => {
       ConfigTemplate: data.configTemplate ?? "",
     }));
   }, [data, parsedVpnServerId]);
+
+  // toast on load error (once per state change)
+  useEffect(() => {
+    if (isError) {
+      toast.error(`Failed to load VPN server configuration: ${getErrorMessage(error)}`, {
+        toastId: "ovpn-config-load-error",
+      });
+    }
+  }, [isError, error]);
 
   const loading = useMemo(() => isFetching || saveMutation.isPending, [isFetching, saveMutation.isPending]);
 
@@ -117,31 +140,33 @@ const OvpnFileConfigForm: React.FC = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    try {
-      const payload: AddOrUpdateOvpnFileConfigRequest = {
-        vpnServerId: ovpnFileConfig.VpnServerId || parsedVpnServerId,
-        vpnServerIp: ovpnFileConfig.VpnServerIp.trim(),
-        vpnServerPort: ovpnFileConfig.VpnServerPort,
-        configTemplate: ovpnFileConfig.ConfigTemplate,
-      };
+    const payload: AddOrUpdateOvpnFileConfigRequest = {
+      vpnServerId: ovpnFileConfig.VpnServerId || parsedVpnServerId,
+      vpnServerIp: ovpnFileConfig.VpnServerIp.trim(),
+      vpnServerPort: ovpnFileConfig.VpnServerPort,
+      configTemplate: ovpnFileConfig.ConfigTemplate,
+    };
 
-      await saveMutation.mutateAsync({ data: payload });
+    try {
+      await toast.promise(
+        saveMutation.mutateAsync({ data: payload }),
+        {
+          pending: "Saving OpenVPN file config…",
+          success: "OpenVPN file config saved",
+          error: {
+            render({ data }) {
+              return getErrorMessage(data);
+            },
+          },
+        }
+      );
 
       setErrors({ VpnServerIp: "", VpnServerPort: "" });
-      toast.success("OpenVPN file config saved");
       navigate(`/servers/${parsedVpnServerId}/certificates`);
-    } catch (err: any) {
-      // orval/ogmMutator returns unwrapped; apiRequest errors likely set .response?.data
-      let errorMessage = "Failed to save VPN server configuration.";
-      const resp = err?.response?.data ?? err?.data ?? err;
-      if (resp) {
-        const msg = resp.message || resp.Message;
-        const detail = resp.detail || resp.Detail;
-        if (msg) errorMessage = msg;
-        if (detail) errorMessage += ` Details: ${detail}`;
-      }
-      toast.error(errorMessage);
-      setErrors((prev) => ({ ...prev, apiError: errorMessage }));
+    } catch (err) {
+      // toast.promise error already shown; keep state error for inline message if нужно
+      const msg = getErrorMessage(err);
+      setErrors((prev) => ({ ...prev, apiError: msg }));
     }
   };
 
@@ -177,11 +202,7 @@ const OvpnFileConfigForm: React.FC = () => {
             </div>
           </div>
 
-          {isError && (
-            <p className="error-message">
-              {(error as any)?.message ?? "Failed to load VPN server configuration."}
-            </p>
-          )}
+          {/* Load error is shown via toast; keep inline API error (from submit) if you want a static indicator */}
           {errors.apiError && <p className="error-message">{errors.apiError}</p>}
 
           <form className="server-form" onSubmit={handleSubmit}>

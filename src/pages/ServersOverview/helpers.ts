@@ -74,7 +74,7 @@ export function buildFallbackOverviewResponse(opts: {
   const wave = (i: number, amp: number) =>
     Math.max(0, Math.round(amp + amp * 0.35 * Math.sin(i / 1.7) + (i % 3) - 1));
 
-  const series: OverviewSeriesRowDto[] = [];
+  const overviewSeriesRows: OverviewSeriesRowDto[] = [];
 
   if (mode === "hours") {
     const cur = new Date(start); cur.setMinutes(0,0,0); let i=0;
@@ -82,7 +82,7 @@ export function buildFallbackOverviewResponse(opts: {
       const active = wave(i, Math.max(4, totals.clients + 8));
       const mb = Math.round((baseMb / 300) * (1 + 0.15 * Math.cos(i / 2)) + active * 3);
       const total = mb * 1024 * 1024;
-      series.push({
+      overviewSeriesRows.push({
         ts: cur.toISOString(),
         activeClients: active,
         trafficInBytes: Math.floor(total * 0.6),
@@ -97,7 +97,7 @@ export function buildFallbackOverviewResponse(opts: {
       const active = wave(i, Math.max(6, totals.clients + 10));
       const mb = Math.round((baseMb / 90) * (1 + 0.15 * Math.cos(i / 2)) + active * 12);
       const total = mb * 1024 * 1024;
-      series.push({
+      overviewSeriesRows.push({
         ts: cur.toISOString(),
         activeClients: active,
         trafficInBytes: Math.floor(total * 0.6),
@@ -112,7 +112,7 @@ export function buildFallbackOverviewResponse(opts: {
       const active = wave(i, Math.max(8, totals.clients + 14));
       const mb = Math.round((baseMb / 8) * (1 + 0.25 * Math.sin(i / 3)) + active * 40);
       const total = mb * 1024 * 1024;
-      series.push({
+      overviewSeriesRows.push({
         ts: cur.toISOString(),
         activeClients: active,
         trafficInBytes: Math.floor(total * 0.6),
@@ -127,7 +127,7 @@ export function buildFallbackOverviewResponse(opts: {
       const active = wave(i, Math.max(10, totals.clients + 20));
       const mb = Math.round((baseMb / 1.6) * (1 + 0.3 * Math.cos(i / 2)) + active * 300);
       const total = mb * 1024 * 1024;
-      series.push({
+      overviewSeriesRows.push({
         ts: new Date(year, 0, 1).toISOString(),
         activeClients: active,
         trafficInBytes: Math.floor(total * 0.6),
@@ -149,8 +149,8 @@ export function buildFallbackOverviewResponse(opts: {
     summary: {
       totalTrafficInBytes: totals.totalIn,
       totalTrafficOutBytes: totals.totalOut,
-      peakActiveClients: Math.max(0, ...series.map(s => (s.activeClients ?? 0))),
+      peakActiveClients: Math.max(0, ...overviewSeriesRows.map(s => (s.activeClients ?? 0))),
     },
-    series,
+    overviewSeriesRows,
   };
 }

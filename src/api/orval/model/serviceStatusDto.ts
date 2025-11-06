@@ -9,9 +9,11 @@ import type { ServiceStatus } from "./serviceStatus";
 export interface ServiceStatusDto {
   vpnServerId?: number;
   status?: ServiceStatus;
-  countConnectedClients?: number;
-  countSessions?: number;
   /** @nullable */
   errorMessage?: string | null;
   nextRunTime?: string;
+  countConnectedClients?: number;
+  countSessions?: number;
+  totalBytesIn?: number;
+  totalBytesOut?: number;
 }

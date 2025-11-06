@@ -85,7 +85,7 @@ export function GeneralServerDetails() {
     : (historyQuery.data as ConnectedClientsResponse | undefined);
 
   const clients: VpnClientInfoDto[] =
-    (activeClientsResponse?.clients ?? []) as VpnClientInfoDto[];
+    (activeClientsResponse?.vpnClients ?? []) as VpnClientInfoDto[];
   const totalClients = activeClientsResponse?.totalCount ?? 0;
 
   // -------- Server info (with-status preferred, fallback to basic get) --------
