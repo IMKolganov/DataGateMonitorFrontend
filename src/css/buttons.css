@@ -157,4 +157,71 @@ box-shadow: 0 0 4px rgba(3, 102, 214, 0.3);
   color: #959da5;
   cursor: not-allowed;
 }
+
+.header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #0d1117;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.left-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.right-buttons {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .header-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .left-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .right-buttons {
+    justify-content: center;
+  }
+}
+
+.desktop-tabs {
+  display: none !important;
+}
+
+.mobile-tabs {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #161b22;
+  color: #ccc;
+  border: 1px solid #333;
+}
+
+@media (min-width: 1025px) {
+  .desktop-tabs {
+    display: flex !important;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #333;
+  }
+
+  .mobile-tabs {
+    display: none;
+  }
+}
 /* buttons.css */

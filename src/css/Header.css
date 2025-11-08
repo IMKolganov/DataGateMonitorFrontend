@@ -8,6 +8,9 @@
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
   border-bottom: 1px solid #30363d;
   position: relative;
+  font-size: 24px;
+  font-weight: bold;
+  color: #c9d1d9;
 }
 
 .logo {
