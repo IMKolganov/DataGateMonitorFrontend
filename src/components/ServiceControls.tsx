@@ -1,5 +1,4 @@
 // src/components/ServiceControls.tsx
-// comments in English only
 import { FaPlay } from "react-icons/fa";
 import { useEffect, useMemo, useState } from "react";
 import type { ServiceStatusDto } from "../api/orval/model/serviceStatusDto";

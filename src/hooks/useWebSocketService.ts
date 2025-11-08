@@ -1,5 +1,4 @@
 // hooks/useWebSocketService.ts
-// comments in English only
 import { useEffect, useRef, useState } from "react";
 import { postApiOpenVpnServersRunNow } from "../api/orval/open-vpn-servers/open-vpn-servers";
 import { fetchConfig, getWebSocketUrlForBackgroundService } from "../api/apirequest";

@@ -1,5 +1,3 @@
-// src/components/OvpnFilesTable.tsx
-// comments in English only
 import React, { useState, useCallback, useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/TableStyle";
@@ -22,7 +20,7 @@ type OvpnRowInput = { issuedOvpnFile?: IssuedOvpnFileDto } | Record<string, any>
 interface Props {
   ovpnFiles: OvpnRowInput[];
   vpnServerId: string;
-  onRevoke: () => void;
+  onRevoke: () => Promise<void> | void;
   loading: boolean;
 }
 
@@ -80,8 +78,8 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
         } as unknown as RevokeFileRequest;
 
         await revokeMutate({ data });
-        toast.success("OVPN file has been successfully revoked.");
-        onRevoke();
+        // success toast is shown by parent
+        await onRevoke();
       } catch (err: any) {
         const msg = err?.response?.data?.Message || err?.message || "Error revoking OVPN file.";
         toast.error(msg);
@@ -166,11 +164,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
     { field: "externalId", headerName: "External ID", flex: 1, minWidth: 120 },
     { field: "commonName", headerName: "Common Name", flex: 1, minWidth: 160 },
     { field: "fileName", headerName: "File Name", flex: 1, minWidth: 160 },
-    { field: "filePath", headerName: "File Path", flex: 1, minWidth: 180 },
     { field: "issuedAt", headerName: "Issued Date", flex: 0.8, minWidth: 140 },
-    { field: "issuedTo", headerName: "Issued To", flex: 1, minWidth: 140 },
-    { field: "certFilePath", headerName: "Cert File Path", flex: 1, minWidth: 180 },
-    { field: "keyFilePath", headerName: "Key File Path", flex: 1, minWidth: 180 },
     {
       field: "isRevoked",
       headerName: "Status",
@@ -178,9 +172,6 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       minWidth: 120,
       renderCell: (params) => (params.value ? "❌ Revoked" : "✅ Active"),
     },
-    { field: "message", headerName: "Message", flex: 1, minWidth: 160 },
-    { field: "lastUpdate", headerName: "Last Update", flex: 0.8, minWidth: 140 },
-    { field: "createDate", headerName: "Created Date", flex: 0.8, minWidth: 140 },
     {
       field: "actions",
       headerName: "Actions",
