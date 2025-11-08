@@ -3,7 +3,8 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import Cookies from "js-cookie";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import type { ConnectedClient } from "../utils/types";
+import type { VpnClientInfoDto } from "../api/orval/model";
+
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 
@@ -28,7 +29,7 @@ const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }
 };
 
 interface VpnMapProps {
-  clients: ConnectedClient[];
+  clients: VpnClientInfoDto[];
 }
 
 const tileLayers = {
@@ -92,7 +93,7 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients }) => {
         {clients
           .filter((client) => client.latitude && client.longitude)
           .map((client) => (
-            <Marker key={client.id} position={[client.latitude, client.longitude]} icon={defaultIcon}>
+            <Marker key={client.id} position={[client.latitude ?? 0, client.longitude ?? 0]} icon={defaultIcon}>
               <Popup>
                 <strong>{client.commonName}</strong> <br />
                 {client.city}, {client.country} <br />

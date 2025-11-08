@@ -17,12 +17,6 @@
     border: 1px solid #30363d;
   }
   
-  .header {
-    font-size: 24px;
-    font-weight: bold;
-    color: #c9d1d9;
-  }
-  
   .action-buttons {
     flex-wrap: wrap;
     display: flex;

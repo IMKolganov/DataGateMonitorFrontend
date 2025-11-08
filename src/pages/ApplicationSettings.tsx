@@ -1,93 +1,129 @@
-import { useState, useEffect } from "react";
+// src/pages/ApplicationSettings.tsx
+import { useEffect, useState } from "react";
 import { FaPlus, FaSync } from "react-icons/fa";
 import "../css/ApplicationSettings.css";
-import { getAllApplications, registerApplication} from "../utils/api/Applications";
-import { fetchConfig } from "../utils/api";
 import ApplicationTable from "../components/ApplicationTable";
 
-interface Application {
-  clientId: string;
-  name: string;
-  clientSecret: string;
-  isRevoked: boolean;
-  lastUpdate: string;
-  createDate: string;
+import {
+  useGetApiApplicationsGetAll,
+  usePostApiApplicationsRegister,
+} from "../api/orval/applications/applications";
+import type { RegisterApplicationRequest, ApplicationDto } from "../api/orval/model";
+
+// Normalizes different API response shapes into ApplicationDto[]
+function extractApps(raw: unknown): ApplicationDto[] {
+  if (!raw) return [];
+
+  const obj = raw as any;
+  const candidates = [
+    obj?.applications,
+    obj?.application,
+    obj?.data?.applications,
+    obj?.data?.application,
+    Array.isArray(obj) ? obj : null,
+  ];
+
+  for (const c of candidates) {
+    if (Array.isArray(c)) return c as ApplicationDto[];
+  }
+
+  const firstArray = Object.values(obj).find(Array.isArray);
+  if (Array.isArray(firstArray)) return firstArray as ApplicationDto[];
+
+  return [];
 }
 
 export function ApplicationSettings() {
-  const [apps, setApps] = useState<Application[]>([]);
+  const [apps, setApps] = useState<ApplicationDto[]>([]);
   const [newAppName, setNewAppName] = useState("");
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const loadApplications = async () => {
-    setLoading(true);
-    setErrorMessage(null);
-    try {
-      await fetchConfig();
-      const data = await getAllApplications();
-      if (!Array.isArray(data)) {
-        throw new Error("Unexpected response format");
-      }
-      setApps(data);
-    } catch (error: any) {
-      setErrorMessage(error.message || "Failed to load applications");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: appsResp,
+    error: appsError,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useGetApiApplicationsGetAll({
+    query: {
+      staleTime: 0,
+      gcTime: 5 * 60 * 1000,
+    },
+  });
+
+  const registerMutation = usePostApiApplicationsRegister();
 
   useEffect(() => {
-    loadApplications();
-  }, []);
+    if (appsError) {
+      setErrorMessage((appsError as Error).message || "Failed to load applications");
+    } else {
+      setErrorMessage(null);
+    }
+    setApps(extractApps(appsResp));
+  }, [appsResp, appsError, isLoading, isFetching]);
+
+  const loading = isLoading;
+  const spinner = refreshing || isFetching || registerMutation.isPending;
 
   const handleRegister = async () => {
-    if (!newAppName.trim()) return;
-    setLoading(true);
+    const name = newAppName.trim();
+    if (!name) return;
+
     setErrorMessage(null);
     try {
-      const newApp = await registerApplication(newAppName);
-      if (!newApp || !newApp.clientId) {
+      const body: RegisterApplicationRequest = { name };
+      const res = await registerMutation.mutateAsync({ data: body });
+
+      const createdList = extractApps(res);
+      const created =
+        createdList[0] ??
+        (res as any)?.application ??
+        (Array.isArray(res) ? res[0] : res);
+
+      if (!created?.clientId) {
         throw new Error("Invalid response from server");
       }
-      setApps((prevApps) => [
-        ...prevApps,
-        {
-          ...newApp,
-          createDate: new Date().toISOString(),
-          lastUpdate: new Date().toISOString(),
-        },
-      ]);
+
+      setApps((prev) => [...prev, created]);
       setNewAppName("");
-    } catch (error: any) {
-      setErrorMessage(error.message || "Failed to register application");
-    } finally {
-      setLoading(false);
+      await refetch();
+    } catch (e: any) {
+      setErrorMessage(
+        e?.response?.data?.error ||
+          e?.response?.data?.message ||
+          e?.message ||
+          "Failed to register application"
+      );
     }
   };
 
   const handleRefresh = async () => {
     if (refreshing) return;
     setRefreshing(true);
-    await loadApplications();
-    setRefreshing(false);
+    setErrorMessage(null);
+    try {
+      await refetch();
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   return (
     <div>
       <h2>Application Settings</h2>
       <div style={{ borderTop: "1px solid #d1d5da" }}></div>
+
       <p className="app-settings-description">
         Manage applications that require API access. Each registered application receives a unique{" "}
-        <strong>Client ID</strong> and <strong>Client Secret</strong>.
-        These credentials can be used to authenticate API requests.
+        <strong>Client ID</strong> and <strong>Client Secret</strong>. These credentials can be used to
+        authenticate API requests.
       </p>
 
       <div className="header-bar">
         <div className="left-buttons">
-          <button className="btn secondary" onClick={handleRefresh} disabled={refreshing}>
-            {FaSync({ className: `icon ${refreshing ? "icon-spin" : ""}` })} Refresh
+          <button className="btn secondary" onClick={handleRefresh} disabled={spinner}>
+            {FaSync({ className: `icon ${spinner ? "icon-spin" : ""}` })} Refresh
           </button>
         </div>
       </div>
@@ -105,13 +141,13 @@ export function ApplicationSettings() {
               placeholder="Application Name"
               value={newAppName}
               onChange={(e) => setNewAppName(e.target.value)}
-              disabled={loading}
+              disabled={spinner}
               className="input"
             />
             <button
               className="btn primary"
               onClick={handleRegister}
-              disabled={loading || !newAppName.trim()}
+              disabled={spinner || !newAppName.trim()}
             >
               {FaPlus({ className: "icon" })} Register app
             </button>
@@ -123,7 +159,7 @@ export function ApplicationSettings() {
             </div>
           )}
 
-          <ApplicationTable applications={apps} refreshApps={loadApplications} />
+          <ApplicationTable applications={apps} refreshApps={handleRefresh} />
         </>
       )}
 
@@ -136,7 +172,7 @@ export function ApplicationSettings() {
 
       <h3>Example: Authenticate with API</h3>
       <pre className="code-block">
-        {`curl -X POST https://api.example.com/auth/token \\
+{`curl -X POST https://api.example.com/auth/token \\
   -H "Content-Type: application/json" \\
   -d '{
     "clientId": "your-client-id",

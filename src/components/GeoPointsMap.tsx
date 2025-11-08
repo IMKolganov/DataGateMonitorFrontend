@@ -7,8 +7,14 @@ import Cookies from "js-cookie";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { toast } from "react-toastify";
-import { fetchGeoPoints } from "../utils/api/OpenVpnServerClients";
-import type { GeoPointAggDto } from "../utils/types";
+
+import {
+  getApiOpenVpnClientsOverviewPoints,
+} from "../api/orval/open-vpn-server-clients/open-vpn-server-clients";
+import type {
+  GeoPointAggDto,
+  GetApiOpenVpnClientsOverviewPointsParams,
+} from "../api/orval/model";
 
 type GeoPointsMapProps = {
   from: Date | string;
@@ -80,7 +86,6 @@ const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }
   return null;
 };
 
-/** Human-readable bytes (KB/MB/GB, base 1024) */
 function formatBytes(value?: number | null, decimals = 1): string {
   if (!value || value <= 0) return "0 B";
   const units = ["B", "KB", "MB", "GB", "TB", "PB"];
@@ -94,7 +99,6 @@ function formatBytes(value?: number | null, decimals = 1): string {
   return `${n.toFixed(d)} ${units[i]}`;
 }
 
-// Decide marker color by total traffic (in + out)
 function iconForTraffic(totalBytes: number): L.Icon {
   if (!totalBytes || totalBytes <= 0)       return ICONS.grey;
   if (totalBytes <= ONE_MB)                 return ICONS.blue;
@@ -105,6 +109,20 @@ function iconForTraffic(totalBytes: number): L.Icon {
   if (totalBytes <= FIVE_HUNDRED_GB)        return ICONS.yellow;
   if (totalBytes <= ONE_TB)                 return ICONS.black;
   return ICONS.black; // > 1 TB
+}
+
+// Ensure ISO8601 string for API
+function toIso(v: Date | string): string {
+  return v instanceof Date ? v.toISOString() : new Date(v).toISOString();
+}
+
+// Try to pick array of points from different response shapes
+function pickPoints(result: unknown): GeoPointAggDto[] {
+  const r = result as any;
+  // prefer `points`, fallback to `geoPointAgg`
+  if (Array.isArray(r?.points)) return r.points as GeoPointAggDto[];
+  if (Array.isArray(r?.geoPointAgg)) return r.geoPointAgg as GeoPointAggDto[];
+  return [];
 }
 
 export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
@@ -127,11 +145,12 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
     Cookies.set("selectedMapLayer", selectedLayer, { expires: 365 });
   }, [selectedLayer]);
 
+  // Single memo key for effect deps
   const depsKey = useMemo(
     () =>
       JSON.stringify({
-        from,
-        to,
+        from: toIso(from),
+        to: toIso(to),
         vpnServerId,
         externalId,
         onlyWithCoordinates,
@@ -145,26 +164,39 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
     const controller = new AbortController();
     abortRef.current = controller;
 
-    fetchGeoPoints({
-      from,
-      to,
-      vpnServerId: vpnServerId ?? undefined,
-      externalId: externalId ?? undefined,
-      onlyWithCoordinates,
-      // Pass signal if your API supports AbortController
-      // @ts-expect-error library typing may not include `signal`
-      signal: controller.signal,
-    })
-      .then((data) => setPoints(data))
-      .catch((e) => {
-        // Ignore abort errors; show toast for real failures
-        if ((e as any).name !== "AbortError") {
-          const message = String(e);
-          toast.error(`Failed to load geo points: ${message}`, {
-            autoClose: 4500,
-            closeOnClick: true,
-          });
+    const params: GetApiOpenVpnClientsOverviewPointsParams = {
+      // PascalCase param names as per orval model
+      From: toIso(from),
+      To: toIso(to),
+      VpnServerId: vpnServerId ?? undefined,
+      ExternalId: externalId ?? undefined,
+      OnlyWithCoordinates: onlyWithCoordinates,
+    };
+
+    getApiOpenVpnClientsOverviewPoints(params, controller.signal)
+      .then((resp) => {
+        const next = pickPoints(resp);
+        setPoints(next);
+      })
+      .catch((e: any) => {
+        // axios cancellation falls here as "CanceledError" / message "canceled" / code "ERR_CANCELED"
+        const isAbortLike =
+          e?.name === "AbortError" ||
+          e?.name === "CanceledError" ||
+          e?.code === "ERR_CANCELED" ||
+          e?.message === "canceled" ||
+          abortRef.current?.signal.aborted;
+
+        if (isAbortLike) {
+          // swallow expected cancellations
+          return;
         }
+
+        const message = String(e?.message ?? e);
+        toast.error(`Failed to load geo points: ${message}`, {
+          autoClose: 4500,
+          closeOnClick: true,
+        });
       });
 
     return () => controller.abort();
@@ -208,7 +240,6 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
           </select>
         </div>
 
-        {/* No loading/error/count indicators here by design */}
         <div />
       </div>
 
@@ -248,7 +279,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                     <br />
                     📍 {p.latitude}, {p.longitude}
                     <hr />
-                    👥 Sessions: {p.sessionsCount}
+                    👥 Sessions: {p.sessionsCount ?? 0}
                     <br />
                     📥 In: {formatBytes(p.totalBytesIn)}
                     <br />

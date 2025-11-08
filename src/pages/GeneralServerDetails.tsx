@@ -1,88 +1,209 @@
-import { useEffect, useState } from "react";
+// src/pages/GeneralServerDetails.tsx
+import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useParams } from "react-router-dom";
 import "../css/ServerDetails.css";
 import { FaSync } from "react-icons/fa";
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
-import ServerDetailsInfo from "../components/ServerDetailsInfo";
-import { fetchConnectedClients,  fetchHistoryClients} from "../utils/api/OpenVpnServerClients";
-import { fetchServersWithStats } from "../utils/api/OpenVpnServers";
+import ServerDetailsInfoDefault from "../components/ServerDetailsInfo";
+
+import {
+  useGetApiOpenVpnClientsGetAllConnected,
+  useGetApiOpenVpnClientsGetAllHistory,
+} from "../api/orval/open-vpn-server-clients/open-vpn-server-clients";
+import type {
+  GetApiOpenVpnClientsGetAllConnectedParams,
+  GetApiOpenVpnClientsGetAllHistoryParams,
+  ConnectedClientsResponse,
+  VpnClientInfoDto,
+} from "../api/orval/model";
+
+import {
+  useGetApiOpenVpnServersGetServerWithStatusVpnServerId,
+  useGetApiOpenVpnServersGetVpnServerId,
+} from "../api/orval/open-vpn-servers/open-vpn-servers";
+
+// explicit type to avoid IntrinsicAttributes error
+const ServerDetailsInfo = ServerDetailsInfoDefault as ComponentType<{
+  serverInfo: any;
+  toHumanReadableSize: (bytes: number) => string;
+  loading?: boolean;
+}>;
 
 export function GeneralServerDetails() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
-  const [isLive, setIsLive] = useState(true);
-  const [serverInfo, setServerInfo] = useState<any>(null);
-  const [loadingServer, setLoadingServer] = useState(false);
-  const [loadingClients, setLoadingClients] = useState(false);
 
-  const [clients, setClients] = useState<any[]>([]);
-  const [totalClients, setTotalClients] = useState(0);
+  const [isLive, setIsLive] = useState(true);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  useEffect(() => {
-    if (vpnServerId) {
-      fetchServerData();
-    }
-  }, [vpnServerId]);
+  const numericServerId = useMemo(
+    () => (vpnServerId ? Number(vpnServerId) : undefined),
+    [vpnServerId]
+  );
 
-  useEffect(() => {
-    if (vpnServerId) {
-      fetchClientsData();
-    }
-  }, [vpnServerId, isLive, page, pageSize]);
+  // -------- Clients (connected/history) --------
+  const connectedParams: GetApiOpenVpnClientsGetAllConnectedParams = useMemo(
+    () => ({
+      VpnServerId: numericServerId ?? 0,
+      Page: page + 1,
+      PageSize: pageSize,
+    }),
+    [numericServerId, page, pageSize]
+  );
 
-  const fetchServerData = async () => {
-    if (!vpnServerId) return;
-    setLoadingServer(true);
-    fetchClientsData();
+  const historyParams: GetApiOpenVpnClientsGetAllHistoryParams = useMemo(
+    () => ({
+      VpnServerId: numericServerId ?? 0,
+      Page: page + 1,
+      PageSize: pageSize,
+    }),
+    [numericServerId, page, pageSize]
+  );
 
-    try {
-      const serverRes = await fetchServersWithStats(vpnServerId);
-      setServerInfo(serverRes || {});
-    } catch (error) {
-      console.error("Error fetching server details:", error);
-    } finally {
-      setLoadingServer(false);
+  const connectedQuery = useGetApiOpenVpnClientsGetAllConnected(connectedParams, {
+    query: {
+      enabled: Number.isFinite(numericServerId) && isLive,
+      staleTime: 10_000,
+      retry: 1,
+    },
+  });
+
+  const historyQuery = useGetApiOpenVpnClientsGetAllHistory(historyParams, {
+    query: {
+      enabled: Number.isFinite(numericServerId) && !isLive,
+      staleTime: 10_000,
+      retry: 1,
+    },
+  });
+
+  const loadingClients =
+    (isLive ? connectedQuery.isFetching : historyQuery.isFetching) ?? false;
+
+  const activeClientsResponse: ConnectedClientsResponse | undefined = isLive
+    ? (connectedQuery.data as ConnectedClientsResponse | undefined)
+    : (historyQuery.data as ConnectedClientsResponse | undefined);
+
+  const clients: VpnClientInfoDto[] =
+    (activeClientsResponse?.vpnClients ?? []) as VpnClientInfoDto[];
+  const totalClients = activeClientsResponse?.totalCount ?? 0;
+
+  // -------- Server info (with-status preferred, fallback to basic get) --------
+  const serverWithStatusQuery = useGetApiOpenVpnServersGetServerWithStatusVpnServerId(
+    numericServerId ?? 0,
+    {
+      query: {
+        enabled: Number.isFinite(numericServerId),
+        staleTime: 30_000,
+        retry: 1,
+      },
     }
+  );
+
+  const serverBasicQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId ?? 0, {
+    query: {
+      enabled: Number.isFinite(numericServerId) && !serverWithStatusQuery.data,
+      staleTime: 30_000,
+      retry: 1,
+    },
+  });
+
+  const loadingServer = serverWithStatusQuery.isFetching || serverBasicQuery.isFetching;
+
+  // normalize shape for ServerDetailsInfo
+  const serverInfo = useMemo(() => {
+    const ws: any = serverWithStatusQuery.data;
+    if (ws?.openVpnServerWithStatus) {
+      const w = ws.openVpnServerWithStatus;
+
+      const ov =
+        w?.openVpnServerResponses?.openVpnServer ??
+        w?.openVpnServer ??
+        w?.server ??
+        null;
+
+      const flatServer = ov
+        ? {
+            serverName: ov.serverName,
+            isOnline: !!ov.isOnline,
+            isDefault: !!ov.isDefault,
+            apiUrl: ov.apiUrl ?? "",
+          }
+        : null;
+
+      return {
+        openVpnServerResponses: flatServer,
+        openVpnServerStatusLogResponse: w?.openVpnServerStatusLogResponse ?? null,
+        totalBytesIn: w?.totalBytesIn ?? 0,
+        totalBytesOut: w?.totalBytesOut ?? 0,
+        countConnectedClients: w?.countConnectedClients ?? 0,
+        countSessions: w?.countSessions ?? 0,
+      };
+    }
+
+    const b: any = serverBasicQuery.data;
+    if (b?.openVpnServer) {
+      const ov = b.openVpnServer;
+      return {
+        openVpnServerResponses: {
+          serverName: ov.serverName,
+          isOnline: !!ov.isOnline,
+          isDefault: !!ov.isDefault,
+          apiUrl: ov.apiUrl ?? "",
+        },
+        openVpnServerStatusLogResponse: {
+          upSince: null,
+          version: null,
+          serverLocalIp: null,
+          serverRemoteIp: null,
+          bytesIn: 0,
+          bytesOut: 0,
+          sessionId: null,
+        },
+        totalBytesIn: 0,
+        totalBytesOut: 0,
+        countConnectedClients: 0,
+        countSessions: 0,
+      };
+    }
+
+    return null;
+  }, [serverWithStatusQuery.data, serverBasicQuery.data]);
+
+  const handleRefresh = () => {
+    if (isLive) connectedQuery.refetch();
+    else historyQuery.refetch();
+
+    serverWithStatusQuery.refetch();
+    serverBasicQuery.refetch();
   };
 
-  const fetchClientsData = async () => {
-    if (!vpnServerId) return;
-    setLoadingClients(true);
+  useEffect(() => {
+    setPage(0);
+  }, [isLive]);
 
-    try {
-      const clientsRes = isLive
-        ? await fetchConnectedClients(vpnServerId, page + 1, pageSize)
-        : await fetchHistoryClients(vpnServerId, page + 1, pageSize);
-
-      setClients(clientsRes?.clients || []);
-      setTotalClients(clientsRes?.totalCount || 0);
-    } catch (error) {
-      console.error("Error fetching clients:", error);
-      setClients([]);
-      setTotalClients(0);
-    } finally {
-      setLoadingClients(false);
-    }
-  };
-
-  const toHumanReadableSize = (bytes: number): string => {
+  const toHumanReadableSize = (bytes: number = 0): string => {
     const sizes = ["B", "KB", "MB", "GB", "TB"];
     let i = 0;
-    while (bytes >= 1024 && i < sizes.length - 1) {
-      bytes /= 1024;
+    let val = bytes;
+    while (val >= 1024 && i < sizes.length - 1) {
+      val /= 1024;
       i++;
     }
-    return `${bytes.toFixed(2)} ${sizes[i]}`;
+    return `${val.toFixed(2)} ${sizes[i]}`;
   };
 
   return (
     <div style={{ width: "100%", minWidth: 0 }}>
       <div className="header-bar">
         <div className="left-buttons">
-          <button className="btn secondary" onClick={fetchServerData} disabled={loadingServer}>
-            {FaSync({ className: `icon ${loadingServer ? "icon-spin" : ""}` })} Refresh
+          <button
+            className="btn secondary"
+            onClick={handleRefresh}
+            disabled={loadingServer || loadingClients}
+          >
+            <FaSync className={`icon ${loadingServer || loadingClients ? "icon-spin" : ""}`} />{" "}
+            Refresh
           </button>
           <label className="square-toggle">
             <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
@@ -90,26 +211,19 @@ export function GeneralServerDetails() {
             <span className="toggle-text">{isLive ? "Live" : "History"}</span>
           </label>
         </div>
-        <div className="right-buttons">
-          {/* <button
-            className="btn secondary settings-button"
-            onClick={() => navigate(`/servers/${id}/settings`)}
-          >
-            {FaCog({ className: "icon" })} Settings
-          </button> */}
-        </div>
+        <div className="right-buttons">{/* reserved */}</div>
       </div>
 
-      {loadingServer ? (
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading server details...</p>
-        </div>
-      ) : (
-        <ServerDetailsInfo serverInfo={serverInfo} toHumanReadableSize={toHumanReadableSize} />
-      )}
+      <ServerDetailsInfo
+        serverInfo={serverInfo}
+        toHumanReadableSize={toHumanReadableSize}
+        loading={loadingServer}
+      />
 
-      <h3>VPN Clients ({isLive ? "Connected" : "Historical"})</h3>
+      <h3>
+        VPN Clients ({isLive ? "Connected" : "Historical"}){" "}
+        {loadingClients && <span style={{ fontSize: 12, opacity: 0.7 }}>loading…</span>}
+      </h3>
 
       <div style={{ width: "100%", minWidth: 0 }}>
         <ClientsTable

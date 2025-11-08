@@ -1,54 +1,58 @@
-import { useState, useEffect } from "react";
+// src/pages/TelegramBotSettings.tsx
+import { useMemo, useState } from "react";
 import { FaSync } from "react-icons/fa";
 import "../css/Settings.css";
 import "../css/TelegramBotUsers.css";
 import TelegramBotUsersTable from "../components/TelegramBotUsersTable";
-import { getTelegramBotUsers } from "../utils/api/TelegramBotUser";
 
-interface TelegramBotUser {
-  id: number;
-  telegramId: number;
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  createDate: string;
-  lastUpdate: string;
-  isAdmin: boolean;
-  isBlocked: boolean;
+// orval-generated
+import { useGetApiTgbotUsersGetAll } from "../api/orval/telegram-bot-user/telegram-bot-user";
+import type {
+  GetAllTelegramUsersResponse,
+  TelegramBotUserDto,
+} from "../api/orval/model";
+
+// helper for mixed Orval return types (ApiResponse<T> or plain T)
+type ApiEnvelope<T> = { data?: T; success?: boolean; message?: string };
+
+function unwrapMaybeApiResponse<T>(v: T | ApiEnvelope<T> | undefined): T | undefined {
+  if (!v) return undefined;
+  if (typeof v === "object" && v !== null && "data" in (v as any)) {
+    return (v as ApiEnvelope<T>).data as T;
+  }
+  return v as T;
 }
 
 export function TelegramBotSettings() {
-  const [users, setUsers] = useState<TelegramBotUser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const qUsers = useGetApiTgbotUsersGetAll();
 
-  const loadUsers = async () => {
-    setLoading(true);
-    setErrorMessage(null);
+  const [manualRefreshing, setManualRefreshing] = useState(false);
+
+  // Normalize to array of TelegramBotUserDto (handles both T and {data:T})
+  const users: TelegramBotUserDto[] = useMemo(() => {
+    const payload = unwrapMaybeApiResponse<GetAllTelegramUsersResponse>(qUsers.data as any);
+    return (payload?.telegramBotUsers ?? []) as TelegramBotUserDto[];
+  }, [qUsers.data]);
+
+  // Refresh via react-query
+  const handleRefresh = async () => {
+    if (qUsers.isFetching || manualRefreshing) return;
+    setManualRefreshing(true);
     try {
-      const data = await getTelegramBotUsers();
-      if (!data?.telegramBotUsers || !Array.isArray(data.telegramBotUsers)) {
-        throw new Error("Unexpected response format");
-      }
-      setUsers(data.telegramBotUsers);
-    } catch (error: any) {
-      setErrorMessage(error.message || "Failed to load Telegram bot users");
+      await qUsers.refetch();
     } finally {
-      setLoading(false);
+      setManualRefreshing(false);
     }
   };
 
-  const handleRefresh = async () => {
-    if (refreshing) return;
-    setRefreshing(true);
-    await loadUsers();
-    setRefreshing(false);
-  };
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
+  const anyLoading = qUsers.isLoading || qUsers.isFetching;
+  const refreshing = manualRefreshing || qUsers.isFetching;
+  const errorMessage =
+    qUsers.error instanceof Error
+      ? qUsers.error.message
+      : qUsers.error
+      ? "Failed to load Telegram bot users"
+      : null;
 
   return (
     <div>
@@ -61,12 +65,12 @@ export function TelegramBotSettings() {
       <div className="header-bar">
         <div className="left-buttons">
           <button className="btn secondary" onClick={handleRefresh} disabled={refreshing}>
-            {FaSync({ className: `icon ${refreshing ? "icon-spin" : ""}` })} Refresh
+            <FaSync className={`icon ${refreshing ? "icon-spin" : ""}`} /> Refresh
           </button>
         </div>
       </div>
 
-      {loading ? (
+      {anyLoading ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Loading users...</p>
@@ -79,7 +83,8 @@ export function TelegramBotSettings() {
             </div>
           )}
 
-          <TelegramBotUsersTable users={users} refreshUsers={loadUsers} />
+          {/* Make sure TelegramBotUsersTable props are typed as TelegramBotUserDto[] */}
+          <TelegramBotUsersTable users={users} refreshUsers={handleRefresh} />
         </>
       )}
 
@@ -93,30 +98,45 @@ export function TelegramBotSettings() {
 
         <h4>How does it work?</h4>
         <p>
-          The bot interacts with this dashboard via a secured API. Upon startup, it authenticates using a
-          <code>clientId</code> and <code>clientSecret</code>, which must be generated in the <strong>Application Settings</strong> tab.
-          These credentials are sent to the dashboard’s <code>/api/Auth/token</code> endpoint to obtain a JWT token.
-          That token is then used to securely communicate with the backend API.
+          The bot interacts with this dashboard via a secured API. Upon startup, it authenticates using a{" "}
+          <code>clientId</code> and <code>clientSecret</code>, which must be generated in the{" "}
+          <strong>Application Settings</strong> tab. These credentials are sent to the dashboard’s{" "}
+          <code>/api/Auth/token</code> endpoint to obtain a JWT token. That token is then used to securely communicate
+          with the backend API.
         </p>
 
         <p>
           When a Telegram user sends a command like <code>/start</code>, the bot checks if the user is allowed and then
-          fetches their VPN configuration file from the backend. The file is sent directly in the Telegram chat as an attachment.
+          fetches their VPN configuration file from the backend. The file is sent directly in the Telegram chat as an
+          attachment.
         </p>
 
         <h4>How to run the bot</h4>
         <ol>
-          <li>Clone the repository: <code>git clone https://github.com/IMKolganov/DataGateVPNBot</code></li>
+          <li>
+            Clone the repository:{" "}
+            <code>git clone https://github.com/IMKolganov/DataGateVPNBot</code>
+          </li>
           <li>Build and run the bot using Docker (example included below)</li>
           <li>
             Make sure you’ve:
             <ul>
               <li>Registered the application in the dashboard</li>
-              <li>Generated and supplied a Telegram bot token from <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer">BotFather</a></li>
+              <li>
+                Generated and supplied a Telegram bot token from{" "}
+                <a
+                  href="https://t.me/BotFather"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  BotFather
+                </a>
+              </li>
             </ul>
           </li>
           <li>
-            The bot will start listening on the specified port (default <code>8443</code>) and handle user requests automatically.
+            The bot will start listening on the specified port (default{" "}
+            <code>8443</code>) and handle user requests automatically.
           </li>
         </ol>
 

@@ -1,18 +1,27 @@
-import React, { useState, useEffect } from "react";
+// src/pages/OvpnFileConfigForm.tsx
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../css/ServerForm.css";
 import "../css/OvpnFileConfigForm.css";
-import { getOvpnFileConfig, saveOvpnFileConfig } from "../utils/api/OpenVpnServerOvpnFileConfig";
 import { FaPlus, FaCopy, FaArrowLeft } from "react-icons/fa";
 import { toast } from "react-toastify";
+
+import {
+  useGetApiOpenVpnConfigsGetVpnServerId,
+  usePostApiOpenVpnConfigsAddUpdate,
+} from "../api/orval/open-vpn-server-ovpn-file-config/open-vpn-server-ovpn-file-config";
+
+import type {
+  AddOrUpdateOvpnFileConfigRequest,
+  OvpnFileConfigResponse,
+} from "../api/orval/model";
 
 const OvpnFileConfigForm: React.FC = () => {
   const navigate = useNavigate();
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const parsedVpnServerId = Number(vpnServerId) || 0;
 
-  const [loading, setLoading] = useState(true);
-
+  // local UI state (kept in PascalCase to match form field names)
   const [ovpnFileConfig, setServerConfig] = useState({
     Id: 0,
     VpnServerId: parsedVpnServerId,
@@ -28,29 +37,64 @@ const OvpnFileConfigForm: React.FC = () => {
 
   const [copyStatus, setCopyStatus] = useState<"Copy" | "Copied!">("Copy");
 
-  useEffect(() => {
-    if (!parsedVpnServerId) {
-      setLoading(false);
-      return;
-    }
+  // load config via orval hook (auto-unwrapped response)
+  const {
+    data,
+    isFetching,
+    isError,
+    error,
+  } = useGetApiOpenVpnConfigsGetVpnServerId<OvpnFileConfigResponse>(
+    parsedVpnServerId,
+    {
+      query: {
+        enabled: parsedVpnServerId > 0, // skip for "create new" w/o id
+        staleTime: 0,
+        retry: 1,
+      },
+    },
+  );
 
-    getOvpnFileConfig(parsedVpnServerId)
-      .then((data) => {
-        setServerConfig((prev) => ({
-          ...prev,
-          VpnServerId: data.vpnServerId ?? parsedVpnServerId,
-          VpnServerIp: data.vpnServerIp ?? "",
-          VpnServerPort: Number(data.vpnServerPort) || 1194,
-          ConfigTemplate: data.configTemplate ?? "",
-          Id: data.id ?? 0,
-        }));
-      })
-      .catch((error) => {
-        toast.error("Error loading config:", error);
-        setErrors((prev) => ({ ...prev, apiError: "Failed to load VPN server configuration." }));
-      })
-      .finally(() => setLoading(false));
-  }, [parsedVpnServerId]);
+  // mutation for save
+  const saveMutation = usePostApiOpenVpnConfigsAddUpdate();
+
+  // small helper to extract readable error messages
+  const getErrorMessage = (err: unknown): string => {
+    const anyErr = err as any;
+    const resp = anyErr?.response?.data ?? anyErr?.data ?? anyErr;
+    if (resp) {
+      if (typeof resp === "string") return resp;
+      const msg = resp.message ?? resp.Message;
+      const detail = resp.detail ?? resp.Detail;
+      if (msg && detail) return `${msg} Details: ${detail}`;
+      if (msg) return msg;
+      if (detail) return detail;
+    }
+    return anyErr?.message ?? "Unknown error";
+  };
+
+  // when data arrives, map to local PascalCase state
+  useEffect(() => {
+    if (!data) return;
+    setServerConfig((prev) => ({
+      ...prev,
+      Id: data.id ?? 0,
+      VpnServerId: data.vpnServerId ?? parsedVpnServerId,
+      VpnServerIp: data.vpnServerIp ?? "",
+      VpnServerPort: Number(data.vpnServerPort ?? 1194),
+      ConfigTemplate: data.configTemplate ?? "",
+    }));
+  }, [data, parsedVpnServerId]);
+
+  // toast on load error (once per state change)
+  useEffect(() => {
+    if (isError) {
+      toast.error(`Failed to load VPN server configuration: ${getErrorMessage(error)}`, {
+        toastId: "ovpn-config-load-error",
+      });
+    }
+  }, [isError, error]);
+
+  const loading = useMemo(() => isFetching || saveMutation.isPending, [isFetching, saveMutation.isPending]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -86,7 +130,7 @@ const OvpnFileConfigForm: React.FC = () => {
       await navigator.clipboard.writeText(text);
       setCopyStatus("Copied!");
       setTimeout(() => setCopyStatus("Copy"), 2000);
-    } catch (err) {
+    } catch {
       toast.error("Failed to copy text");
       setCopyStatus("Copy");
     }
@@ -96,25 +140,32 @@ const OvpnFileConfigForm: React.FC = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    try {
-      const configToSend = {
-        ...ovpnFileConfig,
-        VpnServerId: ovpnFileConfig.VpnServerId || parsedVpnServerId,
-      };
+    const payload: AddOrUpdateOvpnFileConfigRequest = {
+      vpnServerId: ovpnFileConfig.VpnServerId || parsedVpnServerId,
+      vpnServerIp: ovpnFileConfig.VpnServerIp.trim(),
+      vpnServerPort: ovpnFileConfig.VpnServerPort,
+      configTemplate: ovpnFileConfig.ConfigTemplate,
+    };
 
-      await saveOvpnFileConfig(configToSend);
+    try {
+      await toast.promise(
+        saveMutation.mutateAsync({ data: payload }),
+        {
+          pending: "Saving OpenVPN file config…",
+          success: "OpenVPN file config saved",
+          error: {
+            render({ data }) {
+              return getErrorMessage(data);
+            },
+          },
+        }
+      );
+
       setErrors({ VpnServerIp: "", VpnServerPort: "" });
       navigate(`/servers/${parsedVpnServerId}/certificates`);
-    } catch (error: any) {
-      let errorMessage = "Failed to save VPN server configuration.";
-      if (error.response?.data) {
-        errorMessage = error.response.data.Message || errorMessage;
-        if (error.response.data.Detail) {
-          errorMessage += ` Details: ${error.response.data.Detail}`;
-        }
-      }
-      toast.error("Error saving config:", error);
-      setErrors((prev) => ({ ...prev, apiError: errorMessage }));
+    } catch (err) {
+      const msg = getErrorMessage(err);
+      setErrors((prev) => ({ ...prev, apiError: msg }));
     }
   };
 
@@ -130,6 +181,7 @@ const OvpnFileConfigForm: React.FC = () => {
           <h2 className="server-form-header">
             {vpnServerId ? "Edit OpenVPN File Config" : "Add New Ovpn File Config"}
           </h2>
+
           <div className="header-containe">
             <div className="header-bar">
               <div className="left-buttons">
@@ -148,7 +200,10 @@ const OvpnFileConfigForm: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Load error is shown via toast; keep inline API error (from submit) if you want a static indicator */}
           {errors.apiError && <p className="error-message">{errors.apiError}</p>}
+
           <form className="server-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="VpnServerIp">VPN Server IP *</label>
@@ -182,7 +237,11 @@ const OvpnFileConfigForm: React.FC = () => {
               <div className="config-template-container">
                 <div className="toolbar">
                   <span>Config Template</span>
-                  <button className="copy-button" type="button" onClick={() => handleCopy(ovpnFileConfig.ConfigTemplate)}>
+                  <button
+                    className="copy-button"
+                    type="button"
+                    onClick={() => handleCopy(ovpnFileConfig.ConfigTemplate)}
+                  >
                     {FaCopy({})} {copyStatus}
                   </button>
                 </div>
