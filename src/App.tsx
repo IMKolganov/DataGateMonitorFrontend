@@ -1,101 +1,120 @@
-import type { ReactNode } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
-import { Header } from "./components/Header";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import ServersWithDetails from "./pages/ServersWithDetails";
-import ServerForm from "./pages/ServerForm";
-import NotFound from "./pages/NotFound";
-import ServerDetails from "./pages/ServerDetails";
-import Settings from "./pages/Settings";
-import ApplicationSettings from "./pages/ApplicationSettings";
-import GeneralTab from "./pages/GeneralServerDetails";
-import CertificatesTab from "./pages/Certificates";
-import WebConsole from "./pages/WebConsole";
-import Events from "./pages/Events";
-import Login from "./pages/Login";
+// comments in English only
+import type { ReactNode } from "react";
+import React, { Suspense, lazy } from "react";
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import GeneralSettings from "./pages/GeneralSettings";
-import GeoLiteDbSettings from "./pages/GeoLiteDbSettings";
-import TelegramBotSettings from "./pages/TelegramBotSettings";
-import ServersOverview from "./pages/ServersOverview"; 
+import { Header } from "./components/Header";
+import Footer from "./components/Footer";
+import { LoadingOverlay } from "./components/LoadingOverlay";
 import "react-toastify/dist/ReactToastify.css";
 import "./css/ToastifyDark.css";
-
 import "./App.css";
-import OvpnFileConfigForm from "./pages/OvpnFileConfigForm";
+
+// Lazy pages
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const ServersWithDetails = lazy(() => import("./pages/ServersWithDetails"));
+const ServerForm = lazy(() => import("./pages/ServerForm"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const ServerDetails = lazy(() => import("./pages/ServerDetails"));
+const Settings = lazy(() => import("./pages/Settings"));
+const ApplicationSettings = lazy(() => import("./pages/ApplicationSettings"));
+const GeneralTab = lazy(() => import("./pages/GeneralServerDetails"));
+const CertificatesTab = lazy(() => import("./pages/Certificates"));
+const WebConsole = lazy(() => import("./pages/WebConsole"));
+const Events = lazy(() => import("./pages/Events"));
+const Login = lazy(() => import("./pages/Login"));
+const GeneralSettings = lazy(() => import("./pages/GeneralSettings"));
+const GeoLiteDbSettings = lazy(() => import("./pages/GeoLiteDbSettings"));
+const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
+const ServersOverview = lazy(() => import("./pages/ServersOverview"));
+const OvpnFileConfigForm = lazy(() => import("./pages/OvpnFileConfigForm"));
 
 const isAuthenticated = () => !!localStorage.getItem("token");
 
-const PrivateRoute = ({ children }: { children: ReactNode }): React.ReactElement => {
-  return isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
+const PrivateRoute = ({ children }: { children: ReactNode }): React.ReactElement =>
+  isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
+
+export const withSuspense = (node: React.ReactElement) => (
+  <Suspense fallback={<LoadingOverlay />}>{node}</Suspense>
+);
+
+// Small helper to hide header/footer on login
+const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
+  const isLogin = location.pathname === "/login";
+
+  return (
+    <>
+      {/* Render header/footer everywhere except login */}
+      {!isLogin && <Header />}
+
+      <main className="main-content">{children}</main>
+
+      {!isLogin && <Footer />}
+    </>
+  );
 };
 
 function App() {
   return (
     <div className="app-container dark-theme">
       <Router>
-        <Routes>
-          
-          <Route path="/login" element={
-              <Login />
-            } />
+        <Layout>
+          <Routes>
+            <Route path="/login" element={withSuspense(<Login />)} />
 
-          <Route
-            path="/*"
-            element={
-              <PrivateRoute>
-                <Header />
-                <main className="main-content">
+            <Route
+              path="/*"
+              element={
+                <PrivateRoute>
+                  {/* Route content below loads lazily in small chunks */}
                   <Routes>
                     <Route path="/" element={<Navigate to="/servers" replace />} />
 
-                    <Route path="/servers" element={<ServersWithDetails />}>
-                      {/* Index overview */}
-                      <Route index element={<ServersOverview />} />
+                    <Route path="/servers" element={withSuspense(<ServersWithDetails />)}>
+                      <Route index element={withSuspense(<ServersOverview />)} />
+                      <Route path="statistics/:externalId" element={withSuspense(<ServersOverview />)} />
 
-                      {/* Global statistics by externalId */}
-                      <Route path="statistics/:externalId" element={<ServersOverview />} />
+                      <Route path=":vpnServerId" element={withSuspense(<ServerDetails />)}>
+                        <Route index element={withSuspense(<GeneralTab />)} />
+                        <Route path="certificates" element={withSuspense(<CertificatesTab />)} />
+                        <Route path="ovpn-file-config" element={withSuspense(<OvpnFileConfigForm />)} />
+                        <Route path="console" element={withSuspense(<WebConsole />)} />
 
-                      {/* Per-server details */}
-                      <Route path=":vpnServerId" element={<ServerDetails />}>
-                        <Route index element={<GeneralTab />} />
-                        <Route path="certificates" element={<CertificatesTab />} />
-                        <Route path="ovpn-file-config" element={<OvpnFileConfigForm />} />
-                        <Route path="console" element={<WebConsole />} />
-
-                        {/* Server statistics with optional externalId */}
                         <Route path="statistics">
-                          <Route index element={<ServersOverview />} />
-                          <Route path=":externalId" element={<ServersOverview />} />
+                          <Route index element={withSuspense(<ServersOverview />)} />
+                          <Route path=":externalId" element={withSuspense(<ServersOverview />)} />
                         </Route>
 
-                        <Route path="events" element={<Events />} />
+                        <Route path="events" element={withSuspense(<Events />)} />
                       </Route>
                     </Route>
 
-                    <Route path="/settings" element={<Settings />}>
+                    <Route path="/settings" element={withSuspense(<Settings />)}>
                       <Route index element={<Navigate to="general" replace />} />
-                      <Route path="general" element={<GeneralSettings />} />
-                      <Route path="applications" element={<ApplicationSettings />} />
-                      <Route path="geolitedb" element={<GeoLiteDbSettings />} />
-                      <Route path="telegrambot" element={<TelegramBotSettings />} />
+                      <Route path="general" element={withSuspense(<GeneralSettings />)} />
+                      <Route path="applications" element={withSuspense(<ApplicationSettings />)} />
+                      <Route path="geolitedb" element={withSuspense(<GeoLiteDbSettings />)} />
+                      <Route path="telegrambot" element={withSuspense(<TelegramBotSettings />)} />
                     </Route>
 
-                    <Route path="/settings/applications" element={<ApplicationSettings />} />
-                    <Route path="/servers/add" element={<ServerForm />} />
-                    <Route path="/servers/edit/:serverId" element={<ServerForm />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/contact" element={<Contact />} />
+                    {/* legacy direct paths */}
+                    <Route path="/settings/applications" element={withSuspense(<ApplicationSettings />)} />
+                    <Route path="/servers/add" element={withSuspense(<ServerForm />)} />
+                    <Route path="/servers/edit/:serverId" element={withSuspense(<ServerForm />)} />
+                    <Route path="/about" element={withSuspense(<About />)} />
+                    <Route path="/contact" element={withSuspense(<Contact />)} />
 
-                    <Route path="*" element={<NotFound />} />
+                    <Route path="*" element={withSuspense(<NotFound />)} />
                   </Routes>
-                </main>
-              </PrivateRoute>
-            }
-          />
-        </Routes>
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </Layout>
       </Router>
+
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -108,7 +127,6 @@ function App() {
         pauseOnHover
         theme="dark"
       />
-
     </div>
   );
 }

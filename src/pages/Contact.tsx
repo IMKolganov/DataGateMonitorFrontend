@@ -1,5 +1,4 @@
 import React from "react";
-import { appVersion } from '../version';
 
 const Contact: React.FC = () => {
   return (
@@ -27,9 +26,6 @@ const Contact: React.FC = () => {
           hesitate to reach out — we're here to help!
         </em>
       </p>
-      <div className="footer">
-        <p>© 2024 OpenVPN Gate Monitor v. {appVersion}</p>
-      </div>
     </div>
   );
 };

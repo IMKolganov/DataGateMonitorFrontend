@@ -1,69 +1,86 @@
-import React, { useState } from "react";
+// src/components/TelegramBotUsersTable.tsx
+import React, { useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "./TableStyle";
 import CustomThemeProvider from "./ThemeProvider";
-import {
-  blockUser,
-  unblockUser,
-  setAdmin,
-  unsetAdmin,
-} from "../utils/api/TelegramBotUser";
 import { FaBan, FaUserShield } from "react-icons/fa";
-
-interface TelegramBotUser {
-  id: number;
-  telegramId: number;
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  createDate: string;
-  lastUpdate: string;
-  isAdmin: boolean;
-  isBlocked: boolean;
-}
+import type { TelegramBotUserDto, TelegramUserActionRequest } from "../api/orval/model";
+import {
+  usePostApiTgbotUsersBlock,
+  usePostApiTgbotUsersUnblock,
+  usePostApiTgbotUsersSetAdmin,
+  usePostApiTgbotUsersUnsetAdmin,
+} from "../api/orval/telegram-bot-user/telegram-bot-user";
 
 interface TelegramBotUsersTableProps {
-  users: TelegramBotUser[];
+  users: TelegramBotUserDto[];
   refreshUsers: () => void;
 }
 
 const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({ users, refreshUsers }) => {
   const [loading, setLoading] = useState(false);
 
+  // Mutations
+  const mBlock = usePostApiTgbotUsersBlock();
+  const mUnblock = usePostApiTgbotUsersUnblock();
+  const mSetAdmin = usePostApiTgbotUsersSetAdmin();
+  const mUnsetAdmin = usePostApiTgbotUsersUnsetAdmin();
+
+  // Actions using mutations
+  const blockUser = async (telegramId: number) =>
+    mBlock.mutateAsync({ data: { telegramId } as TelegramUserActionRequest });
+
+  const unblockUser = async (telegramId: number) =>
+    mUnblock.mutateAsync({ data: { telegramId } as TelegramUserActionRequest });
+
+  const setAdmin = async (telegramId: number) =>
+    mSetAdmin.mutateAsync({ data: { telegramId } as TelegramUserActionRequest });
+
+  const unsetAdmin = async (telegramId: number) =>
+    mUnsetAdmin.mutateAsync({ data: { telegramId } as TelegramUserActionRequest });
+
   const handleToggleBlock = async (telegramId: number, isBlocked: boolean) => {
+    if (!telegramId) return;
     setLoading(true);
     try {
       isBlocked ? await unblockUser(telegramId) : await blockUser(telegramId);
-      refreshUsers();
+      await refreshUsers();
     } catch (error) {
-      console.error("Failed to toggle block:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleToggleAdmin = async (telegramId: number, isAdmin: boolean) => {
+    if (!telegramId) return;
     setLoading(true);
     try {
       isAdmin ? await unsetAdmin(telegramId) : await setAdmin(telegramId);
-      refreshUsers();
+      await refreshUsers();
     } catch (error) {
-      console.error("Failed to toggle admin:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const rows = users.map((user) => ({
-    id: user.id,
-    telegramId: user.telegramId,
-    username: user.username ?? "-",
-    fullName: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
-    createDate: new Date(user.createDate).toLocaleString(),
-    lastUpdate: new Date(user.lastUpdate).toLocaleString(),
-    isAdmin: user.isAdmin,
-    isBlocked: user.isBlocked,
-  }));
+  const rows = useMemo(
+    () =>
+      (users ?? []).map((u, idx) => {
+        const id = u.id ?? u.telegramId ?? idx + 1;
+        const telegramId = u.telegramId ?? 0;
+        return {
+          id,
+          telegramId,
+          username: u.username ?? "-",
+          fullName: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || "-",
+          createDate: u.createDate ? new Date(u.createDate).toLocaleString() : "-",
+          lastUpdate: u.lastUpdate ? new Date(u.lastUpdate).toLocaleString() : "-",
+          isAdmin: Boolean(u.isAdmin),
+          isBlocked: Boolean(u.isBlocked),
+        };
+      }),
+    [users]
+  );
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 70 },
@@ -78,26 +95,31 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({ users, re
       field: "Actions",
       headerName: "Actions",
       flex: 1,
-      renderCell: (params) => (
-        <div className="action-container">
-          <button
-            className="btn danger"
-            disabled={loading}
-            onClick={() => handleToggleBlock(params.row.telegramId, params.row.isBlocked)}
-          >
-            <FaBan className="icon" /> {params.row.isBlocked ? "Unblock" : "Block"}
-          </button>
+      renderCell: (params) => {
+        const tid: number = params.row.telegramId || 0;
+        const isBlocked: boolean = !!params.row.isBlocked;
+        const isAdmin: boolean = !!params.row.isAdmin;
 
-          <button
-            className="btn danger"
-            disabled={loading}
-            onClick={() => handleToggleAdmin(params.row.telegramId, params.row.isAdmin)}
-          >
-            <FaUserShield className="icon" /> {params.row.isAdmin ? "Unset Admin" : "Set Admin"}
-          </button>
-        </div>
+        return (
+          <div className="action-container">
+            <button
+              className="btn danger"
+              disabled={loading || !tid}
+              onClick={() => handleToggleBlock(tid, isBlocked)}
+            >
+              <FaBan className="icon" /> {isBlocked ? "Unblock" : "Block"}
+            </button>
 
-      ),
+            <button
+              className="btn danger"
+              disabled={loading || !tid}
+              onClick={() => handleToggleAdmin(tid, isAdmin)}
+            >
+              <FaUserShield className="icon" /> {isAdmin ? "Unset Admin" : "Set Admin"}
+            </button>
+          </div>
+        );
+      },
     },
   ];
 
@@ -116,14 +138,10 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({ users, re
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50, 100]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
-          }}
+          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           disableColumnFilter
           disableColumnMenu
-          localeText={{
-            noRowsLabel: "📭 No users found",
-          }}
+          localeText={{ noRowsLabel: "📭 No users found" }}
         />
       </div>
     </CustomThemeProvider>

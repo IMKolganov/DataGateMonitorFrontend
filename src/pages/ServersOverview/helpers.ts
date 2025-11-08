@@ -2,8 +2,8 @@ import type { Grouping } from "../../components/DateRangeFilter";
 import type { ChartPoint } from "./types";
 import type {
   OverviewSeriesResponse,
-  OverviewSeriesRow,
-} from "../../utils/types";
+  OverviewSeriesRowDto,
+} from "../../api/orval/model";
 
 /* ---- time helpers ---- */
 export function startOfToday() { const n = new Date(); n.setHours(0,0,0,0); return n; }
@@ -20,22 +20,36 @@ export function formatBytes(v: number): string {
 }
 
 export function formatLabel(d: Date, mode: Exclude<Grouping,"auto">): string {
-  if (mode === "hours")  return d.toLocaleTimeString(undefined, { hour: "2-digit", day: "2-digit", month: "short" });
-  if (mode === "days")   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  if (mode === "months") return d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+  if (mode === "hours")
+    return d.toLocaleTimeString(undefined, { hour: "2-digit", day: "2-digit", month: "short" });
+  if (mode === "days")
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (mode === "months")
+    return d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
   return String(d.getFullYear());
 }
 
 /* ---- build chart from API ---- */
 export function toChartPoints(
-  rows: OverviewSeriesRow[],
-  mode: Exclude<Grouping,"auto">
+  rows: OverviewSeriesRowDto[],
+  mode: Exclude<Grouping, "auto">
 ): ChartPoint[] {
-  return rows.map(r => ({
-    label: formatLabel(new Date(r.ts), mode),
-    active: r.activeClients,
-    mb: Math.round(r.trafficTotalBytes / (1024 * 1024)),
-  }));
+  return rows
+    // type guard: keep only rows with a valid ts
+    .filter((r): r is OverviewSeriesRowDto & { ts: string } => typeof r.ts === "string" && r.ts.length > 0)
+    .map((r) => {
+      // fallback if server didn't precompute total
+      const totalBytes =
+        r.trafficTotalBytes ?? ((r.trafficInBytes ?? 0) + (r.trafficOutBytes ?? 0));
+
+      const date = new Date(r.ts); // ts is guaranteed here
+
+      return {
+        label: formatLabel(date, mode),
+        active: r.activeClients ?? 0,
+        mb: Math.round(totalBytes / (1024 * 1024)),
+      };
+    });
 }
 
 export function buildFallbackOverviewResponse(opts: {
@@ -50,17 +64,17 @@ export function buildFallbackOverviewResponse(opts: {
 
   const mode: Exclude<Grouping,"auto"> =
     grouping === "auto"
-      ? span <= 2 * dayMs ? "hours"
-      : span <= 180 * dayMs ? "days"
-      : span <= 36 * 30 * dayMs ? "months"
-      : "years"
+      ? (span <= 2 * dayMs ? "hours"
+         : span <= 180 * dayMs ? "days"
+         : span <= 36 * 30 * dayMs ? "months"
+         : "years")
       : grouping;
 
   const baseMb = (totals.totalIn + totals.totalOut) / (1024 * 1024);
   const wave = (i: number, amp: number) =>
     Math.max(0, Math.round(amp + amp * 0.35 * Math.sin(i / 1.7) + (i % 3) - 1));
 
-  const series: OverviewSeriesResponse["series"] = [];
+  const overviewSeriesRows: OverviewSeriesRowDto[] = [];
 
   if (mode === "hours") {
     const cur = new Date(start); cur.setMinutes(0,0,0); let i=0;
@@ -68,7 +82,7 @@ export function buildFallbackOverviewResponse(opts: {
       const active = wave(i, Math.max(4, totals.clients + 8));
       const mb = Math.round((baseMb / 300) * (1 + 0.15 * Math.cos(i / 2)) + active * 3);
       const total = mb * 1024 * 1024;
-      series.push({
+      overviewSeriesRows.push({
         ts: cur.toISOString(),
         activeClients: active,
         trafficInBytes: Math.floor(total * 0.6),
@@ -83,7 +97,7 @@ export function buildFallbackOverviewResponse(opts: {
       const active = wave(i, Math.max(6, totals.clients + 10));
       const mb = Math.round((baseMb / 90) * (1 + 0.15 * Math.cos(i / 2)) + active * 12);
       const total = mb * 1024 * 1024;
-      series.push({
+      overviewSeriesRows.push({
         ts: cur.toISOString(),
         activeClients: active,
         trafficInBytes: Math.floor(total * 0.6),
@@ -98,7 +112,7 @@ export function buildFallbackOverviewResponse(opts: {
       const active = wave(i, Math.max(8, totals.clients + 14));
       const mb = Math.round((baseMb / 8) * (1 + 0.25 * Math.sin(i / 3)) + active * 40);
       const total = mb * 1024 * 1024;
-      series.push({
+      overviewSeriesRows.push({
         ts: cur.toISOString(),
         activeClients: active,
         trafficInBytes: Math.floor(total * 0.6),
@@ -113,7 +127,7 @@ export function buildFallbackOverviewResponse(opts: {
       const active = wave(i, Math.max(10, totals.clients + 20));
       const mb = Math.round((baseMb / 1.6) * (1 + 0.3 * Math.cos(i / 2)) + active * 300);
       const total = mb * 1024 * 1024;
-      series.push({
+      overviewSeriesRows.push({
         ts: new Date(year, 0, 1).toISOString(),
         activeClients: active,
         trafficInBytes: Math.floor(total * 0.6),
@@ -135,8 +149,8 @@ export function buildFallbackOverviewResponse(opts: {
     summary: {
       totalTrafficInBytes: totals.totalIn,
       totalTrafficOutBytes: totals.totalOut,
-      peakActiveClients: Math.max(0, ...series.map(s => s.activeClients)),
+      peakActiveClients: Math.max(0, ...overviewSeriesRows.map(s => (s.activeClients ?? 0))),
     },
-    series,
+    overviewSeriesRows,
   };
 }

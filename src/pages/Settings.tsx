@@ -1,7 +1,6 @@
 import { useNavigate, NavLink, Outlet, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import "../css/Settings.css";
-import { appVersion } from "../version";
 
 export function Settings() {
   const navigate = useNavigate();
@@ -64,10 +63,6 @@ export function Settings() {
 
       <div className="tab-content">
         <Outlet />
-      </div>
-
-      <div className="footer">
-        <p>© 2024 OpenVPN Gate Monitor v. {appVersion}</p>
       </div>
     </div>
   );
