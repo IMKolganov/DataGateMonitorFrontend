@@ -65,7 +65,6 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
 
       setMessage({ type: "error", text });
       toast.error(errMsg);
-      console.error("Failed to add OVPN file", error);
     }
   }, [addMutate, vpnServerId, newExternalId, newCommonName, onSuccess, validate]);
 

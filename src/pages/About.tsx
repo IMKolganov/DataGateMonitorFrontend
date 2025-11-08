@@ -71,9 +71,7 @@ const About: React.FC = () => {
         </em>
       </p>
 
-      <div className="footer">
-        <p>© 2024 OpenVPN Gate Monitor v. {appVersion}</p>
-      </div>
+
     </div>
   );
 };

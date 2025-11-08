@@ -65,10 +65,6 @@ export function Settings() {
       <div className="tab-content">
         <Outlet />
       </div>
-
-      <div className="footer">
-        <p>© 2024 OpenVPN Gate Monitor v. {appVersion}</p>
-      </div>
     </div>
   );
 }

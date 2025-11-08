@@ -90,7 +90,6 @@ export const fetchConfig = async (): Promise<Config> => {
         apiBaseUrl: API_BASE_URL ?? undefined,
       };
     } catch (error) {
-      console.error("Failed to load config:", error);
       throw error;
     }
   })();
