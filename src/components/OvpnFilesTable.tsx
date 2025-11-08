@@ -2,7 +2,13 @@ import React, { useState, useCallback, useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
-import type { IssuedOvpnFileDto, RevokeFileRequest, DownloadFileRequest } from "../api/orval/model";
+import type {
+  IssuedOvpnFileDto,
+  RevokeFileRequest,
+  DownloadFileRequest,
+  DownloadFileResponse,
+  DownloadFileResponseApiResponse,
+} from "../api/orval/model";
 import { usePostApiOpenVpnFilesRevokeFile, usePostApiOpenVpnFilesDownloadFile } from "../api/orval/open-vpn-files/open-vpn-files";
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -91,21 +97,32 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
   const handleDownload = useCallback(
     async (issuedOvpnFileId: number) => {
       try {
-        const data: DownloadFileRequest = {
+        const payload: DownloadFileRequest = {
           vpnServerId: Number(vpnServerId),
           issuedOvpnFileId,
-        } as unknown as DownloadFileRequest;
+        };
 
-        const resp: any = await downloadMutate({ data });
+        // May be wrapped (DownloadFileResponseApiResponse) or unwrapped (DownloadFileResponse)
+        const apiResult = (await downloadMutate({ data: payload })) as
+          | DownloadFileResponseApiResponse
+          | DownloadFileResponse;
 
-        const fileName: string =
-          resp?.fileName || resp?.data?.fileName || `client_${issuedOvpnFileId}.ovpn`;
-        const b64: string = resp?.contentBase64 || resp?.data?.contentBase64;
+        const resp: DownloadFileResponse | undefined =
+          (apiResult as DownloadFileResponseApiResponse)?.data ??
+          (apiResult as DownloadFileResponse);
 
+        const b64 = resp?.content ?? null; // base64 profile content per schema
         if (!b64) throw new Error("No file content received.");
 
-        const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        const raw = atob(b64);
+        const bytes = new Uint8Array([...raw].map((c) => c.charCodeAt(0)));
+
+        if (resp?.fileSizeBytes && resp.fileSizeBytes !== bytes.length) {
+          console.warn(`Declared size ${resp.fileSizeBytes} != actual ${bytes.length}`);
+        }
+
         const blob = new Blob([bytes], { type: "application/x-openvpn-profile" });
+        const fileName = resp?.issuedOvpn?.fileName ?? `client_${issuedOvpnFileId}.ovpn`;
 
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -118,7 +135,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
 
         toast.success("File downloaded.");
       } catch (err: any) {
-        const msg = err?.response?.data?.Message || err?.message || "Error downloading file.";
+        const msg = err?.response?.data?.message || err?.message || "Error downloading file.";
         toast.error(msg);
       }
     },
