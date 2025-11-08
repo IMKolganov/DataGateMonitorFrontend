@@ -178,10 +178,6 @@ const Login: React.FC = () => {
             New to OpenVPN Gate Monitor? <a href="/register">Create an account</a>
           </p>
         </div>
-
-        <div className="footer">
-          <p>© 2024 OpenVPN Gate Monitor v. {appVersion}</p>
-        </div>
       </div>
     </div>
   );

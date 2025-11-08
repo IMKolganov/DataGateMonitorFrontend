@@ -46,7 +46,6 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({ users, re
       isBlocked ? await unblockUser(telegramId) : await blockUser(telegramId);
       await refreshUsers();
     } catch (error) {
-      console.error("Failed to toggle block:", error);
     } finally {
       setLoading(false);
     }
@@ -59,7 +58,6 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({ users, re
       isAdmin ? await unsetAdmin(telegramId) : await setAdmin(telegramId);
       await refreshUsers();
     } catch (error) {
-      console.error("Failed to toggle admin:", error);
     } finally {
       setLoading(false);
     }

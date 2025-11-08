@@ -173,12 +173,9 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
       OnlyWithCoordinates: onlyWithCoordinates,
     };
 
-    console.debug("[GeoPointsMap] request params:", params);
-
     getApiOpenVpnClientsOverviewPoints(params, controller.signal)
       .then((resp) => {
         const next = pickPoints(resp);
-        console.debug("[GeoPointsMap] received points:", next.length);
         setPoints(next);
       })
       .catch((e: any) => {
@@ -192,12 +189,10 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
 
         if (isAbortLike) {
           // swallow expected cancellations
-          console.debug("[GeoPointsMap] request canceled");
           return;
         }
 
         const message = String(e?.message ?? e);
-        console.debug("[GeoPointsMap] error:", message);
         toast.error(`Failed to load geo points: ${message}`, {
           autoClose: 4500,
           closeOnClick: true,

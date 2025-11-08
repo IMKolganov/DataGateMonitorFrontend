@@ -83,7 +83,6 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       } catch (err: any) {
         const msg = err?.response?.data?.Message || err?.message || "Error revoking OVPN file.";
         toast.error(msg);
-        console.error("Failed to revoke OVPN file", err);
       }
     },
     [vpnServerId, revokeMutate, onRevoke]
@@ -121,7 +120,6 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       } catch (err: any) {
         const msg = err?.response?.data?.Message || err?.message || "Error downloading file.";
         toast.error(msg);
-        console.error("Download failed:", err);
       }
     },
     [downloadMutate, vpnServerId]

@@ -4,6 +4,7 @@ import ServerList from "../components/ServerList";
 import { useMediaQuery } from "react-responsive";
 import "../css/ServersWithDetails.css";
 import { appVersion } from "../version";
+import { Suspense } from "react";
 
 function ServersWithDetails() {
   const [collapsed, setCollapsed] = useState(false);
@@ -35,12 +36,11 @@ function ServersWithDetails() {
 
         {!isMobile && (
           <div className="server-details-panel">
-            <Outlet />
+            <Suspense fallback={<div className="center">Loading…</div>}>
+              <Outlet />
+            </Suspense>
           </div>
         )}
-      </div>
-      <div className="footer">
-        <p>© 2024 OpenVPN Gate Monitor v. {appVersion}</p>
       </div>
     </div>
   );

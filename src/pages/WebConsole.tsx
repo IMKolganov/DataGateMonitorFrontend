@@ -31,7 +31,6 @@ export function WebConsole() {
     if (!vpnServerId) return;
 
     if (connectionRef.current && connectionRef.current.state !== "Disconnected") {
-      console.info("SignalR already connected or connecting, skipping setup");
       return;
     }
 
@@ -74,20 +73,16 @@ export function WebConsole() {
         });
 
         connection.onreconnecting(error => {
-          console.warn("Reconnecting:", error);
           setMessages(prev => [...prev, "⚠️ Reconnecting to OpenVPN..."]);
         });
 
         connection.onclose(error => {
-          console.error("Connection closed:", error);
           setMessages(prev => [...prev, "❌ Connection closed."]);
         });
 
         await connection.start();
-        console.info("SignalR connected, state:", connection.state);
         setMessages(prev => [...prev, "✅ Connected to OpenVPN"]);
       } catch (err: any) {
-        console.error("SignalR connection error:", err);
         setMessages(prev => [...prev, `❌ Failed to connect to OpenVPN: ${err.message}`]);
       }
     };
@@ -122,10 +117,8 @@ export function WebConsole() {
     }
 
     try {
-      console.log("Command sent:", command);
       await connection.send("SendCommand", command);
     } catch (error: any) {
-      console.error("Failed to send command:", error);
       setMessages(prev => [...prev, `❌ Failed to send command: ${error.message}`]);
     }
 

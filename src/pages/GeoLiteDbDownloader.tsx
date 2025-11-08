@@ -125,7 +125,6 @@ export function GeoLiteDbDownloader() {
         });
       } catch (err) {
         if (!isMounted) return;
-        console.error("SignalR connection error:", err);
       }
     };
 
