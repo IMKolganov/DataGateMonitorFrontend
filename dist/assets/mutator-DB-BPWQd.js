@@ -1,0 +1,1 @@
+import{R as e}from"./index-CA7E66-Y.js";const o=async a=>{const s=a.method.toLowerCase(),t=await e(s,a.url,{data:a.data,headers:a.headers,params:a.params,signal:a.signal});return t?.data??t};export{o};
