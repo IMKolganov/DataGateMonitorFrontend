@@ -164,7 +164,6 @@ const OvpnFileConfigForm: React.FC = () => {
       setErrors({ VpnServerIp: "", VpnServerPort: "" });
       navigate(`/servers/${parsedVpnServerId}/certificates`);
     } catch (err) {
-      // toast.promise error already shown; keep state error for inline message if нужно
       const msg = getErrorMessage(err);
       setErrors((prev) => ({ ...prev, apiError: msg }));
     }

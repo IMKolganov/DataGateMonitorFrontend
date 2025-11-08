@@ -1,5 +1,4 @@
 // src/components/ServerList.tsx
-// comments in English only
 import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlus } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";

@@ -3,7 +3,10 @@ import React, { useState, useCallback } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/TableStyle";
 import CustomThemeProvider from "../components/ThemeProvider";
-import type { MonitorServerCertificate as Certificate, RevokeCertificateRequest } from "../api/orval/model";
+import type {
+  MonitorServerCertificate as Certificate,
+  RevokeCertificateRequest,
+} from "../api/orval/model";
 import { postApiOpenVpnCertsRevoke } from "../api/orval/open-vpn-server-certs/open-vpn-server-certs";
 import "../css/CertificatesTable.css";
 import { toast } from "react-toastify";
@@ -12,7 +15,7 @@ import { formatDateWithOffset } from "../utils/utils";
 type CertificatesTableProps = {
   certificates: Certificate[];
   vpnServerId: string | number;
-  onRevoke: () => void;
+  onRevoke: () => Promise<void> | void;
   loading?: boolean;
 };
 
@@ -47,18 +50,25 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [serialNumberQuery, setSerialNumberQuery] = useState("");
+  const [revokingCN, setRevokingCN] = useState<string | null>(null);
 
   const handleRevoke = useCallback(
     async (commonName: string) => {
       if (!window.confirm(`Are you sure you want to revoke certificate for ${commonName}?`)) return;
 
       try {
+        setRevokingCN(commonName);
         await revokeCertificate(vpnServerId, commonName);
-        toast.success("Certificate revoked.");
-        onRevoke();
-      } catch (error) {
-        toast.error("Failed to revoke certificate.");
-        // console.error(error);
+        // success toast is handled by parent
+        await onRevoke();
+      } catch (error: any) {
+        const msg =
+          error?.response?.data?.Message ||
+          error?.message ||
+          "Failed to revoke certificate.";
+        toast.error(msg);
+      } finally {
+        setRevokingCN(null);
       }
     },
     [vpnServerId, onRevoke],
@@ -105,10 +115,17 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
           return <span className="no-actions">No actions</span>;
         }
 
+        const cn = params.row.commonName as string;
+
         return (
           <div className="action-container">
-            <button className="btn danger" onClick={() => handleRevoke(params.row.commonName)}>
-              Revoke
+            <button
+              className="btn danger"
+              onClick={() => handleRevoke(cn)}
+              disabled={loading || revokingCN === cn}
+              title={revokingCN === cn ? "Revoking..." : "Revoke"}
+            >
+              {revokingCN === cn ? "Revoking..." : "Revoke"}
             </button>
           </div>
         );

@@ -1,4 +1,3 @@
-// comments in English only
 import type { ReactNode } from "react";
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";

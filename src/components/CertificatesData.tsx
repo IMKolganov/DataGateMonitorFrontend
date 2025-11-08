@@ -1,5 +1,4 @@
-// src/pages/CertificatesData.tsx
-// comments in English only
+// src/components/CertificatesData.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import CertificatesTable from "../components/CertificatesTable";
 import OvpnFilesTable from "../components/OvpnFilesTable";
@@ -61,25 +60,21 @@ function pickArray(payload: any): any[] {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
 
-  // if payload.data exists but is NOT an array, dive into it
   if (payload?.data && !Array.isArray(payload.data)) {
     const nested = pickArray(payload.data);
     if (nested.length) return nested;
   }
 
-  // common top-level array holders
   if (Array.isArray(payload.data)) return payload.data;
   if (Array.isArray(payload.items)) return payload.items;
   if (Array.isArray(payload.ovpnFiles)) return payload.ovpnFiles;
   if (Array.isArray(payload.issuedOvpnFile)) return payload.issuedOvpnFile;
   if (Array.isArray(payload.issuedOvpnFiles)) return payload.issuedOvpnFiles;
 
-  // certificates shapes
   if (Array.isArray(payload.serverCertificates)) return payload.serverCertificates;
   if (Array.isArray(payload.certificates)) return payload.certificates;
   if (Array.isArray(payload.monitorServerCertificates)) return payload.monitorServerCertificates;
 
-  // last resort: single array prop
   if (typeof payload === "object") {
     for (const k of Object.keys(payload)) {
       const v = (payload as any)[k];
@@ -142,7 +137,7 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
     }
   }, [certsQuery.isError, certsQuery.error]);
 
-  // Local helpers to refetch with toast
+  // Helpers
   const refetchFiles = async () =>
     toast.promise(filesQuery.refetch(), {
       pending: "Refreshing OVPN files…",
@@ -155,6 +150,16 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
       },
     });
 
+  const silentRefetchFiles = async () => {
+    try {
+      await filesQuery.refetch();
+    } catch (e) {
+      toast.error(`Failed to refresh OVPN files: ${getErrorMessage(e)}`, {
+        toastId: "files-refetch-error",
+      });
+    }
+  };
+
   const refetchCerts = async () =>
     toast.promise(certsQuery.refetch(), {
       pending: "Refreshing certificates…",
@@ -166,6 +171,17 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
         },
       },
     });
+
+  // Silent refetch for certificates to avoid duplicate toasts after revoke
+  const silentRefetchCerts = async () => {
+    try {
+      await certsQuery.refetch();
+    } catch (e) {
+      toast.error(`Failed to refresh certificates: ${getErrorMessage(e)}`, {
+        toastId: "certs-refetch-error",
+      });
+    }
+  };
 
   return (
     <>
@@ -188,8 +204,8 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
         vpnServerId={vpnServerId}
         loading={filesQuery.isFetching}
         onRevoke={async () => {
-          toast.success("OVPN file revoked");
-          await refetchFiles();
+          toast.success("OVPN file revoked", { toastId: "ovpn-revoked" });
+          await silentRefetchFiles();
         }}
       />
 
@@ -234,8 +250,9 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
         vpnServerId={vpnServerId}
         loading={certsQuery.isFetching}
         onRevoke={async () => {
-          toast.success("Certificate revoked");
-          await refetchCerts();
+          // single success toast on revoke + silent refetch (no duplicate toasts)
+          toast.success("Certificate revoked", { toastId: "cert-revoked" });
+          await silentRefetchCerts();
         }}
       />
     </>
