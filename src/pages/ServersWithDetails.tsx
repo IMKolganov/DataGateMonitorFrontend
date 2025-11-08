@@ -3,7 +3,6 @@ import { Outlet, useLocation } from "react-router-dom";
 import ServerList from "../components/ServerList";
 import { useMediaQuery } from "react-responsive";
 import "../css/ServersWithDetails.css";
-import { appVersion } from "../version";
 import { Suspense } from "react";
 
 function ServersWithDetails() {

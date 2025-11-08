@@ -12,7 +12,6 @@ import type {
 } from "../api/orval/model";
 import { FaDoorOpen } from "react-icons/fa";
 import "../css/Login.css";
-import { appVersion } from "../version";
 import { scheduleAutoLogout } from "../utils/jwt-utils";
 
 const Login: React.FC = () => {

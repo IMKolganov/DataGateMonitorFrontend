@@ -1,5 +1,4 @@
 import React from "react";
-import { appVersion } from '../version';
 
 const Contact: React.FC = () => {
   return (

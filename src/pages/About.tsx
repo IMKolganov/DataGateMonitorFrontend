@@ -1,5 +1,4 @@
 import React from "react";
-import { appVersion } from '../version';
 
 const About: React.FC = () => {
   return (
