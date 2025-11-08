@@ -119,9 +119,22 @@ function toIso(v: Date | string): string {
 // Try to pick array of points from different response shapes
 function pickPoints(result: unknown): GeoPointAggDto[] {
   const r = result as any;
-  // prefer `points`, fallback to `geoPointAgg`
+
+  // direct array
+  if (Array.isArray(r)) return r as GeoPointAggDto[];
+
+  // common wrappers
+  if (Array.isArray(r?.data)) return r.data as GeoPointAggDto[];
+  if (Array.isArray(r?.items)) return r.items as GeoPointAggDto[];
+  if (Array.isArray(r?.result)) return r.result as GeoPointAggDto[];
+
+  // your actual shape from logs
+  if (Array.isArray(r?.geoPointAggs)) return r.geoPointAggs as GeoPointAggDto[];
+
+  // legacy/fallback keys
   if (Array.isArray(r?.points)) return r.points as GeoPointAggDto[];
   if (Array.isArray(r?.geoPointAgg)) return r.geoPointAgg as GeoPointAggDto[];
+
   return [];
 }
 
