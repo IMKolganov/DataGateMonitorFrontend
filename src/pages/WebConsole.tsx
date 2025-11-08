@@ -1,3 +1,4 @@
+// src/pages/WebConsole.tsx
 import { useEffect, useState, useRef } from "react";
 import "../css/Console.css";
 import { FaArrowRight, FaTrash, FaInfoCircle } from "react-icons/fa";
@@ -6,7 +7,8 @@ import {
   HubConnectionBuilder,
   HubConnection,
   HttpTransportType,
-  LogLevel
+  LogLevel,
+  HubConnectionState, // use enum for connection state checks
 } from "@microsoft/signalr";
 import { saveHistoryToDB, loadHistoryFromDB, clearHistoryDB } from "../utils/consoleStorage";
 import { getSignalRUrl, getAccessTokenOrLogout } from "../utils/signalr-url";
@@ -20,7 +22,6 @@ export function WebConsole() {
 
   useEffect(() => {
     if (!vpnServerId) return;
-
     (async () => {
       const history = await loadHistoryFromDB(vpnServerId);
       setMessages(history);
@@ -30,7 +31,8 @@ export function WebConsole() {
   useEffect(() => {
     if (!vpnServerId) return;
 
-    if (connectionRef.current && connectionRef.current.state !== "Disconnected") {
+    // Avoid rebuilding an active connection
+    if (connectionRef.current && connectionRef.current.state !== HubConnectionState.Disconnected) {
       return;
     }
 
@@ -38,20 +40,22 @@ export function WebConsole() {
       try {
         const url = getSignalRUrl(vpnServerId);
         const connection = new HubConnectionBuilder()
-            .withUrl(url, {
-              transport: HttpTransportType.WebSockets,
-              accessTokenFactory: () => getAccessTokenOrLogout(),
-            })
-            .configureLogging(LogLevel.Information)
-            .withAutomaticReconnect()
-            .build();
+          .withUrl(url, {
+            transport: HttpTransportType.WebSockets,
+            accessTokenFactory: () => getAccessTokenOrLogout(),
+          })
+          .configureLogging(LogLevel.Information)
+          .withAutomaticReconnect()
+          .build();
+
         connectionRef.current = connection;
 
+        // Ensure no duplicate handlers
         connection.off("ReceiveCommandResult");
         connection.off("ReceiveMessage");
 
         connection.on("ReceiveCommandResult", (data: string) => {
-          setMessages(prev => {
+          setMessages((prev) => {
             const updated = [...prev, data];
             saveHistoryToDB(vpnServerId, updated);
             return updated;
@@ -59,31 +63,32 @@ export function WebConsole() {
         });
 
         connection.on("ReceiveMessage", (msg: string) => {
-          setMessages(prev => {
+          setMessages((prev) => {
             const updated = [...prev, msg];
             saveHistoryToDB(vpnServerId, updated);
             return updated;
           });
         });
 
+        // Reconnect lifecycle (no unused params to satisfy TS)
         connection.onreconnected(async () => {
-          setMessages(prev => [...prev, "✅ Reconnected to OpenVPN"]);
+          setMessages((prev) => [...prev, "✅ Reconnected to OpenVPN"]);
           const history = await loadHistoryFromDB(vpnServerId);
           setMessages(history);
         });
 
-        connection.onreconnecting(error => {
-          setMessages(prev => [...prev, "⚠️ Reconnecting to OpenVPN..."]);
+        connection.onreconnecting(() => {
+          setMessages((prev) => [...prev, "⚠️ Reconnecting to OpenVPN..."]);
         });
 
-        connection.onclose(error => {
-          setMessages(prev => [...prev, "❌ Connection closed."]);
+        connection.onclose(() => {
+          setMessages((prev) => [...prev, "❌ Connection closed."]);
         });
 
         await connection.start();
-        setMessages(prev => [...prev, "✅ Connected to OpenVPN"]);
+        setMessages((prev) => [...prev, "✅ Connected to OpenVPN"]);
       } catch (err: any) {
-        setMessages(prev => [...prev, `❌ Failed to connect to OpenVPN: ${err.message}`]);
+        setMessages((prev) => [...prev, `❌ Failed to connect to OpenVPN: ${err.message}`]);
       }
     };
 
@@ -103,15 +108,16 @@ export function WebConsole() {
   const sendCommand = async () => {
     if (command.trim() === "") return;
 
-    setMessages(prev => {
+    // Echo command in UI
+    setMessages((prev) => {
       const updated = [...prev, `> ${command}`];
       saveHistoryToDB(vpnServerId!, updated);
       return updated;
     });
 
     const connection = connectionRef.current;
-    if (!connection || connection.state !== "Connected") {
-      setMessages(prev => [...prev, "❌ Cannot send command: not connected"]);
+    if (!connection || connection.state !== HubConnectionState.Connected) {
+      setMessages((prev) => [...prev, "❌ Cannot send command: not connected"]);
       setCommand("");
       return;
     }
@@ -119,7 +125,7 @@ export function WebConsole() {
     try {
       await connection.send("SendCommand", command);
     } catch (error: any) {
-      setMessages(prev => [...prev, `❌ Failed to send command: ${error.message}`]);
+      setMessages((prev) => [...prev, `❌ Failed to send command: ${error.message}`]);
     }
 
     setCommand("");
@@ -137,7 +143,7 @@ export function WebConsole() {
       <div className="header-bar">
         <div className="left-buttons">
           <button className="btn danger" onClick={clearConsole}>
-            {FaTrash({ className: "icon" })} Clear Console
+            <FaTrash className="icon" /> Clear Console
           </button>
         </div>
       </div>
@@ -145,7 +151,9 @@ export function WebConsole() {
       <div className="console-container">
         <div className="console-output">
           {messages.map((msg, index) => (
-            <div key={index} className="console-message">{msg}</div>
+            <div key={index} className="console-message">
+              {msg}
+            </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
@@ -159,20 +167,20 @@ export function WebConsole() {
             className="input"
           />
           <button className="btn primary" onClick={sendCommand}>
-            Send {FaArrowRight({ className: "icon" })}
+            Send <FaArrowRight className="icon" />
           </button>
         </div>
       </div>
 
       <div className="console-info">
-        <h3>{FaInfoCircle({ className: "icon" })} Important Information</h3>
+        <h3>
+          <FaInfoCircle className="icon" /> Important Information
+        </h3>
         <p>
-          This web console provides access to the <strong>OpenVPN Management Interface</strong>.
-          Be careful when executing commands, as incorrect usage can affect VPN operations.
+          This web console provides access to the <strong>OpenVPN Management Interface</strong>. Be careful when
+          executing commands, as incorrect usage can affect VPN operations.
         </p>
-        <p>
-          For a full list of supported OpenVPN commands, please refer to the official documentation:
-        </p>
+        <p>For a full list of supported OpenVPN commands, please refer to the official documentation:</p>
         <ul>
           <li>
             <a
@@ -185,7 +193,10 @@ export function WebConsole() {
             </a>
           </li>
         </ul>
-        <p><strong>Warning:</strong> Modifying server configurations via this interface requires proper knowledge of OpenVPN internals.</p>
+        <p>
+          <strong>Warning:</strong> Modifying server configurations via this interface requires proper knowledge of
+          OpenVPN internals.
+        </p>
       </div>
     </div>
   );
