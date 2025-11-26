@@ -13,7 +13,7 @@ export default {
       override: {
         // Use your own HTTP layer
         mutator: {
-          path: 'src/api/orval/mutator.ts',
+          path: 'src/api/mutator.ts',
           name: 'ogmMutator',
         },
       },

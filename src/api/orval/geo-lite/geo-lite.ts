@@ -29,7 +29,7 @@ import type {
   StringApiResponse,
 } from ".././model";
 
-import { ogmMutator } from ".././mutator";
+import { ogmMutator } from "../../mutator";
 
 export const getApiGeoLiteGetDatabasePath = (signal?: AbortSignal) => {
   return ogmMutator<GetDatabasePathResponseApiResponse>({

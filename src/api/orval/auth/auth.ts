@@ -29,7 +29,7 @@ import type {
   TokenResponseApiResponse,
 } from ".././model";
 
-import { ogmMutator } from ".././mutator";
+import { ogmMutator } from "../../mutator";
 
 export const getApiAuthSystemSecretStatus = (signal?: AbortSignal) => {
   return ogmMutator<SystemSecretStatusResponseApiResponse>({

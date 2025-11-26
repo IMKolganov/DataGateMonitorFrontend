@@ -1,5 +1,5 @@
 // api/orval/mutator.ts
-import { apiRequest, type ApiResponse } from '../apirequest';
+import { apiRequest, type ApiResponse } from './apirequest';
 
 type LowerHttpMethod = 'get' | 'post' | 'put' | 'delete' | 'patch';
 type AnyHttpMethod = LowerHttpMethod | Uppercase<LowerHttpMethod>;
