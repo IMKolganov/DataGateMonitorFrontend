@@ -19,6 +19,7 @@ const safeFormatDate = (input?: string | null): string => {
   const date = new Date(input);
   return isNaN(date.getTime()) ? "Invalid date" : formatDateWithOffset(date);
 };
+import "../css/Table.css";
 
 // Accept both wrapped and plain items
 type OvpnRowInput = { issuedOvpnFile?: IssuedOvpnFileDto } | Record<string, any> | IssuedOvpnFileDto;
@@ -194,7 +195,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <div className="action-container" style={{ display: "flex", gap: 8 }}>
+        <div className="action-container">
           {!params.row.isRevoked && (
             <button
               className="btn danger"
