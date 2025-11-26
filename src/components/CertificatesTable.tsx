@@ -8,7 +8,7 @@ import type {
   RevokeCertificateRequest,
 } from "../api/orval/model";
 import { postApiOpenVpnCertsRevoke } from "../api/orval/open-vpn-server-certs/open-vpn-server-certs";
-import "../css/CertificatesTable.css";
+import "../css/Table.css";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../utils/utils";
 
