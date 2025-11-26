@@ -24,12 +24,13 @@ import type {
   AddMessageRequest,
   AddMessageResponseApiResponse,
   GetAllMessagesResponseApiResponse,
+  GetApiTgbotIncomingMessageLogsGetAllParams,
   GetByIdMessageResponseApiResponse,
   GetByTelegramIdMessagesResponseApiResponse,
   StringApiResponse,
 } from ".././model";
 
-import { ogmMutator } from ".././mutator";
+import { ogmMutator } from "../../mutator";
 
 export const postApiTgbotIncomingMessageLogsAdd = (
   addMessageRequest: AddMessageRequest,
@@ -111,38 +112,51 @@ export const usePostApiTgbotIncomingMessageLogsAdd = <
 
   return useMutation(mutationOptions, queryClient);
 };
-export const getApiTgbotIncomingMessageLogsGetAll = (signal?: AbortSignal) => {
+export const getApiTgbotIncomingMessageLogsGetAll = (
+  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
+  signal?: AbortSignal,
+) => {
   return ogmMutator<GetAllMessagesResponseApiResponse>({
     url: `/api/tgbot-incoming-message-logs/get-all`,
     method: "GET",
+    params,
     signal,
   });
 };
 
-export const getGetApiTgbotIncomingMessageLogsGetAllQueryKey = () => {
-  return [`/api/tgbot-incoming-message-logs/get-all`] as const;
+export const getGetApiTgbotIncomingMessageLogsGetAllQueryKey = (
+  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
+) => {
+  return [
+    `/api/tgbot-incoming-message-logs/get-all`,
+    ...(params ? [params] : []),
+  ] as const;
 };
 
 export const getGetApiTgbotIncomingMessageLogsGetAllQueryOptions = <
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
   TError = unknown,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<
-      Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
-      TError,
-      TData
-    >
-  >;
-}) => {
+>(
+  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
   const { query: queryOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetApiTgbotIncomingMessageLogsGetAllQueryKey();
+    queryOptions?.queryKey ??
+    getGetApiTgbotIncomingMessageLogsGetAllQueryKey(params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>
-  > = ({ signal }) => getApiTgbotIncomingMessageLogsGetAll(signal);
+  > = ({ signal }) => getApiTgbotIncomingMessageLogsGetAll(params, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
@@ -160,6 +174,7 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
   TError = unknown,
 >(
+  params: undefined | GetApiTgbotIncomingMessageLogsGetAllParams,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -185,6 +200,7 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
   TError = unknown,
 >(
+  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -210,6 +226,7 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
   TError = unknown,
 >(
+  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -228,6 +245,7 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
   TError = unknown,
 >(
+  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -241,8 +259,10 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions =
-    getGetApiTgbotIncomingMessageLogsGetAllQueryOptions(options);
+  const queryOptions = getGetApiTgbotIncomingMessageLogsGetAllQueryOptions(
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

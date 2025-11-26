@@ -24,7 +24,7 @@ import type {
   TrafficByClientsResponseApiResponse,
 } from ".././model";
 
-import { ogmMutator } from ".././mutator";
+import { ogmMutator } from "../../mutator";
 
 export const getApiOpenVpnStatisticsGetVpnServerId = (
   vpnServerId: number,

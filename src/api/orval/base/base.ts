@@ -19,7 +19,7 @@ import type {
 
 import type { StringApiResponse } from ".././model";
 
-import { ogmMutator } from ".././mutator";
+import { ogmMutator } from "../../mutator";
 
 export const getApiBaseHealthcheck = (signal?: AbortSignal) => {
   return ogmMutator<StringApiResponse>({

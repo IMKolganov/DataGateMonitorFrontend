@@ -32,7 +32,7 @@ import type {
   StringApiResponse,
 } from ".././model";
 
-import { ogmMutator } from ".././mutator";
+import { ogmMutator } from "../../mutator";
 
 export const getApiOpenVpnFilesByTokenToken = (
   token: string,

@@ -22,7 +22,7 @@ import type {
 
 import type { LoginRequest, StringApiResponse } from ".././model";
 
-import { ogmMutator } from ".././mutator";
+import { ogmMutator } from "../../mutator";
 
 export const postApiUserauthLogin = (
   loginRequest: LoginRequest,
