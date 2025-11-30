@@ -89,3 +89,4 @@ typings/
 .dynamodb/
 
 .env.local
+.idea
