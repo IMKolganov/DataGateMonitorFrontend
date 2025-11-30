@@ -25,7 +25,7 @@ import type {
   VpnServerEventResponseApiResponse,
 } from ".././model";
 
-import { ogmMutator } from ".././mutator";
+import { ogmMutator } from "../../mutator";
 
 export const getApiOpenVpnEventsGetByServer = (
   params: GetApiOpenVpnEventsGetByServerParams,

@@ -1,4 +1,3 @@
-// src/components/TelegramBotUsersTable.tsx
 import React, { useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "./TableStyle";
@@ -11,22 +10,26 @@ import {
   usePostApiTgbotUsersSetAdmin,
   usePostApiTgbotUsersUnsetAdmin,
 } from "../api/orval/telegram-bot-user/telegram-bot-user";
+import "../css/Table.css";
 
 interface TelegramBotUsersTableProps {
   users: TelegramBotUserDto[];
   refreshUsers: () => void;
+  loading: boolean; // loading from data-fetch (query)
 }
 
-const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({ users, refreshUsers }) => {
-  const [loading, setLoading] = useState(false);
+const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
+  users,
+  refreshUsers,
+  loading,
+}) => {
+  const [mutationLoading, setMutationLoading] = useState(false);
 
-  // Mutations
   const mBlock = usePostApiTgbotUsersBlock();
   const mUnblock = usePostApiTgbotUsersUnblock();
   const mSetAdmin = usePostApiTgbotUsersSetAdmin();
   const mUnsetAdmin = usePostApiTgbotUsersUnsetAdmin();
 
-  // Actions using mutations
   const blockUser = async (telegramId: number) =>
     mBlock.mutateAsync({ data: { telegramId } as TelegramUserActionRequest });
 
@@ -41,25 +44,23 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({ users, re
 
   const handleToggleBlock = async (telegramId: number, isBlocked: boolean) => {
     if (!telegramId) return;
-    setLoading(true);
+    setMutationLoading(true);
     try {
       isBlocked ? await unblockUser(telegramId) : await blockUser(telegramId);
       await refreshUsers();
-    } catch (error) {
     } finally {
-      setLoading(false);
+      setMutationLoading(false);
     }
   };
 
   const handleToggleAdmin = async (telegramId: number, isAdmin: boolean) => {
     if (!telegramId) return;
-    setLoading(true);
+    setMutationLoading(true);
     try {
       isAdmin ? await unsetAdmin(telegramId) : await setAdmin(telegramId);
       await refreshUsers();
-    } catch (error) {
     } finally {
-      setLoading(false);
+      setMutationLoading(false);
     }
   };
 
@@ -99,12 +100,13 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({ users, re
         const tid: number = params.row.telegramId || 0;
         const isBlocked: boolean = !!params.row.isBlocked;
         const isAdmin: boolean = !!params.row.isAdmin;
+        const disabled = mutationLoading || !tid;
 
         return (
           <div className="action-container">
             <button
               className="btn danger"
-              disabled={loading || !tid}
+              disabled={disabled}
               onClick={() => handleToggleBlock(tid, isBlocked)}
             >
               <FaBan className="icon" /> {isBlocked ? "Unblock" : "Block"}
@@ -112,7 +114,7 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({ users, re
 
             <button
               className="btn danger"
-              disabled={loading || !tid}
+              disabled={disabled}
               onClick={() => handleToggleAdmin(tid, isAdmin)}
             >
               <FaUserShield className="icon" /> {isAdmin ? "Unset Admin" : "Set Admin"}
@@ -122,6 +124,8 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({ users, re
       },
     },
   ];
+
+  const isGridLoading = loading || mutationLoading;
 
   return (
     <CustomThemeProvider>
@@ -142,6 +146,7 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({ users, re
           disableColumnFilter
           disableColumnMenu
           localeText={{ noRowsLabel: "📭 No users found" }}
+          loading={isGridLoading}
         />
       </div>
     </CustomThemeProvider>

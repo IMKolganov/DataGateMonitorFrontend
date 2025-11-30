@@ -31,7 +31,7 @@ import type {
   UpdateServerRequest,
 } from ".././model";
 
-import { ogmMutator } from ".././mutator";
+import { ogmMutator } from "../../mutator";
 
 export const getApiOpenVpnServersGetAllWithStatus = (signal?: AbortSignal) => {
   return ogmMutator<OpenVpnServerWithStatusesResponseApiResponse>({
