@@ -27,7 +27,7 @@ import type {
   UsersResponseApiResponse,
 } from ".././model";
 
-import { ogmMutator } from ".././mutator";
+import { ogmMutator } from "../../mutator";
 
 export const postApiUsersRegisterFromTgbot = (
   registerUserFromTgBotRequest: RegisterUserFromTgBotRequest,

@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 
 import type { ApplicationDto, RevokeApplicationRequest } from "../api/orval/model";
 import { usePostApiApplicationsRevoke } from "../api/orval/applications/applications";
+import "../css/Table.css";
 
 interface ApplicationTableProps {
   applications: ApplicationDto[];

@@ -17,7 +17,7 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import { ogmMutator } from ".././mutator";
+import { ogmMutator } from "../../mutator";
 
 export const get = (signal?: AbortSignal) => {
   return ogmMutator<void>({ url: `/`, method: "GET", signal });

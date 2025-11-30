@@ -29,7 +29,7 @@ import type {
   UserRequestApiResponse,
 } from ".././model";
 
-import { ogmMutator } from ".././mutator";
+import { ogmMutator } from "../../mutator";
 
 export const getApiTgbotUsersCheckExistsTelegramId = (
   telegramId: number,
