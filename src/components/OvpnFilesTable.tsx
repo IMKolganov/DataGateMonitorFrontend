@@ -74,26 +74,32 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       .filter((x): x is IssuedOvpnFileDto => !!x && (x.id != null || x.commonName != null));
   }, [ovpnFiles]);
 
-  const handleRevoke = useCallback(
-    async (ovpnFileId: number, commonName: string) => {
-      if (!window.confirm(`Are you sure you want to revoke OVPN file ${commonName}?`)) return;
-      try {
-        const data: RevokeFileRequest = {
-          vpnServerId: Number(vpnServerId),
-          issuedOvpnFileId: ovpnFileId,
-          commonName,
-        } as unknown as RevokeFileRequest;
+    const handleRevoke = useCallback(
+        async (ovpnFileId: number, commonName: string) => {
+            if (!window.confirm(`Are you sure you want to revoke OVPN file ${commonName}?`)) return;
+            try {
+                const data: RevokeFileRequest = {
+                    vpnServerId: Number(vpnServerId),
+                    ovpnFileId: ovpnFileId,
+                    commonName,
+                };
 
-        await revokeMutate({ data });
-        // success toast is shown by parent
-        await onRevoke();
-      } catch (err: any) {
-        const msg = err?.response?.data?.Message || err?.message || "Error revoking OVPN file.";
-        toast.error(msg);
-      }
-    },
-    [vpnServerId, revokeMutate, onRevoke]
-  );
+                await revokeMutate({ data });
+                await onRevoke();
+
+            } catch (err: unknown) {
+                const e = err as { response?: { data?: { message?: string } }; message?: string };
+
+                const msg =
+                    e.response?.data?.message ||
+                    e.message ||
+                    "Error revoking OVPN file.";
+
+                toast.error(msg);
+            }
+        },
+        [vpnServerId, revokeMutate, onRevoke]
+    );
 
   const handleDownload = useCallback(
     async (issuedOvpnFileId: number) => {
@@ -135,9 +141,15 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
         URL.revokeObjectURL(url);
 
         toast.success("File downloaded.");
-      } catch (err: any) {
-        const msg = err?.response?.data?.message || err?.message || "Error downloading file.";
-        toast.error(msg);
+      } catch (err: unknown) {
+          const e = err as { response?: { data?: { message?: string } }; message?: string };
+
+          const msg =
+              e.response?.data?.message ||
+              e.message ||
+              "Error downloading file.";
+
+          toast.error(msg);
       }
     },
     [downloadMutate, vpnServerId]
