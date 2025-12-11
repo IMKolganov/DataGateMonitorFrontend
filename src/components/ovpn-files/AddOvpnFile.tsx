@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from "react";
-import "../css/Certificates.css";
+import "../../css/Certificates.css";
 import { FaPlus, FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 // orval
-import { usePostApiOpenVpnFilesAdd } from "../api/orval/open-vpn-files/open-vpn-files";
-import type { AddFileRequest } from "../api/orval/model";
+import { usePostApiOpenVpnFilesAdd } from "../../api/orval/open-vpn-files/open-vpn-files.ts";
+import type { AddFileRequest } from "../../api/orval/model";
 
 interface Props {
   vpnServerId: string;

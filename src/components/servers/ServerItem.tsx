@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import { BsClock, BsPerson, BsFillBookmarkStarFill } from "react-icons/bs";
 import { IoMdPerson } from "react-icons/io";
-import type { ServiceStatus } from "../api/orval/model/serviceStatus";
+import type { ServiceStatus } from "../../api/orval/model/serviceStatus.ts";
 
 // Minimal item shape required by this component
 type OrvalServerItem = {

@@ -1,25 +1,25 @@
 import React, { useState, useCallback, useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
-import StyledDataGrid from "../components/TableStyle";
-import CustomThemeProvider from "../components/ThemeProvider";
+import StyledDataGrid from "../ui/TableStyle.tsx";
+import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type {
   IssuedOvpnFileDto,
   RevokeFileRequest,
   DownloadFileRequest,
   DownloadFileResponse,
   DownloadFileResponseApiResponse,
-} from "../api/orval/model";
-import { usePostApiOpenVpnFilesRevokeFile, usePostApiOpenVpnFilesDownloadFile } from "../api/orval/open-vpn-files/open-vpn-files";
+} from "../../api/orval/model";
+import { usePostApiOpenVpnFilesRevokeFile, usePostApiOpenVpnFilesDownloadFile } from "../../api/orval/open-vpn-files/open-vpn-files.ts";
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { formatDateWithOffset } from "../utils/utils";
+import { formatDateWithOffset } from "../../utils/utils.ts";
 
 const safeFormatDate = (input?: string | null): string => {
   if (!input) return "";
   const date = new Date(input);
   return isNaN(date.getTime()) ? "Invalid date" : formatDateWithOffset(date);
 };
-import "../css/Table.css";
+import "../../css/Table.css";
 
 // Accept both wrapped and plain items
 type OvpnRowInput = { issuedOvpnFile?: IssuedOvpnFileDto } | Record<string, any> | IssuedOvpnFileDto;

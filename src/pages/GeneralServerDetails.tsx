@@ -5,7 +5,7 @@ import "../css/ServerDetails.css";
 import { FaSync } from "react-icons/fa";
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
-import ServerDetailsInfoDefault from "../components/ServerDetailsInfo";
+import ServerDetailsInfoDefault from "../components/servers/ServerDetailsInfo.tsx";
 
 import {
     useGetApiOpenVpnClientsGetAllConnected,

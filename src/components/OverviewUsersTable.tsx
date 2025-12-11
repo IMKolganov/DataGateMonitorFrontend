@@ -2,8 +2,8 @@
 import React, { useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { Link, useParams } from "react-router-dom";
-import StyledDataGrid from "./TableStyle";
-import CustomThemeProvider from "./ThemeProvider";
+import StyledDataGrid from "./ui/TableStyle.tsx";
+import CustomThemeProvider from "./ui/ThemeProvider.tsx";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
 
 import {

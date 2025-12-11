@@ -1,6 +1,6 @@
 // src/pages/TelegramBotSettings/TelegramBotUsersSection.tsx
 import { FaSync } from "react-icons/fa";
-import TelegramBotUsersTable from "../../components/TelegramBotUsersTable";
+import TelegramBotUsersTable from "../../components/settings/TelegramBotUsersTable.tsx";
 import type { TelegramBotUserDto } from "../../api/orval/model";
 
 import "../../css/Settings.css";
