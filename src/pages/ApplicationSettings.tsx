@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { FaPlus, FaSync } from "react-icons/fa";
 import "../css/ApplicationSettings.css";
-import ApplicationTable from "../components/ApplicationTable";
+import ApplicationTable from "../components/settings/ApplicationTable.tsx";
 
 import {
   useGetApiApplicationsGetAll,

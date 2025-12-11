@@ -1,11 +1,11 @@
 // src/components/AddCertificate.tsx
 import React, { useState } from "react";
-import "../css/Certificates.css";
+import "../../css/Certificates.css";
 import { FaPlus } from "react-icons/fa";
 
 // orval
-import { postApiOpenVpnCertsBuild } from "../api/orval/open-vpn-server-certs/open-vpn-server-certs";
-import type { BuildCertificateRequest } from "../api/orval/model";
+import { postApiOpenVpnCertsBuild } from "../../api/orval/open-vpn-server-certs/open-vpn-server-certs.ts";
+import type { BuildCertificateRequest } from "../../api/orval/model";
 
 interface Props {
   vpnServerId: string;

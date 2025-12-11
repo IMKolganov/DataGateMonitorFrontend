@@ -1,8 +1,8 @@
 // src/pages/Events.tsx
 import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
-import StyledDataGrid from "../components/TableStyle";
-import CustomThemeProvider from "../components/ThemeProvider";
+import StyledDataGrid from "../components/ui/TableStyle.tsx";
+import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaSync } from "react-icons/fa";
 import { formatDateWithOffset } from "../utils/utils";

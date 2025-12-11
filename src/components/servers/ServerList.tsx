@@ -3,20 +3,20 @@ import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlus } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
-import "../css/ServerList.css";
+import "../../css/ServerList.css";
 
-import useWebSocketService from "../hooks/useWebSocketService";
-import ServerItem from "./ServerItem";
-import ServiceControls from "./ServiceControls";
+import useWebSocketService from "../../hooks/useWebSocketService.ts";
+import ServerItem from "./ServerItem.tsx";
+import ServiceControls from "../ServiceControls.tsx";
 
 // orval-generated imports
 import {
   getApiOpenVpnServersGetAllWithStatus,
   deleteApiOpenVpnServersDeleteVpnServerId,
-} from "../api/orval/open-vpn-servers/open-vpn-servers";
+} from "../../api/orval/open-vpn-servers/open-vpn-servers.ts";
 
-import { ServiceStatus } from "../api/orval/model";
-import type { ServiceStatusDto } from "../api/orval/model";
+import { ServiceStatus } from "../../api/orval/model";
+import type { ServiceStatusDto } from "../../api/orval/model";
 
 type ApiServerItem = {
   openVpnServerResponses?: { openVpnServer?: any; id?: number } | any;

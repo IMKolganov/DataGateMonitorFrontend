@@ -1,9 +1,9 @@
 // src/components/Header.tsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import "../css/Header.css";
+import "../../css/Header.css";
 import { FaDoorClosed } from "react-icons/fa";
-import { logout } from "../api/apirequest";
+import { logout } from "../../api/apirequest.ts";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);

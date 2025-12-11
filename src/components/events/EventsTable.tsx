@@ -1,8 +1,8 @@
 import React from "react";
 import type { GridColDef } from "@mui/x-data-grid";
-import StyledDataGrid from "../components/TableStyle";
-import CustomThemeProvider from "../components/ThemeProvider";
-import { formatDateWithOffset } from "../utils/utils";
+import StyledDataGrid from "../ui/TableStyle.tsx";
+import CustomThemeProvider from "../ui/ThemeProvider.tsx";
+import { formatDateWithOffset } from "../../utils/utils.ts";
 
 interface VpnEvent {
   id: number;

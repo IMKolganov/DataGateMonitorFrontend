@@ -22,6 +22,10 @@ import type {
 
 import type {
   AuthResponseApiResponse,
+  GoogleLoginRequest,
+  GoogleLoginResponseApiResponse,
+  RegisterUserRequest,
+  RegisterUserResponseApiResponse,
   SetSecretRequest,
   StringApiResponse,
   SystemSecretStatusResponseApiResponse,
@@ -482,6 +486,158 @@ export function useGetApiAuthPublicKeyPin<
   return query;
 }
 
+export const postApiAuthRegister = (
+  registerUserRequest: RegisterUserRequest,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<RegisterUserResponseApiResponse>({
+    url: `/api/auth/register`,
+    method: "POST",
+    headers: { "Content-Type": "application/json-patch+json" },
+    data: registerUserRequest,
+    signal,
+  });
+};
+
+export const getPostApiAuthRegisterMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiAuthRegister>>,
+    TError,
+    { data: RegisterUserRequest },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiAuthRegister>>,
+  TError,
+  { data: RegisterUserRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiAuthRegister"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiAuthRegister>>,
+    { data: RegisterUserRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiAuthRegister(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiAuthRegisterMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiAuthRegister>>
+>;
+export type PostApiAuthRegisterMutationBody = RegisterUserRequest;
+export type PostApiAuthRegisterMutationError = unknown;
+
+export const usePostApiAuthRegister = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiAuthRegister>>,
+      TError,
+      { data: RegisterUserRequest },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiAuthRegister>>,
+  TError,
+  { data: RegisterUserRequest },
+  TContext
+> => {
+  const mutationOptions = getPostApiAuthRegisterMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const postApiAuthGoogleLogin = (
+  googleLoginRequest: GoogleLoginRequest,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GoogleLoginResponseApiResponse>({
+    url: `/api/auth/google-login`,
+    method: "POST",
+    headers: { "Content-Type": "application/json-patch+json" },
+    data: googleLoginRequest,
+    signal,
+  });
+};
+
+export const getPostApiAuthGoogleLoginMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiAuthGoogleLogin>>,
+    TError,
+    { data: GoogleLoginRequest },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiAuthGoogleLogin>>,
+  TError,
+  { data: GoogleLoginRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiAuthGoogleLogin"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiAuthGoogleLogin>>,
+    { data: GoogleLoginRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiAuthGoogleLogin(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiAuthGoogleLoginMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiAuthGoogleLogin>>
+>;
+export type PostApiAuthGoogleLoginMutationBody = GoogleLoginRequest;
+export type PostApiAuthGoogleLoginMutationError = unknown;
+
+export const usePostApiAuthGoogleLogin = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiAuthGoogleLogin>>,
+      TError,
+      { data: GoogleLoginRequest },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiAuthGoogleLogin>>,
+  TError,
+  { data: GoogleLoginRequest },
+  TContext
+> => {
+  const mutationOptions = getPostApiAuthGoogleLoginMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
 export const getApiAuthHealthcheck = (signal?: AbortSignal) => {
   return ogmMutator<StringApiResponse>({
     url: `/api/auth/healthcheck`,

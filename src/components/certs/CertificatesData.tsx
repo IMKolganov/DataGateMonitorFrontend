@@ -1,23 +1,23 @@
 // src/components/CertificatesData.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import CertificatesTable from "../components/CertificatesTable";
-import OvpnFilesTable from "../components/OvpnFilesTable";
-import AddOvpnFile from "../components/AddOvpnFile";
-import AddCertificate from "../components/AddCertificate";
+import CertificatesTable from "./CertificatesTable.tsx";
+import OvpnFilesTable from "../ovpn-files/OvpnFilesTable.tsx";
+import AddOvpnFile from "../ovpn-files/AddOvpnFile.tsx";
+import AddCertificate from "./AddCertificate.tsx";
 import { toast } from "react-toastify";
 
 import {
   useGetApiOpenVpnFilesGetAllVpnServerId,
-} from "../api/orval/open-vpn-files/open-vpn-files";
+} from "../../api/orval/open-vpn-files/open-vpn-files.ts";
 
 import {
   useGetApiOpenVpnCertsVpnServerIdGetAll,
-} from "../api/orval/open-vpn-server-certs/open-vpn-server-certs";
+} from "../../api/orval/open-vpn-server-certs/open-vpn-server-certs.ts";
 
 import type {
   GetAllCertificatesResponse,
   OvpnFilesResponse,
-} from "../api/orval/model";
+} from "../../api/orval/model";
 
 interface Props {
   vpnServerId: string;

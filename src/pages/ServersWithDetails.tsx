@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import ServerList from "../components/ServerList";
+import ServerList from "../components/servers/ServerList.tsx";
 import { useMediaQuery } from "react-responsive";
 import "../css/ServersWithDetails.css";
 import { Suspense } from "react";

@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   getApiAuthSystemSecretStatus,
   postApiAuthSetSystemSecret,
   postApiAuthToken,
-} from "../api/orval/auth/auth";
+} from "../../api/orval/auth/auth";
 import type {
   SetSecretRequest,
   TokenRequest,
   SystemSecretStatusResponse,
   TokenResponse,
-} from "../api/orval/model";
+} from "../../api/orval/model";
 import { FaDoorOpen } from "react-icons/fa";
-import "../css/Login.css";
-import { scheduleAutoLogout } from "../utils/jwt-utils";
+import { scheduleAutoLogout } from "../../utils/jwt-utils";
 
-const Login: React.FC = () => {
+const PasswordLoginForm: React.FC = () => {
   const [clientId, setClientId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
   const [error, setError] = useState("");
@@ -23,20 +22,21 @@ const Login: React.FC = () => {
   const [, setSystemSet] = useState<boolean | null>(null);
 
   const canSubmit =
-    clientId.trim().length > 0 &&
-    clientSecret.trim().length > 0 &&
-    !loading &&
-    statusReady;
+      clientId.trim().length > 0 &&
+      clientSecret.trim().length > 0 &&
+      !loading &&
+      statusReady;
 
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const status = (await getApiAuthSystemSecretStatus()) as SystemSecretStatusResponse;
+        const status =
+            (await getApiAuthSystemSecretStatus()) as SystemSecretStatusResponse;
         const isSet = status?.systemSet === true;
         setSystemSet(isSet);
       } catch (err: any) {
         let detailedMessage =
-          "We couldn't connect to the server. Please make sure it's running.";
+            "We could not connect to the server. Please make sure it is running.";
         if (err.response) {
           detailedMessage += ` Server responded with status ${err.response.status} (${err.response.statusText}).`;
         } else if (err.request) {
@@ -46,8 +46,8 @@ const Login: React.FC = () => {
         }
         if (err.config?.url) {
           const fullUrl = err.config.baseURL
-            ? `${err.config.baseURL}${err.config.url}`
-            : err.config.url;
+              ? `${err.config.baseURL}${err.config.url}`
+              : err.config.url;
           detailedMessage += `<br/>You can also try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${fullUrl}</a> in your browser.`;
         }
         setError(detailedMessage);
@@ -56,7 +56,7 @@ const Login: React.FC = () => {
       }
     };
 
-    checkStatus();
+    void checkStatus();
   }, []);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -65,7 +65,8 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      const latest = (await getApiAuthSystemSecretStatus()) as SystemSecretStatusResponse;
+      const latest =
+          (await getApiAuthSystemSecretStatus()) as SystemSecretStatusResponse;
       const latestIsSet = latest?.systemSet === true;
       setSystemSet(latestIsSet);
 
@@ -75,10 +76,10 @@ const Login: React.FC = () => {
           await postApiAuthSetSystemSecret(body);
         } catch (err: any) {
           const msg: string =
-            err?.response?.data?.message ??
-            err?.response?.data ??
-            err?.message ??
-            "";
+              err?.response?.data?.message ??
+              err?.response?.data ??
+              err?.message ??
+              "";
           if (!/already\s+set/i.test(msg)) {
             throw err;
           }
@@ -86,7 +87,8 @@ const Login: React.FC = () => {
       }
 
       const tokenReq: TokenRequest = { clientId, clientSecret };
-      const tokenPayload = (await postApiAuthToken(tokenReq)) as TokenResponse;
+      const tokenPayload =
+          (await postApiAuthToken(tokenReq)) as TokenResponse;
       const token = tokenPayload?.token;
 
       if (!token) {
@@ -98,7 +100,7 @@ const Login: React.FC = () => {
       window.location.href = "/";
     } catch (err: any) {
       let detailedMessage =
-        "We couldn't log you in. Please check your credentials and try again.";
+          "We could not log you in. Please check your credentials and try again.";
       if (err.response) {
         detailedMessage += ` Server responded with status ${err.response.status} (${err.response.statusText}).`;
         if (err.response.data?.error) {
@@ -112,8 +114,8 @@ const Login: React.FC = () => {
 
       if (err.config?.url) {
         const fullUrl = err.config.baseURL
-          ? `${err.config.baseURL}${err.config.url}`
-          : err.config.url;
+            ? `${err.config.baseURL}${err.config.url}`
+            : err.config.url;
         detailedMessage += `<br/>You can also try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${fullUrl}</a> in your browser.`;
       }
 
@@ -124,62 +126,61 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-wrapper">
-        <div className="login">
-          <h2>Sign in</h2>
-          {error && (
+      <>
+        {error && (
             <p
-              className="error-message"
-              dangerouslySetInnerHTML={{ __html: error }}
+                className="error-message"
+                dangerouslySetInnerHTML={{ __html: error }}
             ></p>
-          )}
+        )}
 
-          <form onSubmit={handleLogin}>
-            <div className="login-item">
-              <h4>Login:</h4>
-              <input
+        <form onSubmit={handleLogin}>
+          <div className="login-item">
+            <h4>Username or email address</h4>
+            <input
                 type="text"
                 name="username"
                 autoComplete="username"
                 value={clientId}
                 onChange={(e) => setClientId(e.target.value)}
-                className="input input-login"
+                className="input-login"
                 required
-                placeholder="Login"
-              />
-            </div>
+                placeholder=""
+            />
+          </div>
 
-            <div className="login-item">
-              <h4>Password:</h4>
-              <input
+          <div className="login-item">
+            <div className="password-label-row">
+              <h4>Password</h4>
+              <a href="#" className="forgot-password-link">
+                Forgot password?
+              </a>
+            </div>
+            <input
                 type="password"
                 name="password"
                 autoComplete="current-password"
                 value={clientSecret}
                 onChange={(e) => setClientSecret(e.target.value)}
-                className="input input-login"
+                className="input-login"
                 required
-                placeholder="Password"
-              />
-            </div>
+                placeholder=""
+            />
+          </div>
 
-            <div className="login-item right">
-              <button className="btn primary" type="submit" disabled={!canSubmit}>
-                {FaDoorOpen({ className: "icon" })} {loading ? "Loading..." : "Sign in"}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <div className="register-container">
-          <p>
-            New to OpenVPN Gate Monitor? <a href="/register">Create an account</a>
-          </p>
-        </div>
-      </div>
-    </div>
+          <div className="login-item">
+            <button
+                className="btn primary btn-fullwidth"
+                type="submit"
+                disabled={!canSubmit}
+            >
+              <FaDoorOpen className="icon" />{" "}
+              {loading ? "Signing in..." : "Sign in"}
+            </button>
+          </div>
+        </form>
+      </>
   );
 };
 
-export default Login;
+export default PasswordLoginForm;
