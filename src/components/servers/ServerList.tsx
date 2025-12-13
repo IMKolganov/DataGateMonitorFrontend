@@ -300,7 +300,11 @@ const ServerList: React.FC = () => {
                 <li
                   key={id}
                   className={`server-item clickable ${selectedServerId === id ? "selected" : ""}`}
-                  onClick={() => navigate(`/servers/${id}/`)}
+                  onClick={() =>
+                      canAddServer
+                          ? navigate(`/servers/${id}/`)
+                          : navigate(`/servers/${id}/statistics`)
+                  }
                 >
                   <ServerItem
                     server={(server.__raw as any) ?? server.openVpnServerResponses}
@@ -312,8 +316,9 @@ const ServerList: React.FC = () => {
                     wsCountConnectedClients={server.wsCountConnectedClients}
                     wsCountSessions={server.wsCountSessions}
                     onView={(id) => {
-                      if (isMobile) navigate(`/servers/${id}/`);
-                      else navigate(`/servers/${id}/`, { replace: true });
+                      const target = canAddServer ? `/servers/${id}/` : `/servers/${id}/statistics`;
+                      if (isMobile) navigate(target);
+                      else navigate(target, { replace: true });
                     }}
                     onEdit={(id) => navigate(`/servers/edit/${id}`)}
                     onDelete={handleDelete}
