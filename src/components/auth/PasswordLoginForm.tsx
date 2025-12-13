@@ -1,63 +1,19 @@
-import React, { useEffect, useState } from "react";
-import {
-  getApiAuthSystemSecretStatus,
-  postApiAuthSetSystemSecret,
-  postApiAuthToken,
-} from "../../api/orval/auth/auth";
-import type {
-  SetSecretRequest,
-  TokenRequest,
-  SystemSecretStatusResponse,
-  TokenResponse,
-} from "../../api/orval/model";
+import React, { useState } from "react";
+import { postApiAuthLogin } from "../../api/orval/auth/auth";
+import type { LoginRequest, LoginResponse } from "../../api/orval/model";
 import { FaDoorOpen } from "react-icons/fa";
 import { scheduleAutoLogout } from "../../utils/jwt-utils";
 
 const PasswordLoginForm: React.FC = () => {
-  const [clientId, setClientId] = useState("");
-  const [clientSecret, setClientSecret] = useState("");
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [statusReady, setStatusReady] = useState(false);
-  const [, setSystemSet] = useState<boolean | null>(null);
 
   const canSubmit =
-      clientId.trim().length > 0 &&
-      clientSecret.trim().length > 0 &&
-      !loading &&
-      statusReady;
-
-  useEffect(() => {
-    const checkStatus = async () => {
-      try {
-        const status =
-            (await getApiAuthSystemSecretStatus()) as SystemSecretStatusResponse;
-        const isSet = status?.systemSet === true;
-        setSystemSet(isSet);
-      } catch (err: any) {
-        let detailedMessage =
-            "We could not connect to the server. Please make sure it is running.";
-        if (err.response) {
-          detailedMessage += ` Server responded with status ${err.response.status} (${err.response.statusText}).`;
-        } else if (err.request) {
-          detailedMessage += " The server did not respond.";
-        } else if (err.message) {
-          detailedMessage += ` Error: ${err.message}`;
-        }
-        if (err.config?.url) {
-          const fullUrl = err.config.baseURL
-              ? `${err.config.baseURL}${err.config.url}`
-              : err.config.url;
-          detailedMessage += `<br/>You can also try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${fullUrl}</a> in your browser.`;
-        }
-        setError(detailedMessage);
-      } finally {
-        setStatusReady(true);
-      }
-    };
-
-    void checkStatus();
-  }, []);
+      login.trim().length > 0 &&
+      password.trim().length > 0 &&
+      !loading;
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -65,31 +21,16 @@ const PasswordLoginForm: React.FC = () => {
     setLoading(true);
 
     try {
-      const latest =
-          (await getApiAuthSystemSecretStatus()) as SystemSecretStatusResponse;
-      const latestIsSet = latest?.systemSet === true;
-      setSystemSet(latestIsSet);
+      const loginReq: LoginRequest = {
+        login,
+        password,
+      };
 
-      if (!latestIsSet) {
-        const body: SetSecretRequest = { clientId, clientSecret };
-        try {
-          await postApiAuthSetSystemSecret(body);
-        } catch (err: any) {
-          const msg: string =
-              err?.response?.data?.message ??
-              err?.response?.data ??
-              err?.message ??
-              "";
-          if (!/already\s+set/i.test(msg)) {
-            throw err;
-          }
-        }
-      }
+      const loginPayload = (await postApiAuthLogin(
+          loginReq,
+      )) as LoginResponse;
 
-      const tokenReq: TokenRequest = { clientId, clientSecret };
-      const tokenPayload =
-          (await postApiAuthToken(tokenReq)) as TokenResponse;
-      const token = tokenPayload?.token;
+      const token = loginPayload?.token;
 
       if (!token) {
         throw new Error("No token returned by API.");
@@ -99,20 +40,33 @@ const PasswordLoginForm: React.FC = () => {
       scheduleAutoLogout(token);
       window.location.href = "/";
     } catch (err: any) {
-      let detailedMessage =
-          "We could not log you in. Please check your credentials and try again.";
+      let detailedMessage = "We could not log you in.";
+
       if (err.response) {
-        detailedMessage += ` Server responded with status ${err.response.status} (${err.response.statusText}).`;
-        if (err.response.data?.error) {
-          detailedMessage += ` Details: ${err.response.data.error}`;
+        const status = err.response.status;
+        const data = err.response.data;
+
+        if (status === 401) {
+          // Invalid credentials / blocked user
+          detailedMessage =
+              data?.message || "Invalid login or password. Please try again.";
+        } else if (status >= 400 && status < 500) {
+          detailedMessage =
+              data?.message ||
+              "The request could not be processed. Please check your input.";
+        } else {
+          detailedMessage =
+              data?.message ||
+              "We could not log you in due to a server error. Please try again later.";
         }
       } else if (err.request) {
-        detailedMessage += " The server did not respond.";
+        detailedMessage =
+            "We could not connect to the server. Please make sure it is running.";
       } else if (err.message) {
-        detailedMessage += ` Error: ${err.message}`;
+        detailedMessage = `Error: ${err.message}`;
       }
 
-      if (err.config?.url) {
+      if (err.config?.url && !err.response) {
         const fullUrl = err.config.baseURL
             ? `${err.config.baseURL}${err.config.url}`
             : err.config.url;
@@ -141,8 +95,8 @@ const PasswordLoginForm: React.FC = () => {
                 type="text"
                 name="username"
                 autoComplete="username"
-                value={clientId}
-                onChange={(e) => setClientId(e.target.value)}
+                value={login}
+                onChange={(e) => setLogin(e.target.value)}
                 className="input-login"
                 required
                 placeholder=""
@@ -160,8 +114,8 @@ const PasswordLoginForm: React.FC = () => {
                 type="password"
                 name="password"
                 autoComplete="current-password"
-                value={clientSecret}
-                onChange={(e) => setClientSecret(e.target.value)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="input-login"
                 required
                 placeholder=""

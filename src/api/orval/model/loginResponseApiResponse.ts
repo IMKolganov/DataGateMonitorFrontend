@@ -4,11 +4,11 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
-import type { SystemSecretStatusResponse } from "./systemSecretStatusResponse";
+import type { LoginResponse } from "./loginResponse";
 
-export interface SystemSecretStatusResponseApiResponse {
+export interface LoginResponseApiResponse {
   success?: boolean;
   /** @nullable */
   message?: string | null;
-  data?: SystemSecretStatusResponse;
+  data?: LoginResponse;
 }
