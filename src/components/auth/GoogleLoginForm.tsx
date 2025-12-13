@@ -5,6 +5,7 @@ import type {
     GoogleLoginResponse,
 } from "../../api/orval/model";
 import { scheduleAutoLogout } from "../../utils/jwt-utils";
+import { getRuntimeEnv } from "../../utils/runtimeEnv";
 
 declare global {
     interface Window {
@@ -106,8 +107,8 @@ const GoogleLoginForm: React.FC = () => {
         const initGoogle = async () => {
             setScriptReady(false);
 
-            const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-            if (!clientId) {
+            const { googleClientId } = getRuntimeEnv();
+            if (!googleClientId) {
                 setError("Google client ID is not configured (VITE_GOOGLE_CLIENT_ID).");
                 return;
             }
@@ -124,7 +125,7 @@ const GoogleLoginForm: React.FC = () => {
                 }
 
                 window.google.accounts.id.initialize({
-                    client_id: clientId,
+                    client_id: googleClientId,
                     callback: (response: any) => {
                         if (response && response.credential) {
                             void handleGoogleCredential(response.credential);
