@@ -9,6 +9,8 @@ import useWebSocketService from "../../hooks/useWebSocketService.ts";
 import ServerItem from "./ServerItem.tsx";
 import ServiceControls from "../ServiceControls.tsx";
 
+import { getCurrentUser, isAdmin } from "../../utils/auth";
+
 // orval-generated imports
 import {
   getApiOpenVpnServersGetAllWithStatus,
@@ -99,6 +101,8 @@ const coerceStatus = (input: unknown): ServiceStatus => {
 const ServerList: React.FC = () => {
   const [servers, setServers] = useState<ServerWithStatus[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const user = getCurrentUser();
+  const canAddServer = isAdmin(user);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -262,9 +266,15 @@ const ServerList: React.FC = () => {
       <div className="header-container">
         <div className="header-bar">
           <div className="left-buttons">
-            <button className="btn primary" onClick={() => navigate("/servers/add")}>
-              <span className="icon">{FaPlus({ className: "icon" })}</span> Add Server
-            </button>
+            {canAddServer && (
+                <button
+                    className="btn primary"
+                    onClick={() => navigate("/servers/add")}
+                >
+                  <span className="icon">{FaPlus({ className: "icon" })}</span>
+                  Add Server
+                </button>
+            )}
 
             <button className="btn secondary" onClick={loadServers} disabled={loading}>
               <span className={`icon ${loading ? "icon-spin" : ""}`}>
