@@ -23,7 +23,7 @@ export function ServerDetails() {
     const canSeeAdminTabs = isAdmin(user);
 
     const allTabs: Tab[] = [
-        { label: "General", path: "" },
+        { label: "General", path: "", adminOnly: true  },
         { label: "Manage Certificates", path: "certificates", adminOnly: true },
         { label: "Web console", path: "console", adminOnly: true },
         { label: "Configurations", path: "ovpn-file-config", adminOnly: true },
