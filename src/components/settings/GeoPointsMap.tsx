@@ -8,11 +8,11 @@ import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { toast } from "react-toastify";
 
-import { getApiOpenVpnClientsOverviewPoints } from "../api/orval/open-vpn-server-clients/open-vpn-server-clients";
+import { getApiOpenVpnClientsOverviewPoints } from "../../api/orval/open-vpn-server-clients/open-vpn-server-clients.ts";
 import type {
     GeoPointAggDto,
     GetApiOpenVpnClientsOverviewPointsParams,
-} from "../api/orval/model";
+} from "../../api/orval/model";
 
 type GeoPointsMapProps = {
     from: Date | string;

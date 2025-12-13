@@ -1,16 +1,16 @@
 import React, { useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
-import StyledDataGrid from "./TableStyle";
-import CustomThemeProvider from "./ThemeProvider";
+import StyledDataGrid from "../ui/TableStyle.tsx";
+import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import { FaBan, FaUserShield } from "react-icons/fa";
-import type { TelegramBotUserDto, TelegramUserActionRequest } from "../api/orval/model";
+import type { TelegramBotUserDto, TelegramUserActionRequest } from "../../api/orval/model";
 import {
   usePostApiTgbotUsersBlock,
   usePostApiTgbotUsersUnblock,
   usePostApiTgbotUsersSetAdmin,
   usePostApiTgbotUsersUnsetAdmin,
-} from "../api/orval/telegram-bot-user/telegram-bot-user";
-import "../css/Table.css";
+} from "../../api/orval/telegram-bot-user/telegram-bot-user.ts";
+import "../../css/Table.css";
 
 interface TelegramBotUsersTableProps {
   users: TelegramBotUserDto[];

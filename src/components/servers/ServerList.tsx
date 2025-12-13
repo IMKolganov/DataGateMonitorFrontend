@@ -3,20 +3,22 @@ import React, { useState, useEffect } from "react";
 import { FaSyncAlt, FaPlus } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
-import "../css/ServerList.css";
+import "../../css/ServerList.css";
 
-import useWebSocketService from "../hooks/useWebSocketService";
-import ServerItem from "./ServerItem";
-import ServiceControls from "./ServiceControls";
+import useWebSocketService from "../../hooks/useWebSocketService.ts";
+import ServerItem from "./ServerItem.tsx";
+import ServiceControls from "../ServiceControls.tsx";
+
+import { getCurrentUser, isAdmin } from "../../utils/auth";
 
 // orval-generated imports
 import {
   getApiOpenVpnServersGetAllWithStatus,
   deleteApiOpenVpnServersDeleteVpnServerId,
-} from "../api/orval/open-vpn-servers/open-vpn-servers";
+} from "../../api/orval/open-vpn-servers/open-vpn-servers.ts";
 
-import { ServiceStatus } from "../api/orval/model";
-import type { ServiceStatusDto } from "../api/orval/model";
+import { ServiceStatus } from "../../api/orval/model";
+import type { ServiceStatusDto } from "../../api/orval/model";
 
 type ApiServerItem = {
   openVpnServerResponses?: { openVpnServer?: any; id?: number } | any;
@@ -99,6 +101,8 @@ const coerceStatus = (input: unknown): ServiceStatus => {
 const ServerList: React.FC = () => {
   const [servers, setServers] = useState<ServerWithStatus[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const user = getCurrentUser();
+  const canAddServer = isAdmin(user);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -262,9 +266,15 @@ const ServerList: React.FC = () => {
       <div className="header-container">
         <div className="header-bar">
           <div className="left-buttons">
-            <button className="btn primary" onClick={() => navigate("/servers/add")}>
-              <span className="icon">{FaPlus({ className: "icon" })}</span> Add Server
-            </button>
+            {canAddServer && (
+                <button
+                    className="btn primary"
+                    onClick={() => navigate("/servers/add")}
+                >
+                  <span className="icon">{FaPlus({ className: "icon" })}</span>
+                  Add Server
+                </button>
+            )}
 
             <button className="btn secondary" onClick={loadServers} disabled={loading}>
               <span className={`icon ${loading ? "icon-spin" : ""}`}>
@@ -290,7 +300,11 @@ const ServerList: React.FC = () => {
                 <li
                   key={id}
                   className={`server-item clickable ${selectedServerId === id ? "selected" : ""}`}
-                  onClick={() => navigate(`/servers/${id}/`)}
+                  onClick={() =>
+                      canAddServer
+                          ? navigate(`/servers/${id}/`)
+                          : navigate(`/servers/${id}/statistics`)
+                  }
                 >
                   <ServerItem
                     server={(server.__raw as any) ?? server.openVpnServerResponses}
@@ -302,8 +316,9 @@ const ServerList: React.FC = () => {
                     wsCountConnectedClients={server.wsCountConnectedClients}
                     wsCountSessions={server.wsCountSessions}
                     onView={(id) => {
-                      if (isMobile) navigate(`/servers/${id}/`);
-                      else navigate(`/servers/${id}/`, { replace: true });
+                      const target = canAddServer ? `/servers/${id}/` : `/servers/${id}/statistics`;
+                      if (isMobile) navigate(target);
+                      else navigate(target, { replace: true });
                     }}
                     onEdit={(id) => navigate(`/servers/edit/${id}`)}
                     onDelete={handleDelete}

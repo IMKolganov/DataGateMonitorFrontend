@@ -1,7 +1,7 @@
 // src/pages/Certificates.tsx
 import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
-import CertificatesData from "../components/CertificatesData";
+import CertificatesData from "../components/certs/CertificatesData.tsx";
 import "../css/Certificates.css";
 
 // Import generated model type

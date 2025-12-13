@@ -2,13 +2,13 @@
 import React, { useState, useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaTrash, FaCopy } from "react-icons/fa";
-import StyledDataGrid from "../components/TableStyle";
-import CustomThemeProvider from "../components/ThemeProvider";
+import StyledDataGrid from "../ui/TableStyle.tsx";
+import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import { toast } from "react-toastify";
 
-import type { ApplicationDto, RevokeApplicationRequest } from "../api/orval/model";
-import { usePostApiApplicationsRevoke } from "../api/orval/applications/applications";
-import "../css/Table.css";
+import type { ApplicationDto, RevokeApplicationRequest } from "../../api/orval/model";
+import { usePostApiApplicationsRevoke } from "../../api/orval/applications/applications.ts";
+import "../../css/Table.css";
 
 interface ApplicationTableProps {
   applications: ApplicationDto[];

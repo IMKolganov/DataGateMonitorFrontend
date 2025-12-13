@@ -5,18 +5,20 @@ import "../css/ServerDetails.css";
 import { FaSync } from "react-icons/fa";
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
-import ServerDetailsInfoDefault from "../components/ServerDetailsInfo";
+import ServerDetailsInfoDefault from "../components/servers/ServerDetailsInfo.tsx";
 
 import {
     useGetApiOpenVpnClientsGetAllConnected,
     useGetApiOpenVpnClientsGetAllHistory,
 } from "../api/orval/open-vpn-server-clients/open-vpn-server-clients";
+
 import type {
     GetApiOpenVpnClientsGetAllConnectedParams,
     GetApiOpenVpnClientsGetAllHistoryParams,
     ConnectedClientsResponse,
-    ConnectedClientsResponseApiResponse,
     VpnClientInfoDto,
+    OpenVpnServerWithStatusDto,
+    OpenVpnServerDto,
 } from "../api/orval/model";
 
 import {
@@ -29,48 +31,6 @@ const ServerDetailsInfo = ServerDetailsInfoDefault as ComponentType<{
     toHumanReadableSize: (bytes: number) => string;
     loading?: boolean;
 }>;
-
-interface FlatServer {
-    serverName: string;
-    isOnline?: boolean;
-    isDefault?: boolean;
-    apiUrl?: string | null;
-}
-
-interface ServerWithStatusPayload {
-    openVpnServerWithStatus: {
-        openVpnServerResponses?: { openVpnServer?: FlatServer };
-        openVpnServer?: FlatServer;
-        server?: FlatServer;
-        openVpnServerStatusLogResponse?: unknown;
-        totalBytesIn?: number;
-        totalBytesOut?: number;
-        countConnectedClients?: number;
-        countSessions?: number;
-    };
-}
-
-interface BasicServerPayload {
-    openVpnServer: FlatServer;
-}
-
-type ConnectedClientsUnion =
-    | ConnectedClientsResponse
-    | ConnectedClientsResponseApiResponse
-    | undefined;
-
-function unwrapConnectedClientsResponse(
-    input: ConnectedClientsUnion
-): ConnectedClientsResponse | undefined {
-    if (!input) return undefined;
-
-    if ("totalCount" in input || "vpnClients" in input) {
-        return input as ConnectedClientsResponse;
-    }
-
-    const api = input as ConnectedClientsResponseApiResponse;
-    return api.data;
-}
 
 export function GeneralServerDetails() {
     const { vpnServerId } = useParams<{ vpnServerId?: string }>();
@@ -122,12 +82,9 @@ export function GeneralServerDetails() {
     const loadingClients =
         (isLive ? connectedQuery.isFetching : historyQuery.isFetching) ?? false;
 
-    const rawConnected = connectedQuery.data as ConnectedClientsUnion;
-    const rawHistory = historyQuery.data as ConnectedClientsUnion;
-
     const activeClientsResponse: ConnectedClientsResponse | undefined = isLive
-        ? unwrapConnectedClientsResponse(rawConnected)
-        : unwrapConnectedClientsResponse(rawHistory);
+        ? connectedQuery.data
+        : historyQuery.data;
 
     const clients: VpnClientInfoDto[] = activeClientsResponse?.vpnClients ?? [];
 
@@ -159,72 +116,30 @@ export function GeneralServerDetails() {
 
     const loadingServer = serverWithStatusQuery.isFetching || serverBasicQuery.isFetching;
 
+    const serverWithStatus: OpenVpnServerWithStatusDto | undefined =
+        serverWithStatusQuery.data?.openVpnServerWithStatus;
+
+    const serverEntity: OpenVpnServerDto | undefined =
+        serverWithStatus?.openVpnServerResponses?.openVpnServer ??
+        serverBasicQuery.data?.openVpnServer;
+
+    const serverLocation = useMemo<[number, number] | null>(() => {
+        const lat = serverEntity?.latitude;
+        const lon = serverEntity?.longitude;
+
+        if (typeof lat === "number" && typeof lon === "number") return [lat, lon];
+        return null;
+    }, [serverEntity]);
+
+    const serverName = serverEntity?.serverName ?? null;
+
     const serverInfo = useMemo(() => {
-        const wsData = serverWithStatusQuery.data as unknown;
-
-        if (
-            wsData &&
-            typeof wsData === "object" &&
-            "openVpnServerWithStatus" in wsData
-        ) {
-            const wsTyped = wsData as ServerWithStatusPayload;
-            const w = wsTyped.openVpnServerWithStatus;
-
-            const ov: FlatServer | null =
-                w.openVpnServerResponses?.openVpnServer ??
-                w.openVpnServer ??
-                w.server ??
-                null;
-
-            const flatServer = ov
-                ? {
-                    serverName: ov.serverName,
-                    isOnline: !!ov.isOnline,
-                    isDefault: !!ov.isDefault,
-                    apiUrl: ov.apiUrl ?? "",
-                }
-                : null;
-
-            return {
-                openVpnServerResponses: flatServer,
-                openVpnServerStatusLogResponse: w.openVpnServerStatusLogResponse ?? null,
-                totalBytesIn: w.totalBytesIn ?? 0,
-                totalBytesOut: w.totalBytesOut ?? 0,
-                countConnectedClients: w.countConnectedClients ?? 0,
-                countSessions: w.countSessions ?? 0,
-            };
+        if (serverWithStatusQuery.data?.openVpnServerWithStatus) {
+            return serverWithStatusQuery.data.openVpnServerWithStatus;
         }
 
-        const basicData = serverBasicQuery.data as unknown;
-        if (
-            basicData &&
-            typeof basicData === "object" &&
-            "openVpnServer" in basicData
-        ) {
-            const basicTyped = basicData as BasicServerPayload;
-            const ov = basicTyped.openVpnServer;
-
-            return {
-                openVpnServerResponses: {
-                    serverName: ov.serverName,
-                    isOnline: !!ov.isOnline,
-                    isDefault: !!ov.isDefault,
-                    apiUrl: ov.apiUrl ?? "",
-                },
-                openVpnServerStatusLogResponse: {
-                    upSince: null,
-                    version: null,
-                    serverLocalIp: null,
-                    serverRemoteIp: null,
-                    bytesIn: 0,
-                    bytesOut: 0,
-                    sessionId: null,
-                },
-                totalBytesIn: 0,
-                totalBytesOut: 0,
-                countConnectedClients: 0,
-                countSessions: 0,
-            };
+        if (serverBasicQuery.data) {
+            return serverBasicQuery.data;
         }
 
         return null;
@@ -237,6 +152,7 @@ export function GeneralServerDetails() {
     const handleRefresh = () => {
         if (isLive) connectedQuery.refetch();
         else historyQuery.refetch();
+
         serverWithStatusQuery.refetch();
         serverBasicQuery.refetch();
     };
@@ -295,7 +211,7 @@ export function GeneralServerDetails() {
             />
 
             <h3>VPN Client Locations</h3>
-            <VpnMap clients={clients} />
+            <VpnMap clients={clients} serverLocation={serverLocation} serverName={serverName} />
         </div>
     );
 }

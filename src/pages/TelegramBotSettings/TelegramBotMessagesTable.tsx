@@ -1,8 +1,8 @@
 // src/pages/TelegramBotSettings/TelegramBotMessagesTable.tsx
 import React, { useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
-import StyledDataGrid from "../../components/TableStyle";
-import CustomThemeProvider from "../../components/ThemeProvider";
+import StyledDataGrid from "../../components/ui/TableStyle.tsx";
+import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
 import "../../css/Table.css";
 import type { MessageDto } from "../../api/orval/model";
 
