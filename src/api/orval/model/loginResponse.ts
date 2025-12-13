@@ -5,9 +5,13 @@
  * OpenAPI spec version: v1
  */
 
-export interface AuthResponse {
-  /** @nullable */
-  message?: string | null;
+export interface LoginResponse {
   /** @nullable */
   token?: string | null;
+  expiration?: string;
+  userId?: number;
+  /** @nullable */
+  displayName?: string | null;
+  /** @nullable */
+  email?: string | null;
 }

@@ -10,6 +10,8 @@ import "react-toastify/dist/ReactToastify.css";
 import "./css/ToastifyDark.css";
 import "./App.css";
 
+import LoginPage from "./components/auth/LoginPage";
+
 // Lazy pages
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -23,7 +25,6 @@ const GeneralTab = lazy(() => import("./pages/GeneralServerDetails"));
 const CertificatesTab = lazy(() => import("./pages/Certificates"));
 const WebConsole = lazy(() => import("./pages/WebConsole"));
 const Events = lazy(() => import("./pages/Events"));
-import LoginPage from "./components/auth/LoginPage";
 const GeneralSettings = lazy(() => import("./pages/GeneralSettings"));
 const GeoLiteDbSettings = lazy(() => import("./pages/GeoLiteDbSettings"));
 const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
