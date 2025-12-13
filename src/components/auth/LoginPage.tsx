@@ -4,6 +4,7 @@ import PasswordLoginForm from "./PasswordLoginForm";
 import GoogleLoginForm from "./GoogleLoginForm";
 import TelegramCodeLoginForm from "./TelegramCodeLoginForm";
 import {FaTelegramPlane} from "react-icons/fa";
+import {appVersion} from "../../version.ts";
 
 const LoginPage: React.FC = () => {
     const [showTelegramForm, setShowTelegramForm] = useState(false);
@@ -57,6 +58,7 @@ const LoginPage: React.FC = () => {
                         New to OpenVPN Gate Monitor?{" "}
                         <a href="/register">Create an account</a>
                     </p>
+                    <p>© {new Date().getFullYear()} OpenVPN Gate Monitor v.{appVersion}</p>
                 </div>
             </div>
         </div>
