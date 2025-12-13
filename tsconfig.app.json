@@ -27,7 +27,8 @@
     "skipLibCheck": true,
 
     "jsx": "react-jsx",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src", "vite-env.d.ts"]
 }

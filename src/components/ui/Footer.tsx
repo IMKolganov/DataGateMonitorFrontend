@@ -1,7 +1,7 @@
 // src/components/Footer.tsx
 import React from "react";
-import { appVersion } from "../version";
-import "../css/Footer.css";
+import { appVersion } from "../../version.ts";
+import "../../css/Footer.css";
 
 const Footer: React.FC = () => {
   return (

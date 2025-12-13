@@ -2,8 +2,8 @@
 import React from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
-import StyledDataGrid from "../components/TableStyle";
-import CustomThemeProvider from "../components/ThemeProvider";
+import StyledDataGrid from "./ui/TableStyle.tsx";
+import CustomThemeProvider from "./ui/ThemeProvider.tsx";
 import { Link, useParams } from "react-router-dom";
 import type { VpnClientInfoDto } from "../api/orval/model";
 

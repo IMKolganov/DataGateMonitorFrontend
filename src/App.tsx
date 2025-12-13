@@ -3,12 +3,14 @@ import type { ReactNode } from "react";
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { Header } from "./components/Header";
-import Footer from "./components/Footer";
-import { LoadingOverlay } from "./components/LoadingOverlay";
+import { Header } from "./components/ui/Header.tsx";
+import Footer from "./components/ui/Footer.tsx";
+import { LoadingOverlay } from "./components/ui/LoadingOverlay.tsx";
 import "react-toastify/dist/ReactToastify.css";
 import "./css/ToastifyDark.css";
 import "./App.css";
+
+import LoginPage from "./components/auth/LoginPage";
 
 // Lazy pages
 const About = lazy(() => import("./pages/About"));
@@ -23,7 +25,6 @@ const GeneralTab = lazy(() => import("./pages/GeneralServerDetails"));
 const CertificatesTab = lazy(() => import("./pages/Certificates"));
 const WebConsole = lazy(() => import("./pages/WebConsole"));
 const Events = lazy(() => import("./pages/Events"));
-const Login = lazy(() => import("./pages/Login"));
 const GeneralSettings = lazy(() => import("./pages/GeneralSettings"));
 const GeoLiteDbSettings = lazy(() => import("./pages/GeoLiteDbSettings"));
 const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
@@ -62,7 +63,7 @@ function App() {
       <Router>
         <Layout>
           <Routes>
-            <Route path="/login" element={withSuspense(<Login />)} />
+            <Route path="/login" element={withSuspense(<LoginPage />)} />
 
             <Route
               path="/*"

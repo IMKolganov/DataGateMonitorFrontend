@@ -1,16 +1,16 @@
 // src/components/CertificatesTable.tsx
 import React, { useState, useCallback } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
-import StyledDataGrid from "../components/TableStyle";
-import CustomThemeProvider from "../components/ThemeProvider";
+import StyledDataGrid from "../ui/TableStyle.tsx";
+import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type {
   MonitorServerCertificate as Certificate,
   RevokeCertificateRequest,
-} from "../api/orval/model";
-import { postApiOpenVpnCertsRevoke } from "../api/orval/open-vpn-server-certs/open-vpn-server-certs";
-import "../css/Table.css";
+} from "../../api/orval/model";
+import { postApiOpenVpnCertsRevoke } from "../../api/orval/open-vpn-server-certs/open-vpn-server-certs.ts";
+import "../../css/Table.css";
 import { toast } from "react-toastify";
-import { formatDateWithOffset } from "../utils/utils";
+import { formatDateWithOffset } from "../../utils/utils.ts";
 
 type CertificatesTableProps = {
   certificates: Certificate[];

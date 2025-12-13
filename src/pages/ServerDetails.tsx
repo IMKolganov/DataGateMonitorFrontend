@@ -4,100 +4,109 @@ import { useMemo } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import "../css/ServerDetails.css";
 
-// orval
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/open-vpn-servers/open-vpn-servers";
+import { getCurrentUser, isAdmin } from "../utils/auth";
 import type { OpenVpnServerResponse } from "../api/orval/model";
 
-// Helper to unwrap ApiResponse<T>
-function unwrap<T>(resp: any): T | undefined {
-  if (!resp) return undefined;
-  if (typeof resp === "object" && "data" in resp) return resp.data as T;
-  return resp as T;
-}
+type Tab = {
+    label: string;
+    path: string;
+    adminOnly?: boolean;
+};
 
 export function ServerDetails() {
-  const navigate = useNavigate();
-  const { vpnServerId = "" } = useParams<{ vpnServerId: string }>();
-  const location = useLocation();
+    const navigate = useNavigate();
+    const { vpnServerId = "" } = useParams<{ vpnServerId: string }>();
+    const location = useLocation();
 
-  const tabs = [
-    { label: "General", path: "" },
-    { label: "Manage Certificates", path: "certificates" },
-    { label: "Web console", path: "console" },
-    { label: "Configurations", path: "ovpn-file-config" },
-    { label: "Statistics", path: "statistics" },
-    { label: "Events", path: "events" },
-  ];
+    const user = getCurrentUser();
+    const canSeeAdminTabs = isAdmin(user);
 
-  // current subpath after /servers/:vpnServerId/
-  const currentPath =
-    location.pathname.split(`/servers/${vpnServerId}/`)[1] ?? "";
+    const allTabs: Tab[] = [
+        { label: "General", path: "", adminOnly: true  },
+        { label: "Manage Certificates", path: "certificates", adminOnly: true },
+        { label: "Web console", path: "console", adminOnly: true },
+        { label: "Configurations", path: "ovpn-file-config", adminOnly: true },
+        { label: "Statistics", path: "statistics" },
+        { label: "Events", path: "events" },
+    ];
 
-  const numericId = useMemo(
-    () => (vpnServerId ? Number(vpnServerId) : undefined),
-    [vpnServerId]
-  );
+    const tabs = useMemo(() => {
+        if (canSeeAdminTabs) return allTabs;
+        return allTabs.filter((t) => !t.adminOnly);
+    }, [canSeeAdminTabs]);
 
-  const serverQuery = useGetApiOpenVpnServersGetVpnServerId(numericId ?? 0, {
-    query: {
-      enabled: Number.isFinite(numericId as number),
-      staleTime: 10_000,
-      retry: 1,
-    },
-  });
+    const currentPath =
+        location.pathname.split(`/servers/${vpnServerId}/`)[1] ?? "";
 
-  const payload = unwrap<OpenVpnServerResponse>(serverQuery.data);
-  const vpnServerName = payload?.openVpnServer?.serverName ?? "(unknown)";
+    const numericId = useMemo(
+        () => (vpnServerId ? Number(vpnServerId) : undefined),
+        [vpnServerId]
+    );
 
-  return (
-    <div>
-      <h2>
-        Server Details for Server{" "}
-        {serverQuery.isLoading ? "…" : vpnServerName || vpnServerId}
-      </h2>
+    const serverQuery = useGetApiOpenVpnServersGetVpnServerId(numericId ?? 0, {
+        query: {
+            enabled: Number.isFinite(numericId as number),
+            staleTime: 10_000,
+            retry: 1,
+        },
+    });
 
-      <div className="header-container">
-        <div className="header-bar">
-          <div className="left-buttons">
-            <button className="btn secondary" onClick={() => navigate("/")}>
-              {FaArrowLeft({ className: "icon" })} Back
-            </button>
-          </div>
+    const payload = serverQuery.data as OpenVpnServerResponse | undefined;
+    const vpnServerName = payload?.openVpnServer?.serverName ?? "(unknown)";
+
+    const safeCurrentPath = useMemo(() => {
+        const exists = tabs.some((t) => t.path === currentPath);
+        return exists ? currentPath : "";
+    }, [currentPath, tabs]);
+
+    return (
+        <div>
+            <h2>
+                Server Details for Server{" "}
+                {serverQuery.isLoading ? "…" : vpnServerName || vpnServerId}
+            </h2>
+
+            <div className="header-container">
+                <div className="header-bar">
+                    <div className="left-buttons">
+                        <button className="btn secondary" onClick={() => navigate("/")}>
+                            {FaArrowLeft({ className: "icon" })} Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="tabs desktop-tabs">
+                {tabs.map((tab) => (
+                    <NavLink
+                        key={tab.path}
+                        to={`/servers/${vpnServerId}/${tab.path}`}
+                        end={tab.path === ""}
+                        className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+                    >
+                        {tab.label}
+                    </NavLink>
+                ))}
+            </div>
+
+            <select
+                className="tabs-dropdown mobile-tabs"
+                value={safeCurrentPath}
+                onChange={(e) => navigate(`/servers/${vpnServerId}/${e.target.value}`)}
+            >
+                {tabs.map((tab) => (
+                    <option key={tab.path} value={tab.path}>
+                        {tab.label}
+                    </option>
+                ))}
+            </select>
+
+            <div className="tab-content">
+                <Outlet />
+            </div>
         </div>
-      </div>
-
-      {/* Desktop tabs */}
-      <div className="tabs desktop-tabs">
-        {tabs.map((tab) => (
-          <NavLink
-            key={tab.path}
-            to={`/servers/${vpnServerId}/${tab.path}`}
-            end={tab.path === ""}
-            className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-          >
-            {tab.label}
-          </NavLink>
-        ))}
-      </div>
-
-      {/* Mobile dropdown */}
-      <select
-        className="tabs-dropdown mobile-tabs"
-        value={currentPath}
-        onChange={(e) => navigate(`/servers/${vpnServerId}/${e.target.value}`)}
-      >
-        {tabs.map((tab) => (
-          <option key={tab.path} value={tab.path}>
-            {tab.label}
-          </option>
-        ))}
-      </select>
-
-      <div className="tab-content">
-        <Outlet />
-      </div>
-    </div>
-  );
+    );
 }
 
 export default ServerDetails;

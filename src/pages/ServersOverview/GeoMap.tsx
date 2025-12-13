@@ -1,5 +1,5 @@
 // src/pages/ServersOverview/GeoMap.tsx
-import GeoPointsMap from "../../components/GeoPointsMap";
+import GeoPointsMap from "../../components/settings/GeoPointsMap.tsx";
 
 type Props = {
   from: Date | string;
