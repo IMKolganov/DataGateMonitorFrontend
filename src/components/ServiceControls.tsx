@@ -1,113 +1,144 @@
 // src/components/ServiceControls.tsx
 import { FaPlay } from "react-icons/fa";
 import { useEffect, useMemo, useState } from "react";
-import type { ServiceStatusDto } from "../api/orval/model/serviceStatusDto";
-import type { ServiceStatus } from "../api/orval/model/serviceStatus";
+import type { ServiceStatusDto } from "../api/orval/model";
+import type { ServiceStatus } from "../api/orval/model";
 
 type Props = {
   serviceData: Record<number, ServiceStatusDto>;
   onRunNow: () => void;
 };
 
-function toLabel(s?: ServiceStatus): "Idle" | "Running" | "Error" {
-  // orval ServiceStatus expected: 0 | 1 | 2
-  if (s === 1) return "Running";
-  if (s === 2) return "Error";
+type UiStatus = "Idle" | "Running" | "Error";
+
+function normalizeStatus(s?: ServiceStatus | string | number | null): UiStatus {
+  if (s === 1 || s === "Running" || s === "running") return "Running";
+  if (s === 2 || s === "Error" || s === "error") return "Error";
   return "Idle";
 }
 
-function isValidNextRun(x?: string): boolean {
-  if (!x || x === "N/A") return false;
-  const ms = new Date(x).getTime();
-  return Number.isFinite(ms);
+function toMs(v: unknown): number | null {
+  if (typeof v === "string") {
+    if (!v || v === "N/A") return null;
+    const ms = new Date(v).getTime();
+    return Number.isFinite(ms) ? ms : null;
+  }
+
+  if (v instanceof Date) {
+    const ms = v.getTime();
+    return Number.isFinite(ms) ? ms : null;
+  }
+
+  return null;
+}
+
+function getNextRunSeconds(entries: ServiceStatusDto[]): number | null {
+  // 1) Prefer nextRunInSeconds if backend ever sends it (common with SignalR push)
+  const secondsCandidates = entries
+      .map((e) => (e as any)?.nextRunInSeconds)
+      .filter((x: unknown) => typeof x === "number" && Number.isFinite(x) && x >= 0) as number[];
+
+  if (secondsCandidates.length > 0) return Math.min(...secondsCandidates);
+
+  // 2) Fallback to nextRunTime (ISO string)
+  const msCandidates = entries
+      .map((e) => toMs((e as any)?.nextRunTime))
+      .filter((x): x is number => typeof x === "number");
+
+  if (msCandidates.length === 0) return null;
+
+  const soonestMs = Math.min(...msCandidates);
+  const diffSec = Math.max(0, Math.floor((soonestMs - Date.now()) / 1000));
+  return diffSec;
 }
 
 export default function ServiceControls({ serviceData, onRunNow }: Props) {
-  const entries = useMemo(() => Object.values(serviceData), [serviceData]);
+  const entries = useMemo(() => Object.values(serviceData ?? {}), [serviceData]);
 
   const totals = useMemo(() => {
     let clients = 0;
     let sessions = 0;
+
     for (const s of entries) {
       if (typeof s.countConnectedClients === "number") clients += s.countConnectedClients;
       if (typeof s.countSessions === "number") sessions += s.countSessions;
     }
+
     return { clients, sessions };
   }, [entries]);
+
+  const anyRunning = useMemo(
+      () => entries.some((e) => normalizeStatus((e as any)?.status) === "Running"),
+      [entries]
+  );
+
+  const anyError = useMemo(
+      () => entries.some((e) => normalizeStatus((e as any)?.status) === "Error"),
+      [entries]
+  );
 
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   useEffect(() => {
     const tick = () => {
-      const anyRunning = entries.some((e) => toLabel(e.status) === "Running");
       if (anyRunning) {
         setTimeLeft(0);
         return;
       }
 
-      const validTimes = entries
-        .map((e) => e.nextRunTime)
-        .filter(isValidNextRun)
-        .map((t) => new Date(String(t)).getTime());
-
-      if (validTimes.length === 0) {
-        setTimeLeft(null);
-        return;
-      }
-
-      const soonest = Math.min(...validTimes);
-      const diffSec = Math.max(0, Math.floor((soonest - Date.now()) / 1000));
-      setTimeLeft(diffSec);
+      const sec = getNextRunSeconds(entries);
+      setTimeLeft(sec);
     };
 
     tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [entries]);
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [entries, anyRunning]);
 
   const statusDescription = useMemo(() => {
-    if (entries.some((e) => toLabel(e.status) === "Running")) return "The service is currently running.";
-    if (entries.some((e) => toLabel(e.status) === "Error")) return "There is an error with the service.";
+    if (anyRunning) return "The service is currently running.";
+    if (anyError) return "There is an error with the service.";
     return "The service is idle.";
-  }, [entries]);
+  }, [anyRunning, anyError]);
 
   const statusColor = useMemo(() => {
-    if (entries.some((e) => toLabel(e.status) === "Running")) return "#1E90FF";
-    if (entries.some((e) => toLabel(e.status) === "Error")) return "red";
+    if (anyRunning) return "#1E90FF";
+    if (anyError) return "red";
     return "green";
-  }, [entries]);
+  }, [anyRunning, anyError]);
 
   return (
-    <div className="service-status-container">
-      <h2>Service Control</h2>
-      <div style={{ borderTop: "1px solid #d1d5da" }} />
+      <div className="service-status-container">
+        <h2>Service Control</h2>
+        <div style={{ borderTop: "1px solid #d1d5da" }} />
 
-      <p>
-        <strong>Service Status:</strong>{" "}
-        <span style={{ color: statusColor }}>{statusDescription}</span>
-      </p>
+        <p>
+          <strong>Service Status:</strong>{" "}
+          <span style={{ color: statusColor }}>{statusDescription}</span>
+        </p>
 
-      <p>
-        <strong>Next Run:</strong>{" "}
-        {timeLeft !== null ? `${timeLeft}s` : "N/A"}
-      </p>
+        <p>
+          <strong>Next Run:</strong>{" "}
+          {timeLeft !== null ? `${timeLeft}s` : "N/A"}
+        </p>
 
-      <p>
-        <strong>Total Connected Clients:</strong> {totals.clients}
-      </p>
-      <p>
-        <strong>Total Sessions:</strong> {totals.sessions.toLocaleString()}
-      </p>
+        <p>
+          <strong>Total Connected Clients:</strong> {totals.clients}
+        </p>
 
-      <button className="btn primary" onClick={onRunNow}>
-        <FaPlay className="icon" /> Sync All Now
-      </button>
+        <p>
+          <strong>Total Sessions:</strong> {totals.sessions.toLocaleString()}
+        </p>
 
-      <p className="description" style={{ marginTop: 12 }}>
-        This service periodically queries the OpenVPN server to collect data about connected clients
-        and stores this information in the database. Use the button below to manually trigger the service
-        and update the data immediately.
-      </p>
-    </div>
+        <button className="btn primary" onClick={onRunNow} disabled={anyRunning}>
+          <FaPlay className="icon" /> Sync All Now
+        </button>
+
+        <p className="description" style={{ marginTop: 12 }}>
+          This service periodically queries the OpenVPN server to collect data about connected clients
+          and stores this information in the database. Use the button below to manually trigger the service
+          and update the data immediately.
+        </p>
+      </div>
   );
 }

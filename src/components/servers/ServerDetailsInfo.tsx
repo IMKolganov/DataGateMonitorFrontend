@@ -25,15 +25,16 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, l
   const safe = serverInfo ?? {};
 
   const server =
-    safe.openVpnServerResponses ??
-    (safe.openVpnServer
-      ? {
-          serverName: safe.openVpnServer.serverName,
-          isOnline: !!safe.openVpnServer.isOnline,
-          isDefault: !!safe.openVpnServer.isDefault,
-          apiUrl: safe.openVpnServer.apiUrl ?? "",
-        }
-      : null);
+      safe.openVpnServerResponses?.openVpnServer
+          ? {
+            ...safe.openVpnServerResponses.openVpnServer,
+            id: safe.openVpnServerResponses.id ?? safe.openVpnServerResponses.openVpnServer.id,
+          }
+          : safe.openVpnServer
+              ? safe.openVpnServer
+              : null;
+
+  console.log(server)
 
   const status = safe.openVpnServerStatusLogResponse ?? null;
 
@@ -50,7 +51,7 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, l
       <div className="server-header">
         <div className="server-meta">
           <strong className="server-name">
-            {loading ? <Skeleton width={220} height={16} /> : (server?.serverName ?? "(unknown)")}
+            {loading ? <Skeleton width={220} height={16} /> : (server?.serverName ?? "(unknown??)")}
           </strong>
         </div>
         <div className={`server-status ${server?.isOnline ? "status-online" : "status-offline"}`}>
