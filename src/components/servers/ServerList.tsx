@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
 import "../../css/ServerList.css";
 
-import useWebSocketService from "../../hooks/useWebSocketService";
+import useSignalRService from "../../hooks/useSignalRService";
 import ServerItem from "./ServerItem";
 import ServiceControls from "../ServiceControls";
 
@@ -88,7 +88,7 @@ const ServerList: React.FC = () => {
   const location = useLocation();
   const isMobile = useMediaQuery({ maxWidth: 768 });
 
-  const { serviceData, runServiceNow } = useWebSocketService();
+  const { serviceData, runServiceNow } = useSignalRService();
 
   const match = location.pathname.match(/\/servers\/(\d+)/);
   const selectedServerId = match ? Number.parseInt(match[1], 10) : null;
