@@ -79,7 +79,7 @@ export default function useSignalRService() {
                 const conn = new HubConnectionBuilder()
                     .withUrl(hubUrl, {
                         accessTokenFactory: () => localStorage.getItem("token") ?? "",
-                        transport: HttpTransportType.WebSockets | HttpTransportType.LongPolling,
+                        transport: HttpTransportType.WebSockets,
                     })
                     .withAutomaticReconnect([0, 2000, 5000, 10000])
                     .configureLogging(LogLevel.Information)
