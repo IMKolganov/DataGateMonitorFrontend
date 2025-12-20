@@ -35,19 +35,20 @@ function toDtos(raw: any): ServiceStatusDto[] {
             ? String(leaf.NextRunTime ?? leaf.nextRunTime)
             : "N/A";
 
+        const ccc = leaf.CountConnectedClients ?? leaf.countConnectedClients;
+        const cs = leaf.CountSessions ?? leaf.countSessions;
+        const tbi = leaf.TotalBytesIn ?? leaf.totalBytesIn;
+        const tbo = leaf.TotalBytesOut ?? leaf.totalBytesOut;
+
         result.push({
             vpnServerId,
             status,
             errorMessage: leaf.ErrorMessage ?? leaf.errorMessage ?? null,
             nextRunTime,
-            countConnectedClients: Number.isFinite(Number(leaf.CountConnectedClients))
-                ? Number(leaf.CountConnectedClients)
-                : undefined,
-            countSessions: Number.isFinite(Number(leaf.CountSessions))
-                ? Number(leaf.CountSessions)
-                : undefined,
-            totalBytesIn: Number.isFinite(Number(leaf.TotalBytesIn)) ? Number(leaf.TotalBytesIn) : undefined,
-            totalBytesOut: Number.isFinite(Number(leaf.TotalBytesOut)) ? Number(leaf.TotalBytesOut) : undefined,
+            countConnectedClients: Number.isFinite(Number(ccc)) ? Number(ccc) : undefined,
+            countSessions: Number.isFinite(Number(cs)) ? Number(cs) : undefined,
+            totalBytesIn: Number.isFinite(Number(tbi)) ? Number(tbi) : undefined,
+            totalBytesOut: Number.isFinite(Number(tbo)) ? Number(tbo) : undefined,
         });
     }
 
