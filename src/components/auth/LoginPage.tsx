@@ -13,10 +13,10 @@ const LoginPage: React.FC = () => {
         <div className="login-container">
             <div className="login-wrapper">
                 {/* Logo circle */}
-                <div className="login-logo-circle">Data Gate Monitor</div>
+                <div className="login-logo-circle"><img src="/favicon.png" alt="Logo" className="logo-icon-login" /></div>
 
                 {/* Title above the card (like GitHub) */}
-                <h1 className="login-page-title">Sign in to OpenVPN Gate Monitor</h1>
+                <h1 className="login-page-title">Sign in to DataGate Monitor</h1>
 
                 {/* Card */}
                 <div className="login">
@@ -55,10 +55,10 @@ const LoginPage: React.FC = () => {
                 {/* Footer under card */}
                 <div className="register-container">
                     <p>
-                        New to OpenVPN Gate Monitor?{" "}
-                        <a href="/register">Create an account</a>
+                        {/*New to OpenVPN Gate Monitor?{" "}*/}
+                        {/*<a href="/register">Create an account</a>*/}
                     </p>
-                    <p>© {new Date().getFullYear()} OpenVPN Gate Monitor v.{appVersion}</p>
+                    <p>© {new Date().getFullYear()} DataGate Monitor v.{appVersion}</p>
                 </div>
             </div>
         </div>
