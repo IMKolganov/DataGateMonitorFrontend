@@ -28,7 +28,11 @@
   height: 48px;
   margin-right: 8px;
 }
-
+.logo-icon-login {
+  width: 200px;
+  height: 200px;
+  margin-right: 8px;
+}
 
 .nav-links {
   list-style: none;
