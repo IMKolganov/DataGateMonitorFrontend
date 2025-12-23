@@ -1,5 +1,13 @@
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 import type { ChartPoint } from "./types";
+import type { TooltipProps } from "recharts";
+type TValue = number | string;
+type TName = string;
+
+const tooltipFormatter: TooltipProps<TValue, TName>["formatter"] = (value, name) => {
+  if (name === "Traffic, MB") return [`${value} MB`, name ?? ""];
+  return [value, name ?? ""];
+};
 
 export default function OverviewChart({
   data, loading, error,
@@ -31,12 +39,7 @@ export default function OverviewChart({
           <XAxis dataKey="label" stroke="#8b949e" tick={{ fill: "#8b949e", fontSize: 12 }} />
           <YAxis yAxisId="left"  stroke="#8b949e" tick={{ fill: "#8b949e", fontSize: 12 }} allowDecimals={false} width={48} />
           <YAxis yAxisId="right" orientation="right" stroke="#8b949e" tick={{ fill: "#8b949e", fontSize: 12 }} tickFormatter={(v) => `${v} MB`} width={64} />
-          <Tooltip
-            contentStyle={{ background: "#0d1117", border: "1px solid #30363d", color: "#c9d1d9" }}
-            labelStyle={{ color: "#c9d1d9" }}
-            cursor={{ stroke: "#30363d" }}
-            formatter={(value: any, name: string) => (name === "Traffic, MB" ? [`${value} MB`, name] : [value, name])}
-          />
+          <Tooltip formatter={tooltipFormatter} />
           <Legend wrapperStyle={{ color: "#c9d1d9" }} />
           <Area yAxisId="left"  type="monotone" dataKey="active" name="Sessions" stroke="#58a6ff" fill="url(#fillActive)" strokeWidth={2} dot={false} />
           <Area yAxisId="right" type="monotone" dataKey="mb"     name="Traffic, MB"    stroke="#3fb950" fill="url(#fillMb)"    strokeWidth={2} dot={false} />
