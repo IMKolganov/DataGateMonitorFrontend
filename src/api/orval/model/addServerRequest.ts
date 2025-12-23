@@ -16,6 +16,7 @@ export interface AddServerRequest {
   latitude?: number | null;
   /** @nullable */
   longitude?: number | null;
+  isEnableWss?: boolean;
   /** @nullable */
   quotaPlanIds?: number[] | null;
 }
