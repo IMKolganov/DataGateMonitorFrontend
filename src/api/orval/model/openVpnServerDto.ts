@@ -17,6 +17,7 @@ export interface OpenVpnServerDto {
   latitude?: number | null;
   /** @nullable */
   longitude?: number | null;
+  isEnableWss?: boolean;
   createDate?: string;
   lastUpdate?: string;
 }
