@@ -22,6 +22,7 @@ import type {
 
 import type {
   AddFileRequest,
+  DownloadFileByCnRequest,
   DownloadFileRequest,
   DownloadFileResponseApiResponse,
   OvpnFileResponseApiResponse,
@@ -1475,6 +1476,87 @@ export const usePostApiOpenVpnFilesDownloadFile = <
 > => {
   const mutationOptions =
     getPostApiOpenVpnFilesDownloadFileMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const postApiOpenVpnFilesDownloadFileByCn = (
+  downloadFileByCnRequest: DownloadFileByCnRequest,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<DownloadFileResponseApiResponse>({
+    url: `/api/open-vpn-files/download-file-by-cn`,
+    method: "POST",
+    headers: { "Content-Type": "application/json-patch+json" },
+    data: downloadFileByCnRequest,
+    signal,
+  });
+};
+
+export const getPostApiOpenVpnFilesDownloadFileByCnMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
+    TError,
+    { data: DownloadFileByCnRequest },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
+  TError,
+  { data: DownloadFileByCnRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiOpenVpnFilesDownloadFileByCn"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
+    { data: DownloadFileByCnRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiOpenVpnFilesDownloadFileByCn(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiOpenVpnFilesDownloadFileByCnMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>
+>;
+export type PostApiOpenVpnFilesDownloadFileByCnMutationBody =
+  DownloadFileByCnRequest;
+export type PostApiOpenVpnFilesDownloadFileByCnMutationError = unknown;
+
+export const usePostApiOpenVpnFilesDownloadFileByCn = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
+      TError,
+      { data: DownloadFileByCnRequest },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
+  TError,
+  { data: DownloadFileByCnRequest },
+  TContext
+> => {
+  const mutationOptions =
+    getPostApiOpenVpnFilesDownloadFileByCnMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };
