@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import "../../css/Header.css";
 import { FaDoorClosed } from "react-icons/fa";
 import { logout } from "../../api/apirequest.ts";
-import { getCurrentUser, isAdmin } from "../../utils/auth";
+import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 
 export function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
