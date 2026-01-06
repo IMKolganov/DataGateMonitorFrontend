@@ -10,7 +10,7 @@ import {
 import { BsClock, BsPerson, BsFillBookmarkStarFill } from "react-icons/bs";
 import { IoMdPerson } from "react-icons/io";
 import type { ServiceStatus, OpenVpnServerWithStatusDto } from "../../api/orval/model";
-import { getCurrentUser, isAdmin } from "../../utils/auth";
+import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 
 interface Props {
     server: OpenVpnServerWithStatusDto;

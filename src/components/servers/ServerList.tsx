@@ -9,7 +9,7 @@ import useSignalRService from "../../hooks/useSignalRService";
 import ServerItem from "./ServerItem";
 import ServiceControls from "../ServiceControls";
 
-import { getCurrentUser, isAdmin } from "../../utils/auth";
+import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 
 import {
   getApiOpenVpnServersGetAllWithStatus,

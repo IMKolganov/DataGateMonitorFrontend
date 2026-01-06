@@ -4,7 +4,7 @@ import type {
     GoogleLoginRequest,
     GoogleLoginResponse,
 } from "../../api/orval/model";
-import { scheduleAutoLogout } from "../../utils/jwt-utils";
+import { scheduleAutoLogout } from "../../utils/auth/authSession";
 import { getRuntimeEnv } from "../../utils/runtimeEnv";
 
 declare global {

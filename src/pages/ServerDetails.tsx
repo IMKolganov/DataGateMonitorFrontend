@@ -5,7 +5,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import "../css/ServerDetails.css";
 
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/open-vpn-servers/open-vpn-servers";
-import { getCurrentUser, isAdmin } from "../utils/auth";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import type { OpenVpnServerResponse } from "../api/orval/model";
 
 type Tab = {
