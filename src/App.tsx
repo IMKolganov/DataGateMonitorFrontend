@@ -11,6 +11,7 @@ import "./css/ToastifyDark.css";
 import "./App.css";
 
 import LoginPage from "./components/auth/LoginPage";
+import {ACCESS_TOKEN_KEY} from "./utils/const.ts";
 
 // Lazy pages
 const About = lazy(() => import("./pages/About"));
@@ -31,7 +32,7 @@ const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
 const ServersOverview = lazy(() => import("./pages/ServersOverview"));
 const OvpnFileConfigForm = lazy(() => import("./pages/OvpnFileConfigForm"));
 
-const isAuthenticated = () => !!localStorage.getItem("token");
+const isAuthenticated = () => !!localStorage.getItem(ACCESS_TOKEN_KEY);
 
 const PrivateRoute = ({ children }: { children: ReactNode }): React.ReactElement =>
   isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;

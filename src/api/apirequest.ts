@@ -1,6 +1,14 @@
 // api/apirequest.ts
 import axios from "axios";
 import type { AxiosRequestConfig } from "axios";
+import {
+  ACCESS_TOKEN_KEY,
+  REFRESH_TOKEN_EXPIRATION,
+  REFRESH_TOKEN_KEY,
+} from "../utils/const.ts";
+import type { RefreshRequest, RefreshResponse } from "./orval/model";
+
+let refreshPromise: Promise<string> | null = null;
 
 export interface Config {
   defaultRefreshInterval: number;
@@ -21,14 +29,14 @@ let configPromise: Promise<Config> | null = null;
 const isAuthEndpoint = (u: string) => /\/api\/auth(\/|$)/i.test(u);
 
 export const apiRequest = async <T>(
-  method: "get" | "post" | "put" | "delete" | "patch",
-  url: string,
-  config: AxiosRequestConfig = {},
-  skipAuth: boolean = false
+    method: "get" | "post" | "put" | "delete" | "patch",
+    url: string,
+    config: AxiosRequestConfig = {},
+    skipAuth: boolean = false,
 ): Promise<ApiResponse<T>> => {
   await ensureApiBaseUrl();
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
 
   // If token is required but missing -> soft logout (no reload loop)
   if (!token && !skipAuth && !isAuthEndpoint(url)) {
@@ -37,8 +45,7 @@ export const apiRequest = async <T>(
   }
 
   // Build headers safely: add Authorization only if token exists AND not skipAuth
-  const authHeader =
-    !skipAuth && token ? { Authorization: `Bearer ${token}` } : {};
+  const authHeader = !skipAuth && token ? { Authorization: `Bearer ${token}` } : {};
 
   try {
     const response = await axios({
@@ -56,13 +63,30 @@ export const apiRequest = async <T>(
     const status = error?.response?.status;
     const pathname = window.location.pathname;
 
-    if (
-      status === 401 &&
-      !skipAuth &&
-      !isAuthEndpoint(url) &&
-      pathname !== "/login"
-    ) {
-      logout();
+    const shouldTryRefresh =
+        status === 401 &&
+        !skipAuth &&
+        !isAuthEndpoint(url) &&
+        pathname !== "/login";
+
+    if (shouldTryRefresh) {
+      try {
+        const newToken = await getOrCreateRefresh();
+
+        const retryResponse = await axios({
+          method,
+          url: `${API_BASE_URL}${url}`,
+          ...config,
+          headers: {
+            ...config.headers,
+            Authorization: `Bearer ${newToken}`,
+          },
+        });
+
+        return retryResponse.data as ApiResponse<T>;
+      } catch {
+        logout();
+      }
     }
 
     throw error;
@@ -73,25 +97,21 @@ export const fetchConfig = async (): Promise<Config> => {
   if (configPromise) return configPromise;
 
   configPromise = (async () => {
-    try {
-      const response = await fetch("/config.json");
-      const cfg: Config = await response.json();
+    const response = await fetch("/config.json");
+    const cfg: Config = await response.json();
 
-      const origin = window.location.origin;
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const host = window.location.host;
+    const origin = window.location.origin;
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const host = window.location.host;
 
-      // Prefer config value if present, otherwise fall back to origin
-      API_BASE_URL = cfg.apiBaseUrl ?? origin;
-      WS_BASE_URL = `${protocol}//${host}`;
+    // Prefer config value if present, otherwise fall back to origin
+    API_BASE_URL = cfg.apiBaseUrl ?? origin;
+    WS_BASE_URL = `${protocol}//${host}`;
 
-      return {
-        ...cfg,
-        apiBaseUrl: API_BASE_URL ?? undefined,
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      ...cfg,
+      apiBaseUrl: API_BASE_URL ?? undefined,
+    };
   })();
 
   return configPromise;
@@ -104,14 +124,20 @@ export const ensureApiBaseUrl = async () => {
 };
 
 export const logout = () => {
-  localStorage.removeItem("token");
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_EXPIRATION);
+
   if (window.location.pathname !== "/login") {
     window.location.assign("/login");
   }
 };
 
 const softLogout = () => {
-  localStorage.removeItem("token");
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_EXPIRATION);
+
   if (window.location.pathname !== "/login") {
     window.location.assign("/login");
   }
@@ -121,11 +147,67 @@ export const getWebSocketUrlForBackgroundService = async (): Promise<string> => 
   await ensureApiBaseUrl();
   if (!WS_BASE_URL) throw new Error("WebSocket base URL is not set");
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
   if (!token) {
     logout();
     throw new Error("User is not authenticated");
   }
 
-  return `${WS_BASE_URL}/api/open-vpn-servers/status-stream?access_token=${encodeURIComponent(token)}`;
+  return `${WS_BASE_URL}/api/open-vpn-servers/status-stream?access_token=${encodeURIComponent(
+      token,
+  )}`;
+};
+
+const refreshAccessToken = async (): Promise<string> => {
+  await ensureApiBaseUrl();
+
+  const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+  if (!refreshToken) {
+    throw new Error("No refresh token");
+  }
+
+  const body: RefreshRequest = {
+    refreshToken,
+    userAgent: navigator.userAgent,
+    // deviceId: localStorage.getItem("deviceId") ?? null,
+  };
+
+  // IMPORTANT: raw axios call (do not call apiRequest / ogmMutator here)
+  const resp = await axios.post<ApiResponse<RefreshResponse>>(
+      `${API_BASE_URL}/api/auth/refresh`,
+      body,
+      { headers: { "Content-Type": "application/json" } },
+  );
+
+  const payload = resp.data;
+  const data = payload?.data;
+
+  const newAccess = data?.token;
+  if (!payload?.success || !newAccess) {
+    throw new Error(payload?.errorMessage ?? "Refresh failed");
+  }
+
+  localStorage.setItem(ACCESS_TOKEN_KEY, newAccess);
+
+  const newRefresh = data?.refreshToken;
+  if (newRefresh) {
+    localStorage.setItem(REFRESH_TOKEN_KEY, newRefresh);
+  }
+
+  const newRefreshExp = data?.refreshExpiration;
+  if (newRefreshExp) {
+    localStorage.setItem(REFRESH_TOKEN_EXPIRATION, newRefreshExp);
+  }
+
+  return newAccess;
+};
+
+// Ensures only one refresh in parallel
+const getOrCreateRefresh = (): Promise<string> => {
+  if (!refreshPromise) {
+    refreshPromise = refreshAccessToken().finally(() => {
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
 };
