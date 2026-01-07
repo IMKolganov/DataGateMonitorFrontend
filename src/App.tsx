@@ -11,6 +11,7 @@ import "./css/ToastifyDark.css";
 import "./App.css";
 
 import LoginPage from "./components/auth/LoginPage";
+import {ACCESS_TOKEN_KEY} from "./utils/const.ts";
 
 // Lazy pages
 const About = lazy(() => import("./pages/About"));
