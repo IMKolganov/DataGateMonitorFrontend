@@ -7,6 +7,7 @@ import {
 } from "@microsoft/signalr";
 import { postApiOpenVpnServersRunNow } from "../api/orval/open-vpn-servers/open-vpn-servers";
 import type { ServiceStatusDto } from "../api/orval/model";
+import {ACCESS_TOKEN_KEY} from "../utils/const.ts";
 
 const MIN_ISO = /^0001-01-01T00:00:00/i;
 
@@ -67,7 +68,7 @@ export default function useSignalRService() {
 
         const start = async () => {
             try {
-                const token = localStorage.getItem("token");
+                const token = localStorage.getItem(ACCESS_TOKEN_KEY);
                 if (!token) {
                     setConnectionState("no-token");
                     setLastError("No token in localStorage");
@@ -79,7 +80,7 @@ export default function useSignalRService() {
 
                 const conn = new HubConnectionBuilder()
                     .withUrl(hubUrl, {
-                        accessTokenFactory: () => localStorage.getItem("token") ?? "",
+                        accessTokenFactory: () => localStorage.getItem(ACCESS_TOKEN_KEY) ?? "",
                         transport: HttpTransportType.WebSockets,
                     })
                     .withAutomaticReconnect([0, 2000, 5000, 10000])

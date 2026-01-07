@@ -31,7 +31,7 @@ const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
 const ServersOverview = lazy(() => import("./pages/ServersOverview"));
 const OvpnFileConfigForm = lazy(() => import("./pages/OvpnFileConfigForm"));
 
-const isAuthenticated = () => !!localStorage.getItem("token");
+const isAuthenticated = () => !!localStorage.getItem(ACCESS_TOKEN_KEY);
 
 const PrivateRoute = ({ children }: { children: ReactNode }): React.ReactElement =>
   isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;

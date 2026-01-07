@@ -8,6 +8,7 @@ import {
     getTokenRemainingMs,
     formatRemainingTime,
 } from "../../utils/auth/tokenExpiration";
+import {ACCESS_TOKEN_KEY} from "../../utils/const.ts";
 
 const Footer: React.FC = () => {
     const [remaining, setRemaining] = useState<string | null>(null);
@@ -16,7 +17,7 @@ const Footer: React.FC = () => {
         const user = getCurrentUser();
         if (!isAdmin(user)) return;
 
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem(ACCESS_TOKEN_KEY);
         if (!token) return;
 
         const update = () => {

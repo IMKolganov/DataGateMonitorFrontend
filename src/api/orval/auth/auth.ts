@@ -25,6 +25,8 @@ import type {
   GoogleLoginResponseApiResponse,
   LoginRequest,
   LoginResponseApiResponse,
+  RefreshRequest,
+  RefreshResponseApiResponse,
   RegisterUserRequest,
   RegisterUserResponseApiResponse,
   StringApiResponse,
@@ -554,6 +556,82 @@ export const usePostApiAuthLogout = <TError = unknown, TContext = unknown>(
   TContext
 > => {
   const mutationOptions = getPostApiAuthLogoutMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const postApiAuthRefresh = (
+  refreshRequest: RefreshRequest,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<RefreshResponseApiResponse>({
+    url: `/api/auth/refresh`,
+    method: "POST",
+    headers: { "Content-Type": "application/json-patch+json" },
+    data: refreshRequest,
+    signal,
+  });
+};
+
+export const getPostApiAuthRefreshMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiAuthRefresh>>,
+    TError,
+    { data: RefreshRequest },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiAuthRefresh>>,
+  TError,
+  { data: RefreshRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiAuthRefresh"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiAuthRefresh>>,
+    { data: RefreshRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiAuthRefresh(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiAuthRefreshMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiAuthRefresh>>
+>;
+export type PostApiAuthRefreshMutationBody = RefreshRequest;
+export type PostApiAuthRefreshMutationError = unknown;
+
+export const usePostApiAuthRefresh = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiAuthRefresh>>,
+      TError,
+      { data: RefreshRequest },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiAuthRefresh>>,
+  TError,
+  { data: RefreshRequest },
+  TContext
+> => {
+  const mutationOptions = getPostApiAuthRefreshMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

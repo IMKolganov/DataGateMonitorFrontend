@@ -6,6 +6,7 @@ import type {
 } from "../../api/orval/model";
 import { scheduleAutoLogout } from "../../utils/auth/authSession";
 import { getRuntimeEnv } from "../../utils/runtimeEnv";
+import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY} from "../../utils/const.ts";
 
 declare global {
     interface Window {
@@ -35,12 +36,20 @@ const GoogleLoginForm: React.FC = () => {
             })) as GoogleLoginResponse;
 
             const token = response.token;
+            const refreshToken = response.refreshToken;
+            const refreshExpiration = response.refreshExpiration;
 
             if (!token) {
                 throw new Error("No token returned by API.");
             }
 
-            localStorage.setItem("token", token);
+            localStorage.setItem(ACCESS_TOKEN_KEY, token);
+            if (refreshToken) {
+                localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+            }
+            if (refreshExpiration) {
+                localStorage.setItem(REFRESH_TOKEN_EXPIRATION, refreshExpiration);
+            }
             scheduleAutoLogout(token);
             window.location.href = "/";
         } catch (err: any) {

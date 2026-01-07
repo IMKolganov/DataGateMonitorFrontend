@@ -1,5 +1,6 @@
 import { decodeToken } from "./jwt";
 import { SystemRoles } from "../../constants/systemRoles";
+import {ACCESS_TOKEN_KEY} from "../const.ts";
 
 const ROLE_CLAIM =
     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
@@ -12,7 +13,7 @@ export interface CurrentUser {
 }
 
 export function getCurrentUser(): CurrentUser | null {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
     if (!token) return null;
 
     try {
