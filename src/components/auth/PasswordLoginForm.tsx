@@ -3,6 +3,7 @@ import { postApiAuthLogin } from "../../api/orval/auth/auth";
 import type { LoginRequest, LoginResponse } from "../../api/orval/model";
 import { FaDoorOpen } from "react-icons/fa";
 import { scheduleAutoLogout } from "../../utils/auth/authSession";
+import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY} from "../../utils/const.ts";
 
 const PasswordLoginForm: React.FC = () => {
   const [login, setLogin] = useState("");
@@ -31,12 +32,20 @@ const PasswordLoginForm: React.FC = () => {
       )) as LoginResponse;
 
       const token = loginPayload?.token;
+      const refreshToken = loginPayload?.refreshToken;
+      const refreshExpiration = loginPayload?.refreshExpiration;
 
       if (!token) {
         throw new Error("No token returned by API.");
       }
 
-      localStorage.setItem("token", token);
+      localStorage.setItem(ACCESS_TOKEN_KEY, token);
+      if (refreshToken) {
+        localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+      }
+      if (refreshExpiration) {
+        localStorage.setItem(REFRESH_TOKEN_EXPIRATION, refreshExpiration);
+      }
       scheduleAutoLogout(token);
       window.location.href = "/";
     } catch (err: any) {
