@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import type { GridColDef } from "@mui/x-data-grid";
+import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type { NotificationItemDto } from "../../api/orval/model";
@@ -7,6 +7,10 @@ import "../../css/Table.css";
 
 interface NotificationsTableProps {
   notifications: NotificationItemDto[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  onPaginationModelChange: (model: { page: number; pageSize: number }) => void;
   loading: boolean;
   onMarkRead: (notificationId: number) => void;
   markReadLoading: boolean;
@@ -14,10 +18,18 @@ interface NotificationsTableProps {
 
 const NotificationsTable: React.FC<NotificationsTableProps> = ({
   notifications,
+  totalCount,
+  page,
+  pageSize,
+  onPaginationModelChange,
   loading,
   onMarkRead,
   markReadLoading,
 }) => {
+  const paginationModel: GridPaginationModel = useMemo(
+    () => ({ page: page - 1, pageSize }),
+    [page, pageSize]
+  );
   const rows = useMemo(
     () =>
       (notifications ?? []).map((n, idx) => {
@@ -81,8 +93,11 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
         <StyledDataGrid
           rows={rows}
           columns={columns}
+          rowCount={totalCount}
+          paginationMode="server"
+          paginationModel={paginationModel}
+          onPaginationModelChange={onPaginationModelChange}
           pageSizeOptions={[5, 10, 20, 50, 100]}
-          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           disableColumnFilter
           disableColumnMenu
           localeText={{ noRowsLabel: "📭 No notifications" }}

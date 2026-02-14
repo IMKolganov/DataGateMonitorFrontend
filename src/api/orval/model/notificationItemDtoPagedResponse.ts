@@ -4,14 +4,14 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
-import type { OpenVpnServerEventLogDto } from "./openVpnServerEventLogDto";
+import type { NotificationItemDto } from "./notificationItemDto";
 
-export interface OpenVpnServerEventLogDtoPagedResponse {
+export interface NotificationItemDtoPagedResponse {
   page?: number;
   pageSize?: number;
   totalCount?: number;
   /** @nullable */
-  items?: OpenVpnServerEventLogDto[] | null;
+  items?: NotificationItemDto[] | null;
   readonly totalPages?: number;
   readonly hasNext?: boolean;
   readonly hasPrev?: boolean;
