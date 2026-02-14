@@ -8,14 +8,20 @@ import "../../css/ApplicationSettings.css";
 export function NotificationsPage() {
   const {
     notifications,
+    totalCount,
+    page,
+    pageSize,
+    onPaginationModelChange,
     anyLoading,
     refreshing,
     errorMessage,
     refresh,
     markRead,
+    markReadAll,
     sendTestNotification,
     adminUserId,
     markReadLoading,
+    markReadAllLoading,
     sendTestLoading,
   } = useNotifications();
 
@@ -32,12 +38,18 @@ export function NotificationsPage() {
 
       <NotificationsSection
         notifications={notifications}
+        totalCount={totalCount}
+        page={page}
+        pageSize={pageSize}
+        onPaginationModelChange={onPaginationModelChange}
         anyLoading={anyLoading}
         refreshing={refreshing}
         errorMessage={errorMessage}
         handleRefresh={refresh}
         onMarkRead={markRead}
         markReadLoading={markReadLoading}
+        onMarkReadAll={markReadAll}
+        markReadAllLoading={markReadAllLoading}
         onSendTest={() => sendTestNotification()}
         sendTestLoading={sendTestLoading}
         showSendTest={showSendTest}
