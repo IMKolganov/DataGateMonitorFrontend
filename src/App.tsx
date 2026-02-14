@@ -11,6 +11,7 @@ import "./css/ToastifyDark.css";
 import "./App.css";
 
 import LoginPage from "./components/auth/LoginPage";
+import RegisterPage from "./components/auth/RegisterPage";
 import {ACCESS_TOKEN_KEY} from "./utils/const.ts";
 
 // Lazy pages
@@ -46,16 +47,17 @@ export const withSuspense = (node: React.ReactElement) => (
 // Small helper to hide header/footer on login
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const isLogin = location.pathname === "/login";
+  const isAuthPage =
+    location.pathname === "/login" || location.pathname === "/register";
 
   return (
     <>
       {/* Render header/footer everywhere except login */}
-      {!isLogin && <Header />}
+      {!isAuthPage && <Header />}
 
       <main className="main-content">{children}</main>
 
-      {!isLogin && <Footer />}
+      {!isAuthPage && <Footer />}
     </>
   );
 };
@@ -67,6 +69,7 @@ function App() {
         <Layout>
           <Routes>
             <Route path="/login" element={withSuspense(<LoginPage />)} />
+            <Route path="/register" element={withSuspense(<RegisterPage />)} />
 
             <Route
               path="/*"
