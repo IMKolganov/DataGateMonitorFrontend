@@ -255,12 +255,14 @@
   color: #8b949e;
 }
 
-.register-container a {
-  color: #0d1117;
+.register-container a,
+.register-link {
+  color: #58a6ff;
   text-decoration: none;
 }
 
-.register-container a:hover {
+.register-container a:hover,
+.register-link:hover {
   text-decoration: underline;
 }
 
