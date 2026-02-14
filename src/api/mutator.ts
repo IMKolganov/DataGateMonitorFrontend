@@ -10,18 +10,30 @@ type UnwrapApiResponse<T> =
         T extends { data?: infer D } ? D :
             T;
 
-export const ogmMutator = async <TApiResponse>(config: {
+type MutatorConfig = {
   url: string;
-  method: AnyHttpMethod;
+  method?: AnyHttpMethod;
   data?: any;
   headers?: Record<string, string>;
   params?: Record<string, any>;
   signal?: AbortSignal;
-}): Promise<UnwrapApiResponse<TApiResponse>> => {
+  body?: string;
+};
+
+/** Supports both (config) and (url, options) for orval v8 compatibility. */
+export const ogmMutator = async <TApiResponse>(
+  configOrUrl: MutatorConfig | string,
+  options?: Omit<MutatorConfig, "url">
+): Promise<UnwrapApiResponse<TApiResponse>> => {
+  const config: MutatorConfig =
+    typeof configOrUrl === "string"
+      ? { url: configOrUrl, ...options } as MutatorConfig
+      : configOrUrl;
+
   const method = (config.method as string).toLowerCase() as LowerHttpMethod;
 
   const res = await apiRequest<any>(method, config.url, {
-    data: config.data,
+    data: config.data ?? config.body,
     headers: config.headers,
     params: config.params,
     signal: config.signal,

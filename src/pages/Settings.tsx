@@ -11,6 +11,7 @@ export function Settings() {
     { label: "API Clients", path: "applications" },
     { label: "GeoLite DB", path: "geolitedb" },
     { label: "Telegram Bot", path: "telegrambot" },
+    { label: "Users", path: "users" },
   ];
 
   const currentTab = location.pathname.split("/settings/")[1] || "general";
