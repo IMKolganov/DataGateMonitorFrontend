@@ -4,10 +4,11 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
+import type { GetNotificationsResponse } from "./getNotificationsResponse";
 
-export interface Int32ApiResponse {
+export interface GetNotificationsResponseApiResponse {
   success?: boolean;
   /** @nullable */
   message?: string | null;
-  data?: number;
+  data?: GetNotificationsResponse;
 }

@@ -5,14 +5,15 @@
  * OpenAPI spec version: v1
  */
 
-export interface RevokeFileRequest {
+export type GetApiNotificationsGetAllParams = {
   /**
    * @minimum 1
    * @maximum 2147483647
    */
-  vpnServerId: number;
-  ovpnFileId: number;
-  /** @minLength 1 */
-  commonName: string;
-  isRevoked?: boolean;
-}
+  Page?: number;
+  /**
+   * @minimum 1
+   * @maximum 2147483647
+   */
+  PageSize?: number;
+};
