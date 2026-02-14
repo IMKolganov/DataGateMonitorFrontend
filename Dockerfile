@@ -1,5 +1,5 @@
 # Step 1: Build Vite App
-FROM node:20 AS build
+FROM node:22 AS build
 
 # Set working directory
 WORKDIR /app
