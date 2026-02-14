@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 import "../../css/Login.css";
 import PasswordLoginForm from "./PasswordLoginForm";
 import GoogleLoginForm from "./GoogleLoginForm";
@@ -8,6 +10,14 @@ import {appVersion} from "../../version.ts";
 
 const LoginPage: React.FC = () => {
     const [showTelegramForm, setShowTelegramForm] = useState(false);
+    const location = useLocation();
+
+    useEffect(() => {
+        const state = location.state as { registered?: boolean } | null;
+        if (state?.registered) {
+            toast.success("Account created successfully. You can now sign in.");
+        }
+    }, [location.state]);
 
     return (
         <div className="login-container">
@@ -55,8 +65,8 @@ const LoginPage: React.FC = () => {
                 {/* Footer under card */}
                 <div className="register-container">
                     <p>
-                        {/*New to OpenVPN Gate Monitor?{" "}*/}
-                        {/*<a href="/register">Create an account</a>*/}
+                        New to DataGate Monitor?{" "}
+                        <Link to="/register" className="register-link">Create an account</Link>
                     </p>
                     <p>© {new Date().getFullYear()} DataGate Monitor v.{appVersion}</p>
                 </div>
