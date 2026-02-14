@@ -21,6 +21,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  GoogleCodeLoginRequest,
   GoogleLoginRequest,
   GoogleLoginResponseApiResponse,
   LoginRequest,
@@ -415,6 +416,85 @@ export const usePostApiAuthGoogleLogin = <TError = unknown, TContext = unknown>(
   TContext
 > => {
   const mutationOptions = getPostApiAuthGoogleLoginMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const postApiAuthGoogleCodeLogin = (
+  googleCodeLoginRequest: GoogleCodeLoginRequest,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GoogleLoginResponseApiResponse>({
+    url: `/api/auth/google-code-login`,
+    method: "POST",
+    headers: { "Content-Type": "application/json-patch+json" },
+    data: googleCodeLoginRequest,
+    signal,
+  });
+};
+
+export const getPostApiAuthGoogleCodeLoginMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiAuthGoogleCodeLogin>>,
+    TError,
+    { data: GoogleCodeLoginRequest },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiAuthGoogleCodeLogin>>,
+  TError,
+  { data: GoogleCodeLoginRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiAuthGoogleCodeLogin"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiAuthGoogleCodeLogin>>,
+    { data: GoogleCodeLoginRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiAuthGoogleCodeLogin(data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiAuthGoogleCodeLoginMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiAuthGoogleCodeLogin>>
+>;
+export type PostApiAuthGoogleCodeLoginMutationBody = GoogleCodeLoginRequest;
+export type PostApiAuthGoogleCodeLoginMutationError = unknown;
+
+export const usePostApiAuthGoogleCodeLogin = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiAuthGoogleCodeLogin>>,
+      TError,
+      { data: GoogleCodeLoginRequest },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiAuthGoogleCodeLogin>>,
+  TError,
+  { data: GoogleCodeLoginRequest },
+  TContext
+> => {
+  const mutationOptions = getPostApiAuthGoogleCodeLoginMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };
