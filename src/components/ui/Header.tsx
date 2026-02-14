@@ -2,13 +2,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../../css/Header.css";
-import { FaDoorClosed } from "react-icons/fa";
+import { FaBell, FaDoorClosed } from "react-icons/fa";
 import { logout } from "../../api/apirequest.ts";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
+import { useNotificationsUnreadCount } from "../../pages/Notifications/useNotifications";
 
 export function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
     const user = getCurrentUser();
+    const { data: unreadCount = 0 } = useNotificationsUnreadCount();
 
     return (
         <header className="header">
@@ -42,9 +44,20 @@ export function Header() {
 
                     {user && (
                         <li className="user-info">
-              <span className="user-name">
-                {user.displayName || user.email || "User"}
-              </span>
+                            <span className="user-name">
+                                {user.displayName || user.email || "User"}
+                            </span>
+                        </li>
+                    )}
+
+                    {user && (
+                        <li className="header-notifications">
+                            <Link to="/notifications" onClick={() => setMenuOpen(false)} className="header-notifications-link" title="Notifications">
+                                <FaBell className="icon" />
+                                {unreadCount > 0 && (
+                                    <span className="header-notifications-badge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+                                )}
+                            </Link>
                         </li>
                     )}
 

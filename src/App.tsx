@@ -29,6 +29,8 @@ const Events = lazy(() => import("./pages/Events"));
 const GeneralSettings = lazy(() => import("./pages/GeneralSettings"));
 const GeoLiteDbSettings = lazy(() => import("./pages/GeoLiteDbSettings"));
 const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
+const UsersSettings = lazy(() => import("./pages/UsersSettings/UsersSettings"));
+const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
 const ServersOverview = lazy(() => import("./pages/ServersOverview"));
 const OvpnFileConfigForm = lazy(() => import("./pages/OvpnFileConfigForm"));
 
@@ -99,7 +101,10 @@ function App() {
                       <Route path="applications" element={withSuspense(<ApplicationSettings />)} />
                       <Route path="geolitedb" element={withSuspense(<GeoLiteDbSettings />)} />
                       <Route path="telegrambot" element={withSuspense(<TelegramBotSettings />)} />
+                      <Route path="users" element={withSuspense(<UsersSettings />)} />
                     </Route>
+
+                    <Route path="/notifications" element={withSuspense(<NotificationsPage />)} />
 
                     {/* legacy direct paths */}
                     <Route path="/settings/applications" element={withSuspense(<ApplicationSettings />)} />
