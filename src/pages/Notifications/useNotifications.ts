@@ -3,18 +3,20 @@ import { useCallback, useState } from "react";
 import {
   useGetApiNotificationsGetAll,
   useGetApiNotificationsUnreadCount,
-  getGetApiNotificationsGetAllQueryKey,
   getGetApiNotificationsUnreadCountQueryKey,
   usePostApiNotificationsNotificationIdDelivered,
   usePostApiNotificationsNotificationIdRead,
+  usePostApiNotificationsMarkReadAll,
   usePostApiNotificationsNotifyAdmins,
 } from "../../api/orval/notification/notification";
 import type { NotificationRequest } from "../../api/orval/model";
 import type { NotificationItemDto } from "../../api/orval/model";
 import { getCurrentUser } from "../../utils/auth/authSelectors";
 
-export function useNotificationsList() {
-  return useGetApiNotificationsGetAll();
+const DEFAULT_PAGE_SIZE = 10;
+
+export function useNotificationsList(params?: { Page?: number; PageSize?: number }) {
+  return useGetApiNotificationsGetAll(params);
 }
 
 export function useNotificationsUnreadCount() {
@@ -28,15 +30,25 @@ export function useNotifications() {
   const user = getCurrentUser();
   const adminUserId = user?.id ?? 0;
 
-  const listQuery = useGetApiNotificationsGetAll();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+
+  const listQuery = useGetApiNotificationsGetAll({
+    Page: page,
+    PageSize: pageSize,
+  });
   const countQuery = useGetApiNotificationsUnreadCount();
   const [refreshing, setRefreshing] = useState(false);
 
   const mRead = usePostApiNotificationsNotificationIdRead();
   const mDelivered = usePostApiNotificationsNotificationIdDelivered();
+  const mMarkReadAll = usePostApiNotificationsMarkReadAll();
   const mNotifyAdmins = usePostApiNotificationsNotifyAdmins();
 
-  const notifications: NotificationItemDto[] = listQuery.data?.notifications ?? [];
+  const paged = listQuery.data?.notifications;
+  const notifications: NotificationItemDto[] = paged?.items ?? [];
+  const totalCount = paged?.totalCount ?? 0;
+  const totalPages = paged?.totalPages ?? 0;
   const unreadCount = countQuery.data?.count ?? 0;
 
   const refresh = useCallback(async () => {
@@ -44,7 +56,9 @@ export function useNotifications() {
     setRefreshing(true);
     try {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: getGetApiNotificationsGetAllQueryKey() }),
+        queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey[0] === "/api/notifications/get-all",
+        }),
         queryClient.invalidateQueries({ queryKey: getGetApiNotificationsUnreadCountQueryKey() }),
       ]);
     } finally {
@@ -62,6 +76,19 @@ export function useNotifications() {
       await refresh();
     },
     [adminUserId, mRead, refresh]
+  );
+
+  const markReadAll = useCallback(async () => {
+    await mMarkReadAll.mutateAsync();
+    await refresh();
+  }, [mMarkReadAll, refresh]);
+
+  const onPaginationModelChange = useCallback(
+    (model: { page: number; pageSize: number }) => {
+      setPage(model.page + 1);
+      setPageSize(model.pageSize);
+    },
+    []
   );
 
   const markDelivered = useCallback(
@@ -96,6 +123,7 @@ export function useNotifications() {
     countQuery.isFetching ||
     mRead.isPending ||
     mDelivered.isPending ||
+    mMarkReadAll.isPending ||
     mNotifyAdmins.isPending;
 
   const errorMessage =
@@ -108,15 +136,22 @@ export function useNotifications() {
   return {
     notifications,
     unreadCount,
+    totalCount,
+    totalPages,
+    page,
+    pageSize,
+    onPaginationModelChange,
     anyLoading,
     refreshing,
     errorMessage,
     refresh,
     markRead,
+    markReadAll,
     markDelivered,
     sendTestNotification,
     adminUserId,
     markReadLoading: mRead.isPending,
+    markReadAllLoading: mMarkReadAll.isPending,
     sendTestLoading: mNotifyAdmins.isPending,
   };
 }
