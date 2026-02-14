@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import {
   useGetApiNotificationsGetAll,
   useGetApiNotificationsUnreadCount,
@@ -9,8 +9,7 @@ import {
   usePostApiNotificationsMarkReadAll,
   usePostApiNotificationsNotifyAdmins,
 } from "../../api/orval/notification/notification";
-import type { NotificationRequest } from "../../api/orval/model";
-import type { NotificationItemDto } from "../../api/orval/model";
+import type { NotificationRequest, NotificationItemDto } from "../../api/orval/model";
 import { getCurrentUser } from "../../utils/auth/authSelectors";
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -30,13 +29,18 @@ export function useNotifications() {
   const user = getCurrentUser();
   const adminUserId = user?.id ?? 0;
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  const listQuery = useGetApiNotificationsGetAll({
-    Page: page,
-    PageSize: pageSize,
+  const listParams = useMemo(
+    () => ({ Page: page + 1, PageSize: pageSize }),
+    [page, pageSize]
+  );
+
+  const listQuery = useGetApiNotificationsGetAll(listParams, {
+    query: { placeholderData: (prev) => prev },
   });
+
   const countQuery = useGetApiNotificationsUnreadCount();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -51,9 +55,45 @@ export function useNotifications() {
   const totalPages = paged?.totalPages ?? 0;
   const unreadCount = countQuery.data?.count ?? 0;
 
+  useEffect(() => {
+    console.debug("[useNotifications] State snapshot", {
+      adminUserId,
+      page,
+      pageSize,
+      listParams,
+      totalCount,
+      totalPages,
+      unreadCount,
+      notificationsCount: notifications.length,
+      listLoading: listQuery.isLoading,
+      listFetching: listQuery.isFetching,
+      countFetching: countQuery.isFetching,
+      markReadPending: mRead.isPending,
+    });
+  }, [
+    adminUserId,
+    page,
+    pageSize,
+    listParams,
+    totalCount,
+    totalPages,
+    unreadCount,
+    notifications.length,
+    listQuery.isLoading,
+    listQuery.isFetching,
+    countQuery.isFetching,
+    mRead.isPending,
+  ]);
+
   const refresh = useCallback(async () => {
-    if (refreshing) return;
+    if (refreshing) {
+      console.debug("[useNotifications] Refresh skipped (already refreshing)");
+      return;
+    }
+
+    console.debug("[useNotifications] Refresh started");
     setRefreshing(true);
+
     try {
       await Promise.all([
         queryClient.invalidateQueries({
@@ -61,6 +101,11 @@ export function useNotifications() {
         }),
         queryClient.invalidateQueries({ queryKey: getGetApiNotificationsUnreadCountQueryKey() }),
       ]);
+
+      console.debug("[useNotifications] Refresh completed");
+    } catch (e) {
+      console.error("[useNotifications] Refresh failed", e);
+      throw e;
     } finally {
       setRefreshing(false);
     }
@@ -68,51 +113,108 @@ export function useNotifications() {
 
   const markRead = useCallback(
     async (notificationId: number) => {
-      if (!adminUserId) return;
-      await mRead.mutateAsync({
+      console.debug("[useNotifications] markRead called", {
         notificationId,
-        params: { adminUserId },
+        adminUserId,
       });
-      await refresh();
+
+      if (!adminUserId) {
+        console.warn("[useNotifications] markRead aborted: adminUserId is 0");
+        return;
+      }
+
+      if (!notificationId) {
+        console.warn("[useNotifications] markRead aborted: notificationId is 0");
+        return;
+      }
+
+      try {
+        const result = await mRead.mutateAsync({
+          notificationId,
+          params: { adminUserId },
+        });
+
+        console.debug("[useNotifications] markRead success", { result });
+        await refresh();
+      } catch (e) {
+        console.error("[useNotifications] markRead failed", e);
+        throw e;
+      }
     },
     [adminUserId, mRead, refresh]
   );
 
   const markReadAll = useCallback(async () => {
-    await mMarkReadAll.mutateAsync();
-    await refresh();
+    console.debug("[useNotifications] markReadAll called");
+    try {
+      const result = await mMarkReadAll.mutateAsync();
+      console.debug("[useNotifications] markReadAll success", { result });
+      await refresh();
+    } catch (e) {
+      console.error("[useNotifications] markReadAll failed", e);
+      throw e;
+    }
   }, [mMarkReadAll, refresh]);
 
-  const onPaginationModelChange = useCallback(
-    (model: { page: number; pageSize: number }) => {
-      setPage(model.page + 1);
-      setPageSize(model.pageSize);
-    },
-    []
-  );
+  const onPaginationModelChange = useCallback((model: { page: number; pageSize: number }) => {
+    console.debug("[useNotifications] Pagination model change", model);
+
+    setPage(model.page ?? 0);
+    setPageSize(Math.max(1, model.pageSize ?? DEFAULT_PAGE_SIZE));
+  }, []);
 
   const markDelivered = useCallback(
     async (notificationId: number) => {
-      if (!adminUserId) return;
-      await mDelivered.mutateAsync({
+      console.debug("[useNotifications] markDelivered called", {
         notificationId,
-        params: { adminUserId, channel: "web" },
+        adminUserId,
       });
-      await refresh();
+
+      if (!adminUserId) {
+        console.warn("[useNotifications] markDelivered aborted: adminUserId is 0");
+        return;
+      }
+
+      if (!notificationId) {
+        console.warn("[useNotifications] markDelivered aborted: notificationId is 0");
+        return;
+      }
+
+      try {
+        const result = await mDelivered.mutateAsync({
+          notificationId,
+          params: { adminUserId, channel: "web" },
+        });
+
+        console.debug("[useNotifications] markDelivered success", { result });
+        await refresh();
+      } catch (e) {
+        console.error("[useNotifications] markDelivered failed", e);
+        throw e;
+      }
     },
     [adminUserId, mDelivered, refresh]
   );
 
   const sendTestNotification = useCallback(
     async (request?: Partial<NotificationRequest>) => {
-      await mNotifyAdmins.mutateAsync({
-        data: {
-          title: request?.title ?? "Test notification",
-          message: request?.message ?? "Sent from dashboard",
-          severity: request?.severity,
-        } as NotificationRequest,
-      });
-      await refresh();
+      console.debug("[useNotifications] sendTestNotification called", request);
+
+      try {
+        const result = await mNotifyAdmins.mutateAsync({
+          data: {
+            title: request?.title ?? "Test notification",
+            message: request?.message ?? "Sent from dashboard",
+            severity: request?.severity,
+          } as NotificationRequest,
+        });
+
+        console.debug("[useNotifications] sendTestNotification success", { result });
+        await refresh();
+      } catch (e) {
+        console.error("[useNotifications] sendTestNotification failed", e);
+        throw e;
+      }
     },
     [mNotifyAdmins, refresh]
   );
@@ -126,12 +228,23 @@ export function useNotifications() {
     mMarkReadAll.isPending ||
     mNotifyAdmins.isPending;
 
+  const isAbortOrCancelError = (e: unknown): boolean => {
+    if (!e || typeof e !== "object") return false;
+    const err = e as { name?: string; code?: string; message?: string };
+    return (
+      err.name === "AbortError" ||
+      err.name === "CanceledError" ||
+      err.code === "ERR_CANCELED" ||
+      err.message === "canceled"
+    );
+  };
+
   const errorMessage =
-    listQuery.error instanceof Error
-      ? listQuery.error.message
-      : listQuery.error
-        ? "Failed to load notifications"
-        : null;
+    listQuery.error != null && !isAbortOrCancelError(listQuery.error)
+      ? listQuery.error instanceof Error
+        ? listQuery.error.message
+        : "Failed to load notifications"
+      : null;
 
   return {
     notifications,

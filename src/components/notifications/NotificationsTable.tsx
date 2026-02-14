@@ -3,6 +3,7 @@ import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type { NotificationItemDto } from "../../api/orval/model";
+import { FaCheck } from "react-icons/fa";
 import "../../css/Table.css";
 
 interface NotificationsTableProps {
@@ -27,22 +28,29 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
   markReadLoading,
 }) => {
   const paginationModel: GridPaginationModel = useMemo(
-    () => ({ page: page - 1, pageSize }),
+    () => ({ page, pageSize }),
     [page, pageSize]
   );
+
   const rows = useMemo(
     () =>
       (notifications ?? []).map((n, idx) => {
         const id = n.id ?? idx + 1;
+        const notificationId = n.id ?? 0;
+
+        const messageRaw = n.message ?? "";
+        const message =
+          messageRaw.length > 100 ? `${messageRaw.slice(0, 100)}…` : messageRaw || "-";
+
         return {
           id,
-          notificationId: n.id ?? 0,
+          notificationId,
           title: n.title ?? "-",
-          message: (n.message ?? "").slice(0, 100) + ((n.message?.length ?? 0) > 100 ? "…" : ""),
-          severity: n.severity ?? "-",
+          message,
+          severity: n.severity != null ? String(n.severity) : "-",
           isRead: Boolean(n.isRead),
           createDate: n.createdAt ? new Date(n.createdAt).toLocaleString() : "-",
-          type: n.type ?? "-",
+          type: n.type != null ? String(n.type) : "-",
         };
       }),
     [notifications]
@@ -56,22 +64,42 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
     { field: "createDate", headerName: "Created", flex: 1 },
     { field: "isRead", headerName: "Read", type: "boolean", flex: 0.5 },
     {
-      field: "actions",
+      field: "Actions",
       headerName: "Actions",
-      flex: 0.8,
+      flex: 1,
+      cellClassName: "grid-cell-actions",
       renderCell: (params) => {
-        const notificationId = params.row.notificationId as number;
-        const isRead = params.row.isRead as boolean;
-        if (!notificationId || isRead) return null;
+        const notificationId: number = params.row.notificationId || 0;
+        const isRead: boolean = !!params.row.isRead;
+
+        const disabled = markReadLoading || !notificationId || isRead;
+
         return (
           <div className="action-container">
             <button
               type="button"
               className="btn secondary"
-              disabled={markReadLoading}
-              onClick={() => onMarkRead(notificationId)}
+              disabled={disabled}
+              onClick={() => {
+                // Logs to prove click reached this handler
+                console.debug("[NotificationsTable] Mark read click", {
+                  notificationId,
+                  disabled,
+                  isRead,
+                  markReadLoading,
+                  rowId: params.row.id,
+                });
+
+                if (disabled) return;
+
+                console.debug("[NotificationsTable] Calling onMarkRead()", {
+                  notificationId,
+                });
+
+                onMarkRead(notificationId);
+              }}
             >
-              Mark read
+              <FaCheck className="icon" /> Mark read
             </button>
           </div>
         );
@@ -82,6 +110,7 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
   return (
     <CustomThemeProvider>
       <div
+        className="notifications-table-wrapper"
         style={{
           width: "100%",
           backgroundColor: "#0d1117",
@@ -96,10 +125,14 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
           rowCount={totalCount}
           paginationMode="server"
           paginationModel={paginationModel}
-          onPaginationModelChange={onPaginationModelChange}
+          onPaginationModelChange={(model) => {
+            console.debug("[NotificationsTable] Pagination changed", model);
+            onPaginationModelChange(model);
+          }}
           pageSizeOptions={[5, 10, 20, 50, 100]}
           disableColumnFilter
           disableColumnMenu
+          disableRowSelectionOnClick
           localeText={{ noRowsLabel: "📭 No notifications" }}
           loading={loading}
         />
