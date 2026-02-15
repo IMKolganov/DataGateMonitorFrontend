@@ -1,8 +1,20 @@
+/* Global wrapper for DataGrid: prevents horizontal overflow past layout, scroll inside */
+.data-grid-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
 .table-container {
   width: 100%;
+  max-width: 100%;
   background-color: #0d1117;
   border-radius: 8px;
   margin-top: 15px;
+  overflow-x: auto;
+  box-sizing: border-box;
 }
 
 .filters {
@@ -20,4 +32,14 @@
   align-items: center;
   height: 100%;
   width: 100%;
+}
+
+.user-view-link {
+  color: #58a6ff;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.user-view-link:hover {
+  text-decoration: underline;
 }

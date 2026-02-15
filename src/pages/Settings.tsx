@@ -9,6 +9,7 @@ export function Settings() {
   const tabs = [
     { label: "General", path: "general" },
     { label: "API Clients", path: "applications" },
+    { label: "Quotas", path: "quotas" },
     { label: "GeoLite DB", path: "geolitedb" },
     { label: "Telegram Bot", path: "telegrambot" },
     { label: "Users", path: "users" },

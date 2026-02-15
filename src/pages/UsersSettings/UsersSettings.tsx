@@ -4,6 +4,9 @@ import { UsersSection } from "./UsersSection";
 export function UsersSettings() {
   const {
     users,
+    totalCount,
+    paginationModel,
+    onPaginationModelChange,
     anyLoading,
     refreshing,
     errorMessage,
@@ -20,6 +23,9 @@ export function UsersSettings() {
 
       <UsersSection
         users={users}
+        totalCount={totalCount}
+        paginationModel={paginationModel}
+        onPaginationModelChange={onPaginationModelChange}
         anyLoading={anyLoading}
         refreshing={refreshing}
         errorMessage={errorMessage}

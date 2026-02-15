@@ -3,6 +3,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import { formatDateWithOffset } from "../../utils/utils.ts";
+import "../../css/Table.css";
 
 interface VpnEvent {
   id: number;
@@ -65,13 +66,11 @@ const EventsTable: React.FC<EventsTableProps> = ({
   return (
     <CustomThemeProvider>
       <div
+        className="data-grid-wrap"
         style={{
-          width: "100%",
-          minWidth: 0,
           backgroundColor: "#0d1117",
           padding: "10px",
           borderRadius: "8px",
-          overflow: "hidden",
         }}
       >
         <StyledDataGrid

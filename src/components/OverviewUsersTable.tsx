@@ -5,6 +5,7 @@ import { Link, useParams } from "react-router-dom";
 import StyledDataGrid from "./ui/TableStyle.tsx";
 import CustomThemeProvider from "./ui/ThemeProvider.tsx";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
+import "../css/Table.css";
 
 import {
   useGetApiOpenVpnClientsOverviewUsers,
@@ -119,13 +120,11 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
       <h3>Users in Selection</h3>
       <CustomThemeProvider>
         <div
+          className="data-grid-wrap"
           style={{
-            width: "100%",
-            minWidth: 0,
             backgroundColor: "#0d1117",
             padding: "10px",
             borderRadius: "8px",
-            overflow: "hidden",
           }}
         >
           <StyledDataGrid
