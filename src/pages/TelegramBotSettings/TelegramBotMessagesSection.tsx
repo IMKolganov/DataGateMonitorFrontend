@@ -11,8 +11,7 @@ interface Props {
     totalCount: number;
     page: number;
     pageSize: number;
-    onPageChange: (page: number) => void;
-    onPageSizeChange: (size: number) => void;
+    onPaginationModelChange: (page: number, pageSize: number) => void;
     anyLoading: boolean;
     refreshing: boolean;
     errorMessage: string | null;
@@ -24,8 +23,7 @@ export function TelegramBotMessagesSection({
                                                totalCount,
                                                page,
                                                pageSize,
-                                               onPageChange,
-                                               onPageSizeChange,
+                                               onPaginationModelChange,
                                                anyLoading,
                                                refreshing,
                                                errorMessage,
@@ -58,8 +56,7 @@ export function TelegramBotMessagesSection({
                 page={page}
                 pageSize={pageSize}
                 totalMessages={totalCount}
-                onPageChange={onPageChange}
-                onPageSizeChange={onPageSizeChange}
+                onPaginationModelChange={onPaginationModelChange}
             />
         </section>
     );

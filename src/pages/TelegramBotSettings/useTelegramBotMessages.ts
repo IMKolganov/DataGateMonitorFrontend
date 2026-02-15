@@ -1,5 +1,5 @@
 // src/pages/TelegramBotSettings/useTelegramBotMessages.ts
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 
 import {
@@ -11,6 +11,7 @@ import type {
     MessageDto,
     GetApiTgbotIncomingMessageLogsGetAllParams,
 } from "../../api/orval/model";
+import { isCanceledError } from "../../utils/queryCanceled";
 
 export function useTelegramBotMessages() {
     // MUI DataGrid — 0-based
@@ -19,10 +20,13 @@ export function useTelegramBotMessages() {
     const [totalCount, setTotalCount] = useState(0);
     const [manualRefreshing, setManualRefreshing] = useState(false);
 
-    const params: GetApiTgbotIncomingMessageLogsGetAllParams = {
-        Page: page + 1,     // backend 1-based
-        PageSize: pageSize,
-    };
+    const params = useMemo<GetApiTgbotIncomingMessageLogsGetAllParams>(
+        () => ({
+            Page: page + 1, // backend 1-based
+            PageSize: pageSize,
+        }),
+        [page, pageSize],
+    );
 
     const qMessages = useGetApiTgbotIncomingMessageLogsGetAll(params, {
         query: {
@@ -30,21 +34,10 @@ export function useTelegramBotMessages() {
         },
     });
 
-    console.log("[TgMessagesHook] params sent to API:", params);
-
     const messages: MessageDto[] = useMemo(() => {
         const raw = qMessages.data as GetAllMessagesResponse | undefined;
         const envelope = raw?.messages;
-
         const items = envelope?.items ?? [];
-
-        console.log("[TgMessagesHook] response meta:", {
-            serverPage: envelope?.page,
-            serverPageSize: envelope?.pageSize,
-            totalCount: envelope?.totalCount,
-            itemsLen: items.length,
-        });
-
         return items as MessageDto[];
     }, [qMessages.data]);
 
@@ -72,19 +65,28 @@ export function useTelegramBotMessages() {
     const refreshing = manualRefreshing || qMessages.isFetching;
 
     const errorMessage =
-        qMessages.error instanceof Error
-            ? qMessages.error.message
-            : qMessages.error
-                ? "Failed to load Telegram bot incoming messages"
-                : null;
+        isCanceledError(qMessages.error)
+            ? null
+            : qMessages.error instanceof Error
+                ? qMessages.error.message
+                : qMessages.error
+                    ? "Failed to load Telegram bot incoming messages"
+                    : null;
+
+    const onPaginationModelChange = useCallback(
+        (newPage: number, newPageSize: number) => {
+            setPage((prevPage) => (prevPage !== newPage ? newPage : prevPage));
+            setPageSize((prevSize) => (prevSize !== newPageSize ? newPageSize : prevSize));
+        },
+        [],
+    );
 
     return {
         messages,
         totalCount,
         page,
         pageSize,
-        setPage,
-        setPageSize,
+        onPaginationModelChange,
         anyLoading,
         refreshing,
         errorMessage,

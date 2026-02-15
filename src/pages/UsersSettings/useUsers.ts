@@ -3,6 +3,7 @@ import { useGetApiUsersGetAll } from "../../api/orval/user/user";
 import type { GetAllUsersResponse, UserDto } from "../../api/orval/model";
 import type { GridPaginationModel } from "@mui/x-data-grid";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
+import { isCanceledError } from "../../utils/queryCanceled";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -21,7 +22,9 @@ export function useUsers() {
     [paginationModel.page, paginationModel.pageSize]
   );
 
-  const qUsers = useGetApiUsersGetAll(params);
+  const qUsers = useGetApiUsersGetAll(params, {
+    query: { placeholderData: (prev) => prev },
+  });
 
   const { users, totalCount } = useMemo(() => {
     const payload = unwrapMaybeApiResponse<GetAllUsersResponse>(qUsers.data as any);
@@ -31,7 +34,10 @@ export function useUsers() {
   }, [qUsers.data]);
 
   const onPaginationModelChange = useCallback((model: GridPaginationModel) => {
-    setPaginationModel(model);
+    setPaginationModel((prev) => {
+      if (prev.page === model.page && prev.pageSize === model.pageSize) return prev;
+      return model;
+    });
   }, []);
 
   const handleRefresh = async () => {
@@ -48,11 +54,13 @@ export function useUsers() {
   const refreshing = manualRefreshing || qUsers.isFetching;
 
   const errorMessage =
-    qUsers.error instanceof Error
-      ? qUsers.error.message
-      : qUsers.error
-        ? "Failed to load users"
-        : null;
+    isCanceledError(qUsers.error)
+      ? null
+      : qUsers.error instanceof Error
+        ? qUsers.error.message
+        : qUsers.error
+          ? "Failed to load users"
+          : null;
 
   return {
     users,

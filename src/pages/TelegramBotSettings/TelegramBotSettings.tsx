@@ -19,8 +19,7 @@ export function TelegramBotSettings() {
         totalCount,
         page,
         pageSize,
-        setPage,
-        setPageSize,
+        onPaginationModelChange,
         anyLoading: messagesLoading,
         refreshing: messagesRefreshing,
         errorMessage: messagesError,
@@ -49,8 +48,7 @@ export function TelegramBotSettings() {
                 totalCount={totalCount}
                 page={page}
                 pageSize={pageSize}
-                onPageChange={setPage}
-                onPageSizeChange={setPageSize}
+                onPaginationModelChange={onPaginationModelChange}
                 anyLoading={messagesLoading}
                 refreshing={messagesRefreshing}
                 errorMessage={messagesError}

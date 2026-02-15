@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaKey, FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaArrowLeft, FaKey, FaPlus, FaEdit, FaTrash, FaSync } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
   useGetApiUsersGetByIdId,
@@ -15,7 +15,8 @@ import {
   usePutApiUserQuotaPlansUpdate,
   useDeleteApiUserQuotaPlansDeleteId,
 } from "../../api/orval/user-quota-plan/user-quota-plan";
-import { useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId } from "../../api/orval/telegram-bot-incoming-message-log/telegram-bot-incoming-message-log";
+import { getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryKey } from "../../api/orval/telegram-bot-incoming-message-log/telegram-bot-incoming-message-log";
+import { ogmMutator } from "../../api/mutator";
 import type {
   QuotaPlanDto,
   QuotaPlansResponse,
@@ -26,12 +27,13 @@ import type { UsersResponse } from "../../api/orval/model";
 import type { GetUserQuotaPlansByUserIdResponse } from "../../api/orval/model";
 import type { GetByTelegramIdMessagesResponse } from "../../api/orval/model";
 import type { MessageDto } from "../../api/orval/model";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { isCanceledError } from "../../utils/queryCanceled";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
 import StyledDataGrid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
-import type { GridColDef } from "@mui/x-data-grid";
+import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import "../../css/Settings.css";
 import "../../css/Table.css";
 
@@ -63,6 +65,9 @@ export function UserDetailPage() {
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<UserQuotaPlanDto | null>(null);
 
+  const [telegramMessagesPagination, setTelegramMessagesPagination] =
+    useState<GridPaginationModel>({ page: 0, pageSize: 10 });
+
   const createAssignmentMutation = usePostApiUserQuotaPlansCreate();
   const updateAssignmentMutation = usePutApiUserQuotaPlansUpdate();
   const deleteAssignmentMutation = useDeleteApiUserQuotaPlansDeleteId();
@@ -74,14 +79,42 @@ export function UserDetailPage() {
     user?.externalId != null ? parseInt(String(user.externalId), 10) : NaN;
   const telegramIdValid = Number.isFinite(telegramId) && telegramId > 0;
 
-  const { data: telegramMessagesData } =
-    useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId(
-      telegramIdValid ? telegramId : 0,
-      { query: { enabled: isTelegramUser && telegramIdValid } }
-    );
+  const {
+    data: telegramMessagesData,
+    isLoading: telegramMessagesLoading,
+    isFetching: telegramMessagesFetching,
+    refetch: refetchTelegramMessages,
+    error: telegramMessagesError,
+  } = useQuery({
+    queryKey: [
+      ...getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryKey(telegramIdValid ? telegramId : undefined),
+      telegramMessagesPagination.page,
+      telegramMessagesPagination.pageSize,
+    ],
+    queryFn: ({ signal }) =>
+      ogmMutator({
+        url: `/api/tgbot-incoming-message-logs/get-by-telegram-userid/${telegramId}`,
+        method: "GET",
+        params: {
+          Page: telegramMessagesPagination.page + 1,
+          PageSize: telegramMessagesPagination.pageSize,
+        },
+        signal,
+      }),
+    enabled: isTelegramUser && telegramIdValid,
+    placeholderData: keepPreviousData,
+  });
   const messagesPayload = (telegramMessagesData as GetByTelegramIdMessagesResponse | undefined)?.messages;
   const telegramMessages: MessageDto[] = messagesPayload?.items ?? [];
-  const telegramMessagesTotalCount = messagesPayload?.totalCount ?? telegramMessages.length;
+  const telegramMessagesTotalCount = messagesPayload?.totalCount ?? 0;
+  const telegramMessagesRefreshing = telegramMessagesFetching;
+  const telegramMessagesErrorMessage = isCanceledError(telegramMessagesError)
+    ? null
+    : telegramMessagesError instanceof Error
+      ? telegramMessagesError.message
+      : telegramMessagesError
+        ? "Failed to load messages"
+        : null;
 
   const invalidateUserQuota = () =>
     queryClient.invalidateQueries({
@@ -292,14 +325,30 @@ export function UserDetailPage() {
             Incoming messages from this user in the Telegram bot.
           </p>
           {telegramIdValid ? (
-            telegramMessages.length === 0 && telegramMessagesTotalCount === 0 ? (
-              <p style={{ color: "#8b949e" }}>No messages.</p>
-            ) : (
+            <>
+              <div className="header-bar" style={{ marginBottom: 8 }}>
+                <div className="left-buttons">
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    onClick={() => refetchTelegramMessages()}
+                    disabled={telegramMessagesRefreshing}
+                  >
+                    <FaSync className={`icon ${telegramMessagesRefreshing ? "icon-spin" : ""}`} /> Refresh
+                  </button>
+                </div>
+              </div>
+              {telegramMessagesErrorMessage && (
+                <p className="error-message" style={{ marginBottom: 8 }}>❌ {telegramMessagesErrorMessage}</p>
+              )}
+              {!telegramMessagesLoading && telegramMessagesTotalCount === 0 ? (
+                <p style={{ color: "#8b949e" }}>No messages.</p>
+              ) : (
               <div className="data-grid-wrap" style={{ backgroundColor: "#0d1117", padding: 10, borderRadius: 8 }}>
                 <CustomThemeProvider>
                   <StyledDataGrid
                     rows={telegramMessages.map((msg, idx) => ({
-                      id: msg.id ?? idx,
+                      id: msg.id ?? `msg-${idx}`,
                       date: msg.receivedAt ?? msg.createDate
                         ? new Date((msg.receivedAt ?? msg.createDate) ?? "").toLocaleString()
                         : "—",
@@ -312,15 +361,23 @@ export function UserDetailPage() {
                       { field: "file", headerName: "File", flex: 1, minWidth: 100 },
                     ] as GridColDef[]}
                     pageSizeOptions={[5, 10, 20, 50]}
-                    initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-                    paginationMode="client"
+                    paginationMode="server"
+                    rowCount={telegramMessagesTotalCount}
+                    paginationModel={telegramMessagesPagination}
+                    onPaginationModelChange={(model) => {
+                      setTelegramMessagesPagination((prev) =>
+                        prev.page !== model.page || prev.pageSize !== model.pageSize ? model : prev
+                      );
+                    }}
+                    loading={telegramMessagesLoading}
                     disableColumnFilter
                     disableColumnMenu
                     localeText={{ noRowsLabel: "📭 No messages" }}
                   />
                 </CustomThemeProvider>
               </div>
-            )
+              )}
+            </>
           ) : (
             <p style={{ color: "#8b949e" }}>
               Telegram ID not available; cannot load messages.
