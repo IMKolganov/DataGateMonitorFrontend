@@ -12,6 +12,8 @@ import "./App.css";
 
 import LoginPage from "./components/auth/LoginPage";
 import RegisterPage from "./components/auth/RegisterPage";
+import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./components/auth/ResetPasswordPage";
 import {ACCESS_TOKEN_KEY} from "./utils/const.ts";
 
 // Lazy pages
@@ -31,6 +33,8 @@ const GeneralSettings = lazy(() => import("./pages/GeneralSettings"));
 const GeoLiteDbSettings = lazy(() => import("./pages/GeoLiteDbSettings"));
 const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
 const UsersSettings = lazy(() => import("./pages/UsersSettings/UsersSettings"));
+const UserDetailPage = lazy(() => import("./pages/UsersSettings/UserDetailPage"));
+const QuotaPlansSettings = lazy(() => import("./pages/QuotaPlansSettings/QuotaPlansSettings"));
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
 const ServersOverview = lazy(() => import("./pages/ServersOverview"));
 const OvpnFileConfigForm = lazy(() => import("./pages/OvpnFileConfigForm"));
@@ -48,7 +52,10 @@ export const withSuspense = (node: React.ReactElement) => (
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const isAuthPage =
-    location.pathname === "/login" || location.pathname === "/register";
+    location.pathname === "/login" ||
+    location.pathname === "/register" ||
+    location.pathname === "/forgot-password" ||
+    location.pathname === "/reset-password";
 
   return (
     <>
@@ -70,6 +77,8 @@ function App() {
           <Routes>
             <Route path="/login" element={withSuspense(<LoginPage />)} />
             <Route path="/register" element={withSuspense(<RegisterPage />)} />
+            <Route path="/forgot-password" element={withSuspense(<ForgotPasswordPage />)} />
+            <Route path="/reset-password" element={withSuspense(<ResetPasswordPage />)} />
 
             <Route
               path="/*"
@@ -102,9 +111,11 @@ function App() {
                       <Route index element={<Navigate to="general" replace />} />
                       <Route path="general" element={withSuspense(<GeneralSettings />)} />
                       <Route path="applications" element={withSuspense(<ApplicationSettings />)} />
+                      <Route path="quotas" element={withSuspense(<QuotaPlansSettings />)} />
                       <Route path="geolitedb" element={withSuspense(<GeoLiteDbSettings />)} />
                       <Route path="telegrambot" element={withSuspense(<TelegramBotSettings />)} />
                       <Route path="users" element={withSuspense(<UsersSettings />)} />
+                      <Route path="users/:userId" element={withSuspense(<UserDetailPage />)} />
                     </Route>
 
                     <Route path="/notifications" element={withSuspense(<NotificationsPage />)} />

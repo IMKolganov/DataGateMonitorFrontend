@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { Link } from "react-router-dom";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
@@ -42,6 +43,21 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, loading }) => {
     { field: "isAdmin", headerName: "Admin", type: "boolean", flex: 0.5 },
     { field: "isBlocked", headerName: "Blocked", type: "boolean", flex: 0.5 },
     { field: "hasDashboardAccess", headerName: "Dashboard", type: "boolean", flex: 0.5 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 90,
+      sortable: false,
+      renderCell: (params) => (
+        <Link
+          to={`/settings/users/${params.row.id}`}
+          className="user-view-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          View
+        </Link>
+      ),
+    },
   ];
 
   return (

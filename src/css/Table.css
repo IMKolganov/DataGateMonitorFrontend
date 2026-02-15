@@ -21,3 +21,13 @@
   height: 100%;
   width: 100%;
 }
+
+.user-view-link {
+  color: #58a6ff;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.user-view-link:hover {
+  text-decoration: underline;
+}
