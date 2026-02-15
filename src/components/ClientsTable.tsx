@@ -6,6 +6,7 @@ import StyledDataGrid from "./ui/TableStyle.tsx";
 import CustomThemeProvider from "./ui/ThemeProvider.tsx";
 import { Link, useParams } from "react-router-dom";
 import type { VpnClientInfoDto } from "../api/orval/model";
+import "../css/Table.css";
 
 type ClientDto = VpnClientInfoDto;
 
@@ -79,13 +80,11 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
     return (
         <CustomThemeProvider>
             <div
+                className="data-grid-wrap"
                 style={{
-                    width: "100%",
-                    minWidth: 0,
                     backgroundColor: "#0d1117",
                     padding: "10px",
                     borderRadius: "8px",
-                    overflow: "hidden",
                 }}
             >
                 <StyledDataGrid

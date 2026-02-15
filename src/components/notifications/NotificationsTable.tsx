@@ -110,13 +110,11 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
   return (
     <CustomThemeProvider>
       <div
-        className="notifications-table-wrapper"
+        className="data-grid-wrap notifications-table-wrapper"
         style={{
-          width: "100%",
           backgroundColor: "#0d1117",
           padding: "10px",
           borderRadius: "8px",
-          overflow: "hidden",
         }}
       >
         <StyledDataGrid

@@ -135,7 +135,14 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
 
   return (
     <CustomThemeProvider>
-      <div className="table-container">
+      <div
+        className="data-grid-wrap"
+        style={{
+          backgroundColor: "#0d1117",
+          padding: "10px",
+          borderRadius: "8px",
+        }}
+      >
         <div className="filters">
           <input
             type="text"

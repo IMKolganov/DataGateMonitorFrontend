@@ -233,8 +233,15 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
 
   return (
     <CustomThemeProvider>
-      <div className="table-container">
-        <div className="filters" style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+      <div
+        className="data-grid-wrap"
+        style={{
+          backgroundColor: "#0d1117",
+          padding: "10px",
+          borderRadius: "8px",
+        }}
+      >
+        <div className="filters" style={{ marginBottom: 12 }}>
           <input
             type="text"
             placeholder="Search by Common Name"

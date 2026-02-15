@@ -292,12 +292,11 @@ export function QuotaPlansSettings() {
       ) : (
         <CustomThemeProvider>
           <div
+            className="data-grid-wrap"
             style={{
-              width: "100%",
               backgroundColor: "#0d1117",
               padding: 10,
               borderRadius: 8,
-              overflow: "hidden",
             }}
           >
             <StyledDataGrid

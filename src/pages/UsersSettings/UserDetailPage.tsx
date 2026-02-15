@@ -15,6 +15,7 @@ import {
   usePutApiUserQuotaPlansUpdate,
   useDeleteApiUserQuotaPlansDeleteId,
 } from "../../api/orval/user-quota-plan/user-quota-plan";
+import { useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId } from "../../api/orval/telegram-bot-incoming-message-log/telegram-bot-incoming-message-log";
 import type {
   QuotaPlanDto,
   QuotaPlansResponse,
@@ -23,6 +24,8 @@ import type {
 } from "../../api/orval/model";
 import type { UsersResponse } from "../../api/orval/model";
 import type { GetUserQuotaPlansByUserIdResponse } from "../../api/orval/model";
+import type { GetByTelegramIdMessagesResponse } from "../../api/orval/model";
+import type { MessageDto } from "../../api/orval/model";
 import { useQueryClient } from "@tanstack/react-query";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
@@ -60,6 +63,21 @@ export function UserDetailPage() {
   const createAssignmentMutation = usePostApiUserQuotaPlansCreate();
   const updateAssignmentMutation = usePutApiUserQuotaPlansUpdate();
   const deleteAssignmentMutation = useDeleteApiUserQuotaPlansDeleteId();
+
+  const isTelegramUser =
+    user != null &&
+    (user.provider?.toLowerCase().includes("telegram") ?? false);
+  const telegramId =
+    user?.externalId != null ? parseInt(String(user.externalId), 10) : NaN;
+  const telegramIdValid = Number.isFinite(telegramId) && telegramId > 0;
+
+  const { data: telegramMessagesData } =
+    useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId(
+      telegramIdValid ? telegramId : 0,
+      { query: { enabled: isTelegramUser && telegramIdValid } }
+    );
+  const telegramMessages: MessageDto[] =
+    (telegramMessagesData as GetByTelegramIdMessagesResponse | undefined)?.messages?.items ?? [];
 
   const invalidateUserQuota = () =>
     queryClient.invalidateQueries({
@@ -193,7 +211,7 @@ export function UserDetailPage() {
   }
 
   return (
-    <div className="content-wrapper">
+    <div>
       <div className="header-bar">
         <div className="left-buttons">
           <button className="btn secondary" onClick={() => navigate("/settings/users")}>
@@ -213,6 +231,14 @@ export function UserDetailPage() {
           <dd>{user.displayName ?? "—"}</dd>
           <dt>Email</dt>
           <dd>{user.email ?? "—"}</dd>
+          <dt>Sign-in method</dt>
+          <dd>
+            {user.provider
+              ? isTelegramUser
+                ? `Telegram${user.externalId != null ? ` (ID: ${user.externalId})` : ""}`
+                : user.provider
+              : "—"}
+          </dd>
           <dt>Provider</dt>
           <dd>{user.provider ?? "—"}</dd>
           <dt>External ID</dt>
@@ -255,30 +281,81 @@ export function UserDetailPage() {
         </button>
       </section>
 
+      {isTelegramUser && (
+        <section className="settings-card" style={{ marginBottom: 24 }}>
+          <h3>Telegram bot messages</h3>
+          <p className="settings-item-description">
+            Incoming messages from this user in the Telegram bot.
+          </p>
+          {telegramIdValid ? (
+            telegramMessages.length === 0 ? (
+              <p style={{ color: "#8b949e" }}>No messages.</p>
+            ) : (
+              <div className="table-container" style={{ padding: 10 }}>
+                <table className="user-quota-assignments-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Text</th>
+                      <th>File</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {telegramMessages.map((msg) => (
+                      <tr key={msg.id}>
+                        <td>
+                          {msg.receivedAt ?? msg.createDate
+                            ? new Date(
+                                (msg.receivedAt ?? msg.createDate) ?? ""
+                              ).toLocaleString()
+                            : "—"}
+                        </td>
+                        <td>{msg.messageText ?? "—"}</td>
+                        <td>
+                          {msg.fileType ?? msg.fileName
+                            ? [msg.fileType, msg.fileName].filter(Boolean).join(" · ")
+                            : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
+          ) : (
+            <p style={{ color: "#8b949e" }}>
+              Telegram ID not available; cannot load messages.
+            </p>
+          )}
+        </section>
+      )}
+
       <section className="settings-card" style={{ marginBottom: 24 }}>
         <h3>User quota plan assignments</h3>
         <p className="settings-item-description">
           Assign quota plans to this user. Effective from/to define the period when the plan applies.
         </p>
-        <div className="header-bar" style={{ marginBottom: 12 }}>
-          <div className="left-buttons">
-            <button
-              type="button"
-              className="btn primary"
-              onClick={() => {
-                setEditingAssignment(null);
-                setAssignmentModalOpen(true);
-              }}
-              disabled={
-                quotaPlans.length === 0 ||
-                createAssignmentMutation.isPending ||
-                updateAssignmentMutation.isPending
-              }
-            >
-              <FaPlus className="icon" /> Assign plan
-            </button>
+        {userAssignments.length === 0 && (
+          <div className="header-bar" style={{ marginBottom: 12 }}>
+            <div className="left-buttons">
+              <button
+                type="button"
+                className="btn primary"
+                onClick={() => {
+                  setEditingAssignment(null);
+                  setAssignmentModalOpen(true);
+                }}
+                disabled={
+                  quotaPlans.length === 0 ||
+                  createAssignmentMutation.isPending ||
+                  updateAssignmentMutation.isPending
+                }
+              >
+                <FaPlus className="icon" /> Assign plan
+              </button>
+            </div>
           </div>
-        </div>
+        )}
         {userAssignments.length === 0 ? (
           <p style={{ color: "#8b949e" }}>No assignments. Click «Assign plan» to add one.</p>
         ) : (

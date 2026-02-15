@@ -130,12 +130,11 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
   return (
     <CustomThemeProvider>
       <div
+        className="data-grid-wrap"
         style={{
-          width: "100%",
           backgroundColor: "#0d1117",
           padding: "10px",
           borderRadius: "8px",
-          overflow: "hidden",
         }}
       >
         <StyledDataGrid
