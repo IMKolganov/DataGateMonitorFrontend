@@ -1,17 +1,24 @@
 import { FaSync } from "react-icons/fa";
 import UsersTable from "../../components/settings/UsersTable.tsx";
 import type { UserDto } from "../../api/orval/model";
+import type { GridPaginationModel } from "@mui/x-data-grid";
 import "../../css/Settings.css";
 import "../../css/TelegramBotUsers.css";
 
 export function UsersSection({
   users,
+  totalCount,
+  paginationModel,
+  onPaginationModelChange,
   anyLoading,
   refreshing,
   errorMessage,
   handleRefresh,
 }: {
   users: UserDto[];
+  totalCount: number;
+  paginationModel: GridPaginationModel;
+  onPaginationModelChange: (model: GridPaginationModel) => void;
   anyLoading: boolean;
   refreshing: boolean;
   errorMessage: string | null;
@@ -33,7 +40,13 @@ export function UsersSection({
         </div>
       )}
 
-      <UsersTable users={users} loading={anyLoading} />
+      <UsersTable
+        users={users}
+        totalCount={totalCount}
+        paginationModel={paginationModel}
+        onPaginationModelChange={onPaginationModelChange}
+        loading={anyLoading}
+      />
     </>
   );
 }

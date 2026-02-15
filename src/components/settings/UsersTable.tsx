@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import type { GridColDef } from "@mui/x-data-grid";
+import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type { UserDto } from "../../api/orval/model";
@@ -8,10 +8,19 @@ import "../../css/Table.css";
 
 interface UsersTableProps {
   users: UserDto[];
+  totalCount: number;
+  paginationModel: GridPaginationModel;
+  onPaginationModelChange: (model: GridPaginationModel) => void;
   loading: boolean;
 }
 
-const UsersTable: React.FC<UsersTableProps> = ({ users, loading }) => {
+const UsersTable: React.FC<UsersTableProps> = ({
+  users,
+  totalCount,
+  paginationModel,
+  onPaginationModelChange,
+  loading,
+}) => {
   const rows = useMemo(
     () =>
       (users ?? []).map((u, idx) => {
@@ -74,8 +83,11 @@ const UsersTable: React.FC<UsersTableProps> = ({ users, loading }) => {
         <StyledDataGrid
           rows={rows}
           columns={columns}
+          rowCount={totalCount}
+          paginationMode="server"
+          paginationModel={paginationModel}
+          onPaginationModelChange={onPaginationModelChange}
           pageSizeOptions={[5, 10, 20, 50, 100]}
-          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           disableColumnFilter
           disableColumnMenu
           localeText={{ noRowsLabel: "📭 No users found" }}
