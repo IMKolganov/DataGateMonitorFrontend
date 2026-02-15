@@ -25,10 +25,10 @@ export function UsersSection({
   handleRefresh: () => void;
 }) {
   return (
-    <>
+    <div>
       <div className="header-bar">
         <div className="left-buttons">
-          <button className="btn secondary" onClick={handleRefresh} disabled={refreshing}>
+          <button type="button" className="btn secondary" onClick={handleRefresh} disabled={refreshing}>
             <FaSync className={`icon ${refreshing ? "icon-spin" : ""}`} /> Refresh
           </button>
         </div>
@@ -47,6 +47,6 @@ export function UsersSection({
         onPaginationModelChange={onPaginationModelChange}
         loading={anyLoading}
       />
-    </>
+    </div>
   );
 }

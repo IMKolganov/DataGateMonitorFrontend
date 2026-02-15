@@ -29,6 +29,9 @@ import type { MessageDto } from "../../api/orval/model";
 import { useQueryClient } from "@tanstack/react-query";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
+import StyledDataGrid from "../../components/ui/TableStyle.tsx";
+import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
+import type { GridColDef } from "@mui/x-data-grid";
 import "../../css/Settings.css";
 import "../../css/Table.css";
 
@@ -76,8 +79,9 @@ export function UserDetailPage() {
       telegramIdValid ? telegramId : 0,
       { query: { enabled: isTelegramUser && telegramIdValid } }
     );
-  const telegramMessages: MessageDto[] =
-    (telegramMessagesData as GetByTelegramIdMessagesResponse | undefined)?.messages?.items ?? [];
+  const messagesPayload = (telegramMessagesData as GetByTelegramIdMessagesResponse | undefined)?.messages;
+  const telegramMessages: MessageDto[] = messagesPayload?.items ?? [];
+  const telegramMessagesTotalCount = messagesPayload?.totalCount ?? telegramMessages.length;
 
   const invalidateUserQuota = () =>
     queryClient.invalidateQueries({
@@ -288,38 +292,33 @@ export function UserDetailPage() {
             Incoming messages from this user in the Telegram bot.
           </p>
           {telegramIdValid ? (
-            telegramMessages.length === 0 ? (
+            telegramMessages.length === 0 && telegramMessagesTotalCount === 0 ? (
               <p style={{ color: "#8b949e" }}>No messages.</p>
             ) : (
-              <div className="table-container" style={{ padding: 10 }}>
-                <table className="user-quota-assignments-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Text</th>
-                      <th>File</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {telegramMessages.map((msg) => (
-                      <tr key={msg.id}>
-                        <td>
-                          {msg.receivedAt ?? msg.createDate
-                            ? new Date(
-                                (msg.receivedAt ?? msg.createDate) ?? ""
-                              ).toLocaleString()
-                            : "—"}
-                        </td>
-                        <td>{msg.messageText ?? "—"}</td>
-                        <td>
-                          {msg.fileType ?? msg.fileName
-                            ? [msg.fileType, msg.fileName].filter(Boolean).join(" · ")
-                            : "—"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="data-grid-wrap" style={{ backgroundColor: "#0d1117", padding: 10, borderRadius: 8 }}>
+                <CustomThemeProvider>
+                  <StyledDataGrid
+                    rows={telegramMessages.map((msg, idx) => ({
+                      id: msg.id ?? idx,
+                      date: msg.receivedAt ?? msg.createDate
+                        ? new Date((msg.receivedAt ?? msg.createDate) ?? "").toLocaleString()
+                        : "—",
+                      text: msg.messageText ?? "—",
+                      file: [msg.fileType, msg.fileName].filter(Boolean).join(" · ") || "—",
+                    }))}
+                    columns={[
+                      { field: "date", headerName: "Date", flex: 1, minWidth: 140 },
+                      { field: "text", headerName: "Text", flex: 2, minWidth: 120 },
+                      { field: "file", headerName: "File", flex: 1, minWidth: 100 },
+                    ] as GridColDef[]}
+                    pageSizeOptions={[5, 10, 20, 50]}
+                    initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+                    paginationMode="client"
+                    disableColumnFilter
+                    disableColumnMenu
+                    localeText={{ noRowsLabel: "📭 No messages" }}
+                  />
+                </CustomThemeProvider>
               </div>
             )
           ) : (
