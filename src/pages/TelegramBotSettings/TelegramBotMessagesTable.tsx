@@ -9,30 +9,20 @@ import type { MessageDto } from "../../api/orval/model";
 interface TelegramBotMessagesTableProps {
     messages: MessageDto[];
     loading: boolean;
-
-    page: number;              // 0-based
+    page: number; // 0-based
     pageSize: number;
     totalMessages: number;
-    onPageChange: (page: number) => void;
-    onPageSizeChange: (size: number) => void;
+    onPaginationModelChange: (page: number, pageSize: number) => void;
 }
 
 const TelegramBotMessagesTable: React.FC<TelegramBotMessagesTableProps> = ({
-                                                                               messages,
-                                                                               loading,
-                                                                               page,
-                                                                               pageSize,
-                                                                               totalMessages,
-                                                                               onPageChange,
-                                                                               onPageSizeChange,
-                                                                           }) => {
-    console.log("[TgMessagesTable] render", {
-        page,
-        pageSize,
-        totalMessages,
-        messagesLen: messages.length,
-    });
-
+    messages,
+    loading,
+    page,
+    pageSize,
+    totalMessages,
+    onPaginationModelChange,
+}) => {
     const rows = useMemo(
         () =>
             (messages ?? []).map((m) => ({
@@ -70,9 +60,7 @@ const TelegramBotMessagesTable: React.FC<TelegramBotMessagesTableProps> = ({
                     rowCount={totalMessages}
                     paginationModel={{ page, pageSize }}
                     onPaginationModelChange={(model) => {
-                        console.log("[TgMessagesTable] onPaginationModelChange", model);
-                        onPageChange(model.page);
-                        onPageSizeChange(model.pageSize);
+                        onPaginationModelChange(model.page, model.pageSize);
                     }}
                     pageSizeOptions={[5, 10, 20, 50, 100]}
                     loading={loading}

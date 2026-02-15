@@ -14,7 +14,14 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 10_000,
       refetchOnWindowFocus: false,
-      retry: 1,
+      refetchOnMount: true,
+      retry: (failureCount, error) => {
+        if (failureCount >= 1) return false;
+        const name = error instanceof Error ? error.name : (error as { name?: string })?.name;
+        const msg = error instanceof Error ? error.message : String((error as { message?: unknown })?.message ?? "");
+        if (name === "CanceledError" || msg === "canceled") return false;
+        return true;
+      },
     },
   },
 });
