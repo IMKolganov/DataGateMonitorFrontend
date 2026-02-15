@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { FaPlus, FaSync, FaEdit, FaTrash, FaStar } from "react-icons/fa";
+import { FaPlus, FaSync, FaEdit, FaTrash, FaStar, FaServer } from "react-icons/fa";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
@@ -19,6 +19,7 @@ import type {
 } from "../../api/orval/model";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { QuotaPlanFormModal } from "./QuotaPlanFormModal";
+import { QuotaPlanAllowedServersModal } from "./QuotaPlanAllowedServersModal";
 import "../../css/Settings.css";
 import "../../css/Table.css";
 
@@ -34,6 +35,7 @@ export function QuotaPlansSettings() {
   const [plans, setPlans] = useState<QuotaPlanDto[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<QuotaPlanDto | null>(null);
+  const [allowedServersPlan, setAllowedServersPlan] = useState<QuotaPlanDto | null>(null);
 
   const getAllMutation = usePostApiQuotaPlansGetAll();
   const createMutation = usePostApiQuotaPlansCreate();
@@ -203,13 +205,22 @@ export function QuotaPlansSettings() {
     {
       field: "actions",
       headerName: "Actions",
-      width: 200,
+      width: 260,
       renderCell: (params) => {
         const plan = params.row.raw as QuotaPlanDto;
         const planId = plan.id;
         if (planId == null) return null;
         return (
           <div className="action-container">
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={() => setAllowedServersPlan(plan)}
+              disabled={isBusy}
+              title="Allowed servers"
+            >
+              {FaServer({ className: "icon" })}
+            </button>
             <button
               type="button"
               className="btn secondary"
@@ -312,6 +323,15 @@ export function QuotaPlansSettings() {
         onSubmit={handleModalSubmit}
         isSubmitting={createMutation.isPending || updateMutation.isPending}
       />
+
+      {allowedServersPlan != null && allowedServersPlan.id != null && (
+        <QuotaPlanAllowedServersModal
+          isOpen={true}
+          planId={allowedServersPlan.id}
+          planName={allowedServersPlan.name ?? `Plan #${allowedServersPlan.id}`}
+          onClose={() => setAllowedServersPlan(null)}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaKey } from "react-icons/fa";
+import { FaArrowLeft, FaKey, FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
   useGetApiUsersGetByIdId,
@@ -8,11 +8,26 @@ import {
 } from "../../api/orval/user/user";
 import { usePostApiAuthForgotPassword } from "../../api/orval/auth/auth";
 import { usePostApiQuotaPlansGetAll } from "../../api/orval/quota-plan/quota-plan";
-import type { QuotaPlanDto, QuotaPlansResponse } from "../../api/orval/model";
+import {
+  useGetApiUserQuotaPlansGetByUserIdUserId,
+  getGetApiUserQuotaPlansGetByUserIdUserIdQueryKey,
+  usePostApiUserQuotaPlansCreate,
+  usePutApiUserQuotaPlansUpdate,
+  useDeleteApiUserQuotaPlansDeleteId,
+} from "../../api/orval/user-quota-plan/user-quota-plan";
+import type {
+  QuotaPlanDto,
+  QuotaPlansResponse,
+  UserQuotaPlanDto,
+  CreateOrUpdateUserQuotaPlanRequest,
+} from "../../api/orval/model";
 import type { UsersResponse } from "../../api/orval/model";
+import type { GetUserQuotaPlansByUserIdResponse } from "../../api/orval/model";
 import { useQueryClient } from "@tanstack/react-query";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
+import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
 import "../../css/Settings.css";
+import "../../css/Table.css";
 
 function formatBytes(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
@@ -34,6 +49,76 @@ export function UserDetailPage() {
   const [quotaPlans, setQuotaPlans] = useState<QuotaPlanDto[]>([]);
   const getAllQuotaMutation = usePostApiQuotaPlansGetAll();
   const forgotPasswordMutation = usePostApiAuthForgotPassword();
+
+  const { data: userQuotaData } = useGetApiUserQuotaPlansGetByUserIdUserId(id);
+  const userAssignments: UserQuotaPlanDto[] =
+    (userQuotaData as GetUserQuotaPlansByUserIdResponse | undefined)?.items ?? [];
+
+  const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
+  const [editingAssignment, setEditingAssignment] = useState<UserQuotaPlanDto | null>(null);
+
+  const createAssignmentMutation = usePostApiUserQuotaPlansCreate();
+  const updateAssignmentMutation = usePutApiUserQuotaPlansUpdate();
+  const deleteAssignmentMutation = useDeleteApiUserQuotaPlansDeleteId();
+
+  const invalidateUserQuota = () =>
+    queryClient.invalidateQueries({
+      queryKey: getGetApiUserQuotaPlansGetByUserIdUserIdQueryKey(id),
+    });
+
+  const handleAssignmentSubmit = (data: CreateOrUpdateUserQuotaPlanRequest) => {
+    const payload = { ...data, userId: id };
+    const isEdit = data.id != null && data.id > 0;
+    if (isEdit) {
+      updateAssignmentMutation.mutate(
+        { data: payload },
+        {
+          onSuccess: () => {
+            toast.success("Assignment updated");
+            setAssignmentModalOpen(false);
+            setEditingAssignment(null);
+            invalidateUserQuota();
+          },
+          onError: (e: unknown) => {
+            const err = e as { response?: { data?: { message?: string } }; message?: string };
+            toast.error(err?.response?.data?.message ?? (err as Error)?.message ?? "Update failed");
+          },
+        }
+      );
+    } else {
+      createAssignmentMutation.mutate(
+        { data: payload },
+        {
+          onSuccess: () => {
+            toast.success("Quota plan assigned");
+            setAssignmentModalOpen(false);
+            invalidateUserQuota();
+          },
+          onError: (e: unknown) => {
+            const err = e as { response?: { data?: { message?: string } }; message?: string };
+            toast.error(err?.response?.data?.message ?? (err as Error)?.message ?? "Assign failed");
+          },
+        }
+      );
+    }
+  };
+
+  const handleDeleteAssignment = (assignmentId: number) => {
+    if (!window.confirm("Remove this quota plan assignment?")) return;
+    deleteAssignmentMutation.mutate(
+      { id: assignmentId },
+      {
+        onSuccess: () => {
+          toast.success("Assignment removed");
+          invalidateUserQuota();
+        },
+        onError: (e: unknown) => {
+          const err = e as { response?: { data?: { message?: string } }; message?: string };
+          toast.error(err?.response?.data?.message ?? (err as Error)?.message ?? "Delete failed");
+        },
+      }
+    );
+  };
 
   useEffect(() => {
     if (!Number.isFinite(id)) return;
@@ -170,10 +255,106 @@ export function UserDetailPage() {
         </button>
       </section>
 
-      <section className="settings-card">
-        <h3>Quota plans</h3>
+      <section className="settings-card" style={{ marginBottom: 24 }}>
+        <h3>User quota plan assignments</h3>
         <p className="settings-item-description">
-          All quota plans defined in the system. User assignment may be configured per server.
+          Assign quota plans to this user. Effective from/to define the period when the plan applies.
+        </p>
+        <div className="header-bar" style={{ marginBottom: 12 }}>
+          <div className="left-buttons">
+            <button
+              type="button"
+              className="btn primary"
+              onClick={() => {
+                setEditingAssignment(null);
+                setAssignmentModalOpen(true);
+              }}
+              disabled={
+                quotaPlans.length === 0 ||
+                createAssignmentMutation.isPending ||
+                updateAssignmentMutation.isPending
+              }
+            >
+              <FaPlus className="icon" /> Assign plan
+            </button>
+          </div>
+        </div>
+        {userAssignments.length === 0 ? (
+          <p style={{ color: "#8b949e" }}>No assignments. Click «Assign plan» to add one.</p>
+        ) : (
+          <div className="table-container" style={{ padding: 10 }}>
+            <table className="user-quota-assignments-table">
+              <thead>
+                <tr>
+                  <th>Plan</th>
+                  <th>Effective from</th>
+                  <th>Effective to</th>
+                  <th>Note</th>
+                  <th style={{ width: 100 }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {userAssignments.map((a) => {
+                  const plan = quotaPlans.find((p) => p.id === a.quotaPlanId);
+                  const planName = plan?.name ?? `Plan #${a.quotaPlanId ?? "?"}`;
+                  return (
+                    <tr key={a.id}>
+                      <td>{planName}</td>
+                      <td>
+                        {a.effectiveFrom
+                          ? new Date(a.effectiveFrom).toLocaleDateString()
+                          : "—"}
+                      </td>
+                      <td>
+                        {a.effectiveTo
+                          ? new Date(a.effectiveTo).toLocaleDateString()
+                          : "—"}
+                      </td>
+                      <td>{a.note ?? "—"}</td>
+                      <td>
+                        <div className="action-container">
+                          <button
+                            type="button"
+                            className="btn secondary"
+                            onClick={() => {
+                              setEditingAssignment(a);
+                              setAssignmentModalOpen(true);
+                            }}
+                            disabled={
+                              updateAssignmentMutation.isPending ||
+                              deleteAssignmentMutation.isPending
+                            }
+                            title="Edit"
+                          >
+                            <FaEdit className="icon" />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn danger"
+                            onClick={() => a.id != null && handleDeleteAssignment(a.id)}
+                            disabled={
+                              updateAssignmentMutation.isPending ||
+                              deleteAssignmentMutation.isPending
+                            }
+                            title="Remove"
+                          >
+                            <FaTrash className="icon" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="settings-card">
+        <h3>Available quota plans</h3>
+        <p className="settings-item-description">
+          All quota plans defined in the system. Assign them above. Server-side restrictions may apply.
         </p>
         {quotaPlans.length === 0 ? (
           <p style={{ color: "#8b949e" }}>No quota plans.</p>
@@ -196,6 +377,19 @@ export function UserDetailPage() {
           </ul>
         )}
       </section>
+
+      <UserQuotaPlanAssignmentModal
+        isOpen={assignmentModalOpen}
+        userId={id}
+        plans={quotaPlans}
+        editItem={editingAssignment}
+        onClose={() => {
+          setAssignmentModalOpen(false);
+          setEditingAssignment(null);
+        }}
+        onSubmit={handleAssignmentSubmit}
+        isSubmitting={createAssignmentMutation.isPending || updateAssignmentMutation.isPending}
+      />
     </div>
   );
 }

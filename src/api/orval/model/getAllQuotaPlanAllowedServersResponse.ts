@@ -4,12 +4,12 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
-import type { UserDto } from "./userDto";
+import type { QuotaPlanAllowedServerDto } from "./quotaPlanAllowedServerDto";
 
-export interface GetAllUsersResponse {
+export interface GetAllQuotaPlanAllowedServersResponse {
   page?: number;
   pageSize?: number;
   totalCount?: number;
   /** @nullable */
-  users?: UserDto[] | null;
+  items?: QuotaPlanAllowedServerDto[] | null;
 }

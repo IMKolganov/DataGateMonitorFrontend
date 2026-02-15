@@ -1,16 +1,38 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useGetApiUsersGetAll } from "../../api/orval/user/user";
 import type { GetAllUsersResponse, UserDto } from "../../api/orval/model";
+import type { GridPaginationModel } from "@mui/x-data-grid";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 
+const DEFAULT_PAGE_SIZE = 10;
+
 export function useUsers() {
-  const qUsers = useGetApiUsersGetAll();
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+    page: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
+  });
   const [manualRefreshing, setManualRefreshing] = useState(false);
 
-  const users: UserDto[] = useMemo(() => {
+  const params = useMemo(
+    () => ({
+      Page: paginationModel.page + 1,
+      PageSize: paginationModel.pageSize,
+    }),
+    [paginationModel.page, paginationModel.pageSize]
+  );
+
+  const qUsers = useGetApiUsersGetAll(params);
+
+  const { users, totalCount } = useMemo(() => {
     const payload = unwrapMaybeApiResponse<GetAllUsersResponse>(qUsers.data as any);
-    return (payload?.users ?? []) as UserDto[];
+    const list = (payload?.users ?? []) as UserDto[];
+    const total = payload?.totalCount ?? 0;
+    return { users: list, totalCount: total };
   }, [qUsers.data]);
+
+  const onPaginationModelChange = useCallback((model: GridPaginationModel) => {
+    setPaginationModel(model);
+  }, []);
 
   const handleRefresh = async () => {
     if (qUsers.isFetching || manualRefreshing) return;
@@ -34,6 +56,9 @@ export function useUsers() {
 
   return {
     users,
+    totalCount,
+    paginationModel,
+    onPaginationModelChange,
     anyLoading,
     refreshing,
     errorMessage,
