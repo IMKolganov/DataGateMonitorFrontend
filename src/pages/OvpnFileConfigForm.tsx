@@ -15,11 +15,40 @@ import type {
   AddOrUpdateOvpnFileConfigRequest,
   OvpnFileConfigResponse,
 } from "../api/orval/model";
+import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
+
+const SAMPLE_TEMPLATE = `setenv FRIENDLY_NAME "{{friendly_name}}"
+client
+dev tun
+proto tcp
+remote {{server_ip}} {{server_port}}
+resolv-retry infinite
+nobind
+remote-cert-tls server
+tls-version-min 1.2
+cipher AES-256-CBC
+auth SHA256
+auth-nocache
+verb 3
+<ca>
+{{ca_cert}}
+</ca>
+<cert>
+{{client_cert}}
+</cert>
+<key>
+{{client_key}}
+</key>
+<tls-crypt>
+{{tls_auth_key}}
+</tls-crypt>`;
 
 const OvpnFileConfigForm: React.FC = () => {
   const navigate = useNavigate();
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const parsedVpnServerId = Number(vpnServerId) || 0;
+  const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
+  const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
 
   // local UI state (kept in PascalCase to match form field names)
   const [ovpnFileConfig, setServerConfig] = useState({
@@ -245,13 +274,30 @@ const OvpnFileConfigForm: React.FC = () => {
                     {FaCopy({})} {copyStatus}
                   </button>
                 </div>
-                <textarea
-                  id="ConfigTemplate"
-                  name="ConfigTemplate"
-                  value={ovpnFileConfig.ConfigTemplate}
-                  onChange={handleChange}
-                  placeholder="Enter config template"
-                />
+                <div className="ovpn-textarea-wrap">
+                  <pre
+                    className="ovpn-highlight-pre"
+                    aria-hidden
+                    ref={highlightPreRef}
+                  >
+                    {highlightOvpnConfig(ovpnFileConfig.ConfigTemplate || " ")}
+                  </pre>
+                  <textarea
+                    id="ConfigTemplate"
+                    name="ConfigTemplate"
+                    value={ovpnFileConfig.ConfigTemplate}
+                    onChange={handleChange}
+                    onScroll={() => {
+                      if (highlightPreRef.current && textareaRef.current) {
+                        highlightPreRef.current.scrollTop = textareaRef.current.scrollTop;
+                        highlightPreRef.current.scrollLeft = textareaRef.current.scrollLeft;
+                      }
+                    }}
+                    placeholder="Enter config template"
+                    className="ovpn-textarea-overlay"
+                    ref={textareaRef}
+                  />
+                </div>
               </div>
             </div>
           </form>
@@ -275,30 +321,7 @@ const OvpnFileConfigForm: React.FC = () => {
             </p>
             <p>These placeholders will be replaced with actual values when generating client configs:</p>
             <pre className="ovpn-template-sample">
-{`client
-dev tun
-proto tcp
-remote {{server_ip}} {{server_port}}
-resolv-retry infinite
-nobind
-remote-cert-tls server
-tls-version-min 1.2
-cipher AES-256-CBC
-auth SHA256
-auth-nocache
-verb 3
-<ca>
-{{ca_cert}}
-</ca>
-<cert>
-{{client_cert}}
-</cert>
-<key>
-{{client_key}}
-</key>
-<tls-crypt>
-{{tls_auth_key}}
-</tls-crypt>`}
+              {highlightOvpnConfig(SAMPLE_TEMPLATE)}
             </pre>
             <p>
               ⚠️ Do not remove or change the placeholders unless you understand their purpose.

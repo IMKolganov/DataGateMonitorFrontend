@@ -4,6 +4,11 @@
   padding: 20px;
 }
 
+.settings .tab-content {
+  min-width: 0;
+}
+
+
 
 .settings-description {
   color: #8b949e;
