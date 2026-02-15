@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { postApiAuthLogin } from "../../api/orval/auth/auth";
 import type { LoginRequest, LoginResponse } from "../../api/orval/model";
 import { FaDoorOpen } from "react-icons/fa";
@@ -115,9 +116,9 @@ const PasswordLoginForm: React.FC = () => {
           <div className="login-item">
             <div className="password-label-row">
               <h4>Password</h4>
-              <a href="#" className="forgot-password-link">
+              <Link to="/forgot-password" className="forgot-password-link">
                 Forgot password?
-              </a>
+              </Link>
             </div>
             <input
                 type="password"
