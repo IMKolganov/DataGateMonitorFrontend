@@ -246,6 +246,22 @@
   justify-content: center;
 }
 
+.login-info-text {
+  font-size: 14px;
+  color: #c9d1d9;
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.login-info-text a {
+  color: #58a6ff;
+  text-decoration: none;
+}
+
+.login-info-text a:hover {
+  text-decoration: underline;
+}
+
 /* Register footer */
 
 .register-container {

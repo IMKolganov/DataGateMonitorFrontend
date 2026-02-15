@@ -6,6 +6,7 @@ import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaSync } from "react-icons/fa";
 import { formatDateWithOffset } from "../utils/utils";
+import "../css/Table.css";
 import {
   useGetApiOpenVpnEventsGetByServer,
   getApiOpenVpnEventsGetByServer,
@@ -203,13 +204,11 @@ const Events: React.FC = () => {
         <h2>Server Events:</h2>
 
           <div
+            className="data-grid-wrap"
             style={{
-              width: "100%",
-              minWidth: 0,
               backgroundColor: "#0d1117",
               padding: "10px",
               borderRadius: "8px",
-              overflow: "hidden",
             }}>          
             <StyledDataGrid
               rows={rows}

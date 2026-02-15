@@ -21,16 +21,24 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AdminForgotPasswordRequest,
+  AdminForgotPasswordResponseApiResponse,
+  AdminResetPasswordRequest,
+  AdminResetPasswordResponseApiResponse,
   GoogleCodeLoginRequest,
   GoogleLoginRequest,
   GoogleLoginResponseApiResponse,
   LoginRequest,
   LoginResponseApiResponse,
+  ProblemDetails,
   RefreshRequest,
   RefreshResponseApiResponse,
   RegisterUserRequest,
   RegisterUserResponseApiResponse,
   StringApiResponse,
+  TelegramCodeLoginRequest,
+  TelegramRequestLoginCodeRequest,
+  TelegramRequestLoginCodeResponseApiResponse,
   TokenRequest,
   TokenResponseApiResponse,
 } from ".././model";
@@ -532,6 +540,179 @@ export const usePostApiAuthGoogleCodeLogin = <
 
   return useMutation(mutationOptions, queryClient);
 };
+export const postApiAuthTelegramRequestLoginCode = (
+  telegramRequestLoginCodeRequest: TelegramRequestLoginCodeRequest,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<TelegramRequestLoginCodeResponseApiResponse>(
+    {
+      url: `/api/auth/telegram/request-login-code`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: telegramRequestLoginCodeRequest,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiAuthTelegramRequestLoginCodeMutationOptions = <
+  TError = ProblemDetails,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiAuthTelegramRequestLoginCode>>,
+    TError,
+    { data: TelegramRequestLoginCodeRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiAuthTelegramRequestLoginCode>>,
+  TError,
+  { data: TelegramRequestLoginCodeRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiAuthTelegramRequestLoginCode"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiAuthTelegramRequestLoginCode>>,
+    { data: TelegramRequestLoginCodeRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiAuthTelegramRequestLoginCode(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiAuthTelegramRequestLoginCodeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiAuthTelegramRequestLoginCode>>
+>;
+export type PostApiAuthTelegramRequestLoginCodeMutationBody =
+  TelegramRequestLoginCodeRequest;
+export type PostApiAuthTelegramRequestLoginCodeMutationError = ProblemDetails;
+
+export const usePostApiAuthTelegramRequestLoginCode = <
+  TError = ProblemDetails,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiAuthTelegramRequestLoginCode>>,
+      TError,
+      { data: TelegramRequestLoginCodeRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiAuthTelegramRequestLoginCode>>,
+  TError,
+  { data: TelegramRequestLoginCodeRequest },
+  TContext
+> => {
+  const mutationOptions =
+    getPostApiAuthTelegramRequestLoginCodeMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const postApiAuthTelegramCodeLogin = (
+  telegramCodeLoginRequest: TelegramCodeLoginRequest,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<LoginResponseApiResponse>(
+    {
+      url: `/api/auth/telegram-code-login`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: telegramCodeLoginRequest,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiAuthTelegramCodeLoginMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiAuthTelegramCodeLogin>>,
+    TError,
+    { data: TelegramCodeLoginRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiAuthTelegramCodeLogin>>,
+  TError,
+  { data: TelegramCodeLoginRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiAuthTelegramCodeLogin"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiAuthTelegramCodeLogin>>,
+    { data: TelegramCodeLoginRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiAuthTelegramCodeLogin(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiAuthTelegramCodeLoginMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiAuthTelegramCodeLogin>>
+>;
+export type PostApiAuthTelegramCodeLoginMutationBody = TelegramCodeLoginRequest;
+export type PostApiAuthTelegramCodeLoginMutationError = unknown;
+
+export const usePostApiAuthTelegramCodeLogin = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiAuthTelegramCodeLogin>>,
+      TError,
+      { data: TelegramCodeLoginRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiAuthTelegramCodeLogin>>,
+  TError,
+  { data: TelegramCodeLoginRequest },
+  TContext
+> => {
+  const mutationOptions =
+    getPostApiAuthTelegramCodeLoginMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
 export const postApiAuthLogin = (
   loginRequest: LoginRequest,
   options?: SecondParameter<typeof ogmMutator>,
@@ -611,6 +792,176 @@ export const usePostApiAuthLogin = <TError = unknown, TContext = unknown>(
   TContext
 > => {
   const mutationOptions = getPostApiAuthLoginMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const postApiAuthForgotPassword = (
+  adminForgotPasswordRequest: AdminForgotPasswordRequest,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<AdminForgotPasswordResponseApiResponse>(
+    {
+      url: `/api/auth/forgot-password`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: adminForgotPasswordRequest,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiAuthForgotPasswordMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiAuthForgotPassword>>,
+    TError,
+    { data: AdminForgotPasswordRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiAuthForgotPassword>>,
+  TError,
+  { data: AdminForgotPasswordRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiAuthForgotPassword"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiAuthForgotPassword>>,
+    { data: AdminForgotPasswordRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiAuthForgotPassword(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiAuthForgotPasswordMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiAuthForgotPassword>>
+>;
+export type PostApiAuthForgotPasswordMutationBody = AdminForgotPasswordRequest;
+export type PostApiAuthForgotPasswordMutationError = unknown;
+
+export const usePostApiAuthForgotPassword = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiAuthForgotPassword>>,
+      TError,
+      { data: AdminForgotPasswordRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiAuthForgotPassword>>,
+  TError,
+  { data: AdminForgotPasswordRequest },
+  TContext
+> => {
+  const mutationOptions = getPostApiAuthForgotPasswordMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const postApiAuthResetPassword = (
+  adminResetPasswordRequest: AdminResetPasswordRequest,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<AdminResetPasswordResponseApiResponse>(
+    {
+      url: `/api/auth/reset-password`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: adminResetPasswordRequest,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiAuthResetPasswordMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiAuthResetPassword>>,
+    TError,
+    { data: AdminResetPasswordRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiAuthResetPassword>>,
+  TError,
+  { data: AdminResetPasswordRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiAuthResetPassword"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiAuthResetPassword>>,
+    { data: AdminResetPasswordRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiAuthResetPassword(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiAuthResetPasswordMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiAuthResetPassword>>
+>;
+export type PostApiAuthResetPasswordMutationBody = AdminResetPasswordRequest;
+export type PostApiAuthResetPasswordMutationError = unknown;
+
+export const usePostApiAuthResetPassword = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiAuthResetPassword>>,
+      TError,
+      { data: AdminResetPasswordRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiAuthResetPassword>>,
+  TError,
+  { data: AdminResetPasswordRequest },
+  TContext
+> => {
+  const mutationOptions = getPostApiAuthResetPasswordMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };
