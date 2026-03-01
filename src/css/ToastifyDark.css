@@ -5,9 +5,9 @@
   
   /* Dark background with light text */
   .Toastify__toast--dark {
-    background: #161b22;
-    color: #c9d1d9;
-    border: 1px solid #30363d;
+    background: var(--bg-content);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
   }
   
@@ -30,6 +30,6 @@
   
   /* Progress bar - subtle gray */
   .Toastify__progress-bar {
-    background: #30363d;
+    background: var(--border-color);
   }
   

@@ -71,7 +71,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 function App() {
   return (
-    <div className="app-container dark-theme">
+    <div className="app-container">
       <Router>
         <Layout>
           <Routes>

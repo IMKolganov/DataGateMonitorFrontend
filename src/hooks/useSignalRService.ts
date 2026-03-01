@@ -105,7 +105,6 @@ export default function useSignalRService() {
                     if (!alive) return;
                     setConnectionState("closed");
                     setLastError(err ? String(err) : null);
-                    console.warn("[SignalR] closed", err);
                 });
 
                 // IMPORTANT: This name must match server SendAsync("StatusUpdated", ...)
@@ -136,7 +135,6 @@ export default function useSignalRService() {
                 if (!alive) return;
                 setConnectionState("error");
                 setLastError(e ? String(e?.message ?? e) : "Unknown error");
-                console.error("[SignalR] start error", e);
             }
         };
 

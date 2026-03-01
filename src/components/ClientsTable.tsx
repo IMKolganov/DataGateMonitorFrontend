@@ -82,7 +82,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
             <div
                 className="data-grid-wrap"
                 style={{
-                    backgroundColor: "#0d1117",
+                    backgroundColor: "var(--bg-body)",
                     padding: "10px",
                     borderRadius: "8px",
                 }}
@@ -99,6 +99,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                         if (model.pageSize !== pageSize) onPageSizeChange(model.pageSize);
                     }}
                     loading={loading}
+                    slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
                     disableColumnFilter
                     disableColumnMenu
                     localeText={{

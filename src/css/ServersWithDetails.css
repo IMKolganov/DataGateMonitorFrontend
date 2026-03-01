@@ -1,8 +1,8 @@
 .servers-with-details-container {
   display: flex;
   height: 100vh;
-  background-color: #121212;
-  color: #fff;
+  background-color: var(--bg-body);
+  color: var(--text-primary);
   overflow: hidden;
 }
 
@@ -11,8 +11,8 @@
   height: 98%;
   overflow-y: auto;
   padding: 1rem;
-  background-color: #161b22;
-  border-right: 1px solid #333;
+  background-color: var(--bg-content);
+  border-right: 1px solid var(--border-color);
   transition: all 0.3s ease;
 }
 
@@ -33,7 +33,7 @@
   flex-grow: 1;
   overflow-y: auto;
   padding: 1rem;
-  background-color: #161b22;
+  background-color: var(--bg-content);
   width: 100%;
 }
 
@@ -41,5 +41,5 @@
   flex-grow: 1;
   overflow-y: auto;
   padding: 1rem;
-  background-color: #161b22;
+  background-color: var(--bg-content);
 }

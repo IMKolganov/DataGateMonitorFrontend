@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { postApiAuthResetPassword } from "../../api/orval/auth/auth";
 import type { AdminResetPasswordRequest } from "../../api/orval/model";
 import { FaKey } from "react-icons/fa";
+import { PasswordInput } from "./PasswordInput";
 import "../../css/Login.css";
 
 const ResetPasswordPage: React.FC = () => {
@@ -103,8 +104,7 @@ const ResetPasswordPage: React.FC = () => {
             </div>
             <div className="login-item">
               <h4>New password</h4>
-              <input
-                type="password"
+              <PasswordInput
                 name="newPassword"
                 autoComplete="new-password"
                 value={newPassword}
@@ -116,8 +116,7 @@ const ResetPasswordPage: React.FC = () => {
             </div>
             <div className="login-item">
               <h4>Confirm password</h4>
-              <input
-                type="password"
+              <PasswordInput
                 name="confirmPassword"
                 autoComplete="new-password"
                 value={confirmPassword}

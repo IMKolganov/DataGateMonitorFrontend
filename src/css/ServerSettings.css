@@ -1,10 +1,10 @@
 .settings-container {
   max-width: auto;
   margin: 40px auto;
-  background: linear-gradient(145deg, #161b22, #21262d);
+  background: var(--bg-content);
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.6), -4px -4px 10px rgba(255, 255, 255, 0.05);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .settings-form {
@@ -17,13 +17,13 @@
   display: flex;
   flex-direction: column;
   padding-bottom: 10px;
-  border-bottom: 1px solid #30363d;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .form-group label {
   font-weight: bold;
   font-size: 14px;
-  color: #ddd;
+  color: var(--text-primary);
   margin-bottom: 5px;
 }
 
@@ -34,7 +34,7 @@
 
 .field-description {
   font-size: 12px;
-  color: #999;
+  color: var(--text-muted);
   margin-bottom: 5px;
 }
 

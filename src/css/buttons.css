@@ -12,12 +12,16 @@
   font-weight: 500;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, box-shadow 0.1s;
   border: 1px solid transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+}
+
+.btn:focus,
+.btn:focus-visible {
+  outline: none;
 }
 
 .icon {
@@ -37,14 +41,14 @@
 }
 
 .btn.secondary {
-  background: #21262d;
-  color: #c9d1d9;
-  border: 1px solid #30363d;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border: 1px solid var(--border-color);
 }
 
 .btn.secondary:hover {
-  background: #30363d;
-  color: #c9d1d9;
+  background: var(--btn-secondary-hover);
+  color: var(--btn-secondary-text);
 }
 
 .btn.normal {
@@ -84,9 +88,9 @@
 .btn[disabled] {
   cursor: not-allowed;
   opacity: 0.5;
-  background: #21262d;
-  border-color: #30363d;
-  color: #484f58;
+  background: var(--btn-secondary-bg);
+  border-color: var(--border-color);
+  color: var(--text-muted);
 }
 
 .btn.primary:disabled,
@@ -123,22 +127,24 @@
   padding: 4px 6px;
   font-size: 14px;
   font-weight: 500;
-  color: #c9d1d9;
-  background-color: #24292e;
-  border: 1px solid #d1d5da;
-  border-radius: 4px;
+  color: #f0f6fc;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   outline: none;
-  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .input-number:focus {
-border-color: #0366d6;
-box-shadow: 0 0 4px rgba(3, 102, 214, 0.3);
+  border-color: #c1bfbf;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+  background-color: var(--input-bg);
 }
 
 .input:focus {
   outline: none;
-  border-color: #0366d6;
+  border-color: #c1bfbf;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+  background-color: var(--input-bg);
 }
 
 .input-number:hover {
@@ -163,7 +169,7 @@ box-shadow: 0 0 4px rgba(3, 102, 214, 0.3);
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  background-color: #0d1117;
+  background-color: var(--input-bg);
   border-radius: 8px;
   margin-bottom: 15px;
   flex-wrap: wrap;
@@ -207,8 +213,8 @@ box-shadow: 0 0 4px rgba(3, 102, 214, 0.3);
   width: 100%;
   margin-bottom: 1rem;
   padding: 0.5rem;
-  background-color: #161b22;
-  color: #ccc;
+  background-color: var(--bg-content);
+  color: var(--text-muted);
   border: 1px solid #333;
 }
 

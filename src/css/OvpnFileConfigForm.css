@@ -1,6 +1,6 @@
 .config-template-container {
-    background-color: #0d1117;
-    border: 1px solid #30363d;
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 10px;
     margin-top: 10px;
@@ -10,7 +10,7 @@
   }
   
   .config-template-container label {
-    color: #c9d1d9;
+    color: var(--text-secondary);
     font-weight: bold;
     display: block;
     margin-bottom: 5px;
@@ -18,8 +18,7 @@
   
   .ovpn-textarea-wrap {
     position: relative;
-    min-height: 520px;
-    max-height: 1200px;
+    height: 480px;
     width: 99%;
     border-radius: 4px;
   }
@@ -29,7 +28,9 @@
     top: 0;
     left: 0;
     right: 8px;
-    bottom: 8px;
+    width: calc(100% - 8px);
+    height: 456px;
+    max-height: 456px;
     overflow: auto;
     padding: 8px;
     z-index: 0;
@@ -45,32 +46,29 @@
     top: 0;
     left: 0;
     right: 8px;
-    bottom: 8px;
     width: calc(100% - 8px);
-    min-height: 520px;
-    max-height: 1200px;
+    height: 456px;
+    max-height: 456px;
+    min-height: 0;
     background: transparent;
     color: transparent;
-    caret-color: #c9d1d9;
+    caret-color: var(--text-secondary);
     border: none;
     font-family: "Courier New", monospace;
     font-size: 14px;
     line-height: 1.5;
     padding: 8px;
-    resize: vertical;
-    overflow-y: auto;
-    overflow-x: auto;
+    resize: none;
+    overflow: auto;
     outline: none;
     z-index: 1;
   }
 
-  .config-template-container textarea {
+  .config-template-container textarea:not(.ovpn-textarea-overlay) {
     width: 99%;
-    min-height: 520px;
-    max-height: 1200px;
-    background-color: #0d1117;
+    background-color: var(--bg-body);
     border: none;
-    color: #c9d1d9;
+    color: var(--text-secondary);
     font-family: "Courier New", monospace;
     font-size: 14px;
     line-height: 1.5;
@@ -83,7 +81,7 @@
   /* Scrollbar like DataGrid: thin, dark track/thumb, no white resizer */
   .ovpn-textarea-wrap .ovpn-textarea-overlay {
     scrollbar-width: thin;
-    scrollbar-color: #30363d #0d1117;
+    scrollbar-color: var(--border-color) var(--bg-body);
   }
 
   .config-template-container textarea.ovpn-textarea-overlay::-webkit-scrollbar {
@@ -92,11 +90,11 @@
   }
 
   .config-template-container textarea.ovpn-textarea-overlay::-webkit-scrollbar-track {
-    background-color: #0d1117;
+    background-color: var(--bg-body);
   }
 
   .config-template-container textarea.ovpn-textarea-overlay::-webkit-scrollbar-thumb {
-    background-color: #30363d;
+    background-color: var(--border-color);
     border-radius: 4px;
   }
 
@@ -105,7 +103,7 @@
   }
 
   .config-template-container textarea.ovpn-textarea-overlay::-webkit-resizer {
-    background: #0d1117;
+    background: var(--bg-body);
     border-radius: 0 0 6px 0;
   }
 
@@ -115,11 +113,11 @@
   }
 
   .config-template-container textarea::-webkit-scrollbar-track {
-    background-color: #0d1117;
+    background-color: var(--bg-body);
   }
 
   .config-template-container textarea::-webkit-scrollbar-thumb {
-    background-color: #30363d;
+    background-color: var(--border-color);
     border-radius: 4px;
   }
 
@@ -128,7 +126,7 @@
   }
 
   .config-template-container textarea::-webkit-resizer {
-    background: #0d1117;
+    background: var(--bg-body);
     border-radius: 0 0 6px 0;
   }
 
@@ -136,7 +134,7 @@
     display: flex;
     justify-content: space-between;
     padding-bottom: 5px;
-    border-bottom: 1px solid #30363d;
+    border-bottom: 1px solid var(--border-color);
     margin-bottom: 5px;
   }
   
@@ -157,8 +155,8 @@
   }
 
   .form-hint-container pre.ovpn-template-sample {
-    background-color: #0d1117;
-    color: #c9d1d9;
+    background-color: var(--bg-body);
+    color: var(--text-secondary);
     padding: 1rem;
     border-radius: 6px;
     font-family: monospace;
@@ -187,5 +185,5 @@
     font-family: "Courier New", monospace;
     font-size: 14px;
     line-height: 1.5;
-    color: #c9d1d9;
+    color: var(--text-secondary);
   }

@@ -5,9 +5,7 @@ const TelegramCodeLoginForm: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
         // TODO: implement Telegram code login once API is ready
-        console.log("Telegram code:", code);
     };
 
     return (

@@ -9,6 +9,7 @@ import type {
   AdminResetPasswordRequest,
 } from "../../api/orval/model";
 import { FaPaperPlane, FaKey } from "react-icons/fa";
+import { PasswordInput } from "./PasswordInput";
 import "../../css/Login.css";
 
 const MESSAGE_AFTER_FORGOT =
@@ -187,8 +188,7 @@ const ForgotPasswordPage: React.FC = () => {
                 </div>
                 <div className="login-item">
                   <h4>New password</h4>
-                  <input
-                    type="password"
+                  <PasswordInput
                     name="newPassword"
                     autoComplete="new-password"
                     value={newPassword}
@@ -200,8 +200,7 @@ const ForgotPasswordPage: React.FC = () => {
                 </div>
                 <div className="login-item">
                   <h4>Confirm password</h4>
-                  <input
-                    type="password"
+                  <PasswordInput
                     name="confirmPassword"
                     autoComplete="new-password"
                     value={confirmPassword}
