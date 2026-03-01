@@ -22,10 +22,12 @@ import type {
 
 import type {
   AddServerRequest,
+  GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
   OpenVpnServerResponseApiResponse,
   OpenVpnServerWithStatusResponseApiResponse,
   OpenVpnServerWithStatusesResponseApiResponse,
   OpenVpnServersResponseApiResponse,
+  RootInfoResponseApiResponse,
   ServiceStatusesResponseApiResponse,
   StringApiResponse,
   UpdateServerRequest,
@@ -402,6 +404,441 @@ export function useGetApiOpenVpnServersGetServerWithStatusVpnServerId<
   const queryOptions =
     getGetApiOpenVpnServersGetServerWithStatusVpnServerIdQueryOptions(
       vpnServerId,
+      options,
+    );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getApiOpenVpnServersGetMicroserviceInfoVpnServerId = (
+  vpnServerId: number,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<RootInfoResponseApiResponse>(
+    {
+      url: `/api/open-vpn-servers/get-microservice-info/${vpnServerId}`,
+      method: "GET",
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetApiOpenVpnServersGetMicroserviceInfoVpnServerIdQueryKey = (
+  vpnServerId?: number,
+) => {
+  return [
+    `/api/open-vpn-servers/get-microservice-info/${vpnServerId}`,
+  ] as const;
+};
+
+export const getGetApiOpenVpnServersGetMicroserviceInfoVpnServerIdQueryOptions =
+  <
+    TData = Awaited<
+      ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId>
+    >,
+    TError = unknown,
+  >(
+    vpnServerId: number,
+    options?: {
+      query?: Partial<
+        UseQueryOptions<
+          Awaited<
+            ReturnType<
+              typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId
+            >
+          >,
+          TError,
+          TData
+        >
+      >;
+      request?: SecondParameter<typeof ogmMutator>;
+    },
+  ) => {
+    const { query: queryOptions, request: requestOptions } = options ?? {};
+
+    const queryKey =
+      queryOptions?.queryKey ??
+      getGetApiOpenVpnServersGetMicroserviceInfoVpnServerIdQueryKey(
+        vpnServerId,
+      );
+
+    const queryFn: QueryFunction<
+      Awaited<
+        ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId>
+      >
+    > = ({ signal }) =>
+      getApiOpenVpnServersGetMicroserviceInfoVpnServerId(
+        vpnServerId,
+        requestOptions,
+        signal,
+      );
+
+    return {
+      queryKey,
+      queryFn,
+      enabled: !!vpnServerId,
+      ...queryOptions,
+    } as UseQueryOptions<
+      Awaited<
+        ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId>
+      >,
+      TError,
+      TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+  };
+
+export type GetApiOpenVpnServersGetMicroserviceInfoVpnServerIdQueryResult =
+  NonNullable<
+    Awaited<
+      ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId>
+    >
+  >;
+export type GetApiOpenVpnServersGetMicroserviceInfoVpnServerIdQueryError =
+  unknown;
+
+export function useGetApiOpenVpnServersGetMicroserviceInfoVpnServerId<
+  TData = Awaited<
+    ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId>
+  >,
+  TError = unknown,
+>(
+  vpnServerId: number,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<
+              typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId
+            >
+          >,
+          TError,
+          Awaited<
+            ReturnType<
+              typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId
+            >
+          >
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiOpenVpnServersGetMicroserviceInfoVpnServerId<
+  TData = Awaited<
+    ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId>
+  >,
+  TError = unknown,
+>(
+  vpnServerId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<
+              typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId
+            >
+          >,
+          TError,
+          Awaited<
+            ReturnType<
+              typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId
+            >
+          >
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiOpenVpnServersGetMicroserviceInfoVpnServerId<
+  TData = Awaited<
+    ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId>
+  >,
+  TError = unknown,
+>(
+  vpnServerId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId>
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetApiOpenVpnServersGetMicroserviceInfoVpnServerId<
+  TData = Awaited<
+    ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId>
+  >,
+  TError = unknown,
+>(
+  vpnServerId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoVpnServerId>
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetApiOpenVpnServersGetMicroserviceInfoVpnServerIdQueryOptions(
+      vpnServerId,
+      options,
+    );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export const getApiOpenVpnServersGetMicroserviceInfoByUrl = (
+  params?: GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<RootInfoResponseApiResponse>(
+    {
+      url: `/api/open-vpn-servers/get-microservice-info-by-url`,
+      method: "GET",
+      params,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetApiOpenVpnServersGetMicroserviceInfoByUrlQueryKey = (
+  params?: GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
+) => {
+  return [
+    `/api/open-vpn-servers/get-microservice-info-by-url`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetApiOpenVpnServersGetMicroserviceInfoByUrlQueryOptions = <
+  TData = Awaited<
+    ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+  >,
+  TError = unknown,
+>(
+  params?: GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetApiOpenVpnServersGetMicroserviceInfoByUrlQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>>
+  > = ({ signal }) =>
+    getApiOpenVpnServersGetMicroserviceInfoByUrl(
+      params,
+      requestOptions,
+      signal,
+    );
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiOpenVpnServersGetMicroserviceInfoByUrlQueryResult =
+  NonNullable<
+    Awaited<ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>>
+  >;
+export type GetApiOpenVpnServersGetMicroserviceInfoByUrlQueryError = unknown;
+
+export function useGetApiOpenVpnServersGetMicroserviceInfoByUrl<
+  TData = Awaited<
+    ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+  >,
+  TError = unknown,
+>(
+  params: undefined | GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+          >
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiOpenVpnServersGetMicroserviceInfoByUrl<
+  TData = Awaited<
+    ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+  >,
+  TError = unknown,
+>(
+  params?: GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+          >,
+          TError,
+          Awaited<
+            ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+          >
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiOpenVpnServersGetMicroserviceInfoByUrl<
+  TData = Awaited<
+    ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+  >,
+  TError = unknown,
+>(
+  params?: GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetApiOpenVpnServersGetMicroserviceInfoByUrl<
+  TData = Awaited<
+    ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+  >,
+  TError = unknown,
+>(
+  params?: GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiOpenVpnServersGetMicroserviceInfoByUrl>
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetApiOpenVpnServersGetMicroserviceInfoByUrlQueryOptions(
+      params,
       options,
     );
 

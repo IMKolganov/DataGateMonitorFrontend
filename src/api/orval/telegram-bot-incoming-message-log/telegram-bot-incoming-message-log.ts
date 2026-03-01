@@ -25,6 +25,7 @@ import type {
   AddMessageResponseApiResponse,
   GetAllMessagesResponseApiResponse,
   GetApiTgbotIncomingMessageLogsGetAllParams,
+  GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
   GetByIdMessageResponseApiResponse,
   GetByTelegramIdMessagesResponseApiResponse,
   StringApiResponse,
@@ -294,6 +295,7 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
 
 export const getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId = (
   telegramId: number,
+  params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
@@ -301,6 +303,7 @@ export const getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId = (
     {
       url: `/api/tgbot-incoming-message-logs/get-by-telegram-userid/${telegramId}`,
       method: "GET",
+      params,
       signal,
     },
     options,
@@ -308,9 +311,13 @@ export const getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId = (
 };
 
 export const getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryKey =
-  (telegramId?: number) => {
+  (
+    telegramId?: number,
+    params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
+  ) => {
     return [
       `/api/tgbot-incoming-message-logs/get-by-telegram-userid/${telegramId}`,
+      ...(params ? [params] : []),
     ] as const;
   };
 
@@ -324,6 +331,7 @@ export const getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQuery
     TError = unknown,
   >(
     telegramId: number,
+    params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
     options?: {
       query?: Partial<
         UseQueryOptions<
@@ -345,6 +353,7 @@ export const getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQuery
       queryOptions?.queryKey ??
       getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryKey(
         telegramId,
+        params,
       );
 
     const queryFn: QueryFunction<
@@ -356,6 +365,7 @@ export const getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQuery
     > = ({ signal }) =>
       getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId(
         telegramId,
+        params,
         requestOptions,
         signal,
       );
@@ -396,6 +406,9 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId<
   TError = unknown,
 >(
   telegramId: number,
+  params:
+    | undefined
+    | GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -439,6 +452,7 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId<
   TError = unknown,
 >(
   telegramId: number,
+  params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -482,6 +496,7 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId<
   TError = unknown,
 >(
   telegramId: number,
+  params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -510,6 +525,7 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId<
   TError = unknown,
 >(
   telegramId: number,
+  params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -531,6 +547,7 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId<
   const queryOptions =
     getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryOptions(
       telegramId,
+      params,
       options,
     );
 

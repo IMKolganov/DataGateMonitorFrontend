@@ -11,6 +11,7 @@ import {
   usePostApiOpenVpnServersAdd,
   usePutApiOpenVpnServersUpdate,
   getApiOpenVpnServersGetVpnServerId,
+  getApiOpenVpnServersGetMicroserviceInfoByUrl,
 } from "../api/orval/open-vpn-servers/open-vpn-servers";
 
 import {
@@ -247,31 +248,18 @@ const ServerForm: React.FC = () => {
     }
     setApiCheck({ status: "loading" });
     try {
-      const res = await fetch(targetUrl, { method: "GET" });
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      }
-      const contentType = res.headers.get("content-type") ?? "";
-      const text = await res.text();
-      let data: unknown;
-      if (contentType.includes("application/json")) {
-        data = JSON.parse(text);
-      } else {
-        try {
-          data = JSON.parse(text);
-        } catch {
-          setApiCheck({
-            status: "error",
-            error: "Server did not return JSON. Response: " + text.slice(0, 200),
-          });
-          return;
-        }
-      }
+      const data = await getApiOpenVpnServersGetMicroserviceInfoByUrl({
+        baseUrl: targetUrl,
+      });
       setApiCheck({ status: "success", data });
       toast.success("Server responded successfully");
-    } catch (err: any) {
+    } catch (err: unknown) {
       const msg =
-        err?.message ?? (err instanceof TypeError ? "Network or CORS error" : "Request failed");
+        err instanceof Error
+          ? err.message
+          : typeof err === "object" && err != null && "message" in err
+            ? String((err as { message: unknown }).message)
+            : "Request failed";
       setApiCheck({ status: "error", error: msg });
       toast.error("Check failed: " + msg);
     }
