@@ -211,7 +211,7 @@ export default function ServersOverview() {
     : "All Servers Overview";
 
   return (
-    <div style={{ padding: 16, backgroundColor: "#161b22", color: "#c9d1d9", minHeight: "100vh" }}>
+    <div style={{ padding: 16, backgroundColor: "var(--bg-content)", color: "var(--text-secondary)", minHeight: "100vh" }}>
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
         <h2 style={{ margin: 0 }}>{title}</h2>
       </div>

@@ -122,7 +122,7 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
         <div
           className="data-grid-wrap"
           style={{
-            backgroundColor: "#0d1117",
+            backgroundColor: "var(--bg-body)",
             padding: "10px",
             borderRadius: "8px",
           }}
@@ -133,6 +133,7 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
             pageSizeOptions={[5, 10, 20, 50, 100]}
             paginationMode="client"
             loading={isFetching}
+            slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
             disableColumnFilter
             disableColumnMenu
             localeText={{

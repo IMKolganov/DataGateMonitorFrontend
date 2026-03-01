@@ -2,7 +2,8 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../css/ServerForm.css";
-import { FaArrowLeft, FaPlus } from "react-icons/fa";
+import "../css/OvpnFileConfigForm.css";
+import { FaArrowLeft, FaPlus, FaCopy, FaCheckCircle } from "react-icons/fa";
 import { toast } from "react-toastify";
 
 import {
@@ -10,13 +11,21 @@ import {
   usePostApiOpenVpnServersAdd,
   usePutApiOpenVpnServersUpdate,
   getApiOpenVpnServersGetVpnServerId,
+  getApiOpenVpnServersGetMicroserviceInfoByUrl,
 } from "../api/orval/open-vpn-servers/open-vpn-servers";
+
+import {
+  useGetApiOpenVpnConfigsGetVpnServerId,
+  usePostApiOpenVpnConfigsAddUpdate,
+} from "../api/orval/open-vpn-server-ovpn-file-config/open-vpn-server-ovpn-file-config";
 
 import type {
   AddServerRequest,
   UpdateServerRequest,
   OpenVpnServerDto,
+  OvpnFileConfigResponse,
 } from "../api/orval/model";
+import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 
 type GetByIdResult = Awaited<ReturnType<typeof getApiOpenVpnServersGetVpnServerId>>;
 
@@ -56,13 +65,20 @@ const ServerForm: React.FC = () => {
   const navigate = useNavigate();
   const { serverId } = useParams<{ serverId?: string }>();
   const idNum = Number(serverId || 0);
+  const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
+  const configTextareaRef = React.useRef<HTMLTextAreaElement | null>(null);
 
   const { data: serverResp, isFetching } = useGetApiOpenVpnServersGetVpnServerId(idNum, {
     query: { enabled: !!idNum },
   });
 
+  const { data: ovpnConfigData } = useGetApiOpenVpnConfigsGetVpnServerId(idNum, {
+    query: { enabled: idNum > 0 },
+  });
+
   const addMutation = usePostApiOpenVpnServersAdd();
   const updateMutation = usePutApiOpenVpnServersUpdate();
+  const saveOvpnConfigMutation = usePostApiOpenVpnConfigsAddUpdate();
 
   const [serverData, setServerData] = React.useState<OpenVpnServerDto>({
     id: idNum || undefined,
@@ -77,9 +93,30 @@ const ServerForm: React.FC = () => {
     lastUpdate: new Date().toISOString(),
   });
 
-  const [errors, setErrors] = React.useState<{ serverName: string }>({
-    serverName: "",
+  const [ovpnConfig, setOvpnConfig] = React.useState({
+    vpnServerIp: "",
+    vpnServerPort: 1194,
+    configTemplate: "",
   });
+
+  const [copyStatus, setCopyStatus] = React.useState<"Copy" | "Copied!">("Copy");
+
+  const [errors, setErrors] = React.useState<{
+    serverName: string;
+    vpnServerIp: string;
+    vpnServerPort: string;
+  }>({
+    serverName: "",
+    vpnServerIp: "",
+    vpnServerPort: "",
+  });
+
+  type ApiCheckStatus = "idle" | "loading" | "success" | "error";
+  const [apiCheck, setApiCheck] = React.useState<{
+    status: ApiCheckStatus;
+    data?: unknown;
+    error?: string;
+  }>({ status: "idle" });
 
   React.useEffect(() => {
     if (!serverResp) return;
@@ -103,20 +140,46 @@ const ServerForm: React.FC = () => {
     }));
   }, [serverResp, idNum]);
 
+  React.useEffect(() => {
+    const raw = (ovpnConfigData as { data?: OvpnFileConfigResponse })?.data ?? ovpnConfigData;
+    if (!raw || typeof raw !== "object") return;
+    setOvpnConfig((prev) => ({
+      ...prev,
+      vpnServerIp: raw.vpnServerIp ?? "",
+      vpnServerPort: Number(raw.vpnServerPort ?? 1194),
+      configTemplate: raw.configTemplate ?? "",
+    }));
+  }, [ovpnConfigData]);
+
   const validateForm = () => {
     let ok = true;
-    const next = { serverName: "" };
+    const next = { serverName: "", vpnServerIp: "", vpnServerPort: "" };
 
     if (!String(serverData.serverName ?? "").trim()) {
       next.serverName = "Server name is required.";
       ok = false;
     }
 
+    if (idNum > 0) {
+      if (!String(ovpnConfig.vpnServerIp ?? "").trim()) {
+        next.vpnServerIp = "VPN Server IP is required.";
+        ok = false;
+      }
+      if (
+        !ovpnConfig.vpnServerPort ||
+        ovpnConfig.vpnServerPort < 1 ||
+        ovpnConfig.vpnServerPort > 65535
+      ) {
+        next.vpnServerPort = "VPN Server Port must be between 1 and 65535.";
+        ok = false;
+      }
+    }
+
     setErrors(next);
     return ok;
   };
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
 
     if (name === "serverName") {
@@ -126,6 +189,7 @@ const ServerForm: React.FC = () => {
 
     if (name === "apiUrl") {
       setServerData((p) => ({ ...p, apiUrl: value.trim() ? value : null }));
+      setApiCheck((prev) => (prev.status !== "idle" ? { status: "idle" } : prev));
       return;
     }
 
@@ -138,7 +202,68 @@ const ServerForm: React.FC = () => {
       setServerData((p) => ({ ...p, longitude: toNumberOrNull(value) }));
       return;
     }
+
+    if (name === "vpnServerIp") {
+      setOvpnConfig((p) => ({ ...p, vpnServerIp: value }));
+      return;
+    }
+
+    if (name === "vpnServerPort") {
+      setOvpnConfig((p) => ({ ...p, vpnServerPort: Number(value) || 0 }));
+      return;
+    }
+
+    if (name === "configTemplate") {
+      setOvpnConfig((p) => ({ ...p, configTemplate: value }));
+      return;
+    }
   };
+
+  const handleCopyConfig = async () => {
+    try {
+      await navigator.clipboard.writeText(ovpnConfig.configTemplate);
+      setCopyStatus("Copied!");
+      setTimeout(() => setCopyStatus("Copy"), 2000);
+    } catch {
+      toast.error("Failed to copy text");
+      setCopyStatus("Copy");
+    }
+  };
+
+  const handleCheckApiUrl = React.useCallback(async () => {
+    const url = String(serverData.apiUrl ?? "").trim();
+    if (!url) {
+      toast.error("Enter API URL first");
+      return;
+    }
+    let targetUrl = url;
+    try {
+      new URL(targetUrl);
+    } catch {
+      toast.error("Invalid URL");
+      return;
+    }
+    if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+      targetUrl = "https://" + targetUrl;
+    }
+    setApiCheck({ status: "loading" });
+    try {
+      const data = await getApiOpenVpnServersGetMicroserviceInfoByUrl({
+        baseUrl: targetUrl,
+      });
+      setApiCheck({ status: "success", data });
+      toast.success("Server responded successfully");
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : typeof err === "object" && err != null && "message" in err
+            ? String((err as { message: unknown }).message)
+            : "Request failed";
+      setApiCheck({ status: "error", error: msg });
+      toast.error("Check failed: " + msg);
+    }
+  }, [serverData.apiUrl]);
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
@@ -177,7 +302,17 @@ const ServerForm: React.FC = () => {
         };
 
         await updateMutation.mutateAsync({ data: payload });
-        toast.success("Server updated successfully!");
+
+        await saveOvpnConfigMutation.mutateAsync({
+          data: {
+            vpnServerId: idNum,
+            vpnServerIp: String(ovpnConfig.vpnServerIp ?? "").trim(),
+            vpnServerPort: ovpnConfig.vpnServerPort || 1194,
+            configTemplate: ovpnConfig.configTemplate || null,
+          },
+        });
+
+        toast.success("Server and OpenVPN config updated successfully!");
       } else {
         const payload: AddServerRequest = {
           serverName: String(serverData.serverName ?? "").trim(),
@@ -274,15 +409,61 @@ const ServerForm: React.FC = () => {
 
             <div className="form-group">
               <label htmlFor="ApiUrl">API url</label>
-              <input
+              <div className="api-url-row">
+                <input
                   type="text"
                   id="ApiUrl"
                   name="apiUrl"
                   value={serverData.apiUrl ?? ""}
                   onChange={handleTextChange}
-                  placeholder="Enter API url (optional)"
+                  placeholder="e.g. http://95.111.204.102:4009/"
                   disabled={isFetching}
-              />
+                />
+                <button
+                  type="button"
+                  className="btn secondary api-check-btn"
+                  onClick={handleCheckApiUrl}
+                  disabled={isFetching || !String(serverData.apiUrl ?? "").trim() || apiCheck.status === "loading"}
+                  title="Send GET request to the URL and show microservice response"
+                >
+                  {apiCheck.status === "loading" ? (
+                    <span className="api-check-spinner" aria-hidden />
+                  ) : (
+                    FaCheckCircle({ className: "icon" })
+                  )}{" "}
+                  {apiCheck.status === "loading" ? "Checking…" : "Check server"}
+                </button>
+              </div>
+              {apiCheck.status === "success" && apiCheck.data != null && (
+                <div className="api-check-result api-check-success">
+                  <div className="api-check-summary">
+                    {typeof (apiCheck.data as any)?.version === "string" && (
+                      <span><strong>Version:</strong> {(apiCheck.data as any).version}</span>
+                    )}
+                    {typeof (apiCheck.data as any)?.application === "string" && (
+                      <span><strong>Application:</strong> {(apiCheck.data as any).application}</span>
+                    )}
+                    {typeof (apiCheck.data as any)?.config === "object" && (apiCheck.data as any).config != null && (
+                      <>
+                        {(apiCheck.data as any).config.port != null && (
+                          <span><strong>Port:</strong> {(apiCheck.data as any).config.port}</span>
+                        )}
+                        {(apiCheck.data as any).config.proto != null && (
+                          <span><strong>Proto:</strong> {(apiCheck.data as any).config.proto}</span>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  <pre className="api-check-json">
+                    {JSON.stringify(apiCheck.data, null, 2)}
+                  </pre>
+                </div>
+              )}
+              {apiCheck.status === "error" && apiCheck.error && (
+                <div className="api-check-result api-check-error">
+                  <strong>Error:</strong> {apiCheck.error}
+                </div>
+              )}
             </div>
 
             <div className="form-group">
@@ -315,6 +496,81 @@ const ServerForm: React.FC = () => {
               />
             </div>
 
+            {idNum > 0 && (
+              <>
+                <h3 className="ovpn-config-section-title">OpenVPN file config</h3>
+                <div className="form-group">
+                  <label htmlFor="VpnServerIp">VPN Server IP *</label>
+                  <input
+                    type="text"
+                    id="VpnServerIp"
+                    name="vpnServerIp"
+                    value={ovpnConfig.vpnServerIp}
+                    onChange={handleTextChange}
+                    className={errors.vpnServerIp ? "input-error" : ""}
+                    placeholder="Enter VPN Server IP"
+                    disabled={isFetching}
+                  />
+                  {errors.vpnServerIp && <p className="error-message">{errors.vpnServerIp}</p>}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="VpnServerPort">VPN Server Port *</label>
+                  <input
+                    type="number"
+                    id="VpnServerPort"
+                    name="vpnServerPort"
+                    value={ovpnConfig.vpnServerPort}
+                    onChange={handleTextChange}
+                    className={errors.vpnServerPort ? "input-error" : ""}
+                    placeholder="1194"
+                    disabled={isFetching}
+                  />
+                  {errors.vpnServerPort && <p className="error-message">{errors.vpnServerPort}</p>}
+                </div>
+
+                <div className="form-group">
+                  <div className="config-template-container">
+                    <div className="toolbar">
+                      <span>Config Template</span>
+                      <button
+                        className="btn secondary"
+                        type="button"
+                        onClick={handleCopyConfig}
+                      >
+                        {FaCopy({})} {copyStatus}
+                      </button>
+                    </div>
+                    <div className="ovpn-textarea-wrap">
+                      <pre
+                        className="ovpn-highlight-pre"
+                        aria-hidden
+                        ref={highlightPreRef}
+                      >
+                        {highlightOvpnConfig(ovpnConfig.configTemplate || " ")}
+                      </pre>
+                      <textarea
+                        id="ConfigTemplate"
+                        name="configTemplate"
+                        value={ovpnConfig.configTemplate}
+                        onChange={handleTextChange}
+                        onScroll={() => {
+                          if (highlightPreRef.current && configTextareaRef.current) {
+                            highlightPreRef.current.scrollTop = configTextareaRef.current.scrollTop;
+                            highlightPreRef.current.scrollLeft = configTextareaRef.current.scrollLeft;
+                          }
+                        }}
+                        placeholder="OpenVPN config template with {{server_ip}}, {{client_cert}}, etc."
+                        className="ovpn-textarea-overlay"
+                        ref={configTextareaRef}
+                        disabled={isFetching}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
             <div className="header-containe">
               <div className="header-bar">
                 <div className="left-buttons">
@@ -325,8 +581,8 @@ const ServerForm: React.FC = () => {
                 <div className="right-buttons">
                   <button
                       type="submit"
-                      className="submit-button"
-                      disabled={addMutation.isPending || updateMutation.isPending}
+                      className="btn primary"
+                      disabled={addMutation.isPending || updateMutation.isPending || saveOvpnConfigMutation.isPending}
                   >
                     {FaPlus({ className: "icon" })} {idNum ? "Update Server" : "Add Server"}
                   </button>

@@ -17,13 +17,13 @@ export default function OverviewChart({
   error: string | null;
 }) {
   return (
-    <div style={{ border: "1px solid #30363d", borderRadius: 12, background: "#0d1117", padding: 12, height: 360, marginBottom: 12 }}>
+    <div className="overview-chart-wrap" style={{ border: "1px solid var(--border-color)", borderRadius: 12, background: "var(--bg-body)", padding: 12, height: 360, marginBottom: 12 }}>
       <div style={{ marginBottom: 8, fontWeight: 600 }}>
         User activity & traffic {loading ? " — loading..." : error ? " — failed" : ""}
       </div>
 
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 28 }}>
           <defs>
             <linearGradient id="fillActive" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#58a6ff" stopOpacity={0.45} />
@@ -35,12 +35,12 @@ export default function OverviewChart({
             </linearGradient>
           </defs>
 
-          <CartesianGrid stroke="#21262d" strokeDasharray="3 3" />
+          <CartesianGrid stroke="var(--border-color)" strokeDasharray="3 3" />
           <XAxis dataKey="label" stroke="#8b949e" tick={{ fill: "#8b949e", fontSize: 12 }} />
           <YAxis yAxisId="left"  stroke="#8b949e" tick={{ fill: "#8b949e", fontSize: 12 }} allowDecimals={false} width={48} />
           <YAxis yAxisId="right" orientation="right" stroke="#8b949e" tick={{ fill: "#8b949e", fontSize: 12 }} tickFormatter={(v) => `${v} MB`} width={64} />
           <Tooltip formatter={tooltipFormatter} />
-          <Legend wrapperStyle={{ color: "#c9d1d9" }} />
+          <Legend wrapperStyle={{ color: "var(--text-secondary)", fontSize: 11 }} iconSize={8} iconType="square" />
           <Area yAxisId="left"  type="monotone" dataKey="active" name="Sessions" stroke="#58a6ff" fill="url(#fillActive)" strokeWidth={2} dot={false} />
           <Area yAxisId="right" type="monotone" dataKey="mb"     name="Traffic, MB"    stroke="#3fb950" fill="url(#fillMb)"    strokeWidth={2} dot={false} />
         </AreaChart>

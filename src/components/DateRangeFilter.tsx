@@ -83,9 +83,9 @@ export default function DateRangeFilter({ from, to, grouping, onChange }: Props)
   return (
     <div
       style={{
-        border: "1px solid #30363d",
+        border: "1px solid var(--border-color)",
         borderRadius: 12,
-        background: "#0d1117",
+        background: "var(--bg-body)",
         padding: 12,
         marginBottom: 12,
         display: "grid",
@@ -101,7 +101,7 @@ export default function DateRangeFilter({ from, to, grouping, onChange }: Props)
             onClick={() => applyPreset(p.id)}
             className="btn secondary"
             style={{
-              color: activePresetId === p.id ? "#ffffff" : "#c9d1d9",
+              color: activePresetId === p.id ? "var(--text-primary)" : "var(--text-secondary)",
               boxShadow: activePresetId === p.id ? "0 0 0 3px rgba(255, 255, 255, 0.25)" : "none",
             }}
           >
@@ -196,9 +196,9 @@ function Labeled({ field, children }: { field: string; children: React.ReactNode
 
 const baseInput: React.CSSProperties = {
   padding: "8px 10px",
-  background: "#0d1117",
-  color: "#c9d1d9",
-  border: "1px solid #30363d",
+  background: "var(--bg-body)",
+  color: "var(--text-secondary)",
+  border: "1px solid var(--border-color)",
   borderRadius: 10,
   fontWeight: 600,
   outline: "none",

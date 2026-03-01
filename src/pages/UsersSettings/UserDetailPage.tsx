@@ -15,8 +15,7 @@ import {
   usePutApiUserQuotaPlansUpdate,
   useDeleteApiUserQuotaPlansDeleteId,
 } from "../../api/orval/user-quota-plan/user-quota-plan";
-import { getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryKey } from "../../api/orval/telegram-bot-incoming-message-log/telegram-bot-incoming-message-log";
-import { ogmMutator } from "../../api/mutator";
+import { useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId } from "../../api/orval/telegram-bot-incoming-message-log/telegram-bot-incoming-message-log";
 import type {
   QuotaPlanDto,
   QuotaPlansResponse,
@@ -25,9 +24,9 @@ import type {
 } from "../../api/orval/model";
 import type { UsersResponse } from "../../api/orval/model";
 import type { GetUserQuotaPlansByUserIdResponse } from "../../api/orval/model";
-import type { GetByTelegramIdMessagesResponse } from "../../api/orval/model";
+import type { GetByTelegramIdMessagesResponseApiResponse } from "../../api/orval/model";
 import type { MessageDto } from "../../api/orval/model";
-import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { isCanceledError } from "../../utils/queryCanceled";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
@@ -85,26 +84,20 @@ export function UserDetailPage() {
     isFetching: telegramMessagesFetching,
     refetch: refetchTelegramMessages,
     error: telegramMessagesError,
-  } = useQuery({
-    queryKey: [
-      ...getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryKey(telegramIdValid ? telegramId : undefined),
-      telegramMessagesPagination.page,
-      telegramMessagesPagination.pageSize,
-    ],
-    queryFn: ({ signal }) =>
-      ogmMutator({
-        url: `/api/tgbot-incoming-message-logs/get-by-telegram-userid/${telegramId}`,
-        method: "GET",
-        params: {
-          Page: telegramMessagesPagination.page + 1,
-          PageSize: telegramMessagesPagination.pageSize,
-        },
-        signal,
-      }),
-    enabled: isTelegramUser && telegramIdValid,
-    placeholderData: keepPreviousData,
-  });
-  const messagesPayload = (telegramMessagesData as GetByTelegramIdMessagesResponse | undefined)?.messages;
+  } = useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId(
+    telegramIdValid ? telegramId : 0,
+    {
+      page: telegramMessagesPagination.page + 1,
+      pageSize: telegramMessagesPagination.pageSize,
+    },
+    {
+      query: {
+        enabled: isTelegramUser && telegramIdValid,
+        placeholderData: keepPreviousData,
+      },
+    },
+  );
+  const messagesPayload = (telegramMessagesData as GetByTelegramIdMessagesResponseApiResponse | undefined)?.data?.messages;
   const telegramMessages: MessageDto[] = messagesPayload?.items ?? [];
   const telegramMessagesTotalCount = messagesPayload?.totalCount ?? 0;
   const telegramMessagesRefreshing = telegramMessagesFetching;
@@ -344,7 +337,7 @@ export function UserDetailPage() {
               {!telegramMessagesLoading && telegramMessagesTotalCount === 0 ? (
                 <p style={{ color: "#8b949e" }}>No messages.</p>
               ) : (
-              <div className="data-grid-wrap" style={{ backgroundColor: "#0d1117", padding: 10, borderRadius: 8 }}>
+              <div className="data-grid-wrap" style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}>
                 <CustomThemeProvider>
                   <StyledDataGrid
                     rows={telegramMessages.map((msg, idx) => ({
@@ -369,7 +362,8 @@ export function UserDetailPage() {
                         prev.page !== model.page || prev.pageSize !== model.pageSize ? model : prev
                       );
                     }}
-                    loading={telegramMessagesLoading}
+                    loading={telegramMessagesLoading || telegramMessagesFetching}
+                    slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
                     disableColumnFilter
                     disableColumnMenu
                     localeText={{ noRowsLabel: "📭 No messages" }}

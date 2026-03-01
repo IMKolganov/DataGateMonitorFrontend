@@ -81,21 +81,7 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
               className="btn secondary"
               disabled={disabled}
               onClick={() => {
-                // Logs to prove click reached this handler
-                console.debug("[NotificationsTable] Mark read click", {
-                  notificationId,
-                  disabled,
-                  isRead,
-                  markReadLoading,
-                  rowId: params.row.id,
-                });
-
                 if (disabled) return;
-
-                console.debug("[NotificationsTable] Calling onMarkRead()", {
-                  notificationId,
-                });
-
                 onMarkRead(notificationId);
               }}
             >
@@ -112,7 +98,7 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
       <div
         className="data-grid-wrap notifications-table-wrapper"
         style={{
-          backgroundColor: "#0d1117",
+          backgroundColor: "var(--bg-body)",
           padding: "10px",
           borderRadius: "8px",
         }}
@@ -124,7 +110,6 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
           paginationMode="server"
           paginationModel={paginationModel}
           onPaginationModelChange={(model) => {
-            console.debug("[NotificationsTable] Pagination changed", model);
             onPaginationModelChange(model);
           }}
           pageSizeOptions={[5, 10, 20, 50, 100]}
@@ -133,6 +118,7 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
           disableRowSelectionOnClick
           localeText={{ noRowsLabel: "📭 No notifications" }}
           loading={loading}
+          slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
         />
       </div>
     </CustomThemeProvider>
