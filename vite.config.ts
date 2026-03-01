@@ -22,13 +22,13 @@ export default defineConfig({
     port: Number(process.env.VITE_PORT) || 5582,
     proxy: {
       "/api/hubs": {
-        target: "https://api.datagateapp.com",
+        target: "http://localhost:5581",
         changeOrigin: true,
         secure: false,
         ws: true,
       },
       "/api": {
-        target: "https://api.datagateapp.com",
+        target: "http://localhost:5581",
         changeOrigin: true,
         secure: false,
         ws: true,
