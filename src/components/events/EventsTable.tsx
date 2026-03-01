@@ -68,7 +68,7 @@ const EventsTable: React.FC<EventsTableProps> = ({
       <div
         className="data-grid-wrap"
         style={{
-          backgroundColor: "#0d1117",
+          backgroundColor: "var(--bg-body)",
           padding: "10px",
           borderRadius: "8px",
         }}
@@ -85,6 +85,7 @@ const EventsTable: React.FC<EventsTableProps> = ({
             onPageSizeChange(newModel.pageSize);
           }}
           loading={loading}
+          slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
           disableColumnFilter
           disableColumnMenu
           localeText={{

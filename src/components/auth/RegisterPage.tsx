@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { postApiAuthRegister } from "../../api/orval/auth/auth";
 import type { RegisterUserRequest } from "../../api/orval/model";
 import { FaUserPlus } from "react-icons/fa";
+import { PasswordInput } from "./PasswordInput";
 import "../../css/Login.css";
 
 const RegisterPage: React.FC = () => {
@@ -143,8 +144,7 @@ const RegisterPage: React.FC = () => {
 
             <div className="login-item">
               <h4>Password</h4>
-              <input
-                type="password"
+              <PasswordInput
                 name="password"
                 autoComplete="new-password"
                 value={password}
@@ -157,8 +157,7 @@ const RegisterPage: React.FC = () => {
 
             <div className="login-item">
               <h4>Confirm password</h4>
-              <input
-                type="password"
+              <PasswordInput
                 name="confirmPassword"
                 autoComplete="new-password"
                 value={confirmPassword}

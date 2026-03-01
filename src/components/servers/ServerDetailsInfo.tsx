@@ -34,8 +34,6 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, l
               ? safe.openVpnServer
               : null;
 
-  console.log(server)
-
   const status = safe.openVpnServerStatusLogResponse ?? null;
 
   // Early state: if nothing and not loading

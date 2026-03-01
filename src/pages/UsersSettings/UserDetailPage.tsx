@@ -344,7 +344,7 @@ export function UserDetailPage() {
               {!telegramMessagesLoading && telegramMessagesTotalCount === 0 ? (
                 <p style={{ color: "#8b949e" }}>No messages.</p>
               ) : (
-              <div className="data-grid-wrap" style={{ backgroundColor: "#0d1117", padding: 10, borderRadius: 8 }}>
+              <div className="data-grid-wrap" style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}>
                 <CustomThemeProvider>
                   <StyledDataGrid
                     rows={telegramMessages.map((msg, idx) => ({
@@ -369,7 +369,8 @@ export function UserDetailPage() {
                         prev.page !== model.page || prev.pageSize !== model.pageSize ? model : prev
                       );
                     }}
-                    loading={telegramMessagesLoading}
+                    loading={telegramMessagesLoading || telegramMessagesFetching}
+                    slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
                     disableColumnFilter
                     disableColumnMenu
                     localeText={{ noRowsLabel: "📭 No messages" }}

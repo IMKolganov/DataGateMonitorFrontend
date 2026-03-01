@@ -1,5 +1,5 @@
   .page {
-    background-color: #0d1117;
+    background-color: var(--bg-body);
     min-height: 100vh;
     padding: 20px;
     display: flex;
@@ -10,11 +10,11 @@
   .container {
     max-width: 900px;
     width: 100%;
-    background-color: #161b22;
+    background-color: var(--bg-content);
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    border: 1px solid #30363d;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
   }
 
   .action-buttons {
@@ -31,19 +31,19 @@
   }
 
   .server-item {
-    background-color: #161b22;
+    background-color: var(--bg-card);
     margin-bottom: 20px;
     padding: 20px;
     border-radius: 12px;
-    border: 1px solid #30363d;
+    border: 1px solid var(--border-color);
     transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
     list-style: none;
     box-shadow: none;
   }
 
   .server-item:hover {
-    border-color: #c9d1d9;
-    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.08);
+    border-color: var(--text-secondary);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   }
 
   .server-header {
@@ -59,7 +59,7 @@
   .server-name {
     font-size: 18px;
     font-weight: bold;
-    color: #c9d1d9;
+    color: var(--text-primary);
     margin-bottom: 4px;
   }
 
@@ -73,10 +73,10 @@
 
   .detail-row {
     display: flex;
-    align-items: flex-start; /* "left" is invalid for align-items */
+    align-items: flex-start;
     gap: 6px;
     font-size: 14px;
-    color: #8b949e;
+    color: var(--text-muted);
     flex-wrap: wrap;
     padding: 4px 8px;
     justify-content: flex-start;
@@ -139,15 +139,15 @@
 
   /* Make clickable hover match normal hover (no blue) */
   .server-item.clickable:hover {
-    border-color: #0d1117;
-    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.10);
+    border-color: var(--border-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   }
 
   /* Selected state */
   .server-item.selected {
-    background-color: #0d1117;
-    border-color: #0d1117;
-    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.10);
+    background-color: var(--bg-content-alt);
+    border-color: var(--border-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   }
 
   .server-item-content {

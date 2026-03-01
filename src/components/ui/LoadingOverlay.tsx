@@ -24,7 +24,7 @@ const overlayStyle: React.CSSProperties = {
 const spinnerStyle: React.CSSProperties = {
   width: 48,
   height: 48,
-  border: "4px solid #161b22",
+  border: "4px solid var(--bg-content)",
   borderTopColor: "#fff",
   borderRadius: "50%",
   animation: "spin 1s linear infinite",

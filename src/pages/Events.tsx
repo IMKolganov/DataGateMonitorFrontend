@@ -206,7 +206,7 @@ const Events: React.FC = () => {
           <div
             className="data-grid-wrap"
             style={{
-              backgroundColor: "#0d1117",
+              backgroundColor: "var(--bg-body)",
               padding: "10px",
               borderRadius: "8px",
             }}>          
@@ -222,6 +222,7 @@ const Events: React.FC = () => {
                 setPageSize(model.pageSize);
               }}
               loading={isFetching}
+              slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
               disableColumnFilter
               disableColumnMenu
               localeText={{ noRowsLabel: "📭 No events logged" }}

@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import "../../css/Login.css";
 import PasswordLoginForm from "./PasswordLoginForm";
 import GoogleLoginForm from "./GoogleLoginForm";
 import TelegramCodeLoginForm from "./TelegramCodeLoginForm";
-import {FaTelegramPlane} from "react-icons/fa";
-import {appVersion} from "../../version.ts";
+import { FaTelegramPlane, FaSun, FaMoon } from "react-icons/fa";
+import { appVersion } from "../../version.ts";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const LoginPage: React.FC = () => {
     const [showTelegramForm, setShowTelegramForm] = useState(false);
     const location = useLocation();
+    const { theme, toggleTheme } = useTheme();
 
     useEffect(() => {
         const state = location.state as { registered?: boolean } | null;
@@ -69,6 +70,16 @@ const LoginPage: React.FC = () => {
                         <Link to="/register" className="register-link">Create an account</Link>
                     </p>
                     <p>© {new Date().getFullYear()} DataGate Monitor v.{appVersion}</p>
+                    <button
+                        type="button"
+                        className="login-theme-toggle"
+                        onClick={toggleTheme}
+                        title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+                        aria-label={theme === "dark" ? "Light theme" : "Dark theme"}
+                    >
+                        {theme === "dark" ? <FaSun className="icon" /> : <FaMoon className="icon" />}
+                        {theme === "dark" ? "Light theme" : "Dark theme"}
+                    </button>
                 </div>
             </div>
         </div>

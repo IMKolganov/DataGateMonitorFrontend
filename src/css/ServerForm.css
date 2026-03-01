@@ -2,11 +2,11 @@
     max-width: 600px;
     margin: 40px auto;
     padding: 20px;
-    background-color: #161b22;
-    border: 1px solid #30363d;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    color: #c9d1d9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
   }
   
   .server-form-header {
@@ -14,15 +14,15 @@
     font-weight: bold;
     margin-bottom: 20px;
     text-align: center;
-    color: #ffffff;
+    color: var(--text-primary);
   }
 
   .ovpn-config-section-title {
     font-size: 18px;
     font-weight: 600;
     margin: 24px 0 12px;
-    color: #c9d1d9;
-    border-bottom: 1px solid #30363d;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 8px;
   }
 
@@ -60,9 +60,9 @@
   }
 
   .api-check-success {
-    background-color: #0d1117;
+    background-color: var(--bg-body);
     border: 1px solid #238636;
-    color: #c9d1d9;
+    color: var(--text-primary);
   }
 
   .api-check-summary {
@@ -71,7 +71,7 @@
     gap: 12px 20px;
     margin-bottom: 10px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #30363d;
+    border-bottom: 1px solid var(--border-color);
   }
 
   .api-check-summary span {
@@ -81,13 +81,13 @@
   .api-check-json {
     margin: 0;
     padding: 12px;
-    background-color: #0d1117;
+    background-color: var(--bg-body);
     border-radius: 6px;
     overflow: auto;
     max-height: 320px;
     font-size: 12px;
     line-height: 1.5;
-    color: #8b949e;
+    color: var(--text-muted);
     white-space: pre-wrap;
     word-break: break-all;
   }
@@ -100,7 +100,7 @@
   
   .server-form-description {
     font-size: 14px;
-    color: #8b949e;
+    color: var(--text-muted);
     margin-bottom: 20px;
     text-align: center;
   }
@@ -116,26 +116,63 @@
     margin-left: 5px;
   }
   
-  /* Как на логине: референс .input-login */
   .server-form input:not([type="checkbox"]),
   .server-form select,
   .server-form textarea {
     width: 100%;
     padding: 8px 10px;
     font-size: 14px;
-    border: 1px solid #30363d;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
-    background-color: #0d1117;
-    color: #f0f6fc;
+    background-color: var(--input-bg);
+    color: var(--input-text);
   }
 
   .server-form input:focus,
   .server-form select:focus,
   .server-form textarea:focus {
     outline: none;
-    border-color: #c1bfbf;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
-    background-color: #010409;
+    border-color: var(--input-focus-border);
+    box-shadow: 0 0 0 1px var(--input-focus-ring);
+    background-color: var(--input-bg);
+  }
+
+  .server-form .config-template-container textarea.ovpn-textarea-overlay:focus {
+    background-color: transparent;
+    color: transparent;
+    caret-color: var(--text-secondary);
+    border: none;
+    box-shadow: none;
+  }
+
+  .server-form input[type="number"] {
+    box-sizing: border-box;
+    width: 100%;
+    padding-right: 28px;
+    background-color: var(--input-bg);
+    color: var(--input-text);
+  }
+  .server-form input[type="number"]::-webkit-inner-spin-button,
+  .server-form input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    opacity: 1;
+    background-color: var(--bg-body) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M5 2l4 4H1L5 2z' fill='currentColor'/%3E%3Cpath d='M5 12l4-4H1l4 4z' fill='currentColor'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 10px 14px;
+    border-left: 1px solid var(--border-color);
+    border-radius: 0 6px 6px 0;
+    color: var(--text-secondary);
+    padding: 0 4px;
+    margin: 0;
+    min-width: 20px;
+  }
+  .server-form input[type="number"]::-webkit-inner-spin-button:hover,
+  .server-form input[type="number"]::-webkit-outer-spin-button:hover {
+    background-color: var(--border-color) !important;
+    color: var(--text-muted);
   }
 
   .checkbox-container {
@@ -163,12 +200,12 @@
   .checkbox-title {
     font-weight: 600;
     font-size: 14px;
-    color: #c9d1d9;
+    color: var(--text-primary);
   }
   
   .checkbox-description {
     font-size: 14px;
-    color: #8b949e;
+    color: var(--text-muted);
     margin-top: 2px;
     line-height: 1.4;
   }
@@ -198,6 +235,47 @@
     justify-content: center;
     align-items: center;
     font-size: 18px;
-    color: #c9d1d9;
+    color: var(--text-secondary);
   }
-  
+
+[data-theme="dark"] .server-form input[type="number"] {
+  background-color: #0d1117;
+  color: #f0f6fc;
+}
+[data-theme="dark"] .server-form input[type="number"]::-webkit-inner-spin-button,
+[data-theme="dark"] .server-form input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #0d1117 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M5 2l4 4H1L5 2z' fill='%23c9d1d9'/%3E%3Cpath d='M5 12l4-4H1l4 4z' fill='%23c9d1d9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 14px;
+  border-left: 1px solid #30363d;
+  color: #c9d1d9;
+}
+[data-theme="dark"] .server-form input[type="number"]::-webkit-inner-spin-button:hover,
+[data-theme="dark"] .server-form input[type="number"]::-webkit-outer-spin-button:hover {
+  background-color: #30363d !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M5 2l4 4H1L5 2z' fill='%238b949e'/%3E%3Cpath d='M5 12l4-4H1l4 4z' fill='%238b949e'/%3E%3C/svg%3E");
+}
+
+[data-theme="light"] .server-form input[type="number"] {
+  background-color: #ffffff;
+  color: #1f2328;
+}
+[data-theme="light"] .server-form input[type="number"]::-webkit-inner-spin-button,
+[data-theme="light"] .server-form input[type="number"]::-webkit-outer-spin-button {
+  background-color: #f6f8fa;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M5 2l4 4H1L5 2z' fill='currentColor'/%3E%3Cpath d='M5 12l4-4H1l4 4z' fill='currentColor'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 14px;
+  border-left-color: #d0d7de;
+  color: #424a53;
+}
+[data-theme="light"] .server-form input[type="number"]::-webkit-inner-spin-button:hover,
+[data-theme="light"] .server-form input[type="number"]::-webkit-outer-spin-button:hover {
+  background-color: #d0d7de;
+  color: #656d76;
+}

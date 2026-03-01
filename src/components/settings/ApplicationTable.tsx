@@ -124,7 +124,7 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
       <div
         className="data-grid-wrap"
         style={{
-          backgroundColor: "#0d1117",
+          backgroundColor: "var(--bg-body)",
           padding: 10,
           borderRadius: 8,
         }}
@@ -134,6 +134,7 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50, 100]}
           initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+          slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
           disableColumnFilter
           disableColumnMenu
           localeText={{ noRowsLabel: "📭 No applications registered" }}
