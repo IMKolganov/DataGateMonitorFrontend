@@ -5,7 +5,7 @@
     cursor: pointer;
     font-size: 14px;
     font-weight: bold;
-    color: #c9d1d9;
+    color: var(--text-secondary);
     transition: color 0.3s ease;
   }
   
@@ -18,7 +18,7 @@
     display: inline-block;
     width: 42px;
     height: 24px;
-    background-color: #373d44;
+    background-color: var(--bg-content-alt);
     border-radius: 6px;
     transition: background 0.3s ease;
   }
@@ -30,7 +30,7 @@
     left: 2px;
     width: 20px;
     height: 20px;
-    background-color: #666b73;
+    background-color: var(--text-muted);
     border-radius: 4px;
     transition: transform 0.3s ease, background-color 0.3s ease;
   }
@@ -45,19 +45,18 @@
   }
   
   .square-toggle:hover .toggle-slider {
-    background-color: #444c56;
+    background-color: var(--border-color);
   }
   
   .square-toggle input:checked:hover + .toggle-slider {
     background-color: #4cca78;
   }
 
-  /* shimmer skeleton */
 .skeleton {
   display: inline-block;
   position: relative;
   overflow: hidden;
-  background: #1f2937; /* dark gray */
+  background: var(--bg-content-alt);
   border-radius: 6px;
   vertical-align: middle;
 }
@@ -68,9 +67,9 @@
   transform: translateX(-100%);
   background: linear-gradient(
     90deg,
-    rgba(255,255,255,0) 0%,
-    rgba(255,255,255,0.08) 50%,
-    rgba(255,255,255,0) 100%
+    transparent 0%,
+    var(--skeleton-shine) 50%,
+    transparent 100%
   );
   animation: shimmer 1.2s infinite;
 }

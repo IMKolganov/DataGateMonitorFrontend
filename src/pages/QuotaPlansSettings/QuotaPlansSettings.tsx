@@ -257,7 +257,7 @@ export function QuotaPlansSettings() {
   return (
     <div>
       <h2>Quota plans</h2>
-      <div style={{ borderTop: "1px solid #30363d", marginTop: 8 }} />
+      <div style={{ borderTop: "1px solid var(--border-color)", marginTop: 8 }} />
 
       <p className="settings-item-description" style={{ marginBottom: 16 }}>
         Manage quota plans: add, edit, delete, and set the default plan for new users.
@@ -294,7 +294,7 @@ export function QuotaPlansSettings() {
           <div
             className="data-grid-wrap"
             style={{
-              backgroundColor: "#0d1117",
+              backgroundColor: "var(--bg-body)",
               padding: 10,
               borderRadius: 8,
             }}
@@ -304,6 +304,7 @@ export function QuotaPlansSettings() {
               columns={columns}
               pageSizeOptions={[5, 10, 20, 50]}
               initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+              slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
               disableColumnFilter
               disableColumnMenu
               localeText={{ noRowsLabel: "No quota plans. Click «Add plan» to create one." }}

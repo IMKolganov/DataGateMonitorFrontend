@@ -39,10 +39,10 @@ function Card({ title, value }: { title: string; value: string | number }) {
     <div
       style={{
         padding: 12,
-        border: "1px solid #30363d",
+        border: "1px solid var(--border-color)",
         borderRadius: 12,
-        background: "#0d1117",
-        color: "#c9d1d9",
+        background: "var(--bg-body)",
+        color: "var(--text-secondary)",
         display: "flex",
         flexDirection: "column",
         gap: 4,

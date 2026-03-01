@@ -132,7 +132,7 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
       <div
         className="data-grid-wrap"
         style={{
-          backgroundColor: "#0d1117",
+          backgroundColor: "var(--bg-body)",
           padding: "10px",
           borderRadius: "8px",
         }}
@@ -146,6 +146,7 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
           disableColumnMenu
           localeText={{ noRowsLabel: "📭 No users found" }}
           loading={isGridLoading}
+          slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
         />
       </div>
     </CustomThemeProvider>

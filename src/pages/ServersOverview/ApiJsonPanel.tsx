@@ -8,13 +8,13 @@ export default function ApiJsonPanel({ data }: { data: OverviewSeriesResponse })
         <div style={{ fontWeight: 700 }}>API response {data?.summary ? "(live or fallback)" : ""}</div>
         <button
           onClick={() => navigator.clipboard.writeText(json)}
-          style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid #30363d", background: "#0d1117", color: "#c9d1d9", cursor: "pointer", fontWeight: 700 }}
+          style={{ padding: "6px 10px", borderRadius: 8, border: "1px solid var(--border-color)", background: "var(--bg-body)", color: "var(--text-secondary)", cursor: "pointer", fontWeight: 700 }}
           title="Copy JSON"
         >
           Copy JSON
         </button>
       </div>
-      <pre style={{ margin: 0, padding: 12, borderRadius: 8, overflow: "auto", background: "#0d1117", border: "1px solid #30363d", color: "#c9d1d9", fontSize: 12, lineHeight: 1.4 }}>
+      <pre style={{ margin: 0, padding: 12, borderRadius: 8, overflow: "auto", background: "var(--bg-body)", border: "1px solid var(--border-color)", color: "var(--text-secondary)", fontSize: 12, lineHeight: 1.4 }}>
         {json}
       </pre>
     </div>

@@ -19,7 +19,6 @@
   gap: 6px;
 }
 
-/* Как на логине: только убираем стандартное кольцо, без своей подсветки (нет «центр/контур с задержкой») */
 .btn:focus,
 .btn:focus-visible {
   outline: none;
@@ -42,14 +41,14 @@
 }
 
 .btn.secondary {
-  background: #21262d;
-  color: #c9d1d9;
-  border: 1px solid #30363d;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border: 1px solid var(--border-color);
 }
 
 .btn.secondary:hover {
-  background: #30363d;
-  color: #c9d1d9;
+  background: var(--btn-secondary-hover);
+  color: var(--btn-secondary-text);
 }
 
 .btn.normal {
@@ -89,9 +88,9 @@
 .btn[disabled] {
   cursor: not-allowed;
   opacity: 0.5;
-  background: #21262d;
-  border-color: #30363d;
-  color: #484f58;
+  background: var(--btn-secondary-bg);
+  border-color: var(--border-color);
+  color: var(--text-muted);
 }
 
 .btn.primary:disabled,
@@ -129,8 +128,8 @@
   font-size: 14px;
   font-weight: 500;
   color: #f0f6fc;
-  background-color: #0d1117;
-  border: 1px solid #30363d;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   outline: none;
 }
@@ -138,14 +137,14 @@
 .input-number:focus {
   border-color: #c1bfbf;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
-  background-color: #010409;
+  background-color: var(--input-bg);
 }
 
 .input:focus {
   outline: none;
   border-color: #c1bfbf;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
-  background-color: #010409;
+  background-color: var(--input-bg);
 }
 
 .input-number:hover {
@@ -170,7 +169,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  background-color: #0d1117;
+  background-color: var(--input-bg);
   border-radius: 8px;
   margin-bottom: 15px;
   flex-wrap: wrap;
@@ -214,8 +213,8 @@
   width: 100%;
   margin-bottom: 1rem;
   padding: 0.5rem;
-  background-color: #161b22;
-  color: #ccc;
+  background-color: var(--bg-content);
+  color: var(--text-muted);
   border: 1px solid #333;
 }
 

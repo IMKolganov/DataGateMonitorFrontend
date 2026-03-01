@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useState, useEffect } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   useGetApiNotificationsGetAll,
   useGetApiNotificationsUnreadCount,
@@ -55,45 +55,9 @@ export function useNotifications() {
   const totalPages = paged?.totalPages ?? 0;
   const unreadCount = countQuery.data?.count ?? 0;
 
-  useEffect(() => {
-    console.debug("[useNotifications] State snapshot", {
-      adminUserId,
-      page,
-      pageSize,
-      listParams,
-      totalCount,
-      totalPages,
-      unreadCount,
-      notificationsCount: notifications.length,
-      listLoading: listQuery.isLoading,
-      listFetching: listQuery.isFetching,
-      countFetching: countQuery.isFetching,
-      markReadPending: mRead.isPending,
-    });
-  }, [
-    adminUserId,
-    page,
-    pageSize,
-    listParams,
-    totalCount,
-    totalPages,
-    unreadCount,
-    notifications.length,
-    listQuery.isLoading,
-    listQuery.isFetching,
-    countQuery.isFetching,
-    mRead.isPending,
-  ]);
-
   const refresh = useCallback(async () => {
-    if (refreshing) {
-      console.debug("[useNotifications] Refresh skipped (already refreshing)");
-      return;
-    }
-
-    console.debug("[useNotifications] Refresh started");
+    if (refreshing) return;
     setRefreshing(true);
-
     try {
       await Promise.all([
         queryClient.invalidateQueries({
@@ -101,10 +65,7 @@ export function useNotifications() {
         }),
         queryClient.invalidateQueries({ queryKey: getGetApiNotificationsUnreadCountQueryKey() }),
       ]);
-
-      console.debug("[useNotifications] Refresh completed");
     } catch (e) {
-      console.error("[useNotifications] Refresh failed", e);
       throw e;
     } finally {
       setRefreshing(false);
@@ -113,31 +74,15 @@ export function useNotifications() {
 
   const markRead = useCallback(
     async (notificationId: number) => {
-      console.debug("[useNotifications] markRead called", {
-        notificationId,
-        adminUserId,
-      });
-
-      if (!adminUserId) {
-        console.warn("[useNotifications] markRead aborted: adminUserId is 0");
-        return;
-      }
-
-      if (!notificationId) {
-        console.warn("[useNotifications] markRead aborted: notificationId is 0");
-        return;
-      }
-
+      if (!adminUserId) return;
+      if (!notificationId) return;
       try {
-        const result = await mRead.mutateAsync({
+        await mRead.mutateAsync({
           notificationId,
           params: { adminUserId },
         });
-
-        console.debug("[useNotifications] markRead success", { result });
         await refresh();
       } catch (e) {
-        console.error("[useNotifications] markRead failed", e);
         throw e;
       }
     },
@@ -145,51 +90,30 @@ export function useNotifications() {
   );
 
   const markReadAll = useCallback(async () => {
-    console.debug("[useNotifications] markReadAll called");
     try {
-      const result = await mMarkReadAll.mutateAsync();
-      console.debug("[useNotifications] markReadAll success", { result });
+      await mMarkReadAll.mutateAsync();
       await refresh();
     } catch (e) {
-      console.error("[useNotifications] markReadAll failed", e);
       throw e;
     }
   }, [mMarkReadAll, refresh]);
 
   const onPaginationModelChange = useCallback((model: { page: number; pageSize: number }) => {
-    console.debug("[useNotifications] Pagination model change", model);
-
     setPage(model.page ?? 0);
     setPageSize(Math.max(1, model.pageSize ?? DEFAULT_PAGE_SIZE));
   }, []);
 
   const markDelivered = useCallback(
     async (notificationId: number) => {
-      console.debug("[useNotifications] markDelivered called", {
-        notificationId,
-        adminUserId,
-      });
-
-      if (!adminUserId) {
-        console.warn("[useNotifications] markDelivered aborted: adminUserId is 0");
-        return;
-      }
-
-      if (!notificationId) {
-        console.warn("[useNotifications] markDelivered aborted: notificationId is 0");
-        return;
-      }
-
+      if (!adminUserId) return;
+      if (!notificationId) return;
       try {
-        const result = await mDelivered.mutateAsync({
+        await mDelivered.mutateAsync({
           notificationId,
           params: { adminUserId, channel: "web" },
         });
-
-        console.debug("[useNotifications] markDelivered success", { result });
         await refresh();
       } catch (e) {
-        console.error("[useNotifications] markDelivered failed", e);
         throw e;
       }
     },
@@ -198,21 +122,16 @@ export function useNotifications() {
 
   const sendTestNotification = useCallback(
     async (request?: Partial<NotificationRequest>) => {
-      console.debug("[useNotifications] sendTestNotification called", request);
-
       try {
-        const result = await mNotifyAdmins.mutateAsync({
+        await mNotifyAdmins.mutateAsync({
           data: {
             title: request?.title ?? "Test notification",
             message: request?.message ?? "Sent from dashboard",
             severity: request?.severity,
           } as NotificationRequest,
         });
-
-        console.debug("[useNotifications] sendTestNotification success", { result });
         await refresh();
       } catch (e) {
-        console.error("[useNotifications] sendTestNotification failed", e);
         throw e;
       }
     },

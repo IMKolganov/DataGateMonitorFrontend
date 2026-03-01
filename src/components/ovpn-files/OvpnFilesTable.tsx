@@ -124,10 +124,6 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
         const raw = atob(b64);
         const bytes = new Uint8Array([...raw].map((c) => c.charCodeAt(0)));
 
-        if (resp?.fileSizeBytes && resp.fileSizeBytes !== bytes.length) {
-          console.warn(`Declared size ${resp.fileSizeBytes} != actual ${bytes.length}`);
-        }
-
         const blob = new Blob([bytes], { type: "application/x-openvpn-profile" });
         const fileName = resp?.issuedOvpn?.fileName ?? `client_${issuedOvpnFileId}.ovpn`;
 
@@ -236,7 +232,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       <div
         className="data-grid-wrap"
         style={{
-          backgroundColor: "#0d1117",
+          backgroundColor: "var(--bg-body)",
           padding: "10px",
           borderRadius: "8px",
         }}
@@ -272,6 +268,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
             noRowsLabel: loading ? "🔄 Loading OVPN files..." : "📭 No OVPN files found",
           }}
           loading={loading || revokePending || downloadPending}
+          slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
         />
       </div>
     </CustomThemeProvider>

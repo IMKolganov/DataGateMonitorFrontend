@@ -1,13 +1,12 @@
-/* Референс: как .input-login на логине — единый вид полей по всему приложению */
 .input {
   display: inline-block;
   width: 100%;
   padding: 8px 10px;
   font-size: 14px;
   line-height: 1.5;
-  color: #f0f6fc;
-  background-color: #0d1117;
-  border: 1px solid #30363d;
+  color: var(--input-text);
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
 }
 
@@ -18,19 +17,34 @@
 
 .input:focus {
   outline: none;
-  border-color: #c1bfbf;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
-  background-color: #010409;
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 1px var(--input-focus-ring);
+  background-color: var(--input-bg);
 }
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-text-fill-color: #f0f6fc !important;
-  background-color: #0d1117 !important;
-  transition: background-color 5000s ease-in-out 0s !important;
+  -webkit-text-fill-color: var(--input-text) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
+  box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
+  transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s !important;
   background-clip: padding-box !important;
   border-radius: 6px !important;
-  box-shadow: none !important;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+  background: var(--bg-body);
+  border-left: 1px solid var(--border-color);
+  border-radius: 0 6px 6px 0;
+  color: var(--text-secondary);
+  padding: 0 4px;
+}
+input[type="number"]::-webkit-inner-spin-button:hover,
+input[type="number"]::-webkit-outer-spin-button:hover {
+  background: var(--border-color);
+  color: var(--text-muted);
 }

@@ -7,7 +7,7 @@
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #c9d1d9;
+  color: var(--text-secondary);
 }
 
 .console-container {
@@ -19,16 +19,16 @@
   padding: 0;
   margin: 0;
   overflow: hidden;
-  background: #0d1117;
-  border: 1px solid #30363d;
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .console-output {
   flex-grow: 1;
-  background: linear-gradient(180deg, #0d1117 0%, #010409 100%);
-  color: #c9d1d9;
+  background: linear-gradient(180deg, var(--bg-body) 0%, var(--bg-body) 100%);
+  color: var(--text-secondary);
   font-family: "JetBrains Mono", "Fira Code", "Consolas", "Monaco", monospace;
   font-size: 13px;
   line-height: 1.5;
@@ -36,7 +36,7 @@
   overflow-y: auto;
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: #484f58 #21262d;
+  scrollbar-color: var(--border-color) var(--bg-body);
 }
 
 .console-output::-webkit-scrollbar {
@@ -45,21 +45,21 @@
 }
 
 .console-output::-webkit-scrollbar-track {
-  background: #21262d;
+  background: var(--bg-content-alt);
   border-radius: 4px;
 }
 
 .console-output::-webkit-scrollbar-thumb {
-  background: #484f58;
+  background: var(--text-muted);
   border-radius: 4px;
 }
 
 .console-output::-webkit-scrollbar-thumb:hover {
-  background: #6e7681;
+  background: var(--text-muted);
 }
 
 .console-output::-webkit-scrollbar-corner {
-  background: #21262d;
+  background: var(--bg-content-alt);
 }
 
 .console-message {
@@ -112,7 +112,7 @@
   color: #ff7b72;
 }
 .ovp-value {
-  color: #c9d1d9;
+  color: var(--text-secondary);
 }
 .ovp-ip {
   color: #79c0ff;
@@ -135,8 +135,8 @@
 /* Input row - terminal prompt style (scoped to console only) */
 .console-container .console-input-wrapper {
   position: relative;
-  background: #161b22;
-  border-top: 1px solid #30363d;
+  background: var(--bg-content);
+  border-top: 1px solid var(--border-color);
 }
 
 .console-container .console-input {
@@ -156,16 +156,16 @@
   padding: 6px 10px;
   font-size: 13px;
   font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
-  color: #c9d1d9;
-  background: #0d1117;
-  border: 1px solid #30363d;
+  color: var(--text-secondary);
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .console-container .console-input-field::placeholder {
-  color: #6e7681;
+  color: var(--text-muted);
 }
 
 .console-container .console-input-field:focus {
@@ -180,7 +180,7 @@
 
 .console-container .console-cmd-btn.active,
 .console-container .console-cmd-btn:hover {
-  background: #30363d;
+  background: var(--border-color);
 }
 
 .console-container .console-send-btn {
@@ -201,14 +201,14 @@
   max-height: 280px;
   overflow-y: auto;
   overflow-x: hidden;
-  background: #161b22;
-  border: 1px solid #30363d;
+  background: var(--bg-content);
+  border: 1px solid var(--border-color);
   border-bottom: none;
   border-radius: 6px 6px 0 0;
   z-index: 10;
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
   scrollbar-width: thin;
-  scrollbar-color: #484f58 #21262d;
+  scrollbar-color: var(--border-color) var(--bg-body);
 }
 
 .console-cmd-list::-webkit-scrollbar {
@@ -216,22 +216,22 @@
 }
 
 .console-cmd-list::-webkit-scrollbar-track {
-  background: #21262d;
+  background: var(--bg-content-alt);
   border-radius: 4px;
 }
 
 .console-cmd-list::-webkit-scrollbar-thumb {
-  background: #484f58;
+  background: var(--text-muted);
   border-radius: 4px;
 }
 
 .console-cmd-list::-webkit-scrollbar-thumb:hover {
-  background: #6e7681;
+  background: var(--text-muted);
 }
 
 .console-cmd-list-empty {
   padding: 12px 16px;
-  color: #6e7681;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
@@ -243,13 +243,13 @@
   padding: 8px 16px;
   font-size: 13px;
   cursor: pointer;
-  color: #c9d1d9;
+  color: var(--text-secondary);
 }
 
 .console-cmd-item:hover,
 .console-cmd-item.selected {
-  background: #21262d;
-  color: #f0f6fc;
+  background: var(--bg-content-alt);
+  color: var(--text-primary);
 }
 
 .console-cmd-name {
@@ -263,7 +263,7 @@
 
 .console-cmd-hint {
   font-size: 11px;
-  color: #6e7681;
+  color: var(--text-muted);
   flex-shrink: 1;
   overflow: hidden;
   text-overflow: ellipsis;

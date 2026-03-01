@@ -138,7 +138,7 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
       <div
         className="data-grid-wrap"
         style={{
-          backgroundColor: "#0d1117",
+          backgroundColor: "var(--bg-body)",
           padding: "10px",
           borderRadius: "8px",
         }}
@@ -183,6 +183,7 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
             noRowsLabel: loading ? "🔄 Loading certificates..." : "📭 No certificates found",
           }}
           loading={loading}
+          slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
         />
       </div>
     </CustomThemeProvider>

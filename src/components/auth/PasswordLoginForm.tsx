@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { postApiAuthLogin } from "../../api/orval/auth/auth";
 import type { LoginRequest, LoginResponse } from "../../api/orval/model";
 import { FaDoorOpen } from "react-icons/fa";
+import { PasswordInput } from "./PasswordInput";
 import { scheduleAutoLogout } from "../../utils/auth/authSession";
 import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY} from "../../utils/const.ts";
 
@@ -120,8 +121,7 @@ const PasswordLoginForm: React.FC = () => {
                 Forgot password?
               </Link>
             </div>
-            <input
-                type="password"
+            <PasswordInput
                 name="password"
                 autoComplete="current-password"
                 value={password}

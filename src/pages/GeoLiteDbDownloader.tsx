@@ -182,14 +182,14 @@ export function GeoLiteDbDownloader() {
         GeoLite2 Downloader
       </h3>
 
-      <p style={{ fontSize: "0.95rem", color: "#c9d1d9" }}>
+      <p style={{ fontSize: "0.95rem", color: "var(--text-secondary)" }}>
         <span style={{ color: "#8b949e" }}>Current DB Version:</span>{" "}
         <strong style={{ color: "#58a6ff" }}>{version}</strong>
       </p>
 
       {stepNo !== null && title && (
         <div className="step-status" style={{ marginTop: "1rem", marginBottom: "1rem" }}>
-          <div style={{ fontSize: "0.9rem", marginBottom: "0.5rem", color: "#c9d1d9" }}>
+          <div style={{ fontSize: "0.9rem", marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
             <strong>
               Step {stepNo}/{total}:
             </strong>{" "}
@@ -200,7 +200,7 @@ export function GeoLiteDbDownloader() {
               style={{
                 width: "100%",
                 height: "8px",
-                backgroundColor: "#21262d",
+                backgroundColor: "var(--bg-content-alt)",
                 borderRadius: "4px",
                 overflow: "hidden",
                 boxShadow: "inset 0 1px 2px rgba(0,0,0,0.1)",

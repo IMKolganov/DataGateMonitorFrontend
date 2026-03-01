@@ -2,14 +2,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../../css/Header.css";
-import { FaBell, FaDoorClosed } from "react-icons/fa";
+import { FaBell, FaDoorClosed, FaSun, FaMoon } from "react-icons/fa";
 import { logout } from "../../api/apirequest.ts";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { useNotificationsUnreadCount } from "../../pages/Notifications/useNotifications";
+import { useTheme } from "../../contexts/ThemeContext";
 
 export function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
     const user = getCurrentUser();
+    const { theme, toggleTheme } = useTheme();
     const { data: unreadCount = 0 } = useNotificationsUnreadCount();
 
     return (
@@ -39,6 +41,19 @@ export function Header() {
 
                     <li><Link to="/about" onClick={() => setMenuOpen(false)}>About</Link></li>
                     <li><Link to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link></li>
+
+                    <li>
+                        <button
+                            type="button"
+                            className="btn secondary theme-toggle"
+                            onClick={() => { setMenuOpen(false); toggleTheme(); }}
+                            title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+                            aria-label={theme === "dark" ? "Light theme" : "Dark theme"}
+                        >
+                            {theme === "dark" ? <FaSun className="icon" /> : <FaMoon className="icon" />}
+                            {theme === "dark" ? "Light" : "Dark"}
+                        </button>
+                    </li>
 
                     <li className="separator">|</li>
 
