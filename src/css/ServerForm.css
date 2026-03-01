@@ -16,6 +16,87 @@
     text-align: center;
     color: #ffffff;
   }
+
+  .ovpn-config-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 24px 0 12px;
+    color: #c9d1d9;
+    border-bottom: 1px solid #30363d;
+    padding-bottom: 8px;
+  }
+
+  .api-url-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .api-url-row input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .api-check-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .api-check-spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid var(--color-spinner-track);
+    border-top-color: var(--color-spinner);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .api-check-result {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .api-check-success {
+    background-color: #0d1117;
+    border: 1px solid #238636;
+    color: #c9d1d9;
+  }
+
+  .api-check-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #30363d;
+  }
+
+  .api-check-summary span {
+    white-space: nowrap;
+  }
+
+  .api-check-json {
+    margin: 0;
+    padding: 12px;
+    background-color: #0d1117;
+    border-radius: 6px;
+    overflow: auto;
+    max-height: 320px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #8b949e;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .api-check-error {
+    background-color: rgba(248, 81, 73, 0.1);
+    border: 1px solid #f85149;
+    color: #f85149;
+  }
   
   .server-form-description {
     font-size: 14px;
@@ -35,22 +116,26 @@
     margin-left: 5px;
   }
   
+  /* Как на логине: референс .input-login */
   .server-form input:not([type="checkbox"]),
-  .server-form select {
+  .server-form select,
+  .server-form textarea {
     width: 100%;
-    padding: 10px;
+    padding: 8px 10px;
     font-size: 14px;
     border: 1px solid #30363d;
-    border-radius: 8px;
+    border-radius: 6px;
     background-color: #0d1117;
-    color: #c9d1d9;
-    transition: border-color 0.2s ease;
+    color: #f0f6fc;
   }
-  
+
   .server-form input:focus,
-  .server-form select:focus {
-    border-color: #58a6ff;
+  .server-form select:focus,
+  .server-form textarea:focus {
     outline: none;
+    border-color: #c1bfbf;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+    background-color: #010409;
   }
 
   .checkbox-container {
@@ -107,36 +192,6 @@
     align-items: center;
   }
   
-  .back-button,
-  .submit-button {
-    padding: 10px 16px;
-    font-size: 14px;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-  
-  .back-button {
-    background-color: #0366d6;
-    color: #ffffff;
-  }
-  
-  .back-button:hover {
-    background-color: #024ea0;
-  }
-  
-  .submit-button {
-    background-color: #2ea043;
-    color: #ffffff;
-  }
-  
-  .submit-button:hover {
-    background-color: #249136;
-  }
-  
-
   .loading-container {
     display: flex;
     flex-direction: column;
@@ -144,20 +199,5 @@
     align-items: center;
     font-size: 18px;
     color: #c9d1d9;
-  }
-  
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #58a6ff;
-    border-top: 4px solid transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 10px;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
   }
   

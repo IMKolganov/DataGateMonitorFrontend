@@ -18,18 +18,20 @@
   
   .ovpn-textarea-wrap {
     position: relative;
-    min-height: 520px;
-    max-height: 1200px;
+    height: 480px;
     width: 99%;
     border-radius: 4px;
   }
 
+  /* Область скролла: жёстко меньше обёртки (480 - 24 = 456px), чтобы скроллбар целиком внутри */
   .ovpn-textarea-wrap .ovpn-highlight-pre {
     position: absolute;
     top: 0;
     left: 0;
     right: 8px;
-    bottom: 8px;
+    width: calc(100% - 8px);
+    height: 456px;
+    max-height: 456px;
     overflow: auto;
     padding: 8px;
     z-index: 0;
@@ -45,10 +47,10 @@
     top: 0;
     left: 0;
     right: 8px;
-    bottom: 8px;
     width: calc(100% - 8px);
-    min-height: 520px;
-    max-height: 1200px;
+    height: 456px;
+    max-height: 456px;
+    min-height: 0;
     background: transparent;
     color: transparent;
     caret-color: #c9d1d9;
@@ -57,17 +59,14 @@
     font-size: 14px;
     line-height: 1.5;
     padding: 8px;
-    resize: vertical;
-    overflow-y: auto;
-    overflow-x: auto;
+    resize: none;
+    overflow: auto;
     outline: none;
     z-index: 1;
   }
 
   .config-template-container textarea {
     width: 99%;
-    min-height: 520px;
-    max-height: 1200px;
     background-color: #0d1117;
     border: none;
     color: #c9d1d9;
