@@ -21,6 +21,7 @@
   --btn-secondary-bg: #21262d;
   --btn-secondary-hover: #30363d;
   --btn-secondary-text: #c9d1d9;
+  --link-color: #58a6ff;
   --skeleton-shine: rgba(255, 255, 255, 0.08);
 }
 
@@ -46,6 +47,7 @@
   --btn-secondary-bg: #eaeef2;
   --btn-secondary-hover: #d0d7de;
   --btn-secondary-text: #1f2328;
+  --link-color: #0969da;
   --skeleton-shine: rgba(0, 0, 0, 0.06);
 }
 

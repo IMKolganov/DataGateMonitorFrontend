@@ -1,6 +1,6 @@
 {
-  "short_name": "OpenVPN Gate Monitor",
-  "name": "OpenVPN Gate Monitor",
+  "short_name": "DataGate Monitor",
+  "name": "DataGate Monitor",
   "icons": [
     {
       "src": "favicon.swg",

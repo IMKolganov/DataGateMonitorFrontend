@@ -38,7 +38,7 @@ const Footer: React.FC = () => {
     return (
         <footer className="footer">
             <p>
-                © {new Date().getFullYear()} OpenVPN Gate Monitor v.{appVersion}
+                © {new Date().getFullYear()} DataGate Monitor v.{appVersion}
             </p>
 
             {remaining && (
