@@ -211,10 +211,46 @@ const ServerList: React.FC = () => {
         </div>
 
         {loading ? (
-            <div className="loading-container">
-              <div className="loading-spinner"></div>
-              <p>Loading servers...</p>
-            </div>
+            <ul className="list">
+              {[1, 2, 3, 4].map((i) => (
+                <li key={i} className="server-item server-item-skeleton">
+                  <div className="server-item-content">
+                    <div className="server-header">
+                      <div className="server-info">
+                        <span className="skeleton" style={{ width: 220, height: 20 }} />
+                      </div>
+                      <span className="skeleton" style={{ width: 70, height: 22 }} />
+                    </div>
+                    <div className="server-details">
+                      <div className="detail-row">
+                        <span className="skeleton" style={{ width: 14, height: 14 }} />
+                        <span className="skeleton" style={{ width: 140, height: 14 }} />
+                      </div>
+                      <div className="detail-row">
+                        <span className="skeleton" style={{ width: 14, height: 14 }} />
+                        <span className="skeleton" style={{ width: 180, height: 14 }} />
+                      </div>
+                      <div className="detail-row">
+                        <span className="skeleton" style={{ width: 14, height: 14 }} />
+                        <span className="skeleton" style={{ width: 100, height: 14 }} />
+                      </div>
+                    </div>
+                    <div className="server-tags-block">
+                      <span className="skeleton" style={{ width: 60, height: 14 }} />
+                      <span className="skeleton" style={{ width: 80, height: 24, borderRadius: 6 }} />
+                      <span className="skeleton" style={{ width: 50, height: 24, borderRadius: 6 }} />
+                    </div>
+                    <div className="server-actions">
+                      <div className="server-actions-buttons">
+                        <span className="skeleton" style={{ width: 70, height: 32, borderRadius: 6 }} />
+                        <span className="skeleton" style={{ width: 65, height: 32, borderRadius: 6 }} />
+                        <span className="skeleton" style={{ width: 75, height: 32, borderRadius: 6 }} />
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
         ) : (
             <ul className="list">
               {servers.length > 0 ? (

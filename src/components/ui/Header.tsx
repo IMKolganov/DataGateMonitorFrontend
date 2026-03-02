@@ -19,7 +19,7 @@ export function Header() {
             <Link to="/" className="logo" onClick={() => setMenuOpen(false)}>
                 <div className="logo">
                     <img src="/favicon.png" alt="Logo" className="logo-icon" />
-                    OpenVPN Gate Monitor
+                    DataGate Monitor
                 </div>
             </Link>
 

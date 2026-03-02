@@ -8,27 +8,27 @@ import type { VpnClientInfoDto } from "../api/orval/model";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 
-export const serverIcon = L.icon({
-  iconUrl:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
-  shadowUrl:
-      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
+const MARKER_BASE =
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x";
+const MARKER_SHADOW =
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png";
 
-export const clientIcon = L.icon({
-  iconUrl:
-      "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
-  shadowUrl:
-      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
+const markerColors = ["red", "blue", "green", "orange", "yellow", "violet", "grey", "black"] as const;
+type MarkerColor = (typeof markerColors)[number];
+
+const createMarkerIcon = (color: MarkerColor, withShadow = true): L.Icon =>
+  L.icon({
+    iconUrl: `${MARKER_BASE}-${color}.png`,
+    ...(withShadow && {
+      shadowUrl: MARKER_SHADOW,
+      shadowSize: [41, 41],
+    }),
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+  });
+
+export const serverIcon = createMarkerIcon("blue");
 
 const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
   const map = useMap();
@@ -47,13 +47,49 @@ const tileLayers = {
     url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
     attribution: '&copy; <a href="https://carto.com/">Carto</a>',
   },
+  "Carto Light": {
+    url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+    attribution: '&copy; <a href="https://carto.com/">Carto</a>',
+  },
+  "Carto Voyager": {
+    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png",
+    attribution: '&copy; <a href="https://carto.com/">Carto</a>',
+  },
   OpenStreetMap: {
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   },
+  OpenTopoMap: {
+    url: "https://tile.opentopomap.org/{z}/{x}/{y}.png",
+    attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+  },
+  CyclOSM: {
+    url: "https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
+    attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://www.cyclosm.org">CyclOSM</a>',
+  },
+  OpenRailwayMap: {
+    url: "https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+    attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://www.openrailwaymap.org">OpenRailwayMap</a>',
+  },
+  "OPNVKarte (transport)": {
+    url: "https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png",
+    attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; memomaps.de',
+  },
   "Esri Dark Gray": {
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+    attribution: 'Tiles &copy; <a href="https://www.arcgis.com/">Esri</a>',
+  },
+  "Esri World Topo": {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+    attribution: 'Tiles &copy; <a href="https://www.arcgis.com/">Esri</a>',
+  },
+  "Esri World Imagery": {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     attribution: 'Tiles &copy; <a href="https://www.arcgis.com/">Esri</a>',
   },
   "Google Maps": {
@@ -62,16 +98,35 @@ const tileLayers = {
   },
 };
 
+const pointStyleLabels: Record<MarkerColor, string> = {
+  red: "Red",
+  blue: "Blue",
+  green: "Green",
+  orange: "Orange",
+  yellow: "Yellow",
+  violet: "Violet",
+  grey: "Grey",
+  black: "Black",
+};
+
 const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName }) => {
   const defaultCenter: [number, number] = [45, 37];
 
   const [selectedLayer, setSelectedLayer] = useState<keyof typeof tileLayers>(
       (Cookies.get("selectedMapLayer") as keyof typeof tileLayers) || "Carto Dark"
   );
+  const [pointColor, setPointColor] = useState<MarkerColor>(
+      (Cookies.get("selectedPointColor") as MarkerColor) || "red"
+  );
 
   useEffect(() => {
     Cookies.set("selectedMapLayer", selectedLayer, { expires: 365 });
   }, [selectedLayer]);
+  useEffect(() => {
+    Cookies.set("selectedPointColor", pointColor, { expires: 365 });
+  }, [pointColor]);
+
+  const clientIcon = useMemo(() => createMarkerIcon(pointColor), [pointColor]);
 
   const visibleClients = useMemo(
       () =>
@@ -101,6 +156,18 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName }) 
             {Object.keys(tileLayers).map((key) => (
                 <option key={key} value={key}>
                   {key}
+                </option>
+            ))}
+          </select>
+          <strong>Point color:</strong>
+          <select
+              className="btn secondary dropdown-select"
+              value={pointColor}
+              onChange={(e) => setPointColor(e.target.value as MarkerColor)}
+          >
+            {markerColors.map((c) => (
+                <option key={c} value={c}>
+                  {pointStyleLabels[c]}
                 </option>
             ))}
           </select>
