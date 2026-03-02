@@ -21,7 +21,12 @@ import {
 import type {
   AddOrUpdateOvpnFileConfigRequest,
   OvpnFileConfigResponse,
+  RootInfoResponse,
 } from "../api/orval/model";
+import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
+import StyledDataGrid from "../components/ui/TableStyle.tsx";
+import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
+import "../css/Table.css";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 
 const SAMPLE_TEMPLATE = `setenv FRIENDLY_NAME "{{friendly_name}}"
@@ -50,7 +55,24 @@ verb 3
 {{tls_auth_key}}
 </tls-crypt>`;
 
-const HISTORY_PAGE_SIZE = 10;
+const DEFAULT_CONFLOG_PAGE_SIZE = 10;
+
+interface ConflogRow {
+  id?: number;
+  vpnServerId?: number | null;
+  requestUrl?: string | null;
+  payload?: RootInfoResponse;
+  createDate?: string;
+}
+
+function formatPayload(payload: RootInfoResponse | undefined | null): string {
+  if (!payload) return "—";
+  const parts: string[] = [];
+  if (payload.version != null) parts.push(`v: ${payload.version}`);
+  if (payload.application != null) parts.push(`app: ${payload.application}`);
+  if (payload.environment != null) parts.push(`env: ${payload.environment}`);
+  return parts.length > 0 ? parts.join(" | ") : JSON.stringify(payload);
+}
 
 const OvpnFileConfigForm: React.FC = () => {
   const navigate = useNavigate();
@@ -59,7 +81,7 @@ const OvpnFileConfigForm: React.FC = () => {
   const parsedVpnServerId = Number(vpnServerId) || 0;
   const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
-  const [conflogHistoryPage, setConflogHistoryPage] = useState(1);
+  const [conflogPagination, setConflogPagination] = useState({ page: 1, pageSize: DEFAULT_CONFLOG_PAGE_SIZE });
 
   // local UI state (kept in PascalCase to match form field names)
   const [ovpnFileConfig, setServerConfig] = useState({
@@ -98,8 +120,8 @@ const OvpnFileConfigForm: React.FC = () => {
   const saveMutation = usePostApiOpenVpnConfigsAddUpdate();
 
   const conflogHistoryParams = useMemo(
-    () => ({ page: conflogHistoryPage, pageSize: HISTORY_PAGE_SIZE }),
-    [conflogHistoryPage]
+    () => ({ page: conflogPagination.page, pageSize: conflogPagination.pageSize }),
+    [conflogPagination]
   );
   const { data: conflogHistoryResp, isFetching: isConflogLoading } =
     useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
@@ -107,10 +129,9 @@ const OvpnFileConfigForm: React.FC = () => {
       conflogHistoryParams,
       { query: { enabled: parsedVpnServerId > 0 } }
     );
-  const conflogPageData = (conflogHistoryResp as { data?: { items?: unknown[]; totalCount?: number; page?: number; pageSize?: number } })?.data;
-  const conflogItems = conflogPageData?.items ?? [];
+  const conflogPageData = (conflogHistoryResp as { data?: { items?: ConflogRow[]; totalCount?: number } })?.data;
+  const conflogItems: ConflogRow[] = conflogPageData?.items ?? [];
   const conflogTotalCount = conflogPageData?.totalCount ?? 0;
-  const conflogTotalPages = Math.max(1, Math.ceil(conflogTotalCount / HISTORY_PAGE_SIZE));
 
   const fetchAndSaveConflogMutation = usePostApiOpenVpnServersConflogFetchAndSaveByServerVpnServerId({
     mutation: {
@@ -128,6 +149,20 @@ const OvpnFileConfigForm: React.FC = () => {
       },
     },
   });
+
+  const conflogRows = conflogItems.map((row, idx) => ({
+    id: row.id ?? idx,
+    requestUrl: row.requestUrl ?? "—",
+    createDate: row.createDate ? new Date(row.createDate).toLocaleString() : "—",
+    payload: formatPayload(row.payload),
+  }));
+
+  const conflogColumns: GridColDef[] = [
+    { field: "id", headerName: "Id", width: 80 },
+    { field: "requestUrl", headerName: "Request URL", flex: 1, minWidth: 150 },
+    { field: "createDate", headerName: "Created", flex: 0.8, minWidth: 140 },
+    { field: "payload", headerName: "Payload", flex: 1, minWidth: 180 },
+  ];
 
   // small helper to extract readable error messages
   const getErrorMessage = (err: unknown): string => {
@@ -393,72 +428,37 @@ const OvpnFileConfigForm: React.FC = () => {
                   {fetchAndSaveConflogMutation.isPending ? "Fetching…" : "Fetch and save conflog"}
                 </button>
               </div>
-              {isConflogLoading ? (
-                <div className="loading-container">
-                  <div className="loading-spinner" />
-                  <p>Loading history...</p>
+              <CustomThemeProvider>
+                <div
+                  className="data-grid-wrap"
+                  style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}
+                >
+                  <StyledDataGrid
+                    rows={conflogRows}
+                    columns={conflogColumns}
+                    pageSizeOptions={[5, 10, 20, 50]}
+                    paginationMode="server"
+                    rowCount={conflogTotalCount}
+                    paginationModel={{
+                      page: conflogPagination.page - 1,
+                      pageSize: conflogPagination.pageSize,
+                    }}
+                    onPaginationModelChange={(model: GridPaginationModel) => {
+                      setConflogPagination((p) => ({
+                        page: model.page + 1,
+                        pageSize: model.pageSize ?? p.pageSize,
+                      }));
+                    }}
+                    loading={isConflogLoading}
+                    slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
+                    disableColumnFilter
+                    disableColumnMenu
+                    localeText={{
+                      noRowsLabel: "No conflog history yet. Use \"Fetch and save conflog\" to load data.",
+                    }}
+                  />
                 </div>
-              ) : (
-                <>
-                  <div className="conflog-table-wrap">
-                    <table className="conflog-table">
-                      <thead>
-                        <tr>
-                          <th>Id</th>
-                          <th>Request URL</th>
-                          <th>Created</th>
-                          <th>Payload</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(conflogItems as { id?: number; requestUrl?: string | null; createDate?: string; payloadJson?: string | null }[]).length === 0 ? (
-                          <tr>
-                            <td colSpan={4}>No conflog history yet. Use &quot;Fetch and save conflog&quot; to load data.</td>
-                          </tr>
-                        ) : (
-                          (conflogItems as { id?: number; requestUrl?: string | null; createDate?: string; payloadJson?: string | null }[]).map((row) => (
-                            <tr key={row.id ?? row.createDate ?? Math.random()}>
-                              <td>{row.id ?? "—"}</td>
-                              <td className="conflog-url">{row.requestUrl ?? "—"}</td>
-                              <td>{row.createDate ? new Date(row.createDate).toLocaleString() : "—"}</td>
-                              <td className="conflog-payload">
-                                {row.payloadJson
-                                  ? row.payloadJson.length > 120
-                                    ? `${row.payloadJson.slice(0, 120)}…`
-                                    : row.payloadJson
-                                  : "—"}
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                  {conflogTotalPages > 1 && (
-                    <div className="conflog-pagination">
-                      <button
-                        type="button"
-                        className="btn secondary"
-                        disabled={conflogHistoryPage <= 1}
-                        onClick={() => setConflogHistoryPage((p) => Math.max(1, p - 1))}
-                      >
-                        Previous
-                      </button>
-                      <span>
-                        Page {conflogHistoryPage} of {conflogTotalPages} ({conflogTotalCount} total)
-                      </span>
-                      <button
-                        type="button"
-                        className="btn secondary"
-                        disabled={conflogHistoryPage >= conflogTotalPages}
-                        onClick={() => setConflogHistoryPage((p) => Math.min(conflogTotalPages, p + 1))}
-                      >
-                        Next
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
+              </CustomThemeProvider>
             </div>
           )}
         </div>

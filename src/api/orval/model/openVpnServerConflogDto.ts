@@ -4,6 +4,7 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
+import type { RootInfoResponse } from "./rootInfoResponse";
 
 export interface OpenVpnServerConflogDto {
   id?: number;
@@ -11,7 +12,6 @@ export interface OpenVpnServerConflogDto {
   vpnServerId?: number | null;
   /** @nullable */
   requestUrl?: string | null;
-  /** @nullable */
-  payloadJson?: string | null;
+  payload?: RootInfoResponse;
   createDate?: string;
 }
