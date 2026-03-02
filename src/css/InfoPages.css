@@ -1,0 +1,114 @@
+/* Shared styles for About and Contact pages */
+
+.info-page {
+  color: var(--text-primary);
+}
+
+.info-page h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.info-page .info-divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 0 0 1.25rem 0;
+}
+
+.info-page .info-section {
+  margin-bottom: 1.5rem;
+}
+
+.info-page .info-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.info-page p {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.info-page ul {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.info-page li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.info-page a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+.info-page a:hover {
+  text-decoration: underline;
+}
+
+.info-page strong {
+  color: var(--text-primary);
+}
+
+.info-page .info-note {
+  margin-top: 1.25rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.info-page .info-wss-block {
+  background: var(--bg-content-alt);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+}
+
+.info-page .info-wss-block p {
+  margin-bottom: 0.5rem;
+}
+
+.info-page .info-wss-block ul {
+  margin-bottom: 0;
+  margin-top: 0.5rem;
+}
+
+.info-page .info-wss-block .info-wss-footer {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+}
+
+.info-page .info-contact-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.info-page .info-contact-list li {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-page .info-icon {
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  color: var(--text-muted);
+  vertical-align: -0.15em;
+}
+
+.info-page .info-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.info-page .info-list-item .info-icon {
+  width: 1.1em;
+  height: 1.1em;
+}

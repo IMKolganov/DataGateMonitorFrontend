@@ -161,38 +161,41 @@ export function GeneralSettings() {
         </p>
       )}
 
-      <h2>OpenVPN Polling Interval</h2>
-      <div style={{ borderTop: "1px solid #d1d5da" }}></div>
-      <h4>OpenVPN Polling Interval:</h4>
+      <div className="settings-polling">
+        <h2>OpenVPN Polling Interval</h2>
+        <div style={{ borderTop: "1px solid #d1d5da" }}></div>
 
-      <div className="settings-item">
-        <input
-          type="number"
-          min={0}
-          value={intervalValue}
-          onChange={(e) => setIntervalValue(Number(e.target.value))}
-          className="input"
-        />
+        <div className="settings-item">
+          <input
+            type="number"
+            min={0}
+            value={intervalValue}
+            onChange={(e) => setIntervalValue(Number(e.target.value))}
+            className="input polling-interval-input"
+          />
 
-        <select
-          value={intervalType}
-          onChange={(e) => setIntervalType(e.target.value as Unit)}
-          className="btn secondary"
-        >
-          <option value="seconds">Seconds</option>
-          <option value="minutes">Minutes</option>
-        </select>
+          <select
+            value={intervalType}
+            onChange={(e) => setIntervalType(e.target.value as Unit)}
+            className="btn secondary"
+          >
+            <option value="seconds">Seconds</option>
+            <option value="minutes">Minutes</option>
+          </select>
 
-        <button
-          className="btn primary"
-          onClick={handleSave}
-          disabled={loading || setSettingMutation.isPending}
-        >
-          <span className="icon">{FaSave({ className: "icon" })}</span> Save
-        </button>
+          <button
+            className="btn primary"
+            onClick={handleSave}
+            disabled={loading || setSettingMutation.isPending}
+          >
+            <span className="icon">{FaSave({ className: "icon" })}</span> Save
+          </button>
+        </div>
+
+        <p className="settings-item-description">
+          Interval for the backend service that runs on the server and periodically polls VPN servers for status and data. 0 = disabled.
+        </p>
       </div>
-
-      <p className="settings-item-description">0 = disabled</p>
     </div>
   );
 }

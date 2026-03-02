@@ -30,6 +30,46 @@
     list-style: none;
   }
 
+  .server-item-skeleton .skeleton {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-content-alt);
+    border-radius: 6px;
+    vertical-align: middle;
+  }
+  .server-item-skeleton .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--skeleton-shine) 50%,
+      transparent 100%
+    );
+    animation: server-list-shimmer 1.2s infinite;
+  }
+  @keyframes server-list-shimmer {
+    100% { transform: translateX(100%); }
+  }
+
+  .server-item-skeleton {
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .server-item-skeleton:hover {
+    border-color: var(--border-color);
+    box-shadow: none;
+  }
+
+  .server-item-skeleton:nth-child(1) .skeleton::after { animation-delay: 0s; }
+  .server-item-skeleton:nth-child(2) .skeleton::after { animation-delay: 0.15s; }
+  .server-item-skeleton:nth-child(3) .skeleton::after { animation-delay: 0.3s; }
+  .server-item-skeleton:nth-child(4) .skeleton::after { animation-delay: 0.45s; }
+
   .server-item {
     background-color: var(--bg-card);
     margin-bottom: 20px;

@@ -60,6 +60,14 @@
   width: 70%;
 }
 
+.settings-polling {
+  text-align: left;
+}
+
+.settings-polling .polling-interval-input {
+  width: 15ch;
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;
