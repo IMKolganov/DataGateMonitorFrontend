@@ -19,4 +19,6 @@ export interface AddServerRequest {
   isEnableWss?: boolean;
   /** @nullable */
   quotaPlanIds?: number[] | null;
+  /** @nullable */
+  tagIds?: number[] | null;
 }

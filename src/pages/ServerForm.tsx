@@ -19,6 +19,8 @@ import {
   usePostApiOpenVpnConfigsAddUpdate,
 } from "../api/orval/open-vpn-server-ovpn-file-config/open-vpn-server-ovpn-file-config";
 
+import { useGetApiTagsGetAll } from "../api/orval/tags/tags";
+
 import type {
   AddServerRequest,
   UpdateServerRequest,
@@ -48,6 +50,7 @@ function unwrapServerDto(raw: GetByIdResult | undefined): OpenVpnServerDto | nul
     isEnableWss: Boolean(s.isEnableWss ?? false),
     createDate: s.createDate,
     lastUpdate: s.lastUpdate,
+    tags: Array.isArray(s.tags) ? s.tags : s.tags ?? null,
   };
 
   return dto;
@@ -76,6 +79,12 @@ const ServerForm: React.FC = () => {
     query: { enabled: idNum > 0 },
   });
 
+  const { data: tagsResp } = useGetApiTagsGetAll();
+  const allTags = React.useMemo(
+    () => (tagsResp as { data?: { tags?: { id?: number; name?: string | null }[] | null } })?.data?.tags ?? [],
+    [tagsResp]
+  );
+
   const addMutation = usePostApiOpenVpnServersAdd();
   const updateMutation = usePutApiOpenVpnServersUpdate();
   const saveOvpnConfigMutation = usePostApiOpenVpnConfigsAddUpdate();
@@ -92,6 +101,8 @@ const ServerForm: React.FC = () => {
     createDate: new Date().toISOString(),
     lastUpdate: new Date().toISOString(),
   });
+
+  const [selectedTagIds, setSelectedTagIds] = React.useState<number[]>([]);
 
   const [ovpnConfig, setOvpnConfig] = React.useState({
     vpnServerIp: "",
@@ -138,7 +149,17 @@ const ServerForm: React.FC = () => {
       lastUpdate: dto.lastUpdate ?? prev.lastUpdate,
       createDate: dto.createDate ?? prev.createDate,
     }));
-  }, [serverResp, idNum]);
+
+    const tagNames = dto.tags ?? [];
+    const ids =
+      tagNames.length > 0 && allTags.length > 0
+        ? allTags
+            .filter((t) => t.name != null && tagNames.includes(t.name))
+            .map((t) => t.id!)
+            .filter((id): id is number => typeof id === "number")
+        : [];
+    setSelectedTagIds(ids);
+  }, [serverResp, idNum, allTags]);
 
   React.useEffect(() => {
     const raw = (ovpnConfigData as { data?: OvpnFileConfigResponse })?.data ?? ovpnConfigData;
@@ -299,6 +320,7 @@ const ServerForm: React.FC = () => {
           latitude: serverData.latitude ?? null,
           longitude: serverData.longitude ?? null,
           isEnableWss: serverData.isEnableWss ?? false,
+          tagIds: selectedTagIds.length > 0 ? selectedTagIds : null,
         };
 
         await updateMutation.mutateAsync({ data: payload });
@@ -322,6 +344,7 @@ const ServerForm: React.FC = () => {
           latitude: serverData.latitude ?? null,
           longitude: serverData.longitude ?? null,
           isEnableWss: serverData.isEnableWss ?? false,
+          tagIds: selectedTagIds.length > 0 ? selectedTagIds : null,
         };
 
         await addMutation.mutateAsync({ data: payload });
@@ -494,6 +517,33 @@ const ServerForm: React.FC = () => {
                   placeholder="Enter longitude (optional)"
                   disabled={isFetching}
               />
+            </div>
+
+            <div className="form-group">
+              <label>Tags</label>
+              <div className="tags-checkbox-list">
+                {allTags.length === 0 ? (
+                  <span className="form-hint">No tags available. Create tags in settings to assign to servers.</span>
+                ) : (
+                  allTags.map((tag) => (
+                    <label key={tag.id ?? tag.name ?? Math.random()} className="checkbox-label tags-checkbox-item">
+                      <input
+                        type="checkbox"
+                        checked={selectedTagIds.includes(tag.id!)}
+                        onChange={() => {
+                          setSelectedTagIds((prev) =>
+                            prev.includes(tag.id!)
+                              ? prev.filter((id) => id !== tag.id)
+                              : [...prev, tag.id!]
+                          );
+                        }}
+                        disabled={isFetching}
+                      />
+                      <span className="checkbox-content">{tag.name ?? ""}</span>
+                    </label>
+                  ))
+                )}
+              </div>
             </div>
 
             {idNum > 0 && (

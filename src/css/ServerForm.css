@@ -209,7 +209,27 @@
     margin-top: 2px;
     line-height: 1.4;
   }
-  
+
+  .tags-checkbox-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+  }
+
+  .tags-checkbox-item.checkbox-label {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .tags-checkbox-item .checkbox-content {
+    flex-direction: row;
+    font-size: 14px;
+  }
+
+  .form-hint {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
 
   
   .input-error {

@@ -20,4 +20,7 @@ export interface OpenVpnServerDto {
   isEnableWss?: boolean;
   createDate?: string;
   lastUpdate?: string;
+  isDeleted?: boolean;
+  /** @nullable */
+  tags?: string[] | null;
 }

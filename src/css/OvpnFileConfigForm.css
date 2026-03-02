@@ -187,3 +187,67 @@
     line-height: 1.5;
     color: var(--text-secondary);
   }
+
+  .conflog-history-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .conflog-history-section .ovpn-config-section-title {
+    margin-top: 0;
+  }
+
+  .conflog-actions {
+    margin-bottom: 1rem;
+  }
+
+  .conflog-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+
+  .conflog-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .conflog-table th,
+  .conflog-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .conflog-table th {
+    background-color: var(--bg-body);
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .conflog-table td.conflog-url {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .conflog-table td.conflog-payload {
+    max-width: 280px;
+    font-family: monospace;
+    font-size: 12px;
+    word-break: break-all;
+  }
+
+  .conflog-pagination {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .conflog-pagination span {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
