@@ -169,10 +169,11 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  background-color: var(--input-bg);
+  background-color: var(--bg-header-bar);
   border-radius: 8px;
   margin-bottom: 15px;
   flex-wrap: wrap;
+  border: 1px solid var(--border-color);
 }
 
 .left-buttons {

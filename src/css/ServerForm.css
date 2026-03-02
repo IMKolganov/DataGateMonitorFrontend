@@ -210,6 +210,30 @@
     line-height: 1.4;
   }
 
+  .tags-section-hint {
+    margin-bottom: 10px;
+  }
+
+  .tags-select-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .tags-create-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .tags-create-row .tags-new-input {
+    flex: 1;
+    min-width: 0;
+    max-width: 240px;
+  }
+
   .tags-checkbox-list {
     display: flex;
     flex-wrap: wrap;
