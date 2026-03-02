@@ -83,3 +83,45 @@
 .server-info.is-loading {
   opacity: 0.97;
 }
+
+.server-tags-list {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.server-tag-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  background-color: var(--bg-content-alt);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.server-tags-block {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 0.5rem;
+  padding-left: 8px;
+}
+
+.detail-row-tags-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.server-tags-block .detail-label {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.server-tags-block .server-tags-list {
+  margin-left: 0;
+}

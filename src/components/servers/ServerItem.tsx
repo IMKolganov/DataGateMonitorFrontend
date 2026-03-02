@@ -7,7 +7,7 @@ import {
     FaPauseCircle,
     FaTimesCircle,
 } from "react-icons/fa";
-import { BsClock, BsPerson, BsFillBookmarkStarFill } from "react-icons/bs";
+import { BsClock, BsFillBookmarkStarFill, BsTag, BsLink45Deg, BsHddNetwork } from "react-icons/bs";
 import { IoMdPerson } from "react-icons/io";
 import type { ServiceStatus, OpenVpnServerWithStatusDto } from "../../api/orval/model";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
@@ -101,10 +101,9 @@ const ServerItem: React.FC<Props> = ({
     const connectedClients =
         wsCountConnectedClients ?? server.countConnectedClients ?? 0;
 
-    const sessions =
-        wsCountSessions ?? server.countSessions ?? 0;
-
-    const upSince = server.openVpnServerStatusLogResponse?.upSince ?? null;
+    const apiUrl = openVpnServer?.apiUrl ?? null;
+    const statusLog = server.openVpnServerStatusLogResponse;
+    const serverIp = statusLog?.serverRemoteIp ?? statusLog?.serverLocalIp ?? null;
 
     return (
         <div className="server-item-content">
@@ -121,22 +120,28 @@ const ServerItem: React.FC<Props> = ({
 
             <div className="server-details">
                 <div className="detail-row">
-                    <BsClock className="detail-icon" />
-                    <span className="detail-label">Uptime:</span>
-                    <span>{upSince ? new Date(upSince).toLocaleString() : "N/A"}</span>
-                </div>
-
-                <div className="detail-row">
                     <IoMdPerson className="detail-icon" />
                     <span className="detail-label">Count Connected Clients:</span>
                     <span>{connectedClients}</span>
                 </div>
 
-                <div className="detail-row">
-                    <BsPerson className="detail-icon" />
-                    <span className="detail-label">Count Sessions:</span>
-                    <span>{sessions}</span>
-                </div>
+                {apiUrl && (
+                    <div className="detail-row">
+                        <BsLink45Deg className="detail-icon" />
+                        <span className="detail-label">API:</span>
+                        <a href={apiUrl} target="_blank" rel="noreferrer" className="detail-link" onClick={(e) => e.stopPropagation()}>
+                            {apiUrl}
+                        </a>
+                    </div>
+                )}
+
+                {serverIp && (
+                    <div className="detail-row">
+                        <BsHddNetwork className="detail-icon" />
+                        <span className="detail-label">IP:</span>
+                        <span>{serverIp}</span>
+                    </div>
+                )}
 
                 {isDefault && (
                     <div className="detail-row">
@@ -160,44 +165,62 @@ const ServerItem: React.FC<Props> = ({
                 )}
             </div>
 
+            {Array.isArray(openVpnServer?.tags) && openVpnServer.tags.length > 0 && (
+                <div className="server-tags-block">
+                    <div className="detail-row-tags-heading">
+                        <BsTag className="detail-icon" />
+                        <span className="detail-label">Tags:</span>
+                    </div>
+                    <span className="server-tags-list">
+                        {openVpnServer.tags.map((tag) => (
+                            <span key={tag} className="server-tag-pill">
+                                {tag}
+                            </span>
+                        ))}
+                    </span>
+                </div>
+            )}
+
             <div className="server-actions">
-                <button
-                    className="btn secondary"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onView(resolvedId);
-                    }}
-                >
-                    <FaEye className="icon" /> View
-                </button>
+                <div className="server-actions-buttons">
+                    <button
+                        className="btn secondary"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onView(resolvedId);
+                        }}
+                    >
+                        <FaEye className="icon" /> View
+                    </button>
 
-                <button
-                    type="button"
-                    className="btn secondary"
-                    disabled={!canManage}
-                    title={!canManage ? "Admin only" : undefined}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (!canManage) return;
-                        onEdit(resolvedId);
-                    }}
-                >
-                    <FaEdit className="icon" /> Edit
-                </button>
+                    <button
+                        type="button"
+                        className="btn secondary"
+                        disabled={!canManage}
+                        title={!canManage ? "Admin only" : undefined}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (!canManage) return;
+                            onEdit(resolvedId);
+                        }}
+                    >
+                        <FaEdit className="icon" /> Edit
+                    </button>
 
-                <button
-                    type="button"
-                    className="btn secondary"
-                    disabled={!canManage}
-                    title={!canManage ? "Admin only" : undefined}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        if (!canManage) return;
-                        onDelete(resolvedId);
-                    }}
-                >
-                    <FaTrash className="icon" /> Delete
-                </button>
+                    <button
+                        type="button"
+                        className="btn secondary"
+                        disabled={!canManage}
+                        title={!canManage ? "Admin only" : undefined}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (!canManage) return;
+                            onDelete(resolvedId);
+                        }}
+                    >
+                        <FaTrash className="icon" /> Delete
+                    </button>
+                </div>
             </div>
         </div>
     );

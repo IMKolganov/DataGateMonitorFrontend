@@ -29,6 +29,12 @@ import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import "../css/Table.css";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 
+/** Extract proto from config template (e.g. "proto tcp" or "proto udp") */
+function extractProtoFromTemplate(template: string): string | null {
+  const m = template.match(/proto\s+(tcp|udp)/i);
+  return m ? m[1].toLowerCase() : null;
+}
+
 const SAMPLE_TEMPLATE = `setenv FRIENDLY_NAME "{{friendly_name}}"
 client
 dev tun
@@ -63,15 +69,6 @@ interface ConflogRow {
   requestUrl?: string | null;
   payload?: RootInfoResponse;
   createDate?: string;
-}
-
-function formatPayload(payload: RootInfoResponse | undefined | null): string {
-  if (!payload) return "—";
-  const parts: string[] = [];
-  if (payload.version != null) parts.push(`v: ${payload.version}`);
-  if (payload.application != null) parts.push(`app: ${payload.application}`);
-  if (payload.environment != null) parts.push(`env: ${payload.environment}`);
-  return parts.length > 0 ? parts.join(" | ") : JSON.stringify(payload);
 }
 
 const OvpnFileConfigForm: React.FC = () => {
@@ -129,9 +126,22 @@ const OvpnFileConfigForm: React.FC = () => {
       conflogHistoryParams,
       { query: { enabled: parsedVpnServerId > 0 } }
     );
-  const conflogPageData = (conflogHistoryResp as { data?: { items?: ConflogRow[]; totalCount?: number } })?.data;
-  const conflogItems: ConflogRow[] = conflogPageData?.items ?? [];
-  const conflogTotalCount = conflogPageData?.totalCount ?? 0;
+
+  const latestConflogParams = useMemo(() => ({ page: 1, pageSize: 1 }), []);
+  const { data: latestConflogResp } = useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
+    parsedVpnServerId,
+    latestConflogParams,
+    { query: { enabled: parsedVpnServerId > 0 } }
+  );
+  const latestConflogItem = (latestConflogResp as { items?: ConflogRow[] } | undefined)?.items?.[0];
+  const latestPayload = latestConflogItem?.payload;
+  const latestConfig = latestPayload?.config;
+
+  const conflogPageData = conflogHistoryResp as
+    | { items?: ConflogRow[] | null; totalCount?: number | null }
+    | undefined;
+  const conflogItems: ConflogRow[] = (conflogPageData?.items ?? []) as ConflogRow[];
+  const conflogTotalCount = conflogPageData?.totalCount ?? conflogItems.length;
 
   const fetchAndSaveConflogMutation = usePostApiOpenVpnServersConflogFetchAndSaveByServerVpnServerId({
     mutation: {
@@ -150,18 +160,58 @@ const OvpnFileConfigForm: React.FC = () => {
     },
   });
 
-  const conflogRows = conflogItems.map((row, idx) => ({
-    id: row.id ?? idx,
-    requestUrl: row.requestUrl ?? "—",
-    createDate: row.createDate ? new Date(row.createDate).toLocaleString() : "—",
-    payload: formatPayload(row.payload),
-  }));
+  const conflogRows = conflogItems.map((row, idx) => {
+    const payload = row.payload;
+    const cfg = payload?.config;
+    const mgmt = cfg?.openVpnManagement;
+
+    return {
+      id: row.id ?? idx,
+      requestUrl: row.requestUrl ?? "—",
+      version: payload?.version ?? "—",
+      application: payload?.application ?? "—",
+      environment: payload?.environment ?? "—",
+      vpnSubnet: cfg?.vpnSubnet ?? "—",
+      vpnNetmask: cfg?.vpnNetmask ?? "—",
+      ovpnPort: cfg?.port ?? "—",
+      ovpnProto: cfg?.proto ?? "—",
+      apiPort: cfg?.apiPort ?? "—",
+      management: mgmt ? `${mgmt.host}:${mgmt.port}` : "—",
+      createDate: row.createDate ? new Date(row.createDate).toLocaleString() : "—",
+    };
+  });
+
+  const templateProto = useMemo(
+    () => extractProtoFromTemplate(ovpnFileConfig.ConfigTemplate || ""),
+    [ovpnFileConfig.ConfigTemplate]
+  );
+  const templatePort = ovpnFileConfig.VpnServerPort != null ? String(ovpnFileConfig.VpnServerPort) : null;
+  const serverPort = latestConfig?.port != null ? String(latestConfig.port).trim() : null;
+  const serverProto = latestConfig?.proto != null ? String(latestConfig.proto).trim().toLowerCase() : null;
+  const configMismatch = useMemo(() => {
+    const mismatches: string[] = [];
+    if (serverPort != null && templatePort != null && serverPort !== templatePort) {
+      mismatches.push(`Port: server has ${serverPort}, template has ${templatePort}`);
+    }
+    if (serverProto != null && templateProto != null && serverProto !== templateProto) {
+      mismatches.push(`Proto: server has ${serverProto}, template has ${templateProto}`);
+    }
+    return mismatches;
+  }, [serverPort, templatePort, serverProto, templateProto]);
 
   const conflogColumns: GridColDef[] = [
-    { field: "id", headerName: "Id", width: 80 },
-    { field: "requestUrl", headerName: "Request URL", flex: 1, minWidth: 150 },
-    { field: "createDate", headerName: "Created", flex: 0.8, minWidth: 140 },
-    { field: "payload", headerName: "Payload", flex: 1, minWidth: 180 },
+    { field: "id", headerName: "Id", width: 70 },
+    { field: "requestUrl", headerName: "Request URL", flex: 1.1, minWidth: 160 },
+    { field: "version", headerName: "Version", width: 120 },
+    { field: "application", headerName: "Application", flex: 1.1, minWidth: 160 },
+    { field: "environment", headerName: "Environment", width: 140 },
+    { field: "vpnSubnet", headerName: "VPN Subnet", width: 140 },
+    { field: "vpnNetmask", headerName: "VPN Netmask", width: 140 },
+    { field: "ovpnPort", headerName: "OVPN Port", width: 110 },
+    { field: "ovpnProto", headerName: "OVPN Proto", width: 120 },
+    { field: "apiPort", headerName: "API Port", width: 110 },
+    { field: "management", headerName: "Mgmt host:port", flex: 1, minWidth: 160 },
+    { field: "createDate", headerName: "Created", flex: 0.9, minWidth: 150 },
   ];
 
   // small helper to extract readable error messages
@@ -413,6 +463,51 @@ const OvpnFileConfigForm: React.FC = () => {
               <p className="form-hint">
                 History of fetched configuration logs for this server. Use &quot;Fetch and save&quot; to load the latest conflog from the server API.
               </p>
+
+              {latestPayload && (
+                <div className="conflog-summary-card">
+                  <h4 className="conflog-summary-title">Server config (from latest conflog)</h4>
+                  <dl className="conflog-summary-dl">
+                    <div className="conflog-summary-row">
+                      <dt>Application</dt>
+                      <dd>{latestPayload.application ?? "—"}</dd>
+                    </div>
+                    <div className="conflog-summary-row">
+                      <dt>Version</dt>
+                      <dd>{latestPayload.version ?? "—"}</dd>
+                    </div>
+                    <div className="conflog-summary-row">
+                      <dt>Subnet</dt>
+                      <dd>{latestConfig?.vpnSubnet ?? "—"}</dd>
+                    </div>
+                    <div className="conflog-summary-row">
+                      <dt>Mask</dt>
+                      <dd>{latestConfig?.vpnNetmask ?? "—"}</dd>
+                    </div>
+                    <div className="conflog-summary-row">
+                      <dt>Port</dt>
+                      <dd>{latestConfig?.port ?? "—"}</dd>
+                    </div>
+                    <div className="conflog-summary-row">
+                      <dt>Proto</dt>
+                      <dd>{latestConfig?.proto ?? "—"}</dd>
+                    </div>
+                  </dl>
+                </div>
+              )}
+
+              {configMismatch.length > 0 && (
+                <div className="conflog-config-alert" role="alert">
+                  <strong>Config mismatch:</strong> Values from the server (conflog) do not match the ones set in your config template.
+                  <ul>
+                    {configMismatch.map((msg, i) => (
+                      <li key={i}>{msg}</li>
+                    ))}
+                  </ul>
+                  Update the template (VPN Server Port, or <code>proto tcp</code> / <code>proto udp</code> in the template) to match the server.
+                </div>
+              )}
+
               <div className="conflog-actions">
                 <button
                   type="button"

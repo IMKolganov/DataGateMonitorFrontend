@@ -25,11 +25,27 @@ import {
     useGetApiOpenVpnServersGetServerWithStatusVpnServerId,
     useGetApiOpenVpnServersGetVpnServerId,
 } from "../api/orval/open-vpn-servers/open-vpn-servers";
+import { useGetApiOpenVpnConfigsGetVpnServerId } from "../api/orval/open-vpn-server-ovpn-file-config/open-vpn-server-ovpn-file-config";
+import { useGetApiOpenVpnServersConflogHistoryByServerVpnServerId } from "../api/orval/open-vpn-server-conflog/open-vpn-server-conflog";
+
+type ConflogPayload = {
+    application?: string | null;
+    version?: string | null;
+    config?: {
+        vpnSubnet?: string | null;
+        vpnNetmask?: string | null;
+        port?: string | null;
+        proto?: string | null;
+    };
+};
 
 const ServerDetailsInfo = ServerDetailsInfoDefault as ComponentType<{
     serverInfo: unknown;
     toHumanReadableSize: (bytes: number) => string;
     loading?: boolean;
+    configIp?: string | null;
+    configPort?: number | null;
+    latestConflogPayload?: ConflogPayload | null;
 }>;
 
 export function GeneralServerDetails() {
@@ -114,6 +130,26 @@ export function GeneralServerDetails() {
         },
     });
 
+    const ovpnConfigQuery = useGetApiOpenVpnConfigsGetVpnServerId(numericServerId ?? 0, {
+        query: {
+            enabled: Number.isFinite(numericServerId),
+            staleTime: 30000,
+            retry: 1,
+        },
+    });
+
+    const ovpnConfig = ovpnConfigQuery.data as { vpnServerIp?: string | null; vpnServerPort?: number | null } | undefined;
+    const configIp = ovpnConfig?.vpnServerIp ?? null;
+    const configPort = ovpnConfig?.vpnServerPort ?? null;
+
+    const latestConflogQuery = useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
+        numericServerId ?? 0,
+        { page: 1, pageSize: 1 },
+        { query: { enabled: Number.isFinite(numericServerId) } }
+    );
+    const latestConflogItems = (latestConflogQuery.data as { items?: { payload?: ConflogPayload }[] } | undefined)?.items ?? [];
+    const latestConflogPayload: ConflogPayload | null = latestConflogItems[0]?.payload ?? null;
+
     const loadingServer = serverWithStatusQuery.isFetching || serverBasicQuery.isFetching;
 
     const serverWithStatus: OpenVpnServerWithStatusDto | undefined =
@@ -155,6 +191,7 @@ export function GeneralServerDetails() {
 
         serverWithStatusQuery.refetch();
         serverBasicQuery.refetch();
+        latestConflogQuery.refetch();
     };
 
     const toHumanReadableSize = (bytes: number = 0): string => {
@@ -193,6 +230,9 @@ export function GeneralServerDetails() {
                 serverInfo={serverInfo}
                 toHumanReadableSize={toHumanReadableSize}
                 loading={loadingServer}
+                configIp={configIp}
+                configPort={configPort}
+                latestConflogPayload={latestConflogPayload}
             />
 
             <h3>

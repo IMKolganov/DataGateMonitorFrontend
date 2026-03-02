@@ -19,7 +19,12 @@ import {
   usePostApiOpenVpnConfigsAddUpdate,
 } from "../api/orval/open-vpn-server-ovpn-file-config/open-vpn-server-ovpn-file-config";
 
-import { useGetApiTagsGetAll } from "../api/orval/tags/tags";
+import {
+  useGetApiTagsGetAll,
+  usePostApiTagsCreate,
+  getGetApiTagsGetAllQueryKey,
+} from "../api/orval/tags/tags";
+import { useQueryClient } from "@tanstack/react-query";
 
 import type {
   AddServerRequest,
@@ -66,6 +71,7 @@ function toNumberOrNull(value: string): number | null {
 
 const ServerForm: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { serverId } = useParams<{ serverId?: string }>();
   const idNum = Number(serverId || 0);
   const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
@@ -80,10 +86,10 @@ const ServerForm: React.FC = () => {
   });
 
   const { data: tagsResp } = useGetApiTagsGetAll();
-  const allTags = React.useMemo(
-    () => (tagsResp as { data?: { tags?: { id?: number; name?: string | null }[] | null } })?.data?.tags ?? [],
-    [tagsResp]
-  );
+  const allTags = React.useMemo(() => {
+    const raw = tagsResp as { tags?: { id?: number; name?: string | null }[]; data?: { tags?: { id?: number; name?: string | null }[] } } | undefined;
+    return raw?.tags ?? raw?.data?.tags ?? [];
+  }, [tagsResp]);
 
   const addMutation = usePostApiOpenVpnServersAdd();
   const updateMutation = usePutApiOpenVpnServersUpdate();
@@ -103,6 +109,24 @@ const ServerForm: React.FC = () => {
   });
 
   const [selectedTagIds, setSelectedTagIds] = React.useState<number[]>([]);
+  const [newTagName, setNewTagName] = React.useState("");
+  const createTagMutation = usePostApiTagsCreate({
+    mutation: {
+      onSuccess: (resp) => {
+        queryClient.invalidateQueries({ queryKey: getGetApiTagsGetAllQueryKey() });
+        const createdId = (resp as { tag?: { id?: number } })?.tag?.id;
+        if (typeof createdId === "number") {
+          setSelectedTagIds((prev) => (prev.includes(createdId) ? prev : [...prev, createdId]));
+        }
+        setNewTagName("");
+        toast.success("Tag created");
+      },
+      onError: (err: unknown) => {
+        const msg = err instanceof Error ? err.message : "Failed to create tag";
+        toast.error(msg);
+      },
+    },
+  });
 
   const [ovpnConfig, setOvpnConfig] = React.useState({
     vpnServerIp: "",
@@ -521,9 +545,42 @@ const ServerForm: React.FC = () => {
 
             <div className="form-group">
               <label>Tags</label>
+              <p className="form-hint tags-section-hint">
+                Create a new tag below or select existing tags for this server.
+              </p>
+              <div className="tags-create-row">
+                <input
+                  type="text"
+                  value={newTagName}
+                  onChange={(e) => setNewTagName(e.target.value)}
+                  placeholder="New tag name"
+                  className="tags-new-input"
+                  maxLength={64}
+                  disabled={isFetching || createTagMutation.isPending}
+                />
+                <button
+                  type="button"
+                  className="btn secondary"
+                  disabled={
+                    !newTagName.trim() || isFetching || createTagMutation.isPending
+                  }
+                  onClick={() => {
+                    const name = newTagName.trim();
+                    if (!name) return;
+                    createTagMutation.mutate({ data: { name } });
+                  }}
+                >
+                  Create tag
+                </button>
+              </div>
+              <span className="tags-select-label">Please select tags:</span>
               <div className="tags-checkbox-list">
                 {allTags.length === 0 ? (
-                  <span className="form-hint">No tags available. Create tags in settings to assign to servers.</span>
+                  <span className="form-hint">
+                    {idNum > 0
+                      ? "No tags yet. Create one above and assign to this server."
+                      : "No tags yet. Create one above; selected tags will be assigned when you save the server."}
+                  </span>
                 ) : (
                   allTags.map((tag) => (
                     <label key={tag.id ?? tag.name ?? Math.random()} className="checkbox-label tags-checkbox-item">
