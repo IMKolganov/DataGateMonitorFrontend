@@ -3,13 +3,20 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../css/ServerForm.css";
 import "../css/OvpnFileConfigForm.css";
-import { FaPlus, FaCopy, FaArrowLeft } from "react-icons/fa";
+import { FaPlus, FaCopy, FaArrowLeft, FaSync } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
 import {
   useGetApiOpenVpnConfigsGetVpnServerId,
   usePostApiOpenVpnConfigsAddUpdate,
 } from "../api/orval/open-vpn-server-ovpn-file-config/open-vpn-server-ovpn-file-config";
+
+import {
+  useGetApiOpenVpnServersConflogHistoryByServerVpnServerId,
+  usePostApiOpenVpnServersConflogFetchAndSaveByServerVpnServerId,
+  getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryKey,
+} from "../api/orval/open-vpn-server-conflog/open-vpn-server-conflog";
 
 import type {
   AddOrUpdateOvpnFileConfigRequest,
@@ -43,12 +50,16 @@ verb 3
 {{tls_auth_key}}
 </tls-crypt>`;
 
+const HISTORY_PAGE_SIZE = 10;
+
 const OvpnFileConfigForm: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const parsedVpnServerId = Number(vpnServerId) || 0;
   const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const [conflogHistoryPage, setConflogHistoryPage] = useState(1);
 
   // local UI state (kept in PascalCase to match form field names)
   const [ovpnFileConfig, setServerConfig] = useState({
@@ -85,6 +96,38 @@ const OvpnFileConfigForm: React.FC = () => {
 
   // mutation for save
   const saveMutation = usePostApiOpenVpnConfigsAddUpdate();
+
+  const conflogHistoryParams = useMemo(
+    () => ({ page: conflogHistoryPage, pageSize: HISTORY_PAGE_SIZE }),
+    [conflogHistoryPage]
+  );
+  const { data: conflogHistoryResp, isFetching: isConflogLoading } =
+    useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
+      parsedVpnServerId,
+      conflogHistoryParams,
+      { query: { enabled: parsedVpnServerId > 0 } }
+    );
+  const conflogPageData = (conflogHistoryResp as { data?: { items?: unknown[]; totalCount?: number; page?: number; pageSize?: number } })?.data;
+  const conflogItems = conflogPageData?.items ?? [];
+  const conflogTotalCount = conflogPageData?.totalCount ?? 0;
+  const conflogTotalPages = Math.max(1, Math.ceil(conflogTotalCount / HISTORY_PAGE_SIZE));
+
+  const fetchAndSaveConflogMutation = usePostApiOpenVpnServersConflogFetchAndSaveByServerVpnServerId({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryKey(
+            parsedVpnServerId,
+            conflogHistoryParams
+          ),
+        });
+        toast.success("Conflog fetched and saved");
+      },
+      onError: (err: unknown) => {
+        toast.error(getErrorMessage(err));
+      },
+    },
+  });
 
   // small helper to extract readable error messages
   const getErrorMessage = (err: unknown): string => {
@@ -328,6 +371,96 @@ const OvpnFileConfigForm: React.FC = () => {
               Each one is automatically replaced with correct values for the selected VPN server and user certificate.
             </p>
           </div>
+
+          {parsedVpnServerId > 0 && (
+            <div className="conflog-history-section">
+              <h3 className="ovpn-config-section-title">Conflog history</h3>
+              <p className="form-hint">
+                History of fetched configuration logs for this server. Use &quot;Fetch and save&quot; to load the latest conflog from the server API.
+              </p>
+              <div className="conflog-actions">
+                <button
+                  type="button"
+                  className="btn secondary"
+                  onClick={() => fetchAndSaveConflogMutation.mutate({ vpnServerId: parsedVpnServerId })}
+                  disabled={fetchAndSaveConflogMutation.isPending}
+                >
+                  {fetchAndSaveConflogMutation.isPending ? (
+                    <span className="api-check-spinner" aria-hidden />
+                  ) : (
+                    <FaSync className="icon" />
+                  )}{" "}
+                  {fetchAndSaveConflogMutation.isPending ? "Fetching…" : "Fetch and save conflog"}
+                </button>
+              </div>
+              {isConflogLoading ? (
+                <div className="loading-container">
+                  <div className="loading-spinner" />
+                  <p>Loading history...</p>
+                </div>
+              ) : (
+                <>
+                  <div className="conflog-table-wrap">
+                    <table className="conflog-table">
+                      <thead>
+                        <tr>
+                          <th>Id</th>
+                          <th>Request URL</th>
+                          <th>Created</th>
+                          <th>Payload</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(conflogItems as { id?: number; requestUrl?: string | null; createDate?: string; payloadJson?: string | null }[]).length === 0 ? (
+                          <tr>
+                            <td colSpan={4}>No conflog history yet. Use &quot;Fetch and save conflog&quot; to load data.</td>
+                          </tr>
+                        ) : (
+                          (conflogItems as { id?: number; requestUrl?: string | null; createDate?: string; payloadJson?: string | null }[]).map((row) => (
+                            <tr key={row.id ?? row.createDate ?? Math.random()}>
+                              <td>{row.id ?? "—"}</td>
+                              <td className="conflog-url">{row.requestUrl ?? "—"}</td>
+                              <td>{row.createDate ? new Date(row.createDate).toLocaleString() : "—"}</td>
+                              <td className="conflog-payload">
+                                {row.payloadJson
+                                  ? row.payloadJson.length > 120
+                                    ? `${row.payloadJson.slice(0, 120)}…`
+                                    : row.payloadJson
+                                  : "—"}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  {conflogTotalPages > 1 && (
+                    <div className="conflog-pagination">
+                      <button
+                        type="button"
+                        className="btn secondary"
+                        disabled={conflogHistoryPage <= 1}
+                        onClick={() => setConflogHistoryPage((p) => Math.max(1, p - 1))}
+                      >
+                        Previous
+                      </button>
+                      <span>
+                        Page {conflogHistoryPage} of {conflogTotalPages} ({conflogTotalCount} total)
+                      </span>
+                      <button
+                        type="button"
+                        className="btn secondary"
+                        disabled={conflogHistoryPage >= conflogTotalPages}
+                        onClick={() => setConflogHistoryPage((p) => Math.min(conflogTotalPages, p + 1))}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

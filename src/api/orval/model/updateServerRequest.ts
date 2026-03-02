@@ -24,4 +24,6 @@ export interface UpdateServerRequest {
   isEnableWss?: boolean;
   /** @nullable */
   quotaPlanIds?: number[] | null;
+  /** @nullable */
+  tagIds?: number[] | null;
 }
