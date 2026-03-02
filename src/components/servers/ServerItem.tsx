@@ -79,7 +79,6 @@ const ServerItem: React.FC<Props> = ({
                                          errorMessage,
                                          nextRunTime,
                                          wsCountConnectedClients,
-                                         wsCountSessions,
                                          onView,
                                          onEdit,
                                          onDelete,

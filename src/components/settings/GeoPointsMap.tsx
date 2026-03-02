@@ -52,7 +52,6 @@ const ONE_GB = 1024 * ONE_MB;
 const TEN_GB = 10 * ONE_GB;
 const HUNDRED_GB = 100 * ONE_GB;
 const FIVE_HUNDRED_GB = 500 * ONE_GB;
-const ONE_TB = 1024 * ONE_GB;
 
 const tileLayers = {
     "Carto Dark": {
@@ -142,10 +141,6 @@ function colorKeyForTraffic(totalBytes: number): PointColorKey {
     if (totalBytes <= HUNDRED_GB) return "violet";
     if (totalBytes <= FIVE_HUNDRED_GB) return "yellow";
     return "black";
-}
-
-function iconForTraffic(totalBytes: number): L.Icon {
-    return ICONS[colorKeyForTraffic(totalBytes)];
 }
 
 // Ensure ISO8601 string for API
