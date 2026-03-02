@@ -25,73 +25,25 @@ type GeoPointsMapProps = {
     serverLocation?: [number, number] | null;
 };
 
-// Static server icon
-const serverIcon = L.icon({
-    iconUrl:
-        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-});
+const MARKER_BASE =
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x";
 
-const ICONS: Record<string, L.Icon> = {
-    grey: L.icon({
-        iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png",
+const pointColorKeys = ["grey", "blue", "green", "orange", "red", "violet", "yellow", "black"] as const;
+type PointColorKey = (typeof pointColorKeys)[number];
+
+const createPointIcon = (color: PointColorKey): L.Icon =>
+    L.icon({
+        iconUrl: `${MARKER_BASE}-${color}.png`,
         iconSize: [25, 41],
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],
-    }),
-    blue: L.icon({
-        iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-    }),
-    green: L.icon({
-        iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-    }),
-    orange: L.icon({
-        iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-    }),
-    red: L.icon({
-        iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-    }),
-    violet: L.icon({
-        iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-    }),
-    yellow: L.icon({
-        iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-    }),
-    black: L.icon({
-        iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-black.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-    }),
-};
+    });
+
+const serverIcon = createPointIcon("blue");
+
+const ICONS: Record<string, L.Icon> = Object.fromEntries(
+    pointColorKeys.map((c) => [c, createPointIcon(c)])
+);
 
 // Thresholds (bytes) -> icon color
 const ONE_MB = 1024 * 1024;
@@ -107,14 +59,50 @@ const tileLayers = {
         url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
         attribution: '&copy; <a href="https://carto.com/">Carto</a>',
     },
+    "Carto Light": {
+        url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        attribution: '&copy; <a href="https://carto.com/">Carto</a>',
+    },
+    "Carto Voyager": {
+        url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png",
+        attribution: '&copy; <a href="https://carto.com/">Carto</a>',
+    },
     OpenStreetMap: {
         url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         attribution:
             '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     },
+    OpenTopoMap: {
+        url: "https://tile.opentopomap.org/{z}/{x}/{y}.png",
+        attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+    },
+    CyclOSM: {
+        url: "https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png",
+        attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://www.cyclosm.org">CyclOSM</a>',
+    },
+    OpenRailwayMap: {
+        url: "https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+        attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://www.openrailwaymap.org">OpenRailwayMap</a>',
+    },
+    "OPNVKarte (transport)": {
+        url: "https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png",
+        attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; memomaps.de',
+    },
     "Esri Dark Gray": {
         url:
             "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+        attribution: 'Tiles &copy; <a href="https://www.arcgis.com/">Esri</a>',
+    },
+    "Esri World Topo": {
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+        attribution: 'Tiles &copy; <a href="https://www.arcgis.com/">Esri</a>',
+    },
+    "Esri World Imagery": {
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         attribution: 'Tiles &copy; <a href="https://www.arcgis.com/">Esri</a>',
     },
     "Google Maps": {
@@ -145,16 +133,19 @@ function formatBytes(value?: number | null, decimals = 1): string {
     return `${n.toFixed(d)} ${units[i]}`;
 }
 
+function colorKeyForTraffic(totalBytes: number): PointColorKey {
+    if (!totalBytes || totalBytes <= 0) return "grey";
+    if (totalBytes <= ONE_MB) return "blue";
+    if (totalBytes <= FIFTY_MB) return "green";
+    if (totalBytes <= ONE_GB) return "orange";
+    if (totalBytes <= TEN_GB) return "red";
+    if (totalBytes <= HUNDRED_GB) return "violet";
+    if (totalBytes <= FIVE_HUNDRED_GB) return "yellow";
+    return "black";
+}
+
 function iconForTraffic(totalBytes: number): L.Icon {
-    if (!totalBytes || totalBytes <= 0) return ICONS.grey;
-    if (totalBytes <= ONE_MB) return ICONS.blue;
-    if (totalBytes <= FIFTY_MB) return ICONS.green;
-    if (totalBytes <= ONE_GB) return ICONS.orange;
-    if (totalBytes <= TEN_GB) return ICONS.red;
-    if (totalBytes <= HUNDRED_GB) return ICONS.violet;
-    if (totalBytes <= FIVE_HUNDRED_GB) return ICONS.yellow;
-    if (totalBytes <= ONE_TB) return ICONS.black;
-    return ICONS.black;
+    return ICONS[colorKeyForTraffic(totalBytes)];
 }
 
 // Ensure ISO8601 string for API
@@ -228,6 +219,12 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
     const [selectedLayer, setSelectedLayer] = useState<keyof typeof tileLayers>(
         (Cookies.get("selectedMapLayer") as keyof typeof tileLayers) || "Carto Dark"
     );
+    const [pointStyle, setPointStyle] = useState<"by_traffic" | "single">(
+        (Cookies.get("geoPointStyle") as "by_traffic" | "single") || "by_traffic"
+    );
+    const [pointColor, setPointColor] = useState<PointColorKey>(
+        (Cookies.get("geoPointColor") as PointColorKey) || "blue"
+    );
     const [points, setPoints] = useState<GeoPointAggDto[]>([]);
     const [hideZeroTraffic, setHideZeroTraffic] = useState(false);
     const abortRef = useRef<AbortController | null>(null);
@@ -235,6 +232,12 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
     useEffect(() => {
         Cookies.set("selectedMapLayer", selectedLayer, { expires: 365 });
     }, [selectedLayer]);
+    useEffect(() => {
+        Cookies.set("geoPointStyle", pointStyle, { expires: 365 });
+    }, [pointStyle]);
+    useEffect(() => {
+        Cookies.set("geoPointColor", pointColor, { expires: 365 });
+    }, [pointColor]);
 
     const depsKey = useMemo(
         () =>
@@ -321,7 +324,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                     justifyContent: "space-between",
                 }}
             >
-                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                     <strong>Map Style:</strong>
                     <select
                         className="btn secondary dropdown-select"
@@ -336,6 +339,28 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                             </option>
                         ))}
                     </select>
+                    <strong>Point style:</strong>
+                    <select
+                        className="btn secondary dropdown-select"
+                        value={pointStyle}
+                        onChange={(e) => setPointStyle(e.target.value as "by_traffic" | "single")}
+                    >
+                        <option value="by_traffic">By traffic</option>
+                        <option value="single">Single color</option>
+                    </select>
+                    {pointStyle === "single" && (
+                        <select
+                            className="btn secondary dropdown-select"
+                            value={pointColor}
+                            onChange={(e) => setPointColor(e.target.value as PointColorKey)}
+                        >
+                            {pointColorKeys.map((c) => (
+                                <option key={c} value={c}>
+                                    {c.charAt(0).toUpperCase() + c.slice(1)}
+                                </option>
+                            ))}
+                        </select>
+                    )}
                 </div>
 
                 <button
@@ -366,7 +391,8 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
 
                 {filteredPoints.map((p, i) => {
                     const total = (p.totalBytesIn ?? 0) + (p.totalBytesOut ?? 0);
-                    const icon = iconForTraffic(total);
+                    const colorKey = pointStyle === "single" ? pointColor : colorKeyForTraffic(total);
+                    const icon = ICONS[colorKey];
                     return (
                         <Marker
                             key={`${p.latitude}-${p.longitude}-${i}`}

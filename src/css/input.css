@@ -34,17 +34,43 @@ input:-webkit-autofill:active {
   border-radius: 6px !important;
 }
 
+/* Number input: reserve space for spin buttons (up/down arrows) */
+input[type="number"] {
+  padding-right: 28px;
+  box-sizing: border-box;
+}
+
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
   opacity: 1;
-  background: var(--bg-body);
+  background-color: var(--bg-body) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M5 2l4 4H1L5 2z' fill='currentColor'/%3E%3Cpath d='M5 12l4-4H1l4 4z' fill='currentColor'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 14px;
   border-left: 1px solid var(--border-color);
   border-radius: 0 6px 6px 0;
   color: var(--text-secondary);
   padding: 0 4px;
+  margin: 0;
+  min-width: 20px;
 }
+
 input[type="number"]::-webkit-inner-spin-button:hover,
 input[type="number"]::-webkit-outer-spin-button:hover {
-  background: var(--border-color);
+  background-color: var(--border-color) !important;
   color: var(--text-muted);
+}
+
+/* Dark theme: explicit light fill for arrows (currentColor not applied in SVG data URL) */
+[data-theme="dark"] input[type="number"]::-webkit-inner-spin-button,
+[data-theme="dark"] input[type="number"]::-webkit-outer-spin-button {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M5 2l4 4H1L5 2z' fill='%23c9d1d9'/%3E%3Cpath d='M5 12l4-4H1l4 4z' fill='%23c9d1d9'/%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] input[type="number"]::-webkit-inner-spin-button:hover,
+[data-theme="dark"] input[type="number"]::-webkit-outer-spin-button:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M5 2l4 4H1L5 2z' fill='%238b949e'/%3E%3Cpath d='M5 12l4-4H1l4 4z' fill='%238b949e'/%3E%3C/svg%3E");
 }

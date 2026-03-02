@@ -1,14 +1,30 @@
 // src/components/ServerDetailsInfo.tsx
 import React from "react";
-import { BsClock, BsHddNetwork, BsFillBookmarkStarFill, BsPerson } from "react-icons/bs";
+import { BsClock, BsHddNetwork, BsFillBookmarkStarFill, BsPerson, BsTag } from "react-icons/bs";
 import { RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer, IoMdPerson } from "react-icons/io";
+
+export type ConflogPayloadSummary = {
+  application?: string | null;
+  version?: string | null;
+  config?: {
+    vpnSubnet?: string | null;
+    vpnNetmask?: string | null;
+    port?: string | null;
+    proto?: string | null;
+  };
+};
 
 interface Props {
   serverInfo: any; // normalized object from GeneralServerDetails
   toHumanReadableSize: (bytes: number) => string;
   /** show per-field shimmer placeholders */
   loading?: boolean;
+  /** IP and port from OVPN file config */
+  configIp?: string | null;
+  configPort?: number | null;
+  /** From latest conflog (for General tab) */
+  latestConflogPayload?: ConflogPayloadSummary | null;
 }
 
 /** Simple shimmer skeleton */
@@ -20,7 +36,7 @@ const Skeleton: React.FC<{ width?: number | string; height?: number | string; cl
   <span className={`skeleton ${className}`} style={{ width, height }} aria-label="loading" />
 );
 
-const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, loading = false }) => {
+const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, loading = false, configIp, configPort, latestConflogPayload }) => {
   // When loading, we still render the layout with skeletons
   const safe = serverInfo ?? {};
 
@@ -86,6 +102,25 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, l
           <span>{loading ? <Skeleton width={160} /> : (status?.serverRemoteIp || "N/A")}</span>
         </div>
 
+        {(configIp != null || configPort != null) && (
+          <>
+            {configIp != null && configIp !== "" && (
+              <div className="detail-row">
+                <BsHddNetwork className="detail-icon" />
+                <span className="detail-label">Config IP:</span>
+                <span>{loading ? <Skeleton width={140} /> : configIp}</span>
+              </div>
+            )}
+            {configPort != null && (
+              <div className="detail-row">
+                <BsHddNetwork className="detail-icon" />
+                <span className="detail-label">Config Port:</span>
+                <span>{loading ? <Skeleton width={80} /> : String(configPort)}</span>
+              </div>
+            )}
+          </>
+        )}
+
         <div className="detail-row">
           <IoIosSpeedometer className="detail-icon" />
           <span className="detail-label">Traffic IN:</span>
@@ -150,6 +185,61 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, l
             <span className="detail-label">Default server</span>
           </div>
         )}
+
+        {latestConflogPayload && (
+          <>
+            <div className="detail-row">
+              <RiHardDrive2Line className="detail-icon" />
+              <span className="detail-label">Conflog Application:</span>
+              <span>{latestConflogPayload.application ?? "—"}</span>
+            </div>
+            <div className="detail-row">
+              <RiHardDrive2Line className="detail-icon" />
+              <span className="detail-label">Conflog Version:</span>
+              <span>{latestConflogPayload.version ?? "—"}</span>
+            </div>
+            <div className="detail-row">
+              <BsHddNetwork className="detail-icon" />
+              <span className="detail-label">Conflog Subnet:</span>
+              <span>{latestConflogPayload.config?.vpnSubnet ?? "—"}</span>
+            </div>
+            <div className="detail-row">
+              <BsHddNetwork className="detail-icon" />
+              <span className="detail-label">Conflog Mask:</span>
+              <span>{latestConflogPayload.config?.vpnNetmask ?? "—"}</span>
+            </div>
+            <div className="detail-row">
+              <BsHddNetwork className="detail-icon" />
+              <span className="detail-label">Conflog Port:</span>
+              <span>{latestConflogPayload.config?.port ?? "—"}</span>
+            </div>
+            <div className="detail-row">
+              <BsHddNetwork className="detail-icon" />
+              <span className="detail-label">Conflog Proto:</span>
+              <span>{latestConflogPayload.config?.proto ?? "—"}</span>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="server-tags-block">
+        <div className="detail-row-tags-heading">
+          <BsTag className="detail-icon" />
+          <span className="detail-label">Tags:</span>
+        </div>
+        <span className="server-tags-list">
+          {loading ? (
+            <Skeleton width={120} />
+          ) : Array.isArray(server?.tags) && server.tags.length > 0 ? (
+            server.tags.map((tag) => (
+              <span key={tag} className="server-tag-pill">
+                {tag}
+              </span>
+            ))
+          ) : (
+            "—"
+          )}
+        </span>
       </div>
     </div>
   );

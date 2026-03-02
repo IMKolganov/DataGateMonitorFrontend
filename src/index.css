@@ -4,6 +4,7 @@
   --bg-content: #161b22;
   --bg-content-alt: #21262d;
   --bg-header: #161b22;
+  --bg-header-bar: #161b22;
   --bg-card: #161b22;
   --text-primary: #f0f6fc;
   --text-secondary: #c9d1d9;
@@ -16,9 +17,11 @@
   --color-focus: #c9d1d9;
   --color-spinner: #8b949e;
   --color-spinner-track: #30363d;
+  --border-color-selected: #6e7681;
   --btn-secondary-bg: #21262d;
   --btn-secondary-hover: #30363d;
   --btn-secondary-text: #c9d1d9;
+  --link-color: #58a6ff;
   --skeleton-shine: rgba(255, 255, 255, 0.08);
 }
 
@@ -27,6 +30,7 @@
   --bg-content: #ffffff;
   --bg-content-alt: #eaeef2;
   --bg-header: #ffffff;
+  --bg-header-bar: #f6f8fa;
   --bg-card: #ffffff;
   --text-primary: #1f2328;
   --text-secondary: #424a53;
@@ -39,9 +43,11 @@
   --color-focus: #0969da;
   --color-spinner: #656d76;
   --color-spinner-track: #d0d7de;
+  --border-color-selected: #424a53;
   --btn-secondary-bg: #eaeef2;
   --btn-secondary-hover: #d0d7de;
   --btn-secondary-text: #1f2328;
+  --link-color: #0969da;
   --skeleton-shine: rgba(0, 0, 0, 0.06);
 }
 
