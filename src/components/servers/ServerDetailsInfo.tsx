@@ -231,7 +231,7 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, l
           {loading ? (
             <Skeleton width={120} />
           ) : Array.isArray(server?.tags) && server.tags.length > 0 ? (
-            server.tags.map((tag) => (
+            server.tags.map((tag: string) => (
               <span key={tag} className="server-tag-pill">
                 {tag}
               </span>
