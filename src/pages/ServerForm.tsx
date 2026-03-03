@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../css/ServerForm.css";
 import "../css/OvpnFileConfigForm.css";
-import { FaArrowLeft, FaPlus, FaCopy, FaCheckCircle } from "react-icons/fa";
+import { FaArrowLeft, FaPlus, FaCopy, FaCheckCircle, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 
 import {
@@ -22,6 +22,7 @@ import {
 import {
   useGetApiTagsGetAll,
   usePostApiTagsCreate,
+  useDeleteApiTagsDeleteId,
   getGetApiTagsGetAllQueryKey,
 } from "../api/orval/tags/tags";
 import { useQueryClient } from "@tanstack/react-query";
@@ -123,6 +124,20 @@ const ServerForm: React.FC = () => {
       },
       onError: (err: unknown) => {
         const msg = err instanceof Error ? err.message : "Failed to create tag";
+        toast.error(msg);
+      },
+    },
+  });
+
+  const deleteTagMutation = useDeleteApiTagsDeleteId({
+    mutation: {
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries({ queryKey: getGetApiTagsGetAllQueryKey() });
+        setSelectedTagIds((prev) => prev.filter((id) => id !== variables.id));
+        toast.success("Tag deleted");
+      },
+      onError: (err: unknown) => {
+        const msg = err instanceof Error ? err.message : "Failed to delete tag";
         toast.error(msg);
       },
     },
@@ -583,21 +598,36 @@ const ServerForm: React.FC = () => {
                   </span>
                 ) : (
                   allTags.map((tag) => (
-                    <label key={tag.id ?? tag.name ?? Math.random()} className="checkbox-label tags-checkbox-item">
-                      <input
-                        type="checkbox"
-                        checked={selectedTagIds.includes(tag.id!)}
-                        onChange={() => {
-                          setSelectedTagIds((prev) =>
-                            prev.includes(tag.id!)
-                              ? prev.filter((id) => id !== tag.id)
-                              : [...prev, tag.id!]
-                          );
+                    <div key={tag.id ?? tag.name ?? Math.random()} className="tags-checkbox-item tags-checkbox-row">
+                      <label className="checkbox-label tags-checkbox-item-inner">
+                        <input
+                          type="checkbox"
+                          checked={selectedTagIds.includes(tag.id!)}
+                          onChange={() => {
+                            setSelectedTagIds((prev) =>
+                              prev.includes(tag.id!)
+                                ? prev.filter((id) => id !== tag.id)
+                                : [...prev, tag.id!]
+                            );
+                          }}
+                          disabled={isFetching}
+                        />
+                        <span className="checkbox-content">{tag.name ?? ""}</span>
+                      </label>
+                      <button
+                        type="button"
+                        className="btn secondary btn-icon-small"
+                        title="Delete tag"
+                        disabled={isFetching || deleteTagMutation.isPending}
+                        onClick={() => {
+                          if (tag.id == null) return;
+                          if (!window.confirm(`Delete tag "${tag.name ?? ""}"? It will be removed from all servers.`)) return;
+                          deleteTagMutation.mutate({ id: tag.id });
                         }}
-                        disabled={isFetching}
-                      />
-                      <span className="checkbox-content">{tag.name ?? ""}</span>
-                    </label>
+                      >
+                        <FaTrash className="icon" />
+                      </button>
+                    </div>
                   ))
                 )}
               </div>

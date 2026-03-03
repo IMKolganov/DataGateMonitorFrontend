@@ -220,6 +220,54 @@
     font-size: 14px;
   }
 
+  .tags-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    min-height: 28px;
+  }
+
+  .tags-checkbox-row .tags-checkbox-item-inner {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .tags-checkbox-row .tags-checkbox-item-inner .checkbox-content {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.35;
+    margin-top: 8px;
+  }
+
+  .tags-checkbox-row .tags-checkbox-item-inner input[type="checkbox"] {
+    margin-top: 8px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    vertical-align: middle;
+    transform: scale(1.2);
+  }
+
+  .tags-checkbox-row .btn-icon-small {
+    flex-shrink: 0;
+    padding: 3px 6px;
+    min-width: 24px;
+    min-height: 24px;
+    align-self: center;
+  }
+
+  .tags-checkbox-row .btn-icon-small .icon {
+    width: 12px;
+    height: 12px;
+  }
+
   .form-hint {
     font-size: 13px;
     color: var(--text-muted);

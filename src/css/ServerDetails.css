@@ -79,6 +79,21 @@
   }
 }
 
+/* DCO stats accuracy notice */
+.dco-stats-alert {
+  background-color: rgba(210, 168, 255, 0.12);
+  border: 1px solid rgba(210, 168, 255, 0.4);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.dco-stats-alert strong {
+  color: #d2a8ff;
+}
+
 /* optional: slightly dim the block while loading */
 .server-info.is-loading {
   opacity: 0.97;
