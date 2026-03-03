@@ -1,6 +1,6 @@
 // src/components/ServerDetailsInfo.tsx
 import React from "react";
-import { BsClock, BsHddNetwork, BsFillBookmarkStarFill, BsPerson, BsTag } from "react-icons/bs";
+import { BsClock, BsCpu, BsHddNetwork, BsFillBookmarkStarFill, BsPerson, BsTag } from "react-icons/bs";
 import { RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer, IoMdPerson } from "react-icons/io";
 
@@ -60,8 +60,15 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, l
   const countConnectedClients = safe.countConnectedClients ?? 0;
   const countSessions = safe.countSessions ?? 0;
 
+  const dcoIsEnabled = server?.dcoIsEnabled === true;
+
   return (
     <div className={`server-info ${loading ? "is-loading" : ""}`}>
+      {!loading && dcoIsEnabled && (
+        <div className="dco-stats-alert" role="alert">
+          <strong>DCO enabled:</strong> Traffic and session statistics on this page may be less accurate. With Data Channel Offload enabled, part of the VPN processing runs in the kernel and may not be fully reported to the monitoring layer, so displayed totals can differ from actual usage.
+        </div>
+      )}
       <div className="server-header">
         <div className="server-meta">
           <strong className="server-name">
@@ -88,6 +95,22 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, l
           <RiHardDrive2Line className="detail-icon" />
           <span className="detail-label">Version:</span>
           <span>{loading ? <Skeleton width={90} /> : (status?.version || "Unknown")}</span>
+        </div>
+
+        <div className="detail-row">
+          <BsCpu className="detail-icon" />
+          <span className="detail-label">DCO (Data Channel Offload):</span>
+          <span>
+            {loading ? (
+              <Skeleton width={40} />
+            ) : server?.dcoIsEnabled === true ? (
+              "Yes"
+            ) : server?.dcoIsEnabled === false ? (
+              "No"
+            ) : (
+              "—"
+            )}
+          </span>
         </div>
 
         <div className="detail-row">
