@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('app-theme');
+          if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+          else document.documentElement.setAttribute('data-theme', 'dark');
+        } catch (e) {}
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DataGate Monitor</title>
+    <script type="module" crossorigin src="/assets/index-BEarefK6.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/react-C4v5I1ns.js">
+    <link rel="modulepreload" crossorigin href="/assets/misc-d7ZeQWBu.js">
+    <link rel="modulepreload" crossorigin href="/assets/mui-kzKKu_W0.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-dtZSTZtp.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="/env.js"></script>
+    <script
+            src="https://accounts.google.com/gsi/client"
+            async
+            defer
+    ></script>
+  </body>
+</html>

@@ -2,11 +2,11 @@
     max-width: 600px;
     margin: 40px auto;
     padding: 20px;
-    background-color: #161b22;
-    border: 1px solid #30363d;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    color: #c9d1d9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
   }
   
   .server-form-header {
@@ -14,12 +14,93 @@
     font-weight: bold;
     margin-bottom: 20px;
     text-align: center;
-    color: #ffffff;
+    color: var(--text-primary);
+  }
+
+  .ovpn-config-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 24px 0 12px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+  }
+
+  .api-url-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .api-url-row input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .api-check-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .api-check-spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid var(--color-spinner-track);
+    border-top-color: var(--color-spinner);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .api-check-result {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .api-check-success {
+    background-color: var(--bg-body);
+    border: 1px solid #238636;
+    color: var(--text-primary);
+  }
+
+  .api-check-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .api-check-summary span {
+    white-space: nowrap;
+  }
+
+  .api-check-json {
+    margin: 0;
+    padding: 12px;
+    background-color: var(--bg-body);
+    border-radius: 6px;
+    overflow: auto;
+    max-height: 320px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-muted);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .api-check-error {
+    background-color: rgba(248, 81, 73, 0.1);
+    border: 1px solid #f85149;
+    color: #f85149;
   }
   
   .server-form-description {
     font-size: 14px;
-    color: #8b949e;
+    color: var(--text-muted);
     margin-bottom: 20px;
     text-align: center;
   }
@@ -30,28 +111,168 @@
   }
   
   .server-form label {
-    display: block;
     margin-bottom: 8px;
     font-weight: bold;
+    margin-left: 5px;
   }
   
-  .server-form input,
-  .server-form select {
+  .server-form input:not([type="checkbox"]),
+  .server-form select,
+  .server-form textarea {
     width: 100%;
-    padding: 10px;
+    padding: 8px 10px;
     font-size: 14px;
-    border: 1px solid #30363d;
-    border-radius: 8px;
-    background-color: #0d1117;
-    color: #c9d1d9;
-    transition: border-color 0.2s ease;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--input-bg);
+    color: var(--input-text);
+  }
+
+  .server-form input:focus,
+  .server-form select:focus,
+  .server-form textarea:focus {
+    outline: none;
+    border-color: var(--input-focus-border);
+    box-shadow: 0 0 0 1px var(--input-focus-ring);
+    background-color: var(--input-bg);
+  }
+
+  .server-form .config-template-container textarea.ovpn-textarea-overlay:focus {
+    background-color: transparent;
+    color: transparent;
+    caret-color: var(--text-secondary);
+    border: none;
+    box-shadow: none;
+  }
+
+  .checkbox-container {
+    margin-top: 20px;
   }
   
-  .server-form input:focus,
-  .server-form select:focus {
-    border-color: #58a6ff;
-    outline: none;
+  .checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
   }
+  
+  .checkbox-input {
+    margin-top: 4px;
+    transform: scale(1.2);
+    cursor: pointer;
+  }
+  
+  .checkbox-content {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .checkbox-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+  
+  .checkbox-description {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  .tags-section-hint {
+    margin-bottom: 10px;
+  }
+
+  .tags-select-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .tags-create-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .tags-create-row .tags-new-input {
+    flex: 1;
+    min-width: 0;
+    max-width: 240px;
+  }
+
+  .tags-checkbox-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+  }
+
+  .tags-checkbox-item.checkbox-label {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .tags-checkbox-item .checkbox-content {
+    flex-direction: row;
+    font-size: 14px;
+  }
+
+  .tags-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    min-height: 28px;
+  }
+
+  .tags-checkbox-row .tags-checkbox-item-inner {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .tags-checkbox-row .tags-checkbox-item-inner .checkbox-content {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.35;
+    margin-top: 8px;
+  }
+
+  .tags-checkbox-row .tags-checkbox-item-inner input[type="checkbox"] {
+    margin-top: 8px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    vertical-align: middle;
+    transform: scale(1.2);
+  }
+
+  .tags-checkbox-row .btn-icon-small {
+    flex-shrink: 0;
+    padding: 3px 6px;
+    min-width: 24px;
+    min-height: 24px;
+    align-self: center;
+  }
+
+  .tags-checkbox-row .btn-icon-small .icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .form-hint {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
   
   .input-error {
     border-color: #e74c3c;
@@ -70,57 +291,12 @@
     align-items: center;
   }
   
-  .back-button,
-  .submit-button {
-    padding: 10px 16px;
-    font-size: 14px;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-  
-  .back-button {
-    background-color: #0366d6;
-    color: #ffffff;
-  }
-  
-  .back-button:hover {
-    background-color: #024ea0;
-  }
-  
-  .submit-button {
-    background-color: #2ea043;
-    color: #ffffff;
-  }
-  
-  .submit-button:hover {
-    background-color: #249136;
-  }
-  
-
   .loading-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     font-size: 18px;
-    color: #c9d1d9;
+    color: var(--text-secondary);
   }
-  
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #58a6ff;
-    border-top: 4px solid transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 10px;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
+

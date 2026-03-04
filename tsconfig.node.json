@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "composite": true,
+
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+
+    "outDir": "./node_modules/.tmp/tsc-node",
+
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationDir": "./node_modules/.tmp/types-node",
+
+    "types": ["node"],
+    "skipLibCheck": true,
+    "strict": true
+  },
+  "include": ["vite.config.ts"]
+}

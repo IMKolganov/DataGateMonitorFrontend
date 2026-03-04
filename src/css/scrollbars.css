@@ -1,0 +1,22 @@
+.server-list-panel::-webkit-scrollbar,
+.server-details-panel::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.server-list-panel::-webkit-scrollbar-track,
+.server-details-panel::-webkit-scrollbar-track {
+  background: var(--bg-body);
+}
+
+.server-list-panel::-webkit-scrollbar-thumb,
+.server-details-panel::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 10px;
+  border: 2px solid var(--bg-body);
+}
+
+.server-list-panel::-webkit-scrollbar-thumb:hover,
+.server-details-panel::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-muted);
+}

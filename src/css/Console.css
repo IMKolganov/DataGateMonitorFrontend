@@ -1,77 +1,292 @@
+/* Web Console - terminal-style layout */
+.web-console-page {
+  padding-bottom: 1rem;
+}
+
+.console-page-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
 .console-container {
-    width: 100%;
-    height: 70vh;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    margin: 0;
+  width: 100%;
+  height: 70vh;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .console-output {
-    flex-grow: 1;
-    background-color: #0d0d0d;
-    color: #dbdfe7;
-    font-family: monospace;
-    padding: 10px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #555 #222;
+  flex-grow: 1;
+  background: linear-gradient(180deg, var(--bg-body) 0%, var(--bg-body) 100%);
+  color: var(--text-secondary);
+  font-family: "JetBrains Mono", "Fira Code", "Consolas", "Monaco", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 12px 16px;
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--bg-body);
 }
 
-
 .console-output::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 .console-output::-webkit-scrollbar-track {
-    background: #222;
-    border-radius: 5px;
+  background: var(--bg-content-alt);
+  border-radius: 4px;
 }
 
 .console-output::-webkit-scrollbar-thumb {
-    background: #555;
-    border-radius: 5px;
+  background: var(--text-muted);
+  border-radius: 4px;
 }
 
 .console-output::-webkit-scrollbar-thumb:hover {
-    background: #777;
+  background: var(--text-muted);
+}
+
+.console-output::-webkit-scrollbar-corner {
+  background: var(--bg-content-alt);
 }
 
 .console-message {
-    white-space: pre-wrap;
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 1px 0;
 }
 
-.console-input {
-    flex-wrap: wrap;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    margin: 10px 0px 10px 0px;
+.console-message:empty {
+  min-height: 1em;
 }
 
-.console-input .input {
-    margin-top: 10px;
-    flex-grow: 1;
-    padding: 10px;
-    font-size: 16px;
-    outline: none;
-    max-width: 100%;
+.console-message.console-command {
+  color: #7ee787;
 }
 
-.console-input button {
-    margin-top: 10px;
-    margin-left: 10px;
-    padding: 10px 15px;
+.console-message.console-msg-success {
+  color: #3fb950;
 }
 
-.console-input button svg {
-    font-size: 18px;
+.console-message.console-msg-warning {
+  color: #d29922;
+}
+
+.console-message.console-msg-error {
+  color: #f85149;
+}
+
+/* OpenVPN Management syntax highlighting */
+.ovp-prompt {
+  color: #7ee787;
+  font-weight: 600;
+}
+.ovp-command {
+  color: #79c0ff;
+}
+.ovp-realtime {
+  color: #d2a8ff;
+}
+.ovp-realtime-data {
+  color: #a5d6ff;
+}
+.ovp-success {
+  color: #3fb950;
+}
+.ovp-error {
+  color: #f85149;
+}
+.ovp-keyword {
+  color: #ff7b72;
+}
+.ovp-value {
+  color: var(--text-secondary);
+}
+.ovp-ip {
+  color: #79c0ff;
+}
+.ovp-timestamp {
+  color: #a5d6ff;
+}
+.ovp-datetime {
+  color: #a5d6ff;
+}
+
+.ovp-bracket {
+  color: #a5d6ff;
+}
+
+.ovp-identifier {
+  color: #ffa657;
+}
+
+/* Input row - terminal prompt style (scoped to console only) */
+.console-container .console-input-wrapper {
+  position: relative;
+  background: var(--bg-content);
+  border-top: 1px solid var(--border-color);
+}
+
+.console-container .console-input {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 12px 10px 12px;
+  padding-right: 25px; /* spacing from output scrollbar and panel edge */
+  gap: 6px;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.console-container .console-input-field {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  color: var(--text-secondary);
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.console-container .console-input-field::placeholder {
+  color: var(--text-muted);
+}
+
+.console-container .console-input-field:focus {
+  border-color: #58a6ff;
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+}
+
+.console-container .console-cmd-btn {
+  flex-shrink: 0;
+  padding: 6px 8px;
+}
+
+.console-container .console-cmd-btn.active,
+.console-container .console-cmd-btn:hover {
+  background: var(--border-color);
+}
+
+.console-container .console-send-btn {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  margin: 0;
+}
+
+.console-container .console-send-btn .icon {
+  font-size: 12px;
+}
+
+.console-cmd-list {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg-content);
+  border: 1px solid var(--border-color);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  z-index: 10;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--bg-body);
+}
+
+.console-cmd-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.console-cmd-list::-webkit-scrollbar-track {
+  background: var(--bg-content-alt);
+  border-radius: 4px;
+}
+
+.console-cmd-list::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 4px;
+}
+
+.console-cmd-list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.console-cmd-list-empty {
+  padding: 12px 16px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.console-cmd-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.console-cmd-item:hover,
+.console-cmd-item.selected {
+  background: var(--bg-content-alt);
+  color: var(--text-primary);
+}
+
+.console-cmd-name {
+  font-weight: 500;
+  color: #79c0ff;
+}
+
+.console-cmd-item.selected .console-cmd-name {
+  color: #58a6ff;
+}
+
+.console-cmd-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 50%;
+}
+
+.console-container .console-prompt {
+  color: #7ee787;
+  font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  font-size: 13px;
+  font-weight: 600;
+  margin-right: 6px;
+  flex-shrink: 0;
+  user-select: none;
 }
 
 a {
-    color: rgb(88, 166, 255);
-    color: -webkit-link;
-    cursor: pointer;
-    text-decoration: underline;
-  }
+  color: #58a6ff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+a:hover {
+  text-decoration: none;
+}

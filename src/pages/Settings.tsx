@@ -1,10 +1,25 @@
-import React from "react";
-import { useNavigate, NavLink, Outlet } from "react-router-dom";
+import { useNavigate, NavLink, Outlet, useLocation } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import "../css/Settings.css";
 
 export function Settings() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const tabs = [
+    { label: "General", path: "general" },
+    { label: "API Clients", path: "applications" },
+    { label: "Quotas", path: "quotas" },
+    { label: "GeoLite DB", path: "geolitedb" },
+    { label: "Telegram Bot", path: "telegrambot" },
+    { label: "Users", path: "users" },
+  ];
+
+  const currentTab = location.pathname.split("/settings/")[1] || "general";
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    navigate(`/settings/${e.target.value}`);
+  };
 
   return (
     <div className="content-wrapper wide-table settings">
@@ -16,31 +31,37 @@ export function Settings() {
         <div className="header-bar">
           <div className="left-buttons">
             <button className="btn secondary" onClick={() => navigate("/")}>
-              <FaArrowLeft className="icon" /> Back
+              {FaArrowLeft({ className: "icon" })} Back
             </button>
           </div>
         </div>
       </div>
 
-        <div className="tabs">
-        <NavLink
-            to="/settings/general"
-            className={({ isActive }) => isActive ? "tab active-tab" : "tab"}>
-            General
-        </NavLink>
-        <NavLink
-            to="/settings/applications"
-            className={({ isActive }) => isActive ? "tab active-tab" : "tab"}>
-            API Clients
-        </NavLink>
-        <NavLink
-            to="/settings/geolitedb"
+      {/* Desktop tabs */}
+      <div className="tabs desktop-tabs">
+        {tabs.map((tab) => (
+          <NavLink
+            key={tab.path}
+            to={`/settings/${tab.path}`}
             className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-            >
-            GeoLite DB
-        </NavLink>
-        </div>
+          >
+            {tab.label}
+          </NavLink>
+        ))}
+      </div>
 
+      {/* Mobile dropdown */}
+      <select
+        className="tabs-dropdown mobile-tabs"
+        value={currentTab}
+        onChange={handleSelectChange}
+      >
+        {tabs.map((tab) => (
+          <option key={tab.path} value={tab.path}>
+            {tab.label}
+          </option>
+        ))}
+      </select>
 
       <div className="tab-content">
         <Outlet />
