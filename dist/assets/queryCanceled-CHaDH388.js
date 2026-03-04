@@ -1,0 +1,1 @@
+function n(e){return e instanceof Error?e.name==="CanceledError"||e.message==="canceled":e&&typeof e=="object"&&"name"in e?e.name==="CanceledError":e&&typeof e=="object"&&"message"in e?String(e.message)==="canceled":!1}export{n as i};

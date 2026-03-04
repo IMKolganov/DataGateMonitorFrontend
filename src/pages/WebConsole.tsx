@@ -1,106 +1,268 @@
-import React, { useEffect, useState, useRef } from "react";
+// src/pages/WebConsole.tsx
+import { useEffect, useState, useRef, useCallback } from "react";
 import "../css/Console.css";
-import { FaArrowRight, FaArrowLeft, FaTrash, FaInfoCircle } from "react-icons/fa";
-import { useParams, useNavigate } from "react-router-dom";
-import { getWebSocketUrl } from "../utils/api";
-import { saveHistoryToDB, loadHistoryFromDB, clearHistoryDB } from "../utils/consoleStorage";
+import { FaArrowRight, FaTrash, FaInfoCircle, FaList } from "react-icons/fa";
+import { useParams } from "react-router-dom";
+import {
+  HubConnectionBuilder,
+  HubConnection,
+  HttpTransportType,
+  LogLevel,
+  HubConnectionState,
+} from "@microsoft/signalr";
+import {
+  saveHistoryToDB,
+  loadHistoryFromDB,
+  clearHistoryDB,
+  saveCommandHistory,
+  loadCommandHistory,
+} from "../utils/consoleStorage";
+import { getSignalRUrl, getAccessTokenOrLogout } from "../utils/signalr-url";
+import { highlightOvpMgmtLine } from "../utils/ovpMgmtHighlight";
+import { OVP_MGMT_COMMANDS } from "../utils/ovpMgmtCommands";
 
 export function WebConsole() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const [messages, setMessages] = useState<string[]>([]);
   const [command, setCommand] = useState("");
-  const ws = useRef<WebSocket | null>(null);
+  const [showCmdList, setShowCmdList] = useState(false);
+  const [selectedCmdIdx, setSelectedCmdIdx] = useState(0);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const historyIndexRef = useRef<number>(-1);
+  const cmdListRef = useRef<HTMLDivElement>(null);
+  const inputWrapperRef = useRef<HTMLDivElement>(null);
+  const connectionRef = useRef<HubConnection | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  const isConnected = useRef(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!vpnServerId) return;
-    
     (async () => {
-      const history = await loadHistoryFromDB(vpnServerId);
+      const [history, cmds] = await Promise.all([
+        loadHistoryFromDB(vpnServerId),
+        loadCommandHistory(vpnServerId),
+      ]);
       setMessages(history);
+      setCommandHistory(cmds);
     })();
   }, [vpnServerId]);
 
   useEffect(() => {
     if (!vpnServerId) return;
 
-    const connectWebSocket = async () => {
+    // Avoid rebuilding an active connection
+    if (connectionRef.current && connectionRef.current.state !== HubConnectionState.Disconnected) {
+      return;
+    }
+
+    const setupSignalR = async () => {
       try {
-        const WS_URL = await getWebSocketUrl(vpnServerId);
-        ws.current = new WebSocket(WS_URL);
+        const url = getSignalRUrl(vpnServerId);
+        const connection = new HubConnectionBuilder()
+          .withUrl(url, {
+            transport: HttpTransportType.WebSockets,
+            accessTokenFactory: () => getAccessTokenOrLogout(),
+          })
+          .configureLogging(LogLevel.Information)
+          .withAutomaticReconnect()
+          .build();
 
-        ws.current.onopen = () => {
-          if (!isConnected.current) {
-            setMessages((prev) => [...prev, "✅ Connected to OpenVPN Telnet"]);
-            isConnected.current = true;
-          }
-        };
+        connectionRef.current = connection;
 
-        ws.current.onmessage = (event) => {
+        // Ensure no duplicate handlers
+        connection.off("ReceiveCommandResult");
+        connection.off("ReceiveMessage");
+
+        connection.on("ReceiveCommandResult", (data: string) => {
           setMessages((prev) => {
-            const updatedMessages = [...prev, event.data];
-
-            saveHistoryToDB(vpnServerId, updatedMessages);
-            return updatedMessages;
+            const updated = [...prev, data];
+            saveHistoryToDB(vpnServerId, updated);
+            return updated;
           });
-        };
+        });
 
-        ws.current.onclose = () => {
-          if (isConnected.current) {
-            setMessages((prev) => [...prev, "❌ Connection closed. Reconnecting..."]);
-            isConnected.current = false;
-            setTimeout(connectWebSocket, 5000);
-          }
-        };
-      } catch (error) {
-        console.error("WebSocket connection failed:", error);
+        connection.on("ReceiveMessage", (msg: string) => {
+          setMessages((prev) => {
+            const updated = [...prev, msg];
+            saveHistoryToDB(vpnServerId, updated);
+            return updated;
+          });
+        });
+
+        // Reconnect lifecycle (no unused params to satisfy TS)
+        connection.onreconnected(async () => {
+          setMessages((prev) => [...prev, "✅ Console ready. Connection to OpenVPN server re-established."]);
+          const history = await loadHistoryFromDB(vpnServerId);
+          setMessages(history);
+        });
+
+        connection.onreconnecting(() => {
+          setMessages((prev) => [...prev, "⚠️ Reconnecting to OpenVPN server..."]);
+        });
+
+        connection.onclose(() => {
+          setMessages((prev) => [...prev, "❌ Connection to OpenVPN server closed."]);
+        });
+
+        await connection.start();
+        setMessages((prev) => [...prev, "✅ Console ready. Connection to OpenVPN server established."]);
+      } catch (err: any) {
+        setMessages((prev) => [...prev, `❌ Failed to connect to OpenVPN server: ${err.message}`]);
       }
     };
 
-    ws.current?.close();
-    connectWebSocket();
+    setupSignalR();
 
     return () => {
-      ws.current?.close();
-      ws.current = null;
+      connectionRef.current?.stop();
+      connectionRef.current = null;
     };
   }, [vpnServerId]);
 
   useEffect(() => {
+    if (messages.length === 0) return;
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendCommand = () => {
-    if (ws.current && command.trim() !== "") {
-      ws.current.send(command);
-      setMessages((prev) => {
-        const updatedMessages = [...prev, `> ${command}`];
-
-        saveHistoryToDB(vpnServerId!, updatedMessages);
-        return updatedMessages;
+  const addToCommandHistory = useCallback(
+    (cmd: string) => {
+      if (!vpnServerId || !cmd.trim()) return;
+      setCommandHistory((prev) => {
+        const trimmed = cmd.trim();
+        const filtered = prev.filter((c) => c !== trimmed);
+        const next = [trimmed, ...filtered];
+        saveCommandHistory(vpnServerId, next);
+        return next;
       });
-      setCommand("");
+      historyIndexRef.current = -1;
+    },
+    [vpnServerId],
+  );
+
+  const sendCommand = async () => {
+    if (command.trim() === "") return;
+    const cmdToSend = command;
+
+    setMessages((prev) => {
+      const updated = [...prev, `> ${cmdToSend}`];
+      saveHistoryToDB(vpnServerId!, updated);
+      return updated;
+    });
+
+    addToCommandHistory(cmdToSend);
+    setCommand("");
+    historyIndexRef.current = -1;
+
+    const connection = connectionRef.current;
+    if (!connection || connection.state !== HubConnectionState.Connected) {
+      setMessages((prev) => [...prev, "❌ Cannot send command: no connection to OpenVPN server."]);
+      return;
+    }
+
+    try {
+      await connection.send("SendCommand", cmdToSend);
+    } catch (error: any) {
+      setMessages((prev) => [...prev, `❌ Failed to send command to OpenVPN: ${error.message}`]);
     }
   };
+
+  const filteredCommands = OVP_MGMT_COMMANDS.filter((c) =>
+    command.trim()
+      ? c.name.toLowerCase().includes(command.trim().toLowerCase())
+      : true,
+  );
+
+  const applyCommand = (cmd: string) => {
+    setCommand(cmd);
+    setShowCmdList(false);
+    inputRef.current?.focus();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (showCmdList) {
+      if (e.key === "Escape") {
+        setShowCmdList(false);
+        e.preventDefault();
+        return;
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedCmdIdx((i) => Math.min(i + 1, filteredCommands.length - 1));
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedCmdIdx((i) => Math.max(i - 1, 0));
+        return;
+      }
+      if (e.key === "Enter" && filteredCommands[selectedCmdIdx]) {
+        e.preventDefault();
+        applyCommand(filteredCommands[selectedCmdIdx].name);
+        return;
+      }
+    }
+    if (e.key === "Enter") {
+      sendCommand();
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (commandHistory.length === 0) return;
+      if (historyIndexRef.current < commandHistory.length - 1) {
+        historyIndexRef.current++;
+        setCommand(commandHistory[historyIndexRef.current] ?? "");
+      } else if (historyIndexRef.current === -1) {
+        historyIndexRef.current = 0;
+        setCommand(commandHistory[0] ?? "");
+      }
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (historyIndexRef.current === -1) return;
+      if (historyIndexRef.current === 0) {
+        historyIndexRef.current = -1;
+        setCommand("");
+        return;
+      }
+      historyIndexRef.current--;
+      setCommand(commandHistory[historyIndexRef.current] ?? "");
+      return;
+    }
+    historyIndexRef.current = -1;
+  };
+
+  useEffect(() => {
+    if (showCmdList) setSelectedCmdIdx(0);
+  }, [showCmdList, command]);
+
+  useEffect(() => {
+    if (!showCmdList) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (
+        inputWrapperRef.current &&
+        !inputWrapperRef.current.contains(e.target as Node)
+      ) {
+        setShowCmdList(false);
+      }
+    };
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, [showCmdList]);
 
   const clearConsole = async () => {
     if (!vpnServerId) return;
     setMessages([]);
+    setCommandHistory([]);
+    historyIndexRef.current = -1;
     await clearHistoryDB(vpnServerId);
   };
 
   return (
-    <div className="content-wrapper wide-table">
-      <h2>Web console:</h2>
+    <div className="web-console-page">
+      <h2 className="console-page-title">Web Console</h2>
       <div className="header-bar">
         <div className="left-buttons">
-          <button className="btn secondary" onClick={() => navigate(`/server-details/${vpnServerId}`)}>
-            <FaArrowLeft className="icon" /> Back
-          </button>
-        </div>
-        <div className="right-buttons">
           <button className="btn danger" onClick={clearConsole}>
             <FaTrash className="icon" /> Clear Console
           </button>
@@ -109,44 +271,110 @@ export function WebConsole() {
 
       <div className="console-container">
         <div className="console-output">
-          {messages.map((msg, index) => (
-            <div key={index} className="console-message">{msg}</div>
-          ))}
+          {messages.map((msg, index) => {
+            const isCommand = msg.startsWith("> ");
+            const isSuccess = msg.startsWith("✅");
+            const isWarning = msg.startsWith("⚠️");
+            const isError = msg.startsWith("❌");
+            const statusClass = isSuccess
+              ? "console-msg-success"
+              : isWarning
+                ? "console-msg-warning"
+                : isError
+                  ? "console-msg-error"
+                  : "";
+            return (
+              <div
+                key={index}
+                className={`console-message ${isCommand ? "console-command" : ""} ${statusClass}`}
+              >
+                {highlightOvpMgmtLine(msg)}
+              </div>
+            );
+          })}
           <div ref={messagesEndRef} />
         </div>
-        <div className="console-input">
-          <input
-            type="text"
-            value={command}
-            onChange={(e) => setCommand(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendCommand()}
-            placeholder="Enter command..."
-            className="input"
-          />
-          <button className="btn primary" onClick={sendCommand}>
-            Send <FaArrowRight />
-          </button>
+        <div ref={inputWrapperRef} className="console-input-wrapper">
+          <div className="console-input">
+            <span className="console-prompt">$</span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={command}
+              onChange={(e) => setCommand(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder=" Enter command (↑↓ history)"
+              className="console-input-field"
+              spellCheck={false}
+              autoComplete="off"
+            />
+            <button
+              type="button"
+              className={`btn secondary console-cmd-btn ${showCmdList ? "active" : ""}`}
+              onClick={() => setShowCmdList((v) => !v)}
+              title="Commands"
+            >
+              <FaList className="icon" />
+            </button>
+            <button className="btn primary console-send-btn" onClick={sendCommand}>
+              <FaArrowRight className="icon" />
+            </button>
+          </div>
+          {showCmdList && (
+            <div
+              ref={cmdListRef}
+              className="console-cmd-list"
+              role="listbox"
+            >
+              {filteredCommands.length === 0 ? (
+                <div className="console-cmd-list-empty">No commands match</div>
+              ) : (
+                filteredCommands.slice(0, 20).map((c, i) => (
+                  <div
+                    key={c.name}
+                    role="option"
+                    aria-selected={i === selectedCmdIdx}
+                    className={`console-cmd-item ${i === selectedCmdIdx ? "selected" : ""}`}
+                    onMouseEnter={() => setSelectedCmdIdx(i)}
+                    onClick={() => applyCommand(c.name)}
+                  >
+                    <span className="console-cmd-name">{c.name}</span>
+                    {c.hint && (
+                      <span className="console-cmd-hint">{c.hint}</span>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="console-info">
-        <h3><FaInfoCircle /> Important Information</h3>
+        <h3>
+          <FaInfoCircle className="icon" /> Important Information
+        </h3>
         <p>
-          This web console provides access to the <strong>OpenVPN Management Interface</strong>.
-          Be careful when executing commands, as incorrect usage can affect VPN operations.
+          This web console provides access to the <strong>OpenVPN Management Interface</strong>. Be careful when
+          executing commands, as incorrect usage can affect VPN operations.
         </p>
-        <p>
-          For a full list of supported OpenVPN commands, please refer to the official documentation:
-        </p>
+        <p>For a full list of supported OpenVPN commands, please refer to the official documentation:</p>
         <ul>
           <li>
-            <a href="https://openvpn.net/community-resources/management-interface/" 
-              target="_blank" rel="noopener noreferrer" style={{ color: "#58a6ff" }}>
+            <a
+              href="https://openvpn.net/community-resources/management-interface/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#58a6ff" }}
+            >
               OpenVPN Management Interface Guide
             </a>
           </li>
         </ul>
-        <p><strong>Warning:</strong> Modifying server configurations via this interface requires proper knowledge of OpenVPN internals.</p>
+        <p>
+          <strong>Warning:</strong> Modifying server configurations via this interface requires proper knowledge of
+          OpenVPN internals.
+        </p>
       </div>
     </div>
   );

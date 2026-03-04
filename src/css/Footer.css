@@ -1,0 +1,23 @@
+.footer {
+  text-align: center;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-muted);
+  background-color: var(--bg-body);
+  font-size: 0.9rem;
+  margin-top: auto;
+}
+
+/* layout helpers so footer sticks to page bottom */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Footer.css */
+.footer-debug {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  margin-top: 4px;
+}

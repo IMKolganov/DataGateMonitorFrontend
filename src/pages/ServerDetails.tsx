@@ -1,138 +1,112 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+// src/pages/ServerDetails.tsx
+import { useNavigate, NavLink, Outlet, useParams, useLocation } from "react-router-dom";
+import { useMemo } from "react";
+import { FaArrowLeft } from "react-icons/fa";
 import "../css/ServerDetails.css";
 
-import { FaSync, FaArrowLeft, FaKey, FaTerminal, FaCog } from "react-icons/fa";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/open-vpn-servers/open-vpn-servers";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
+import type { OpenVpnServerResponse } from "../api/orval/model";
 
-import ClientsTable from "../components/ClientsTable";
-import VpnMap from "../components/VpnMap";
-import ServerDetailsInfo from "../components/ServerDetailsInfo";
-import { fetchServersWithStats, fetchConnectedClients, fetchHistoryClients } from "../utils/api";
+type Tab = {
+    label: string;
+    path: string;
+    adminOnly?: boolean;
+};
 
 export function ServerDetails() {
-  const { id } = useParams<{ id?: string }>();
-  const navigate = useNavigate();
-  const [isLive, setIsLive] = useState<boolean>(true);
-  const [serverInfo, setServerInfo] = useState<any>(null);
-  const [loadingServer, setLoadingServer] = useState(false);
-  const [loadingClients, setLoadingClients] = useState(false);
+    const navigate = useNavigate();
+    const { vpnServerId = "" } = useParams<{ vpnServerId: string }>();
+    const location = useLocation();
 
-  const [clients, setClients] = useState<any[]>([]);
-  const [totalClients, setTotalClients] = useState<number>(0);
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+    const user = getCurrentUser();
+    const canSeeAdminTabs = isAdmin(user);
 
-  useEffect(() => {
-    if (id) {
-      fetchServerData();
-    }
-  }, [id]);
+    const allTabs: Tab[] = [
+        { label: "General", path: "", adminOnly: true  },
+        { label: "Manage Certificates", path: "certificates", adminOnly: true },
+        { label: "Web console", path: "console", adminOnly: true },
+        { label: "Configurations", path: "ovpn-file-config", adminOnly: true },
+        { label: "Statistics", path: "statistics" },
+        { label: "Events", path: "events" },
+    ];
 
-  useEffect(() => {
-    if (id) {
-      fetchClientsData();
-    }
-  }, [id, isLive, page, pageSize]);
+    const tabs = useMemo(() => {
+        if (canSeeAdminTabs) return allTabs;
+        return allTabs.filter((t) => !t.adminOnly);
+    }, [canSeeAdminTabs]);
 
-  const fetchServerData = async () => {
-    if (!id) return;
-    setLoadingServer(true);
-    fetchClientsData();
+    const currentPath =
+        location.pathname.split(`/servers/${vpnServerId}/`)[1] ?? "";
 
-    try {
-      const serverRes = await fetchServersWithStats(id);
-      setServerInfo(serverRes || {});
-    } catch (error) {
-      console.error("Error fetching server details:", error);
-    } finally {
-      setLoadingServer(false);
-    }
-  };
+    const numericId = useMemo(
+        () => (vpnServerId ? Number(vpnServerId) : undefined),
+        [vpnServerId]
+    );
 
-  const fetchClientsData = async () => {
-    if (!id) return;
-    setLoadingClients(true);
+    const serverQuery = useGetApiOpenVpnServersGetVpnServerId(numericId ?? 0, {
+        query: {
+            enabled: Number.isFinite(numericId as number),
+            staleTime: 10_000,
+            retry: 1,
+        },
+    });
 
-    try {
-      const clientsRes = isLive
-        ? await fetchConnectedClients(id, page + 1, pageSize)
-        : await fetchHistoryClients(id, page + 1, pageSize);
+    const payload = serverQuery.data as OpenVpnServerResponse | undefined;
+    const vpnServerName = payload?.openVpnServer?.serverName ?? "(unknown)";
 
-      setClients(clientsRes?.clients || []);
-      setTotalClients(clientsRes?.totalCount || 0);
-    } catch (error) {
-      console.error("Error fetching clients:", error);
-      setClients([]);
-      setTotalClients(0);
-    } finally {
-      setLoadingClients(false);
-    }
-  };
+    const safeCurrentPath = useMemo(() => {
+        const exists = tabs.some((t) => t.path === currentPath);
+        return exists ? currentPath : "";
+    }, [currentPath, tabs]);
 
-  const toHumanReadableSize = (bytes: number): string => {
-    const sizes = ["B", "KB", "MB", "GB", "TB"];
-    let i = 0;
-    while (bytes >= 1024 && i < sizes.length - 1) {
-      bytes /= 1024;
-      i++;
-    }
-    return `${bytes.toFixed(2)} ${sizes[i]}`;
-  };
+    return (
+        <div>
+            <h2>
+                Server Details for Server{" "}
+                {serverQuery.isLoading ? "…" : vpnServerName || vpnServerId}
+            </h2>
 
-  return (
-    <div className="content-wrapper wide-table">
-      <div className="header-bar">
-        <div className="left-buttons">
-          <button className="btn secondary" onClick={() => navigate("/")}>
-            <FaArrowLeft className="icon" /> Back
-          </button>
-          <button className="btn secondary" onClick={fetchServerData} disabled={loadingServer}>
-            <FaSync className={`icon ${loadingServer ? "icon-spin" : ""}`} /> Refresh
-          </button>
-          <button className="btn secondary" onClick={() => navigate(`/server-details/${id}/certificates`)}>
-            <FaKey className="icon" /> Manage Certificates
-          </button>
-          <button className="btn secondary" onClick={() => navigate(`/server-details/${id}/console`)}>
-            <FaTerminal className="icon" /> OpenVPN Console
-          </button>
-          <label className="square-toggle">
-            <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
-            <span className="toggle-slider"></span>
-            <span className="toggle-text">{isLive ? "Live" : "History"}</span>
-          </label>
+            <div className="header-container">
+                <div className="header-bar">
+                    <div className="left-buttons">
+                        <button className="btn secondary" onClick={() => navigate("/")}>
+                            {FaArrowLeft({ className: "icon" })} Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="tabs desktop-tabs">
+                {tabs.map((tab) => (
+                    <NavLink
+                        key={tab.path}
+                        to={`/servers/${vpnServerId}/${tab.path}`}
+                        end={tab.path === ""}
+                        className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+                    >
+                        {tab.label}
+                    </NavLink>
+                ))}
+            </div>
+
+            <select
+                className="tabs-dropdown mobile-tabs"
+                value={safeCurrentPath}
+                onChange={(e) => navigate(`/servers/${vpnServerId}/${e.target.value}`)}
+            >
+                {tabs.map((tab) => (
+                    <option key={tab.path} value={tab.path}>
+                        {tab.label}
+                    </option>
+                ))}
+            </select>
+
+            <div className="tab-content">
+                <Outlet />
+            </div>
         </div>
-        <div className="right-buttons">
-          <button className="btn secondary settings-button" onClick={() => navigate(`/server-details/${id}/settings`)}>
-            <FaCog className="icon" /> Settings
-          </button>
-        </div>
-      </div>
-
-      {loadingServer ? (
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading server details...</p>
-        </div>
-      ) : (
-        <ServerDetailsInfo serverInfo={serverInfo} toHumanReadableSize={toHumanReadableSize} />
-      )}
-
-      <h3>VPN Clients ({isLive ? "Connected" : "Historical"})</h3>
-
-      <ClientsTable
-        clients={clients}
-        totalClients={totalClients}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-        loading={loadingClients}
-      />
-
-      <h3>VPN Client Locations</h3>
-      <VpnMap clients={clients} />
-    </div>
-  );
+    );
 }
 
 export default ServerDetails;
