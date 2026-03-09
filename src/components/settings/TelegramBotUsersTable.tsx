@@ -142,8 +142,6 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50, 100]}
           initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-          disableColumnFilter
-          disableColumnMenu
           localeText={{ noRowsLabel: "📭 No users found" }}
           loading={isGridLoading}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}

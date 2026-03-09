@@ -18,6 +18,9 @@ const darkPalette = {
     bg: "#0d1117",
     headerBg: "#161b22",
     pinnedBg: "#161b22",
+    scrollbarTrack: "#161b22",
+    scrollbarThumb: "#30363d",
+    scrollbarThumbHover: "#484f58",
   },
 };
 
@@ -35,6 +38,9 @@ const lightPalette = {
     bg: "#f6f8fa",
     headerBg: "#ffffff",
     pinnedBg: "#eaeef2",
+    scrollbarTrack: "#eaeef2",
+    scrollbarThumb: "#d0d7de",
+    scrollbarThumbHover: "#8b949e",
   },
 };
 

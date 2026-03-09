@@ -87,8 +87,6 @@ const UsersTable: React.FC<UsersTableProps> = ({
           paginationModel={paginationModel}
           onPaginationModelChange={onPaginationModelChange}
           pageSizeOptions={[5, 10, 20, 50, 100]}
-          disableColumnFilter
-          disableColumnMenu
           localeText={{ noRowsLabel: "📭 No users found" }}
           loading={loading}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}

@@ -100,8 +100,6 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                     }}
                     loading={loading}
                     slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-                    disableColumnFilter
-                    disableColumnMenu
                     localeText={{
                         noRowsLabel: "No connected clients",
                     }}

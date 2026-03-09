@@ -86,8 +86,6 @@ const EventsTable: React.FC<EventsTableProps> = ({
           }}
           loading={loading}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-          disableColumnFilter
-          disableColumnMenu
           localeText={{
             noRowsLabel: "📭 No events logged",
           }}
