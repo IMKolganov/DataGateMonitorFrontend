@@ -177,8 +177,6 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
           initialState={{
             pagination: { paginationModel: { pageSize: 10 } },
           }}
-          disableColumnFilter
-          disableColumnMenu
           localeText={{
             noRowsLabel: loading ? "🔄 Loading certificates..." : "📭 No certificates found",
           }}

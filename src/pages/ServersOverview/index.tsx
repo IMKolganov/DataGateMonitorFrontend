@@ -5,12 +5,11 @@ import { toast } from "react-toastify";
 
 import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
 import { OverviewUsersTable } from "../../components/OverviewUsersTable";
-
 import StatsCards from "./StatsCards";
 import OverviewChart from "./OverviewChart";
 import GeoMap from "./GeoMap";
-import { addDays, endOfToday, startOfToday, toChartPoints, buildFallbackOverviewResponse } from "./helpers";
-import type { ChartPoint } from "./types";
+import { addDays, endOfToday, startOfToday, toChartPoints, toUsersSeriesChartPoints, mergeChartWithUsersSeries, buildFallbackOverviewResponse, normalizeGrouping } from "./helpers";
+import type { ChartPoint, MergedChartPoint } from "./types";
 
 import { keepPreviousData } from "@tanstack/react-query";
 
@@ -18,10 +17,12 @@ import { keepPreviousData } from "@tanstack/react-query";
 import {
   useGetApiOpenVpnClientsOverviewSeries,
   useGetApiOpenVpnClientsOverviewSummary,
+  useGetApiOpenVpnClientsOverviewUsersSeries,
 } from "../../api/orval/open-vpn-server-clients/open-vpn-server-clients";
 import type {
   OverviewSeriesResponse,
   OverviewTotalsResponse,
+  OverviewUsersSeriesResponse,
   GetApiOpenVpnClientsOverviewSeriesParams,
   GetApiOpenVpnClientsOverviewSummaryParams,
 } from "../../api/orval/model";
@@ -60,22 +61,6 @@ function makeSafeTotals(resp?: OverviewTotalsResponse): SafeTotals {
     resp?.totals?.trafficTotalBytes ?? (trafficInBytes + trafficOutBytes);
 
   return { sessionsCount, usersCount, trafficInBytes, trafficOutBytes, trafficTotalBytes };
-}
-
-type NormalizedGrouping = "hours" | "days" | "months" | "years";
-
-function normalizeGrouping(
-  g: string | null | undefined
-): NormalizedGrouping {
-  switch (g) {
-    case "hours":
-    case "days":
-    case "months":
-    case "years":
-      return g;
-    default:
-      return "days";
-  }
 }
 
 export default function ServersOverview() {
@@ -154,6 +139,15 @@ export default function ServersOverview() {
     },
   });
 
+  const usersSeriesQuery = useGetApiOpenVpnClientsOverviewUsersSeries(seriesParams, {
+    query: {
+      enabled: true,
+      staleTime: 10_000,
+      retry: 1,
+      placeholderData: keepPreviousData,
+    },
+  });
+
   // Toast errors via effects
   useEffect(() => {
     if (seriesQuery.isError) showErrorToast("Series load error", seriesQuery.error as unknown);
@@ -163,18 +157,22 @@ export default function ServersOverview() {
     if (totalsQuery.isError) showErrorToast("Totals load error", totalsQuery.error as unknown);
   }, [totalsQuery.isError, totalsQuery.error]);
 
+  useEffect(() => {
+    if (usersSeriesQuery.isError) showErrorToast("Users series load error", usersSeriesQuery.error as unknown);
+  }, [usersSeriesQuery.isError, usersSeriesQuery.error]);
+
   const apiData = seriesQuery.data as OverviewSeriesResponse | undefined;
   const totalsResp = totalsQuery.data as OverviewTotalsResponse | undefined;
+  const usersSeriesData = usersSeriesQuery.data as OverviewUsersSeriesResponse | undefined;
 
-  const loadingSeries = seriesQuery.isFetching;
+  const loadingSeries = seriesQuery.isFetching || usersSeriesQuery.isFetching;
   const loadingTotals = totalsQuery.isFetching;
 
   const safeTotals = useMemo(() => makeSafeTotals(totalsResp), [totalsResp]);
 
-  const chartData: ChartPoint[] = useMemo(() => {
+  const baseChartData: ChartPoint[] = useMemo(() => {
     const hasSeries = Array.isArray(apiData?.overviewSeriesRows) && apiData.overviewSeriesRows.length > 0;
     if (hasSeries) {
-      // normalize API meta grouping safely
       const g = normalizeGrouping(apiData?.meta?.grouping);
       return toChartPoints(apiData!.overviewSeriesRows!, g);
     }
@@ -191,10 +189,20 @@ export default function ServersOverview() {
     };
 
     const fb = buildFallbackOverviewResponse({ from, to, grouping, totals: totalsForFallback });
-
     const fbGrouping = normalizeGrouping(fb?.meta?.grouping);
     return toChartPoints(fb.overviewSeriesRows ?? [], fbGrouping);
   }, [apiData, from, to, grouping, safeTotals]);
+
+  const usersSeriesPoints = useMemo(() => {
+    const rows = usersSeriesData?.rows ?? [];
+    const g = normalizeGrouping(usersSeriesData?.meta?.grouping);
+    return toUsersSeriesChartPoints(rows, g);
+  }, [usersSeriesData]);
+
+  const chartData: MergedChartPoint[] = useMemo(
+    () => mergeChartWithUsersSeries(baseChartData, usersSeriesPoints),
+    [baseChartData, usersSeriesPoints]
+  );
 
   const onFilterChange = (c: DateRangeChange) => {
     setFrom(c.from);

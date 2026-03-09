@@ -134,8 +134,6 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
             paginationMode="client"
             loading={isFetching}
             slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-            disableColumnFilter
-            disableColumnMenu
             localeText={{
               noRowsLabel: isError
                 ? `❗ ${(error as any)?.message ?? "Failed to load users"}`

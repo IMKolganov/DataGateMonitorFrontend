@@ -262,8 +262,6 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           initialState={{
             pagination: { paginationModel: { pageSize: 10 } },
           }}
-          disableColumnFilter
-          disableColumnMenu
           localeText={{
             noRowsLabel: loading ? "🔄 Loading OVPN files..." : "📭 No OVPN files found",
           }}
