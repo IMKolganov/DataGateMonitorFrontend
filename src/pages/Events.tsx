@@ -223,8 +223,6 @@ const Events: React.FC = () => {
               }}
               loading={isFetching}
               slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-              disableColumnFilter
-              disableColumnMenu
               localeText={{ noRowsLabel: "📭 No events logged" }}
             />
           </div>

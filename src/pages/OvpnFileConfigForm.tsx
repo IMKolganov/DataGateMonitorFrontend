@@ -546,8 +546,6 @@ const OvpnFileConfigForm: React.FC = () => {
                     }}
                     loading={isConflogLoading}
                     slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-                    disableColumnFilter
-                    disableColumnMenu
                     localeText={{
                       noRowsLabel: "No conflog history yet. Use \"Fetch and save conflog\" to load data.",
                     }}
