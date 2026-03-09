@@ -364,8 +364,6 @@ export function UserDetailPage() {
                     }}
                     loading={telegramMessagesLoading || telegramMessagesFetching}
                     slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-                    disableColumnFilter
-                    disableColumnMenu
                     localeText={{ noRowsLabel: "📭 No messages" }}
                   />
                 </CustomThemeProvider>

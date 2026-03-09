@@ -1,1 +1,0 @@
-import{j as e}from"./mui-kzKKu_W0.js";import"./react-C4v5I1ns.js";import"./misc-d7ZeQWBu.js";const n=()=>e.jsxs("div",{style:{padding:"2rem",textAlign:"center"},children:[e.jsx("h1",{children:"404 - Page Not Found"}),e.jsx("p",{children:"The page you’re looking for does not exist."})]});export{n as default};

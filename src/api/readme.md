@@ -4,5 +4,5 @@
 2. From project root run:
 
    ```bash
-    rm -rf src/api/orval
-    npm run gen:api
+rm -rf src/api/orval
+npm run gen:api
