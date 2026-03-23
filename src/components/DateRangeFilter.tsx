@@ -16,12 +16,24 @@ type Props = {
   onChange: (c: DateRangeChange) => void;
 };
 
-type PresetId = "24h" | "7d" | "30d" | "thisMonth" | "lastMonth" | "ytd" | "1y" | "3y";
+type PresetId =
+  | "24h"
+  | "7d"
+  | "30d"
+  | "last2m"
+  | "last3m"
+  | "thisMonth"
+  | "lastMonth"
+  | "ytd"
+  | "1y"
+  | "3y";
 
 const PRESETS: { id: PresetId; label: string }[] = [
   { id: "24h", label: "Last 24h" },
   { id: "7d", label: "Last 7 days" },
   { id: "30d", label: "Last 30 days" },
+  { id: "last2m", label: "Last 2 months" },
+  { id: "last3m", label: "Last 3 months" },
   { id: "thisMonth", label: "This month" },
   { id: "lastMonth", label: "Last month" },
   { id: "ytd", label: "YTD" },
@@ -49,6 +61,14 @@ export default function DateRangeFilter({ from, to, grouping, onChange }: Props)
       const s = startOfToday();
       const f = addDays(s, -29);
       onChange({ from: f, to: endOfToday(), grouping: "auto" });
+      return;
+    }
+    if (p === "last2m") {
+      onChange({ from: addMonths(startOfToday(), -2), to: endOfToday(), grouping: "auto" });
+      return;
+    }
+    if (p === "last3m") {
+      onChange({ from: addMonths(startOfToday(), -3), to: endOfToday(), grouping: "auto" });
       return;
     }
     if (p === "thisMonth") {
@@ -300,6 +320,14 @@ function detectActivePreset(from: Date, to: Date): PresetId | null {
   const s30 = addDays(startOfToday(), -29);
   if (sameDay(from, s30) && sameDay(to, startOfToday()))
     return "30d";
+
+  // last 2 / 3 months (from same calendar day N months ago, through end of today)
+  const from2m = addMonths(startOfToday(), -2);
+  if (sameDay(from, from2m) && sameDay(to, endOfToday()))
+    return "last2m";
+  const from3m = addMonths(startOfToday(), -3);
+  if (sameDay(from, from3m) && sameDay(to, endOfToday()))
+    return "last3m";
 
   // thisMonth
   if (sameDay(from, startOfMonth(now)) && sameDay(to, endOfMonth(now)))

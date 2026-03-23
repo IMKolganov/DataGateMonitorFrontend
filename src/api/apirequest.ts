@@ -10,6 +10,16 @@ import type { RefreshRequest, RefreshResponse } from "./orval/model";
 
 let refreshPromise: Promise<string> | null = null;
 
+/** Only these refresh failures should end the browser session (logout). */
+function shouldLogoutOnRefreshError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const e = err as { name?: string; message?: string; response?: { status?: number } };
+  if (e.message === "No refresh token") return true;
+  if (e.name === "RefreshAuthFailure") return true;
+  const st = e.response?.status;
+  return st === 401 || st === 403;
+}
+
 export interface Config {
   defaultRefreshInterval: number;
   apiBaseUrl?: string;
@@ -73,6 +83,11 @@ export const apiRequest = async <T>(
       try {
         const newToken = await getOrCreateRefresh();
 
+        // Reschedule JWT expiry timer (avoids stale timer if login ever stays in SPA without full reload)
+        void import("../utils/auth/authSession").then(({ scheduleAutoLogout }) => {
+          scheduleAutoLogout(newToken);
+        });
+
         const retryResponse = await axios({
           method,
           url: `${API_BASE_URL}${url}`,
@@ -84,8 +99,11 @@ export const apiRequest = async <T>(
         });
 
         return retryResponse.data as ApiResponse<T>;
-      } catch {
-        logout();
+      } catch (refreshErr) {
+        if (shouldLogoutOnRefreshError(refreshErr)) {
+          logout();
+        }
+        throw error;
       }
     }
 
@@ -184,7 +202,9 @@ const refreshAccessToken = async (): Promise<string> => {
 
   const newAccess = data?.token;
   if (!payload?.success || !newAccess) {
-    throw new Error(payload?.errorMessage ?? "Refresh failed");
+    const e = new Error(payload?.errorMessage ?? "Refresh failed");
+    e.name = "RefreshAuthFailure";
+    throw e;
   }
 
   localStorage.setItem(ACCESS_TOKEN_KEY, newAccess);
