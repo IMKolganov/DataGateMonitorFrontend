@@ -53,12 +53,28 @@ export default defineConfig({
         warn(warning);
       },
       output: {
-        manualChunks: {
-          react: ["react", "react-dom", "react-router-dom"],
-          mui: ["@mui/material", "@mui/x-data-grid"],
-          leaflet: ["leaflet", "react-leaflet"],
-          signalr: ["@microsoft/signalr"],
-          misc: ["react-toastify", "js-cookie"], // removed "zustand"
+        // Rolldown (Vite 8) accepts only a function for manualChunks, not a package→chunk map.
+        manualChunks(id) {
+          if (
+            id.includes("node_modules/react/") ||
+            id.includes("node_modules/react-dom/") ||
+            id.includes("node_modules/react-router-dom/") ||
+            id.includes("node_modules/react-router/")
+          ) {
+            return "react";
+          }
+          if (id.includes("node_modules/@mui/material/") || id.includes("node_modules/@mui/x-data-grid/")) {
+            return "mui";
+          }
+          if (id.includes("node_modules/leaflet/") || id.includes("node_modules/react-leaflet/")) {
+            return "leaflet";
+          }
+          if (id.includes("node_modules/@microsoft/signalr/")) {
+            return "signalr";
+          }
+          if (id.includes("node_modules/react-toastify/") || id.includes("node_modules/js-cookie/")) {
+            return "misc";
+          }
         },
       },
     },

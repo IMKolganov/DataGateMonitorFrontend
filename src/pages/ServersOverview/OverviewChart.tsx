@@ -2,8 +2,6 @@ import { useState } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 import type { MergedChartPoint } from "./types";
 import type { TooltipProps } from "recharts";
-type TValue = number | string;
-type TName = string;
 
 export type OverviewChartMode = "combined" | "sessions" | "users" | "traffic";
 
@@ -14,10 +12,10 @@ const MODE_OPTIONS: { id: OverviewChartMode; label: string; hint: string }[] = [
   { id: "traffic", label: "Traffic", hint: "Total traffic per bucket (MB)." },
 ];
 
-const tooltipFormatter: TooltipProps<TValue, TName>["formatter"] = (value, name) => {
+const tooltipFormatter = ((value, name) => {
   if (name === "Traffic, MB") return [`${value} MB`, name ?? ""];
   return [value, name ?? ""];
-};
+}) as NonNullable<TooltipProps["formatter"]>;
 
 export default function OverviewChart({
   data, loading, error,
