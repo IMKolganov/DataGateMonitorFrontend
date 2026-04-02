@@ -18,6 +18,7 @@ import {
   loadCommandHistory,
 } from "../utils/consoleStorage";
 import { getSignalRUrl, getAccessTokenOrLogout } from "../utils/signalr-url";
+import { ACCESS_TOKEN_REFRESHED_EVENT } from "../utils/auth/accessTokenEvents.ts";
 import { highlightOvpMgmtLine } from "../utils/ovpMgmtHighlight";
 import { OVP_MGMT_COMMANDS } from "../utils/ovpMgmtCommands";
 
@@ -34,6 +35,13 @@ export function WebConsole() {
   const connectionRef = useRef<HubConnection | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [hubSessionKey, setHubSessionKey] = useState(0);
+
+  useEffect(() => {
+    const bump = () => setHubSessionKey((k) => k + 1);
+    window.addEventListener(ACCESS_TOKEN_REFRESHED_EVENT, bump);
+    return () => window.removeEventListener(ACCESS_TOKEN_REFRESHED_EVENT, bump);
+  }, []);
 
   useEffect(() => {
     if (!vpnServerId) return;
@@ -50,13 +58,13 @@ export function WebConsole() {
   useEffect(() => {
     if (!vpnServerId) return;
 
-    // Avoid rebuilding an active connection
-    if (connectionRef.current && connectionRef.current.state !== HubConnectionState.Disconnected) {
-      return;
-    }
-
     const setupSignalR = async () => {
       try {
+        if (connectionRef.current) {
+          await connectionRef.current.stop().catch(() => {});
+          connectionRef.current = null;
+        }
+
         const url = getSignalRUrl(vpnServerId);
         const connection = new HubConnectionBuilder()
           .withUrl(url, {
@@ -117,7 +125,7 @@ export function WebConsole() {
       connectionRef.current?.stop();
       connectionRef.current = null;
     };
-  }, [vpnServerId]);
+  }, [vpnServerId, hubSessionKey]);
 
   useEffect(() => {
     if (messages.length === 0) return;

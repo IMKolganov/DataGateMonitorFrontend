@@ -1,7 +1,7 @@
 // src/components/ServerDetailsInfo.tsx
 import React from "react";
 import { BsClock, BsCpu, BsHddNetwork, BsFillBookmarkStarFill, BsPerson, BsTag } from "react-icons/bs";
-import { RiHardDrive2Line } from "react-icons/ri";
+import { RiBarChart2Line, RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer, IoMdPerson } from "react-icons/io";
 
 export type ConflogPayloadSummary = {
@@ -25,6 +25,8 @@ interface Props {
   configPort?: number | null;
   /** From latest conflog (for General tab) */
   latestConflogPayload?: ConflogPayloadSummary | null;
+  /** Quota plan names this server is allowed for (from quota-plan-allowed-servers) */
+  quotaPlanLabels?: string[] | null;
 }
 
 /** Simple shimmer skeleton */
@@ -36,7 +38,15 @@ const Skeleton: React.FC<{ width?: number | string; height?: number | string; cl
   <span className={`skeleton ${className}`} style={{ width, height }} aria-label="loading" />
 );
 
-const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, loading = false, configIp, configPort, latestConflogPayload }) => {
+const ServerDetailsInfo: React.FC<Props> = ({
+  serverInfo,
+  toHumanReadableSize,
+  loading = false,
+  configIp,
+  configPort,
+  latestConflogPayload,
+  quotaPlanLabels,
+}) => {
   // When loading, we still render the layout with skeletons
   const safe = serverInfo ?? {};
 
@@ -198,6 +208,20 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, l
               </a>
             ) : (
               "N/A"
+            )}
+          </span>
+        </div>
+
+        <div className="detail-row">
+          <RiBarChart2Line className="detail-icon" />
+          <span className="detail-label">Quota plans:</span>
+          <span>
+            {loading ? (
+              <Skeleton width={220} />
+            ) : quotaPlanLabels != null && quotaPlanLabels.length > 0 ? (
+              quotaPlanLabels.join(", ")
+            ) : (
+              "—"
             )}
           </span>
         </div>

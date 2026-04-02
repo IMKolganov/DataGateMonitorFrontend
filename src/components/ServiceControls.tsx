@@ -9,9 +9,10 @@ type Props = {
   onRunNow: () => void;
 };
 
-type UiStatus = "Idle" | "Running" | "Error";
+type UiStatus = "Idle" | "Running" | "Error" | "Pending";
 
 function normalizeStatus(s?: ServiceStatus | string | number | null): UiStatus {
+  if (s === undefined || s === null) return "Pending";
   if (s === 1 || s === "Running" || s === "running") return "Running";
   if (s === 2 || s === "Error" || s === "error") return "Error";
   return "Idle";
@@ -77,6 +78,11 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
       [entries]
   );
 
+  const anyPending = useMemo(
+      () => entries.some((e) => normalizeStatus((e as any)?.status) === "Pending"),
+      [entries]
+  );
+
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   useEffect(() => {
@@ -86,7 +92,10 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
         return;
       }
 
-      const sec = getNextRunSeconds(entries);
+      const live = entries.filter(
+          (e) => (e as any)?.status !== undefined && (e as any)?.status !== null,
+      );
+      const sec = getNextRunSeconds(live);
       setTimeLeft(sec);
     };
 
@@ -98,14 +107,16 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
   const statusDescription = useMemo(() => {
     if (anyRunning) return "The service is currently running.";
     if (anyError) return "There is an error with the service.";
+    if (anyPending) return "Waiting for live status from the background service (WebSocket).";
     return "The service is idle.";
-  }, [anyRunning, anyError]);
+  }, [anyRunning, anyError, anyPending]);
 
   const statusColor = useMemo(() => {
     if (anyRunning) return "#1E90FF";
     if (anyError) return "red";
+    if (anyPending) return "#8b949e";
     return "green";
-  }, [anyRunning, anyError]);
+  }, [anyRunning, anyError, anyPending]);
 
   return (
       <div className="service-status-container">
