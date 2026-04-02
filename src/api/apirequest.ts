@@ -6,6 +6,7 @@ import {
   REFRESH_TOKEN_EXPIRATION,
   REFRESH_TOKEN_KEY,
 } from "../utils/const.ts";
+import { notifyAccessTokenRefreshed } from "../utils/auth/accessTokenEvents.ts";
 import type { RefreshRequest, RefreshResponse } from "./orval/model";
 
 let refreshPromise: Promise<string> | null = null;
@@ -219,6 +220,7 @@ const refreshAccessToken = async (): Promise<string> => {
     localStorage.setItem(REFRESH_TOKEN_EXPIRATION, newRefreshExp);
   }
 
+  notifyAccessTokenRefreshed();
   return newAccess;
 };
 
@@ -231,3 +233,6 @@ const getOrCreateRefresh = (): Promise<string> => {
   }
   return refreshPromise;
 };
+
+/** Single-flight refresh (same promise if multiple callers during 401). Safe when access JWT expired but refresh token still valid. */
+export const refreshSessionTokens = (): Promise<string> => getOrCreateRefresh();

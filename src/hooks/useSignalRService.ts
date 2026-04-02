@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ACCESS_TOKEN_REFRESHED_EVENT } from "../utils/auth/accessTokenEvents.ts";
 import {
     HubConnection,
     HubConnectionBuilder,
@@ -40,6 +41,7 @@ function toDtos(raw: any): ServiceStatusDto[] {
         const cs = leaf.CountSessions ?? leaf.countSessions;
         const tbi = leaf.TotalBytesIn ?? leaf.totalBytesIn;
         const tbo = leaf.TotalBytesOut ?? leaf.totalBytesOut;
+        const onlineRaw = leaf.IsOnline ?? leaf.isOnline;
 
         result.push({
             vpnServerId,
@@ -50,7 +52,8 @@ function toDtos(raw: any): ServiceStatusDto[] {
             countSessions: Number.isFinite(Number(cs)) ? Number(cs) : undefined,
             totalBytesIn: Number.isFinite(Number(tbi)) ? Number(tbi) : undefined,
             totalBytesOut: Number.isFinite(Number(tbo)) ? Number(tbo) : undefined,
-        });
+            ...(typeof onlineRaw === "boolean" ? { isOnline: onlineRaw } : {}),
+        } as ServiceStatusDto);
     }
 
     return result;
@@ -60,8 +63,16 @@ export default function useSignalRService() {
     const [serviceData, setServiceData] = useState<Record<number, ServiceStatusDto>>({});
     const [connectionState, setConnectionState] = useState<string>("init");
     const [lastError, setLastError] = useState<string | null>(null);
+    /** Bumps when access token is refreshed so the hub reconnects with a new JWT. */
+    const [hubSessionKey, setHubSessionKey] = useState(0);
 
     const connRef = useRef<HubConnection | null>(null);
+
+    useEffect(() => {
+        const bumpHub = () => setHubSessionKey((k) => k + 1);
+        window.addEventListener(ACCESS_TOKEN_REFRESHED_EVENT, bumpHub);
+        return () => window.removeEventListener(ACCESS_TOKEN_REFRESHED_EVENT, bumpHub);
+    }, []);
 
     useEffect(() => {
         let alive = true;
@@ -151,7 +162,7 @@ export default function useSignalRService() {
                 });
             }
         };
-    }, []);
+    }, [hubSessionKey]);
 
     const runServiceNow = async () => {
         await postApiOpenVpnServersRunNow();

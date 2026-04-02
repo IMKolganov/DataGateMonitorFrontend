@@ -1,7 +1,7 @@
 export default {
   ogm: {
-    // Your OpenAPI YAML
-    input: 'http://localhost:5581/swagger/v1/swagger.yaml',
+    // Run the backend first — Orval fetches the spec from the live Swagger endpoint.
+    input: "http://localhost:5581/swagger/v1/swagger.yaml",
 
     // Where to put generated files
     output: {
