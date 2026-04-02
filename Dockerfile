@@ -1,5 +1,5 @@
 # Step 1: Build Vite App
-FROM node:22 AS build
+FROM node:24-bookworm AS build
 
 # Set working directory
 WORKDIR /app

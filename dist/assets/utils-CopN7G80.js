@@ -1,1 +1,0 @@
-const s=t=>{if(t==null||isNaN(t))return"0 Bytes";const e=["Bytes","KiB","MiB","GiB","TiB"];let i=0;for(;t>=1024&&i<e.length-1;)t/=1024,i++;return`${t.toFixed(1)} ${e[i]}`},n=t=>{const e=t.getTimezoneOffset(),i=Math.abs(e/60).toString().padStart(2,"0"),o=e>0?"-":"+";return`${t.toISOString().replace("T"," ").slice(0,-5)} ${o}${i}00`};export{s as a,n as f};
