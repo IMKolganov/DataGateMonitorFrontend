@@ -1,7 +1,7 @@
 // src/components/CertificatesData.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import CertificatesTable from "./CertificatesTable.tsx";
-import OvpnFilesTable from "../ovpn-files/OvpnFilesTable.tsx";
+import OvpnFilesTable, { type OvpnRowInput } from "../ovpn-files/OvpnFilesTable.tsx";
 import AddOvpnFile from "../ovpn-files/AddOvpnFile.tsx";
 import AddCertificate from "./AddCertificate.tsx";
 import { toast } from "react-toastify";
@@ -16,8 +16,11 @@ import {
 
 import type {
   GetAllCertificatesResponse,
+  MonitorServerCertificate,
   OvpnFilesResponse,
 } from "../../api/orval/model";
+import axios from "axios";
+import { errorMessage as baseErrorMessage } from "../../utils/errorMessage";
 
 interface Props {
   vpnServerId: string;
@@ -39,45 +42,45 @@ const statusLabels: Record<CertificateStatus, string> = {
 
 // Safe error extractor
 function getErrorMessage(err: unknown): string {
-  const anyErr = err as any;
-  if (anyErr?.response?.data) {
-    const data = anyErr.response.data;
+  if (axios.isAxiosError(err) && err.response?.data !== undefined) {
+    const data = err.response.data;
     if (typeof data === "string") return data;
-    if (typeof data?.message === "string") return data.message;
-    if (typeof data?.title === "string") return data.title;
-    if (Array.isArray(data?.errors)) return data.errors.join(", ");
+    if (typeof data === "object" && data !== null) {
+      const r = data as Record<string, unknown>;
+      const msg = r["message"] ?? r["title"];
+      if (typeof msg === "string") return msg;
+      const errors = r["errors"];
+      if (Array.isArray(errors)) return errors.map(String).join(", ");
+    }
   }
-  if (typeof anyErr?.message === "string") return anyErr.message;
-  try {
-    return JSON.stringify(anyErr);
-  } catch {
-    return "Unknown error";
-  }
+  return baseErrorMessage(err);
 }
 
 // Normalize different shapes safely
-function pickArray(payload: any): any[] {
+function pickArray(payload: unknown): unknown[] {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
 
-  if (payload?.data && !Array.isArray(payload.data)) {
-    const nested = pickArray(payload.data);
+  const p = payload as Record<string, unknown>;
+
+  if (p["data"] != null && !Array.isArray(p["data"])) {
+    const nested = pickArray(p["data"]);
     if (nested.length) return nested;
   }
 
-  if (Array.isArray(payload.data)) return payload.data;
-  if (Array.isArray(payload.items)) return payload.items;
-  if (Array.isArray(payload.ovpnFiles)) return payload.ovpnFiles;
-  if (Array.isArray(payload.issuedOvpnFile)) return payload.issuedOvpnFile;
-  if (Array.isArray(payload.issuedOvpnFiles)) return payload.issuedOvpnFiles;
+  if (Array.isArray(p["data"])) return p["data"];
+  if (Array.isArray(p["items"])) return p["items"];
+  if (Array.isArray(p["ovpnFiles"])) return p["ovpnFiles"];
+  if (Array.isArray(p["issuedOvpnFile"])) return p["issuedOvpnFile"];
+  if (Array.isArray(p["issuedOvpnFiles"])) return p["issuedOvpnFiles"];
 
-  if (Array.isArray(payload.serverCertificates)) return payload.serverCertificates;
-  if (Array.isArray(payload.certificates)) return payload.certificates;
-  if (Array.isArray(payload.monitorServerCertificates)) return payload.monitorServerCertificates;
+  if (Array.isArray(p["serverCertificates"])) return p["serverCertificates"];
+  if (Array.isArray(p["certificates"])) return p["certificates"];
+  if (Array.isArray(p["monitorServerCertificates"])) return p["monitorServerCertificates"];
 
-  if (typeof payload === "object") {
-    for (const k of Object.keys(payload)) {
-      const v = (payload as any)[k];
+  if (typeof payload === "object" && payload !== null) {
+    for (const k of Object.keys(p)) {
+      const v = p[k];
       if (Array.isArray(v)) return v;
     }
   }
@@ -106,12 +109,12 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
     },
   );
 
-  const ovpnFiles = pickArray(filesQuery.data as OvpnFilesResponse);
-  const allCertificates = pickArray(certsQuery.data as GetAllCertificatesResponse);
-  const certificates =
+  const ovpnFiles = pickArray(filesQuery.data as OvpnFilesResponse) as OvpnRowInput[];
+  const allCertificates = pickArray(certsQuery.data as GetAllCertificatesResponse) as MonitorServerCertificate[];
+  const certificates: MonitorServerCertificate[] =
     selectedStatus === null
       ? allCertificates
-      : allCertificates.filter((c: any) => c?.status === selectedStatus);
+      : allCertificates.filter((c) => c?.status === selectedStatus);
 
   // Toasts for invalid server id
   useEffect(() => {
@@ -143,8 +146,11 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
       pending: "Refreshing OVPN files…",
       success: "OVPN files are up to date",
       error: {
-        render({ data }) {
-          const err = (data as any)?.error ?? data;
+        render({ data }: { data?: unknown }) {
+          const err =
+            data && typeof data === "object" && data !== null && "error" in data
+              ? (data as { error: unknown }).error
+              : data;
           return `Failed to refresh OVPN files: ${getErrorMessage(err)}`;
         },
       },
@@ -165,8 +171,11 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
       pending: "Refreshing certificates…",
       success: "Certificates are up to date",
       error: {
-        render({ data }) {
-          const err = (data as any)?.error ?? data;
+        render({ data }: { data?: unknown }) {
+          const err =
+            data && typeof data === "object" && data !== null && "error" in data
+              ? (data as { error: unknown }).error
+              : data;
           return `Failed to refresh certificates: ${getErrorMessage(err)}`;
         },
       },

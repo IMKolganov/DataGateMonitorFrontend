@@ -141,7 +141,6 @@ const ServerList: React.FC = () => {
 
   useEffect(() => {
     loadServers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

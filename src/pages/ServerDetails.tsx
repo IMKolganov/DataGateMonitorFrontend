@@ -14,6 +14,15 @@ type Tab = {
     adminOnly?: boolean;
 };
 
+const ALL_SERVER_TABS: Tab[] = [
+    { label: "General", path: "", adminOnly: true },
+    { label: "Manage Certificates", path: "certificates", adminOnly: true },
+    { label: "Web console", path: "console", adminOnly: true },
+    { label: "Configurations", path: "ovpn-file-config", adminOnly: true },
+    { label: "Statistics", path: "statistics" },
+    { label: "Events", path: "events" },
+];
+
 export function ServerDetails() {
     const navigate = useNavigate();
     const { vpnServerId = "" } = useParams<{ vpnServerId: string }>();
@@ -22,18 +31,9 @@ export function ServerDetails() {
     const user = getCurrentUser();
     const canSeeAdminTabs = isAdmin(user);
 
-    const allTabs: Tab[] = [
-        { label: "General", path: "", adminOnly: true  },
-        { label: "Manage Certificates", path: "certificates", adminOnly: true },
-        { label: "Web console", path: "console", adminOnly: true },
-        { label: "Configurations", path: "ovpn-file-config", adminOnly: true },
-        { label: "Statistics", path: "statistics" },
-        { label: "Events", path: "events" },
-    ];
-
     const tabs = useMemo(() => {
-        if (canSeeAdminTabs) return allTabs;
-        return allTabs.filter((t) => !t.adminOnly);
+        if (canSeeAdminTabs) return ALL_SERVER_TABS;
+        return ALL_SERVER_TABS.filter((t) => !t.adminOnly);
     }, [canSeeAdminTabs]);
 
     const currentPath =

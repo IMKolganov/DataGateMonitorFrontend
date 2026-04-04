@@ -5,6 +5,8 @@ import type { RegisterUserRequest } from "../../api/orval/model";
 import { FaUserPlus } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
 import "../../css/Login.css";
+import axios from "axios";
+import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -46,36 +48,34 @@ const RegisterPage: React.FC = () => {
       await postApiAuthRegister(req);
 
       navigate("/login", { replace: true, state: { registered: true } });
-    } catch (err: any) {
+    } catch (err: unknown) {
       let detailedMessage = "Registration failed.";
 
-      if (err.response) {
-        const status = err.response.status;
-        const data = err.response.data;
+      if (axios.isAxiosError(err)) {
+        if (err.response) {
+          const status = err.response.status;
+          const m = axiosResponseDataMessage(err.response.data);
 
-        if (status >= 400 && status < 500) {
+          if (status >= 400 && status < 500) {
+            detailedMessage = m ?? "Please check your input and try again.";
+          } else {
+            detailedMessage = m ?? "Server error. Please try again later.";
+          }
+        } else if (err.request) {
           detailedMessage =
-            data?.message ??
-            data?.errorMessage ??
-            "Please check your input and try again.";
-        } else {
-          detailedMessage =
-            data?.message ??
-            data?.errorMessage ??
-            "Server error. Please try again later.";
+            "Could not connect to the server. Please ensure it is running.";
+        } else if (err.message) {
+          detailedMessage = `Error: ${err.message}`;
         }
-      } else if (err.request) {
-        detailedMessage =
-          "Could not connect to the server. Please ensure it is running.";
-      } else if (err.message) {
-        detailedMessage = `Error: ${err.message}`;
-      }
 
-      if (err.config?.url && !err.response) {
-        const fullUrl = err.config.baseURL
-          ? `${err.config.baseURL}${err.config.url}`
-          : err.config.url;
-        detailedMessage += ` You can try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${fullUrl}</a> in your browser.`;
+        if (err.config?.url && !err.response) {
+          const fullUrl = err.config.baseURL
+            ? `${err.config.baseURL}${err.config.url}`
+            : err.config.url;
+          detailedMessage += ` You can try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${fullUrl}</a> in your browser.`;
+        }
+      } else {
+        detailedMessage = `Error: ${errorMessage(err)}`;
       }
 
       setError(detailedMessage);

@@ -9,26 +9,29 @@ import {
   usePostApiApplicationsRegister,
 } from "../api/orval/applications/applications";
 import type { RegisterApplicationRequest, ApplicationDto } from "../api/orval/model";
+import axios from "axios";
+import { errorMessage as formatError } from "../utils/errorMessage";
 
 // Normalizes different API response shapes into ApplicationDto[]
 function extractApps(raw: unknown): ApplicationDto[] {
   if (!raw) return [];
+  if (Array.isArray(raw)) return raw as ApplicationDto[];
 
-  const obj = raw as any;
+  const obj = raw as Record<string, unknown>;
+  const data = obj["data"] as Record<string, unknown> | undefined;
   const candidates = [
-    obj?.applications,
-    obj?.application,
-    obj?.data?.applications,
-    obj?.data?.application,
-    Array.isArray(obj) ? obj : null,
+    obj["applications"],
+    obj["application"],
+    data?.["applications"],
+    data?.["application"],
   ];
 
   for (const c of candidates) {
     if (Array.isArray(c)) return c as ApplicationDto[];
   }
 
-  const firstArray = Object.values(obj).find(Array.isArray);
-  if (Array.isArray(firstArray)) return firstArray as ApplicationDto[];
+  const firstArray = Object.values(obj).find((v): v is unknown[] => Array.isArray(v));
+  if (firstArray) return firstArray as ApplicationDto[];
 
   return [];
 }
@@ -76,25 +79,34 @@ export function ApplicationSettings() {
       const res = await registerMutation.mutateAsync({ data: body });
 
       const createdList = extractApps(res);
+      const resRec = res && typeof res === "object" && res !== null ? (res as Record<string, unknown>) : null;
+      const single =
+        resRec && !Array.isArray(res) ? resRec["application"] : undefined;
       const created =
         createdList[0] ??
-        (res as any)?.application ??
+        (Array.isArray(single) ? single[0] : single) ??
         (Array.isArray(res) ? res[0] : res);
 
-      if (!created?.clientId) {
+      if (!created || typeof created !== "object" || !("clientId" in created) || !created.clientId) {
         throw new Error("Invalid response from server");
       }
 
-      setApps((prev) => [...prev, created]);
+      setApps((prev) => [...prev, created as ApplicationDto]);
       setNewAppName("");
       await refetch();
-    } catch (e: any) {
-      setErrorMessage(
-        e?.response?.data?.error ||
-          e?.response?.data?.message ||
-          e?.message ||
-          "Failed to register application"
-      );
+    } catch (e: unknown) {
+      let msg = "Failed to register application";
+      if (axios.isAxiosError(e)) {
+        const d = e.response?.data;
+        if (d && typeof d === "object" && d !== null) {
+          const r = d as Record<string, unknown>;
+          const err = r["error"] ?? r["message"];
+          if (typeof err === "string") msg = err;
+        } else if (e.message) msg = e.message;
+      } else {
+        msg = formatError(e) || msg;
+      }
+      setErrorMessage(msg);
     }
   };
 

@@ -5,6 +5,8 @@ import type { AdminResetPasswordRequest } from "../../api/orval/model";
 import { FaKey } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
 import "../../css/Login.css";
+import axios from "axios";
+import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
 const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -46,13 +48,13 @@ const ResetPasswordPage: React.FC = () => {
       await postApiAuthResetPassword(req);
       setSuccess(true);
       setTimeout(() => navigate("/login", { replace: true }), 2500);
-    } catch (err: any) {
-      const msg =
-        err.response?.data?.message ??
-        err.response?.data?.errorMessage ??
-        err.message ??
-        "Password reset failed.";
-      setError(msg);
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err)
+        ? axiosResponseDataMessage(err.response?.data) ??
+          err.message ??
+          "Password reset failed."
+        : errorMessage(err);
+      setError(msg || "Password reset failed.");
     } finally {
       setLoading(false);
     }

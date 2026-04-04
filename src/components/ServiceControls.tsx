@@ -33,17 +33,22 @@ function toMs(v: unknown): number | null {
   return null;
 }
 
+/** SignalR may add fields not present on the OpenAPI DTO. */
+type ServiceStatusDtoLive = ServiceStatusDto & {
+  nextRunInSeconds?: number;
+};
+
 function getNextRunSeconds(entries: ServiceStatusDto[]): number | null {
   // 1) Prefer nextRunInSeconds if backend ever sends it (common with SignalR push)
   const secondsCandidates = entries
-      .map((e) => (e as any)?.nextRunInSeconds)
-      .filter((x: unknown) => typeof x === "number" && Number.isFinite(x) && x >= 0) as number[];
+      .map((e) => (e as ServiceStatusDtoLive).nextRunInSeconds)
+      .filter((x: unknown): x is number => typeof x === "number" && Number.isFinite(x) && x >= 0);
 
   if (secondsCandidates.length > 0) return Math.min(...secondsCandidates);
 
   // 2) Fallback to nextRunTime (ISO string)
   const msCandidates = entries
-      .map((e) => toMs((e as any)?.nextRunTime))
+      .map((e) => toMs(e.nextRunTime))
       .filter((x): x is number => typeof x === "number");
 
   if (msCandidates.length === 0) return null;
@@ -69,17 +74,17 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
   }, [entries]);
 
   const anyRunning = useMemo(
-      () => entries.some((e) => normalizeStatus((e as any)?.status) === "Running"),
+      () => entries.some((e) => normalizeStatus(e.status) === "Running"),
       [entries]
   );
 
   const anyError = useMemo(
-      () => entries.some((e) => normalizeStatus((e as any)?.status) === "Error"),
+      () => entries.some((e) => normalizeStatus(e.status) === "Error"),
       [entries]
   );
 
   const anyPending = useMemo(
-      () => entries.some((e) => normalizeStatus((e as any)?.status) === "Pending"),
+      () => entries.some((e) => normalizeStatus(e.status) === "Pending"),
       [entries]
   );
 
@@ -93,7 +98,7 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
       }
 
       const live = entries.filter(
-          (e) => (e as any)?.status !== undefined && (e as any)?.status !== null,
+          (e) => e.status !== undefined && e.status !== null,
       );
       const sec = getNextRunSeconds(live);
       setTimeLeft(sec);

@@ -1,6 +1,7 @@
 // vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import { readFileSync } from "fs";
 import { visualizer } from "rollup-plugin-visualizer";
 
@@ -8,6 +9,7 @@ const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
 
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     react(),
     visualizer({
       filename: "dist/stats.html",
@@ -22,13 +24,13 @@ export default defineConfig({
     port: Number(process.env.VITE_PORT) || 5582,
     proxy: {
       "/api/hubs": {
-        target: "https://dev-api.datagateapp.com",
+        target: "http://localhost:5581",
         changeOrigin: true,
         secure: false,
         ws: true,
       },
       "/api": {
-        target: "https://dev-api.datagateapp.com/",
+        target: "http://localhost:5581",
         changeOrigin: true,
         secure: false,
         ws: true,

@@ -22,7 +22,10 @@ const safeFormatDate = (input?: string | null): string => {
 import "../../css/Table.css";
 
 // Accept both wrapped and plain items
-type OvpnRowInput = { issuedOvpnFile?: IssuedOvpnFileDto } | Record<string, any> | IssuedOvpnFileDto;
+export type OvpnRowInput =
+  | { issuedOvpnFile?: IssuedOvpnFileDto }
+  | Record<string, unknown>
+  | IssuedOvpnFileDto;
 
 interface Props {
   ovpnFiles: OvpnRowInput[];
@@ -38,7 +41,7 @@ function unwrapOvpnItem(x: OvpnRowInput): IssuedOvpnFileDto | null {
   if ((x as IssuedOvpnFileDto).commonName != null || (x as IssuedOvpnFileDto).id != null) {
     return x as IssuedOvpnFileDto;
   }
-  const any = x as any;
+  const rec = x as Record<string, unknown>;
   // common wrapper keys we might see from various backends/mappers
   const candidates = [
     "issuedOvpnFile",
@@ -50,11 +53,18 @@ function unwrapOvpnItem(x: OvpnRowInput): IssuedOvpnFileDto | null {
     "data",
   ];
   for (const k of candidates) {
-    const v = any?.[k];
-    if (v && (v.commonName != null || v.id != null)) return v as IssuedOvpnFileDto;
+    const v = rec[k];
+    if (v && typeof v === "object" && v !== null) {
+      const o = v as IssuedOvpnFileDto;
+      if (o.commonName != null || o.id != null) return o;
+    }
   }
   // sometimes nested deeper
-  if (any?.payload?.issuedOvpnFile) return any.payload.issuedOvpnFile as IssuedOvpnFileDto;
+  const payload = rec["payload"];
+  if (payload && typeof payload === "object" && payload !== null) {
+    const nested = (payload as Record<string, unknown>)["issuedOvpnFile"];
+    if (nested && typeof nested === "object") return nested as IssuedOvpnFileDto;
+  }
   return null;
 }
 

@@ -4,6 +4,7 @@ import { FaDatabase } from "react-icons/fa";
 import * as signalR from "@microsoft/signalr";
 import { toast } from "react-toastify";
 import type { GetVersionDatabaseResponse } from "../api/orval/model";
+import { errorMessage } from "../utils/errorMessage";
 
 
 // ⬇️ adjust the import path if your orval file lives elsewhere
@@ -24,9 +25,7 @@ type StepProgressPayload = {
 // IMPORTANT: update the hub URL to match your backend.
 function buildGeoLiteHubConnection(): signalR.HubConnection {
   const baseUrl =
-    (import.meta as any).env?.VITE_API_BASE_URL ??
-    (window as any).__API_BASE_URL__ ??
-    "";
+    import.meta.env.VITE_API_BASE_URL ?? window.__API_BASE_URL__ ?? "";
   return new signalR.HubConnectionBuilder()
     .withUrl(`${baseUrl}/hubs/geolite`)
     .withAutomaticReconnect()
@@ -52,10 +51,8 @@ export function GeoLiteDbDownloader() {
     isPending: isUpdatingRequest,
   } = usePostApiGeoLiteUpdateDb({
     mutation: {
-      onError: (err: any) => {
-        const msg =
-          err?.response?.data?.error || err?.message || "Unknown error";
-        toast.error(msg);
+      onError: (err: unknown) => {
+        toast.error(errorMessage(err));
       },
     },
   });
@@ -123,7 +120,7 @@ export function GeoLiteDbDownloader() {
           updateRunningRef.current = false;
           forceRerender();
         });
-      } catch (err) {
+      } catch {
         if (!isMounted) return;
       }
     };

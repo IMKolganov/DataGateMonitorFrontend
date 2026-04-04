@@ -6,6 +6,7 @@ import StyledDataGrid from "./ui/TableStyle.tsx";
 import CustomThemeProvider from "./ui/ThemeProvider.tsx";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
 import "../css/Table.css";
+import { errorMessage } from "../utils/errorMessage";
 
 import {
   useGetApiOpenVpnClientsOverviewUsers,
@@ -136,7 +137,7 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
             slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
             localeText={{
               noRowsLabel: isError
-                ? `❗ ${(error as any)?.message ?? "Failed to load users"}`
+                ? `❗ ${error ? errorMessage(error) : "Failed to load users"}`
                 : "📭 No users in selection",
             }}
           />
