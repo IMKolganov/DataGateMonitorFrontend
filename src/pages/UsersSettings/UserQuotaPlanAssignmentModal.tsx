@@ -91,7 +91,6 @@ export function UserQuotaPlanAssignmentModal({
               className="input"
               required
               defaultValue={initialQuotaPlanId}
-              disabled={isEdit}
             >
               {plans.map((p) => (
                 <option key={p.id} value={p.id ?? 0}>

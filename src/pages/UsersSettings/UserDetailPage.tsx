@@ -383,27 +383,25 @@ export function UserDetailPage() {
         <p className="settings-item-description">
           Assign quota plans to this user. Effective from/to define the period when the plan applies.
         </p>
-        {userAssignments.length === 0 && (
-          <div className="header-bar" style={{ marginBottom: 12 }}>
-            <div className="left-buttons">
-              <button
-                type="button"
-                className="btn primary"
-                onClick={() => {
-                  setEditingAssignment(null);
-                  setAssignmentModalOpen(true);
-                }}
-                disabled={
-                  quotaPlans.length === 0 ||
-                  createAssignmentMutation.isPending ||
-                  updateAssignmentMutation.isPending
-                }
-              >
-                <FaPlus className="icon" /> Assign plan
-              </button>
-            </div>
+        <div className="header-bar" style={{ marginBottom: 12 }}>
+          <div className="left-buttons">
+            <button
+              type="button"
+              className="btn primary"
+              onClick={() => {
+                setEditingAssignment(null);
+                setAssignmentModalOpen(true);
+              }}
+              disabled={
+                quotaPlans.length === 0 ||
+                createAssignmentMutation.isPending ||
+                updateAssignmentMutation.isPending
+              }
+            >
+              <FaPlus className="icon" /> Assign plan
+            </button>
           </div>
-        )}
+        </div>
         {userAssignments.length === 0 ? (
           <p style={{ color: "#8b949e" }}>No assignments. Click «Assign plan» to add one.</p>
         ) : (
