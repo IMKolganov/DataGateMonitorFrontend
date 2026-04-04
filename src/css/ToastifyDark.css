@@ -1,6 +1,19 @@
 /* Toast container */
 .Toastify__toast-container {
     font-family: "Segoe UI", sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Avoid 1px horizontal scrollbar on long messages / flex layout */
+  .Toastify__toast {
+    overflow-x: hidden;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .Toastify__toast-body {
+    overflow-x: hidden;
+    min-width: 0;
   }
   
   /* Dark background with light text */
