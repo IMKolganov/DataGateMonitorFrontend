@@ -9,15 +9,24 @@ import {
 } from "react-icons/fa";
 import { BsClock, BsFillBookmarkStarFill, BsTag, BsLink45Deg, BsHddNetwork } from "react-icons/bs";
 import { IoMdPerson } from "react-icons/io";
-import type { ServiceStatus, OpenVpnServerWithStatusDto } from "../../api/orval/model";
+import type {
+    ServiceStatus,
+    OpenVpnServerV2Dto,
+    OpenVpnServerWithStatusDto,
+    OpenVpnServerWithStatusV2Dto,
+} from "../../api/orval/model";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 
 interface Props {
-    server: OpenVpnServerWithStatusDto;
+    /** v2 includes quota plan groups and accessibility; v1 kept for detail pages still on legacy GET. */
+    server: OpenVpnServerWithStatusDto | OpenVpnServerWithStatusV2Dto;
     vpnServerId: number;
-    serviceStatus: ServiceStatus;
+    /** null until the status-stream hub sends service status for this server. */
+    serviceStatus: ServiceStatus | null;
     errorMessage: string | null;
     nextRunTime: string;
+    /** null = use REST isOnline; true/false = live override from hub when backend sends IsOnline. */
+    wsOnline: boolean | null;
 
     wsCountConnectedClients?: number | null;
     wsCountSessions?: number | null;
@@ -42,7 +51,14 @@ const formatUtcDate = (utc: string | null | undefined) => {
     }
 };
 
-const getStatusLabel = (status: ServiceStatus) => {
+const getStatusLabel = (status: ServiceStatus | null) => {
+    if (status === null) {
+        return (
+            <span className="status-indicator idle" title="Waiting for live status from the background service">
+                <BsClock className="status-icon" /> Service status: …
+            </span>
+        );
+    }
     const s = Number(status);
     if (s === 1) {
         return (
@@ -78,6 +94,7 @@ const ServerItem: React.FC<Props> = ({
                                          serviceStatus,
                                          errorMessage,
                                          nextRunTime,
+                                         wsOnline,
                                          wsCountConnectedClients,
                                          onView,
                                          onEdit,
@@ -94,7 +111,8 @@ const ServerItem: React.FC<Props> = ({
         vpnServerId;
 
     const name = openVpnServer?.serverName ?? "";
-    const isOnline = !!openVpnServer?.isOnline;
+    const isOnlineFromApi = !!openVpnServer?.isOnline;
+    const isOnline = wsOnline === null ? isOnlineFromApi : wsOnline;
     const isDefault = !!openVpnServer?.isDefault;
 
     const connectedClients =
@@ -104,6 +122,10 @@ const ServerItem: React.FC<Props> = ({
     const statusLog = server.openVpnServerStatusLogResponse;
     const serverIp = statusLog?.serverRemoteIp ?? statusLog?.serverLocalIp ?? null;
 
+    const v2Server = openVpnServer as OpenVpnServerV2Dto | null;
+    const quotaPlanGroups = v2Server?.quotaPlanGroups?.filter((g) => g?.name) ?? [];
+    const accessibleByQuotaPlan = v2Server?.isAccessibleForUserQuotaPlan;
+
     return (
         <div className="server-item-content">
             <div className="server-header">
@@ -111,6 +133,20 @@ const ServerItem: React.FC<Props> = ({
                     <strong className="server-name">
                         ({vpnServerId !== 0 ? vpnServerId : resolvedId}) {name}
                     </strong>
+                    {quotaPlanGroups.length > 0 && (
+                        <div
+                            className="server-quota-plans"
+                            style={{ marginTop: 4, fontSize: 11, color: "var(--text-secondary)" }}
+                        >
+                            Quota plans:{" "}
+                            {quotaPlanGroups.map((g) => g?.name).filter(Boolean).join(", ")}
+                        </div>
+                    )}
+                    {accessibleByQuotaPlan === false && !canManage && (
+                        <div style={{ marginTop: 4, fontSize: 11, color: "#f85149" }}>
+                            Not included in your quota plan (view only).
+                        </div>
+                    )}
                 </div>
                 <div className={`server-status ${isOnline ? "status-online" : "status-offline"}`}>
                     {isOnline ? "✅ Online" : "❌ Offline"}

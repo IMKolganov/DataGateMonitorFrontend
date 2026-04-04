@@ -10,7 +10,7 @@ export function getRuntimeEnv() {
     const w = window as EnvWindow;
 
     const runtime = (w.__ENV__ ?? {}) as Record<string, unknown>;
-    const build = ((import.meta as any).env ?? {}) as Record<string, unknown>;
+    const build = import.meta.env as unknown as Record<string, unknown>;
 
     return {
         googleClientId: readString(runtime["VITE_GOOGLE_CLIENT_ID"]) || readString(build["VITE_GOOGLE_CLIENT_ID"]),

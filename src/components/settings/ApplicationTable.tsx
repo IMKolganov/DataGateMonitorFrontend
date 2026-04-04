@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import type { ApplicationDto, RevokeApplicationRequest } from "../../api/orval/model";
 import { usePostApiApplicationsRevoke } from "../../api/orval/applications/applications.ts";
 import "../../css/Table.css";
+import { errorMessage } from "../../utils/errorMessage";
 
 interface ApplicationTableProps {
   applications: ApplicationDto[];
@@ -24,13 +25,8 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
         toast.success("Application revoked");
         refreshApps();
       },
-      onError: (e: any) => {
-        toast.error(
-          e?.response?.data?.error ||
-            e?.response?.data?.message ||
-            e?.message ||
-            "Failed to revoke application."
-        );
+      onError: (e: unknown) => {
+        toast.error(errorMessage(e) || "Failed to revoke application.");
       },
     },
   });

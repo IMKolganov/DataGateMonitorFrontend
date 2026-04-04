@@ -19,6 +19,8 @@ import type {
     VpnClientInfoDto,
     OpenVpnServerWithStatusDto,
     OpenVpnServerDto,
+    OpenVpnServerWithStatusResponse,
+    OpenVpnServerResponse,
 } from "../api/orval/model";
 
 import {
@@ -27,6 +29,14 @@ import {
 } from "../api/orval/open-vpn-servers/open-vpn-servers";
 import { useGetApiOpenVpnConfigsGetVpnServerId } from "../api/orval/open-vpn-server-ovpn-file-config/open-vpn-server-ovpn-file-config";
 import { useGetApiOpenVpnServersConflogHistoryByServerVpnServerId } from "../api/orval/open-vpn-server-conflog/open-vpn-server-conflog";
+import { usePostApiQuotaPlansGetAll } from "../api/orval/quota-plan/quota-plan";
+import {
+    useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId,
+    getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey,
+} from "../api/orval/quota-plan-allowed-server/quota-plan-allowed-server";
+import { useQueryClient } from "@tanstack/react-query";
+import type { QuotaPlansResponse, QuotaPlanAllowedServerDto } from "../api/orval/model";
+import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 
 type ConflogPayload = {
     application?: string | null;
@@ -46,20 +56,77 @@ const ServerDetailsInfo = ServerDetailsInfoDefault as ComponentType<{
     configIp?: string | null;
     configPort?: number | null;
     latestConflogPayload?: ConflogPayload | null;
+    quotaPlanLabels?: string[] | null;
 }>;
+
+function getAllowedItemsByVpnServer(raw: unknown): QuotaPlanAllowedServerDto[] {
+    if (raw == null) return [];
+    const r = raw as Record<string, unknown>;
+    if (Array.isArray(r.items)) return r.items as QuotaPlanAllowedServerDto[];
+    const data = r.data as Record<string, unknown> | undefined;
+    if (data && Array.isArray(data.items)) return data.items as QuotaPlanAllowedServerDto[];
+    const unwrapped = unwrapMaybeApiResponse<{ items?: QuotaPlanAllowedServerDto[] | null }>(raw as never);
+    return unwrapped?.items ?? [];
+}
 
 export function GeneralServerDetails() {
     const { vpnServerId } = useParams<{ vpnServerId?: string }>();
+    const queryClient = useQueryClient();
 
     const [isLive, setIsLive] = useState(true);
     const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [totalClients, setTotalClients] = useState(0);
+    const [planNameById, setPlanNameById] = useState<Map<number, string>>(new Map());
 
     const numericServerId = useMemo(
         () => (vpnServerId ? Number(vpnServerId) : undefined),
         [vpnServerId]
     );
+
+    const getPlansMutation = usePostApiQuotaPlansGetAll();
+
+    useEffect(() => {
+        getPlansMutation.mutate(
+            { data: { includeInactive: true } },
+            {
+                onSuccess: (raw) => {
+                    const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(raw as never);
+                    const m = new Map<number, string>();
+                    for (const p of payload?.quotaPlans ?? []) {
+                        if (p.id == null) continue;
+                        const label =
+                            (p.name?.trim() || `Plan #${p.id}`) +
+                            (p.isActive === false ? " (inactive)" : "");
+                        m.set(p.id, label);
+                    }
+                    setPlanNameById(m);
+                },
+            }
+        );
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- mutation result reference is unstable; `mutate` is stable (TanStack Query v5)
+    }, [getPlansMutation.mutate]);
+
+    const { data: allowedByVpnRaw } = useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId(
+        numericServerId ?? 0,
+        {
+            query: {
+                enabled: Number.isFinite(numericServerId) && (numericServerId ?? 0) > 0,
+            },
+        }
+    );
+
+    const quotaPlanLabels = useMemo(() => {
+        if (!Number.isFinite(numericServerId)) return [];
+        const items = getAllowedItemsByVpnServer(allowedByVpnRaw);
+        const labels: string[] = [];
+        for (const item of items) {
+            const qid = item.quotaPlanId;
+            if (qid == null) continue;
+            labels.push(planNameById.get(qid) ?? `Plan #${qid}`);
+        }
+        return labels;
+    }, [numericServerId, allowedByVpnRaw, planNameById]);
 
     const connectedParams: GetApiOpenVpnClientsGetAllConnectedParams = useMemo(
         () => ({
@@ -98,9 +165,10 @@ export function GeneralServerDetails() {
     const loadingClients =
         (isLive ? connectedQuery.isFetching : historyQuery.isFetching) ?? false;
 
-    const activeClientsResponse: ConnectedClientsResponse | undefined = isLive
-        ? connectedQuery.data
-        : historyQuery.data;
+    const activeClientsResponse =
+        (isLive ? connectedQuery.data : historyQuery.data) as unknown as
+            | ConnectedClientsResponse
+            | undefined;
 
     const clients: VpnClientInfoDto[] = activeClientsResponse?.vpnClients ?? [];
 
@@ -152,12 +220,16 @@ export function GeneralServerDetails() {
 
     const loadingServer = serverWithStatusQuery.isFetching || serverBasicQuery.isFetching;
 
+    const serverWithStatusPayload = serverWithStatusQuery.data as unknown as
+        | OpenVpnServerWithStatusResponse
+        | undefined;
     const serverWithStatus: OpenVpnServerWithStatusDto | undefined =
-        serverWithStatusQuery.data?.openVpnServerWithStatus;
+        serverWithStatusPayload?.openVpnServerWithStatus;
+
+    const serverBasicPayload = serverBasicQuery.data as unknown as OpenVpnServerResponse | undefined;
 
     const serverEntity: OpenVpnServerDto | undefined =
-        serverWithStatus?.openVpnServerResponses?.openVpnServer ??
-        serverBasicQuery.data?.openVpnServer;
+        serverWithStatus?.openVpnServerResponses?.openVpnServer ?? serverBasicPayload?.openVpnServer;
 
     const serverLocation = useMemo<[number, number] | null>(() => {
         const lat = serverEntity?.latitude;
@@ -170,12 +242,16 @@ export function GeneralServerDetails() {
     const serverName = serverEntity?.serverName ?? null;
 
     const serverInfo = useMemo(() => {
-        if (serverWithStatusQuery.data?.openVpnServerWithStatus) {
-            return serverWithStatusQuery.data.openVpnServerWithStatus;
+        const withStatus = serverWithStatusQuery.data as unknown as
+            | OpenVpnServerWithStatusResponse
+            | undefined;
+        if (withStatus?.openVpnServerWithStatus) {
+            return withStatus.openVpnServerWithStatus;
         }
 
-        if (serverBasicQuery.data) {
-            return serverBasicQuery.data;
+        const basic = serverBasicQuery.data as unknown as OpenVpnServerResponse | undefined;
+        if (basic) {
+            return basic;
         }
 
         return null;
@@ -192,6 +268,14 @@ export function GeneralServerDetails() {
         serverWithStatusQuery.refetch();
         serverBasicQuery.refetch();
         latestConflogQuery.refetch();
+
+        if (Number.isFinite(numericServerId)) {
+            queryClient.invalidateQueries({
+                queryKey: getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey(
+                    numericServerId!
+                ),
+            });
+        }
     };
 
     const toHumanReadableSize = (bytes: number = 0): string => {
@@ -233,6 +317,7 @@ export function GeneralServerDetails() {
                 configIp={configIp}
                 configPort={configPort}
                 latestConflogPayload={latestConflogPayload}
+                quotaPlanLabels={quotaPlanLabels}
             />
 
             <h3>

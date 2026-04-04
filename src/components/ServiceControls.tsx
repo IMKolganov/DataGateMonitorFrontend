@@ -9,9 +9,10 @@ type Props = {
   onRunNow: () => void;
 };
 
-type UiStatus = "Idle" | "Running" | "Error";
+type UiStatus = "Idle" | "Running" | "Error" | "Pending";
 
 function normalizeStatus(s?: ServiceStatus | string | number | null): UiStatus {
+  if (s === undefined || s === null) return "Pending";
   if (s === 1 || s === "Running" || s === "running") return "Running";
   if (s === 2 || s === "Error" || s === "error") return "Error";
   return "Idle";
@@ -32,17 +33,22 @@ function toMs(v: unknown): number | null {
   return null;
 }
 
+/** SignalR may add fields not present on the OpenAPI DTO. */
+type ServiceStatusDtoLive = ServiceStatusDto & {
+  nextRunInSeconds?: number;
+};
+
 function getNextRunSeconds(entries: ServiceStatusDto[]): number | null {
   // 1) Prefer nextRunInSeconds if backend ever sends it (common with SignalR push)
   const secondsCandidates = entries
-      .map((e) => (e as any)?.nextRunInSeconds)
-      .filter((x: unknown) => typeof x === "number" && Number.isFinite(x) && x >= 0) as number[];
+      .map((e) => (e as ServiceStatusDtoLive).nextRunInSeconds)
+      .filter((x: unknown): x is number => typeof x === "number" && Number.isFinite(x) && x >= 0);
 
   if (secondsCandidates.length > 0) return Math.min(...secondsCandidates);
 
   // 2) Fallback to nextRunTime (ISO string)
   const msCandidates = entries
-      .map((e) => toMs((e as any)?.nextRunTime))
+      .map((e) => toMs(e.nextRunTime))
       .filter((x): x is number => typeof x === "number");
 
   if (msCandidates.length === 0) return null;
@@ -68,12 +74,17 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
   }, [entries]);
 
   const anyRunning = useMemo(
-      () => entries.some((e) => normalizeStatus((e as any)?.status) === "Running"),
+      () => entries.some((e) => normalizeStatus(e.status) === "Running"),
       [entries]
   );
 
   const anyError = useMemo(
-      () => entries.some((e) => normalizeStatus((e as any)?.status) === "Error"),
+      () => entries.some((e) => normalizeStatus(e.status) === "Error"),
+      [entries]
+  );
+
+  const anyPending = useMemo(
+      () => entries.some((e) => normalizeStatus(e.status) === "Pending"),
       [entries]
   );
 
@@ -86,7 +97,10 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
         return;
       }
 
-      const sec = getNextRunSeconds(entries);
+      const live = entries.filter(
+          (e) => e.status !== undefined && e.status !== null,
+      );
+      const sec = getNextRunSeconds(live);
       setTimeLeft(sec);
     };
 
@@ -98,14 +112,16 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
   const statusDescription = useMemo(() => {
     if (anyRunning) return "The service is currently running.";
     if (anyError) return "There is an error with the service.";
+    if (anyPending) return "Waiting for live status from the background service (WebSocket).";
     return "The service is idle.";
-  }, [anyRunning, anyError]);
+  }, [anyRunning, anyError, anyPending]);
 
   const statusColor = useMemo(() => {
     if (anyRunning) return "#1E90FF";
     if (anyError) return "red";
+    if (anyPending) return "#8b949e";
     return "green";
-  }, [anyRunning, anyError]);
+  }, [anyRunning, anyError, anyPending]);
 
   return (
       <div className="service-status-container">

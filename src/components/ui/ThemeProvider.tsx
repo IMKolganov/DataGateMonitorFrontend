@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { ThemeProvider as MuiThemeProvider, createTheme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import type {} from "@mui/x-data-grid/themeAugmentation";
-import { useTheme } from "../../contexts/ThemeContext";
+import { useTheme } from "../../contexts/useTheme";
 
 const darkPalette = {
   mode: "dark" as const,

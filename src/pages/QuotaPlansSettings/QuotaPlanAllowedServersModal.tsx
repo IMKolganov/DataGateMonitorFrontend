@@ -5,10 +5,14 @@ import {
   usePostApiQuotaPlanAllowedServersCreate,
   useDeleteApiQuotaPlanAllowedServersDeleteId,
 } from "../../api/orval/quota-plan-allowed-server/quota-plan-allowed-server";
-import { useGetApiOpenVpnServersGetAll } from "../../api/orval/open-vpn-servers/open-vpn-servers";
+import {
+  useGetApiV2OpenVpnServersGetAll,
+  getGetApiV2OpenVpnServersGetAllQueryKey,
+  getGetApiV2OpenVpnServersGetAllWithStatusQueryKey,
+} from "../../api/orval/open-vpn-servers-v2/open-vpn-servers-v2";
 import type {
   QuotaPlanAllowedServerDto,
-  OpenVpnServersResponse,
+  OpenVpnServersV2Response,
   GetQuotaPlanAllowedServersByQuotaPlanIdResponse,
 } from "../../api/orval/model";
 import { useQueryClient } from "@tanstack/react-query";
@@ -36,9 +40,9 @@ export function QuotaPlanAllowedServersModal({
   const allowed: QuotaPlanAllowedServerDto[] =
     (allowedData as GetQuotaPlanAllowedServersByQuotaPlanIdResponse | undefined)?.items ?? [];
 
-  const { data: serversData } = useGetApiOpenVpnServersGetAll();
+  const { data: serversData } = useGetApiV2OpenVpnServersGetAll({});
   const servers =
-    (serversData as OpenVpnServersResponse | undefined)?.openVpnServers ?? [];
+    (serversData as OpenVpnServersV2Response | undefined)?.openVpnServers ?? [];
 
   const createMutation = usePostApiQuotaPlanAllowedServersCreate();
   const deleteMutation = useDeleteApiQuotaPlanAllowedServersDeleteId();
@@ -50,12 +54,17 @@ export function QuotaPlanAllowedServersModal({
     (s) => s.id != null && !allowedVpnServerIds.has(s.id)
   );
 
-  const invalidate = () =>
+  const invalidate = () => {
     queryClient.invalidateQueries({
       queryKey: getGetApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdQueryKey(
         planId
       ),
     });
+    queryClient.invalidateQueries({ queryKey: getGetApiV2OpenVpnServersGetAllQueryKey(undefined) });
+    queryClient.invalidateQueries({
+      queryKey: getGetApiV2OpenVpnServersGetAllWithStatusQueryKey(undefined),
+    });
+  };
 
   const handleAdd = (vpnServerId: number) => {
     createMutation.mutate(

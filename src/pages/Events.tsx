@@ -11,20 +11,11 @@ import {
   useGetApiOpenVpnEventsGetByServer,
   getApiOpenVpnEventsGetByServer,
 } from "../api/orval/open-vpn-server-event/open-vpn-server-event";
+import type { OpenVpnServerEventLogDto } from "../api/orval/model";
 
-// --- Type helpers derived from orval output ---
 // Resp is already unwrapped by ogmMutator (ApiResponse<T> -> T)
 type Resp = Awaited<ReturnType<typeof getApiOpenVpnEventsGetByServer>>;
-
-// Try to extract item shape from several possible server response shapes
-type ExtractItem<T> =
-  T extends { events: { items: infer A } } ? (A extends Array<infer I> ? I : never) :
-  T extends { events: infer A } ? (A extends Array<infer I> ? I : never) :
-  T extends { items: infer A } ? (A extends Array<infer I> ? I : never) :
-  T extends Array<infer I> ? I :
-  never;
-
-type Item = ExtractItem<Resp>;
+type Item = OpenVpnServerEventLogDto;
 
 type Normalized<TItem> = {
   items: TItem[];
@@ -64,31 +55,50 @@ const formatDuration = (s?: number | null) => {
 
 // Normalize different possible response shapes into a stable struct
 function normalize<TItem = Item>(raw: Resp): Normalized<TItem> {
-  // primary containers we might see
-  const top: any = raw ?? {};
-  const events = top.events ?? top;
+  const rawU: unknown = raw ?? {};
+  const events: unknown = Array.isArray(rawU)
+    ? rawU
+    : (rawU as Record<string, unknown>)["events"] ?? rawU;
 
-  let items: any[] | undefined =
-    Array.isArray(events?.items) ? events.items :
-    Array.isArray(events) ? events :
-    Array.isArray(top?.items) ? top.items :
-    Array.isArray(top) ? top :
-    [];
+  const topRec =
+    !Array.isArray(rawU) && rawU !== null && typeof rawU === "object"
+      ? (rawU as Record<string, unknown>)
+      : null;
+
+  const items: unknown[] = (() => {
+    if (events !== null && typeof events === "object" && !Array.isArray(events)) {
+      const ev = events as Record<string, unknown>;
+      if (Array.isArray(ev["items"])) return ev["items"] as unknown[];
+    }
+    if (Array.isArray(events)) return events;
+    if (topRec && Array.isArray(topRec["items"])) return topRec["items"] as unknown[];
+    if (Array.isArray(rawU)) return rawU;
+    return [];
+  })();
+
+  const evRec =
+    events !== null && typeof events === "object" && !Array.isArray(events)
+      ? (events as Record<string, unknown>)
+      : null;
 
   const totalCount: number =
-    typeof events?.totalCount === "number" ? events.totalCount :
-    typeof top?.totalCount === "number" ? top.totalCount :
-    items?.length;
+    (typeof evRec?.["totalCount"] === "number" ? evRec["totalCount"] : undefined) ??
+    (typeof topRec?.["totalCount"] === "number" ? topRec["totalCount"] : undefined) ??
+    items.length;
 
   const page: number | undefined =
-    typeof events?.page === "number" ? events.page :
-    typeof top?.page === "number" ? top.page :
-    undefined;
+    typeof evRec?.["page"] === "number"
+      ? evRec["page"]
+      : typeof topRec?.["page"] === "number"
+        ? topRec["page"]
+        : undefined;
 
   const pageSize: number | undefined =
-    typeof events?.pageSize === "number" ? events.pageSize :
-    typeof top?.pageSize === "number" ? top.pageSize :
-    undefined;
+    typeof evRec?.["pageSize"] === "number"
+      ? evRec["pageSize"]
+      : typeof topRec?.["pageSize"] === "number"
+        ? topRec["pageSize"]
+        : undefined;
 
   return { items: items as TItem[], totalCount, page, pageSize };
 }
@@ -142,7 +152,7 @@ const Events: React.FC = () => {
   }, [resp]);
 
   const rows = useMemo(() => {
-    return normalized.items.map((e: any, idx: number) => ({
+    return normalized.items.map((e: Item, idx: number) => ({
       id: Number(e?.id ?? idx + 1),
       eventType: String(e?.eventType ?? ""),
       commonName: e?.commonName ?? "",

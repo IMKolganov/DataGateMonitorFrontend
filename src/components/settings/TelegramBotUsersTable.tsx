@@ -46,7 +46,11 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
     if (!telegramId) return;
     setMutationLoading(true);
     try {
-      isBlocked ? await unblockUser(telegramId) : await blockUser(telegramId);
+      if (isBlocked) {
+        await unblockUser(telegramId);
+      } else {
+        await blockUser(telegramId);
+      }
       await refreshUsers();
     } finally {
       setMutationLoading(false);
@@ -57,7 +61,11 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
     if (!telegramId) return;
     setMutationLoading(true);
     try {
-      isAdmin ? await unsetAdmin(telegramId) : await setAdmin(telegramId);
+      if (isAdmin) {
+        await unsetAdmin(telegramId);
+      } else {
+        await setAdmin(telegramId);
+      }
       await refreshUsers();
     } finally {
       setMutationLoading(false);

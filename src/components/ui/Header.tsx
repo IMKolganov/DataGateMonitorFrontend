@@ -6,7 +6,7 @@ import { FaBell, FaDoorClosed, FaSun, FaMoon } from "react-icons/fa";
 import { logout } from "../../api/apirequest.ts";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { useNotificationsUnreadCount } from "../../pages/Notifications/useNotifications";
-import { useTheme } from "../../contexts/ThemeContext";
+import { useTheme } from "../../contexts/useTheme";
 
 export function Header() {
     const [menuOpen, setMenuOpen] = useState(false);

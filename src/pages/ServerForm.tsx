@@ -32,34 +32,157 @@ import type {
   UpdateServerRequest,
   OpenVpnServerDto,
   OvpnFileConfigResponse,
+  QuotaPlanDto,
+  QuotaPlansResponse,
+  QuotaPlanAllowedServerDto,
+  OpenVpnServerResponse,
 } from "../api/orval/model";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
+import { usePostApiQuotaPlansGetAll } from "../api/orval/quota-plan/quota-plan";
+import {
+  useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId,
+  postApiQuotaPlanAllowedServersCreate,
+  deleteApiQuotaPlanAllowedServersDeleteId,
+  getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey,
+} from "../api/orval/quota-plan-allowed-server/quota-plan-allowed-server";
+import { getGetApiV2OpenVpnServersGetAllWithStatusQueryKey } from "../api/orval/open-vpn-servers-v2/open-vpn-servers-v2";
+import {
+  getGetApiOpenVpnServersGetVpnServerIdQueryKey,
+  getGetApiOpenVpnServersGetServerWithStatusVpnServerIdQueryKey,
+} from "../api/orval/open-vpn-servers/open-vpn-servers";
+import type { ApiEnvelope } from "./TelegramBotSettings/unwrapApiResponse";
+import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
+import { errorMessage } from "../utils/errorMessage";
+import axios from "axios";
 
 type GetByIdResult = Awaited<ReturnType<typeof getApiOpenVpnServersGetVpnServerId>>;
+
+function asRecord(v: unknown): Record<string, unknown> | null {
+  return typeof v === "object" && v !== null ? (v as Record<string, unknown>) : null;
+}
 
 function unwrapServerDto(raw: GetByIdResult | undefined): OpenVpnServerDto | null {
   if (!raw) return null;
 
-  const top: any = raw;
-  const s: any = top?.openVpnServer ?? top?.data?.openVpnServer ?? top;
+  const top = asRecord(raw);
+  if (!top) return null;
+  const data = asRecord(top["data"]);
+  const s =
+    (top["openVpnServer"] as unknown) ??
+    data?.["openVpnServer"] ??
+    raw;
 
   if (!s || typeof s !== "object") return null;
+  const o = s as Record<string, unknown>;
 
   const dto: OpenVpnServerDto = {
-    id: typeof s.id === "number" ? s.id : s.id != null ? Number(s.id) : undefined,
-    serverName: s.serverName ?? null,
-    isOnline: Boolean(s.isOnline ?? false),
-    isDefault: Boolean(s.isDefault ?? false),
-    apiUrl: s.apiUrl ?? null,
-    latitude: s.latitude ?? null,
-    longitude: s.longitude ?? null,
-    isEnableWss: Boolean(s.isEnableWss ?? false),
-    createDate: s.createDate,
-    lastUpdate: s.lastUpdate,
-    tags: Array.isArray(s.tags) ? s.tags : s.tags ?? null,
+    id: typeof o["id"] === "number" ? o["id"] : o["id"] != null ? Number(o["id"]) : undefined,
+    serverName: (o["serverName"] as string | null | undefined) ?? null,
+    isOnline: Boolean(o["isOnline"] ?? false),
+    isDefault: Boolean(o["isDefault"] ?? false),
+    apiUrl: (o["apiUrl"] as string | null | undefined) ?? null,
+    latitude: (o["latitude"] as number | null | undefined) ?? null,
+    longitude: (o["longitude"] as number | null | undefined) ?? null,
+    isEnableWss: Boolean(o["isEnableWss"] ?? false),
+    createDate: o["createDate"] as string | undefined,
+    lastUpdate: o["lastUpdate"] as string | undefined,
+    tags: Array.isArray(o["tags"]) ? o["tags"] : (o["tags"] as string[] | null | undefined) ?? null,
   };
 
   return dto;
+}
+
+function getAllowedItemsByVpnServer(raw: unknown): QuotaPlanAllowedServerDto[] {
+  if (raw == null) return [];
+  const r = raw as Record<string, unknown>;
+  if (Array.isArray(r.items)) return r.items as QuotaPlanAllowedServerDto[];
+  const data = r.data as Record<string, unknown> | undefined;
+  if (data && Array.isArray(data.items)) return data.items as QuotaPlanAllowedServerDto[];
+  const unwrapped = unwrapMaybeApiResponse<{ items?: QuotaPlanAllowedServerDto[] | null }>(
+    raw as
+      | { items?: QuotaPlanAllowedServerDto[] | null }
+      | ApiEnvelope<{ items?: QuotaPlanAllowedServerDto[] | null }>
+      | undefined,
+  );
+  return unwrapped?.items ?? [];
+}
+
+function unwrapNewServerIdFromAdd(raw: unknown): number | null {
+  const top = unwrapMaybeApiResponse<OpenVpnServerResponse>(
+    raw as OpenVpnServerResponse | ApiEnvelope<OpenVpnServerResponse> | undefined,
+  );
+  const rawRec = asRecord(raw);
+  const nested = rawRec ? asRecord(rawRec["data"]) : null;
+  const fromRaw =
+    (rawRec?.["openVpnServer"] as { id?: number } | undefined)?.id ??
+    (nested?.["openVpnServer"] as { id?: number } | undefined)?.id;
+  const id = top?.openVpnServer?.id ?? fromRaw;
+  return typeof id === "number" && id > 0 ? id : null;
+}
+
+async function syncQuotaPlanAssignments(
+  vpnServerId: number,
+  previous: QuotaPlanAllowedServerDto[],
+  selectedPlanIds: number[],
+) {
+  const prevByPlanId = new Map<number, QuotaPlanAllowedServerDto>();
+  for (const link of previous) {
+    if (link.quotaPlanId != null) prevByPlanId.set(link.quotaPlanId, link);
+  }
+  const selected = new Set(selectedPlanIds);
+
+  for (const planId of selected) {
+    if (!prevByPlanId.has(planId)) {
+      await postApiQuotaPlanAllowedServersCreate({ quotaPlanId: planId, vpnServerId });
+    }
+  }
+
+  for (const [planId, link] of prevByPlanId) {
+    if (!selected.has(planId) && link.id != null) {
+      await deleteApiQuotaPlanAllowedServersDeleteId(link.id);
+    }
+  }
+}
+
+function ApiCheckSuccessSummary({ data }: { data: unknown }) {
+  const rec = asRecord(data);
+  const cfg =
+    rec && typeof rec["config"] === "object" && rec["config"] !== null
+      ? asRecord(rec["config"])
+      : null;
+  const version = rec?.["version"];
+  const application = rec?.["application"];
+  return (
+    <div className="api-check-result api-check-success">
+      <div className="api-check-summary">
+        {typeof version === "string" && (
+          <span>
+            <strong>Version:</strong> {version}
+          </span>
+        )}
+        {typeof application === "string" && (
+          <span>
+            <strong>Application:</strong> {application}
+          </span>
+        )}
+        {cfg != null && (
+          <>
+            {cfg["port"] != null && (
+              <span>
+                <strong>Port:</strong> {String(cfg["port"])}
+              </span>
+            )}
+            {cfg["proto"] != null && (
+              <span>
+                <strong>Proto:</strong> {String(cfg["proto"])}
+              </span>
+            )}
+          </>
+        )}
+      </div>
+      <pre className="api-check-json">{JSON.stringify(data, null, 2)}</pre>
+    </div>
+  );
 }
 
 function toNumberOrNull(value: string): number | null {
@@ -87,6 +210,16 @@ const ServerForm: React.FC = () => {
   });
 
   const { data: tagsResp } = useGetApiTagsGetAll();
+
+  const getPlansMutation = usePostApiQuotaPlansGetAll();
+  const [quotaPlans, setQuotaPlans] = React.useState<QuotaPlanDto[]>([]);
+  const [selectedQuotaPlanIds, setSelectedQuotaPlanIds] = React.useState<number[]>([]);
+  const quotaInitForServerRef = React.useRef<number | null>(null);
+
+  const { data: allowedByServerRaw } = useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId(idNum, {
+    query: { enabled: idNum > 0 },
+  });
+
   const allTags = React.useMemo(() => {
     const raw = tagsResp as { tags?: { id?: number; name?: string | null }[]; data?: { tags?: { id?: number; name?: string | null }[] } } | undefined;
     return raw?.tags ?? raw?.data?.tags ?? [];
@@ -151,6 +284,44 @@ const ServerForm: React.FC = () => {
 
   const [copyStatus, setCopyStatus] = React.useState<"Copy" | "Copied!">("Copy");
 
+  React.useEffect(() => {
+    quotaInitForServerRef.current = null;
+    if (!idNum) setSelectedQuotaPlanIds([]);
+  }, [idNum]);
+
+  React.useEffect(() => {
+    getPlansMutation.mutate(
+      { data: { includeInactive: true } },
+      {
+        onSuccess: (raw) => {
+          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(
+            raw as QuotaPlansResponse | ApiEnvelope<QuotaPlansResponse> | undefined,
+          );
+          setQuotaPlans(payload?.quotaPlans ?? []);
+        },
+      }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mutation result reference is unstable; `mutate` is stable (TanStack Query v5)
+  }, [getPlansMutation.mutate]);
+
+  React.useEffect(() => {
+    if (!idNum || !allowedByServerRaw) return;
+    if (quotaInitForServerRef.current === idNum) return;
+    const items = getAllowedItemsByVpnServer(allowedByServerRaw);
+    setSelectedQuotaPlanIds(
+      items
+        .map((i) => i.quotaPlanId)
+        .filter((x): x is number => typeof x === "number")
+    );
+    quotaInitForServerRef.current = idNum;
+  }, [idNum, allowedByServerRaw]);
+
+  const visibleQuotaPlans = React.useMemo(() => {
+    return quotaPlans
+      .filter((p) => p.id != null)
+      .sort((a, b) => String(a.name ?? "").localeCompare(String(b.name ?? "")));
+  }, [quotaPlans]);
+
   const [errors, setErrors] = React.useState<{
     serverName: string;
     vpnServerIp: string;
@@ -201,7 +372,7 @@ const ServerForm: React.FC = () => {
   }, [serverResp, idNum, allTags]);
 
   React.useEffect(() => {
-    const raw = (ovpnConfigData as { data?: OvpnFileConfigResponse })?.data ?? ovpnConfigData;
+    const raw = ovpnConfigData as OvpnFileConfigResponse | undefined;
     if (!raw || typeof raw !== "object") return;
     setOvpnConfig((prev) => ({
       ...prev,
@@ -348,6 +519,17 @@ const ServerForm: React.FC = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
+    const invalidateQuotaCaches = (vpnServerId: number) => {
+      queryClient.invalidateQueries({
+        queryKey: getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey(vpnServerId),
+      });
+      queryClient.invalidateQueries({ queryKey: getGetApiV2OpenVpnServersGetAllWithStatusQueryKey(undefined) });
+      queryClient.invalidateQueries({ queryKey: getGetApiOpenVpnServersGetVpnServerIdQueryKey(vpnServerId) });
+      queryClient.invalidateQueries({
+        queryKey: getGetApiOpenVpnServersGetServerWithStatusVpnServerIdQueryKey(vpnServerId),
+      });
+    };
+
     try {
       if (idNum) {
         const payload: UpdateServerRequest = {
@@ -359,7 +541,7 @@ const ServerForm: React.FC = () => {
           latitude: serverData.latitude ?? null,
           longitude: serverData.longitude ?? null,
           isEnableWss: serverData.isEnableWss ?? false,
-          tagIds: selectedTagIds.length > 0 ? selectedTagIds : null,
+          tagIds: selectedTagIds,
         };
 
         await updateMutation.mutateAsync({ data: payload });
@@ -373,6 +555,25 @@ const ServerForm: React.FC = () => {
           },
         });
 
+        const prevRaw =
+          queryClient.getQueryData(
+            getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey(idNum)
+          ) ?? allowedByServerRaw;
+        const previousLinks = getAllowedItemsByVpnServer(prevRaw);
+
+        try {
+          await syncQuotaPlanAssignments(idNum, previousLinks, selectedQuotaPlanIds);
+        } catch (quotaErr: unknown) {
+          const msg =
+            quotaErr instanceof Error
+              ? quotaErr.message
+              : typeof quotaErr === "object" && quotaErr != null && "message" in quotaErr
+                ? String((quotaErr as { message: unknown }).message)
+                : "Quota plan links failed";
+          toast.error(`Server saved, but quota plans: ${msg}`);
+        }
+
+        invalidateQuotaCaches(idNum);
         toast.success("Server and OpenVPN config updated successfully!");
       } else {
         const payload: AddServerRequest = {
@@ -383,17 +584,50 @@ const ServerForm: React.FC = () => {
           latitude: serverData.latitude ?? null,
           longitude: serverData.longitude ?? null,
           isEnableWss: serverData.isEnableWss ?? false,
-          tagIds: selectedTagIds.length > 0 ? selectedTagIds : null,
+          tagIds: selectedTagIds,
         };
 
-        await addMutation.mutateAsync({ data: payload });
+        const addResult = await addMutation.mutateAsync({ data: payload });
+        const newId = unwrapNewServerIdFromAdd(addResult);
+
+        if (newId) {
+          if (selectedQuotaPlanIds.length > 0) {
+            try {
+              await syncQuotaPlanAssignments(newId, [], selectedQuotaPlanIds);
+            } catch (quotaErr: unknown) {
+              const msg =
+                quotaErr instanceof Error
+                  ? quotaErr.message
+                  : typeof quotaErr === "object" && quotaErr != null && "message" in quotaErr
+                    ? String((quotaErr as { message: unknown }).message)
+                    : "Quota plan links failed";
+              toast.error(`Server added, but quota plans: ${msg}`);
+            }
+          }
+          invalidateQuotaCaches(newId);
+        } else {
+          queryClient.invalidateQueries({
+            queryKey: getGetApiV2OpenVpnServersGetAllWithStatusQueryKey(undefined),
+          });
+        }
+
         toast.success("Server added successfully!");
       }
 
       navigate("/");
-    } catch (err: any) {
+    } catch (err: unknown) {
       const base = idNum ? "Failed to update server." : "Failed to add server.";
-      const apiMsg = err?.response?.data?.Message || err?.message || base;
+      let apiMsg = base;
+      if (axios.isAxiosError(err)) {
+        const d = err.response?.data;
+        if (d && typeof d === "object" && d !== null) {
+          const rec = d as Record<string, unknown>;
+          const m = rec["Message"] ?? rec["message"];
+          if (typeof m === "string") apiMsg = m;
+        } else if (err.message) apiMsg = err.message;
+      } else {
+        apiMsg = errorMessage(err) || base;
+      }
       toast.error(apiMsg);
     }
   };
@@ -497,29 +731,7 @@ const ServerForm: React.FC = () => {
                 </button>
               </div>
               {apiCheck.status === "success" && apiCheck.data != null && (
-                <div className="api-check-result api-check-success">
-                  <div className="api-check-summary">
-                    {typeof (apiCheck.data as any)?.version === "string" && (
-                      <span><strong>Version:</strong> {(apiCheck.data as any).version}</span>
-                    )}
-                    {typeof (apiCheck.data as any)?.application === "string" && (
-                      <span><strong>Application:</strong> {(apiCheck.data as any).application}</span>
-                    )}
-                    {typeof (apiCheck.data as any)?.config === "object" && (apiCheck.data as any).config != null && (
-                      <>
-                        {(apiCheck.data as any).config.port != null && (
-                          <span><strong>Port:</strong> {(apiCheck.data as any).config.port}</span>
-                        )}
-                        {(apiCheck.data as any).config.proto != null && (
-                          <span><strong>Proto:</strong> {(apiCheck.data as any).config.proto}</span>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  <pre className="api-check-json">
-                    {JSON.stringify(apiCheck.data, null, 2)}
-                  </pre>
-                </div>
+                <ApiCheckSuccessSummary data={apiCheck.data} />
               )}
               {apiCheck.status === "error" && apiCheck.error && (
                 <div className="api-check-result api-check-error">
@@ -629,6 +841,44 @@ const ServerForm: React.FC = () => {
                       </button>
                     </div>
                   ))
+                )}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Quota plans</label>
+              <p className="form-hint tags-section-hint">
+                Select which quota plans may use this server. You can change this later when editing the server.
+              </p>
+              <div className="tags-checkbox-list">
+                {visibleQuotaPlans.length === 0 ? (
+                  <span className="form-hint">
+                    {getPlansMutation.isPending ? "Loading quota plans…" : "No quota plans defined. Create them under Settings → Quota plans."}
+                  </span>
+                ) : (
+                  visibleQuotaPlans.map((plan) => {
+                    const pid = plan.id!;
+                    const label =
+                      (plan.name?.trim() || `Plan #${pid}`) +
+                      (plan.isActive === false ? " (inactive)" : "");
+                    return (
+                      <div key={pid} className="tags-checkbox-item tags-checkbox-row">
+                        <label className="checkbox-label tags-checkbox-item-inner">
+                          <input
+                            type="checkbox"
+                            checked={selectedQuotaPlanIds.includes(pid)}
+                            onChange={() => {
+                              setSelectedQuotaPlanIds((prev) =>
+                                prev.includes(pid) ? prev.filter((x) => x !== pid) : [...prev, pid]
+                              );
+                            }}
+                            disabled={isFetching}
+                          />
+                          <span className="checkbox-content">{label}</span>
+                        </label>
+                      </div>
+                    );
+                  })
                 )}
               </div>
             </div>

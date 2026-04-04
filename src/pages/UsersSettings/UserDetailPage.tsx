@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaKey, FaPlus, FaEdit, FaTrash, FaSync } from "react-icons/fa";
+import { FaArrowLeft, FaKey, FaPlus, FaEdit, FaTrash, FaSync, FaShieldAlt } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
   useGetApiUsersGetByIdId,
@@ -15,12 +15,21 @@ import {
   usePutApiUserQuotaPlansUpdate,
   useDeleteApiUserQuotaPlansDeleteId,
 } from "../../api/orval/user-quota-plan/user-quota-plan";
+import {
+  useGetApiUserRolesGetAllRoles,
+  useGetApiUserRolesByUserUserId,
+  usePutApiUserRolesSet,
+  getGetApiUserRolesByUserUserIdQueryKey,
+} from "../../api/orval/user-roles/user-roles";
 import { useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId } from "../../api/orval/telegram-bot-incoming-message-log/telegram-bot-incoming-message-log";
 import type {
   QuotaPlanDto,
   QuotaPlansResponse,
   UserQuotaPlanDto,
   CreateOrUpdateUserQuotaPlanRequest,
+  RoleDto,
+  RolesResponse,
+  UserRoleAssignmentResponse,
 } from "../../api/orval/model";
 import type { UsersResponse } from "../../api/orval/model";
 import type { GetUserQuotaPlansByUserIdResponse } from "../../api/orval/model";
@@ -28,6 +37,8 @@ import type { GetByTelegramIdMessagesResponseApiResponse } from "../../api/orval
 import type { MessageDto } from "../../api/orval/model";
 import { useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { isCanceledError } from "../../utils/queryCanceled";
+import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
+import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
 import StyledDataGrid from "../../components/ui/TableStyle.tsx";
@@ -63,6 +74,7 @@ export function UserDetailPage() {
 
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<UserQuotaPlanDto | null>(null);
+  const [pendingRoleId, setPendingRoleId] = useState<number | "">("");
 
   const [telegramMessagesPagination, setTelegramMessagesPagination] =
     useState<GridPaginationModel>({ page: 0, pageSize: 10 });
@@ -70,6 +82,66 @@ export function UserDetailPage() {
   const createAssignmentMutation = usePostApiUserQuotaPlansCreate();
   const updateAssignmentMutation = usePutApiUserQuotaPlansUpdate();
   const deleteAssignmentMutation = useDeleteApiUserQuotaPlansDeleteId();
+
+  const canManageRoles = isAdmin(getCurrentUser());
+  const userIdValid = Number.isFinite(id) && id > 0;
+
+  const { data: allRolesRaw, isLoading: rolesCatalogLoading } = useGetApiUserRolesGetAllRoles({
+    query: {
+      enabled: canManageRoles,
+      staleTime: 60_000,
+    },
+  });
+
+  const roleCatalog = useMemo(() => {
+    if (!allRolesRaw) return [] as (RoleDto & { id: number })[];
+    const r = unwrapMaybeApiResponse<RolesResponse>(
+      allRolesRaw as RolesResponse | ApiEnvelope<RolesResponse> | undefined,
+    );
+    return (r?.roles ?? []).filter(
+      (x): x is RoleDto & { id: number } => typeof x.id === "number" && x.id > 0,
+    );
+  }, [allRolesRaw]);
+
+  const { data: userRoleRaw, isLoading: userRoleLoading } = useGetApiUserRolesByUserUserId(
+    userIdValid ? id : 0,
+    {
+      query: {
+        enabled: canManageRoles && userIdValid,
+      },
+    },
+  );
+
+  const currentRoleAssignment = useMemo(() => {
+    if (!userRoleRaw) return undefined;
+    const u = unwrapMaybeApiResponse<UserRoleAssignmentResponse>(
+      userRoleRaw as UserRoleAssignmentResponse | ApiEnvelope<UserRoleAssignmentResponse> | undefined,
+    );
+    return u?.assignment ?? (userRoleRaw as UserRoleAssignmentResponse).assignment;
+  }, [userRoleRaw]);
+
+  const setRoleMutation = usePutApiUserRolesSet({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Role updated");
+        void queryClient.invalidateQueries({
+          queryKey: getGetApiUserRolesByUserUserIdQueryKey(id),
+        });
+      },
+      onError: (e: unknown) => {
+        const err = e as { response?: { data?: { message?: string } }; message?: string };
+        toast.error(
+          err?.response?.data?.message ?? (err as Error)?.message ?? "Failed to update role",
+        );
+      },
+    },
+  });
+
+  useEffect(() => {
+    const rid = currentRoleAssignment?.roleId;
+    if (rid != null && typeof rid === "number") setPendingRoleId(rid);
+    else setPendingRoleId("");
+  }, [currentRoleAssignment?.roleId]);
 
   const isTelegramUser =
     user != null &&
@@ -174,12 +246,15 @@ export function UserDetailPage() {
       { data: { includeInactive: true } },
       {
         onSuccess: (raw) => {
-          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(raw as any);
+          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(
+            raw as QuotaPlansResponse | ApiEnvelope<QuotaPlansResponse> | undefined,
+          );
           setQuotaPlans(payload?.quotaPlans ?? []);
         },
       }
     );
-  }, [id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mutation result reference is unstable; `mutate` is stable (TanStack Query v5)
+  }, [id, getAllQuotaMutation.mutate]);
 
   const handleSendResetCode = () => {
     if (!user) return;
@@ -205,6 +280,19 @@ export function UserDetailPage() {
         },
       }
     );
+  };
+
+  const roleDirty =
+    (typeof pendingRoleId === "number" ? pendingRoleId : null) !==
+    (currentRoleAssignment?.roleId ?? null);
+
+  const handleSaveRole = () => {
+    if (!userIdValid) return;
+    if (pendingRoleId === "" || typeof pendingRoleId !== "number") {
+      toast.error("Select a role");
+      return;
+    }
+    setRoleMutation.mutate({ data: { userId: id, roleId: pendingRoleId } });
   };
 
   if (!Number.isFinite(id)) {
@@ -311,6 +399,64 @@ export function UserDetailPage() {
         </button>
       </section>
 
+      {canManageRoles && (
+        <section className="settings-card" style={{ marginBottom: 24 }}>
+          <h3>
+            <FaShieldAlt className="icon" style={{ marginRight: 8 }} />
+            Access role
+          </h3>
+          <p className="settings-item-description">
+            Role used for authorization on the server. The &quot;Admin&quot; field in the profile above may still
+            reflect legacy data.
+          </p>
+          {rolesCatalogLoading || userRoleLoading ? (
+            <p style={{ color: "#8b949e" }}>Loading role…</p>
+          ) : roleCatalog.length === 0 ? (
+            <p className="error-message">No roles returned from the API. Check permissions or backend configuration.</p>
+          ) : (
+            <div className="settings-item" style={{ alignItems: "flex-start", gap: 12 }}>
+              <label htmlFor="user-role-select" style={{ minWidth: 120 }}>
+                Role
+              </label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+                <select
+                  id="user-role-select"
+                  className="input"
+                  value={pendingRoleId === "" ? "" : String(pendingRoleId)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setPendingRoleId(v === "" ? "" : Number(v));
+                  }}
+                  disabled={setRoleMutation.isPending}
+                  style={{ minWidth: 220 }}
+                >
+                  <option value="">— Select role —</option>
+                  {roleCatalog.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name?.trim() || r.normalizedName || `Role #${r.id}`}
+                      {r.isSystem ? " (system)" : ""}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={handleSaveRole}
+                  disabled={!roleDirty || setRoleMutation.isPending}
+                >
+                  Save role
+                </button>
+              </div>
+              {currentRoleAssignment?.roleName != null && (
+                <p style={{ color: "#8b949e", fontSize: 13, marginTop: 8, marginBottom: 0 }}>
+                  Current (from server): {currentRoleAssignment.roleName}
+                </p>
+              )}
+            </div>
+          )}
+        </section>
+      )}
+
       {isTelegramUser && (
         <section className="settings-card" style={{ marginBottom: 24 }}>
           <h3>Telegram bot messages</h3>
@@ -383,27 +529,25 @@ export function UserDetailPage() {
         <p className="settings-item-description">
           Assign quota plans to this user. Effective from/to define the period when the plan applies.
         </p>
-        {userAssignments.length === 0 && (
-          <div className="header-bar" style={{ marginBottom: 12 }}>
-            <div className="left-buttons">
-              <button
-                type="button"
-                className="btn primary"
-                onClick={() => {
-                  setEditingAssignment(null);
-                  setAssignmentModalOpen(true);
-                }}
-                disabled={
-                  quotaPlans.length === 0 ||
-                  createAssignmentMutation.isPending ||
-                  updateAssignmentMutation.isPending
-                }
-              >
-                <FaPlus className="icon" /> Assign plan
-              </button>
-            </div>
+        <div className="header-bar" style={{ marginBottom: 12 }}>
+          <div className="left-buttons">
+            <button
+              type="button"
+              className="btn primary"
+              onClick={() => {
+                setEditingAssignment(null);
+                setAssignmentModalOpen(true);
+              }}
+              disabled={
+                quotaPlans.length === 0 ||
+                createAssignmentMutation.isPending ||
+                updateAssignmentMutation.isPending
+              }
+            >
+              <FaPlus className="icon" /> Assign plan
+            </button>
           </div>
-        )}
+        </div>
         {userAssignments.length === 0 ? (
           <p style={{ color: "#8b949e" }}>No assignments. Click «Assign plan» to add one.</p>
         ) : (

@@ -6,7 +6,7 @@ import GoogleLoginForm from "./GoogleLoginForm";
 import TelegramCodeLoginForm from "./TelegramCodeLoginForm";
 import { FaTelegramPlane, FaSun, FaMoon } from "react-icons/fa";
 import { appVersion } from "../../version.ts";
-import { useTheme } from "../../contexts/ThemeContext";
+import { useTheme } from "../../contexts/useTheme";
 
 const LoginPage: React.FC = () => {
     const [showTelegramForm, setShowTelegramForm] = useState(false);

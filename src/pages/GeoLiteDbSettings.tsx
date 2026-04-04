@@ -17,6 +17,8 @@ import type {
 } from "../api/orval/model";
 
 import { useGetApiGeoLiteGetVerionDb } from "../api/orval/geo-lite/geo-lite";
+import axios from "axios";
+import { axiosResponseDataMessage, errorMessage } from "../utils/errorMessage";
 
 export function GeoLiteDbSettings() {
   const [geoIpAccountId, setGeoIpAccountId] = useState<string>("Fetching...");
@@ -97,8 +99,18 @@ export function GeoLiteDbSettings() {
           qLicenseKey.refetch();
           break;
       }
-    } catch (err: any) {
-      const message = err?.response?.data?.error || err?.message || "Unknown error";
+    } catch (err: unknown) {
+      const data = axios.isAxiosError(err) ? err.response?.data : undefined;
+      const errField =
+        data && typeof data === "object" && data !== null
+          ? (data as Record<string, unknown>)["error"]
+          : undefined;
+      const message =
+        (typeof errField === "string" ? errField : undefined) ??
+        axiosResponseDataMessage(data) ??
+        (axios.isAxiosError(err) ? err.message : undefined) ??
+        errorMessage(err) ??
+        "Unknown error";
       toast.error(`Failed to save ${key}: ${message}`);
     }
   };
