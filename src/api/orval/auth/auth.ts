@@ -47,47 +47,21 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type postApiAuthTokenResponse200TextPlain = {
-  data: TokenResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthTokenResponse200ApplicationJson = {
-  data: TokenResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthTokenResponse200TextJson = {
-  data: TokenResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthTokenResponseSuccess = (
-  | postApiAuthTokenResponse200TextPlain
-  | postApiAuthTokenResponse200ApplicationJson
-  | postApiAuthTokenResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiAuthTokenResponse = postApiAuthTokenResponseSuccess;
-
-export const getPostApiAuthTokenUrl = () => {
-  return `/api/auth/token`;
-};
-
-export const postApiAuthToken = async (
+export const postApiAuthToken = (
   tokenRequest: TokenRequest,
-  options?: RequestInit,
-): Promise<postApiAuthTokenResponse> => {
-  return ogmMutator<postApiAuthTokenResponse>(getPostApiAuthTokenUrl(), {
-    ...options,
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json-patch+json",
-      ...options?.headers,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<TokenResponseApiResponse>(
+    {
+      url: `/api/auth/token`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: tokenRequest,
+      signal,
     },
-    body: JSON.stringify(tokenRequest),
-  });
+    options,
+  );
 };
 
 export const getPostApiAuthTokenMutationOptions = <
@@ -153,45 +127,14 @@ export const usePostApiAuthToken = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(getPostApiAuthTokenMutationOptions(options), queryClient);
 };
-export type getApiAuthPublicKeyPinResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiAuthPublicKeyPinResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiAuthPublicKeyPinResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiAuthPublicKeyPinResponseSuccess = (
-  | getApiAuthPublicKeyPinResponse200TextPlain
-  | getApiAuthPublicKeyPinResponse200ApplicationJson
-  | getApiAuthPublicKeyPinResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiAuthPublicKeyPinResponse =
-  getApiAuthPublicKeyPinResponseSuccess;
-
-export const getGetApiAuthPublicKeyPinUrl = (pin: number) => {
-  return `/api/auth/public-key/${pin}`;
-};
-
-export const getApiAuthPublicKeyPin = async (
+export const getApiAuthPublicKeyPin = (
   pin: number,
-  options?: RequestInit,
-): Promise<getApiAuthPublicKeyPinResponse> => {
-  return ogmMutator<getApiAuthPublicKeyPinResponse>(
-    getGetApiAuthPublicKeyPinUrl(pin),
-    {
-      ...options,
-      method: "GET",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/auth/public-key/${pin}`, method: "GET", signal },
+    options,
   );
 };
 
@@ -222,8 +165,7 @@ export const getGetApiAuthPublicKeyPinQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiAuthPublicKeyPin>>
-  > = ({ signal }) =>
-    getApiAuthPublicKeyPin(pin, { signal, ...requestOptions });
+  > = ({ signal }) => getApiAuthPublicKeyPin(pin, requestOptions, signal);
 
   return {
     queryKey,
@@ -345,47 +287,21 @@ export function useGetApiAuthPublicKeyPin<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type postApiAuthRegisterResponse200TextPlain = {
-  data: RegisterUserResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthRegisterResponse200ApplicationJson = {
-  data: RegisterUserResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthRegisterResponse200TextJson = {
-  data: RegisterUserResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthRegisterResponseSuccess = (
-  | postApiAuthRegisterResponse200TextPlain
-  | postApiAuthRegisterResponse200ApplicationJson
-  | postApiAuthRegisterResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiAuthRegisterResponse = postApiAuthRegisterResponseSuccess;
-
-export const getPostApiAuthRegisterUrl = () => {
-  return `/api/auth/register`;
-};
-
-export const postApiAuthRegister = async (
+export const postApiAuthRegister = (
   registerUserRequest: RegisterUserRequest,
-  options?: RequestInit,
-): Promise<postApiAuthRegisterResponse> => {
-  return ogmMutator<postApiAuthRegisterResponse>(getPostApiAuthRegisterUrl(), {
-    ...options,
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json-patch+json",
-      ...options?.headers,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<RegisterUserResponseApiResponse>(
+    {
+      url: `/api/auth/register`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: registerUserRequest,
+      signal,
     },
-    body: JSON.stringify(registerUserRequest),
-  });
+    options,
+  );
 };
 
 export const getPostApiAuthRegisterMutationOptions = <
@@ -454,50 +370,20 @@ export const usePostApiAuthRegister = <TError = unknown, TContext = unknown>(
     queryClient,
   );
 };
-export type postApiAuthGoogleLoginResponse200TextPlain = {
-  data: GoogleLoginResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthGoogleLoginResponse200ApplicationJson = {
-  data: GoogleLoginResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthGoogleLoginResponse200TextJson = {
-  data: GoogleLoginResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthGoogleLoginResponseSuccess = (
-  | postApiAuthGoogleLoginResponse200TextPlain
-  | postApiAuthGoogleLoginResponse200ApplicationJson
-  | postApiAuthGoogleLoginResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiAuthGoogleLoginResponse =
-  postApiAuthGoogleLoginResponseSuccess;
-
-export const getPostApiAuthGoogleLoginUrl = () => {
-  return `/api/auth/google-login`;
-};
-
-export const postApiAuthGoogleLogin = async (
+export const postApiAuthGoogleLogin = (
   googleLoginRequest: GoogleLoginRequest,
-  options?: RequestInit,
-): Promise<postApiAuthGoogleLoginResponse> => {
-  return ogmMutator<postApiAuthGoogleLoginResponse>(
-    getPostApiAuthGoogleLoginUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GoogleLoginResponseApiResponse>(
     {
-      ...options,
+      url: `/api/auth/google-login`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(googleLoginRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: googleLoginRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -567,50 +453,20 @@ export const usePostApiAuthGoogleLogin = <TError = unknown, TContext = unknown>(
     queryClient,
   );
 };
-export type postApiAuthGoogleCodeLoginResponse200TextPlain = {
-  data: GoogleLoginResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthGoogleCodeLoginResponse200ApplicationJson = {
-  data: GoogleLoginResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthGoogleCodeLoginResponse200TextJson = {
-  data: GoogleLoginResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthGoogleCodeLoginResponseSuccess = (
-  | postApiAuthGoogleCodeLoginResponse200TextPlain
-  | postApiAuthGoogleCodeLoginResponse200ApplicationJson
-  | postApiAuthGoogleCodeLoginResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiAuthGoogleCodeLoginResponse =
-  postApiAuthGoogleCodeLoginResponseSuccess;
-
-export const getPostApiAuthGoogleCodeLoginUrl = () => {
-  return `/api/auth/google-code-login`;
-};
-
-export const postApiAuthGoogleCodeLogin = async (
+export const postApiAuthGoogleCodeLogin = (
   googleCodeLoginRequest: GoogleCodeLoginRequest,
-  options?: RequestInit,
-): Promise<postApiAuthGoogleCodeLoginResponse> => {
-  return ogmMutator<postApiAuthGoogleCodeLoginResponse>(
-    getPostApiAuthGoogleCodeLoginUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GoogleLoginResponseApiResponse>(
     {
-      ...options,
+      url: `/api/auth/google-code-login`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(googleCodeLoginRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: googleCodeLoginRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -683,74 +539,20 @@ export const usePostApiAuthGoogleCodeLogin = <
     queryClient,
   );
 };
-export type postApiAuthTelegramRequestLoginCodeResponse200TextPlain = {
-  data: TelegramRequestLoginCodeResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthTelegramRequestLoginCodeResponse200ApplicationJson = {
-  data: TelegramRequestLoginCodeResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthTelegramRequestLoginCodeResponse200TextJson = {
-  data: TelegramRequestLoginCodeResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthTelegramRequestLoginCodeResponse404TextPlain = {
-  data: ProblemDetails;
-  status: 404;
-};
-
-export type postApiAuthTelegramRequestLoginCodeResponse404ApplicationJson = {
-  data: ProblemDetails;
-  status: 404;
-};
-
-export type postApiAuthTelegramRequestLoginCodeResponse404TextJson = {
-  data: ProblemDetails;
-  status: 404;
-};
-
-export type postApiAuthTelegramRequestLoginCodeResponseSuccess = (
-  | postApiAuthTelegramRequestLoginCodeResponse200TextPlain
-  | postApiAuthTelegramRequestLoginCodeResponse200ApplicationJson
-  | postApiAuthTelegramRequestLoginCodeResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiAuthTelegramRequestLoginCodeResponseError = (
-  | postApiAuthTelegramRequestLoginCodeResponse404TextPlain
-  | postApiAuthTelegramRequestLoginCodeResponse404ApplicationJson
-  | postApiAuthTelegramRequestLoginCodeResponse404TextJson
-) & {
-  headers: Headers;
-};
-
-export type postApiAuthTelegramRequestLoginCodeResponse =
-  | postApiAuthTelegramRequestLoginCodeResponseSuccess
-  | postApiAuthTelegramRequestLoginCodeResponseError;
-
-export const getPostApiAuthTelegramRequestLoginCodeUrl = () => {
-  return `/api/auth/telegram/request-login-code`;
-};
-
-export const postApiAuthTelegramRequestLoginCode = async (
+export const postApiAuthTelegramRequestLoginCode = (
   telegramRequestLoginCodeRequest: TelegramRequestLoginCodeRequest,
-  options?: RequestInit,
-): Promise<postApiAuthTelegramRequestLoginCodeResponse> => {
-  return ogmMutator<postApiAuthTelegramRequestLoginCodeResponse>(
-    getPostApiAuthTelegramRequestLoginCodeUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<TelegramRequestLoginCodeResponseApiResponse>(
     {
-      ...options,
+      url: `/api/auth/telegram/request-login-code`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(telegramRequestLoginCodeRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: telegramRequestLoginCodeRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -824,50 +626,20 @@ export const usePostApiAuthTelegramRequestLoginCode = <
     queryClient,
   );
 };
-export type postApiAuthTelegramCodeLoginResponse200TextPlain = {
-  data: LoginResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthTelegramCodeLoginResponse200ApplicationJson = {
-  data: LoginResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthTelegramCodeLoginResponse200TextJson = {
-  data: LoginResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthTelegramCodeLoginResponseSuccess = (
-  | postApiAuthTelegramCodeLoginResponse200TextPlain
-  | postApiAuthTelegramCodeLoginResponse200ApplicationJson
-  | postApiAuthTelegramCodeLoginResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiAuthTelegramCodeLoginResponse =
-  postApiAuthTelegramCodeLoginResponseSuccess;
-
-export const getPostApiAuthTelegramCodeLoginUrl = () => {
-  return `/api/auth/telegram-code-login`;
-};
-
-export const postApiAuthTelegramCodeLogin = async (
+export const postApiAuthTelegramCodeLogin = (
   telegramCodeLoginRequest: TelegramCodeLoginRequest,
-  options?: RequestInit,
-): Promise<postApiAuthTelegramCodeLoginResponse> => {
-  return ogmMutator<postApiAuthTelegramCodeLoginResponse>(
-    getPostApiAuthTelegramCodeLoginUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<LoginResponseApiResponse>(
     {
-      ...options,
+      url: `/api/auth/telegram-code-login`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(telegramCodeLoginRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: telegramCodeLoginRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -940,47 +712,21 @@ export const usePostApiAuthTelegramCodeLogin = <
     queryClient,
   );
 };
-export type postApiAuthLoginResponse200TextPlain = {
-  data: LoginResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthLoginResponse200ApplicationJson = {
-  data: LoginResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthLoginResponse200TextJson = {
-  data: LoginResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthLoginResponseSuccess = (
-  | postApiAuthLoginResponse200TextPlain
-  | postApiAuthLoginResponse200ApplicationJson
-  | postApiAuthLoginResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiAuthLoginResponse = postApiAuthLoginResponseSuccess;
-
-export const getPostApiAuthLoginUrl = () => {
-  return `/api/auth/login`;
-};
-
-export const postApiAuthLogin = async (
+export const postApiAuthLogin = (
   loginRequest: LoginRequest,
-  options?: RequestInit,
-): Promise<postApiAuthLoginResponse> => {
-  return ogmMutator<postApiAuthLoginResponse>(getPostApiAuthLoginUrl(), {
-    ...options,
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json-patch+json",
-      ...options?.headers,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<LoginResponseApiResponse>(
+    {
+      url: `/api/auth/login`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: loginRequest,
+      signal,
     },
-    body: JSON.stringify(loginRequest),
-  });
+    options,
+  );
 };
 
 export const getPostApiAuthLoginMutationOptions = <
@@ -1046,50 +792,20 @@ export const usePostApiAuthLogin = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(getPostApiAuthLoginMutationOptions(options), queryClient);
 };
-export type postApiAuthForgotPasswordResponse200TextPlain = {
-  data: AdminForgotPasswordResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthForgotPasswordResponse200ApplicationJson = {
-  data: AdminForgotPasswordResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthForgotPasswordResponse200TextJson = {
-  data: AdminForgotPasswordResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthForgotPasswordResponseSuccess = (
-  | postApiAuthForgotPasswordResponse200TextPlain
-  | postApiAuthForgotPasswordResponse200ApplicationJson
-  | postApiAuthForgotPasswordResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiAuthForgotPasswordResponse =
-  postApiAuthForgotPasswordResponseSuccess;
-
-export const getPostApiAuthForgotPasswordUrl = () => {
-  return `/api/auth/forgot-password`;
-};
-
-export const postApiAuthForgotPassword = async (
+export const postApiAuthForgotPassword = (
   adminForgotPasswordRequest: AdminForgotPasswordRequest,
-  options?: RequestInit,
-): Promise<postApiAuthForgotPasswordResponse> => {
-  return ogmMutator<postApiAuthForgotPasswordResponse>(
-    getPostApiAuthForgotPasswordUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<AdminForgotPasswordResponseApiResponse>(
     {
-      ...options,
+      url: `/api/auth/forgot-password`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(adminForgotPasswordRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: adminForgotPasswordRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -1162,50 +878,20 @@ export const usePostApiAuthForgotPassword = <
     queryClient,
   );
 };
-export type postApiAuthResetPasswordResponse200TextPlain = {
-  data: AdminResetPasswordResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthResetPasswordResponse200ApplicationJson = {
-  data: AdminResetPasswordResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthResetPasswordResponse200TextJson = {
-  data: AdminResetPasswordResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthResetPasswordResponseSuccess = (
-  | postApiAuthResetPasswordResponse200TextPlain
-  | postApiAuthResetPasswordResponse200ApplicationJson
-  | postApiAuthResetPasswordResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiAuthResetPasswordResponse =
-  postApiAuthResetPasswordResponseSuccess;
-
-export const getPostApiAuthResetPasswordUrl = () => {
-  return `/api/auth/reset-password`;
-};
-
-export const postApiAuthResetPassword = async (
+export const postApiAuthResetPassword = (
   adminResetPasswordRequest: AdminResetPasswordRequest,
-  options?: RequestInit,
-): Promise<postApiAuthResetPasswordResponse> => {
-  return ogmMutator<postApiAuthResetPasswordResponse>(
-    getPostApiAuthResetPasswordUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<AdminResetPasswordResponseApiResponse>(
     {
-      ...options,
+      url: `/api/auth/reset-password`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(adminResetPasswordRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: adminResetPasswordRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -1278,27 +964,14 @@ export const usePostApiAuthResetPassword = <
     queryClient,
   );
 };
-export type postApiAuthLogoutResponse200 = {
-  data: void;
-  status: 200;
-};
-
-export type postApiAuthLogoutResponseSuccess = postApiAuthLogoutResponse200 & {
-  headers: Headers;
-};
-export type postApiAuthLogoutResponse = postApiAuthLogoutResponseSuccess;
-
-export const getPostApiAuthLogoutUrl = () => {
-  return `/api/auth/logout`;
-};
-
-export const postApiAuthLogout = async (
-  options?: RequestInit,
-): Promise<postApiAuthLogoutResponse> => {
-  return ogmMutator<postApiAuthLogoutResponse>(getPostApiAuthLogoutUrl(), {
-    ...options,
-    method: "POST",
-  });
+export const postApiAuthLogout = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<void>(
+    { url: `/api/auth/logout`, method: "POST", signal },
+    options,
+  );
 };
 
 export const getPostApiAuthLogoutMutationOptions = <
@@ -1362,47 +1035,21 @@ export const usePostApiAuthLogout = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(getPostApiAuthLogoutMutationOptions(options), queryClient);
 };
-export type postApiAuthRefreshResponse200TextPlain = {
-  data: RefreshResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthRefreshResponse200ApplicationJson = {
-  data: RefreshResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthRefreshResponse200TextJson = {
-  data: RefreshResponseApiResponse;
-  status: 200;
-};
-
-export type postApiAuthRefreshResponseSuccess = (
-  | postApiAuthRefreshResponse200TextPlain
-  | postApiAuthRefreshResponse200ApplicationJson
-  | postApiAuthRefreshResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiAuthRefreshResponse = postApiAuthRefreshResponseSuccess;
-
-export const getPostApiAuthRefreshUrl = () => {
-  return `/api/auth/refresh`;
-};
-
-export const postApiAuthRefresh = async (
+export const postApiAuthRefresh = (
   refreshRequest: RefreshRequest,
-  options?: RequestInit,
-): Promise<postApiAuthRefreshResponse> => {
-  return ogmMutator<postApiAuthRefreshResponse>(getPostApiAuthRefreshUrl(), {
-    ...options,
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json-patch+json",
-      ...options?.headers,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<RefreshResponseApiResponse>(
+    {
+      url: `/api/auth/refresh`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: refreshRequest,
+      signal,
     },
-    body: JSON.stringify(refreshRequest),
-  });
+    options,
+  );
 };
 
 export const getPostApiAuthRefreshMutationOptions = <
@@ -1471,44 +1118,13 @@ export const usePostApiAuthRefresh = <TError = unknown, TContext = unknown>(
     queryClient,
   );
 };
-export type getApiAuthHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiAuthHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiAuthHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiAuthHealthcheckResponseSuccess = (
-  | getApiAuthHealthcheckResponse200TextPlain
-  | getApiAuthHealthcheckResponse200ApplicationJson
-  | getApiAuthHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiAuthHealthcheckResponse =
-  getApiAuthHealthcheckResponseSuccess;
-
-export const getGetApiAuthHealthcheckUrl = () => {
-  return `/api/auth/healthcheck`;
-};
-
-export const getApiAuthHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiAuthHealthcheckResponse> => {
-  return ogmMutator<getApiAuthHealthcheckResponse>(
-    getGetApiAuthHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiAuthHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/auth/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -1535,7 +1151,7 @@ export const getGetApiAuthHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiAuthHealthcheck>>
-  > = ({ signal }) => getApiAuthHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiAuthHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiAuthHealthcheck>>,
@@ -1648,44 +1264,13 @@ export function useGetApiAuthHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiAuthHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiAuthHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiAuthHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiAuthHealthcheckWithJwtResponseSuccess = (
-  | getApiAuthHealthcheckWithJwtResponse200TextPlain
-  | getApiAuthHealthcheckWithJwtResponse200ApplicationJson
-  | getApiAuthHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiAuthHealthcheckWithJwtResponse =
-  getApiAuthHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiAuthHealthcheckWithJwtUrl = () => {
-  return `/api/auth/healthcheck-with-jwt`;
-};
-
-export const getApiAuthHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiAuthHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiAuthHealthcheckWithJwtResponse>(
-    getGetApiAuthHealthcheckWithJwtUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiAuthHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/auth/healthcheck-with-jwt`, method: "GET", signal },
+    options,
   );
 };
 
@@ -1713,8 +1298,7 @@ export const getGetApiAuthHealthcheckWithJwtQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiAuthHealthcheckWithJwt>>
-  > = ({ signal }) =>
-    getApiAuthHealthcheckWithJwt({ signal, ...requestOptions });
+  > = ({ signal }) => getApiAuthHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiAuthHealthcheckWithJwt>>,

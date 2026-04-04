@@ -29,59 +29,19 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type getApiOpenVpnEventsGetByServerResponse200TextPlain = {
-  data: VpnServerEventResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsGetByServerResponse200ApplicationJson = {
-  data: VpnServerEventResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsGetByServerResponse200TextJson = {
-  data: VpnServerEventResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsGetByServerResponseSuccess = (
-  | getApiOpenVpnEventsGetByServerResponse200TextPlain
-  | getApiOpenVpnEventsGetByServerResponse200ApplicationJson
-  | getApiOpenVpnEventsGetByServerResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnEventsGetByServerResponse =
-  getApiOpenVpnEventsGetByServerResponseSuccess;
-
-export const getGetApiOpenVpnEventsGetByServerUrl = (
+export const getApiOpenVpnEventsGetByServer = (
   params: GetApiOpenVpnEventsGetByServerParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/open-vpn-events/get-by-server?${stringifiedParams}`
-    : `/api/open-vpn-events/get-by-server`;
-};
-
-export const getApiOpenVpnEventsGetByServer = async (
-  params: GetApiOpenVpnEventsGetByServerParams,
-  options?: RequestInit,
-): Promise<getApiOpenVpnEventsGetByServerResponse> => {
-  return ogmMutator<getApiOpenVpnEventsGetByServerResponse>(
-    getGetApiOpenVpnEventsGetByServerUrl(params),
+  return ogmMutator<VpnServerEventResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-events/get-by-server`,
       method: "GET",
+      params,
+      signal,
     },
+    options,
   );
 };
 
@@ -118,7 +78,7 @@ export const getGetApiOpenVpnEventsGetByServerQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnEventsGetByServer>>
   > = ({ signal }) =>
-    getApiOpenVpnEventsGetByServer(params, { signal, ...requestOptions });
+    getApiOpenVpnEventsGetByServer(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnEventsGetByServer>>,
@@ -238,44 +198,13 @@ export function useGetApiOpenVpnEventsGetByServer<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnEventsStatusResponse200TextPlain = {
-  data: ConnectionStatusesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsStatusResponse200ApplicationJson = {
-  data: ConnectionStatusesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsStatusResponse200TextJson = {
-  data: ConnectionStatusesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsStatusResponseSuccess = (
-  | getApiOpenVpnEventsStatusResponse200TextPlain
-  | getApiOpenVpnEventsStatusResponse200ApplicationJson
-  | getApiOpenVpnEventsStatusResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnEventsStatusResponse =
-  getApiOpenVpnEventsStatusResponseSuccess;
-
-export const getGetApiOpenVpnEventsStatusUrl = () => {
-  return `/api/open-vpn-events/status`;
-};
-
-export const getApiOpenVpnEventsStatus = async (
-  options?: RequestInit,
-): Promise<getApiOpenVpnEventsStatusResponse> => {
-  return ogmMutator<getApiOpenVpnEventsStatusResponse>(
-    getGetApiOpenVpnEventsStatusUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiOpenVpnEventsStatus = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<ConnectionStatusesResponseApiResponse>(
+    { url: `/api/open-vpn-events/status`, method: "GET", signal },
+    options,
   );
 };
 
@@ -303,7 +232,7 @@ export const getGetApiOpenVpnEventsStatusQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnEventsStatus>>
-  > = ({ signal }) => getApiOpenVpnEventsStatus({ signal, ...requestOptions });
+  > = ({ signal }) => getApiOpenVpnEventsStatus(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnEventsStatus>>,
@@ -416,47 +345,18 @@ export function useGetApiOpenVpnEventsStatus<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnEventsStatusVpnServerIdResponse200TextPlain = {
-  data: ConnectionStatusResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsStatusVpnServerIdResponse200ApplicationJson = {
-  data: ConnectionStatusResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsStatusVpnServerIdResponse200TextJson = {
-  data: ConnectionStatusResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsStatusVpnServerIdResponseSuccess = (
-  | getApiOpenVpnEventsStatusVpnServerIdResponse200TextPlain
-  | getApiOpenVpnEventsStatusVpnServerIdResponse200ApplicationJson
-  | getApiOpenVpnEventsStatusVpnServerIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnEventsStatusVpnServerIdResponse =
-  getApiOpenVpnEventsStatusVpnServerIdResponseSuccess;
-
-export const getGetApiOpenVpnEventsStatusVpnServerIdUrl = (
+export const getApiOpenVpnEventsStatusVpnServerId = (
   vpnServerId: number,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  return `/api/open-vpn-events/status/${vpnServerId}`;
-};
-
-export const getApiOpenVpnEventsStatusVpnServerId = async (
-  vpnServerId: number,
-  options?: RequestInit,
-): Promise<getApiOpenVpnEventsStatusVpnServerIdResponse> => {
-  return ogmMutator<getApiOpenVpnEventsStatusVpnServerIdResponse>(
-    getGetApiOpenVpnEventsStatusVpnServerIdUrl(vpnServerId),
+  return ogmMutator<ConnectionStatusResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-events/status/${vpnServerId}`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -491,10 +391,7 @@ export const getGetApiOpenVpnEventsStatusVpnServerIdQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnEventsStatusVpnServerId>>
   > = ({ signal }) =>
-    getApiOpenVpnEventsStatusVpnServerId(vpnServerId, {
-      signal,
-      ...requestOptions,
-    });
+    getApiOpenVpnEventsStatusVpnServerId(vpnServerId, requestOptions, signal);
 
   return {
     queryKey,
@@ -619,44 +516,13 @@ export function useGetApiOpenVpnEventsStatusVpnServerId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnEventsHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsHealthcheckResponseSuccess = (
-  | getApiOpenVpnEventsHealthcheckResponse200TextPlain
-  | getApiOpenVpnEventsHealthcheckResponse200ApplicationJson
-  | getApiOpenVpnEventsHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnEventsHealthcheckResponse =
-  getApiOpenVpnEventsHealthcheckResponseSuccess;
-
-export const getGetApiOpenVpnEventsHealthcheckUrl = () => {
-  return `/api/open-vpn-events/healthcheck`;
-};
-
-export const getApiOpenVpnEventsHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiOpenVpnEventsHealthcheckResponse> => {
-  return ogmMutator<getApiOpenVpnEventsHealthcheckResponse>(
-    getGetApiOpenVpnEventsHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiOpenVpnEventsHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/open-vpn-events/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -684,8 +550,7 @@ export const getGetApiOpenVpnEventsHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnEventsHealthcheck>>
-  > = ({ signal }) =>
-    getApiOpenVpnEventsHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiOpenVpnEventsHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnEventsHealthcheck>>,
@@ -798,44 +663,13 @@ export function useGetApiOpenVpnEventsHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnEventsHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnEventsHealthcheckWithJwtResponseSuccess = (
-  | getApiOpenVpnEventsHealthcheckWithJwtResponse200TextPlain
-  | getApiOpenVpnEventsHealthcheckWithJwtResponse200ApplicationJson
-  | getApiOpenVpnEventsHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnEventsHealthcheckWithJwtResponse =
-  getApiOpenVpnEventsHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiOpenVpnEventsHealthcheckWithJwtUrl = () => {
-  return `/api/open-vpn-events/healthcheck-with-jwt`;
-};
-
-export const getApiOpenVpnEventsHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiOpenVpnEventsHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiOpenVpnEventsHealthcheckWithJwtResponse>(
-    getGetApiOpenVpnEventsHealthcheckWithJwtUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiOpenVpnEventsHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/open-vpn-events/healthcheck-with-jwt`, method: "GET", signal },
+    options,
   );
 };
 
@@ -865,7 +699,7 @@ export const getGetApiOpenVpnEventsHealthcheckWithJwtQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnEventsHealthcheckWithJwt>>
   > = ({ signal }) =>
-    getApiOpenVpnEventsHealthcheckWithJwt({ signal, ...requestOptions });
+    getApiOpenVpnEventsHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnEventsHealthcheckWithJwt>>,

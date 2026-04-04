@@ -38,59 +38,19 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type getApiOpenVpnClientsGetAllConnectedResponse200TextPlain = {
-  data: ConnectedClientsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsGetAllConnectedResponse200ApplicationJson = {
-  data: ConnectedClientsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsGetAllConnectedResponse200TextJson = {
-  data: ConnectedClientsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsGetAllConnectedResponseSuccess = (
-  | getApiOpenVpnClientsGetAllConnectedResponse200TextPlain
-  | getApiOpenVpnClientsGetAllConnectedResponse200ApplicationJson
-  | getApiOpenVpnClientsGetAllConnectedResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnClientsGetAllConnectedResponse =
-  getApiOpenVpnClientsGetAllConnectedResponseSuccess;
-
-export const getGetApiOpenVpnClientsGetAllConnectedUrl = (
+export const getApiOpenVpnClientsGetAllConnected = (
   params: GetApiOpenVpnClientsGetAllConnectedParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/open-vpn-clients/get-all-connected?${stringifiedParams}`
-    : `/api/open-vpn-clients/get-all-connected`;
-};
-
-export const getApiOpenVpnClientsGetAllConnected = async (
-  params: GetApiOpenVpnClientsGetAllConnectedParams,
-  options?: RequestInit,
-): Promise<getApiOpenVpnClientsGetAllConnectedResponse> => {
-  return ogmMutator<getApiOpenVpnClientsGetAllConnectedResponse>(
-    getGetApiOpenVpnClientsGetAllConnectedUrl(params),
+  return ogmMutator<ConnectedClientsResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-clients/get-all-connected`,
       method: "GET",
+      params,
+      signal,
     },
+    options,
   );
 };
 
@@ -128,7 +88,7 @@ export const getGetApiOpenVpnClientsGetAllConnectedQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnClientsGetAllConnected>>
   > = ({ signal }) =>
-    getApiOpenVpnClientsGetAllConnected(params, { signal, ...requestOptions });
+    getApiOpenVpnClientsGetAllConnected(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnClientsGetAllConnected>>,
@@ -248,59 +208,19 @@ export function useGetApiOpenVpnClientsGetAllConnected<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnClientsGetAllHistoryResponse200TextPlain = {
-  data: ConnectedClientsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsGetAllHistoryResponse200ApplicationJson = {
-  data: ConnectedClientsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsGetAllHistoryResponse200TextJson = {
-  data: ConnectedClientsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsGetAllHistoryResponseSuccess = (
-  | getApiOpenVpnClientsGetAllHistoryResponse200TextPlain
-  | getApiOpenVpnClientsGetAllHistoryResponse200ApplicationJson
-  | getApiOpenVpnClientsGetAllHistoryResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnClientsGetAllHistoryResponse =
-  getApiOpenVpnClientsGetAllHistoryResponseSuccess;
-
-export const getGetApiOpenVpnClientsGetAllHistoryUrl = (
+export const getApiOpenVpnClientsGetAllHistory = (
   params: GetApiOpenVpnClientsGetAllHistoryParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/open-vpn-clients/get-all-history?${stringifiedParams}`
-    : `/api/open-vpn-clients/get-all-history`;
-};
-
-export const getApiOpenVpnClientsGetAllHistory = async (
-  params: GetApiOpenVpnClientsGetAllHistoryParams,
-  options?: RequestInit,
-): Promise<getApiOpenVpnClientsGetAllHistoryResponse> => {
-  return ogmMutator<getApiOpenVpnClientsGetAllHistoryResponse>(
-    getGetApiOpenVpnClientsGetAllHistoryUrl(params),
+  return ogmMutator<ConnectedClientsResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-clients/get-all-history`,
       method: "GET",
+      params,
+      signal,
     },
+    options,
   );
 };
 
@@ -338,7 +258,7 @@ export const getGetApiOpenVpnClientsGetAllHistoryQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnClientsGetAllHistory>>
   > = ({ signal }) =>
-    getApiOpenVpnClientsGetAllHistory(params, { signal, ...requestOptions });
+    getApiOpenVpnClientsGetAllHistory(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnClientsGetAllHistory>>,
@@ -458,59 +378,19 @@ export function useGetApiOpenVpnClientsGetAllHistory<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnClientsOverviewSeriesResponse200TextPlain = {
-  data: OverviewSeriesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewSeriesResponse200ApplicationJson = {
-  data: OverviewSeriesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewSeriesResponse200TextJson = {
-  data: OverviewSeriesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewSeriesResponseSuccess = (
-  | getApiOpenVpnClientsOverviewSeriesResponse200TextPlain
-  | getApiOpenVpnClientsOverviewSeriesResponse200ApplicationJson
-  | getApiOpenVpnClientsOverviewSeriesResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnClientsOverviewSeriesResponse =
-  getApiOpenVpnClientsOverviewSeriesResponseSuccess;
-
-export const getGetApiOpenVpnClientsOverviewSeriesUrl = (
+export const getApiOpenVpnClientsOverviewSeries = (
   params: GetApiOpenVpnClientsOverviewSeriesParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/open-vpn-clients/overview/series?${stringifiedParams}`
-    : `/api/open-vpn-clients/overview/series`;
-};
-
-export const getApiOpenVpnClientsOverviewSeries = async (
-  params: GetApiOpenVpnClientsOverviewSeriesParams,
-  options?: RequestInit,
-): Promise<getApiOpenVpnClientsOverviewSeriesResponse> => {
-  return ogmMutator<getApiOpenVpnClientsOverviewSeriesResponse>(
-    getGetApiOpenVpnClientsOverviewSeriesUrl(params),
+  return ogmMutator<OverviewSeriesResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-clients/overview/series`,
       method: "GET",
+      params,
+      signal,
     },
+    options,
   );
 };
 
@@ -548,7 +428,7 @@ export const getGetApiOpenVpnClientsOverviewSeriesQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnClientsOverviewSeries>>
   > = ({ signal }) =>
-    getApiOpenVpnClientsOverviewSeries(params, { signal, ...requestOptions });
+    getApiOpenVpnClientsOverviewSeries(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnClientsOverviewSeries>>,
@@ -668,59 +548,19 @@ export function useGetApiOpenVpnClientsOverviewSeries<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnClientsOverviewSummaryResponse200TextPlain = {
-  data: OverviewTotalsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewSummaryResponse200ApplicationJson = {
-  data: OverviewTotalsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewSummaryResponse200TextJson = {
-  data: OverviewTotalsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewSummaryResponseSuccess = (
-  | getApiOpenVpnClientsOverviewSummaryResponse200TextPlain
-  | getApiOpenVpnClientsOverviewSummaryResponse200ApplicationJson
-  | getApiOpenVpnClientsOverviewSummaryResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnClientsOverviewSummaryResponse =
-  getApiOpenVpnClientsOverviewSummaryResponseSuccess;
-
-export const getGetApiOpenVpnClientsOverviewSummaryUrl = (
+export const getApiOpenVpnClientsOverviewSummary = (
   params: GetApiOpenVpnClientsOverviewSummaryParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/open-vpn-clients/overview/summary?${stringifiedParams}`
-    : `/api/open-vpn-clients/overview/summary`;
-};
-
-export const getApiOpenVpnClientsOverviewSummary = async (
-  params: GetApiOpenVpnClientsOverviewSummaryParams,
-  options?: RequestInit,
-): Promise<getApiOpenVpnClientsOverviewSummaryResponse> => {
-  return ogmMutator<getApiOpenVpnClientsOverviewSummaryResponse>(
-    getGetApiOpenVpnClientsOverviewSummaryUrl(params),
+  return ogmMutator<OverviewTotalsResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-clients/overview/summary`,
       method: "GET",
+      params,
+      signal,
     },
+    options,
   );
 };
 
@@ -758,7 +598,7 @@ export const getGetApiOpenVpnClientsOverviewSummaryQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnClientsOverviewSummary>>
   > = ({ signal }) =>
-    getApiOpenVpnClientsOverviewSummary(params, { signal, ...requestOptions });
+    getApiOpenVpnClientsOverviewSummary(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnClientsOverviewSummary>>,
@@ -878,59 +718,19 @@ export function useGetApiOpenVpnClientsOverviewSummary<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnClientsOverviewPointsResponse200TextPlain = {
-  data: OverviewPointsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewPointsResponse200ApplicationJson = {
-  data: OverviewPointsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewPointsResponse200TextJson = {
-  data: OverviewPointsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewPointsResponseSuccess = (
-  | getApiOpenVpnClientsOverviewPointsResponse200TextPlain
-  | getApiOpenVpnClientsOverviewPointsResponse200ApplicationJson
-  | getApiOpenVpnClientsOverviewPointsResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnClientsOverviewPointsResponse =
-  getApiOpenVpnClientsOverviewPointsResponseSuccess;
-
-export const getGetApiOpenVpnClientsOverviewPointsUrl = (
+export const getApiOpenVpnClientsOverviewPoints = (
   params: GetApiOpenVpnClientsOverviewPointsParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/open-vpn-clients/overview/points?${stringifiedParams}`
-    : `/api/open-vpn-clients/overview/points`;
-};
-
-export const getApiOpenVpnClientsOverviewPoints = async (
-  params: GetApiOpenVpnClientsOverviewPointsParams,
-  options?: RequestInit,
-): Promise<getApiOpenVpnClientsOverviewPointsResponse> => {
-  return ogmMutator<getApiOpenVpnClientsOverviewPointsResponse>(
-    getGetApiOpenVpnClientsOverviewPointsUrl(params),
+  return ogmMutator<OverviewPointsResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-clients/overview/points`,
       method: "GET",
+      params,
+      signal,
     },
+    options,
   );
 };
 
@@ -968,7 +768,7 @@ export const getGetApiOpenVpnClientsOverviewPointsQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnClientsOverviewPoints>>
   > = ({ signal }) =>
-    getApiOpenVpnClientsOverviewPoints(params, { signal, ...requestOptions });
+    getApiOpenVpnClientsOverviewPoints(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnClientsOverviewPoints>>,
@@ -1088,59 +888,19 @@ export function useGetApiOpenVpnClientsOverviewPoints<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnClientsOverviewUsersResponse200TextPlain = {
-  data: OverviewUsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewUsersResponse200ApplicationJson = {
-  data: OverviewUsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewUsersResponse200TextJson = {
-  data: OverviewUsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewUsersResponseSuccess = (
-  | getApiOpenVpnClientsOverviewUsersResponse200TextPlain
-  | getApiOpenVpnClientsOverviewUsersResponse200ApplicationJson
-  | getApiOpenVpnClientsOverviewUsersResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnClientsOverviewUsersResponse =
-  getApiOpenVpnClientsOverviewUsersResponseSuccess;
-
-export const getGetApiOpenVpnClientsOverviewUsersUrl = (
+export const getApiOpenVpnClientsOverviewUsers = (
   params: GetApiOpenVpnClientsOverviewUsersParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/open-vpn-clients/overview/users?${stringifiedParams}`
-    : `/api/open-vpn-clients/overview/users`;
-};
-
-export const getApiOpenVpnClientsOverviewUsers = async (
-  params: GetApiOpenVpnClientsOverviewUsersParams,
-  options?: RequestInit,
-): Promise<getApiOpenVpnClientsOverviewUsersResponse> => {
-  return ogmMutator<getApiOpenVpnClientsOverviewUsersResponse>(
-    getGetApiOpenVpnClientsOverviewUsersUrl(params),
+  return ogmMutator<OverviewUsersResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-clients/overview/users`,
       method: "GET",
+      params,
+      signal,
     },
+    options,
   );
 };
 
@@ -1178,7 +938,7 @@ export const getGetApiOpenVpnClientsOverviewUsersQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnClientsOverviewUsers>>
   > = ({ signal }) =>
-    getApiOpenVpnClientsOverviewUsers(params, { signal, ...requestOptions });
+    getApiOpenVpnClientsOverviewUsers(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnClientsOverviewUsers>>,
@@ -1298,60 +1058,19 @@ export function useGetApiOpenVpnClientsOverviewUsers<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnClientsOverviewUsersSeriesResponse200TextPlain = {
-  data: OverviewUsersSeriesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewUsersSeriesResponse200ApplicationJson =
-  {
-    data: OverviewUsersSeriesResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiOpenVpnClientsOverviewUsersSeriesResponse200TextJson = {
-  data: OverviewUsersSeriesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsOverviewUsersSeriesResponseSuccess = (
-  | getApiOpenVpnClientsOverviewUsersSeriesResponse200TextPlain
-  | getApiOpenVpnClientsOverviewUsersSeriesResponse200ApplicationJson
-  | getApiOpenVpnClientsOverviewUsersSeriesResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnClientsOverviewUsersSeriesResponse =
-  getApiOpenVpnClientsOverviewUsersSeriesResponseSuccess;
-
-export const getGetApiOpenVpnClientsOverviewUsersSeriesUrl = (
+export const getApiOpenVpnClientsOverviewUsersSeries = (
   params: GetApiOpenVpnClientsOverviewUsersSeriesParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/open-vpn-clients/overview/users/series?${stringifiedParams}`
-    : `/api/open-vpn-clients/overview/users/series`;
-};
-
-export const getApiOpenVpnClientsOverviewUsersSeries = async (
-  params: GetApiOpenVpnClientsOverviewUsersSeriesParams,
-  options?: RequestInit,
-): Promise<getApiOpenVpnClientsOverviewUsersSeriesResponse> => {
-  return ogmMutator<getApiOpenVpnClientsOverviewUsersSeriesResponse>(
-    getGetApiOpenVpnClientsOverviewUsersSeriesUrl(params),
+  return ogmMutator<OverviewUsersSeriesResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-clients/overview/users/series`,
       method: "GET",
+      params,
+      signal,
     },
+    options,
   );
 };
 
@@ -1389,10 +1108,7 @@ export const getGetApiOpenVpnClientsOverviewUsersSeriesQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnClientsOverviewUsersSeries>>
   > = ({ signal }) =>
-    getApiOpenVpnClientsOverviewUsersSeries(params, {
-      signal,
-      ...requestOptions,
-    });
+    getApiOpenVpnClientsOverviewUsersSeries(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnClientsOverviewUsersSeries>>,
@@ -1512,44 +1228,13 @@ export function useGetApiOpenVpnClientsOverviewUsersSeries<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnClientsHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsHealthcheckResponseSuccess = (
-  | getApiOpenVpnClientsHealthcheckResponse200TextPlain
-  | getApiOpenVpnClientsHealthcheckResponse200ApplicationJson
-  | getApiOpenVpnClientsHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnClientsHealthcheckResponse =
-  getApiOpenVpnClientsHealthcheckResponseSuccess;
-
-export const getGetApiOpenVpnClientsHealthcheckUrl = () => {
-  return `/api/open-vpn-clients/healthcheck`;
-};
-
-export const getApiOpenVpnClientsHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiOpenVpnClientsHealthcheckResponse> => {
-  return ogmMutator<getApiOpenVpnClientsHealthcheckResponse>(
-    getGetApiOpenVpnClientsHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiOpenVpnClientsHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/open-vpn-clients/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -1577,8 +1262,7 @@ export const getGetApiOpenVpnClientsHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnClientsHealthcheck>>
-  > = ({ signal }) =>
-    getApiOpenVpnClientsHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiOpenVpnClientsHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnClientsHealthcheck>>,
@@ -1691,44 +1375,17 @@ export function useGetApiOpenVpnClientsHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnClientsHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnClientsHealthcheckWithJwtResponseSuccess = (
-  | getApiOpenVpnClientsHealthcheckWithJwtResponse200TextPlain
-  | getApiOpenVpnClientsHealthcheckWithJwtResponse200ApplicationJson
-  | getApiOpenVpnClientsHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnClientsHealthcheckWithJwtResponse =
-  getApiOpenVpnClientsHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiOpenVpnClientsHealthcheckWithJwtUrl = () => {
-  return `/api/open-vpn-clients/healthcheck-with-jwt`;
-};
-
-export const getApiOpenVpnClientsHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiOpenVpnClientsHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiOpenVpnClientsHealthcheckWithJwtResponse>(
-    getGetApiOpenVpnClientsHealthcheckWithJwtUrl(),
+export const getApiOpenVpnClientsHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-clients/healthcheck-with-jwt`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -1758,7 +1415,7 @@ export const getGetApiOpenVpnClientsHealthcheckWithJwtQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnClientsHealthcheckWithJwt>>
   > = ({ signal }) =>
-    getApiOpenVpnClientsHealthcheckWithJwt({ signal, ...requestOptions });
+    getApiOpenVpnClientsHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnClientsHealthcheckWithJwt>>,

@@ -23,44 +23,13 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type getApiBaseHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiBaseHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiBaseHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiBaseHealthcheckResponseSuccess = (
-  | getApiBaseHealthcheckResponse200TextPlain
-  | getApiBaseHealthcheckResponse200ApplicationJson
-  | getApiBaseHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiBaseHealthcheckResponse =
-  getApiBaseHealthcheckResponseSuccess;
-
-export const getGetApiBaseHealthcheckUrl = () => {
-  return `/api/base/healthcheck`;
-};
-
-export const getApiBaseHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiBaseHealthcheckResponse> => {
-  return ogmMutator<getApiBaseHealthcheckResponse>(
-    getGetApiBaseHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiBaseHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/base/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -87,7 +56,7 @@ export const getGetApiBaseHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiBaseHealthcheck>>
-  > = ({ signal }) => getApiBaseHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiBaseHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiBaseHealthcheck>>,
@@ -200,44 +169,13 @@ export function useGetApiBaseHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiBaseHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiBaseHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiBaseHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiBaseHealthcheckWithJwtResponseSuccess = (
-  | getApiBaseHealthcheckWithJwtResponse200TextPlain
-  | getApiBaseHealthcheckWithJwtResponse200ApplicationJson
-  | getApiBaseHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiBaseHealthcheckWithJwtResponse =
-  getApiBaseHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiBaseHealthcheckWithJwtUrl = () => {
-  return `/api/base/healthcheck-with-jwt`;
-};
-
-export const getApiBaseHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiBaseHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiBaseHealthcheckWithJwtResponse>(
-    getGetApiBaseHealthcheckWithJwtUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiBaseHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/base/healthcheck-with-jwt`, method: "GET", signal },
+    options,
   );
 };
 
@@ -265,8 +203,7 @@ export const getGetApiBaseHealthcheckWithJwtQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiBaseHealthcheckWithJwt>>
-  > = ({ signal }) =>
-    getApiBaseHealthcheckWithJwt({ signal, ...requestOptions });
+  > = ({ signal }) => getApiBaseHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiBaseHealthcheckWithJwt>>,

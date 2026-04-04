@@ -36,50 +36,20 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type postApiNotificationsNotifyAdminsResponse200TextPlain = {
-  data: Int32ApiResponse;
-  status: 200;
-};
-
-export type postApiNotificationsNotifyAdminsResponse200ApplicationJson = {
-  data: Int32ApiResponse;
-  status: 200;
-};
-
-export type postApiNotificationsNotifyAdminsResponse200TextJson = {
-  data: Int32ApiResponse;
-  status: 200;
-};
-
-export type postApiNotificationsNotifyAdminsResponseSuccess = (
-  | postApiNotificationsNotifyAdminsResponse200TextPlain
-  | postApiNotificationsNotifyAdminsResponse200ApplicationJson
-  | postApiNotificationsNotifyAdminsResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiNotificationsNotifyAdminsResponse =
-  postApiNotificationsNotifyAdminsResponseSuccess;
-
-export const getPostApiNotificationsNotifyAdminsUrl = () => {
-  return `/api/notifications/notify-admins`;
-};
-
-export const postApiNotificationsNotifyAdmins = async (
+export const postApiNotificationsNotifyAdmins = (
   notificationRequest: NotificationRequest,
-  options?: RequestInit,
-): Promise<postApiNotificationsNotifyAdminsResponse> => {
-  return ogmMutator<postApiNotificationsNotifyAdminsResponse>(
-    getPostApiNotificationsNotifyAdminsUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<Int32ApiResponse>(
     {
-      ...options,
+      url: `/api/notifications/notify-admins`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(notificationRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: notificationRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -152,62 +122,20 @@ export const usePostApiNotificationsNotifyAdmins = <
     queryClient,
   );
 };
-export type postApiNotificationsNotificationIdDeliveredResponse200TextPlain = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiNotificationsNotificationIdDeliveredResponse200ApplicationJson =
-  {
-    data: BooleanApiResponse;
-    status: 200;
-  };
-
-export type postApiNotificationsNotificationIdDeliveredResponse200TextJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiNotificationsNotificationIdDeliveredResponseSuccess = (
-  | postApiNotificationsNotificationIdDeliveredResponse200TextPlain
-  | postApiNotificationsNotificationIdDeliveredResponse200ApplicationJson
-  | postApiNotificationsNotificationIdDeliveredResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiNotificationsNotificationIdDeliveredResponse =
-  postApiNotificationsNotificationIdDeliveredResponseSuccess;
-
-export const getPostApiNotificationsNotificationIdDeliveredUrl = (
+export const postApiNotificationsNotificationIdDelivered = (
   notificationId: number,
   params?: PostApiNotificationsNotificationIdDeliveredParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/notifications/${notificationId}/delivered?${stringifiedParams}`
-    : `/api/notifications/${notificationId}/delivered`;
-};
-
-export const postApiNotificationsNotificationIdDelivered = async (
-  notificationId: number,
-  params?: PostApiNotificationsNotificationIdDeliveredParams,
-  options?: RequestInit,
-): Promise<postApiNotificationsNotificationIdDeliveredResponse> => {
-  return ogmMutator<postApiNotificationsNotificationIdDeliveredResponse>(
-    getPostApiNotificationsNotificationIdDeliveredUrl(notificationId, params),
+  return ogmMutator<BooleanApiResponse>(
     {
-      ...options,
+      url: `/api/notifications/${notificationId}/delivered`,
       method: "POST",
+      params,
+      signal,
     },
+    options,
   );
 };
 
@@ -300,61 +228,20 @@ export const usePostApiNotificationsNotificationIdDelivered = <
     queryClient,
   );
 };
-export type postApiNotificationsNotificationIdReadResponse200TextPlain = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiNotificationsNotificationIdReadResponse200ApplicationJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiNotificationsNotificationIdReadResponse200TextJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiNotificationsNotificationIdReadResponseSuccess = (
-  | postApiNotificationsNotificationIdReadResponse200TextPlain
-  | postApiNotificationsNotificationIdReadResponse200ApplicationJson
-  | postApiNotificationsNotificationIdReadResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiNotificationsNotificationIdReadResponse =
-  postApiNotificationsNotificationIdReadResponseSuccess;
-
-export const getPostApiNotificationsNotificationIdReadUrl = (
+export const postApiNotificationsNotificationIdRead = (
   notificationId: number,
   params?: PostApiNotificationsNotificationIdReadParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/notifications/${notificationId}/read?${stringifiedParams}`
-    : `/api/notifications/${notificationId}/read`;
-};
-
-export const postApiNotificationsNotificationIdRead = async (
-  notificationId: number,
-  params?: PostApiNotificationsNotificationIdReadParams,
-  options?: RequestInit,
-): Promise<postApiNotificationsNotificationIdReadResponse> => {
-  return ogmMutator<postApiNotificationsNotificationIdReadResponse>(
-    getPostApiNotificationsNotificationIdReadUrl(notificationId, params),
+  return ogmMutator<BooleanApiResponse>(
     {
-      ...options,
+      url: `/api/notifications/${notificationId}/read`,
       method: "POST",
+      params,
+      signal,
     },
+    options,
   );
 };
 
@@ -446,59 +333,14 @@ export const usePostApiNotificationsNotificationIdRead = <
     queryClient,
   );
 };
-export type getApiNotificationsGetAllResponse200TextPlain = {
-  data: GetNotificationsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiNotificationsGetAllResponse200ApplicationJson = {
-  data: GetNotificationsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiNotificationsGetAllResponse200TextJson = {
-  data: GetNotificationsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiNotificationsGetAllResponseSuccess = (
-  | getApiNotificationsGetAllResponse200TextPlain
-  | getApiNotificationsGetAllResponse200ApplicationJson
-  | getApiNotificationsGetAllResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiNotificationsGetAllResponse =
-  getApiNotificationsGetAllResponseSuccess;
-
-export const getGetApiNotificationsGetAllUrl = (
+export const getApiNotificationsGetAll = (
   params?: GetApiNotificationsGetAllParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/notifications/get-all?${stringifiedParams}`
-    : `/api/notifications/get-all`;
-};
-
-export const getApiNotificationsGetAll = async (
-  params?: GetApiNotificationsGetAllParams,
-  options?: RequestInit,
-): Promise<getApiNotificationsGetAllResponse> => {
-  return ogmMutator<getApiNotificationsGetAllResponse>(
-    getGetApiNotificationsGetAllUrl(params),
-    {
-      ...options,
-      method: "GET",
-    },
+  return ogmMutator<GetNotificationsResponseApiResponse>(
+    { url: `/api/notifications/get-all`, method: "GET", params, signal },
+    options,
   );
 };
 
@@ -531,8 +373,7 @@ export const getGetApiNotificationsGetAllQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiNotificationsGetAll>>
-  > = ({ signal }) =>
-    getApiNotificationsGetAll(params, { signal, ...requestOptions });
+  > = ({ signal }) => getApiNotificationsGetAll(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
@@ -652,44 +493,13 @@ export function useGetApiNotificationsGetAll<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type postApiNotificationsMarkReadAllResponse200TextPlain = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiNotificationsMarkReadAllResponse200ApplicationJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiNotificationsMarkReadAllResponse200TextJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiNotificationsMarkReadAllResponseSuccess = (
-  | postApiNotificationsMarkReadAllResponse200TextPlain
-  | postApiNotificationsMarkReadAllResponse200ApplicationJson
-  | postApiNotificationsMarkReadAllResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiNotificationsMarkReadAllResponse =
-  postApiNotificationsMarkReadAllResponseSuccess;
-
-export const getPostApiNotificationsMarkReadAllUrl = () => {
-  return `/api/notifications/mark-read-all`;
-};
-
-export const postApiNotificationsMarkReadAll = async (
-  options?: RequestInit,
-): Promise<postApiNotificationsMarkReadAllResponse> => {
-  return ogmMutator<postApiNotificationsMarkReadAllResponse>(
-    getPostApiNotificationsMarkReadAllUrl(),
-    {
-      ...options,
-      method: "POST",
-    },
+export const postApiNotificationsMarkReadAll = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<BooleanApiResponse>(
+    { url: `/api/notifications/mark-read-all`, method: "POST", signal },
+    options,
   );
 };
 
@@ -760,44 +570,13 @@ export const usePostApiNotificationsMarkReadAll = <
     queryClient,
   );
 };
-export type getApiNotificationsUnreadCountResponse200TextPlain = {
-  data: UnreadCountResponseApiResponse;
-  status: 200;
-};
-
-export type getApiNotificationsUnreadCountResponse200ApplicationJson = {
-  data: UnreadCountResponseApiResponse;
-  status: 200;
-};
-
-export type getApiNotificationsUnreadCountResponse200TextJson = {
-  data: UnreadCountResponseApiResponse;
-  status: 200;
-};
-
-export type getApiNotificationsUnreadCountResponseSuccess = (
-  | getApiNotificationsUnreadCountResponse200TextPlain
-  | getApiNotificationsUnreadCountResponse200ApplicationJson
-  | getApiNotificationsUnreadCountResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiNotificationsUnreadCountResponse =
-  getApiNotificationsUnreadCountResponseSuccess;
-
-export const getGetApiNotificationsUnreadCountUrl = () => {
-  return `/api/notifications/unread-count`;
-};
-
-export const getApiNotificationsUnreadCount = async (
-  options?: RequestInit,
-): Promise<getApiNotificationsUnreadCountResponse> => {
-  return ogmMutator<getApiNotificationsUnreadCountResponse>(
-    getGetApiNotificationsUnreadCountUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiNotificationsUnreadCount = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<UnreadCountResponseApiResponse>(
+    { url: `/api/notifications/unread-count`, method: "GET", signal },
+    options,
   );
 };
 
@@ -825,8 +604,7 @@ export const getGetApiNotificationsUnreadCountQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>
-  > = ({ signal }) =>
-    getApiNotificationsUnreadCount({ signal, ...requestOptions });
+  > = ({ signal }) => getApiNotificationsUnreadCount(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
@@ -939,44 +717,13 @@ export function useGetApiNotificationsUnreadCount<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiNotificationsHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiNotificationsHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiNotificationsHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiNotificationsHealthcheckResponseSuccess = (
-  | getApiNotificationsHealthcheckResponse200TextPlain
-  | getApiNotificationsHealthcheckResponse200ApplicationJson
-  | getApiNotificationsHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiNotificationsHealthcheckResponse =
-  getApiNotificationsHealthcheckResponseSuccess;
-
-export const getGetApiNotificationsHealthcheckUrl = () => {
-  return `/api/notifications/healthcheck`;
-};
-
-export const getApiNotificationsHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiNotificationsHealthcheckResponse> => {
-  return ogmMutator<getApiNotificationsHealthcheckResponse>(
-    getGetApiNotificationsHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiNotificationsHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/notifications/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -1004,8 +751,7 @@ export const getGetApiNotificationsHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiNotificationsHealthcheck>>
-  > = ({ signal }) =>
-    getApiNotificationsHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiNotificationsHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiNotificationsHealthcheck>>,
@@ -1118,44 +864,13 @@ export function useGetApiNotificationsHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiNotificationsHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiNotificationsHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiNotificationsHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiNotificationsHealthcheckWithJwtResponseSuccess = (
-  | getApiNotificationsHealthcheckWithJwtResponse200TextPlain
-  | getApiNotificationsHealthcheckWithJwtResponse200ApplicationJson
-  | getApiNotificationsHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiNotificationsHealthcheckWithJwtResponse =
-  getApiNotificationsHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiNotificationsHealthcheckWithJwtUrl = () => {
-  return `/api/notifications/healthcheck-with-jwt`;
-};
-
-export const getApiNotificationsHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiNotificationsHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiNotificationsHealthcheckWithJwtResponse>(
-    getGetApiNotificationsHealthcheckWithJwtUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiNotificationsHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/notifications/healthcheck-with-jwt`, method: "GET", signal },
+    options,
   );
 };
 
@@ -1185,7 +900,7 @@ export const getGetApiNotificationsHealthcheckWithJwtQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiNotificationsHealthcheckWithJwt>>
   > = ({ signal }) =>
-    getApiNotificationsHealthcheckWithJwt({ signal, ...requestOptions });
+    getApiNotificationsHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiNotificationsHealthcheckWithJwt>>,

@@ -32,50 +32,20 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type postApiUsersRegisterFromTgbotResponse200TextPlain = {
-  data: UsersResponseApiResponse;
-  status: 200;
-};
-
-export type postApiUsersRegisterFromTgbotResponse200ApplicationJson = {
-  data: UsersResponseApiResponse;
-  status: 200;
-};
-
-export type postApiUsersRegisterFromTgbotResponse200TextJson = {
-  data: UsersResponseApiResponse;
-  status: 200;
-};
-
-export type postApiUsersRegisterFromTgbotResponseSuccess = (
-  | postApiUsersRegisterFromTgbotResponse200TextPlain
-  | postApiUsersRegisterFromTgbotResponse200ApplicationJson
-  | postApiUsersRegisterFromTgbotResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiUsersRegisterFromTgbotResponse =
-  postApiUsersRegisterFromTgbotResponseSuccess;
-
-export const getPostApiUsersRegisterFromTgbotUrl = () => {
-  return `/api/users/register-from-tgbot`;
-};
-
-export const postApiUsersRegisterFromTgbot = async (
+export const postApiUsersRegisterFromTgbot = (
   registerUserFromTgBotRequest: RegisterUserFromTgBotRequest,
-  options?: RequestInit,
-): Promise<postApiUsersRegisterFromTgbotResponse> => {
-  return ogmMutator<postApiUsersRegisterFromTgbotResponse>(
-    getPostApiUsersRegisterFromTgbotUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<UsersResponseApiResponse>(
     {
-      ...options,
+      url: `/api/users/register-from-tgbot`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(registerUserFromTgBotRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: registerUserFromTgBotRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -149,56 +119,14 @@ export const usePostApiUsersRegisterFromTgbot = <
     queryClient,
   );
 };
-export type getApiUsersGetAllResponse200TextPlain = {
-  data: GetAllUsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiUsersGetAllResponse200ApplicationJson = {
-  data: GetAllUsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiUsersGetAllResponse200TextJson = {
-  data: GetAllUsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiUsersGetAllResponseSuccess = (
-  | getApiUsersGetAllResponse200TextPlain
-  | getApiUsersGetAllResponse200ApplicationJson
-  | getApiUsersGetAllResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiUsersGetAllResponse = getApiUsersGetAllResponseSuccess;
-
-export const getGetApiUsersGetAllUrl = (params?: GetApiUsersGetAllParams) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/users/get-all?${stringifiedParams}`
-    : `/api/users/get-all`;
-};
-
-export const getApiUsersGetAll = async (
+export const getApiUsersGetAll = (
   params?: GetApiUsersGetAllParams,
-  options?: RequestInit,
-): Promise<getApiUsersGetAllResponse> => {
-  return ogmMutator<getApiUsersGetAllResponse>(
-    getGetApiUsersGetAllUrl(params),
-    {
-      ...options,
-      method: "GET",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GetAllUsersResponseApiResponse>(
+    { url: `/api/users/get-all`, method: "GET", params, signal },
+    options,
   );
 };
 
@@ -231,7 +159,7 @@ export const getGetApiUsersGetAllQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiUsersGetAll>>
-  > = ({ signal }) => getApiUsersGetAll(params, { signal, ...requestOptions });
+  > = ({ signal }) => getApiUsersGetAll(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiUsersGetAll>>,
@@ -348,44 +276,14 @@ export function useGetApiUsersGetAll<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiUsersGetByIdIdResponse200TextPlain = {
-  data: UsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiUsersGetByIdIdResponse200ApplicationJson = {
-  data: UsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiUsersGetByIdIdResponse200TextJson = {
-  data: UsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiUsersGetByIdIdResponseSuccess = (
-  | getApiUsersGetByIdIdResponse200TextPlain
-  | getApiUsersGetByIdIdResponse200ApplicationJson
-  | getApiUsersGetByIdIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiUsersGetByIdIdResponse = getApiUsersGetByIdIdResponseSuccess;
-
-export const getGetApiUsersGetByIdIdUrl = (id: number) => {
-  return `/api/users/get-by-id/${id}`;
-};
-
-export const getApiUsersGetByIdId = async (
+export const getApiUsersGetByIdId = (
   id: number,
-  options?: RequestInit,
-): Promise<getApiUsersGetByIdIdResponse> => {
-  return ogmMutator<getApiUsersGetByIdIdResponse>(
-    getGetApiUsersGetByIdIdUrl(id),
-    {
-      ...options,
-      method: "GET",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<UsersResponseApiResponse>(
+    { url: `/api/users/get-by-id/${id}`, method: "GET", signal },
+    options,
   );
 };
 
@@ -416,7 +314,7 @@ export const getGetApiUsersGetByIdIdQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiUsersGetByIdId>>
-  > = ({ signal }) => getApiUsersGetByIdId(id, { signal, ...requestOptions });
+  > = ({ signal }) => getApiUsersGetByIdId(id, requestOptions, signal);
 
   return {
     queryKey,
@@ -538,47 +436,18 @@ export function useGetApiUsersGetByIdId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiUsersGetByExternalIdExternalIdResponse200TextPlain = {
-  data: UsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiUsersGetByExternalIdExternalIdResponse200ApplicationJson = {
-  data: UsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiUsersGetByExternalIdExternalIdResponse200TextJson = {
-  data: UsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiUsersGetByExternalIdExternalIdResponseSuccess = (
-  | getApiUsersGetByExternalIdExternalIdResponse200TextPlain
-  | getApiUsersGetByExternalIdExternalIdResponse200ApplicationJson
-  | getApiUsersGetByExternalIdExternalIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiUsersGetByExternalIdExternalIdResponse =
-  getApiUsersGetByExternalIdExternalIdResponseSuccess;
-
-export const getGetApiUsersGetByExternalIdExternalIdUrl = (
+export const getApiUsersGetByExternalIdExternalId = (
   externalId: string,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  return `/api/users/get-by-external-id/${externalId}`;
-};
-
-export const getApiUsersGetByExternalIdExternalId = async (
-  externalId: string,
-  options?: RequestInit,
-): Promise<getApiUsersGetByExternalIdExternalIdResponse> => {
-  return ogmMutator<getApiUsersGetByExternalIdExternalIdResponse>(
-    getGetApiUsersGetByExternalIdExternalIdUrl(externalId),
+  return ogmMutator<UsersResponseApiResponse>(
     {
-      ...options,
+      url: `/api/users/get-by-external-id/${externalId}`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -613,10 +482,7 @@ export const getGetApiUsersGetByExternalIdExternalIdQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiUsersGetByExternalIdExternalId>>
   > = ({ signal }) =>
-    getApiUsersGetByExternalIdExternalId(externalId, {
-      signal,
-      ...requestOptions,
-    });
+    getApiUsersGetByExternalIdExternalId(externalId, requestOptions, signal);
 
   return {
     queryKey,
@@ -741,44 +607,13 @@ export function useGetApiUsersGetByExternalIdExternalId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiUsersHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiUsersHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiUsersHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiUsersHealthcheckResponseSuccess = (
-  | getApiUsersHealthcheckResponse200TextPlain
-  | getApiUsersHealthcheckResponse200ApplicationJson
-  | getApiUsersHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiUsersHealthcheckResponse =
-  getApiUsersHealthcheckResponseSuccess;
-
-export const getGetApiUsersHealthcheckUrl = () => {
-  return `/api/users/healthcheck`;
-};
-
-export const getApiUsersHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiUsersHealthcheckResponse> => {
-  return ogmMutator<getApiUsersHealthcheckResponse>(
-    getGetApiUsersHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiUsersHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/users/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -806,7 +641,7 @@ export const getGetApiUsersHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiUsersHealthcheck>>
-  > = ({ signal }) => getApiUsersHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiUsersHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiUsersHealthcheck>>,
@@ -919,44 +754,13 @@ export function useGetApiUsersHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiUsersHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiUsersHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiUsersHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiUsersHealthcheckWithJwtResponseSuccess = (
-  | getApiUsersHealthcheckWithJwtResponse200TextPlain
-  | getApiUsersHealthcheckWithJwtResponse200ApplicationJson
-  | getApiUsersHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiUsersHealthcheckWithJwtResponse =
-  getApiUsersHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiUsersHealthcheckWithJwtUrl = () => {
-  return `/api/users/healthcheck-with-jwt`;
-};
-
-export const getApiUsersHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiUsersHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiUsersHealthcheckWithJwtResponse>(
-    getGetApiUsersHealthcheckWithJwtUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiUsersHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/users/healthcheck-with-jwt`, method: "GET", signal },
+    options,
   );
 };
 
@@ -984,8 +788,7 @@ export const getGetApiUsersHealthcheckWithJwtQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiUsersHealthcheckWithJwt>>
-  > = ({ signal }) =>
-    getApiUsersHealthcheckWithJwt({ signal, ...requestOptions });
+  > = ({ signal }) => getApiUsersHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiUsersHealthcheckWithJwt>>,

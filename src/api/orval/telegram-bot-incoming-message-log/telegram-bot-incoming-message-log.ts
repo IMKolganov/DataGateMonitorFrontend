@@ -35,50 +35,20 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type postApiTgbotIncomingMessageLogsAddResponse200TextPlain = {
-  data: AddMessageResponseApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotIncomingMessageLogsAddResponse200ApplicationJson = {
-  data: AddMessageResponseApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotIncomingMessageLogsAddResponse200TextJson = {
-  data: AddMessageResponseApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotIncomingMessageLogsAddResponseSuccess = (
-  | postApiTgbotIncomingMessageLogsAddResponse200TextPlain
-  | postApiTgbotIncomingMessageLogsAddResponse200ApplicationJson
-  | postApiTgbotIncomingMessageLogsAddResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiTgbotIncomingMessageLogsAddResponse =
-  postApiTgbotIncomingMessageLogsAddResponseSuccess;
-
-export const getPostApiTgbotIncomingMessageLogsAddUrl = () => {
-  return `/api/tgbot-incoming-message-logs/add`;
-};
-
-export const postApiTgbotIncomingMessageLogsAdd = async (
+export const postApiTgbotIncomingMessageLogsAdd = (
   addMessageRequest: AddMessageRequest,
-  options?: RequestInit,
-): Promise<postApiTgbotIncomingMessageLogsAddResponse> => {
-  return ogmMutator<postApiTgbotIncomingMessageLogsAddResponse>(
-    getPostApiTgbotIncomingMessageLogsAddUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<AddMessageResponseApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-incoming-message-logs/add`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(addMessageRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: addMessageRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -151,59 +121,19 @@ export const usePostApiTgbotIncomingMessageLogsAdd = <
     queryClient,
   );
 };
-export type getApiTgbotIncomingMessageLogsGetAllResponse200TextPlain = {
-  data: GetAllMessagesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotIncomingMessageLogsGetAllResponse200ApplicationJson = {
-  data: GetAllMessagesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotIncomingMessageLogsGetAllResponse200TextJson = {
-  data: GetAllMessagesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotIncomingMessageLogsGetAllResponseSuccess = (
-  | getApiTgbotIncomingMessageLogsGetAllResponse200TextPlain
-  | getApiTgbotIncomingMessageLogsGetAllResponse200ApplicationJson
-  | getApiTgbotIncomingMessageLogsGetAllResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTgbotIncomingMessageLogsGetAllResponse =
-  getApiTgbotIncomingMessageLogsGetAllResponseSuccess;
-
-export const getGetApiTgbotIncomingMessageLogsGetAllUrl = (
+export const getApiTgbotIncomingMessageLogsGetAll = (
   params?: GetApiTgbotIncomingMessageLogsGetAllParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/tgbot-incoming-message-logs/get-all?${stringifiedParams}`
-    : `/api/tgbot-incoming-message-logs/get-all`;
-};
-
-export const getApiTgbotIncomingMessageLogsGetAll = async (
-  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
-  options?: RequestInit,
-): Promise<getApiTgbotIncomingMessageLogsGetAllResponse> => {
-  return ogmMutator<getApiTgbotIncomingMessageLogsGetAllResponse>(
-    getGetApiTgbotIncomingMessageLogsGetAllUrl(params),
+  return ogmMutator<GetAllMessagesResponseApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-incoming-message-logs/get-all`,
       method: "GET",
+      params,
+      signal,
     },
+    options,
   );
 };
 
@@ -241,7 +171,7 @@ export const getGetApiTgbotIncomingMessageLogsGetAllQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>
   > = ({ signal }) =>
-    getApiTgbotIncomingMessageLogsGetAll(params, { signal, ...requestOptions });
+    getApiTgbotIncomingMessageLogsGetAll(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
@@ -361,75 +291,22 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdResponse200TextPlain =
-  {
-    data: GetByTelegramIdMessagesResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdResponse200ApplicationJson =
-  {
-    data: GetByTelegramIdMessagesResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdResponse200TextJson =
-  {
-    data: GetByTelegramIdMessagesResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdResponseSuccess =
-  (
-    | getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdResponse200TextPlain
-    | getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdResponse200ApplicationJson
-    | getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdResponse200TextJson
-  ) & {
-    headers: Headers;
-  };
-export type getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdResponse =
-  getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdResponseSuccess;
-
-export const getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdUrl =
-  (
-    telegramId: number,
-    params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
-  ) => {
-    const normalizedParams = new URLSearchParams();
-
-    Object.entries(params || {}).forEach(([key, value]) => {
-      if (value !== undefined) {
-        normalizedParams.append(
-          key,
-          value === null ? "null" : value.toString(),
-        );
-      }
-    });
-
-    const stringifiedParams = normalizedParams.toString();
-
-    return stringifiedParams.length > 0
-      ? `/api/tgbot-incoming-message-logs/get-by-telegram-userid/${telegramId}?${stringifiedParams}`
-      : `/api/tgbot-incoming-message-logs/get-by-telegram-userid/${telegramId}`;
-  };
-
-export const getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId =
-  async (
-    telegramId: number,
-    params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
-    options?: RequestInit,
-  ): Promise<getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdResponse> => {
-    return ogmMutator<getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdResponse>(
-      getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdUrl(
-        telegramId,
-        params,
-      ),
-      {
-        ...options,
-        method: "GET",
-      },
-    );
-  };
+export const getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId = (
+  telegramId: number,
+  params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GetByTelegramIdMessagesResponseApiResponse>(
+    {
+      url: `/api/tgbot-incoming-message-logs/get-by-telegram-userid/${telegramId}`,
+      method: "GET",
+      params,
+      signal,
+    },
+    options,
+  );
+};
 
 export const getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryKey =
   (
@@ -487,7 +364,8 @@ export const getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQuery
       getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId(
         telegramId,
         params,
-        { signal, ...requestOptions },
+        requestOptions,
+        signal,
       );
 
     return {
@@ -679,44 +557,17 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTgbotIncomingMessageLogsGetByIdResponse200TextPlain = {
-  data: GetByIdMessageResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotIncomingMessageLogsGetByIdResponse200ApplicationJson = {
-  data: GetByIdMessageResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotIncomingMessageLogsGetByIdResponse200TextJson = {
-  data: GetByIdMessageResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotIncomingMessageLogsGetByIdResponseSuccess = (
-  | getApiTgbotIncomingMessageLogsGetByIdResponse200TextPlain
-  | getApiTgbotIncomingMessageLogsGetByIdResponse200ApplicationJson
-  | getApiTgbotIncomingMessageLogsGetByIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTgbotIncomingMessageLogsGetByIdResponse =
-  getApiTgbotIncomingMessageLogsGetByIdResponseSuccess;
-
-export const getGetApiTgbotIncomingMessageLogsGetByIdUrl = () => {
-  return `/api/tgbot-incoming-message-logs/get-by-id`;
-};
-
-export const getApiTgbotIncomingMessageLogsGetById = async (
-  options?: RequestInit,
-): Promise<getApiTgbotIncomingMessageLogsGetByIdResponse> => {
-  return ogmMutator<getApiTgbotIncomingMessageLogsGetByIdResponse>(
-    getGetApiTgbotIncomingMessageLogsGetByIdUrl(),
+export const getApiTgbotIncomingMessageLogsGetById = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GetByIdMessageResponseApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-incoming-message-logs/get-by-id`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -746,7 +597,7 @@ export const getGetApiTgbotIncomingMessageLogsGetByIdQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetById>>
   > = ({ signal }) =>
-    getApiTgbotIncomingMessageLogsGetById({ signal, ...requestOptions });
+    getApiTgbotIncomingMessageLogsGetById(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetById>>,
@@ -860,45 +711,17 @@ export function useGetApiTgbotIncomingMessageLogsGetById<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTgbotIncomingMessageLogsHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotIncomingMessageLogsHealthcheckResponse200ApplicationJson =
-  {
-    data: StringApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotIncomingMessageLogsHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotIncomingMessageLogsHealthcheckResponseSuccess = (
-  | getApiTgbotIncomingMessageLogsHealthcheckResponse200TextPlain
-  | getApiTgbotIncomingMessageLogsHealthcheckResponse200ApplicationJson
-  | getApiTgbotIncomingMessageLogsHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTgbotIncomingMessageLogsHealthcheckResponse =
-  getApiTgbotIncomingMessageLogsHealthcheckResponseSuccess;
-
-export const getGetApiTgbotIncomingMessageLogsHealthcheckUrl = () => {
-  return `/api/tgbot-incoming-message-logs/healthcheck`;
-};
-
-export const getApiTgbotIncomingMessageLogsHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiTgbotIncomingMessageLogsHealthcheckResponse> => {
-  return ogmMutator<getApiTgbotIncomingMessageLogsHealthcheckResponse>(
-    getGetApiTgbotIncomingMessageLogsHealthcheckUrl(),
+export const getApiTgbotIncomingMessageLogsHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-incoming-message-logs/healthcheck`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -928,7 +751,7 @@ export const getGetApiTgbotIncomingMessageLogsHealthcheckQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsHealthcheck>>
   > = ({ signal }) =>
-    getApiTgbotIncomingMessageLogsHealthcheck({ signal, ...requestOptions });
+    getApiTgbotIncomingMessageLogsHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsHealthcheck>>,
@@ -1042,47 +865,17 @@ export function useGetApiTgbotIncomingMessageLogsHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTgbotIncomingMessageLogsHealthcheckWithJwtResponse200TextPlain =
-  {
-    data: StringApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotIncomingMessageLogsHealthcheckWithJwtResponse200ApplicationJson =
-  {
-    data: StringApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotIncomingMessageLogsHealthcheckWithJwtResponse200TextJson =
-  {
-    data: StringApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotIncomingMessageLogsHealthcheckWithJwtResponseSuccess = (
-  | getApiTgbotIncomingMessageLogsHealthcheckWithJwtResponse200TextPlain
-  | getApiTgbotIncomingMessageLogsHealthcheckWithJwtResponse200ApplicationJson
-  | getApiTgbotIncomingMessageLogsHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTgbotIncomingMessageLogsHealthcheckWithJwtResponse =
-  getApiTgbotIncomingMessageLogsHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiTgbotIncomingMessageLogsHealthcheckWithJwtUrl = () => {
-  return `/api/tgbot-incoming-message-logs/healthcheck-with-jwt`;
-};
-
-export const getApiTgbotIncomingMessageLogsHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiTgbotIncomingMessageLogsHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiTgbotIncomingMessageLogsHealthcheckWithJwtResponse>(
-    getGetApiTgbotIncomingMessageLogsHealthcheckWithJwtUrl(),
+export const getApiTgbotIncomingMessageLogsHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-incoming-message-logs/healthcheck-with-jwt`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -1117,10 +910,7 @@ export const getGetApiTgbotIncomingMessageLogsHealthcheckWithJwtQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsHealthcheckWithJwt>>
   > = ({ signal }) =>
-    getApiTgbotIncomingMessageLogsHealthcheckWithJwt({
-      signal,
-      ...requestOptions,
-    });
+    getApiTgbotIncomingMessageLogsHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<

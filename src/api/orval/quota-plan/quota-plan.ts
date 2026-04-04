@@ -32,50 +32,20 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type postApiQuotaPlansGetAllResponse200TextPlain = {
-  data: QuotaPlansResponseApiResponse;
-  status: 200;
-};
-
-export type postApiQuotaPlansGetAllResponse200ApplicationJson = {
-  data: QuotaPlansResponseApiResponse;
-  status: 200;
-};
-
-export type postApiQuotaPlansGetAllResponse200TextJson = {
-  data: QuotaPlansResponseApiResponse;
-  status: 200;
-};
-
-export type postApiQuotaPlansGetAllResponseSuccess = (
-  | postApiQuotaPlansGetAllResponse200TextPlain
-  | postApiQuotaPlansGetAllResponse200ApplicationJson
-  | postApiQuotaPlansGetAllResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiQuotaPlansGetAllResponse =
-  postApiQuotaPlansGetAllResponseSuccess;
-
-export const getPostApiQuotaPlansGetAllUrl = () => {
-  return `/api/quota-plans/get-all`;
-};
-
-export const postApiQuotaPlansGetAll = async (
+export const postApiQuotaPlansGetAll = (
   getQuotaPlansRequest: GetQuotaPlansRequest,
-  options?: RequestInit,
-): Promise<postApiQuotaPlansGetAllResponse> => {
-  return ogmMutator<postApiQuotaPlansGetAllResponse>(
-    getPostApiQuotaPlansGetAllUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<QuotaPlansResponseApiResponse>(
     {
-      ...options,
+      url: `/api/quota-plans/get-all`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(getQuotaPlansRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: getQuotaPlansRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -148,45 +118,14 @@ export const usePostApiQuotaPlansGetAll = <
     queryClient,
   );
 };
-export type getApiQuotaPlansGetIdResponse200TextPlain = {
-  data: QuotaPlanResponseApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlansGetIdResponse200ApplicationJson = {
-  data: QuotaPlanResponseApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlansGetIdResponse200TextJson = {
-  data: QuotaPlanResponseApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlansGetIdResponseSuccess = (
-  | getApiQuotaPlansGetIdResponse200TextPlain
-  | getApiQuotaPlansGetIdResponse200ApplicationJson
-  | getApiQuotaPlansGetIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiQuotaPlansGetIdResponse =
-  getApiQuotaPlansGetIdResponseSuccess;
-
-export const getGetApiQuotaPlansGetIdUrl = (id: number) => {
-  return `/api/quota-plans/get/${id}`;
-};
-
-export const getApiQuotaPlansGetId = async (
+export const getApiQuotaPlansGetId = (
   id: number,
-  options?: RequestInit,
-): Promise<getApiQuotaPlansGetIdResponse> => {
-  return ogmMutator<getApiQuotaPlansGetIdResponse>(
-    getGetApiQuotaPlansGetIdUrl(id),
-    {
-      ...options,
-      method: "GET",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<QuotaPlanResponseApiResponse>(
+    { url: `/api/quota-plans/get/${id}`, method: "GET", signal },
+    options,
   );
 };
 
@@ -217,7 +156,7 @@ export const getGetApiQuotaPlansGetIdQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiQuotaPlansGetId>>
-  > = ({ signal }) => getApiQuotaPlansGetId(id, { signal, ...requestOptions });
+  > = ({ signal }) => getApiQuotaPlansGetId(id, requestOptions, signal);
 
   return {
     queryKey,
@@ -339,50 +278,20 @@ export function useGetApiQuotaPlansGetId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type postApiQuotaPlansCreateResponse200TextPlain = {
-  data: QuotaPlanResponseApiResponse;
-  status: 200;
-};
-
-export type postApiQuotaPlansCreateResponse200ApplicationJson = {
-  data: QuotaPlanResponseApiResponse;
-  status: 200;
-};
-
-export type postApiQuotaPlansCreateResponse200TextJson = {
-  data: QuotaPlanResponseApiResponse;
-  status: 200;
-};
-
-export type postApiQuotaPlansCreateResponseSuccess = (
-  | postApiQuotaPlansCreateResponse200TextPlain
-  | postApiQuotaPlansCreateResponse200ApplicationJson
-  | postApiQuotaPlansCreateResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiQuotaPlansCreateResponse =
-  postApiQuotaPlansCreateResponseSuccess;
-
-export const getPostApiQuotaPlansCreateUrl = () => {
-  return `/api/quota-plans/create`;
-};
-
-export const postApiQuotaPlansCreate = async (
+export const postApiQuotaPlansCreate = (
   createOrUpdateQuotaPlanRequest: CreateOrUpdateQuotaPlanRequest,
-  options?: RequestInit,
-): Promise<postApiQuotaPlansCreateResponse> => {
-  return ogmMutator<postApiQuotaPlansCreateResponse>(
-    getPostApiQuotaPlansCreateUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<QuotaPlanResponseApiResponse>(
     {
-      ...options,
+      url: `/api/quota-plans/create`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(createOrUpdateQuotaPlanRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: createOrUpdateQuotaPlanRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -456,50 +365,20 @@ export const usePostApiQuotaPlansCreate = <
     queryClient,
   );
 };
-export type putApiQuotaPlansUpdateResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type putApiQuotaPlansUpdateResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type putApiQuotaPlansUpdateResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type putApiQuotaPlansUpdateResponseSuccess = (
-  | putApiQuotaPlansUpdateResponse200TextPlain
-  | putApiQuotaPlansUpdateResponse200ApplicationJson
-  | putApiQuotaPlansUpdateResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type putApiQuotaPlansUpdateResponse =
-  putApiQuotaPlansUpdateResponseSuccess;
-
-export const getPutApiQuotaPlansUpdateUrl = () => {
-  return `/api/quota-plans/update`;
-};
-
-export const putApiQuotaPlansUpdate = async (
+export const putApiQuotaPlansUpdate = (
   createOrUpdateQuotaPlanRequest: CreateOrUpdateQuotaPlanRequest,
-  options?: RequestInit,
-): Promise<putApiQuotaPlansUpdateResponse> => {
-  return ogmMutator<putApiQuotaPlansUpdateResponse>(
-    getPutApiQuotaPlansUpdateUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
     {
-      ...options,
+      url: `/api/quota-plans/update`,
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(createOrUpdateQuotaPlanRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: createOrUpdateQuotaPlanRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -569,45 +448,14 @@ export const usePutApiQuotaPlansUpdate = <TError = unknown, TContext = unknown>(
     queryClient,
   );
 };
-export type deleteApiQuotaPlansDeleteIdResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type deleteApiQuotaPlansDeleteIdResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type deleteApiQuotaPlansDeleteIdResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type deleteApiQuotaPlansDeleteIdResponseSuccess = (
-  | deleteApiQuotaPlansDeleteIdResponse200TextPlain
-  | deleteApiQuotaPlansDeleteIdResponse200ApplicationJson
-  | deleteApiQuotaPlansDeleteIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type deleteApiQuotaPlansDeleteIdResponse =
-  deleteApiQuotaPlansDeleteIdResponseSuccess;
-
-export const getDeleteApiQuotaPlansDeleteIdUrl = (id: number) => {
-  return `/api/quota-plans/delete/${id}`;
-};
-
-export const deleteApiQuotaPlansDeleteId = async (
+export const deleteApiQuotaPlansDeleteId = (
   id: number,
-  options?: RequestInit,
-): Promise<deleteApiQuotaPlansDeleteIdResponse> => {
-  return ogmMutator<deleteApiQuotaPlansDeleteIdResponse>(
-    getDeleteApiQuotaPlansDeleteIdUrl(id),
-    {
-      ...options,
-      method: "DELETE",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/quota-plans/delete/${id}`, method: "DELETE", signal },
+    options,
   );
 };
 
@@ -680,45 +528,14 @@ export const useDeleteApiQuotaPlansDeleteId = <
     queryClient,
   );
 };
-export type postApiQuotaPlansSetDefaultIdResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type postApiQuotaPlansSetDefaultIdResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type postApiQuotaPlansSetDefaultIdResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type postApiQuotaPlansSetDefaultIdResponseSuccess = (
-  | postApiQuotaPlansSetDefaultIdResponse200TextPlain
-  | postApiQuotaPlansSetDefaultIdResponse200ApplicationJson
-  | postApiQuotaPlansSetDefaultIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiQuotaPlansSetDefaultIdResponse =
-  postApiQuotaPlansSetDefaultIdResponseSuccess;
-
-export const getPostApiQuotaPlansSetDefaultIdUrl = (id: number) => {
-  return `/api/quota-plans/set-default/${id}`;
-};
-
-export const postApiQuotaPlansSetDefaultId = async (
+export const postApiQuotaPlansSetDefaultId = (
   id: number,
-  options?: RequestInit,
-): Promise<postApiQuotaPlansSetDefaultIdResponse> => {
-  return ogmMutator<postApiQuotaPlansSetDefaultIdResponse>(
-    getPostApiQuotaPlansSetDefaultIdUrl(id),
-    {
-      ...options,
-      method: "POST",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/quota-plans/set-default/${id}`, method: "POST", signal },
+    options,
   );
 };
 
@@ -791,44 +608,13 @@ export const usePostApiQuotaPlansSetDefaultId = <
     queryClient,
   );
 };
-export type getApiQuotaPlansHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlansHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlansHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlansHealthcheckResponseSuccess = (
-  | getApiQuotaPlansHealthcheckResponse200TextPlain
-  | getApiQuotaPlansHealthcheckResponse200ApplicationJson
-  | getApiQuotaPlansHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiQuotaPlansHealthcheckResponse =
-  getApiQuotaPlansHealthcheckResponseSuccess;
-
-export const getGetApiQuotaPlansHealthcheckUrl = () => {
-  return `/api/quota-plans/healthcheck`;
-};
-
-export const getApiQuotaPlansHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiQuotaPlansHealthcheckResponse> => {
-  return ogmMutator<getApiQuotaPlansHealthcheckResponse>(
-    getGetApiQuotaPlansHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiQuotaPlansHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/quota-plans/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -856,8 +642,7 @@ export const getGetApiQuotaPlansHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiQuotaPlansHealthcheck>>
-  > = ({ signal }) =>
-    getApiQuotaPlansHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiQuotaPlansHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiQuotaPlansHealthcheck>>,
@@ -970,44 +755,13 @@ export function useGetApiQuotaPlansHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiQuotaPlansHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlansHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlansHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlansHealthcheckWithJwtResponseSuccess = (
-  | getApiQuotaPlansHealthcheckWithJwtResponse200TextPlain
-  | getApiQuotaPlansHealthcheckWithJwtResponse200ApplicationJson
-  | getApiQuotaPlansHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiQuotaPlansHealthcheckWithJwtResponse =
-  getApiQuotaPlansHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiQuotaPlansHealthcheckWithJwtUrl = () => {
-  return `/api/quota-plans/healthcheck-with-jwt`;
-};
-
-export const getApiQuotaPlansHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiQuotaPlansHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiQuotaPlansHealthcheckWithJwtResponse>(
-    getGetApiQuotaPlansHealthcheckWithJwtUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiQuotaPlansHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/quota-plans/healthcheck-with-jwt`, method: "GET", signal },
+    options,
   );
 };
 
@@ -1036,7 +790,7 @@ export const getGetApiQuotaPlansHealthcheckWithJwtQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiQuotaPlansHealthcheckWithJwt>>
   > = ({ signal }) =>
-    getApiQuotaPlansHealthcheckWithJwt({ signal, ...requestOptions });
+    getApiQuotaPlansHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiQuotaPlansHealthcheckWithJwt>>,

@@ -33,44 +33,13 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type getApiGeoLiteGetDatabasePathResponse200TextPlain = {
-  data: GetDatabasePathResponseApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteGetDatabasePathResponse200ApplicationJson = {
-  data: GetDatabasePathResponseApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteGetDatabasePathResponse200TextJson = {
-  data: GetDatabasePathResponseApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteGetDatabasePathResponseSuccess = (
-  | getApiGeoLiteGetDatabasePathResponse200TextPlain
-  | getApiGeoLiteGetDatabasePathResponse200ApplicationJson
-  | getApiGeoLiteGetDatabasePathResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiGeoLiteGetDatabasePathResponse =
-  getApiGeoLiteGetDatabasePathResponseSuccess;
-
-export const getGetApiGeoLiteGetDatabasePathUrl = () => {
-  return `/api/geo-lite/get-database-path`;
-};
-
-export const getApiGeoLiteGetDatabasePath = async (
-  options?: RequestInit,
-): Promise<getApiGeoLiteGetDatabasePathResponse> => {
-  return ogmMutator<getApiGeoLiteGetDatabasePathResponse>(
-    getGetApiGeoLiteGetDatabasePathUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiGeoLiteGetDatabasePath = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GetDatabasePathResponseApiResponse>(
+    { url: `/api/geo-lite/get-database-path`, method: "GET", signal },
+    options,
   );
 };
 
@@ -98,8 +67,7 @@ export const getGetApiGeoLiteGetDatabasePathQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiGeoLiteGetDatabasePath>>
-  > = ({ signal }) =>
-    getApiGeoLiteGetDatabasePath({ signal, ...requestOptions });
+  > = ({ signal }) => getApiGeoLiteGetDatabasePath(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiGeoLiteGetDatabasePath>>,
@@ -212,45 +180,14 @@ export function useGetApiGeoLiteGetDatabasePath<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiGeoLiteGetGeoInfoIpAddressResponse200TextPlain = {
-  data: GetGeoInfoResponseApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteGetGeoInfoIpAddressResponse200ApplicationJson = {
-  data: GetGeoInfoResponseApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteGetGeoInfoIpAddressResponse200TextJson = {
-  data: GetGeoInfoResponseApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteGetGeoInfoIpAddressResponseSuccess = (
-  | getApiGeoLiteGetGeoInfoIpAddressResponse200TextPlain
-  | getApiGeoLiteGetGeoInfoIpAddressResponse200ApplicationJson
-  | getApiGeoLiteGetGeoInfoIpAddressResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiGeoLiteGetGeoInfoIpAddressResponse =
-  getApiGeoLiteGetGeoInfoIpAddressResponseSuccess;
-
-export const getGetApiGeoLiteGetGeoInfoIpAddressUrl = (ipAddress: string) => {
-  return `/api/geo-lite/get-geo-info/${ipAddress}`;
-};
-
-export const getApiGeoLiteGetGeoInfoIpAddress = async (
+export const getApiGeoLiteGetGeoInfoIpAddress = (
   ipAddress: string,
-  options?: RequestInit,
-): Promise<getApiGeoLiteGetGeoInfoIpAddressResponse> => {
-  return ogmMutator<getApiGeoLiteGetGeoInfoIpAddressResponse>(
-    getGetApiGeoLiteGetGeoInfoIpAddressUrl(ipAddress),
-    {
-      ...options,
-      method: "GET",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GetGeoInfoResponseApiResponse>(
+    { url: `/api/geo-lite/get-geo-info/${ipAddress}`, method: "GET", signal },
+    options,
   );
 };
 
@@ -285,7 +222,7 @@ export const getGetApiGeoLiteGetGeoInfoIpAddressQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiGeoLiteGetGeoInfoIpAddress>>
   > = ({ signal }) =>
-    getApiGeoLiteGetGeoInfoIpAddress(ipAddress, { signal, ...requestOptions });
+    getApiGeoLiteGetGeoInfoIpAddress(ipAddress, requestOptions, signal);
 
   return {
     queryKey,
@@ -410,44 +347,13 @@ export function useGetApiGeoLiteGetGeoInfoIpAddress<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiGeoLiteGetVerionDbResponse200TextPlain = {
-  data: GetVersionDatabaseResponseApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteGetVerionDbResponse200ApplicationJson = {
-  data: GetVersionDatabaseResponseApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteGetVerionDbResponse200TextJson = {
-  data: GetVersionDatabaseResponseApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteGetVerionDbResponseSuccess = (
-  | getApiGeoLiteGetVerionDbResponse200TextPlain
-  | getApiGeoLiteGetVerionDbResponse200ApplicationJson
-  | getApiGeoLiteGetVerionDbResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiGeoLiteGetVerionDbResponse =
-  getApiGeoLiteGetVerionDbResponseSuccess;
-
-export const getGetApiGeoLiteGetVerionDbUrl = () => {
-  return `/api/geo-lite/get-verion-db`;
-};
-
-export const getApiGeoLiteGetVerionDb = async (
-  options?: RequestInit,
-): Promise<getApiGeoLiteGetVerionDbResponse> => {
-  return ogmMutator<getApiGeoLiteGetVerionDbResponse>(
-    getGetApiGeoLiteGetVerionDbUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiGeoLiteGetVerionDb = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GetVersionDatabaseResponseApiResponse>(
+    { url: `/api/geo-lite/get-verion-db`, method: "GET", signal },
+    options,
   );
 };
 
@@ -475,7 +381,7 @@ export const getGetApiGeoLiteGetVerionDbQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiGeoLiteGetVerionDb>>
-  > = ({ signal }) => getApiGeoLiteGetVerionDb({ signal, ...requestOptions });
+  > = ({ signal }) => getApiGeoLiteGetVerionDb(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiGeoLiteGetVerionDb>>,
@@ -588,44 +494,13 @@ export function useGetApiGeoLiteGetVerionDb<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type postApiGeoLiteUpdateDbResponse200TextPlain = {
-  data: GeoLiteUpdateResponseApiResponse;
-  status: 200;
-};
-
-export type postApiGeoLiteUpdateDbResponse200ApplicationJson = {
-  data: GeoLiteUpdateResponseApiResponse;
-  status: 200;
-};
-
-export type postApiGeoLiteUpdateDbResponse200TextJson = {
-  data: GeoLiteUpdateResponseApiResponse;
-  status: 200;
-};
-
-export type postApiGeoLiteUpdateDbResponseSuccess = (
-  | postApiGeoLiteUpdateDbResponse200TextPlain
-  | postApiGeoLiteUpdateDbResponse200ApplicationJson
-  | postApiGeoLiteUpdateDbResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiGeoLiteUpdateDbResponse =
-  postApiGeoLiteUpdateDbResponseSuccess;
-
-export const getPostApiGeoLiteUpdateDbUrl = () => {
-  return `/api/geo-lite/update-db`;
-};
-
-export const postApiGeoLiteUpdateDb = async (
-  options?: RequestInit,
-): Promise<postApiGeoLiteUpdateDbResponse> => {
-  return ogmMutator<postApiGeoLiteUpdateDbResponse>(
-    getPostApiGeoLiteUpdateDbUrl(),
-    {
-      ...options,
-      method: "POST",
-    },
+export const postApiGeoLiteUpdateDb = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GeoLiteUpdateResponseApiResponse>(
+    { url: `/api/geo-lite/update-db`, method: "POST", signal },
+    options,
   );
 };
 
@@ -693,44 +568,13 @@ export const usePostApiGeoLiteUpdateDb = <TError = unknown, TContext = unknown>(
     queryClient,
   );
 };
-export type getApiGeoLiteCheckNewVersionResponse200TextPlain = {
-  data: GeoLiteVersionCheckResponseApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteCheckNewVersionResponse200ApplicationJson = {
-  data: GeoLiteVersionCheckResponseApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteCheckNewVersionResponse200TextJson = {
-  data: GeoLiteVersionCheckResponseApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteCheckNewVersionResponseSuccess = (
-  | getApiGeoLiteCheckNewVersionResponse200TextPlain
-  | getApiGeoLiteCheckNewVersionResponse200ApplicationJson
-  | getApiGeoLiteCheckNewVersionResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiGeoLiteCheckNewVersionResponse =
-  getApiGeoLiteCheckNewVersionResponseSuccess;
-
-export const getGetApiGeoLiteCheckNewVersionUrl = () => {
-  return `/api/geo-lite/check-new-version`;
-};
-
-export const getApiGeoLiteCheckNewVersion = async (
-  options?: RequestInit,
-): Promise<getApiGeoLiteCheckNewVersionResponse> => {
-  return ogmMutator<getApiGeoLiteCheckNewVersionResponse>(
-    getGetApiGeoLiteCheckNewVersionUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiGeoLiteCheckNewVersion = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GeoLiteVersionCheckResponseApiResponse>(
+    { url: `/api/geo-lite/check-new-version`, method: "GET", signal },
+    options,
   );
 };
 
@@ -758,8 +602,7 @@ export const getGetApiGeoLiteCheckNewVersionQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>
-  > = ({ signal }) =>
-    getApiGeoLiteCheckNewVersion({ signal, ...requestOptions });
+  > = ({ signal }) => getApiGeoLiteCheckNewVersion(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>,
@@ -872,44 +715,13 @@ export function useGetApiGeoLiteCheckNewVersion<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiGeoLiteHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteHealthcheckResponseSuccess = (
-  | getApiGeoLiteHealthcheckResponse200TextPlain
-  | getApiGeoLiteHealthcheckResponse200ApplicationJson
-  | getApiGeoLiteHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiGeoLiteHealthcheckResponse =
-  getApiGeoLiteHealthcheckResponseSuccess;
-
-export const getGetApiGeoLiteHealthcheckUrl = () => {
-  return `/api/geo-lite/healthcheck`;
-};
-
-export const getApiGeoLiteHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiGeoLiteHealthcheckResponse> => {
-  return ogmMutator<getApiGeoLiteHealthcheckResponse>(
-    getGetApiGeoLiteHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiGeoLiteHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/geo-lite/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -937,7 +749,7 @@ export const getGetApiGeoLiteHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiGeoLiteHealthcheck>>
-  > = ({ signal }) => getApiGeoLiteHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiGeoLiteHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiGeoLiteHealthcheck>>,
@@ -1050,44 +862,13 @@ export function useGetApiGeoLiteHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiGeoLiteHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiGeoLiteHealthcheckWithJwtResponseSuccess = (
-  | getApiGeoLiteHealthcheckWithJwtResponse200TextPlain
-  | getApiGeoLiteHealthcheckWithJwtResponse200ApplicationJson
-  | getApiGeoLiteHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiGeoLiteHealthcheckWithJwtResponse =
-  getApiGeoLiteHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiGeoLiteHealthcheckWithJwtUrl = () => {
-  return `/api/geo-lite/healthcheck-with-jwt`;
-};
-
-export const getApiGeoLiteHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiGeoLiteHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiGeoLiteHealthcheckWithJwtResponse>(
-    getGetApiGeoLiteHealthcheckWithJwtUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiGeoLiteHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/geo-lite/healthcheck-with-jwt`, method: "GET", signal },
+    options,
   );
 };
 
@@ -1115,8 +896,7 @@ export const getGetApiGeoLiteHealthcheckWithJwtQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiGeoLiteHealthcheckWithJwt>>
-  > = ({ signal }) =>
-    getApiGeoLiteHealthcheckWithJwt({ signal, ...requestOptions });
+  > = ({ signal }) => getApiGeoLiteHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiGeoLiteHealthcheckWithJwt>>,

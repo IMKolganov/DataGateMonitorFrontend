@@ -33,47 +33,18 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type getApiTgbotUsersCheckExistsTelegramIdResponse200TextPlain = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersCheckExistsTelegramIdResponse200ApplicationJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersCheckExistsTelegramIdResponse200TextJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersCheckExistsTelegramIdResponseSuccess = (
-  | getApiTgbotUsersCheckExistsTelegramIdResponse200TextPlain
-  | getApiTgbotUsersCheckExistsTelegramIdResponse200ApplicationJson
-  | getApiTgbotUsersCheckExistsTelegramIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTgbotUsersCheckExistsTelegramIdResponse =
-  getApiTgbotUsersCheckExistsTelegramIdResponseSuccess;
-
-export const getGetApiTgbotUsersCheckExistsTelegramIdUrl = (
+export const getApiTgbotUsersCheckExistsTelegramId = (
   telegramId: number,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  return `/api/tgbot-users/check-exists/${telegramId}`;
-};
-
-export const getApiTgbotUsersCheckExistsTelegramId = async (
-  telegramId: number,
-  options?: RequestInit,
-): Promise<getApiTgbotUsersCheckExistsTelegramIdResponse> => {
-  return ogmMutator<getApiTgbotUsersCheckExistsTelegramIdResponse>(
-    getGetApiTgbotUsersCheckExistsTelegramIdUrl(telegramId),
+  return ogmMutator<BooleanApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-users/check-exists/${telegramId}`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -108,10 +79,7 @@ export const getGetApiTgbotUsersCheckExistsTelegramIdQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotUsersCheckExistsTelegramId>>
   > = ({ signal }) =>
-    getApiTgbotUsersCheckExistsTelegramId(telegramId, {
-      signal,
-      ...requestOptions,
-    });
+    getApiTgbotUsersCheckExistsTelegramId(telegramId, requestOptions, signal);
 
   return {
     queryKey,
@@ -236,45 +204,14 @@ export function useGetApiTgbotUsersCheckExistsTelegramId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTgbotUsersGetTelegramIdResponse200TextPlain = {
-  data: UserRequestApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersGetTelegramIdResponse200ApplicationJson = {
-  data: UserRequestApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersGetTelegramIdResponse200TextJson = {
-  data: UserRequestApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersGetTelegramIdResponseSuccess = (
-  | getApiTgbotUsersGetTelegramIdResponse200TextPlain
-  | getApiTgbotUsersGetTelegramIdResponse200ApplicationJson
-  | getApiTgbotUsersGetTelegramIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTgbotUsersGetTelegramIdResponse =
-  getApiTgbotUsersGetTelegramIdResponseSuccess;
-
-export const getGetApiTgbotUsersGetTelegramIdUrl = (telegramId: number) => {
-  return `/api/tgbot-users/get/${telegramId}`;
-};
-
-export const getApiTgbotUsersGetTelegramId = async (
+export const getApiTgbotUsersGetTelegramId = (
   telegramId: number,
-  options?: RequestInit,
-): Promise<getApiTgbotUsersGetTelegramIdResponse> => {
-  return ogmMutator<getApiTgbotUsersGetTelegramIdResponse>(
-    getGetApiTgbotUsersGetTelegramIdUrl(telegramId),
-    {
-      ...options,
-      method: "GET",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<UserRequestApiResponse>(
+    { url: `/api/tgbot-users/get/${telegramId}`, method: "GET", signal },
+    options,
   );
 };
 
@@ -309,7 +246,7 @@ export const getGetApiTgbotUsersGetTelegramIdQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotUsersGetTelegramId>>
   > = ({ signal }) =>
-    getApiTgbotUsersGetTelegramId(telegramId, { signal, ...requestOptions });
+    getApiTgbotUsersGetTelegramId(telegramId, requestOptions, signal);
 
   return {
     queryKey,
@@ -434,44 +371,13 @@ export function useGetApiTgbotUsersGetTelegramId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTgbotUsersGetAdminsResponse200TextPlain = {
-  data: GetAdminsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersGetAdminsResponse200ApplicationJson = {
-  data: GetAdminsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersGetAdminsResponse200TextJson = {
-  data: GetAdminsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersGetAdminsResponseSuccess = (
-  | getApiTgbotUsersGetAdminsResponse200TextPlain
-  | getApiTgbotUsersGetAdminsResponse200ApplicationJson
-  | getApiTgbotUsersGetAdminsResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTgbotUsersGetAdminsResponse =
-  getApiTgbotUsersGetAdminsResponseSuccess;
-
-export const getGetApiTgbotUsersGetAdminsUrl = () => {
-  return `/api/tgbot-users/get-admins`;
-};
-
-export const getApiTgbotUsersGetAdmins = async (
-  options?: RequestInit,
-): Promise<getApiTgbotUsersGetAdminsResponse> => {
-  return ogmMutator<getApiTgbotUsersGetAdminsResponse>(
-    getGetApiTgbotUsersGetAdminsUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiTgbotUsersGetAdmins = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GetAdminsResponseApiResponse>(
+    { url: `/api/tgbot-users/get-admins`, method: "GET", signal },
+    options,
   );
 };
 
@@ -499,7 +405,7 @@ export const getGetApiTgbotUsersGetAdminsQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotUsersGetAdmins>>
-  > = ({ signal }) => getApiTgbotUsersGetAdmins({ signal, ...requestOptions });
+  > = ({ signal }) => getApiTgbotUsersGetAdmins(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTgbotUsersGetAdmins>>,
@@ -612,44 +518,13 @@ export function useGetApiTgbotUsersGetAdmins<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTgbotUsersGetAllResponse200TextPlain = {
-  data: GetAllTelegramUsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersGetAllResponse200ApplicationJson = {
-  data: GetAllTelegramUsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersGetAllResponse200TextJson = {
-  data: GetAllTelegramUsersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersGetAllResponseSuccess = (
-  | getApiTgbotUsersGetAllResponse200TextPlain
-  | getApiTgbotUsersGetAllResponse200ApplicationJson
-  | getApiTgbotUsersGetAllResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTgbotUsersGetAllResponse =
-  getApiTgbotUsersGetAllResponseSuccess;
-
-export const getGetApiTgbotUsersGetAllUrl = () => {
-  return `/api/tgbot-users/get-all`;
-};
-
-export const getApiTgbotUsersGetAll = async (
-  options?: RequestInit,
-): Promise<getApiTgbotUsersGetAllResponse> => {
-  return ogmMutator<getApiTgbotUsersGetAllResponse>(
-    getGetApiTgbotUsersGetAllUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiTgbotUsersGetAll = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GetAllTelegramUsersResponseApiResponse>(
+    { url: `/api/tgbot-users/get-all`, method: "GET", signal },
+    options,
   );
 };
 
@@ -677,7 +552,7 @@ export const getGetApiTgbotUsersGetAllQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotUsersGetAll>>
-  > = ({ signal }) => getApiTgbotUsersGetAll({ signal, ...requestOptions });
+  > = ({ signal }) => getApiTgbotUsersGetAll(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTgbotUsersGetAll>>,
@@ -790,50 +665,20 @@ export function useGetApiTgbotUsersGetAll<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type postApiTgbotUsersBlockResponse200TextPlain = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotUsersBlockResponse200ApplicationJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotUsersBlockResponse200TextJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotUsersBlockResponseSuccess = (
-  | postApiTgbotUsersBlockResponse200TextPlain
-  | postApiTgbotUsersBlockResponse200ApplicationJson
-  | postApiTgbotUsersBlockResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiTgbotUsersBlockResponse =
-  postApiTgbotUsersBlockResponseSuccess;
-
-export const getPostApiTgbotUsersBlockUrl = () => {
-  return `/api/tgbot-users/block`;
-};
-
-export const postApiTgbotUsersBlock = async (
+export const postApiTgbotUsersBlock = (
   telegramUserActionRequest: TelegramUserActionRequest,
-  options?: RequestInit,
-): Promise<postApiTgbotUsersBlockResponse> => {
-  return ogmMutator<postApiTgbotUsersBlockResponse>(
-    getPostApiTgbotUsersBlockUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<BooleanApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-users/block`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(telegramUserActionRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: telegramUserActionRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -903,50 +748,20 @@ export const usePostApiTgbotUsersBlock = <TError = unknown, TContext = unknown>(
     queryClient,
   );
 };
-export type postApiTgbotUsersUnblockResponse200TextPlain = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotUsersUnblockResponse200ApplicationJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotUsersUnblockResponse200TextJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotUsersUnblockResponseSuccess = (
-  | postApiTgbotUsersUnblockResponse200TextPlain
-  | postApiTgbotUsersUnblockResponse200ApplicationJson
-  | postApiTgbotUsersUnblockResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiTgbotUsersUnblockResponse =
-  postApiTgbotUsersUnblockResponseSuccess;
-
-export const getPostApiTgbotUsersUnblockUrl = () => {
-  return `/api/tgbot-users/unblock`;
-};
-
-export const postApiTgbotUsersUnblock = async (
+export const postApiTgbotUsersUnblock = (
   telegramUserActionRequest: TelegramUserActionRequest,
-  options?: RequestInit,
-): Promise<postApiTgbotUsersUnblockResponse> => {
-  return ogmMutator<postApiTgbotUsersUnblockResponse>(
-    getPostApiTgbotUsersUnblockUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<BooleanApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-users/unblock`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(telegramUserActionRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: telegramUserActionRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -1019,50 +834,20 @@ export const usePostApiTgbotUsersUnblock = <
     queryClient,
   );
 };
-export type postApiTgbotUsersSetAdminResponse200TextPlain = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotUsersSetAdminResponse200ApplicationJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotUsersSetAdminResponse200TextJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotUsersSetAdminResponseSuccess = (
-  | postApiTgbotUsersSetAdminResponse200TextPlain
-  | postApiTgbotUsersSetAdminResponse200ApplicationJson
-  | postApiTgbotUsersSetAdminResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiTgbotUsersSetAdminResponse =
-  postApiTgbotUsersSetAdminResponseSuccess;
-
-export const getPostApiTgbotUsersSetAdminUrl = () => {
-  return `/api/tgbot-users/set-admin`;
-};
-
-export const postApiTgbotUsersSetAdmin = async (
+export const postApiTgbotUsersSetAdmin = (
   telegramUserActionRequest: TelegramUserActionRequest,
-  options?: RequestInit,
-): Promise<postApiTgbotUsersSetAdminResponse> => {
-  return ogmMutator<postApiTgbotUsersSetAdminResponse>(
-    getPostApiTgbotUsersSetAdminUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<BooleanApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-users/set-admin`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(telegramUserActionRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: telegramUserActionRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -1135,50 +920,20 @@ export const usePostApiTgbotUsersSetAdmin = <
     queryClient,
   );
 };
-export type postApiTgbotUsersUnsetAdminResponse200TextPlain = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotUsersUnsetAdminResponse200ApplicationJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotUsersUnsetAdminResponse200TextJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotUsersUnsetAdminResponseSuccess = (
-  | postApiTgbotUsersUnsetAdminResponse200TextPlain
-  | postApiTgbotUsersUnsetAdminResponse200ApplicationJson
-  | postApiTgbotUsersUnsetAdminResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiTgbotUsersUnsetAdminResponse =
-  postApiTgbotUsersUnsetAdminResponseSuccess;
-
-export const getPostApiTgbotUsersUnsetAdminUrl = () => {
-  return `/api/tgbot-users/unset-admin`;
-};
-
-export const postApiTgbotUsersUnsetAdmin = async (
+export const postApiTgbotUsersUnsetAdmin = (
   telegramUserActionRequest: TelegramUserActionRequest,
-  options?: RequestInit,
-): Promise<postApiTgbotUsersUnsetAdminResponse> => {
-  return ogmMutator<postApiTgbotUsersUnsetAdminResponse>(
-    getPostApiTgbotUsersUnsetAdminUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<BooleanApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-users/unset-admin`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(telegramUserActionRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: telegramUserActionRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -1251,44 +1006,13 @@ export const usePostApiTgbotUsersUnsetAdmin = <
     queryClient,
   );
 };
-export type getApiTgbotUsersHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersHealthcheckResponseSuccess = (
-  | getApiTgbotUsersHealthcheckResponse200TextPlain
-  | getApiTgbotUsersHealthcheckResponse200ApplicationJson
-  | getApiTgbotUsersHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTgbotUsersHealthcheckResponse =
-  getApiTgbotUsersHealthcheckResponseSuccess;
-
-export const getGetApiTgbotUsersHealthcheckUrl = () => {
-  return `/api/tgbot-users/healthcheck`;
-};
-
-export const getApiTgbotUsersHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiTgbotUsersHealthcheckResponse> => {
-  return ogmMutator<getApiTgbotUsersHealthcheckResponse>(
-    getGetApiTgbotUsersHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiTgbotUsersHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/tgbot-users/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -1316,8 +1040,7 @@ export const getGetApiTgbotUsersHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotUsersHealthcheck>>
-  > = ({ signal }) =>
-    getApiTgbotUsersHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiTgbotUsersHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTgbotUsersHealthcheck>>,
@@ -1430,44 +1153,13 @@ export function useGetApiTgbotUsersHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTgbotUsersHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotUsersHealthcheckWithJwtResponseSuccess = (
-  | getApiTgbotUsersHealthcheckWithJwtResponse200TextPlain
-  | getApiTgbotUsersHealthcheckWithJwtResponse200ApplicationJson
-  | getApiTgbotUsersHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTgbotUsersHealthcheckWithJwtResponse =
-  getApiTgbotUsersHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiTgbotUsersHealthcheckWithJwtUrl = () => {
-  return `/api/tgbot-users/healthcheck-with-jwt`;
-};
-
-export const getApiTgbotUsersHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiTgbotUsersHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiTgbotUsersHealthcheckWithJwtResponse>(
-    getGetApiTgbotUsersHealthcheckWithJwtUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiTgbotUsersHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/tgbot-users/healthcheck-with-jwt`, method: "GET", signal },
+    options,
   );
 };
 
@@ -1496,7 +1188,7 @@ export const getGetApiTgbotUsersHealthcheckWithJwtQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotUsersHealthcheckWithJwt>>
   > = ({ signal }) =>
-    getApiTgbotUsersHealthcheckWithJwt({ signal, ...requestOptions });
+    getApiTgbotUsersHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTgbotUsersHealthcheckWithJwt>>,
