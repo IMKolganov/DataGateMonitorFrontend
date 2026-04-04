@@ -37,45 +37,14 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type getApiOpenVpnFilesByTokenTokenResponse200TextPlain = {
-  data: OvpnFileResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesByTokenTokenResponse200ApplicationJson = {
-  data: OvpnFileResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesByTokenTokenResponse200TextJson = {
-  data: OvpnFileResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesByTokenTokenResponseSuccess = (
-  | getApiOpenVpnFilesByTokenTokenResponse200TextPlain
-  | getApiOpenVpnFilesByTokenTokenResponse200ApplicationJson
-  | getApiOpenVpnFilesByTokenTokenResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnFilesByTokenTokenResponse =
-  getApiOpenVpnFilesByTokenTokenResponseSuccess;
-
-export const getGetApiOpenVpnFilesByTokenTokenUrl = (token: string) => {
-  return `/api/open-vpn-files/by-token/${token}`;
-};
-
-export const getApiOpenVpnFilesByTokenToken = async (
+export const getApiOpenVpnFilesByTokenToken = (
   token: string,
-  options?: RequestInit,
-): Promise<getApiOpenVpnFilesByTokenTokenResponse> => {
-  return ogmMutator<getApiOpenVpnFilesByTokenTokenResponse>(
-    getGetApiOpenVpnFilesByTokenTokenUrl(token),
-    {
-      ...options,
-      method: "GET",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<OvpnFileResponseApiResponse>(
+    { url: `/api/open-vpn-files/by-token/${token}`, method: "GET", signal },
+    options,
   );
 };
 
@@ -107,7 +76,7 @@ export const getGetApiOpenVpnFilesByTokenTokenQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnFilesByTokenToken>>
   > = ({ signal }) =>
-    getApiOpenVpnFilesByTokenToken(token, { signal, ...requestOptions });
+    getApiOpenVpnFilesByTokenToken(token, requestOptions, signal);
 
   return {
     queryKey,
@@ -232,47 +201,18 @@ export function useGetApiOpenVpnFilesByTokenToken<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnFilesGetAllVpnServerIdResponse200TextPlain = {
-  data: OvpnFilesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesGetAllVpnServerIdResponse200ApplicationJson = {
-  data: OvpnFilesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesGetAllVpnServerIdResponse200TextJson = {
-  data: OvpnFilesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesGetAllVpnServerIdResponseSuccess = (
-  | getApiOpenVpnFilesGetAllVpnServerIdResponse200TextPlain
-  | getApiOpenVpnFilesGetAllVpnServerIdResponse200ApplicationJson
-  | getApiOpenVpnFilesGetAllVpnServerIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnFilesGetAllVpnServerIdResponse =
-  getApiOpenVpnFilesGetAllVpnServerIdResponseSuccess;
-
-export const getGetApiOpenVpnFilesGetAllVpnServerIdUrl = (
+export const getApiOpenVpnFilesGetAllVpnServerId = (
   vpnServerId: number,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  return `/api/open-vpn-files/get-all/${vpnServerId}`;
-};
-
-export const getApiOpenVpnFilesGetAllVpnServerId = async (
-  vpnServerId: number,
-  options?: RequestInit,
-): Promise<getApiOpenVpnFilesGetAllVpnServerIdResponse> => {
-  return ogmMutator<getApiOpenVpnFilesGetAllVpnServerIdResponse>(
-    getGetApiOpenVpnFilesGetAllVpnServerIdUrl(vpnServerId),
+  return ogmMutator<OvpnFilesResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-files/get-all/${vpnServerId}`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -307,10 +247,7 @@ export const getGetApiOpenVpnFilesGetAllVpnServerIdQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnFilesGetAllVpnServerId>>
   > = ({ signal }) =>
-    getApiOpenVpnFilesGetAllVpnServerId(vpnServerId, {
-      signal,
-      ...requestOptions,
-    });
+    getApiOpenVpnFilesGetAllVpnServerId(vpnServerId, requestOptions, signal);
 
   return {
     queryKey,
@@ -435,54 +372,19 @@ export function useGetApiOpenVpnFilesGetAllVpnServerId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnFilesGetAllVpnServerIdExternalIdResponse200TextPlain =
-  {
-    data: OvpnFilesResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiOpenVpnFilesGetAllVpnServerIdExternalIdResponse200ApplicationJson =
-  {
-    data: OvpnFilesResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiOpenVpnFilesGetAllVpnServerIdExternalIdResponse200TextJson = {
-  data: OvpnFilesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesGetAllVpnServerIdExternalIdResponseSuccess = (
-  | getApiOpenVpnFilesGetAllVpnServerIdExternalIdResponse200TextPlain
-  | getApiOpenVpnFilesGetAllVpnServerIdExternalIdResponse200ApplicationJson
-  | getApiOpenVpnFilesGetAllVpnServerIdExternalIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnFilesGetAllVpnServerIdExternalIdResponse =
-  getApiOpenVpnFilesGetAllVpnServerIdExternalIdResponseSuccess;
-
-export const getGetApiOpenVpnFilesGetAllVpnServerIdExternalIdUrl = (
+export const getApiOpenVpnFilesGetAllVpnServerIdExternalId = (
   vpnServerId: number,
   externalId: string,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  return `/api/open-vpn-files/get-all/${vpnServerId}/${externalId}`;
-};
-
-export const getApiOpenVpnFilesGetAllVpnServerIdExternalId = async (
-  vpnServerId: number,
-  externalId: string,
-  options?: RequestInit,
-): Promise<getApiOpenVpnFilesGetAllVpnServerIdExternalIdResponse> => {
-  return ogmMutator<getApiOpenVpnFilesGetAllVpnServerIdExternalIdResponse>(
-    getGetApiOpenVpnFilesGetAllVpnServerIdExternalIdUrl(
-      vpnServerId,
-      externalId,
-    ),
+  return ogmMutator<OvpnFilesResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-files/get-all/${vpnServerId}/${externalId}`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -526,10 +428,12 @@ export const getGetApiOpenVpnFilesGetAllVpnServerIdExternalIdQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnFilesGetAllVpnServerIdExternalId>>
   > = ({ signal }) =>
-    getApiOpenVpnFilesGetAllVpnServerIdExternalId(vpnServerId, externalId, {
+    getApiOpenVpnFilesGetAllVpnServerIdExternalId(
+      vpnServerId,
+      externalId,
+      requestOptions,
       signal,
-      ...requestOptions,
-    });
+    );
 
   return {
     queryKey,
@@ -685,48 +589,18 @@ export function useGetApiOpenVpnFilesGetAllVpnServerIdExternalId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnFilesGetAllWithTokenVpnServerIdResponse200TextPlain = {
-  data: OvpnFilesWithTokensResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesGetAllWithTokenVpnServerIdResponse200ApplicationJson =
-  {
-    data: OvpnFilesWithTokensResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiOpenVpnFilesGetAllWithTokenVpnServerIdResponse200TextJson = {
-  data: OvpnFilesWithTokensResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesGetAllWithTokenVpnServerIdResponseSuccess = (
-  | getApiOpenVpnFilesGetAllWithTokenVpnServerIdResponse200TextPlain
-  | getApiOpenVpnFilesGetAllWithTokenVpnServerIdResponse200ApplicationJson
-  | getApiOpenVpnFilesGetAllWithTokenVpnServerIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnFilesGetAllWithTokenVpnServerIdResponse =
-  getApiOpenVpnFilesGetAllWithTokenVpnServerIdResponseSuccess;
-
-export const getGetApiOpenVpnFilesGetAllWithTokenVpnServerIdUrl = (
+export const getApiOpenVpnFilesGetAllWithTokenVpnServerId = (
   vpnServerId: number,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  return `/api/open-vpn-files/get-all-with-token/${vpnServerId}`;
-};
-
-export const getApiOpenVpnFilesGetAllWithTokenVpnServerId = async (
-  vpnServerId: number,
-  options?: RequestInit,
-): Promise<getApiOpenVpnFilesGetAllWithTokenVpnServerIdResponse> => {
-  return ogmMutator<getApiOpenVpnFilesGetAllWithTokenVpnServerIdResponse>(
-    getGetApiOpenVpnFilesGetAllWithTokenVpnServerIdUrl(vpnServerId),
+  return ogmMutator<OvpnFilesWithTokensResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-files/get-all-with-token/${vpnServerId}`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -765,10 +639,11 @@ export const getGetApiOpenVpnFilesGetAllWithTokenVpnServerIdQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnFilesGetAllWithTokenVpnServerId>>
   > = ({ signal }) =>
-    getApiOpenVpnFilesGetAllWithTokenVpnServerId(vpnServerId, {
+    getApiOpenVpnFilesGetAllWithTokenVpnServerId(
+      vpnServerId,
+      requestOptions,
       signal,
-      ...requestOptions,
-    });
+    );
 
   return {
     queryKey,
@@ -919,56 +794,19 @@ export function useGetApiOpenVpnFilesGetAllWithTokenVpnServerId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdResponse200TextPlain =
-  {
-    data: OvpnFilesWithTokensResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdResponse200ApplicationJson =
-  {
-    data: OvpnFilesWithTokensResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdResponse200TextJson =
-  {
-    data: OvpnFilesWithTokensResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdResponseSuccess =
-  (
-    | getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdResponse200TextPlain
-    | getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdResponse200ApplicationJson
-    | getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdResponse200TextJson
-  ) & {
-    headers: Headers;
-  };
-export type getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdResponse =
-  getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdResponseSuccess;
-
-export const getGetApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdUrl = (
+export const getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalId = (
   vpnServerId: number,
   externalId: string,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  return `/api/open-vpn-files/get-all-with-token/${vpnServerId}/${externalId}`;
-};
-
-export const getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalId = async (
-  vpnServerId: number,
-  externalId: string,
-  options?: RequestInit,
-): Promise<getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdResponse> => {
-  return ogmMutator<getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdResponse>(
-    getGetApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdUrl(
-      vpnServerId,
-      externalId,
-    ),
+  return ogmMutator<OvpnFilesWithTokensResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-files/get-all-with-token/${vpnServerId}/${externalId}`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -1022,7 +860,8 @@ export const getGetApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalIdQueryOptio
       getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalId(
         vpnServerId,
         externalId,
-        { signal, ...requestOptions },
+        requestOptions,
+        signal,
       );
 
     return {
@@ -1202,47 +1041,18 @@ export function useGetApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnFilesGetFilesExternalIdResponse200TextPlain = {
-  data: OvpnFilesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesGetFilesExternalIdResponse200ApplicationJson = {
-  data: OvpnFilesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesGetFilesExternalIdResponse200TextJson = {
-  data: OvpnFilesResponseApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesGetFilesExternalIdResponseSuccess = (
-  | getApiOpenVpnFilesGetFilesExternalIdResponse200TextPlain
-  | getApiOpenVpnFilesGetFilesExternalIdResponse200ApplicationJson
-  | getApiOpenVpnFilesGetFilesExternalIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnFilesGetFilesExternalIdResponse =
-  getApiOpenVpnFilesGetFilesExternalIdResponseSuccess;
-
-export const getGetApiOpenVpnFilesGetFilesExternalIdUrl = (
+export const getApiOpenVpnFilesGetFilesExternalId = (
   externalId: string,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  return `/api/open-vpn-files/get-files/${externalId}`;
-};
-
-export const getApiOpenVpnFilesGetFilesExternalId = async (
-  externalId: string,
-  options?: RequestInit,
-): Promise<getApiOpenVpnFilesGetFilesExternalIdResponse> => {
-  return ogmMutator<getApiOpenVpnFilesGetFilesExternalIdResponse>(
-    getGetApiOpenVpnFilesGetFilesExternalIdUrl(externalId),
+  return ogmMutator<OvpnFilesResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-files/get-files/${externalId}`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -1277,10 +1087,7 @@ export const getGetApiOpenVpnFilesGetFilesExternalIdQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnFilesGetFilesExternalId>>
   > = ({ signal }) =>
-    getApiOpenVpnFilesGetFilesExternalId(externalId, {
-      signal,
-      ...requestOptions,
-    });
+    getApiOpenVpnFilesGetFilesExternalId(externalId, requestOptions, signal);
 
   return {
     queryKey,
@@ -1405,50 +1212,20 @@ export function useGetApiOpenVpnFilesGetFilesExternalId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type postApiOpenVpnFilesAddResponse200TextPlain = {
-  data: OvpnFileResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesAddResponse200ApplicationJson = {
-  data: OvpnFileResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesAddResponse200TextJson = {
-  data: OvpnFileResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesAddResponseSuccess = (
-  | postApiOpenVpnFilesAddResponse200TextPlain
-  | postApiOpenVpnFilesAddResponse200ApplicationJson
-  | postApiOpenVpnFilesAddResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiOpenVpnFilesAddResponse =
-  postApiOpenVpnFilesAddResponseSuccess;
-
-export const getPostApiOpenVpnFilesAddUrl = () => {
-  return `/api/open-vpn-files/add`;
-};
-
-export const postApiOpenVpnFilesAdd = async (
+export const postApiOpenVpnFilesAdd = (
   addFileRequest: AddFileRequest,
-  options?: RequestInit,
-): Promise<postApiOpenVpnFilesAddResponse> => {
-  return ogmMutator<postApiOpenVpnFilesAddResponse>(
-    getPostApiOpenVpnFilesAddUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<OvpnFileResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-files/add`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(addFileRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: addFileRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -1518,50 +1295,20 @@ export const usePostApiOpenVpnFilesAdd = <TError = unknown, TContext = unknown>(
     queryClient,
   );
 };
-export type postApiOpenVpnFilesAddWithTokenResponse200TextPlain = {
-  data: OvpnFileWithTokenResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesAddWithTokenResponse200ApplicationJson = {
-  data: OvpnFileWithTokenResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesAddWithTokenResponse200TextJson = {
-  data: OvpnFileWithTokenResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesAddWithTokenResponseSuccess = (
-  | postApiOpenVpnFilesAddWithTokenResponse200TextPlain
-  | postApiOpenVpnFilesAddWithTokenResponse200ApplicationJson
-  | postApiOpenVpnFilesAddWithTokenResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiOpenVpnFilesAddWithTokenResponse =
-  postApiOpenVpnFilesAddWithTokenResponseSuccess;
-
-export const getPostApiOpenVpnFilesAddWithTokenUrl = () => {
-  return `/api/open-vpn-files/add-with-token`;
-};
-
-export const postApiOpenVpnFilesAddWithToken = async (
+export const postApiOpenVpnFilesAddWithToken = (
   addFileRequest: AddFileRequest,
-  options?: RequestInit,
-): Promise<postApiOpenVpnFilesAddWithTokenResponse> => {
-  return ogmMutator<postApiOpenVpnFilesAddWithTokenResponse>(
-    getPostApiOpenVpnFilesAddWithTokenUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<OvpnFileWithTokenResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-files/add-with-token`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(addFileRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: addFileRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -1634,50 +1381,20 @@ export const usePostApiOpenVpnFilesAddWithToken = <
     queryClient,
   );
 };
-export type postApiOpenVpnFilesRevokeFileResponse200TextPlain = {
-  data: OvpnFileResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesRevokeFileResponse200ApplicationJson = {
-  data: OvpnFileResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesRevokeFileResponse200TextJson = {
-  data: OvpnFileResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesRevokeFileResponseSuccess = (
-  | postApiOpenVpnFilesRevokeFileResponse200TextPlain
-  | postApiOpenVpnFilesRevokeFileResponse200ApplicationJson
-  | postApiOpenVpnFilesRevokeFileResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiOpenVpnFilesRevokeFileResponse =
-  postApiOpenVpnFilesRevokeFileResponseSuccess;
-
-export const getPostApiOpenVpnFilesRevokeFileUrl = () => {
-  return `/api/open-vpn-files/revoke-file`;
-};
-
-export const postApiOpenVpnFilesRevokeFile = async (
+export const postApiOpenVpnFilesRevokeFile = (
   revokeFileRequest: RevokeFileRequest,
-  options?: RequestInit,
-): Promise<postApiOpenVpnFilesRevokeFileResponse> => {
-  return ogmMutator<postApiOpenVpnFilesRevokeFileResponse>(
-    getPostApiOpenVpnFilesRevokeFileUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<OvpnFileResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-files/revoke-file`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(revokeFileRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: revokeFileRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -1750,50 +1467,20 @@ export const usePostApiOpenVpnFilesRevokeFile = <
     queryClient,
   );
 };
-export type postApiOpenVpnFilesDownloadFileResponse200TextPlain = {
-  data: DownloadFileResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesDownloadFileResponse200ApplicationJson = {
-  data: DownloadFileResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesDownloadFileResponse200TextJson = {
-  data: DownloadFileResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesDownloadFileResponseSuccess = (
-  | postApiOpenVpnFilesDownloadFileResponse200TextPlain
-  | postApiOpenVpnFilesDownloadFileResponse200ApplicationJson
-  | postApiOpenVpnFilesDownloadFileResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiOpenVpnFilesDownloadFileResponse =
-  postApiOpenVpnFilesDownloadFileResponseSuccess;
-
-export const getPostApiOpenVpnFilesDownloadFileUrl = () => {
-  return `/api/open-vpn-files/download-file`;
-};
-
-export const postApiOpenVpnFilesDownloadFile = async (
+export const postApiOpenVpnFilesDownloadFile = (
   downloadFileRequest: DownloadFileRequest,
-  options?: RequestInit,
-): Promise<postApiOpenVpnFilesDownloadFileResponse> => {
-  return ogmMutator<postApiOpenVpnFilesDownloadFileResponse>(
-    getPostApiOpenVpnFilesDownloadFileUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<DownloadFileResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-files/download-file`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(downloadFileRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: downloadFileRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -1866,50 +1553,20 @@ export const usePostApiOpenVpnFilesDownloadFile = <
     queryClient,
   );
 };
-export type postApiOpenVpnFilesDownloadFileByCnResponse200TextPlain = {
-  data: DownloadFileResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesDownloadFileByCnResponse200ApplicationJson = {
-  data: DownloadFileResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesDownloadFileByCnResponse200TextJson = {
-  data: DownloadFileResponseApiResponse;
-  status: 200;
-};
-
-export type postApiOpenVpnFilesDownloadFileByCnResponseSuccess = (
-  | postApiOpenVpnFilesDownloadFileByCnResponse200TextPlain
-  | postApiOpenVpnFilesDownloadFileByCnResponse200ApplicationJson
-  | postApiOpenVpnFilesDownloadFileByCnResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiOpenVpnFilesDownloadFileByCnResponse =
-  postApiOpenVpnFilesDownloadFileByCnResponseSuccess;
-
-export const getPostApiOpenVpnFilesDownloadFileByCnUrl = () => {
-  return `/api/open-vpn-files/download-file-by-cn`;
-};
-
-export const postApiOpenVpnFilesDownloadFileByCn = async (
+export const postApiOpenVpnFilesDownloadFileByCn = (
   downloadFileByCnRequest: DownloadFileByCnRequest,
-  options?: RequestInit,
-): Promise<postApiOpenVpnFilesDownloadFileByCnResponse> => {
-  return ogmMutator<postApiOpenVpnFilesDownloadFileByCnResponse>(
-    getPostApiOpenVpnFilesDownloadFileByCnUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<DownloadFileResponseApiResponse>(
     {
-      ...options,
+      url: `/api/open-vpn-files/download-file-by-cn`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(downloadFileByCnRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: downloadFileByCnRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -1983,44 +1640,13 @@ export const usePostApiOpenVpnFilesDownloadFileByCn = <
     queryClient,
   );
 };
-export type getApiOpenVpnFilesHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesHealthcheckResponseSuccess = (
-  | getApiOpenVpnFilesHealthcheckResponse200TextPlain
-  | getApiOpenVpnFilesHealthcheckResponse200ApplicationJson
-  | getApiOpenVpnFilesHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnFilesHealthcheckResponse =
-  getApiOpenVpnFilesHealthcheckResponseSuccess;
-
-export const getGetApiOpenVpnFilesHealthcheckUrl = () => {
-  return `/api/open-vpn-files/healthcheck`;
-};
-
-export const getApiOpenVpnFilesHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiOpenVpnFilesHealthcheckResponse> => {
-  return ogmMutator<getApiOpenVpnFilesHealthcheckResponse>(
-    getGetApiOpenVpnFilesHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiOpenVpnFilesHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/open-vpn-files/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -2048,8 +1674,7 @@ export const getGetApiOpenVpnFilesHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnFilesHealthcheck>>
-  > = ({ signal }) =>
-    getApiOpenVpnFilesHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiOpenVpnFilesHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnFilesHealthcheck>>,
@@ -2162,44 +1787,13 @@ export function useGetApiOpenVpnFilesHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiOpenVpnFilesHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiOpenVpnFilesHealthcheckWithJwtResponseSuccess = (
-  | getApiOpenVpnFilesHealthcheckWithJwtResponse200TextPlain
-  | getApiOpenVpnFilesHealthcheckWithJwtResponse200ApplicationJson
-  | getApiOpenVpnFilesHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiOpenVpnFilesHealthcheckWithJwtResponse =
-  getApiOpenVpnFilesHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiOpenVpnFilesHealthcheckWithJwtUrl = () => {
-  return `/api/open-vpn-files/healthcheck-with-jwt`;
-};
-
-export const getApiOpenVpnFilesHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiOpenVpnFilesHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiOpenVpnFilesHealthcheckWithJwtResponse>(
-    getGetApiOpenVpnFilesHealthcheckWithJwtUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiOpenVpnFilesHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/open-vpn-files/healthcheck-with-jwt`, method: "GET", signal },
+    options,
   );
 };
 
@@ -2228,7 +1822,7 @@ export const getGetApiOpenVpnFilesHealthcheckWithJwtQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiOpenVpnFilesHealthcheckWithJwt>>
   > = ({ signal }) =>
-    getApiOpenVpnFilesHealthcheckWithJwt({ signal, ...requestOptions });
+    getApiOpenVpnFilesHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiOpenVpnFilesHealthcheckWithJwt>>,

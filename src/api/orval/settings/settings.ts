@@ -31,56 +31,14 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type getApiSettingsGetResponse200TextPlain = {
-  data: SettingResponseApiResponse;
-  status: 200;
-};
-
-export type getApiSettingsGetResponse200ApplicationJson = {
-  data: SettingResponseApiResponse;
-  status: 200;
-};
-
-export type getApiSettingsGetResponse200TextJson = {
-  data: SettingResponseApiResponse;
-  status: 200;
-};
-
-export type getApiSettingsGetResponseSuccess = (
-  | getApiSettingsGetResponse200TextPlain
-  | getApiSettingsGetResponse200ApplicationJson
-  | getApiSettingsGetResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiSettingsGetResponse = getApiSettingsGetResponseSuccess;
-
-export const getGetApiSettingsGetUrl = (params: GetApiSettingsGetParams) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/settings/get?${stringifiedParams}`
-    : `/api/settings/get`;
-};
-
-export const getApiSettingsGet = async (
+export const getApiSettingsGet = (
   params: GetApiSettingsGetParams,
-  options?: RequestInit,
-): Promise<getApiSettingsGetResponse> => {
-  return ogmMutator<getApiSettingsGetResponse>(
-    getGetApiSettingsGetUrl(params),
-    {
-      ...options,
-      method: "GET",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<SettingResponseApiResponse>(
+    { url: `/api/settings/get`, method: "GET", params, signal },
+    options,
   );
 };
 
@@ -113,7 +71,7 @@ export const getGetApiSettingsGetQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiSettingsGet>>
-  > = ({ signal }) => getApiSettingsGet(params, { signal, ...requestOptions });
+  > = ({ signal }) => getApiSettingsGet(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiSettingsGet>>,
@@ -230,56 +188,14 @@ export function useGetApiSettingsGet<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type postApiSettingsSetResponse200TextPlain = {
-  data: SettingResponseApiResponse;
-  status: 200;
-};
-
-export type postApiSettingsSetResponse200ApplicationJson = {
-  data: SettingResponseApiResponse;
-  status: 200;
-};
-
-export type postApiSettingsSetResponse200TextJson = {
-  data: SettingResponseApiResponse;
-  status: 200;
-};
-
-export type postApiSettingsSetResponseSuccess = (
-  | postApiSettingsSetResponse200TextPlain
-  | postApiSettingsSetResponse200ApplicationJson
-  | postApiSettingsSetResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiSettingsSetResponse = postApiSettingsSetResponseSuccess;
-
-export const getPostApiSettingsSetUrl = (params: PostApiSettingsSetParams) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/settings/set?${stringifiedParams}`
-    : `/api/settings/set`;
-};
-
-export const postApiSettingsSet = async (
+export const postApiSettingsSet = (
   params: PostApiSettingsSetParams,
-  options?: RequestInit,
-): Promise<postApiSettingsSetResponse> => {
-  return ogmMutator<postApiSettingsSetResponse>(
-    getPostApiSettingsSetUrl(params),
-    {
-      ...options,
-      method: "POST",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<SettingResponseApiResponse>(
+    { url: `/api/settings/set`, method: "POST", params, signal },
+    options,
   );
 };
 
@@ -349,44 +265,13 @@ export const usePostApiSettingsSet = <TError = unknown, TContext = unknown>(
     queryClient,
   );
 };
-export type getApiSettingsHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiSettingsHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiSettingsHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiSettingsHealthcheckResponseSuccess = (
-  | getApiSettingsHealthcheckResponse200TextPlain
-  | getApiSettingsHealthcheckResponse200ApplicationJson
-  | getApiSettingsHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiSettingsHealthcheckResponse =
-  getApiSettingsHealthcheckResponseSuccess;
-
-export const getGetApiSettingsHealthcheckUrl = () => {
-  return `/api/settings/healthcheck`;
-};
-
-export const getApiSettingsHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiSettingsHealthcheckResponse> => {
-  return ogmMutator<getApiSettingsHealthcheckResponse>(
-    getGetApiSettingsHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiSettingsHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/settings/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -414,7 +299,7 @@ export const getGetApiSettingsHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiSettingsHealthcheck>>
-  > = ({ signal }) => getApiSettingsHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiSettingsHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiSettingsHealthcheck>>,
@@ -527,44 +412,13 @@ export function useGetApiSettingsHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiSettingsHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiSettingsHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiSettingsHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiSettingsHealthcheckWithJwtResponseSuccess = (
-  | getApiSettingsHealthcheckWithJwtResponse200TextPlain
-  | getApiSettingsHealthcheckWithJwtResponse200ApplicationJson
-  | getApiSettingsHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiSettingsHealthcheckWithJwtResponse =
-  getApiSettingsHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiSettingsHealthcheckWithJwtUrl = () => {
-  return `/api/settings/healthcheck-with-jwt`;
-};
-
-export const getApiSettingsHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiSettingsHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiSettingsHealthcheckWithJwtResponse>(
-    getGetApiSettingsHealthcheckWithJwtUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiSettingsHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/settings/healthcheck-with-jwt`, method: "GET", signal },
+    options,
   );
 };
 
@@ -592,8 +446,7 @@ export const getGetApiSettingsHealthcheckWithJwtQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiSettingsHealthcheckWithJwt>>
-  > = ({ signal }) =>
-    getApiSettingsHealthcheckWithJwt({ signal, ...requestOptions });
+  > = ({ signal }) => getApiSettingsHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiSettingsHealthcheckWithJwt>>,

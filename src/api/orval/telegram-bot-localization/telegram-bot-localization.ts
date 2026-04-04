@@ -33,51 +33,20 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type postApiTgbotLocalizationsSetTgUserLanguageResponse200TextPlain = {
-  data: SetTelegramUserLanguageResponseApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotLocalizationsSetTgUserLanguageResponse200ApplicationJson =
-  {
-    data: SetTelegramUserLanguageResponseApiResponse;
-    status: 200;
-  };
-
-export type postApiTgbotLocalizationsSetTgUserLanguageResponse200TextJson = {
-  data: SetTelegramUserLanguageResponseApiResponse;
-  status: 200;
-};
-
-export type postApiTgbotLocalizationsSetTgUserLanguageResponseSuccess = (
-  | postApiTgbotLocalizationsSetTgUserLanguageResponse200TextPlain
-  | postApiTgbotLocalizationsSetTgUserLanguageResponse200ApplicationJson
-  | postApiTgbotLocalizationsSetTgUserLanguageResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiTgbotLocalizationsSetTgUserLanguageResponse =
-  postApiTgbotLocalizationsSetTgUserLanguageResponseSuccess;
-
-export const getPostApiTgbotLocalizationsSetTgUserLanguageUrl = () => {
-  return `/api/tgbot-localizations/set-tg-user-language`;
-};
-
-export const postApiTgbotLocalizationsSetTgUserLanguage = async (
+export const postApiTgbotLocalizationsSetTgUserLanguage = (
   setTelegramUserLanguageRequest: SetTelegramUserLanguageRequest,
-  options?: RequestInit,
-): Promise<postApiTgbotLocalizationsSetTgUserLanguageResponse> => {
-  return ogmMutator<postApiTgbotLocalizationsSetTgUserLanguageResponse>(
-    getPostApiTgbotLocalizationsSetTgUserLanguageUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<SetTelegramUserLanguageResponseApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-localizations/set-tg-user-language`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(setTelegramUserLanguageRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: setTelegramUserLanguageRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -152,51 +121,18 @@ export const usePostApiTgbotLocalizationsSetTgUserLanguage = <
     queryClient,
   );
 };
-export type getApiTgbotLocalizationsGetTgUserLanguageTelegramIdResponse200TextPlain =
-  {
-    data: GetTelegramUserLanguageResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotLocalizationsGetTgUserLanguageTelegramIdResponse200ApplicationJson =
-  {
-    data: GetTelegramUserLanguageResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotLocalizationsGetTgUserLanguageTelegramIdResponse200TextJson =
-  {
-    data: GetTelegramUserLanguageResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotLocalizationsGetTgUserLanguageTelegramIdResponseSuccess =
-  (
-    | getApiTgbotLocalizationsGetTgUserLanguageTelegramIdResponse200TextPlain
-    | getApiTgbotLocalizationsGetTgUserLanguageTelegramIdResponse200ApplicationJson
-    | getApiTgbotLocalizationsGetTgUserLanguageTelegramIdResponse200TextJson
-  ) & {
-    headers: Headers;
-  };
-export type getApiTgbotLocalizationsGetTgUserLanguageTelegramIdResponse =
-  getApiTgbotLocalizationsGetTgUserLanguageTelegramIdResponseSuccess;
-
-export const getGetApiTgbotLocalizationsGetTgUserLanguageTelegramIdUrl = (
+export const getApiTgbotLocalizationsGetTgUserLanguageTelegramId = (
   telegramId: number,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  return `/api/tgbot-localizations/get-tg-user-language/${telegramId}`;
-};
-
-export const getApiTgbotLocalizationsGetTgUserLanguageTelegramId = async (
-  telegramId: number,
-  options?: RequestInit,
-): Promise<getApiTgbotLocalizationsGetTgUserLanguageTelegramIdResponse> => {
-  return ogmMutator<getApiTgbotLocalizationsGetTgUserLanguageTelegramIdResponse>(
-    getGetApiTgbotLocalizationsGetTgUserLanguageTelegramIdUrl(telegramId),
+  return ogmMutator<GetTelegramUserLanguageResponseApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-localizations/get-tg-user-language/${telegramId}`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -244,10 +180,11 @@ export const getGetApiTgbotLocalizationsGetTgUserLanguageTelegramIdQueryOptions 
         ReturnType<typeof getApiTgbotLocalizationsGetTgUserLanguageTelegramId>
       >
     > = ({ signal }) =>
-      getApiTgbotLocalizationsGetTgUserLanguageTelegramId(telegramId, {
+      getApiTgbotLocalizationsGetTgUserLanguageTelegramId(
+        telegramId,
+        requestOptions,
         signal,
-        ...requestOptions,
-      });
+      );
 
     return {
       queryKey,
@@ -411,53 +348,19 @@ export function useGetApiTgbotLocalizationsGetTgUserLanguageTelegramId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdResponse200TextPlain =
-  {
-    data: IsExistTelegramUserLanguagePreferenceResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdResponse200ApplicationJson =
-  {
-    data: IsExistTelegramUserLanguagePreferenceResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdResponse200TextJson =
-  {
-    data: IsExistTelegramUserLanguagePreferenceResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdResponseSuccess =
-  (
-    | getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdResponse200TextPlain
-    | getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdResponse200ApplicationJson
-    | getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdResponse200TextJson
-  ) & {
-    headers: Headers;
-  };
-export type getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdResponse =
-  getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdResponseSuccess;
-
-export const getGetApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdUrl =
-  (telegramId: number) => {
-    return `/api/tgbot-localizations/is-exist-tg-user-language-preference/${telegramId}`;
-  };
-
 export const getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramId =
-  async (
+  (
     telegramId: number,
-    options?: RequestInit,
-  ): Promise<getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdResponse> => {
-    return ogmMutator<getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdResponse>(
-      getGetApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramIdUrl(
-        telegramId,
-      ),
+    options?: SecondParameter<typeof ogmMutator>,
+    signal?: AbortSignal,
+  ) => {
+    return ogmMutator<IsExistTelegramUserLanguagePreferenceResponseApiResponse>(
       {
-        ...options,
+        url: `/api/tgbot-localizations/is-exist-tg-user-language-preference/${telegramId}`,
         method: "GET",
+        signal,
       },
+      options,
     );
   };
 
@@ -510,7 +413,8 @@ export const getGetApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramI
     > = ({ signal }) =>
       getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramId(
         telegramId,
-        { signal, ...requestOptions },
+        requestOptions,
+        signal,
       );
 
     return {
@@ -695,56 +599,19 @@ export function useGetApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegr
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyResponse200TextPlain =
-  {
-    data: GetTextForTelegramUserResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyResponse200ApplicationJson =
-  {
-    data: GetTextForTelegramUserResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyResponse200TextJson =
-  {
-    data: GetTextForTelegramUserResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyResponseSuccess =
-  (
-    | getApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyResponse200TextPlain
-    | getApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyResponse200ApplicationJson
-    | getApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyResponse200TextJson
-  ) & {
-    headers: Headers;
-  };
-export type getApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyResponse =
-  getApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyResponseSuccess;
-
-export const getGetApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyUrl = (
+export const getApiTgbotLocalizationsGetTextForTgUserTelegramIdKey = (
   telegramId: number,
   key: string,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  return `/api/tgbot-localizations/get-text-for-tg-user/${telegramId}/${key}`;
-};
-
-export const getApiTgbotLocalizationsGetTextForTgUserTelegramIdKey = async (
-  telegramId: number,
-  key: string,
-  options?: RequestInit,
-): Promise<getApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyResponse> => {
-  return ogmMutator<getApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyResponse>(
-    getGetApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyUrl(
-      telegramId,
-      key,
-    ),
+  return ogmMutator<GetTextForTelegramUserResponseApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-localizations/get-text-for-tg-user/${telegramId}/${key}`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -793,10 +660,12 @@ export const getGetApiTgbotLocalizationsGetTextForTgUserTelegramIdKeyQueryOption
         ReturnType<typeof getApiTgbotLocalizationsGetTextForTgUserTelegramIdKey>
       >
     > = ({ signal }) =>
-      getApiTgbotLocalizationsGetTextForTgUserTelegramIdKey(telegramId, key, {
+      getApiTgbotLocalizationsGetTextForTgUserTelegramIdKey(
+        telegramId,
+        key,
+        requestOptions,
         signal,
-        ...requestOptions,
-      });
+      );
 
     return {
       queryKey,
@@ -973,44 +842,13 @@ export function useGetApiTgbotLocalizationsGetTextForTgUserTelegramIdKey<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTgbotLocalizationsHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotLocalizationsHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotLocalizationsHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotLocalizationsHealthcheckResponseSuccess = (
-  | getApiTgbotLocalizationsHealthcheckResponse200TextPlain
-  | getApiTgbotLocalizationsHealthcheckResponse200ApplicationJson
-  | getApiTgbotLocalizationsHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTgbotLocalizationsHealthcheckResponse =
-  getApiTgbotLocalizationsHealthcheckResponseSuccess;
-
-export const getGetApiTgbotLocalizationsHealthcheckUrl = () => {
-  return `/api/tgbot-localizations/healthcheck`;
-};
-
-export const getApiTgbotLocalizationsHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiTgbotLocalizationsHealthcheckResponse> => {
-  return ogmMutator<getApiTgbotLocalizationsHealthcheckResponse>(
-    getGetApiTgbotLocalizationsHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiTgbotLocalizationsHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/tgbot-localizations/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -1039,7 +877,7 @@ export const getGetApiTgbotLocalizationsHealthcheckQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotLocalizationsHealthcheck>>
   > = ({ signal }) =>
-    getApiTgbotLocalizationsHealthcheck({ signal, ...requestOptions });
+    getApiTgbotLocalizationsHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTgbotLocalizationsHealthcheck>>,
@@ -1153,45 +991,17 @@ export function useGetApiTgbotLocalizationsHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTgbotLocalizationsHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotLocalizationsHealthcheckWithJwtResponse200ApplicationJson =
-  {
-    data: StringApiResponse;
-    status: 200;
-  };
-
-export type getApiTgbotLocalizationsHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTgbotLocalizationsHealthcheckWithJwtResponseSuccess = (
-  | getApiTgbotLocalizationsHealthcheckWithJwtResponse200TextPlain
-  | getApiTgbotLocalizationsHealthcheckWithJwtResponse200ApplicationJson
-  | getApiTgbotLocalizationsHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTgbotLocalizationsHealthcheckWithJwtResponse =
-  getApiTgbotLocalizationsHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiTgbotLocalizationsHealthcheckWithJwtUrl = () => {
-  return `/api/tgbot-localizations/healthcheck-with-jwt`;
-};
-
-export const getApiTgbotLocalizationsHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiTgbotLocalizationsHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiTgbotLocalizationsHealthcheckWithJwtResponse>(
-    getGetApiTgbotLocalizationsHealthcheckWithJwtUrl(),
+export const getApiTgbotLocalizationsHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
     {
-      ...options,
+      url: `/api/tgbot-localizations/healthcheck-with-jwt`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -1223,7 +1033,7 @@ export const getGetApiTgbotLocalizationsHealthcheckWithJwtQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotLocalizationsHealthcheckWithJwt>>
   > = ({ signal }) =>
-    getApiTgbotLocalizationsHealthcheckWithJwt({ signal, ...requestOptions });
+    getApiTgbotLocalizationsHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTgbotLocalizationsHealthcheckWithJwt>>,

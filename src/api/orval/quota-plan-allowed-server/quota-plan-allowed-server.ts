@@ -34,59 +34,19 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type getApiQuotaPlanAllowedServersGetAllResponse200TextPlain = {
-  data: GetAllQuotaPlanAllowedServersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlanAllowedServersGetAllResponse200ApplicationJson = {
-  data: GetAllQuotaPlanAllowedServersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlanAllowedServersGetAllResponse200TextJson = {
-  data: GetAllQuotaPlanAllowedServersResponseApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlanAllowedServersGetAllResponseSuccess = (
-  | getApiQuotaPlanAllowedServersGetAllResponse200TextPlain
-  | getApiQuotaPlanAllowedServersGetAllResponse200ApplicationJson
-  | getApiQuotaPlanAllowedServersGetAllResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiQuotaPlanAllowedServersGetAllResponse =
-  getApiQuotaPlanAllowedServersGetAllResponseSuccess;
-
-export const getGetApiQuotaPlanAllowedServersGetAllUrl = (
+export const getApiQuotaPlanAllowedServersGetAll = (
   params?: GetApiQuotaPlanAllowedServersGetAllParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : value.toString());
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0
-    ? `/api/quota-plan-allowed-servers/get-all?${stringifiedParams}`
-    : `/api/quota-plan-allowed-servers/get-all`;
-};
-
-export const getApiQuotaPlanAllowedServersGetAll = async (
-  params?: GetApiQuotaPlanAllowedServersGetAllParams,
-  options?: RequestInit,
-): Promise<getApiQuotaPlanAllowedServersGetAllResponse> => {
-  return ogmMutator<getApiQuotaPlanAllowedServersGetAllResponse>(
-    getGetApiQuotaPlanAllowedServersGetAllUrl(params),
+  return ogmMutator<GetAllQuotaPlanAllowedServersResponseApiResponse>(
     {
-      ...options,
+      url: `/api/quota-plan-allowed-servers/get-all`,
       method: "GET",
+      params,
+      signal,
     },
+    options,
   );
 };
 
@@ -124,7 +84,7 @@ export const getGetApiQuotaPlanAllowedServersGetAllQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetAll>>
   > = ({ signal }) =>
-    getApiQuotaPlanAllowedServersGetAll(params, { signal, ...requestOptions });
+    getApiQuotaPlanAllowedServersGetAll(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetAll>>,
@@ -244,45 +204,14 @@ export function useGetApiQuotaPlanAllowedServersGetAll<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiQuotaPlanAllowedServersGetIdResponse200TextPlain = {
-  data: QuotaPlanAllowedServerResponseApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlanAllowedServersGetIdResponse200ApplicationJson = {
-  data: QuotaPlanAllowedServerResponseApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlanAllowedServersGetIdResponse200TextJson = {
-  data: QuotaPlanAllowedServerResponseApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlanAllowedServersGetIdResponseSuccess = (
-  | getApiQuotaPlanAllowedServersGetIdResponse200TextPlain
-  | getApiQuotaPlanAllowedServersGetIdResponse200ApplicationJson
-  | getApiQuotaPlanAllowedServersGetIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiQuotaPlanAllowedServersGetIdResponse =
-  getApiQuotaPlanAllowedServersGetIdResponseSuccess;
-
-export const getGetApiQuotaPlanAllowedServersGetIdUrl = (id: number) => {
-  return `/api/quota-plan-allowed-servers/get/${id}`;
-};
-
-export const getApiQuotaPlanAllowedServersGetId = async (
+export const getApiQuotaPlanAllowedServersGetId = (
   id: number,
-  options?: RequestInit,
-): Promise<getApiQuotaPlanAllowedServersGetIdResponse> => {
-  return ogmMutator<getApiQuotaPlanAllowedServersGetIdResponse>(
-    getGetApiQuotaPlanAllowedServersGetIdUrl(id),
-    {
-      ...options,
-      method: "GET",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<QuotaPlanAllowedServerResponseApiResponse>(
+    { url: `/api/quota-plan-allowed-servers/get/${id}`, method: "GET", signal },
+    options,
   );
 };
 
@@ -314,7 +243,7 @@ export const getGetApiQuotaPlanAllowedServersGetIdQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>
   > = ({ signal }) =>
-    getApiQuotaPlanAllowedServersGetId(id, { signal, ...requestOptions });
+    getApiQuotaPlanAllowedServersGetId(id, requestOptions, signal);
 
   return {
     queryKey,
@@ -439,51 +368,18 @@ export function useGetApiQuotaPlanAllowedServersGetId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdResponse200TextPlain =
-  {
-    data: GetQuotaPlanAllowedServersByQuotaPlanIdResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdResponse200ApplicationJson =
-  {
-    data: GetQuotaPlanAllowedServersByQuotaPlanIdResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdResponse200TextJson =
-  {
-    data: GetQuotaPlanAllowedServersByQuotaPlanIdResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdResponseSuccess =
-  (
-    | getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdResponse200TextPlain
-    | getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdResponse200ApplicationJson
-    | getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdResponse200TextJson
-  ) & {
-    headers: Headers;
-  };
-export type getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdResponse =
-  getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdResponseSuccess;
-
-export const getGetApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdUrl = (
+export const getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanId = (
   quotaPlanId: number,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  return `/api/quota-plan-allowed-servers/get-by-quota-plan-id/${quotaPlanId}`;
-};
-
-export const getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanId = async (
-  quotaPlanId: number,
-  options?: RequestInit,
-): Promise<getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdResponse> => {
-  return ogmMutator<getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdResponse>(
-    getGetApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdUrl(quotaPlanId),
+  return ogmMutator<GetQuotaPlanAllowedServersByQuotaPlanIdResponseApiResponse>(
     {
-      ...options,
+      url: `/api/quota-plan-allowed-servers/get-by-quota-plan-id/${quotaPlanId}`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -534,10 +430,11 @@ export const getGetApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdQueryOpt
         >
       >
     > = ({ signal }) =>
-      getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanId(quotaPlanId, {
+      getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanId(
+        quotaPlanId,
+        requestOptions,
         signal,
-        ...requestOptions,
-      });
+      );
 
     return {
       queryKey,
@@ -713,51 +610,18 @@ export function useGetApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdResponse200TextPlain =
-  {
-    data: GetQuotaPlanAllowedServersByVpnServerIdResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdResponse200ApplicationJson =
-  {
-    data: GetQuotaPlanAllowedServersByVpnServerIdResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdResponse200TextJson =
-  {
-    data: GetQuotaPlanAllowedServersByVpnServerIdResponseApiResponse;
-    status: 200;
-  };
-
-export type getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdResponseSuccess =
-  (
-    | getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdResponse200TextPlain
-    | getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdResponse200ApplicationJson
-    | getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdResponse200TextJson
-  ) & {
-    headers: Headers;
-  };
-export type getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdResponse =
-  getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdResponseSuccess;
-
-export const getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdUrl = (
+export const getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId = (
   vpnServerId: number,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
 ) => {
-  return `/api/quota-plan-allowed-servers/get-by-vpn-server-id/${vpnServerId}`;
-};
-
-export const getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId = async (
-  vpnServerId: number,
-  options?: RequestInit,
-): Promise<getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdResponse> => {
-  return ogmMutator<getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdResponse>(
-    getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdUrl(vpnServerId),
+  return ogmMutator<GetQuotaPlanAllowedServersByVpnServerIdResponseApiResponse>(
     {
-      ...options,
+      url: `/api/quota-plan-allowed-servers/get-by-vpn-server-id/${vpnServerId}`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -808,10 +672,11 @@ export const getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryOpt
         >
       >
     > = ({ signal }) =>
-      getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId(vpnServerId, {
+      getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId(
+        vpnServerId,
+        requestOptions,
         signal,
-        ...requestOptions,
-      });
+      );
 
     return {
       queryKey,
@@ -987,50 +852,20 @@ export function useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type postApiQuotaPlanAllowedServersCreateResponse200TextPlain = {
-  data: QuotaPlanAllowedServerResponseApiResponse;
-  status: 200;
-};
-
-export type postApiQuotaPlanAllowedServersCreateResponse200ApplicationJson = {
-  data: QuotaPlanAllowedServerResponseApiResponse;
-  status: 200;
-};
-
-export type postApiQuotaPlanAllowedServersCreateResponse200TextJson = {
-  data: QuotaPlanAllowedServerResponseApiResponse;
-  status: 200;
-};
-
-export type postApiQuotaPlanAllowedServersCreateResponseSuccess = (
-  | postApiQuotaPlanAllowedServersCreateResponse200TextPlain
-  | postApiQuotaPlanAllowedServersCreateResponse200ApplicationJson
-  | postApiQuotaPlanAllowedServersCreateResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiQuotaPlanAllowedServersCreateResponse =
-  postApiQuotaPlanAllowedServersCreateResponseSuccess;
-
-export const getPostApiQuotaPlanAllowedServersCreateUrl = () => {
-  return `/api/quota-plan-allowed-servers/create`;
-};
-
-export const postApiQuotaPlanAllowedServersCreate = async (
+export const postApiQuotaPlanAllowedServersCreate = (
   createOrUpdateQuotaPlanAllowedServerRequest: CreateOrUpdateQuotaPlanAllowedServerRequest,
-  options?: RequestInit,
-): Promise<postApiQuotaPlanAllowedServersCreateResponse> => {
-  return ogmMutator<postApiQuotaPlanAllowedServersCreateResponse>(
-    getPostApiQuotaPlanAllowedServersCreateUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<QuotaPlanAllowedServerResponseApiResponse>(
     {
-      ...options,
+      url: `/api/quota-plan-allowed-servers/create`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(createOrUpdateQuotaPlanAllowedServerRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: createOrUpdateQuotaPlanAllowedServerRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -1104,50 +939,20 @@ export const usePostApiQuotaPlanAllowedServersCreate = <
     queryClient,
   );
 };
-export type putApiQuotaPlanAllowedServersUpdateResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type putApiQuotaPlanAllowedServersUpdateResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type putApiQuotaPlanAllowedServersUpdateResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type putApiQuotaPlanAllowedServersUpdateResponseSuccess = (
-  | putApiQuotaPlanAllowedServersUpdateResponse200TextPlain
-  | putApiQuotaPlanAllowedServersUpdateResponse200ApplicationJson
-  | putApiQuotaPlanAllowedServersUpdateResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type putApiQuotaPlanAllowedServersUpdateResponse =
-  putApiQuotaPlanAllowedServersUpdateResponseSuccess;
-
-export const getPutApiQuotaPlanAllowedServersUpdateUrl = () => {
-  return `/api/quota-plan-allowed-servers/update`;
-};
-
-export const putApiQuotaPlanAllowedServersUpdate = async (
+export const putApiQuotaPlanAllowedServersUpdate = (
   createOrUpdateQuotaPlanAllowedServerRequest: CreateOrUpdateQuotaPlanAllowedServerRequest,
-  options?: RequestInit,
-): Promise<putApiQuotaPlanAllowedServersUpdateResponse> => {
-  return ogmMutator<putApiQuotaPlanAllowedServersUpdateResponse>(
-    getPutApiQuotaPlanAllowedServersUpdateUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
     {
-      ...options,
+      url: `/api/quota-plan-allowed-servers/update`,
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(createOrUpdateQuotaPlanAllowedServerRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: createOrUpdateQuotaPlanAllowedServerRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -1221,46 +1026,18 @@ export const usePutApiQuotaPlanAllowedServersUpdate = <
     queryClient,
   );
 };
-export type deleteApiQuotaPlanAllowedServersDeleteIdResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type deleteApiQuotaPlanAllowedServersDeleteIdResponse200ApplicationJson =
-  {
-    data: StringApiResponse;
-    status: 200;
-  };
-
-export type deleteApiQuotaPlanAllowedServersDeleteIdResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type deleteApiQuotaPlanAllowedServersDeleteIdResponseSuccess = (
-  | deleteApiQuotaPlanAllowedServersDeleteIdResponse200TextPlain
-  | deleteApiQuotaPlanAllowedServersDeleteIdResponse200ApplicationJson
-  | deleteApiQuotaPlanAllowedServersDeleteIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type deleteApiQuotaPlanAllowedServersDeleteIdResponse =
-  deleteApiQuotaPlanAllowedServersDeleteIdResponseSuccess;
-
-export const getDeleteApiQuotaPlanAllowedServersDeleteIdUrl = (id: number) => {
-  return `/api/quota-plan-allowed-servers/delete/${id}`;
-};
-
-export const deleteApiQuotaPlanAllowedServersDeleteId = async (
+export const deleteApiQuotaPlanAllowedServersDeleteId = (
   id: number,
-  options?: RequestInit,
-): Promise<deleteApiQuotaPlanAllowedServersDeleteIdResponse> => {
-  return ogmMutator<deleteApiQuotaPlanAllowedServersDeleteIdResponse>(
-    getDeleteApiQuotaPlanAllowedServersDeleteIdUrl(id),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
     {
-      ...options,
+      url: `/api/quota-plan-allowed-servers/delete/${id}`,
       method: "DELETE",
+      signal,
     },
+    options,
   );
 };
 
@@ -1334,45 +1111,17 @@ export const useDeleteApiQuotaPlanAllowedServersDeleteId = <
     queryClient,
   );
 };
-export type getApiQuotaPlanAllowedServersHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlanAllowedServersHealthcheckResponse200ApplicationJson =
-  {
-    data: StringApiResponse;
-    status: 200;
-  };
-
-export type getApiQuotaPlanAllowedServersHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiQuotaPlanAllowedServersHealthcheckResponseSuccess = (
-  | getApiQuotaPlanAllowedServersHealthcheckResponse200TextPlain
-  | getApiQuotaPlanAllowedServersHealthcheckResponse200ApplicationJson
-  | getApiQuotaPlanAllowedServersHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiQuotaPlanAllowedServersHealthcheckResponse =
-  getApiQuotaPlanAllowedServersHealthcheckResponseSuccess;
-
-export const getGetApiQuotaPlanAllowedServersHealthcheckUrl = () => {
-  return `/api/quota-plan-allowed-servers/healthcheck`;
-};
-
-export const getApiQuotaPlanAllowedServersHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiQuotaPlanAllowedServersHealthcheckResponse> => {
-  return ogmMutator<getApiQuotaPlanAllowedServersHealthcheckResponse>(
-    getGetApiQuotaPlanAllowedServersHealthcheckUrl(),
+export const getApiQuotaPlanAllowedServersHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
     {
-      ...options,
+      url: `/api/quota-plan-allowed-servers/healthcheck`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -1402,7 +1151,7 @@ export const getGetApiQuotaPlanAllowedServersHealthcheckQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersHealthcheck>>
   > = ({ signal }) =>
-    getApiQuotaPlanAllowedServersHealthcheck({ signal, ...requestOptions });
+    getApiQuotaPlanAllowedServersHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersHealthcheck>>,
@@ -1516,47 +1265,17 @@ export function useGetApiQuotaPlanAllowedServersHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiQuotaPlanAllowedServersHealthcheckWithJwtResponse200TextPlain =
-  {
-    data: StringApiResponse;
-    status: 200;
-  };
-
-export type getApiQuotaPlanAllowedServersHealthcheckWithJwtResponse200ApplicationJson =
-  {
-    data: StringApiResponse;
-    status: 200;
-  };
-
-export type getApiQuotaPlanAllowedServersHealthcheckWithJwtResponse200TextJson =
-  {
-    data: StringApiResponse;
-    status: 200;
-  };
-
-export type getApiQuotaPlanAllowedServersHealthcheckWithJwtResponseSuccess = (
-  | getApiQuotaPlanAllowedServersHealthcheckWithJwtResponse200TextPlain
-  | getApiQuotaPlanAllowedServersHealthcheckWithJwtResponse200ApplicationJson
-  | getApiQuotaPlanAllowedServersHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiQuotaPlanAllowedServersHealthcheckWithJwtResponse =
-  getApiQuotaPlanAllowedServersHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiQuotaPlanAllowedServersHealthcheckWithJwtUrl = () => {
-  return `/api/quota-plan-allowed-servers/healthcheck-with-jwt`;
-};
-
-export const getApiQuotaPlanAllowedServersHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiQuotaPlanAllowedServersHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiQuotaPlanAllowedServersHealthcheckWithJwtResponse>(
-    getGetApiQuotaPlanAllowedServersHealthcheckWithJwtUrl(),
+export const getApiQuotaPlanAllowedServersHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
     {
-      ...options,
+      url: `/api/quota-plan-allowed-servers/healthcheck-with-jwt`,
       method: "GET",
+      signal,
     },
+    options,
   );
 };
 
@@ -1591,10 +1310,7 @@ export const getGetApiQuotaPlanAllowedServersHealthcheckWithJwtQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersHealthcheckWithJwt>>
   > = ({ signal }) =>
-    getApiQuotaPlanAllowedServersHealthcheckWithJwt({
-      signal,
-      ...requestOptions,
-    });
+    getApiQuotaPlanAllowedServersHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersHealthcheckWithJwt>>,

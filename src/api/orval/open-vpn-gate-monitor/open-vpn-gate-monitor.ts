@@ -21,25 +21,11 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type getResponse200 = {
-  data: void;
-  status: 200;
-};
-
-export type getResponseSuccess = getResponse200 & {
-  headers: Headers;
-};
-export type getResponse = getResponseSuccess;
-
-export const getGetUrl = () => {
-  return `/`;
-};
-
-export const get = async (options?: RequestInit): Promise<getResponse> => {
-  return ogmMutator<getResponse>(getGetUrl(), {
-    ...options,
-    method: "GET",
-  });
+export const get = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<void>({ url: `/`, method: "GET", signal }, options);
 };
 
 export const getGetQueryKey = () => {
@@ -61,7 +47,7 @@ export const getGetQueryOptions = <
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof get>>> = ({
     signal,
-  }) => get({ signal, ...requestOptions });
+  }) => get(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof get>>,

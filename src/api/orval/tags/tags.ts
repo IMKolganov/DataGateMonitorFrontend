@@ -32,41 +32,14 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type getApiTagsGetAllResponse200TextPlain = {
-  data: TagsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTagsGetAllResponse200ApplicationJson = {
-  data: TagsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTagsGetAllResponse200TextJson = {
-  data: TagsResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTagsGetAllResponseSuccess = (
-  | getApiTagsGetAllResponse200TextPlain
-  | getApiTagsGetAllResponse200ApplicationJson
-  | getApiTagsGetAllResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTagsGetAllResponse = getApiTagsGetAllResponseSuccess;
-
-export const getGetApiTagsGetAllUrl = () => {
-  return `/api/tags/get-all`;
-};
-
-export const getApiTagsGetAll = async (
-  options?: RequestInit,
-): Promise<getApiTagsGetAllResponse> => {
-  return ogmMutator<getApiTagsGetAllResponse>(getGetApiTagsGetAllUrl(), {
-    ...options,
-    method: "GET",
-  });
+export const getApiTagsGetAll = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<TagsResponseApiResponse>(
+    { url: `/api/tags/get-all`, method: "GET", signal },
+    options,
+  );
 };
 
 export const getGetApiTagsGetAllQueryKey = () => {
@@ -88,7 +61,7 @@ export const getGetApiTagsGetAllQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTagsGetAll>>
-  > = ({ signal }) => getApiTagsGetAll({ signal, ...requestOptions });
+  > = ({ signal }) => getApiTagsGetAll(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTagsGetAll>>,
@@ -201,42 +174,15 @@ export function useGetApiTagsGetAll<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTagsGetIdResponse200TextPlain = {
-  data: TagResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTagsGetIdResponse200ApplicationJson = {
-  data: TagResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTagsGetIdResponse200TextJson = {
-  data: TagResponseApiResponse;
-  status: 200;
-};
-
-export type getApiTagsGetIdResponseSuccess = (
-  | getApiTagsGetIdResponse200TextPlain
-  | getApiTagsGetIdResponse200ApplicationJson
-  | getApiTagsGetIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTagsGetIdResponse = getApiTagsGetIdResponseSuccess;
-
-export const getGetApiTagsGetIdUrl = (id: number) => {
-  return `/api/tags/get/${id}`;
-};
-
-export const getApiTagsGetId = async (
+export const getApiTagsGetId = (
   id: number,
-  options?: RequestInit,
-): Promise<getApiTagsGetIdResponse> => {
-  return ogmMutator<getApiTagsGetIdResponse>(getGetApiTagsGetIdUrl(id), {
-    ...options,
-    method: "GET",
-  });
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<TagResponseApiResponse>(
+    { url: `/api/tags/get/${id}`, method: "GET", signal },
+    options,
+  );
 };
 
 export const getGetApiTagsGetIdQueryKey = (id: number) => {
@@ -265,7 +211,7 @@ export const getGetApiTagsGetIdQueryOptions = <
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTagsGetId>>> = ({
     signal,
-  }) => getApiTagsGetId(id, { signal, ...requestOptions });
+  }) => getApiTagsGetId(id, requestOptions, signal);
 
   return {
     queryKey,
@@ -387,47 +333,21 @@ export function useGetApiTagsGetId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type postApiTagsCreateResponse200TextPlain = {
-  data: TagResponseApiResponse;
-  status: 200;
-};
-
-export type postApiTagsCreateResponse200ApplicationJson = {
-  data: TagResponseApiResponse;
-  status: 200;
-};
-
-export type postApiTagsCreateResponse200TextJson = {
-  data: TagResponseApiResponse;
-  status: 200;
-};
-
-export type postApiTagsCreateResponseSuccess = (
-  | postApiTagsCreateResponse200TextPlain
-  | postApiTagsCreateResponse200ApplicationJson
-  | postApiTagsCreateResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiTagsCreateResponse = postApiTagsCreateResponseSuccess;
-
-export const getPostApiTagsCreateUrl = () => {
-  return `/api/tags/create`;
-};
-
-export const postApiTagsCreate = async (
+export const postApiTagsCreate = (
   createOrUpdateTagRequest: CreateOrUpdateTagRequest,
-  options?: RequestInit,
-): Promise<postApiTagsCreateResponse> => {
-  return ogmMutator<postApiTagsCreateResponse>(getPostApiTagsCreateUrl(), {
-    ...options,
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json-patch+json",
-      ...options?.headers,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<TagResponseApiResponse>(
+    {
+      url: `/api/tags/create`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: createOrUpdateTagRequest,
+      signal,
     },
-    body: JSON.stringify(createOrUpdateTagRequest),
-  });
+    options,
+  );
 };
 
 export const getPostApiTagsCreateMutationOptions = <
@@ -493,48 +413,22 @@ export const usePostApiTagsCreate = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(getPostApiTagsCreateMutationOptions(options), queryClient);
 };
-export type putApiTagsUpdateIdResponse200TextPlain = {
-  data: TagResponseApiResponse;
-  status: 200;
-};
-
-export type putApiTagsUpdateIdResponse200ApplicationJson = {
-  data: TagResponseApiResponse;
-  status: 200;
-};
-
-export type putApiTagsUpdateIdResponse200TextJson = {
-  data: TagResponseApiResponse;
-  status: 200;
-};
-
-export type putApiTagsUpdateIdResponseSuccess = (
-  | putApiTagsUpdateIdResponse200TextPlain
-  | putApiTagsUpdateIdResponse200ApplicationJson
-  | putApiTagsUpdateIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type putApiTagsUpdateIdResponse = putApiTagsUpdateIdResponseSuccess;
-
-export const getPutApiTagsUpdateIdUrl = (id: number) => {
-  return `/api/tags/update/${id}`;
-};
-
-export const putApiTagsUpdateId = async (
+export const putApiTagsUpdateId = (
   id: number,
   createOrUpdateTagRequest: CreateOrUpdateTagRequest,
-  options?: RequestInit,
-): Promise<putApiTagsUpdateIdResponse> => {
-  return ogmMutator<putApiTagsUpdateIdResponse>(getPutApiTagsUpdateIdUrl(id), {
-    ...options,
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json-patch+json",
-      ...options?.headers,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<TagResponseApiResponse>(
+    {
+      url: `/api/tags/update/${id}`,
+      method: "PUT",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: createOrUpdateTagRequest,
+      signal,
     },
-    body: JSON.stringify(createOrUpdateTagRequest),
-  });
+    options,
+  );
 };
 
 export const getPutApiTagsUpdateIdMutationOptions = <
@@ -603,45 +497,14 @@ export const usePutApiTagsUpdateId = <TError = unknown, TContext = unknown>(
     queryClient,
   );
 };
-export type deleteApiTagsDeleteIdResponse200TextPlain = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type deleteApiTagsDeleteIdResponse200ApplicationJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type deleteApiTagsDeleteIdResponse200TextJson = {
-  data: BooleanApiResponse;
-  status: 200;
-};
-
-export type deleteApiTagsDeleteIdResponseSuccess = (
-  | deleteApiTagsDeleteIdResponse200TextPlain
-  | deleteApiTagsDeleteIdResponse200ApplicationJson
-  | deleteApiTagsDeleteIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type deleteApiTagsDeleteIdResponse =
-  deleteApiTagsDeleteIdResponseSuccess;
-
-export const getDeleteApiTagsDeleteIdUrl = (id: number) => {
-  return `/api/tags/delete/${id}`;
-};
-
-export const deleteApiTagsDeleteId = async (
+export const deleteApiTagsDeleteId = (
   id: number,
-  options?: RequestInit,
-): Promise<deleteApiTagsDeleteIdResponse> => {
-  return ogmMutator<deleteApiTagsDeleteIdResponse>(
-    getDeleteApiTagsDeleteIdUrl(id),
-    {
-      ...options,
-      method: "DELETE",
-    },
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<BooleanApiResponse>(
+    { url: `/api/tags/delete/${id}`, method: "DELETE", signal },
+    options,
   );
 };
 
@@ -711,44 +574,13 @@ export const useDeleteApiTagsDeleteId = <TError = unknown, TContext = unknown>(
     queryClient,
   );
 };
-export type getApiTagsHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTagsHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTagsHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTagsHealthcheckResponseSuccess = (
-  | getApiTagsHealthcheckResponse200TextPlain
-  | getApiTagsHealthcheckResponse200ApplicationJson
-  | getApiTagsHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTagsHealthcheckResponse =
-  getApiTagsHealthcheckResponseSuccess;
-
-export const getGetApiTagsHealthcheckUrl = () => {
-  return `/api/tags/healthcheck`;
-};
-
-export const getApiTagsHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiTagsHealthcheckResponse> => {
-  return ogmMutator<getApiTagsHealthcheckResponse>(
-    getGetApiTagsHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiTagsHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/tags/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -775,7 +607,7 @@ export const getGetApiTagsHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTagsHealthcheck>>
-  > = ({ signal }) => getApiTagsHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiTagsHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTagsHealthcheck>>,
@@ -888,44 +720,13 @@ export function useGetApiTagsHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiTagsHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTagsHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTagsHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiTagsHealthcheckWithJwtResponseSuccess = (
-  | getApiTagsHealthcheckWithJwtResponse200TextPlain
-  | getApiTagsHealthcheckWithJwtResponse200ApplicationJson
-  | getApiTagsHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiTagsHealthcheckWithJwtResponse =
-  getApiTagsHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiTagsHealthcheckWithJwtUrl = () => {
-  return `/api/tags/healthcheck-with-jwt`;
-};
-
-export const getApiTagsHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiTagsHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiTagsHealthcheckWithJwtResponse>(
-    getGetApiTagsHealthcheckWithJwtUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiTagsHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/tags/healthcheck-with-jwt`, method: "GET", signal },
+    options,
   );
 };
 
@@ -953,8 +754,7 @@ export const getGetApiTagsHealthcheckWithJwtQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTagsHealthcheckWithJwt>>
-  > = ({ signal }) =>
-    getApiTagsHealthcheckWithJwt({ signal, ...requestOptions });
+  > = ({ signal }) => getApiTagsHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTagsHealthcheckWithJwt>>,

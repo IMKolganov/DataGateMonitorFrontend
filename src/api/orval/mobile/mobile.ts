@@ -30,50 +30,20 @@ import { ogmMutator } from "../../mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type postApiMobileAddAndroidInstallationIdResponse200TextPlain = {
-  data: InstallationIdResponseApiResponse;
-  status: 200;
-};
-
-export type postApiMobileAddAndroidInstallationIdResponse200ApplicationJson = {
-  data: InstallationIdResponseApiResponse;
-  status: 200;
-};
-
-export type postApiMobileAddAndroidInstallationIdResponse200TextJson = {
-  data: InstallationIdResponseApiResponse;
-  status: 200;
-};
-
-export type postApiMobileAddAndroidInstallationIdResponseSuccess = (
-  | postApiMobileAddAndroidInstallationIdResponse200TextPlain
-  | postApiMobileAddAndroidInstallationIdResponse200ApplicationJson
-  | postApiMobileAddAndroidInstallationIdResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type postApiMobileAddAndroidInstallationIdResponse =
-  postApiMobileAddAndroidInstallationIdResponseSuccess;
-
-export const getPostApiMobileAddAndroidInstallationIdUrl = () => {
-  return `/api/mobile/add-android-installation-id`;
-};
-
-export const postApiMobileAddAndroidInstallationId = async (
+export const postApiMobileAddAndroidInstallationId = (
   installationIdRequest: InstallationIdRequest,
-  options?: RequestInit,
-): Promise<postApiMobileAddAndroidInstallationIdResponse> => {
-  return ogmMutator<postApiMobileAddAndroidInstallationIdResponse>(
-    getPostApiMobileAddAndroidInstallationIdUrl(),
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<InstallationIdResponseApiResponse>(
     {
-      ...options,
+      url: `/api/mobile/add-android-installation-id`,
       method: "POST",
-      headers: {
-        "Content-Type": "application/json-patch+json",
-        ...options?.headers,
-      },
-      body: JSON.stringify(installationIdRequest),
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: installationIdRequest,
+      signal,
     },
+    options,
   );
 };
 
@@ -147,44 +117,13 @@ export const usePostApiMobileAddAndroidInstallationId = <
     queryClient,
   );
 };
-export type getApiMobileHealthcheckResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiMobileHealthcheckResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiMobileHealthcheckResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiMobileHealthcheckResponseSuccess = (
-  | getApiMobileHealthcheckResponse200TextPlain
-  | getApiMobileHealthcheckResponse200ApplicationJson
-  | getApiMobileHealthcheckResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiMobileHealthcheckResponse =
-  getApiMobileHealthcheckResponseSuccess;
-
-export const getGetApiMobileHealthcheckUrl = () => {
-  return `/api/mobile/healthcheck`;
-};
-
-export const getApiMobileHealthcheck = async (
-  options?: RequestInit,
-): Promise<getApiMobileHealthcheckResponse> => {
-  return ogmMutator<getApiMobileHealthcheckResponse>(
-    getGetApiMobileHealthcheckUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiMobileHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/mobile/healthcheck`, method: "GET", signal },
+    options,
   );
 };
 
@@ -212,7 +151,7 @@ export const getGetApiMobileHealthcheckQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiMobileHealthcheck>>
-  > = ({ signal }) => getApiMobileHealthcheck({ signal, ...requestOptions });
+  > = ({ signal }) => getApiMobileHealthcheck(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiMobileHealthcheck>>,
@@ -325,44 +264,13 @@ export function useGetApiMobileHealthcheck<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export type getApiMobileHealthcheckWithJwtResponse200TextPlain = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiMobileHealthcheckWithJwtResponse200ApplicationJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiMobileHealthcheckWithJwtResponse200TextJson = {
-  data: StringApiResponse;
-  status: 200;
-};
-
-export type getApiMobileHealthcheckWithJwtResponseSuccess = (
-  | getApiMobileHealthcheckWithJwtResponse200TextPlain
-  | getApiMobileHealthcheckWithJwtResponse200ApplicationJson
-  | getApiMobileHealthcheckWithJwtResponse200TextJson
-) & {
-  headers: Headers;
-};
-export type getApiMobileHealthcheckWithJwtResponse =
-  getApiMobileHealthcheckWithJwtResponseSuccess;
-
-export const getGetApiMobileHealthcheckWithJwtUrl = () => {
-  return `/api/mobile/healthcheck-with-jwt`;
-};
-
-export const getApiMobileHealthcheckWithJwt = async (
-  options?: RequestInit,
-): Promise<getApiMobileHealthcheckWithJwtResponse> => {
-  return ogmMutator<getApiMobileHealthcheckWithJwtResponse>(
-    getGetApiMobileHealthcheckWithJwtUrl(),
-    {
-      ...options,
-      method: "GET",
-    },
+export const getApiMobileHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<StringApiResponse>(
+    { url: `/api/mobile/healthcheck-with-jwt`, method: "GET", signal },
+    options,
   );
 };
 
@@ -390,8 +298,7 @@ export const getGetApiMobileHealthcheckWithJwtQueryOptions = <
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiMobileHealthcheckWithJwt>>
-  > = ({ signal }) =>
-    getApiMobileHealthcheckWithJwt({ signal, ...requestOptions });
+  > = ({ signal }) => getApiMobileHealthcheckWithJwt(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiMobileHealthcheckWithJwt>>,
