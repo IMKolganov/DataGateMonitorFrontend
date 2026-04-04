@@ -39,13 +39,14 @@ export function QuotaPlansSettings() {
   const [allowedServersPlan, setAllowedServersPlan] = useState<QuotaPlanDto | null>(null);
 
   const getAllMutation = usePostApiQuotaPlansGetAll();
+  const loadPlansMutate = getAllMutation.mutate;
   const createMutation = usePostApiQuotaPlansCreate();
   const updateMutation = usePutApiQuotaPlansUpdate();
   const deleteMutation = useDeleteApiQuotaPlansDeleteId();
   const setDefaultMutation = usePostApiQuotaPlansSetDefaultId();
 
   const loadPlans = useCallback(() => {
-    getAllMutation.mutate(
+    loadPlansMutate(
       { data: { includeInactive: true } },
       {
         onSuccess: (raw) => {
@@ -65,7 +66,7 @@ export function QuotaPlansSettings() {
         },
       }
     );
-  }, [getAllMutation]);
+  }, [loadPlansMutate]);
 
   useEffect(() => {
     loadPlans();

@@ -104,7 +104,8 @@ export function GeneralServerDetails() {
                 },
             }
         );
-    }, [getPlansMutation]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- mutation result reference is unstable; `mutate` is stable (TanStack Query v5)
+    }, [getPlansMutation.mutate]);
 
     const { data: allowedByVpnRaw } = useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId(
         numericServerId ?? 0,

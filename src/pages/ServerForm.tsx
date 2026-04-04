@@ -301,7 +301,8 @@ const ServerForm: React.FC = () => {
         },
       }
     );
-  }, [getPlansMutation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mutation result reference is unstable; `mutate` is stable (TanStack Query v5)
+  }, [getPlansMutation.mutate]);
 
   React.useEffect(() => {
     if (!idNum || !allowedByServerRaw) return;
