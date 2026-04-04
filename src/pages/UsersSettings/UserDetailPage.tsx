@@ -182,7 +182,8 @@ export function UserDetailPage() {
         },
       }
     );
-  }, [id, getAllQuotaMutation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mutation result reference is unstable; `mutate` is stable (TanStack Query v5)
+  }, [id, getAllQuotaMutation.mutate]);
 
   const handleSendResetCode = () => {
     if (!user) return;
