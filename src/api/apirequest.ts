@@ -6,6 +6,7 @@ import {
   REFRESH_TOKEN_EXPIRATION,
   REFRESH_TOKEN_KEY,
 } from "../utils/const.ts";
+import { notifyAccessTokenRefreshed } from "../utils/auth/accessTokenEvents.ts";
 import type { RefreshRequest, RefreshResponse } from "./orval/model";
 
 let refreshPromise: Promise<string> | null = null;
@@ -39,7 +40,7 @@ let configPromise: Promise<Config> | null = null;
 const isAuthEndpoint = (u: string) => /\/api\/auth(\/|$)/i.test(u);
 
 export const apiRequest = async <T>(
-    method: "get" | "post" | "put" | "delete" | "patch",
+    method: "get" | "head" | "post" | "put" | "delete" | "patch",
     url: string,
     config: AxiosRequestConfig = {},
     skipAuth: boolean = false,
@@ -69,8 +70,8 @@ export const apiRequest = async <T>(
     });
 
     return response.data as ApiResponse<T>;
-  } catch (error: any) {
-    const status = error?.response?.status;
+  } catch (error: unknown) {
+    const status = axios.isAxiosError(error) ? error.response?.status : undefined;
     const pathname = window.location.pathname;
 
     const shouldTryRefresh =
@@ -219,6 +220,7 @@ const refreshAccessToken = async (): Promise<string> => {
     localStorage.setItem(REFRESH_TOKEN_EXPIRATION, newRefreshExp);
   }
 
+  notifyAccessTokenRefreshed();
   return newAccess;
 };
 
@@ -231,3 +233,6 @@ const getOrCreateRefresh = (): Promise<string> => {
   }
   return refreshPromise;
 };
+
+/** Single-flight refresh (same promise if multiple callers during 401). Safe when access JWT expired but refresh token still valid. */
+export const refreshSessionTokens = (): Promise<string> => getOrCreateRefresh();

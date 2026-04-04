@@ -28,7 +28,7 @@ const createMarkerIcon = (color: MarkerColor, withShadow = true): L.Icon =>
     popupAnchor: [1, -34],
   });
 
-export const serverIcon = createMarkerIcon("blue");
+const serverIcon = createMarkerIcon("blue");
 
 const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
   const map = useMap();

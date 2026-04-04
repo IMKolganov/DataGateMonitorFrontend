@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { FaPlus, FaSync, FaEdit, FaTrash, FaStar, FaServer } from "react-icons/fa";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../../components/ui/TableStyle.tsx";
@@ -17,6 +17,7 @@ import type {
   CreateOrUpdateQuotaPlanRequest,
   QuotaPlansResponse,
 } from "../../api/orval/model";
+import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { QuotaPlanFormModal } from "./QuotaPlanFormModal";
 import { QuotaPlanAllowedServersModal } from "./QuotaPlanAllowedServersModal";
@@ -38,17 +39,20 @@ export function QuotaPlansSettings() {
   const [allowedServersPlan, setAllowedServersPlan] = useState<QuotaPlanDto | null>(null);
 
   const getAllMutation = usePostApiQuotaPlansGetAll();
+  const loadPlansMutate = getAllMutation.mutate;
   const createMutation = usePostApiQuotaPlansCreate();
   const updateMutation = usePutApiQuotaPlansUpdate();
   const deleteMutation = useDeleteApiQuotaPlansDeleteId();
   const setDefaultMutation = usePostApiQuotaPlansSetDefaultId();
 
-  const loadPlans = () => {
-    getAllMutation.mutate(
+  const loadPlans = useCallback(() => {
+    loadPlansMutate(
       { data: { includeInactive: true } },
       {
         onSuccess: (raw) => {
-          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(raw as any);
+          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(
+            raw as QuotaPlansResponse | ApiEnvelope<QuotaPlansResponse> | undefined,
+          );
           setPlans(payload?.quotaPlans ?? []);
         },
         onError: (e: unknown) => {
@@ -62,11 +66,11 @@ export function QuotaPlansSettings() {
         },
       }
     );
-  };
+  }, [loadPlansMutate]);
 
   useEffect(() => {
     loadPlans();
-  }, []);
+  }, [loadPlans]);
 
   const isBusy =
     getAllMutation.isPending ||

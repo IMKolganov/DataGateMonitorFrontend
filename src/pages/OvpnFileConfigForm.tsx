@@ -28,6 +28,8 @@ import StyledDataGrid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import "../css/Table.css";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
+import axios from "axios";
+import { axiosResponseDataMessage, errorMessage } from "../utils/errorMessage";
 
 /** Extract proto from config template (e.g. "proto tcp" or "proto udp") */
 function extractProtoFromTemplate(template: string): string | null {
@@ -216,17 +218,35 @@ const OvpnFileConfigForm: React.FC = () => {
 
   // small helper to extract readable error messages
   const getErrorMessage = (err: unknown): string => {
-    const anyErr = err as any;
-    const resp = anyErr?.response?.data ?? anyErr?.data ?? anyErr;
-    if (resp) {
+    if (axios.isAxiosError(err)) {
+      const resp = err.response?.data;
       if (typeof resp === "string") return resp;
-      const msg = resp.message ?? resp.Message;
-      const detail = resp.detail ?? resp.Detail;
-      if (msg && detail) return `${msg} Details: ${detail}`;
-      if (msg) return msg;
-      if (detail) return detail;
+      if (resp && typeof resp === "object") {
+        const r = resp as Record<string, unknown>;
+        const mStr =
+          axiosResponseDataMessage(resp) ??
+          (typeof r["Message"] === "string" ? r["Message"] : undefined);
+        const dStr =
+          (typeof r["detail"] === "string" ? r["detail"] : undefined) ??
+          (typeof r["Detail"] === "string" ? r["Detail"] : undefined);
+        if (mStr && dStr) return `${mStr} Details: ${dStr}`;
+        if (mStr) return mStr;
+        if (dStr) return dStr;
+      }
+      return err.message || "Unknown error";
     }
-    return anyErr?.message ?? "Unknown error";
+    const nonAxios = err as { data?: unknown };
+    const resp = nonAxios?.data ?? err;
+    if (typeof resp === "string") return resp;
+    if (resp && typeof resp === "object") {
+      const r = resp as Record<string, unknown>;
+      const msg = r["message"] ?? r["Message"];
+      const detail = r["detail"] ?? r["Detail"];
+      if (typeof msg === "string" && typeof detail === "string") return `${msg} Details: ${detail}`;
+      if (typeof msg === "string") return msg;
+      if (typeof detail === "string") return detail;
+    }
+    return errorMessage(err);
   };
 
   // when data arrives, map to local PascalCase state

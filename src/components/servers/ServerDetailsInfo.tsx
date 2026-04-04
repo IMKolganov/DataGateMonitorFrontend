@@ -1,8 +1,9 @@
 // src/components/ServerDetailsInfo.tsx
 import React from "react";
 import { BsClock, BsCpu, BsHddNetwork, BsFillBookmarkStarFill, BsPerson, BsTag } from "react-icons/bs";
-import { RiHardDrive2Line } from "react-icons/ri";
+import { RiBarChart2Line, RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer, IoMdPerson } from "react-icons/io";
+import type { OpenVpnServerResponse, OpenVpnServerWithStatusDto } from "../../api/orval/model";
 
 export type ConflogPayloadSummary = {
   application?: string | null;
@@ -15,8 +16,14 @@ export type ConflogPayloadSummary = {
   };
 };
 
+/** Props may carry fields from either API shape (merged in GeneralServerDetails). */
+export type ServerDetailsServerInfo =
+  | (Partial<OpenVpnServerWithStatusDto> & Partial<OpenVpnServerResponse>)
+  | null
+  | undefined;
+
 interface Props {
-  serverInfo: any; // normalized object from GeneralServerDetails
+  serverInfo: ServerDetailsServerInfo;
   toHumanReadableSize: (bytes: number) => string;
   /** show per-field shimmer placeholders */
   loading?: boolean;
@@ -25,6 +32,8 @@ interface Props {
   configPort?: number | null;
   /** From latest conflog (for General tab) */
   latestConflogPayload?: ConflogPayloadSummary | null;
+  /** Quota plan names this server is allowed for (from quota-plan-allowed-servers) */
+  quotaPlanLabels?: string[] | null;
 }
 
 /** Simple shimmer skeleton */
@@ -36,19 +45,27 @@ const Skeleton: React.FC<{ width?: number | string; height?: number | string; cl
   <span className={`skeleton ${className}`} style={{ width, height }} aria-label="loading" />
 );
 
-const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, loading = false, configIp, configPort, latestConflogPayload }) => {
+const ServerDetailsInfo: React.FC<Props> = ({
+  serverInfo,
+  toHumanReadableSize,
+  loading = false,
+  configIp,
+  configPort,
+  latestConflogPayload,
+  quotaPlanLabels,
+}) => {
   // When loading, we still render the layout with skeletons
   const safe = serverInfo ?? {};
 
-  const server =
-      safe.openVpnServerResponses?.openVpnServer
-          ? {
-            ...safe.openVpnServerResponses.openVpnServer,
-            id: safe.openVpnServerResponses.id ?? safe.openVpnServerResponses.openVpnServer.id,
-          }
-          : safe.openVpnServer
-              ? safe.openVpnServer
-              : null;
+  const server = (() => {
+    const wr = safe.openVpnServerResponses;
+    const inner = wr?.openVpnServer;
+    if (wr && inner) {
+      const wrapperId = (wr as OpenVpnServerResponse & { id?: number }).id;
+      return { ...inner, id: wrapperId ?? inner.id };
+    }
+    return safe.openVpnServer ?? null;
+  })();
 
   const status = safe.openVpnServerStatusLogResponse ?? null;
 
@@ -198,6 +215,20 @@ const ServerDetailsInfo: React.FC<Props> = ({ serverInfo, toHumanReadableSize, l
               </a>
             ) : (
               "N/A"
+            )}
+          </span>
+        </div>
+
+        <div className="detail-row">
+          <RiBarChart2Line className="detail-icon" />
+          <span className="detail-label">Quota plans:</span>
+          <span>
+            {loading ? (
+              <Skeleton width={220} />
+            ) : quotaPlanLabels != null && quotaPlanLabels.length > 0 ? (
+              quotaPlanLabels.join(", ")
+            ) : (
+              "—"
             )}
           </span>
         </div>

@@ -11,30 +11,31 @@ import ServiceControls from "../ServiceControls";
 
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 
-import {
-  getApiOpenVpnServersGetAllWithStatus,
-  deleteApiOpenVpnServersDeleteVpnServerId,
-} from "../../api/orval/open-vpn-servers/open-vpn-servers";
+import { deleteApiOpenVpnServersDeleteVpnServerId } from "../../api/orval/open-vpn-servers/open-vpn-servers";
+import { getApiV2OpenVpnServersGetAllWithStatus } from "../../api/orval/open-vpn-servers-v2/open-vpn-servers-v2";
 
 import { ServiceStatus } from "../../api/orval/model";
 import type {
   ServiceStatusDto,
-  OpenVpnServerWithStatusDto,
-  OpenVpnServerWithStatusesResponse,
+  OpenVpnServerWithStatusV2Dto,
+  OpenVpnServerWithStatusesV2Response,
 } from "../../api/orval/model";
 
-type GetAllWithStatusData = Awaited<ReturnType<typeof getApiOpenVpnServersGetAllWithStatus>>;
+type GetAllWithStatusData = Awaited<ReturnType<typeof getApiV2OpenVpnServersGetAllWithStatus>>;
 
-type OrvalServerItem = OpenVpnServerWithStatusDto;
+type OrvalServerItem = OpenVpnServerWithStatusV2Dto;
 
 type MappedServer = {
   id: number;
   vpnServerId: number;
-  serviceStatus: ServiceStatus;
+  /** Background service status; null until the status-stream hub sends a snapshot for this server. */
+  serviceStatus: ServiceStatus | null;
   errorMessage: string | null;
   nextRunTime: string;
   wsCountConnectedClients?: number;
   wsCountSessions?: number;
+  /** When hub sends IsOnline, overrides REST badge for real-time offline/online. */
+  wsOnline: boolean | null;
   raw: OrvalServerItem;
 };
 
@@ -63,8 +64,19 @@ const coerceStatus = (input: unknown): ServiceStatus => {
   return NUMBER_0;
 };
 
+function wsStatusIsPresent(ws: ServiceStatusDto | undefined): ws is ServiceStatusDto & { status: ServiceStatus } {
+  return ws != null && ws.status !== undefined && ws.status !== null;
+}
+
+function pickServiceDataEntry(
+  map: Record<number, ServiceStatusDto>,
+  id: number,
+): ServiceStatusDto | undefined {
+  return map[id] ?? (map as unknown as Record<string, ServiceStatusDto>)[String(id)];
+}
+
 const extractList = (resp: GetAllWithStatusData): OrvalServerItem[] => {
-  const payload = resp as OpenVpnServerWithStatusesResponse;
+  const payload = resp as OpenVpnServerWithStatusesV2Response;
   const list = payload.openVpnServerWithStatuses ?? null;
   return Array.isArray(list) ? list : [];
 };
@@ -96,7 +108,7 @@ const ServerList: React.FC = () => {
   const loadServers = async () => {
     setLoading(true);
     try {
-      const resp = await getApiOpenVpnServersGetAllWithStatus();
+      const resp = await getApiV2OpenVpnServersGetAllWithStatus();
       const list = extractList(resp);
 
       const mapped: MappedServer[] = list.flatMap((item) => {
@@ -107,11 +119,13 @@ const ServerList: React.FC = () => {
           {
             id,
             vpnServerId: id,
-            serviceStatus: NUMBER_0,
+            serviceStatus: null,
             errorMessage: null,
             nextRunTime: "N/A",
+            // Snapshot from GET (DB); live values overwritten when the hub sends CountConnectedClients / CountSessions.
             wsCountConnectedClients: item.countConnectedClients,
             wsCountSessions: item.countSessions,
+            wsOnline: null,
             raw: item,
           },
         ];
@@ -127,7 +141,6 @@ const ServerList: React.FC = () => {
 
   useEffect(() => {
     loadServers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -142,16 +155,23 @@ const ServerList: React.FC = () => {
 
     setServers((prev) =>
         prev.map((s) => {
-          const ws = normalized[s.id];
+          const ws = pickServiceDataEntry(normalized, s.id);
           if (!ws) return s;
+
+          const onlineRaw = (ws as ServiceStatusDto & { isOnline?: boolean }).isOnline;
+          const nextWsOnline = typeof onlineRaw === "boolean" ? onlineRaw : s.wsOnline;
 
           return {
             ...s,
-            serviceStatus: coerceStatus(ws.status),
-            errorMessage: ws.errorMessage ?? s.errorMessage ?? null,
-            nextRunTime: ws.nextRunTime ?? s.nextRunTime ?? "N/A",
-            wsCountConnectedClients: ws.countConnectedClients ?? s.wsCountConnectedClients,
-            wsCountSessions: ws.countSessions ?? s.wsCountSessions,
+            serviceStatus: wsStatusIsPresent(ws) ? coerceStatus(ws.status) : s.serviceStatus,
+            errorMessage: ws.errorMessage !== undefined ? ws.errorMessage : s.errorMessage,
+            nextRunTime:
+              ws.nextRunTime !== undefined && ws.nextRunTime !== "" ? ws.nextRunTime : s.nextRunTime,
+            // Prefer hub numbers when present (real-time); keep last REST/WS value if the payload omits counts.
+            wsCountConnectedClients:
+              ws.countConnectedClients !== undefined ? ws.countConnectedClients : s.wsCountConnectedClients,
+            wsCountSessions: ws.countSessions !== undefined ? ws.countSessions : s.wsCountSessions,
+            wsOnline: nextWsOnline,
           };
         }),
     );
@@ -168,25 +188,40 @@ const ServerList: React.FC = () => {
     }
   };
 
+  /** Footer aggregates: REST baseline per server, then live WebSocket overlay (real-time status / next run / counts). */
   const normalizedServiceControlsData: Record<number, ServiceStatusDto> = useMemo(() => {
-    const src = (serviceData ?? {}) as Record<string, ServiceStatusDto>;
+    const hub = (serviceData ?? {}) as Record<number, ServiceStatusDto>;
     const acc: Record<number, ServiceStatusDto> = {};
 
-    for (const [k, v] of Object.entries(src)) {
-      const id = Number(k);
-      if (!Number.isFinite(id)) continue;
+    for (const s of servers) {
+      const id = s.id;
+      const ws = pickServiceDataEntry(hub, id);
 
-      acc[id] = {
-        status: coerceStatus(v.status),
-        nextRunTime: v.nextRunTime,
-        errorMessage: v.errorMessage,
-        countConnectedClients: v.countConnectedClients,
-        countSessions: v.countSessions,
+      const base: ServiceStatusDto = {
+        vpnServerId: id,
+        countConnectedClients: s.wsCountConnectedClients ?? s.raw.countConnectedClients,
+        countSessions: s.wsCountSessions ?? s.raw.countSessions,
+        totalBytesIn: s.raw.totalBytesIn,
+        totalBytesOut: s.raw.totalBytesOut,
       };
+
+      if (ws) {
+        acc[id] = {
+          ...base,
+          ...ws,
+          status: wsStatusIsPresent(ws) ? coerceStatus(ws.status) : undefined,
+          nextRunTime: ws.nextRunTime,
+          errorMessage: ws.errorMessage ?? null,
+          countConnectedClients: ws.countConnectedClients ?? base.countConnectedClients,
+          countSessions: ws.countSessions ?? base.countSessions,
+        };
+      } else {
+        acc[id] = base;
+      }
     }
 
     return acc;
-  }, [serviceData]);
+  }, [servers, serviceData]);
 
   return (
       <div>
@@ -270,6 +305,7 @@ const ServerList: React.FC = () => {
                             serviceStatus={server.serviceStatus}
                             errorMessage={server.errorMessage}
                             nextRunTime={server.nextRunTime}
+                            wsOnline={server.wsOnline}
                             wsCountConnectedClients={server.wsCountConnectedClients}
                             wsCountSessions={server.wsCountSessions}
                             onView={(id) => {

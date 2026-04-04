@@ -12,6 +12,7 @@ import type {
   GetApiSettingsGetParams,
   PostApiSettingsSetParams,
 } from "../api/orval/model";
+import { errorMessage } from "../utils/errorMessage";
 
 const KEY_INTERVAL = "OpenVPN_Polling_Interval";
 const KEY_UNIT = "OpenVPN_Polling_Interval_Unit";
@@ -37,12 +38,17 @@ export function GeneralSettings() {
   );
 
   function pickSettingValue(resp: unknown): string | undefined {
-  const r = resp as any;
-  // common shapes we might see
-  return r?.value
-    ?? r?.data?.value
-    ?? r?.data?.setting?.value
-    ?? r?.setting?.value;
+    if (resp == null || typeof resp !== "object") return undefined;
+    const r = resp as Record<string, unknown>;
+    const data = r["data"] as Record<string, unknown> | undefined;
+    const setting = r["setting"] as Record<string, unknown> | undefined;
+    const dataSetting = data?.["setting"] as Record<string, unknown> | undefined;
+    const v =
+      r["value"] ??
+      data?.["value"] ??
+      dataSetting?.["value"] ??
+      setting?.["value"];
+    return typeof v === "string" ? v : v != null ? String(v) : undefined;
   }
 
   const {
@@ -126,13 +132,8 @@ export function GeneralSettings() {
       ]);
 
       setSuccessMessage("Settings successfully updated.");
-    } catch (e: any) {
-      const apiErr =
-        e?.response?.data?.error ??
-        e?.response?.data?.message ??
-        e?.message ??
-        "Unknown error";
-      setErrorDetails(String(apiErr));
+    } catch (e: unknown) {
+      setErrorDetails(errorMessage(e));
     }
   };
 

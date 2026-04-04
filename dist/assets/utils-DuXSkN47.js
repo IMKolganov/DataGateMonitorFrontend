@@ -1,0 +1,1 @@
+var e=e=>{if(e==null||isNaN(e))return`0 Bytes`;let t=[`Bytes`,`KiB`,`MiB`,`GiB`,`TiB`],n=0;for(;e>=1024&&n<t.length-1;)e/=1024,n++;return`${e.toFixed(1)} ${t[n]}`},t=e=>{let t=e.getTimezoneOffset(),n=Math.abs(t/60).toString().padStart(2,`0`),r=t>0?`-`:`+`;return`${e.toISOString().replace(`T`,` `).slice(0,-5)} ${r}${n}00`};export{t as n,e as t};

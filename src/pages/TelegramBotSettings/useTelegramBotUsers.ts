@@ -9,6 +9,7 @@ import type {
   TelegramBotUserDto,
 } from "../../api/orval/model";
 
+import type { ApiEnvelope } from "./unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "./unwrapApiResponse";
 
 export function useTelegramBotUsers() {
@@ -16,7 +17,9 @@ export function useTelegramBotUsers() {
   const [manualRefreshing, setManualRefreshing] = useState(false);
 
   const users: TelegramBotUserDto[] = useMemo(() => {
-    const payload = unwrapMaybeApiResponse<GetAllTelegramUsersResponse>(qUsers.data as any);
+    const payload = unwrapMaybeApiResponse<GetAllTelegramUsersResponse>(
+      qUsers.data as GetAllTelegramUsersResponse | ApiEnvelope<GetAllTelegramUsersResponse> | undefined,
+    );
     return (payload?.telegramBotUsers ?? []) as TelegramBotUserDto[];
   }, [qUsers.data]);
 
