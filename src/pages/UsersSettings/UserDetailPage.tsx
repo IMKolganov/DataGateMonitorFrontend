@@ -28,6 +28,7 @@ import type { GetByTelegramIdMessagesResponseApiResponse } from "../../api/orval
 import type { MessageDto } from "../../api/orval/model";
 import { useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { isCanceledError } from "../../utils/queryCanceled";
+import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
 import StyledDataGrid from "../../components/ui/TableStyle.tsx";
@@ -174,12 +175,14 @@ export function UserDetailPage() {
       { data: { includeInactive: true } },
       {
         onSuccess: (raw) => {
-          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(raw as any);
+          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(
+            raw as QuotaPlansResponse | ApiEnvelope<QuotaPlansResponse> | undefined,
+          );
           setQuotaPlans(payload?.quotaPlans ?? []);
         },
       }
     );
-  }, [id]);
+  }, [id, getAllQuotaMutation]);
 
   const handleSendResetCode = () => {
     if (!user) return;

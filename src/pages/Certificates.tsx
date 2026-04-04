@@ -11,9 +11,11 @@ import type { OpenVpnServerResponse } from "../api/orval/model";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/open-vpn-servers/open-vpn-servers";
 
 // Helper to unwrap ApiResponse<T>
-function unwrap<T>(resp: any): T | undefined {
-  if (!resp) return undefined;
-  if (typeof resp === "object" && "data" in resp) return resp.data as T;
+function unwrap<T>(resp: unknown): T | undefined {
+  if (resp == null) return undefined;
+  if (typeof resp === "object" && resp !== null && "data" in resp) {
+    return (resp as { data: T }).data;
+  }
   return resp as T;
 }
 

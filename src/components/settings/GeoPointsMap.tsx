@@ -234,18 +234,6 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
         Cookies.set("geoPointColor", pointColor, { expires: 365 });
     }, [pointColor]);
 
-    const depsKey = useMemo(
-        () =>
-            JSON.stringify({
-                from: toIso(from),
-                to: toIso(to),
-                vpnServerId,
-                externalId,
-                onlyWithCoordinates,
-            }),
-        [from, to, vpnServerId, externalId, onlyWithCoordinates]
-    );
-
     useEffect(() => {
         abortRef.current?.abort();
         const controller = new AbortController();
@@ -281,7 +269,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
             });
 
         return () => controller.abort();
-    }, [depsKey]);
+    }, [from, to, vpnServerId, externalId, onlyWithCoordinates]);
 
     const filteredPoints = useMemo(() => {
         return points.filter((p) => {

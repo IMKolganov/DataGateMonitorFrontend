@@ -104,7 +104,7 @@ export function GeneralServerDetails() {
                 },
             }
         );
-    }, []);
+    }, [getPlansMutation]);
 
     const { data: allowedByVpnRaw } = useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId(
         numericServerId ?? 0,

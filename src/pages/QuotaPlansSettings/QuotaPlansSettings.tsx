@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { FaPlus, FaSync, FaEdit, FaTrash, FaStar, FaServer } from "react-icons/fa";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../../components/ui/TableStyle.tsx";
@@ -17,6 +17,7 @@ import type {
   CreateOrUpdateQuotaPlanRequest,
   QuotaPlansResponse,
 } from "../../api/orval/model";
+import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { QuotaPlanFormModal } from "./QuotaPlanFormModal";
 import { QuotaPlanAllowedServersModal } from "./QuotaPlanAllowedServersModal";
@@ -43,12 +44,14 @@ export function QuotaPlansSettings() {
   const deleteMutation = useDeleteApiQuotaPlansDeleteId();
   const setDefaultMutation = usePostApiQuotaPlansSetDefaultId();
 
-  const loadPlans = () => {
+  const loadPlans = useCallback(() => {
     getAllMutation.mutate(
       { data: { includeInactive: true } },
       {
         onSuccess: (raw) => {
-          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(raw as any);
+          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(
+            raw as QuotaPlansResponse | ApiEnvelope<QuotaPlansResponse> | undefined,
+          );
           setPlans(payload?.quotaPlans ?? []);
         },
         onError: (e: unknown) => {
@@ -62,11 +65,11 @@ export function QuotaPlansSettings() {
         },
       }
     );
-  };
+  }, [getAllMutation]);
 
   useEffect(() => {
     loadPlans();
-  }, []);
+  }, [loadPlans]);
 
   const isBusy =
     getAllMutation.isPending ||

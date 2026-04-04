@@ -70,8 +70,8 @@ export const apiRequest = async <T>(
     });
 
     return response.data as ApiResponse<T>;
-  } catch (error: any) {
-    const status = error?.response?.status;
+  } catch (error: unknown) {
+    const status = axios.isAxiosError(error) ? error.response?.status : undefined;
     const pathname = window.location.pathname;
 
     const shouldTryRefresh =

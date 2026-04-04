@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { usePostApiAuthGoogleLogin } from "../../api/orval/auth/auth";
 import type {
     GoogleLoginRequest,
@@ -7,11 +7,25 @@ import type {
 import { scheduleAutoLogout } from "../../utils/auth/authSession";
 import { getRuntimeEnv } from "../../utils/runtimeEnv";
 import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY} from "../../utils/const.ts";
+import axios from "axios";
+import { errorMessage } from "../../utils/errorMessage";
+
+type GoogleCredentialResponse = { credential?: string };
 
 declare global {
-    interface Window {
-        google?: any;
-    }
+  interface Window {
+    google?: {
+      accounts?: {
+        id?: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: GoogleCredentialResponse) => void;
+          }) => void;
+          renderButton: (el: HTMLElement, opts: Record<string, unknown>) => void;
+        };
+      };
+    };
+  }
 }
 
 const GOOGLE_SCRIPT_ID = "google-identity-script";
@@ -23,53 +37,61 @@ const GoogleLoginForm: React.FC = () => {
 
     const { mutateAsync: googleLogin, isPending } = usePostApiAuthGoogleLogin();
 
-    const handleGoogleCredential = async (idToken: string) => {
-        setError("");
+    const handleGoogleCredential = useCallback(
+        async (idToken: string) => {
+            setError("");
 
-        try {
-            const body: GoogleLoginRequest = {
-                idToken,
-            };
+            try {
+                const body: GoogleLoginRequest = {
+                    idToken,
+                };
 
-            const response = (await googleLogin({
-                data: body,
-            })) as GoogleLoginResponse;
+                const response = (await googleLogin({
+                    data: body,
+                })) as GoogleLoginResponse;
 
-            const token = response.token;
-            const refreshToken = response.refreshToken;
-            const refreshExpiration = response.refreshExpiration;
+                const token = response.token;
+                const refreshToken = response.refreshToken;
+                const refreshExpiration = response.refreshExpiration;
 
-            if (!token) {
-                throw new Error("No token returned by API.");
-            }
-
-            localStorage.setItem(ACCESS_TOKEN_KEY, token);
-            if (refreshToken) {
-                localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-            }
-            if (refreshExpiration) {
-                localStorage.setItem(REFRESH_TOKEN_EXPIRATION, refreshExpiration);
-            }
-            scheduleAutoLogout(token);
-            window.location.href = "/";
-        } catch (err: any) {
-            let detailedMessage =
-                "We could not log you in with Google. Please try again.";
-
-            if (err?.response) {
-                detailedMessage += ` Server responded with status ${err.response.status} (${err.response.statusText}).`;
-                if (err.response.data?.error) {
-                    detailedMessage += ` Details: ${err.response.data.error}`;
+                if (!token) {
+                    throw new Error("No token returned by API.");
                 }
-            } else if (err?.request) {
-                detailedMessage += " The server did not respond.";
-            } else if (err?.message) {
-                detailedMessage += ` Error: ${err.message}`;
-            }
 
-            setError(detailedMessage);
-        }
-    };
+                localStorage.setItem(ACCESS_TOKEN_KEY, token);
+                if (refreshToken) {
+                    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+                }
+                if (refreshExpiration) {
+                    localStorage.setItem(REFRESH_TOKEN_EXPIRATION, refreshExpiration);
+                }
+                scheduleAutoLogout(token);
+                window.location.href = "/";
+            } catch (err: unknown) {
+                let detailedMessage =
+                    "We could not log you in with Google. Please try again.";
+
+                if (axios.isAxiosError(err)) {
+                    if (err.response) {
+                        detailedMessage += ` Server responded with status ${err.response.status} (${err.response.statusText}).`;
+                        const d = err.response.data;
+                        if (d && typeof d === "object" && d !== null && "error" in d) {
+                            detailedMessage += ` Details: ${String((d as { error: unknown }).error)}`;
+                        }
+                    } else if (err.request) {
+                        detailedMessage += " The server did not respond.";
+                    } else if (err.message) {
+                        detailedMessage += ` Error: ${err.message}`;
+                    }
+                } else {
+                    detailedMessage += ` Error: ${errorMessage(err)}`;
+                }
+
+                setError(detailedMessage);
+            }
+        },
+        [googleLogin],
+    );
 
     const loadGoogleScript = () =>
         new Promise<void>((resolve, reject) => {
@@ -135,8 +157,8 @@ const GoogleLoginForm: React.FC = () => {
 
                 window.google.accounts.id.initialize({
                     client_id: googleClientId,
-                    callback: (response: any) => {
-                        if (response && response.credential) {
+                    callback: (response: GoogleCredentialResponse) => {
+                        if (response?.credential) {
                             void handleGoogleCredential(response.credential);
                         } else {
                             setError("Google did not return a valid credential.");
@@ -164,14 +186,16 @@ const GoogleLoginForm: React.FC = () => {
                 // window.google.accounts.id.prompt();
 
                 setScriptReady(true);
-            } catch (e: any) {
+            } catch (e: unknown) {
                 if (cancelled) {
                     return;
                 }
 
                 setError(
-                    e?.message ??
-                    "Failed to initialize Google Identity Services. Please try again later.",
+                    e instanceof Error
+                        ? e.message
+                        : errorMessage(e) ||
+                          "Failed to initialize Google Identity Services. Please try again later.",
                 );
                 setScriptReady(false);
             }
@@ -182,7 +206,7 @@ const GoogleLoginForm: React.FC = () => {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [handleGoogleCredential]);
 
     return (
         <>

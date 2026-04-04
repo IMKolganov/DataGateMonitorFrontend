@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import { errorMessage } from "../../utils/errorMessage";
 import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
 import { OverviewUsersTable } from "../../components/OverviewUsersTable";
 import StatsCards from "./StatsCards";
@@ -81,9 +82,7 @@ export default function ServersOverview() {
 
   const showErrorToast = (prefix: string, err: unknown) => {
     const message =
-      (err as any)?.message ||
-      (typeof err === "string" ? err : "") ||
-      "Unexpected error";
+      (typeof err === "string" ? err : errorMessage(err)) || "Unexpected error";
     const key = `${prefix}:${message}`;
     if (lastErrorKey.current !== key) {
       lastErrorKey.current = key;

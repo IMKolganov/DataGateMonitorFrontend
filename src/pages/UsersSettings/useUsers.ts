@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback } from "react";
 import { useGetApiUsersGetAll } from "../../api/orval/user/user";
 import type { GetAllUsersResponse, UserDto } from "../../api/orval/model";
 import type { GridPaginationModel } from "@mui/x-data-grid";
+import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { isCanceledError } from "../../utils/queryCanceled";
 
@@ -27,7 +28,9 @@ export function useUsers() {
   });
 
   const { users, totalCount } = useMemo(() => {
-    const payload = unwrapMaybeApiResponse<GetAllUsersResponse>(qUsers.data as any);
+    const payload = unwrapMaybeApiResponse<GetAllUsersResponse>(
+      qUsers.data as GetAllUsersResponse | ApiEnvelope<GetAllUsersResponse> | undefined,
+    );
     const list = (payload?.users ?? []) as UserDto[];
     const total = payload?.totalCount ?? 0;
     return { users: list, totalCount: total };

@@ -11,6 +11,8 @@ import { postApiOpenVpnCertsRevoke } from "../../api/orval/open-vpn-server-certs
 import "../../css/Table.css";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
+import axios from "axios";
+import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
 type CertificatesTableProps = {
   certificates: Certificate[];
@@ -61,10 +63,12 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
         await revokeCertificate(vpnServerId, commonName);
         // success toast is handled by parent
         await onRevoke();
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const data = axios.isAxiosError(error) ? error.response?.data : undefined;
         const msg =
-          error?.response?.data?.Message ||
-          error?.message ||
+          axiosResponseDataMessage(data) ??
+          (axios.isAxiosError(error) ? error.message : undefined) ??
+          errorMessage(error) ??
           "Failed to revoke certificate.";
         toast.error(msg);
       } finally {

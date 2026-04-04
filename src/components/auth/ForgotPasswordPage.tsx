@@ -11,6 +11,8 @@ import type {
 import { FaPaperPlane, FaKey } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
 import "../../css/Login.css";
+import axios from "axios";
+import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
 const MESSAGE_AFTER_FORGOT =
   "If an admin account exists with this login and password login is enabled, the reset code has been written to the server console. Otherwise the user was not found.";
@@ -50,8 +52,8 @@ const ForgotPasswordPage: React.FC = () => {
         loginOrEmail: loginOrEmail.trim() || null,
       };
       await postApiAuthForgotPassword(req);
-    } catch (err: any) {
-      if (err.request && !err.response) {
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.request && !err.response) {
         setForgotError("Could not connect to the server. Please try again later.");
         setForgotLoading(false);
         return;
@@ -79,13 +81,13 @@ const ForgotPasswordPage: React.FC = () => {
       await postApiAuthResetPassword(req);
       setResetSuccess(true);
       setTimeout(() => navigate("/login", { replace: true }), 2500);
-    } catch (err: any) {
-      const msg =
-        err.response?.data?.message ??
-        err.response?.data?.errorMessage ??
-        err.message ??
-        "Password reset failed.";
-      setResetError(msg);
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err)
+        ? axiosResponseDataMessage(err.response?.data) ??
+          err.message ??
+          "Password reset failed."
+        : errorMessage(err);
+      setResetError(msg || "Password reset failed.");
     } finally {
       setResetLoading(false);
     }

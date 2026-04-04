@@ -50,30 +50,43 @@ import {
   getGetApiOpenVpnServersGetVpnServerIdQueryKey,
   getGetApiOpenVpnServersGetServerWithStatusVpnServerIdQueryKey,
 } from "../api/orval/open-vpn-servers/open-vpn-servers";
+import type { ApiEnvelope } from "./TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
+import { errorMessage } from "../utils/errorMessage";
+import axios from "axios";
 
 type GetByIdResult = Awaited<ReturnType<typeof getApiOpenVpnServersGetVpnServerId>>;
+
+function asRecord(v: unknown): Record<string, unknown> | null {
+  return typeof v === "object" && v !== null ? (v as Record<string, unknown>) : null;
+}
 
 function unwrapServerDto(raw: GetByIdResult | undefined): OpenVpnServerDto | null {
   if (!raw) return null;
 
-  const top: any = raw;
-  const s: any = top?.openVpnServer ?? top?.data?.openVpnServer ?? top;
+  const top = asRecord(raw);
+  if (!top) return null;
+  const data = asRecord(top["data"]);
+  const s =
+    (top["openVpnServer"] as unknown) ??
+    data?.["openVpnServer"] ??
+    raw;
 
   if (!s || typeof s !== "object") return null;
+  const o = s as Record<string, unknown>;
 
   const dto: OpenVpnServerDto = {
-    id: typeof s.id === "number" ? s.id : s.id != null ? Number(s.id) : undefined,
-    serverName: s.serverName ?? null,
-    isOnline: Boolean(s.isOnline ?? false),
-    isDefault: Boolean(s.isDefault ?? false),
-    apiUrl: s.apiUrl ?? null,
-    latitude: s.latitude ?? null,
-    longitude: s.longitude ?? null,
-    isEnableWss: Boolean(s.isEnableWss ?? false),
-    createDate: s.createDate,
-    lastUpdate: s.lastUpdate,
-    tags: Array.isArray(s.tags) ? s.tags : s.tags ?? null,
+    id: typeof o["id"] === "number" ? o["id"] : o["id"] != null ? Number(o["id"]) : undefined,
+    serverName: (o["serverName"] as string | null | undefined) ?? null,
+    isOnline: Boolean(o["isOnline"] ?? false),
+    isDefault: Boolean(o["isDefault"] ?? false),
+    apiUrl: (o["apiUrl"] as string | null | undefined) ?? null,
+    latitude: (o["latitude"] as number | null | undefined) ?? null,
+    longitude: (o["longitude"] as number | null | undefined) ?? null,
+    isEnableWss: Boolean(o["isEnableWss"] ?? false),
+    createDate: o["createDate"] as string | undefined,
+    lastUpdate: o["lastUpdate"] as string | undefined,
+    tags: Array.isArray(o["tags"]) ? o["tags"] : (o["tags"] as string[] | null | undefined) ?? null,
   };
 
   return dto;
@@ -85,13 +98,25 @@ function getAllowedItemsByVpnServer(raw: unknown): QuotaPlanAllowedServerDto[] {
   if (Array.isArray(r.items)) return r.items as QuotaPlanAllowedServerDto[];
   const data = r.data as Record<string, unknown> | undefined;
   if (data && Array.isArray(data.items)) return data.items as QuotaPlanAllowedServerDto[];
-  const unwrapped = unwrapMaybeApiResponse<{ items?: QuotaPlanAllowedServerDto[] | null }>(raw as any);
+  const unwrapped = unwrapMaybeApiResponse<{ items?: QuotaPlanAllowedServerDto[] | null }>(
+    raw as
+      | { items?: QuotaPlanAllowedServerDto[] | null }
+      | ApiEnvelope<{ items?: QuotaPlanAllowedServerDto[] | null }>
+      | undefined,
+  );
   return unwrapped?.items ?? [];
 }
 
 function unwrapNewServerIdFromAdd(raw: unknown): number | null {
-  const top = unwrapMaybeApiResponse<OpenVpnServerResponse>(raw as any);
-  const id = top?.openVpnServer?.id ?? (raw as any)?.openVpnServer?.id ?? (raw as any)?.data?.openVpnServer?.id;
+  const top = unwrapMaybeApiResponse<OpenVpnServerResponse>(
+    raw as OpenVpnServerResponse | ApiEnvelope<OpenVpnServerResponse> | undefined,
+  );
+  const rawRec = asRecord(raw);
+  const nested = rawRec ? asRecord(rawRec["data"]) : null;
+  const fromRaw =
+    (rawRec?.["openVpnServer"] as { id?: number } | undefined)?.id ??
+    (nested?.["openVpnServer"] as { id?: number } | undefined)?.id;
+  const id = top?.openVpnServer?.id ?? fromRaw;
   return typeof id === "number" && id > 0 ? id : null;
 }
 
@@ -117,6 +142,47 @@ async function syncQuotaPlanAssignments(
       await deleteApiQuotaPlanAllowedServersDeleteId(link.id);
     }
   }
+}
+
+function ApiCheckSuccessSummary({ data }: { data: unknown }) {
+  const rec = asRecord(data);
+  const cfg =
+    rec && typeof rec["config"] === "object" && rec["config"] !== null
+      ? asRecord(rec["config"])
+      : null;
+  const version = rec?.["version"];
+  const application = rec?.["application"];
+  return (
+    <div className="api-check-result api-check-success">
+      <div className="api-check-summary">
+        {typeof version === "string" && (
+          <span>
+            <strong>Version:</strong> {version}
+          </span>
+        )}
+        {typeof application === "string" && (
+          <span>
+            <strong>Application:</strong> {application}
+          </span>
+        )}
+        {cfg != null && (
+          <>
+            {cfg["port"] != null && (
+              <span>
+                <strong>Port:</strong> {String(cfg["port"])}
+              </span>
+            )}
+            {cfg["proto"] != null && (
+              <span>
+                <strong>Proto:</strong> {String(cfg["proto"])}
+              </span>
+            )}
+          </>
+        )}
+      </div>
+      <pre className="api-check-json">{JSON.stringify(data, null, 2)}</pre>
+    </div>
+  );
 }
 
 function toNumberOrNull(value: string): number | null {
@@ -228,12 +294,14 @@ const ServerForm: React.FC = () => {
       { data: { includeInactive: true } },
       {
         onSuccess: (raw) => {
-          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(raw as any);
+          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(
+            raw as QuotaPlansResponse | ApiEnvelope<QuotaPlansResponse> | undefined,
+          );
           setQuotaPlans(payload?.quotaPlans ?? []);
         },
       }
     );
-  }, []);
+  }, [getPlansMutation]);
 
   React.useEffect(() => {
     if (!idNum || !allowedByServerRaw) return;
@@ -546,9 +614,19 @@ const ServerForm: React.FC = () => {
       }
 
       navigate("/");
-    } catch (err: any) {
+    } catch (err: unknown) {
       const base = idNum ? "Failed to update server." : "Failed to add server.";
-      const apiMsg = err?.response?.data?.Message || err?.message || base;
+      let apiMsg = base;
+      if (axios.isAxiosError(err)) {
+        const d = err.response?.data;
+        if (d && typeof d === "object" && d !== null) {
+          const rec = d as Record<string, unknown>;
+          const m = rec["Message"] ?? rec["message"];
+          if (typeof m === "string") apiMsg = m;
+        } else if (err.message) apiMsg = err.message;
+      } else {
+        apiMsg = errorMessage(err) || base;
+      }
       toast.error(apiMsg);
     }
   };
@@ -652,29 +730,7 @@ const ServerForm: React.FC = () => {
                 </button>
               </div>
               {apiCheck.status === "success" && apiCheck.data != null && (
-                <div className="api-check-result api-check-success">
-                  <div className="api-check-summary">
-                    {typeof (apiCheck.data as any)?.version === "string" && (
-                      <span><strong>Version:</strong> {(apiCheck.data as any).version}</span>
-                    )}
-                    {typeof (apiCheck.data as any)?.application === "string" && (
-                      <span><strong>Application:</strong> {(apiCheck.data as any).application}</span>
-                    )}
-                    {typeof (apiCheck.data as any)?.config === "object" && (apiCheck.data as any).config != null && (
-                      <>
-                        {(apiCheck.data as any).config.port != null && (
-                          <span><strong>Port:</strong> {(apiCheck.data as any).config.port}</span>
-                        )}
-                        {(apiCheck.data as any).config.proto != null && (
-                          <span><strong>Proto:</strong> {(apiCheck.data as any).config.proto}</span>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  <pre className="api-check-json">
-                    {JSON.stringify(apiCheck.data, null, 2)}
-                  </pre>
-                </div>
+                <ApiCheckSuccessSummary data={apiCheck.data} />
               )}
               {apiCheck.status === "error" && apiCheck.error && (
                 <div className="api-check-result api-check-error">

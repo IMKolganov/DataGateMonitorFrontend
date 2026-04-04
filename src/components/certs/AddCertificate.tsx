@@ -6,6 +6,8 @@ import { FaPlus } from "react-icons/fa";
 // orval
 import { postApiOpenVpnCertsBuild } from "../../api/orval/open-vpn-server-certs/open-vpn-server-certs.ts";
 import type { BuildCertificateRequest } from "../../api/orval/model";
+import axios from "axios";
+import { axiosResponseDataMessage, axiosResponseDetail, errorMessage } from "../../utils/errorMessage";
 
 interface Props {
   vpnServerId: string;
@@ -39,13 +41,14 @@ const AddCertificate: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
       setNewCertCommonName("");
       setMessage({ type: "success", text: "Certificate added successfully!" });
       onSuccess();
-    } catch (error: any) {
-      // Try to extract backend-friendly message
+    } catch (error: unknown) {
+      const data = axios.isAxiosError(error) ? error.response?.data : undefined;
       const msg =
-        error?.response?.data?.Message ||
-        error?.message ||
+        axiosResponseDataMessage(data) ??
+        (axios.isAxiosError(error) ? error.message : undefined) ??
+        errorMessage(error) ??
         "Failed to add certificate.";
-      const detail = error?.response?.data?.Detail || "";
+      const detail = axiosResponseDetail(data) ?? "";
       setMessage({ type: "error", text: `${msg}${detail ? ` ${detail}` : ""}` });
     } finally {
       setLoading(false);

@@ -7,6 +7,8 @@ import { toast } from "react-toastify";
 // orval
 import { usePostApiOpenVpnFilesAdd } from "../../api/orval/open-vpn-files/open-vpn-files.ts";
 import type { AddFileRequest } from "../../api/orval/model";
+import axios from "axios";
+import { axiosResponseDataMessage, axiosResponseDetail, errorMessage } from "../../utils/errorMessage";
 
 interface Props {
   vpnServerId: string;
@@ -55,12 +57,14 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
       setMessage({ type: "success", text: "OVPN file added successfully!" });
       toast.success("OVPN file created");
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const data = axios.isAxiosError(error) ? error.response?.data : undefined;
       const errMsg =
-        error?.response?.data?.Message ||
-        error?.message ||
+        axiosResponseDataMessage(data) ??
+        (axios.isAxiosError(error) ? error.message : undefined) ??
+        errorMessage(error) ??
         "Failed to add OVPN file.";
-      const detail = error?.response?.data?.Detail;
+      const detail = axiosResponseDetail(data);
       const text = detail ? `${errMsg} Details: ${detail}` : errMsg;
 
       setMessage({ type: "error", text });

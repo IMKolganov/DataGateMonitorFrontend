@@ -21,6 +21,7 @@ import { getSignalRUrl, getAccessTokenOrLogout } from "../utils/signalr-url";
 import { ACCESS_TOKEN_REFRESHED_EVENT } from "../utils/auth/accessTokenEvents.ts";
 import { highlightOvpMgmtLine } from "../utils/ovpMgmtHighlight";
 import { OVP_MGMT_COMMANDS } from "../utils/ovpMgmtCommands";
+import { errorMessage } from "../utils/errorMessage";
 
 export function WebConsole() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
@@ -114,8 +115,8 @@ export function WebConsole() {
 
         await connection.start();
         setMessages((prev) => [...prev, "✅ Console ready. Connection to OpenVPN server established."]);
-      } catch (err: any) {
-        setMessages((prev) => [...prev, `❌ Failed to connect to OpenVPN server: ${err.message}`]);
+      } catch (err: unknown) {
+        setMessages((prev) => [...prev, `❌ Failed to connect to OpenVPN server: ${errorMessage(err)}`]);
       }
     };
 
@@ -169,8 +170,8 @@ export function WebConsole() {
 
     try {
       await connection.send("SendCommand", cmdToSend);
-    } catch (error: any) {
-      setMessages((prev) => [...prev, `❌ Failed to send command to OpenVPN: ${error.message}`]);
+    } catch (error: unknown) {
+      setMessages((prev) => [...prev, `❌ Failed to send command to OpenVPN: ${errorMessage(error)}`]);
     }
   };
 

@@ -1,11 +1,10 @@
 // comments in English only
 import type { ReactNode } from "react";
-import React, { Suspense, lazy } from "react";
+import React, { lazy } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { Header } from "./components/ui/Header.tsx";
 import Footer from "./components/ui/Footer.tsx";
-import { LoadingOverlay } from "./components/ui/LoadingOverlay.tsx";
 import "react-toastify/dist/ReactToastify.css";
 import "./css/ToastifyDark.css";
 import "./App.css";
@@ -15,6 +14,7 @@ import RegisterPage from "./components/auth/RegisterPage";
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./components/auth/ResetPasswordPage";
 import {ACCESS_TOKEN_KEY} from "./utils/const.ts";
+import { withSuspense } from "./utils/withSuspense.tsx";
 
 // Lazy pages
 const About = lazy(() => import("./pages/About"));
@@ -43,10 +43,6 @@ const isAuthenticated = () => !!localStorage.getItem(ACCESS_TOKEN_KEY);
 
 const PrivateRoute = ({ children }: { children: ReactNode }): React.ReactElement =>
   isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
-
-export const withSuspense = (node: React.ReactElement) => (
-  <Suspense fallback={<LoadingOverlay />}>{node}</Suspense>
-);
 
 // Small helper to hide header/footer on login
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {

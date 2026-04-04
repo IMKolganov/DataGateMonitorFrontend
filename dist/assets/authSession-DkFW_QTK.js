@@ -1,1 +1,0 @@
-import{n as e,r as t}from"./apirequest-Dro2yBrk.js";import{n}from"./jwt-cXSzYYNW.js";var r=null;async function i(){try{let r=await t(),{expiresInMs:i}=n(r);if(i<=0){e();return}a(r)}catch{e()}}function a(e){try{let{expiresInMs:t}=n(e);if(r&&=(clearTimeout(r),null),t<=0){i();return}r=window.setTimeout(()=>{r=null,i()},t)}catch{i()}}export{a as t};
