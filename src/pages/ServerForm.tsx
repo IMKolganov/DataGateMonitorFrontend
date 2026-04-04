@@ -303,7 +303,7 @@ const ServerForm: React.FC = () => {
   }, [serverResp, idNum, allTags]);
 
   React.useEffect(() => {
-    const raw = (ovpnConfigData as { data?: OvpnFileConfigResponse })?.data ?? ovpnConfigData;
+    const raw = ovpnConfigData as OvpnFileConfigResponse | undefined;
     if (!raw || typeof raw !== "object") return;
     setOvpnConfig((prev) => ({
       ...prev,

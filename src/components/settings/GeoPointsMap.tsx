@@ -259,7 +259,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
             OnlyWithCoordinates: onlyWithCoordinates,
         };
 
-        getApiOpenVpnClientsOverviewPoints(params, undefined, controller.signal)
+        getApiOpenVpnClientsOverviewPoints(params, { signal: controller.signal })
             .then((resp) => {
                 const next = pickPoints(resp);
                 setPoints(next);

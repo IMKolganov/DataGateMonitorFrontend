@@ -9,7 +9,12 @@ import {
   usePostApiNotificationsMarkReadAll,
   usePostApiNotificationsNotifyAdmins,
 } from "../../api/orval/notification/notification";
-import type { NotificationRequest, NotificationItemDto } from "../../api/orval/model";
+import type {
+  NotificationRequest,
+  NotificationItemDto,
+  GetNotificationsResponse,
+  UnreadCountResponse,
+} from "../../api/orval/model";
 import { getCurrentUser } from "../../utils/auth/authSelectors";
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -20,7 +25,8 @@ export function useNotificationsList(params?: { Page?: number; PageSize?: number
 
 export function useNotificationsUnreadCount() {
   const query = useGetApiNotificationsUnreadCount();
-  const count = query.data?.count ?? 0;
+  const payload = query.data as unknown as UnreadCountResponse | undefined;
+  const count = payload?.count ?? 0;
   return { ...query, data: count };
 }
 
@@ -49,11 +55,13 @@ export function useNotifications() {
   const mMarkReadAll = usePostApiNotificationsMarkReadAll();
   const mNotifyAdmins = usePostApiNotificationsNotifyAdmins();
 
-  const paged = listQuery.data?.notifications;
+  const listPayload = listQuery.data as unknown as GetNotificationsResponse | undefined;
+  const paged = listPayload?.notifications;
   const notifications: NotificationItemDto[] = paged?.items ?? [];
   const totalCount = paged?.totalCount ?? 0;
   const totalPages = paged?.totalPages ?? 0;
-  const unreadCount = countQuery.data?.count ?? 0;
+  const unreadPayload = countQuery.data as unknown as UnreadCountResponse | undefined;
+  const unreadCount = unreadPayload?.count ?? 0;
 
   const refresh = useCallback(async () => {
     if (refreshing) return;
@@ -65,8 +73,6 @@ export function useNotifications() {
         }),
         queryClient.invalidateQueries({ queryKey: getGetApiNotificationsUnreadCountQueryKey() }),
       ]);
-    } catch (e) {
-      throw e;
     } finally {
       setRefreshing(false);
     }
@@ -76,26 +82,18 @@ export function useNotifications() {
     async (notificationId: number) => {
       if (!adminUserId) return;
       if (!notificationId) return;
-      try {
-        await mRead.mutateAsync({
-          notificationId,
-          params: { adminUserId },
-        });
-        await refresh();
-      } catch (e) {
-        throw e;
-      }
+      await mRead.mutateAsync({
+        notificationId,
+        params: { adminUserId },
+      });
+      await refresh();
     },
     [adminUserId, mRead, refresh]
   );
 
   const markReadAll = useCallback(async () => {
-    try {
-      await mMarkReadAll.mutateAsync();
-      await refresh();
-    } catch (e) {
-      throw e;
-    }
+    await mMarkReadAll.mutateAsync();
+    await refresh();
   }, [mMarkReadAll, refresh]);
 
   const onPaginationModelChange = useCallback((model: { page: number; pageSize: number }) => {
@@ -107,33 +105,25 @@ export function useNotifications() {
     async (notificationId: number) => {
       if (!adminUserId) return;
       if (!notificationId) return;
-      try {
-        await mDelivered.mutateAsync({
-          notificationId,
-          params: { adminUserId, channel: "web" },
-        });
-        await refresh();
-      } catch (e) {
-        throw e;
-      }
+      await mDelivered.mutateAsync({
+        notificationId,
+        params: { adminUserId, channel: "web" },
+      });
+      await refresh();
     },
     [adminUserId, mDelivered, refresh]
   );
 
   const sendTestNotification = useCallback(
     async (request?: Partial<NotificationRequest>) => {
-      try {
-        await mNotifyAdmins.mutateAsync({
-          data: {
-            title: request?.title ?? "Test notification",
-            message: request?.message ?? "Sent from dashboard",
-            severity: request?.severity,
-          } as NotificationRequest,
-        });
-        await refresh();
-      } catch (e) {
-        throw e;
-      }
+      await mNotifyAdmins.mutateAsync({
+        data: {
+          title: request?.title ?? "Test notification",
+          message: request?.message ?? "Sent from dashboard",
+          severity: request?.severity,
+        } as NotificationRequest,
+      });
+      await refresh();
     },
     [mNotifyAdmins, refresh]
   );

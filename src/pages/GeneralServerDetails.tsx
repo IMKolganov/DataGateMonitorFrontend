@@ -19,6 +19,8 @@ import type {
     VpnClientInfoDto,
     OpenVpnServerWithStatusDto,
     OpenVpnServerDto,
+    OpenVpnServerWithStatusResponse,
+    OpenVpnServerResponse,
 } from "../api/orval/model";
 
 import {
@@ -162,9 +164,10 @@ export function GeneralServerDetails() {
     const loadingClients =
         (isLive ? connectedQuery.isFetching : historyQuery.isFetching) ?? false;
 
-    const activeClientsResponse: ConnectedClientsResponse | undefined = isLive
-        ? connectedQuery.data
-        : historyQuery.data;
+    const activeClientsResponse =
+        (isLive ? connectedQuery.data : historyQuery.data) as unknown as
+            | ConnectedClientsResponse
+            | undefined;
 
     const clients: VpnClientInfoDto[] = activeClientsResponse?.vpnClients ?? [];
 
@@ -216,12 +219,16 @@ export function GeneralServerDetails() {
 
     const loadingServer = serverWithStatusQuery.isFetching || serverBasicQuery.isFetching;
 
+    const serverWithStatusPayload = serverWithStatusQuery.data as unknown as
+        | OpenVpnServerWithStatusResponse
+        | undefined;
     const serverWithStatus: OpenVpnServerWithStatusDto | undefined =
-        serverWithStatusQuery.data?.openVpnServerWithStatus;
+        serverWithStatusPayload?.openVpnServerWithStatus;
+
+    const serverBasicPayload = serverBasicQuery.data as unknown as OpenVpnServerResponse | undefined;
 
     const serverEntity: OpenVpnServerDto | undefined =
-        serverWithStatus?.openVpnServerResponses?.openVpnServer ??
-        serverBasicQuery.data?.openVpnServer;
+        serverWithStatus?.openVpnServerResponses?.openVpnServer ?? serverBasicPayload?.openVpnServer;
 
     const serverLocation = useMemo<[number, number] | null>(() => {
         const lat = serverEntity?.latitude;
@@ -234,12 +241,16 @@ export function GeneralServerDetails() {
     const serverName = serverEntity?.serverName ?? null;
 
     const serverInfo = useMemo(() => {
-        if (serverWithStatusQuery.data?.openVpnServerWithStatus) {
-            return serverWithStatusQuery.data.openVpnServerWithStatus;
+        const withStatus = serverWithStatusQuery.data as unknown as
+            | OpenVpnServerWithStatusResponse
+            | undefined;
+        if (withStatus?.openVpnServerWithStatus) {
+            return withStatus.openVpnServerWithStatus;
         }
 
-        if (serverBasicQuery.data) {
-            return serverBasicQuery.data;
+        const basic = serverBasicQuery.data as unknown as OpenVpnServerResponse | undefined;
+        if (basic) {
+            return basic;
         }
 
         return null;
