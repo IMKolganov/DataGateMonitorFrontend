@@ -1,1 +1,0 @@
-import{n as e}from"./apirequest-DZL15sau.js";import{n as t}from"./jwt-cXSzYYNW.js";var n=null;function r(r){try{let{expiresInMs:i}=t(r);if(i<=0){e();return}n&&clearTimeout(n),n=window.setTimeout(()=>{e()},i)}catch{e()}}export{r as t};

@@ -40,7 +40,7 @@ let configPromise: Promise<Config> | null = null;
 const isAuthEndpoint = (u: string) => /\/api\/auth(\/|$)/i.test(u);
 
 export const apiRequest = async <T>(
-    method: "get" | "post" | "put" | "delete" | "patch",
+    method: "get" | "head" | "post" | "put" | "delete" | "patch",
     url: string,
     config: AxiosRequestConfig = {},
     skipAuth: boolean = false,
