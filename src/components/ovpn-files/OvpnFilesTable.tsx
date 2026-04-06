@@ -13,6 +13,7 @@ import { usePostApiOpenVpnFilesRevokeFile, usePostApiOpenVpnFilesDownloadFile } 
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 
 const safeFormatDate = (input?: string | null): string => {
   if (!input) return "";
@@ -75,6 +76,12 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
 
   const [searchQuery, setSearchQuery] = useState("");
   const [issuedToFilter, setIssuedToFilter] = useState("");
+  const [ovpnFilesGridPage, setOvpnFilesGridPage] = useState(0);
+  const [ovpnFilesPageSize, setOvpnFilesPageSize] = usePersistedPageSize(
+    `ovpn-files:${vpnServerId}`,
+    10,
+    "5,10,20,100",
+  );
 
   // Normalize input list to IssuedOvpnFileDto[]
   const items: IssuedOvpnFileDto[] = useMemo(() => {
@@ -269,8 +276,11 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 100]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
+          paginationMode="client"
+          paginationModel={{ page: ovpnFilesGridPage, pageSize: ovpnFilesPageSize }}
+          onPaginationModelChange={(m) => {
+            setOvpnFilesGridPage(m.page);
+            setOvpnFilesPageSize(m.pageSize);
           }}
           localeText={{
             noRowsLabel: loading ? "🔄 Loading OVPN files..." : "📭 No OVPN files found",

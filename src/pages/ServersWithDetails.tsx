@@ -21,7 +21,7 @@ function ServersWithDetails() {
   }
 
   return (
-    <div>
+    <div className="servers-with-details-root">
       <div className="servers-with-details-container">
         <div className="server-list-panel toggle-panel">
           <button className="btn secondary" onClick={() => setCollapsed(!collapsed)}>

@@ -28,6 +28,7 @@ import StyledDataGrid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import "../css/Table.css";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
+import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../utils/errorMessage";
 
@@ -80,7 +81,12 @@ const OvpnFileConfigForm: React.FC = () => {
   const parsedVpnServerId = Number(vpnServerId) || 0;
   const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
-  const [conflogPagination, setConflogPagination] = useState({ page: 1, pageSize: DEFAULT_CONFLOG_PAGE_SIZE });
+  const [conflogPage, setConflogPage] = useState(1);
+  const [conflogPageSize, setConflogPageSize] = usePersistedPageSize(
+    parsedVpnServerId > 0 ? `ovpn-conflog:${parsedVpnServerId}` : "ovpn-conflog:0",
+    DEFAULT_CONFLOG_PAGE_SIZE,
+    "5,10,20,50",
+  );
 
   // local UI state (kept in PascalCase to match form field names)
   const [ovpnFileConfig, setServerConfig] = useState({
@@ -119,9 +125,13 @@ const OvpnFileConfigForm: React.FC = () => {
   const saveMutation = usePostApiOpenVpnConfigsAddUpdate();
 
   const conflogHistoryParams = useMemo(
-    () => ({ page: conflogPagination.page, pageSize: conflogPagination.pageSize }),
-    [conflogPagination]
+    () => ({ page: conflogPage, pageSize: conflogPageSize }),
+    [conflogPage, conflogPageSize]
   );
+
+  useEffect(() => {
+    setConflogPage(1);
+  }, [parsedVpnServerId]);
   const { data: conflogHistoryResp, isFetching: isConflogLoading } =
     useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
       parsedVpnServerId,
@@ -555,14 +565,12 @@ const OvpnFileConfigForm: React.FC = () => {
                     paginationMode="server"
                     rowCount={conflogTotalCount}
                     paginationModel={{
-                      page: conflogPagination.page - 1,
-                      pageSize: conflogPagination.pageSize,
+                      page: conflogPage - 1,
+                      pageSize: conflogPageSize,
                     }}
                     onPaginationModelChange={(model: GridPaginationModel) => {
-                      setConflogPagination((p) => ({
-                        page: model.page + 1,
-                        pageSize: model.pageSize ?? p.pageSize,
-                      }));
+                      setConflogPage(model.page + 1);
+                      setConflogPageSize(model.pageSize ?? conflogPageSize);
                     }}
                     loading={isConflogLoading}
                     slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}

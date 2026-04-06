@@ -8,8 +8,10 @@ import {
 } from "@microsoft/signalr";
 import { postApiOpenVpnServersRunNow } from "../api/orval/open-vpn-servers/open-vpn-servers";
 import type { ServiceStatusDto } from "../api/orval/model";
+import { ServiceStatus as ServiceStatusEnum } from "../api/orval/model";
 import {ACCESS_TOKEN_KEY} from "../utils/const.ts";
 import { errorMessage } from "../utils/errorMessage.ts";
+import { getStatusStreamHubUrl } from "../utils/signalrHubUrl.ts";
 
 const MIN_ISO = /^0001-01-01T00:00:00/i;
 
@@ -39,7 +41,10 @@ function toDtos(raw: unknown): ServiceStatusDto[] {
         if (!leaf) continue;
 
         const vpnServerId = Number(leaf["VpnServerId"] ?? leaf["vpnServerId"] ?? 0);
-        const status = leaf["Status"] ?? leaf["status"];
+        const rawStatus = leaf["Status"] ?? leaf["status"];
+        /** Hub JSON often omits default enum value (Idle = 0); treat as Idle. */
+        const status =
+            rawStatus === undefined || rawStatus === null ? ServiceStatusEnum.NUMBER_0 : rawStatus;
 
         const nrt = leaf["NextRunTime"] ?? leaf["nextRunTime"];
         const nextRunTime = isValidIso(typeof nrt === "string" ? nrt : undefined)
@@ -95,16 +100,33 @@ export default function useSignalRService() {
                     return;
                 }
 
-                // IMPORTANT: Use relative URL so it works behind your /api proxy
-                const hubUrl = "/api/hubs/status-stream";
+                const hubUrl = getStatusStreamHubUrl();
+                const lpOnly =
+                    import.meta.env.DEV &&
+                    String(import.meta.env.VITE_SIGNALR_LONG_POLLING_ONLY ?? "").trim() === "1";
+
+                /**
+                 * One HubConnection only. Do not retry with LongPolling-only: if the API hub allows WebSockets only,
+                 * that retry produces a misleading "'WebSockets' is disabled by the client" error.
+                 * SignalR already falls through transports inside start() when negotiate lists more than one.
+                 */
+                const transport: HttpTransportType = import.meta.env.PROD
+                    ? HttpTransportType.WebSockets
+                    : lpOnly
+                      ? HttpTransportType.LongPolling
+                      : HttpTransportType.WebSockets | HttpTransportType.LongPolling;
+
+                if (import.meta.env.DEV) {
+                    console.info("[SignalR status-stream] connecting to", hubUrl, { transport });
+                }
 
                 const conn = new HubConnectionBuilder()
                     .withUrl(hubUrl, {
                         accessTokenFactory: () => localStorage.getItem(ACCESS_TOKEN_KEY) ?? "",
-                        transport: HttpTransportType.WebSockets,
+                        transport,
                     })
                     .withAutomaticReconnect([0, 2000, 5000, 10000])
-                    .configureLogging(LogLevel.Information)
+                    .configureLogging(import.meta.env.DEV ? LogLevel.None : LogLevel.Information)
                     .build();
 
                 connRef.current = conn;
@@ -127,7 +149,6 @@ export default function useSignalRService() {
                     setLastError(err ? String(err) : null);
                 });
 
-                // IMPORTANT: This name must match server SendAsync("StatusUpdated", ...)
                 conn.on("StatusUpdated", (payload: unknown) => {
                     const p =
                         payload !== null && typeof payload === "object"
@@ -158,7 +179,11 @@ export default function useSignalRService() {
             } catch (e: unknown) {
                 if (!alive) return;
                 setConnectionState("error");
-                setLastError(e ? errorMessage(e) : "Unknown error");
+                const msg = e ? errorMessage(e) : "Unknown error";
+                setLastError(msg);
+                if (import.meta.env.DEV) {
+                    console.warn("[SignalR status-stream] connect failed — see Service Control hint or API LB sticky for /api/hubs.");
+                }
             }
         };
 

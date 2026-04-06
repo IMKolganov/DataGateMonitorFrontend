@@ -11,6 +11,7 @@ import {
   usePostApiTgbotUsersUnsetAdmin,
 } from "../../api/orval/telegram-bot-user/telegram-bot-user.ts";
 import "../../css/Table.css";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 
 interface TelegramBotUsersTableProps {
   users: TelegramBotUserDto[];
@@ -24,6 +25,12 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
   loading,
 }) => {
   const [mutationLoading, setMutationLoading] = useState(false);
+  const [tgUsersGridPage, setTgUsersGridPage] = useState(0);
+  const [tgUsersPageSize, setTgUsersPageSize] = usePersistedPageSize(
+    "telegram-bot-users",
+    10,
+    "5,10,20,50,100",
+  );
 
   const mBlock = usePostApiTgbotUsersBlock();
   const mUnblock = usePostApiTgbotUsersUnblock();
@@ -149,7 +156,12 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50, 100]}
-          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+          paginationMode="client"
+          paginationModel={{ page: tgUsersGridPage, pageSize: tgUsersPageSize }}
+          onPaginationModelChange={(m) => {
+            setTgUsersGridPage(m.page);
+            setTgUsersPageSize(m.pageSize);
+          }}
           localeText={{ noRowsLabel: "📭 No users found" }}
           loading={isGridLoading}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
