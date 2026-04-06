@@ -45,10 +45,12 @@ export async function ogmMutator<T = unknown>(
   const headers = flattenHeaders(merged.headers as HeadersInit | undefined);
   const params = merged.params as Record<string, unknown> | undefined;
   const signal = merged.signal as AbortSignal | undefined;
+  const paramsSerializer = merged.paramsSerializer as AxiosRequestConfig["paramsSerializer"] | undefined;
 
   const axiosConfig: AxiosRequestConfig = {
     params,
     signal,
+    ...(paramsSerializer !== undefined ? { paramsSerializer } : {}),
   };
 
   if (headers && Object.keys(headers).length > 0) {
