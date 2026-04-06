@@ -11,6 +11,7 @@ import { postApiOpenVpnCertsRevoke } from "../../api/orval/open-vpn-server-certs
 import "../../css/Table.css";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
@@ -53,6 +54,12 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
   const [selectedStatus, setSelectedStatus] = useState("");
   const [serialNumberQuery, setSerialNumberQuery] = useState("");
   const [revokingCN, setRevokingCN] = useState<string | null>(null);
+  const [certsGridPage, setCertsGridPage] = useState(0);
+  const [certsPageSize, setCertsPageSize] = usePersistedPageSize(
+    `certs:${vpnServerId}`,
+    10,
+    "5,10,20,100",
+  );
 
   const handleRevoke = useCallback(
     async (commonName: string) => {
@@ -178,8 +185,11 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 100]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
+          paginationMode="client"
+          paginationModel={{ page: certsGridPage, pageSize: certsPageSize }}
+          onPaginationModelChange={(m) => {
+            setCertsGridPage(m.page);
+            setCertsPageSize(m.pageSize);
           }}
           localeText={{
             noRowsLabel: loading ? "🔄 Loading certificates..." : "📭 No certificates found",

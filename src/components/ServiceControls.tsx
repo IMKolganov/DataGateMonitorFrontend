@@ -3,10 +3,14 @@ import { FaPlay } from "react-icons/fa";
 import { useEffect, useMemo, useState } from "react";
 import type { ServiceStatusDto } from "../api/orval/model";
 import type { ServiceStatus } from "../api/orval/model";
+import { humanizeSignalRStatusStreamError } from "../utils/signalrFriendlyError";
 
 type Props = {
   serviceData: Record<number, ServiceStatusDto>;
   onRunNow: () => void;
+  /** From useSignalRService — helps tell connection errors from “no snapshot yet”. */
+  hubConnectionState?: string;
+  hubLastError?: string | null;
 };
 
 type UiStatus = "Idle" | "Running" | "Error" | "Pending";
@@ -58,7 +62,12 @@ function getNextRunSeconds(entries: ServiceStatusDto[]): number | null {
   return diffSec;
 }
 
-export default function ServiceControls({ serviceData, onRunNow }: Props) {
+export default function ServiceControls({
+  serviceData,
+  onRunNow,
+  hubConnectionState,
+  hubLastError,
+}: Props) {
   const entries = useMemo(() => Object.values(serviceData ?? {}), [serviceData]);
 
   const totals = useMemo(() => {
@@ -109,19 +118,44 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
     return () => window.clearInterval(id);
   }, [entries, anyRunning]);
 
+  const hubErrorDisplay = useMemo(
+      () => humanizeSignalRStatusStreamError(hubLastError ?? null),
+      [hubLastError],
+  );
+
   const statusDescription = useMemo(() => {
+    if (hubConnectionState === "error" && hubLastError) {
+      return `Live status unavailable: ${hubErrorDisplay}`;
+    }
+    if (hubConnectionState === "no-token") {
+      return "Not authenticated; live status unavailable.";
+    }
+    if (hubConnectionState === "reconnecting") {
+      return "Reconnecting…";
+    }
+    if (hubConnectionState === "closed") {
+      return "Live updates disconnected. Refresh the page or check the network.";
+    }
     if (anyRunning) return "The service is currently running.";
     if (anyError) return "There is an error with the service.";
-    if (anyPending) return "Waiting for live status from the background service (WebSocket).";
+    if (anyPending) {
+      if (hubConnectionState === "connected") {
+        return "Connected, but no live data yet (background service may be empty).";
+      }
+      return "Waiting for live status from the background service…";
+    }
     return "The service is idle.";
-  }, [anyRunning, anyError, anyPending]);
+  }, [anyRunning, anyError, anyPending, hubConnectionState, hubLastError, hubErrorDisplay]);
 
   const statusColor = useMemo(() => {
+    if (hubConnectionState === "error" || hubConnectionState === "no-token" || hubConnectionState === "closed") {
+      return "#f85149";
+    }
     if (anyRunning) return "#1E90FF";
     if (anyError) return "red";
     if (anyPending) return "#8b949e";
     return "green";
-  }, [anyRunning, anyError, anyPending]);
+  }, [anyRunning, anyError, anyPending, hubConnectionState]);
 
   return (
       <div className="service-status-container">

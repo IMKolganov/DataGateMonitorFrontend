@@ -155,43 +155,53 @@ const ServerItem: React.FC<Props> = ({
 
             <div className="server-details">
                 <div className="detail-row">
-                    <IoMdPerson className="detail-icon" />
-                    <span className="detail-label">Count Connected Clients:</span>
-                    <span>{connectedClients}</span>
+                    <IoMdPerson className="detail-icon" aria-hidden />
+                    <div className="detail-row-main">
+                        <span className="detail-label">Count Connected Clients:</span>
+                        <span className="detail-value">{connectedClients}</span>
+                    </div>
                 </div>
 
                 {apiUrl && (
                     <div className="detail-row">
-                        <BsLink45Deg className="detail-icon" />
-                        <span className="detail-label">API:</span>
-                        <a href={apiUrl} target="_blank" rel="noreferrer" className="detail-link" onClick={(e) => e.stopPropagation()}>
-                            {apiUrl}
-                        </a>
+                        <BsLink45Deg className="detail-icon" aria-hidden />
+                        <div className="detail-row-main">
+                            <span className="detail-label">API:</span>
+                            <a href={apiUrl} target="_blank" rel="noreferrer" className="detail-link" onClick={(e) => e.stopPropagation()}>
+                                {apiUrl}
+                            </a>
+                        </div>
                     </div>
                 )}
 
                 {serverIp && (
                     <div className="detail-row">
-                        <BsHddNetwork className="detail-icon" />
-                        <span className="detail-label">IP:</span>
-                        <span>{serverIp}</span>
+                        <BsHddNetwork className="detail-icon" aria-hidden />
+                        <div className="detail-row-main">
+                            <span className="detail-label">IP:</span>
+                            <span className="detail-value">{serverIp}</span>
+                        </div>
                     </div>
                 )}
 
                 {isDefault && (
                     <div className="detail-row">
-                        <BsFillBookmarkStarFill className="detail-icon" />
-                        <span className="detail-label">Default server</span>
+                        <BsFillBookmarkStarFill className="detail-icon" aria-hidden />
+                        <div className="detail-row-main">
+                            <span className="detail-label">Default server</span>
+                        </div>
                     </div>
                 )}
             </div>
 
             <div className="server-service">
-                <div className="detail-row">{getStatusLabel(serviceStatus)}</div>
+                <div className="detail-row detail-row--status">{getStatusLabel(serviceStatus)}</div>
                 <div className="detail-row">
-                    <BsClock className="detail-icon" />
-                    <span className="detail-label">Next Run Time:</span>
-                    <span>{formatUtcDate(nextRunTime)}</span>
+                    <BsClock className="detail-icon" aria-hidden />
+                    <div className="detail-row-main">
+                        <span className="detail-label">Next Run Time:</span>
+                        <span className="detail-value">{formatUtcDate(nextRunTime)}</span>
+                    </div>
                 </div>
                 {errorMessage && (
                     <div className="error-message">

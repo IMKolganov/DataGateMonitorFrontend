@@ -10,6 +10,7 @@ import type { ApplicationDto, RevokeApplicationRequest } from "../../api/orval/m
 import { usePostApiApplicationsRevoke } from "../../api/orval/applications/applications.ts";
 import "../../css/Table.css";
 import { errorMessage } from "../../utils/errorMessage";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 
 interface ApplicationTableProps {
   applications: ApplicationDto[];
@@ -18,6 +19,12 @@ interface ApplicationTableProps {
 
 const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refreshApps }) => {
   const [copied, setCopied] = useState<string | null>(null);
+  const [appsGridPage, setAppsGridPage] = useState(0);
+  const [appsPageSize, setAppsPageSize] = usePersistedPageSize(
+    "applications-settings",
+    10,
+    "5,10,20,50,100",
+  );
 
   const revokeMutation = usePostApiApplicationsRevoke({
     mutation: {
@@ -129,7 +136,12 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50, 100]}
-          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+          paginationMode="client"
+          paginationModel={{ page: appsGridPage, pageSize: appsPageSize }}
+          onPaginationModelChange={(m) => {
+            setAppsGridPage(m.page);
+            setAppsPageSize(m.pageSize);
+          }}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
           localeText={{ noRowsLabel: "📭 No applications registered" }}
         />

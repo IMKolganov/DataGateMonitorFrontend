@@ -5,14 +5,17 @@ import type { GridPaginationModel } from "@mui/x-data-grid";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { isCanceledError } from "../../utils/queryCanceled";
+import { getStoredPageSize, setStoredPageSize } from "../../hooks/usePersistedPageSize";
 
 const DEFAULT_PAGE_SIZE = 10;
+const USERS_PAGE_SIZE_KEY = "settings-users";
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50, 100] as const;
 
 export function useUsers() {
-  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>(() => ({
     page: 0,
-    pageSize: DEFAULT_PAGE_SIZE,
-  });
+    pageSize: getStoredPageSize(USERS_PAGE_SIZE_KEY, DEFAULT_PAGE_SIZE, [...PAGE_SIZE_OPTIONS]),
+  }));
   const [manualRefreshing, setManualRefreshing] = useState(false);
 
   const params = useMemo(
@@ -39,6 +42,9 @@ export function useUsers() {
   const onPaginationModelChange = useCallback((model: GridPaginationModel) => {
     setPaginationModel((prev) => {
       if (prev.page === model.page && prev.pageSize === model.pageSize) return prev;
+      if (model.pageSize !== prev.pageSize) {
+        setStoredPageSize(USERS_PAGE_SIZE_KEY, model.pageSize);
+      }
       return model;
     });
   }, []);
