@@ -34,7 +34,8 @@ export function WebConsole() {
   const cmdListRef = useRef<HTMLDivElement>(null);
   const inputWrapperRef = useRef<HTMLDivElement>(null);
   const connectionRef = useRef<HubConnection | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  /** Scroll this element only — never use scrollIntoView on inner nodes (it scrolls the whole page). */
+  const consoleOutputRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [hubSessionKey, setHubSessionKey] = useState(0);
 
@@ -130,7 +131,9 @@ export function WebConsole() {
 
   useEffect(() => {
     if (messages.length === 0) return;
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = consoleOutputRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
   }, [messages]);
 
   const addToCommandHistory = useCallback(
@@ -279,7 +282,7 @@ export function WebConsole() {
       </div>
 
       <div className="console-container">
-        <div className="console-output">
+        <div ref={consoleOutputRef} className="console-output">
           {messages.map((msg, index) => {
             const isCommand = msg.startsWith("> ");
             const isSuccess = msg.startsWith("✅");
@@ -301,7 +304,6 @@ export function WebConsole() {
               </div>
             );
           })}
-          <div ref={messagesEndRef} />
         </div>
         <div ref={inputWrapperRef} className="console-input-wrapper">
           <div className="console-input">

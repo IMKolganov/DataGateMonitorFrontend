@@ -37,6 +37,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import type { QuotaPlansResponse, QuotaPlanAllowedServerDto } from "../api/orval/model";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
+import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 
 type ConflogPayload = {
     application?: string | null;
@@ -75,7 +76,11 @@ export function GeneralServerDetails() {
 
     const [isLive, setIsLive] = useState(true);
     const [page, setPage] = useState(0);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = usePersistedPageSize(
+        `clients:${vpnServerId ?? "0"}`,
+        10,
+        "5,10,20,50,100",
+    );
     const [totalClients, setTotalClients] = useState(0);
     const [planNameById, setPlanNameById] = useState<Map<number, string>>(new Map());
 

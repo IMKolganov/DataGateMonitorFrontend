@@ -4,10 +4,10 @@ import { FaDatabase } from "react-icons/fa";
 import * as signalR from "@microsoft/signalr";
 import { toast } from "react-toastify";
 import type { GetVersionDatabaseResponse } from "../api/orval/model";
+import { getApiBaseUrl } from "../config/apiBase";
 import { errorMessage } from "../utils/errorMessage";
+import { ACCESS_TOKEN_KEY } from "../utils/const.ts";
 
-
-// ⬇️ adjust the import path if your orval file lives elsewhere
 import {
   useGetApiGeoLiteGetVerionDb,
   usePostApiGeoLiteUpdateDb,
@@ -20,14 +20,14 @@ type StepProgressPayload = {
   progress: number; // 0..100
 };
 
-// If you already have a helper that builds the connection, keep using it.
-// Otherwise, provide a simple builder like below.
-// IMPORTANT: update the hub URL to match your backend.
+/** Same prefix as REST (`/api/...`) and Vite proxy — not `/hubs/...` at site root. */
 function buildGeoLiteHubConnection(): signalR.HubConnection {
-  const baseUrl =
-    import.meta.env.VITE_API_BASE_URL ?? window.__API_BASE_URL__ ?? "";
+  const hubUrl = `${getApiBaseUrl()}/hubs/geolite`;
   return new signalR.HubConnectionBuilder()
-    .withUrl(`${baseUrl}/hubs/geolite`)
+    .withUrl(hubUrl, {
+      accessTokenFactory: () => localStorage.getItem(ACCESS_TOKEN_KEY) ?? "",
+      transport: signalR.HttpTransportType.WebSockets,
+    })
     .withAutomaticReconnect()
     .build();
 }
@@ -120,8 +120,9 @@ export function GeoLiteDbDownloader() {
           updateRunningRef.current = false;
           forceRerender();
         });
-      } catch {
+      } catch (e) {
         if (!isMounted) return;
+        console.error("[GeoLite] SignalR connect failed:", e);
       }
     };
 

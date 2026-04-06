@@ -37,13 +37,14 @@ import type { GetByTelegramIdMessagesResponseApiResponse } from "../../api/orval
 import type { MessageDto } from "../../api/orval/model";
 import { useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { isCanceledError } from "../../utils/queryCanceled";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
 import StyledDataGrid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
-import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
+import type { GridColDef } from "@mui/x-data-grid";
 import "../../css/Settings.css";
 import "../../css/Table.css";
 
@@ -76,8 +77,12 @@ export function UserDetailPage() {
   const [editingAssignment, setEditingAssignment] = useState<UserQuotaPlanDto | null>(null);
   const [pendingRoleId, setPendingRoleId] = useState<number | "">("");
 
-  const [telegramMessagesPagination, setTelegramMessagesPagination] =
-    useState<GridPaginationModel>({ page: 0, pageSize: 10 });
+  const [telegramMessagesPage, setTelegramMessagesPage] = useState(0);
+  const [telegramMessagesPageSize, setTelegramMessagesPageSize] = usePersistedPageSize(
+    `user-detail-telegram:${userId ?? "0"}`,
+    10,
+    "5,10,20,50",
+  );
 
   const createAssignmentMutation = usePostApiUserQuotaPlansCreate();
   const updateAssignmentMutation = usePutApiUserQuotaPlansUpdate();
@@ -143,6 +148,10 @@ export function UserDetailPage() {
     else setPendingRoleId("");
   }, [currentRoleAssignment?.roleId]);
 
+  useEffect(() => {
+    setTelegramMessagesPage(0);
+  }, [userId]);
+
   const isTelegramUser =
     user != null &&
     (user.provider?.toLowerCase().includes("telegram") ?? false);
@@ -159,8 +168,8 @@ export function UserDetailPage() {
   } = useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId(
     telegramIdValid ? telegramId : 0,
     {
-      page: telegramMessagesPagination.page + 1,
-      pageSize: telegramMessagesPagination.pageSize,
+      page: telegramMessagesPage + 1,
+      pageSize: telegramMessagesPageSize,
     },
     {
       query: {
@@ -502,11 +511,13 @@ export function UserDetailPage() {
                     pageSizeOptions={[5, 10, 20, 50]}
                     paginationMode="server"
                     rowCount={telegramMessagesTotalCount}
-                    paginationModel={telegramMessagesPagination}
+                    paginationModel={{
+                      page: telegramMessagesPage,
+                      pageSize: telegramMessagesPageSize,
+                    }}
                     onPaginationModelChange={(model) => {
-                      setTelegramMessagesPagination((prev) =>
-                        prev.page !== model.page || prev.pageSize !== model.pageSize ? model : prev
-                      );
+                      setTelegramMessagesPage(model.page);
+                      setTelegramMessagesPageSize(model.pageSize);
                     }}
                     loading={telegramMessagesLoading || telegramMessagesFetching}
                     slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}

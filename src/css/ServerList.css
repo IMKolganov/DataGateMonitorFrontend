@@ -86,40 +86,106 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   }
 
-  .server-header {
+  .server-item .server-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    gap: 8px;
     margin-bottom: 20px;
+    min-width: 0;
   }
 
-  .server-info {
+  .server-item .server-info {
+    display: flex;
+    flex: 1;
+    min-width: 0;
     flex-direction: column;
   }
 
-  .server-name {
+  .server-item .server-name {
     font-size: 18px;
     font-weight: bold;
     color: var(--text-primary);
     margin-bottom: 4px;
+    overflow-wrap: anywhere;
   }
 
-  .server-details {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  /* One column only — multi-column grid made each row too narrow and broke icon+text rows. */
+  .server-item .server-details {
+    display: flex;
+    flex-direction: column;
     gap: 10px;
     margin-top: 10px;
-    max-width: clamp(900px, 80vw, 2024px);
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
-  .detail-row {
+  /* Icon column + text column (sidebar cards). Rows with only status use .status-indicator below. */
+  .server-item .detail-row {
     display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: flex-start;
-    gap: 6px;
+    gap: 8px;
+    padding: 4px 8px;
+    min-width: 0;
     font-size: 14px;
     color: var(--text-muted);
+  }
+
+  .server-item .detail-row .detail-row-main {
+    color: inherit;
+  }
+
+  .server-item .detail-row--status {
+    align-items: center;
+  }
+
+  .server-item .status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
     flex-wrap: wrap;
-    padding: 4px 8px;
-    justify-content: flex-start;
+    line-height: 1.35;
+    min-width: 0;
+  }
+
+  .server-item .status-indicator .status-icon {
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .server-item .detail-row .detail-icon {
+    flex-shrink: 0;
+    width: 1em;
+    height: 1em;
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-top: 0.12em;
+  }
+
+  .server-item .detail-row-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.4em;
+    row-gap: 0.1em;
+  }
+
+  .server-item .detail-row-main .detail-label {
+    color: var(--text-muted);
+  }
+
+  .server-item .detail-row-main .detail-value {
+    color: var(--text-secondary);
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  .server-item .detail-row-main .detail-link {
+    min-width: 0;
   }
 
   .server-container {
@@ -168,6 +234,7 @@
   }
 
   .server-status {
+    flex-shrink: 0;
     white-space: nowrap;
     display: inline-block;
     padding: 3px 6px;
