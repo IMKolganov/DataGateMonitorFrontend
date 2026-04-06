@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   useGetApiNotificationsGetAll,
   useGetApiNotificationsUnreadCount,
@@ -14,13 +14,18 @@ import type {
   NotificationItemDto,
   GetNotificationsResponse,
   UnreadCountResponse,
+  GetApiNotificationsGetAllParams,
+  NotificationSeverity,
 } from "../../api/orval/model";
 import { getCurrentUser } from "../../utils/auth/authSelectors";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { serializeNotificationsGetAllParams } from "../../utils/notificationsQuerySerialize";
 
 const DEFAULT_PAGE_SIZE = 10;
 
-export function useNotificationsList(params?: { Page?: number; PageSize?: number }) {
+export type NotificationReadFilter = "all" | "unread" | "read";
+
+export function useNotificationsList(params?: GetApiNotificationsGetAllParams) {
   return useGetApiNotificationsGetAll(params);
 }
 
@@ -43,13 +48,44 @@ export function useNotifications() {
     "5,10,20,50,100",
   );
 
-  const listParams = useMemo(
-    () => ({ Page: page + 1, PageSize: pageSize }),
-    [page, pageSize]
-  );
+  const [readFilter, setReadFilter] = useState<NotificationReadFilter>("all");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [severityEnabled, setSeverityEnabled] = useState<[boolean, boolean, boolean, boolean]>([
+    true,
+    true,
+    true,
+    true,
+  ]);
+
+  const severitiesForApi = useMemo((): NotificationSeverity[] | undefined => {
+    const selected: NotificationSeverity[] = [];
+    for (let i = 0; i < 4; i++) {
+      if (severityEnabled[i]) selected.push(i as NotificationSeverity);
+    }
+    if (selected.length === 0 || selected.length === 4) return undefined;
+    return selected;
+  }, [severityEnabled]);
+
+  const listParams = useMemo((): GetApiNotificationsGetAllParams => {
+    const trimmedType = typeFilter.trim();
+    const p: GetApiNotificationsGetAllParams = {
+      Page: page + 1,
+      PageSize: pageSize,
+    };
+    if (readFilter === "unread") p.IsRead = false;
+    else if (readFilter === "read") p.IsRead = true;
+    if (trimmedType) p.Type = trimmedType.slice(0, 256);
+    if (severitiesForApi) p.Severities = severitiesForApi;
+    return p;
+  }, [page, pageSize, readFilter, typeFilter, severitiesForApi]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [readFilter, typeFilter, severitiesForApi]);
 
   const listQuery = useGetApiNotificationsGetAll(listParams, {
     query: { placeholderData: (prev) => prev },
+    request: { paramsSerializer: serializeNotificationsGetAllParams },
   });
 
   const countQuery = useGetApiNotificationsUnreadCount();
@@ -101,10 +137,13 @@ export function useNotifications() {
     await refresh();
   }, [mMarkReadAll, refresh]);
 
-  const onPaginationModelChange = useCallback((model: { page: number; pageSize: number }) => {
-    setPage(model.page ?? 0);
-    setPageSize(Math.max(1, model.pageSize ?? DEFAULT_PAGE_SIZE));
-  }, []);
+  const onPaginationModelChange = useCallback(
+    (model: { page: number; pageSize: number }) => {
+      setPage(model.page ?? 0);
+      setPageSize(model.pageSize ?? DEFAULT_PAGE_SIZE);
+    },
+    [setPageSize],
+  );
 
   const markDelivered = useCallback(
     async (notificationId: number) => {
@@ -160,6 +199,14 @@ export function useNotifications() {
         : "Failed to load notifications"
       : null;
 
+  const toggleSeverity = useCallback((index: 0 | 1 | 2 | 3) => {
+    setSeverityEnabled((prev) => {
+      const next = [...prev] as [boolean, boolean, boolean, boolean];
+      next[index] = !next[index];
+      return next;
+    });
+  }, []);
+
   return {
     notifications,
     unreadCount,
@@ -168,6 +215,12 @@ export function useNotifications() {
     page,
     pageSize,
     onPaginationModelChange,
+    readFilter,
+    setReadFilter,
+    typeFilter,
+    setTypeFilter,
+    severityEnabled,
+    toggleSeverity,
     anyLoading,
     refreshing,
     errorMessage,
