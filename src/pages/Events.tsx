@@ -11,6 +11,7 @@ import {
   useGetApiOpenVpnEventsGetByServer,
   getApiOpenVpnEventsGetByServer,
 } from "../api/orval/open-vpn-server-event/open-vpn-server-event";
+import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import type { OpenVpnServerEventLogDto } from "../api/orval/model";
 
 // Resp is already unwrapped by ogmMutator (ApiResponse<T> -> T)
@@ -108,7 +109,11 @@ const Events: React.FC = () => {
 
   // Keep DataGrid model in URL-less state via React state lifted into grid (server pagination)
   const [page, setPage] = React.useState(0);       // DataGrid is 0-based
-  const [pageSize, setPageSize] = React.useState(10);
+  const [pageSize, setPageSize] = usePersistedPageSize(
+    `events:${vpnServerId ?? "0"}`,
+    10,
+    "5,10,20,50",
+  );
 
   const params = useMemo(() => {
     const idNum = Number(vpnServerId || 0);

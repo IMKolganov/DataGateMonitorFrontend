@@ -16,6 +16,7 @@ import type {
   UnreadCountResponse,
 } from "../../api/orval/model";
 import { getCurrentUser } from "../../utils/auth/authSelectors";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -36,7 +37,11 @@ export function useNotifications() {
   const adminUserId = user?.id ?? 0;
 
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [pageSize, setPageSize] = usePersistedPageSize(
+    "notifications",
+    DEFAULT_PAGE_SIZE,
+    "5,10,20,50,100",
+  );
 
   const listParams = useMemo(
     () => ({ Page: page + 1, PageSize: pageSize }),

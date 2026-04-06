@@ -21,6 +21,7 @@ import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { QuotaPlanFormModal } from "./QuotaPlanFormModal";
 import { QuotaPlanAllowedServersModal } from "./QuotaPlanAllowedServersModal";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import "../../css/Settings.css";
 import "../../css/Table.css";
 
@@ -37,6 +38,12 @@ export function QuotaPlansSettings() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<QuotaPlanDto | null>(null);
   const [allowedServersPlan, setAllowedServersPlan] = useState<QuotaPlanDto | null>(null);
+  const [quotaPlansGridPage, setQuotaPlansGridPage] = useState(0);
+  const [quotaPlansPageSize, setQuotaPlansPageSize] = usePersistedPageSize(
+    "quota-plans",
+    10,
+    "5,10,20,50",
+  );
 
   const getAllMutation = usePostApiQuotaPlansGetAll();
   const loadPlansMutate = getAllMutation.mutate;
@@ -307,7 +314,12 @@ export function QuotaPlansSettings() {
               rows={rows}
               columns={columns}
               pageSizeOptions={[5, 10, 20, 50]}
-              initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+              paginationMode="client"
+              paginationModel={{ page: quotaPlansGridPage, pageSize: quotaPlansPageSize }}
+              onPaginationModelChange={(m) => {
+                setQuotaPlansGridPage(m.page);
+                setQuotaPlansPageSize(m.pageSize);
+              }}
               slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
               localeText={{ noRowsLabel: "No quota plans. Click «Add plan» to create one." }}
             />
