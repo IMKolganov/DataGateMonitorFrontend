@@ -12,6 +12,12 @@ export function NotificationsPage() {
     page,
     pageSize,
     onPaginationModelChange,
+    readFilter,
+    setReadFilter,
+    typeFilter,
+    setTypeFilter,
+    severityEnabled,
+    toggleSeverity,
     anyLoading,
     refreshing,
     errorMessage,
@@ -42,6 +48,12 @@ export function NotificationsPage() {
         page={page}
         pageSize={pageSize}
         onPaginationModelChange={onPaginationModelChange}
+        readFilter={readFilter}
+        onReadFilterChange={setReadFilter}
+        typeFilter={typeFilter}
+        onTypeFilterChange={setTypeFilter}
+        severityEnabled={severityEnabled}
+        onToggleSeverity={toggleSeverity}
         anyLoading={anyLoading}
         refreshing={refreshing}
         errorMessage={errorMessage}
