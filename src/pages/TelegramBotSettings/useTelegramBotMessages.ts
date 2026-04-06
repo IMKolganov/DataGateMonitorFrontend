@@ -12,11 +12,16 @@ import type {
     GetApiTgbotIncomingMessageLogsGetAllParams,
 } from "../../api/orval/model";
 import { isCanceledError } from "../../utils/queryCanceled";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 
 export function useTelegramBotMessages() {
     // MUI DataGrid — 0-based
     const [page, setPage] = useState(0);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = usePersistedPageSize(
+        "telegram-bot-incoming-messages",
+        10,
+        "5,10,20,50,100",
+    );
     const [totalCount, setTotalCount] = useState(0);
     const [manualRefreshing, setManualRefreshing] = useState(false);
 
@@ -76,9 +81,9 @@ export function useTelegramBotMessages() {
     const onPaginationModelChange = useCallback(
         (newPage: number, newPageSize: number) => {
             setPage((prevPage) => (prevPage !== newPage ? newPage : prevPage));
-            setPageSize((prevSize) => (prevSize !== newPageSize ? newPageSize : prevSize));
+            setPageSize(newPageSize);
         },
-        [],
+        [setPageSize],
     );
 
     return {

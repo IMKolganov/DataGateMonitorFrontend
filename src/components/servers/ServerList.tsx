@@ -10,6 +10,7 @@ import ServerItem from "./ServerItem";
 import ServiceControls from "../ServiceControls";
 
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
+import { buildServerSwitchPath } from "../../utils/buildServerSwitchPath";
 
 import { deleteApiOpenVpnServersDeleteVpnServerId } from "../../api/orval/open-vpn-servers/open-vpn-servers";
 import { getApiV2OpenVpnServersGetAllWithStatus } from "../../api/orval/open-vpn-servers-v2/open-vpn-servers-v2";
@@ -100,7 +101,8 @@ const ServerList: React.FC = () => {
   const location = useLocation();
   const isMobile = useMediaQuery({ maxWidth: 768 });
 
-  const { serviceData, runServiceNow } = useSignalRService();
+  const { serviceData, runServiceNow, connectionState: hubConnectionState, lastError: hubLastError } =
+      useSignalRService();
 
   const match = location.pathname.match(/\/servers\/(\d+)/);
   const selectedServerId = match ? Number.parseInt(match[1], 10) : null;
@@ -294,9 +296,9 @@ const ServerList: React.FC = () => {
                           key={server.id}
                           className={`server-item clickable ${selectedServerId === server.id ? "selected" : ""}`}
                           onClick={() =>
-                              canAddServer
-                                  ? navigate(`/servers/${server.id}/`)
-                                  : navigate(`/servers/${server.id}/statistics`)
+                              navigate(
+                                  buildServerSwitchPath(server.id, location.pathname, canAddServer),
+                              )
                           }
                       >
                         <ServerItem
@@ -309,7 +311,7 @@ const ServerList: React.FC = () => {
                             wsCountConnectedClients={server.wsCountConnectedClients}
                             wsCountSessions={server.wsCountSessions}
                             onView={(id) => {
-                              const target = canAddServer ? `/servers/${id}/` : `/servers/${id}/statistics`;
+                              const target = buildServerSwitchPath(id, location.pathname, canAddServer);
                               if (isMobile) navigate(target);
                               else navigate(target, { replace: true });
                             }}
@@ -324,7 +326,12 @@ const ServerList: React.FC = () => {
             </ul>
         )}
 
-        <ServiceControls serviceData={normalizedServiceControlsData} onRunNow={runServiceNow} />
+        <ServiceControls
+            serviceData={normalizedServiceControlsData}
+            onRunNow={runServiceNow}
+            hubConnectionState={hubConnectionState}
+            hubLastError={hubLastError}
+        />
       </div>
   );
 };

@@ -1,0 +1,1 @@
+function e(){return`/api`}export{e as t};

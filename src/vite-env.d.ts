@@ -1,4 +1,12 @@
 /// <reference types="vite/client" />
+
+/** Direct API origin for SignalR in dev — see `getStatusStreamHubUrl`. */
+interface ImportMetaEnv {
+  readonly VITE_SIGNALR_ORIGIN?: string;
+  /** Dev: "1" = only Long Polling (if API allows); skip WebSocket first. */
+  readonly VITE_SIGNALR_LONG_POLLING_ONLY?: string;
+}
+
 declare const __APP_VERSION__: string;
 
 /** Optional runtime injection (e.g. GeoLite downloader) */
