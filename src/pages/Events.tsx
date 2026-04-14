@@ -250,8 +250,8 @@ const Events: React.FC = () => {
           </div>
         </section>
 
-        <section className="server-details__panel events-page__about" aria-labelledby="server-events-about-heading">
-          <h2 id="server-events-about-heading" className="settings-page__h2-with-icon">
+        <section className="events-page__about-card" aria-labelledby="server-events-about-heading">
+          <h2 id="server-events-about-heading" className="events-page__about-title">
             <FaInfoCircle className="icon" aria-hidden />
             <span>About Server Events</span>
           </h2>

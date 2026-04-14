@@ -123,10 +123,46 @@
   max-width: min(720px, 92vw);
 }
 
-/* Server Events: about block */
+/* Server Events: about block (same pattern as Web Console “Important Information”) */
+.events-page__about-card {
+  margin-top: 2rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-body);
+  color: var(--text-secondary);
+}
+
+.events-page__about-card .events-page__about-title {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.events-page__about-card .events-page__about-title > .icon {
+  flex-shrink: 0;
+  margin-top: 0.15em;
+  opacity: 0.9;
+}
+
+.events-page__about-card .events-page__about-title > span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .events-page__about-body p,
 .events-page__about-body ul {
   margin: 0 0 0.75rem 0;
+}
+
+.events-page__about-body p:last-child {
+  margin-bottom: 0;
 }
 
 .events-page__about-body ul {
