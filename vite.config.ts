@@ -1,5 +1,5 @@
 // vite.config.ts
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { readFileSync } from "fs";
@@ -7,12 +7,19 @@ import { visualizer } from "rollup-plugin-visualizer";
 
 const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
 
-/** Same target for `/api` proxy and (in dev) direct SignalR URL — avoids broken WS upgrade via Vite. */
-const defaultProxyTarget = process.env.VITE_PROXY_TARGET ?? "https://api.datagateapp.com/";
+function normalizeProxyBase(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) return "http://localhost:5000/";
+  return trimmed.endsWith("/") ? trimmed : `${trimmed}/`;
+}
 
 export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const proxyTarget = normalizeProxyBase(env.VITE_PROXY_TARGET ?? "http://localhost:5000/");
+  const port = Number.parseInt(env.VITE_PORT || "", 10) || 5173;
+
   const isDev = mode === "development";
-  const signalrDevOrigin = new URL(defaultProxyTarget).origin;
+  const signalrDevOrigin = new URL(proxyTarget).origin;
 
   return {
     plugins: [
@@ -28,16 +35,16 @@ export default defineConfig(({ mode }) => {
     ],
 
     server: {
-      port: Number(process.env.VITE_PORT) || 5582,
+      port,
       proxy: {
         "/api/hubs": {
-          target: defaultProxyTarget,
+          target: proxyTarget,
           changeOrigin: true,
           secure: false,
           ws: true,
         },
         "/api": {
-          target: defaultProxyTarget,
+          target: proxyTarget,
           changeOrigin: true,
           secure: false,
           ws: true,
@@ -46,7 +53,7 @@ export default defineConfig(({ mode }) => {
     },
 
     preview: {
-      port: Number(process.env.VITE_PORT) || 5582,
+      port,
     },
 
     define: {
