@@ -365,8 +365,9 @@ export function WebConsole() {
       </div>
 
       <div className="console-info">
-        <h3>
-          <FaInfoCircle className="icon" /> Important Information
+        <h3 className="console-info__title">
+          <FaInfoCircle className="icon" aria-hidden />
+          <span>Important Information</span>
         </h3>
         <p>
           This web console provides access to the <strong>OpenVPN Management Interface</strong>. Be careful when
