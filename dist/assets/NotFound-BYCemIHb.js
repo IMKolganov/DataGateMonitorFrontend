@@ -1,0 +1,1 @@
+import"./chunk-DseTPa7n.js";import{n as e,t}from"./jsx-runtime-B-G0DNmd.js";e();var n=t(),r=()=>(0,n.jsxs)(`div`,{style:{padding:`2rem`,textAlign:`center`},children:[(0,n.jsx)(`h1`,{children:`404 - Page Not Found`}),(0,n.jsx)(`p`,{children:`The page you’re looking for does not exist.`})]});export{r as default};

@@ -58,6 +58,12 @@ export default defineConfig(({ mode }) => {
     build: {
       reportCompressedSize: true,
       chunkSizeWarningLimit: 1200,
+      /** Suppress Rolldown’s PLUGIN_TIMINGS noise (vite:css / visualizer / tailwind are expected). */
+      rolldownOptions: {
+        checks: {
+          pluginTimings: false,
+        },
+      },
       rollupOptions: {
         onwarn(warning, warn) {
           if (warning.message.includes("/*#__PURE__*/")) return;
