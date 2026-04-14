@@ -9,14 +9,14 @@ const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
 
 function normalizeProxyBase(url: string): string {
   const trimmed = url.trim();
-  if (!trimmed) return "http://localhost:5000/";
+  if (!trimmed) return "http://localhost:5581/";
   return trimmed.endsWith("/") ? trimmed : `${trimmed}/`;
 }
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const proxyTarget = normalizeProxyBase(env.VITE_PROXY_TARGET ?? "http://localhost:5000/");
-  const port = Number.parseInt(env.VITE_PORT || "", 10) || 5173;
+  const proxyTarget = normalizeProxyBase(env.VITE_PROXY_TARGET ?? "http://localhost:5581/");
+  const port = Number.parseInt(env.VITE_PORT || "", 10) || 5582;
 
   const isDev = mode === "development";
   const signalrDevOrigin = new URL(proxyTarget).origin;
