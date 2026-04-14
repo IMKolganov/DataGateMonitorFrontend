@@ -1,5 +1,6 @@
 // src/components/CertificatesData.tsx
 import React, { useEffect, useMemo, useState } from "react";
+import { FaCertificate, FaFileArchive, FaFilter, FaPlus } from "react-icons/fa";
 import CertificatesTable from "./CertificatesTable.tsx";
 import OvpnFilesTable, { type OvpnRowInput } from "../ovpn-files/OvpnFilesTable.tsx";
 import AddOvpnFile from "../ovpn-files/AddOvpnFile.tsx";
@@ -21,6 +22,8 @@ import type {
 } from "../../api/orval/model";
 import axios from "axios";
 import { errorMessage as baseErrorMessage } from "../../utils/errorMessage";
+import "../../css/Settings.css";
+import "../../css/ServerDetails.css";
 
 interface Props {
   vpnServerId: string;
@@ -193,78 +196,110 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
   };
 
   return (
-    <>
-      <h3>Issued OVPN Files</h3>
-      <h5>Make New OVPN File for Client</h5>
-      <p className="certificate-description">
-        Enter the <strong>Common Name (CN)</strong> and an <strong>External ID</strong> to generate a new OVPN file.
-      </p>
+    <div className="certificates-page__content">
+      <section
+        className="certificates-page__section server-details__panel"
+        aria-labelledby="certificates-ovpn-heading"
+      >
+        <h3 id="certificates-ovpn-heading" className="settings-card__h3-with-icon">
+          <FaFileArchive className="icon" aria-hidden />
+          <span>Issued OVPN Files</span>
+        </h3>
 
-      <AddOvpnFile
-        vpnServerId={vpnServerId}
-        onSuccess={async () => {
-          toast.success("OVPN file created");
-          await refetchFiles();
-        }}
-      />
+        <div className="certificates-page__add-block">
+          <h4 className="certificates-page__subtitle certificates-page__add-block-title">
+            <FaPlus className="icon" aria-hidden />
+            Make New OVPN File for Client
+          </h4>
+          <p className="certificate-description certificates-page__add-block-desc">
+            Enter the <strong>Common Name (CN)</strong> and an <strong>External ID</strong> to generate a new OVPN file.
+          </p>
 
-      <OvpnFilesTable
-        ovpnFiles={ovpnFiles}
-        vpnServerId={vpnServerId}
-        loading={filesQuery.isFetching}
-        onRevoke={async () => {
-          toast.success("OVPN file revoked", { toastId: "ovpn-revoked" });
-          await silentRefetchFiles();
-        }}
-      />
+          <AddOvpnFile
+            vpnServerId={vpnServerId}
+            onSuccess={async () => {
+              toast.success("OVPN file created");
+              await refetchFiles();
+            }}
+          />
+        </div>
 
-      <h3>Certificates</h3>
-      <h5>Filter by Certificate Status</h5>
-      <div className="settings-item">
-        <select
-          className="input"
-          value={selectedStatus ?? ""}
-          onChange={(e) =>
-            setSelectedStatus(
-              e.target.value === ""
-                ? null
-                : (Number(e.target.value) as CertificateStatus),
-            )
-          }
-        >
-          <option value="">All</option>
-          {Object.entries(statusLabels).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
+        <OvpnFilesTable
+          ovpnFiles={ovpnFiles}
+          vpnServerId={vpnServerId}
+          loading={filesQuery.isFetching}
+          onRevoke={async () => {
+            toast.success("OVPN file revoked", { toastId: "ovpn-revoked" });
+            await silentRefetchFiles();
+          }}
+        />
+      </section>
 
-      <h5>Add New Certificate</h5>
-      <p className="certificate-description">
-        Enter the <strong>Common Name (CN)</strong> for the new certificate and click "Add Certificate".
-      </p>
+      <section
+        className="certificates-page__section server-details__panel"
+        aria-labelledby="certificates-list-heading"
+      >
+        <h3 id="certificates-list-heading" className="settings-card__h3-with-icon">
+          <FaCertificate className="icon" aria-hidden />
+          <span>Certificates</span>
+        </h3>
 
-      <AddCertificate
-        vpnServerId={vpnServerId}
-        onSuccess={async () => {
-          toast.success("Certificate added");
-          await refetchCerts();
-        }}
-      />
+        <div className="certificates-page__add-block">
+          <h4 className="certificates-page__subtitle certificates-page__add-block-title">
+            <FaPlus className="icon" aria-hidden />
+            Add New Certificate
+          </h4>
+          <p className="certificate-description certificates-page__add-block-desc">
+            Enter the <strong>Common Name (CN)</strong> for the new certificate and click &quot;Add Certificate&quot;.
+          </p>
 
-      <CertificatesTable
-        certificates={certificates}
-        vpnServerId={vpnServerId}
-        loading={certsQuery.isFetching}
-        onRevoke={async () => {
-          // single success toast on revoke + silent refetch (no duplicate toasts)
-          toast.success("Certificate revoked", { toastId: "cert-revoked" });
-          await silentRefetchCerts();
-        }}
-      />
-    </>
+          <AddCertificate
+            vpnServerId={vpnServerId}
+            onSuccess={async () => {
+              toast.success("Certificate added");
+              await refetchCerts();
+            }}
+          />
+        </div>
+
+        <div className="certificates-page__list-toolbar" aria-label="Certificate list filters">
+          <h4 className="certificates-page__subtitle">
+            <FaFilter className="icon" aria-hidden />
+            Filter by Certificate Status
+          </h4>
+          <div className="settings-item">
+            <select
+              className="input"
+              value={selectedStatus ?? ""}
+              onChange={(e) =>
+                setSelectedStatus(
+                  e.target.value === ""
+                    ? null
+                    : (Number(e.target.value) as CertificateStatus),
+                )
+              }
+            >
+              <option value="">All</option>
+              {Object.entries(statusLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <CertificatesTable
+          certificates={certificates}
+          vpnServerId={vpnServerId}
+          loading={certsQuery.isFetching}
+          onRevoke={async () => {
+            toast.success("Certificate revoked", { toastId: "cert-revoked" });
+            await silentRefetchCerts();
+          }}
+        />
+      </section>
+    </div>
   );
 };
 

@@ -1,5 +1,6 @@
 // src/components/DateRangeFilter.tsx
 import React, { useMemo } from "react";
+import { FaCheck, FaUndo } from "react-icons/fa";
 
 export type Grouping = "auto" | "hours" | "days" | "months" | "years";
 
@@ -194,9 +195,11 @@ export default function DateRangeFilter({ from, to, grouping, onChange }: Props)
 
         <div style={{ display: "flex", gap: 8 }}>
           <OutlineBtn onClick={() => onChange({ from: defaultFrom(), to: defaultTo(), grouping: "auto" })}>
-            Reset
+            <FaUndo className="icon" aria-hidden /> Reset
           </OutlineBtn>
-          <PrimaryBtn onClick={() => onChange({ from, to, grouping })}>Apply</PrimaryBtn>
+          <PrimaryBtn onClick={() => onChange({ from, to, grouping })}>
+            <FaCheck className="icon" aria-hidden /> Apply
+          </PrimaryBtn>
         </div>
       </div>
     </div>
