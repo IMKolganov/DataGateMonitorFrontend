@@ -1,3 +1,4 @@
+import { FaBell } from "react-icons/fa";
 import { useNotifications } from "./useNotifications";
 import { NotificationsSection } from "./NotificationsSection";
 import { isAdmin } from "../../utils/auth/authSelectors";
@@ -36,7 +37,10 @@ export function NotificationsPage() {
 
   return (
     <div className="content-wrapper wide-table settings">
-      <h2>Notifications</h2>
+      <h2 className="settings-page__h2-with-icon">
+        <FaBell className="icon" aria-hidden />
+        <span>Notifications</span>
+      </h2>
       <div style={{ borderTop: "1px solid #d1d5da" }} />
       <p className="app-settings-description">
         Notifications for the current user. Mark as read when done.

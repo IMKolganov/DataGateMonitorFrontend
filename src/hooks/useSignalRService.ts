@@ -3,7 +3,6 @@ import { ACCESS_TOKEN_REFRESHED_EVENT } from "../utils/auth/accessTokenEvents.ts
 import {
     HubConnection,
     HubConnectionBuilder,
-    HttpTransportType,
     LogLevel,
 } from "@microsoft/signalr";
 import { postApiOpenVpnServersRunNow } from "../api/orval/open-vpn-servers/open-vpn-servers";
@@ -12,6 +11,7 @@ import { ServiceStatus as ServiceStatusEnum } from "../api/orval/model";
 import {ACCESS_TOKEN_KEY} from "../utils/const.ts";
 import { errorMessage } from "../utils/errorMessage.ts";
 import { getStatusStreamHubUrl } from "../utils/signalrHubUrl.ts";
+import { getSignalRPreferredTransport } from "../utils/signalrTransport.ts";
 
 const MIN_ISO = /^0001-01-01T00:00:00/i;
 
@@ -101,29 +101,27 @@ export default function useSignalRService() {
                 }
 
                 const hubUrl = getStatusStreamHubUrl();
-                const lpOnly =
-                    import.meta.env.DEV &&
+                const primaryTransport = getSignalRPreferredTransport();
+                const forceLp =
                     String(import.meta.env.VITE_SIGNALR_LONG_POLLING_ONLY ?? "").trim() === "1";
-
-                /**
-                 * One HubConnection only. Do not retry with LongPolling-only: if the API hub allows WebSockets only,
-                 * that retry produces a misleading "'WebSockets' is disabled by the client" error.
-                 * SignalR already falls through transports inside start() when negotiate lists more than one.
-                 */
-                const transport: HttpTransportType = import.meta.env.PROD
-                    ? HttpTransportType.WebSockets
-                    : lpOnly
-                      ? HttpTransportType.LongPolling
-                      : HttpTransportType.WebSockets | HttpTransportType.LongPolling;
+                const preferLp =
+                    String(import.meta.env.VITE_SIGNALR_PREFER_LONG_POLLING ?? "").trim() === "1";
+                const skipWebSockets =
+                    String(import.meta.env.VITE_SIGNALR_SKIP_WEBSOCKETS ?? "").trim() === "1";
 
                 if (import.meta.env.DEV) {
-                    console.info("[SignalR status-stream] connecting to", hubUrl, { transport });
+                    console.info("[SignalR status-stream] connecting to", hubUrl, {
+                        primaryTransport,
+                        forceLp,
+                        preferLp,
+                        skipWebSockets,
+                    });
                 }
 
                 const conn = new HubConnectionBuilder()
                     .withUrl(hubUrl, {
                         accessTokenFactory: () => localStorage.getItem(ACCESS_TOKEN_KEY) ?? "",
-                        transport,
+                        transport: primaryTransport,
                     })
                     .withAutomaticReconnect([0, 2000, 5000, 10000])
                     .configureLogging(import.meta.env.DEV ? LogLevel.None : LogLevel.Information)
@@ -181,9 +179,10 @@ export default function useSignalRService() {
                 setConnectionState("error");
                 const msg = e ? errorMessage(e) : "Unknown error";
                 setLastError(msg);
-                if (import.meta.env.DEV) {
-                    console.warn("[SignalR status-stream] connect failed — see Service Control hint or API LB sticky for /api/hubs.");
-                }
+                console.warn(
+                    "[SignalR status-stream] connect failed — hub / negotiate / sticky sessions / scale-out backplane on API; optional .env: VITE_SIGNALR_SKIP_WEBSOCKETS=1, VITE_SIGNALR_PREFER_LONG_POLLING=1",
+                    e,
+                );
             }
         };
 

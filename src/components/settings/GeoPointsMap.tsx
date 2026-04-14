@@ -14,6 +14,12 @@ import type {
     GetApiOpenVpnClientsOverviewPointsParams,
 } from "../../api/orval/model";
 
+export type VpnServerMapMarker = {
+    id?: number;
+    name: string;
+    position: [number, number];
+};
+
 type GeoPointsMapProps = {
     from: Date | string;
     to: Date | string;
@@ -22,13 +28,24 @@ type GeoPointsMapProps = {
     onlyWithCoordinates?: boolean;
     center?: [number, number];
     zoom?: number;
-    serverLocation?: [number, number] | null;
+    /** VPN server location markers (from server list / API), not client geo points. */
+    vpnServerMarkers?: VpnServerMapMarker[];
 };
 
 const MARKER_BASE =
     "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x";
 
-const pointColorKeys = ["grey", "blue", "green", "orange", "red", "violet", "yellow", "black"] as const;
+const pointColorKeys = [
+    "grey",
+    "blue",
+    "green",
+    "orange",
+    "red",
+    "yellow",
+    "gold",
+    "violet",
+    "black",
+] as const;
 type PointColorKey = (typeof pointColorKeys)[number];
 
 const createPointIcon = (color: PointColorKey): L.Icon =>
@@ -39,7 +56,13 @@ const createPointIcon = (color: PointColorKey): L.Icon =>
         popupAnchor: [1, -34],
     });
 
-const serverIcon = createPointIcon("blue");
+/** VPN server locations — violet pin (not used for client traffic tiers). */
+const serverIcon = L.icon({
+    iconUrl: `${MARKER_BASE}-violet.png`,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+});
 
 const ICONS: Record<string, L.Icon> = Object.fromEntries(
     pointColorKeys.map((c) => [c, createPointIcon(c)])
@@ -138,8 +161,8 @@ function colorKeyForTraffic(totalBytes: number): PointColorKey {
     if (totalBytes <= FIFTY_MB) return "green";
     if (totalBytes <= ONE_GB) return "orange";
     if (totalBytes <= TEN_GB) return "red";
-    if (totalBytes <= HUNDRED_GB) return "violet";
-    if (totalBytes <= FIVE_HUNDRED_GB) return "yellow";
+    if (totalBytes <= HUNDRED_GB) return "yellow";
+    if (totalBytes <= FIVE_HUNDRED_GB) return "gold";
     return "black";
 }
 
@@ -209,7 +232,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                                                               onlyWithCoordinates = true,
                                                               center = [45, 37],
                                                               zoom = 4,
-                                                              serverLocation = null,
+                                                              vpnServerMarkers = [],
                                                           }) => {
     const [selectedLayer, setSelectedLayer] = useState<keyof typeof tileLayers>(
         (Cookies.get("selectedMapLayer") as keyof typeof tileLayers) || "Carto Dark"
@@ -287,14 +310,14 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
 
     const bounds = useMemo(() => {
         const latlngs: [number, number][] = [];
-        if (serverLocation) latlngs.push(serverLocation);
+        vpnServerMarkers.forEach((m) => latlngs.push(m.position));
         filteredPoints.forEach((p) => {
             if (p.latitude != null && p.longitude != null) {
                 latlngs.push([p.latitude, p.longitude]);
             }
         });
         return latlngs.length ? L.latLngBounds(latlngs) : null;
-    }, [filteredPoints, serverLocation]);
+    }, [filteredPoints, vpnServerMarkers]);
 
     return (
         <div style={{ height: "650px", width: "100%", marginTop: 20 }}>
@@ -362,15 +385,19 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                     attribution={tileLayers[selectedLayer].attribution}
                 />
 
-                {serverLocation && (
-                    <Marker position={serverLocation} icon={serverIcon}>
+                {vpnServerMarkers.map((m, idx) => (
+                    <Marker
+                        key={m.id != null ? `vpn-server-${m.id}` : `vpn-server-${idx}`}
+                        position={m.position}
+                        icon={serverIcon}
+                    >
                         <Popup>
-                            <strong>VPN Server</strong>
+                            <strong>{m.name}</strong>
                             <br />
-                            🌎 {serverLocation[0]}, {serverLocation[1]}
+                            🌎 {m.position[0]}, {m.position[1]}
                         </Popup>
                     </Marker>
-                )}
+                ))}
 
                 {filteredPoints.map((p, i) => {
                     const total = (p.totalBytesIn ?? 0) + (p.totalBytesOut ?? 0);
@@ -414,15 +441,27 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                     display: "flex",
                     gap: 12,
                     flexWrap: "wrap",
+                    alignItems: "center",
                 }}
             >
+                {vpnServerMarkers.length > 0 && (
+                    <>
+                        <LegendItem
+                            colorUrl={serverIcon.options.iconUrl as string}
+                            label="VPN server (location)"
+                        />
+                        <span style={{ opacity: 0.45, userSelect: "none" }} aria-hidden="true">
+                            |
+                        </span>
+                    </>
+                )}
                 <LegendItem colorUrl={ICONS.grey.options.iconUrl as string} label="0 B" />
                 <LegendItem colorUrl={ICONS.blue.options.iconUrl as string} label="≤ 1 MB" />
                 <LegendItem colorUrl={ICONS.green.options.iconUrl as string} label="≤ 50 MB" />
                 <LegendItem colorUrl={ICONS.orange.options.iconUrl as string} label="≤ 1 GB" />
                 <LegendItem colorUrl={ICONS.red.options.iconUrl as string} label="≤ 10 GB" />
-                <LegendItem colorUrl={ICONS.violet.options.iconUrl as string} label="≤ 100 GB" />
-                <LegendItem colorUrl={ICONS.yellow.options.iconUrl as string} label="≤ 500 GB" />
+                <LegendItem colorUrl={ICONS.yellow.options.iconUrl as string} label="≤ 100 GB" />
+                <LegendItem colorUrl={ICONS.gold.options.iconUrl as string} label="≤ 500 GB" />
                 <LegendItem colorUrl={ICONS.black.options.iconUrl as string} label="≤ 1 TB" />
                 <LegendItem colorUrl={ICONS.black.options.iconUrl as string} label="> 1 TB" />
             </div>
@@ -433,7 +472,21 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
 const FitBounds: React.FC<{ bounds: L.LatLngBounds }> = ({ bounds }) => {
     const map = useMap();
     useEffect(() => {
-        map.fitBounds(bounds, { padding: [40, 40] });
+        let alive = true;
+        const id = window.setTimeout(() => {
+            if (!alive) return;
+            try {
+                const el = map.getContainer();
+                if (!el?.isConnected) return;
+                map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+            } catch {
+                /* map unmounting mid-zoom — avoids Leaflet _leaflet_pos on torn panes */
+            }
+        }, 0);
+        return () => {
+            alive = false;
+            clearTimeout(id);
+        };
     }, [map, bounds]);
     return null;
 };

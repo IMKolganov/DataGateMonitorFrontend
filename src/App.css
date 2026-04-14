@@ -23,17 +23,17 @@ body {
   overflow: hidden;
 }
 
-/* Fills space between header and footer; inner routes scroll or flex as needed. */
+/* Fills space between header and footer; inner routes scroll or flex as needed.
+   No scrollbar-gutter: stable — it reserves a permanent strip for the scrollbar and reads as extra right padding. */
 .main-content {
   flex: 1 1 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 2px;
+  padding: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  scrollbar-gutter: stable;
 }
 
 .content-wrapper {

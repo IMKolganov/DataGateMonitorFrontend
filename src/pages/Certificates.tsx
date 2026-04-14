@@ -1,8 +1,10 @@
 // src/pages/Certificates.tsx
 import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
+import { FaKey } from "react-icons/fa";
 import CertificatesData from "../components/certs/CertificatesData.tsx";
 import "../css/Certificates.css";
+import "../css/Settings.css";
 
 // Import generated model type
 import type { OpenVpnServerResponse } from "../api/orval/model";
@@ -39,13 +41,15 @@ const Certificates: React.FC = () => {
   const serverName = apiPayload?.openVpnServer?.serverName ?? "(unknown)";
 
   return (
-    <div>
-      <h2>
-        VPN Certificates &amp; OVPN Files for Server{" "}
-        {serverQuery.isLoading ? "…" : serverName || vpnServerId}
+    <div className="certificates-page">
+      <h2 className="certificates-page__title settings-page__h2-with-icon">
+        <FaKey className="icon" aria-hidden />
+        <span>
+          VPN Certificates &amp; OVPN Files for Server{" "}
+          {serverQuery.isLoading ? "…" : serverName || vpnServerId}
+        </span>
       </h2>
 
-      <div className="header-container" />
       <CertificatesData vpnServerId={vpnServerId || ""} />
     </div>
   );

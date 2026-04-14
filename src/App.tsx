@@ -1,6 +1,6 @@
 // comments in English only
 import type { ReactNode } from "react";
-import React, { lazy } from "react";
+import React, { lazy, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { Header } from "./components/ui/Header.tsx";
@@ -13,7 +13,7 @@ import LoginPage from "./components/auth/LoginPage";
 import RegisterPage from "./components/auth/RegisterPage";
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./components/auth/ResetPasswordPage";
-import {ACCESS_TOKEN_KEY} from "./utils/const.ts";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./utils/const.ts";
 import { withSuspense } from "./utils/withSuspense.tsx";
 
 // Lazy pages
@@ -33,6 +33,7 @@ const GeneralSettings = lazy(() => import("./pages/GeneralSettings"));
 const GeoLiteDbSettings = lazy(() => import("./pages/GeoLiteDbSettings"));
 const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
 const UsersSettings = lazy(() => import("./pages/UsersSettings/UsersSettings"));
+const UserQuotasPage = lazy(() => import("./pages/UsersSettings/UserQuotasPage"));
 const UserDetailPage = lazy(() => import("./pages/UsersSettings/UserDetailPage"));
 const QuotaPlansSettings = lazy(() => import("./pages/QuotaPlansSettings/QuotaPlansSettings"));
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
@@ -66,6 +67,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 function App() {
+  // Restore JWT expiry timer after full page load so idle refresh runs even if the tab was closed overnight.
+  // If the access JWT is already expired, scheduleAutoLogout triggers refresh immediately (same as after 401).
+  useEffect(() => {
+    const access = localStorage.getItem(ACCESS_TOKEN_KEY);
+    const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
+    if (!access || !refresh) return;
+    void import("./utils/auth/authSession").then(({ scheduleAutoLogout }) => {
+      scheduleAutoLogout(access);
+    });
+  }, []);
+
   return (
     <div className="app-container">
       <Router>
@@ -110,6 +122,7 @@ function App() {
                       <Route path="quotas" element={withSuspense(<QuotaPlansSettings />)} />
                       <Route path="geolitedb" element={withSuspense(<GeoLiteDbSettings />)} />
                       <Route path="telegrambot" element={withSuspense(<TelegramBotSettings />)} />
+                      <Route path="users/quotas" element={withSuspense(<UserQuotasPage />)} />
                       <Route path="users" element={withSuspense(<UsersSettings />)} />
                       <Route path="users/:userId" element={withSuspense(<UserDetailPage />)} />
                     </Route>
