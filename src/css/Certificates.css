@@ -5,6 +5,81 @@
     text-align: center;
   }
 
+  .certificates-page {
+    padding: 0 0 2rem 0;
+  }
+
+  .certificates-page__title {
+    margin-bottom: 1rem;
+  }
+
+  .certificates-page__add-block {
+    margin: 0 0 1.5rem 0;
+    padding: 1rem 1.25rem 1.25rem;
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+  }
+
+  .certificates-page__add-block-title {
+    margin-top: 0;
+  }
+
+  .certificates-page__add-block-desc {
+    margin-top: 0.35rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Filter applies to the table below — keep it next to the list, not above “add”. */
+  .certificates-page__list-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .certificates-page__list-toolbar .certificates-page__subtitle {
+    margin: 0;
+  }
+
+  .certificates-page__list-toolbar .settings-item {
+    margin-top: 0;
+  }
+
+  .certificates-page__section {
+    margin-top: 2rem;
+  }
+
+  .certificates-page__section:first-of-type {
+    margin-top: 0;
+  }
+
+  .certificates-page__subtitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0.75rem 0 0.5rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .certificates-page__subtitle > .icon {
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+
+  .certificates-page .server-details__panel:first-of-type {
+    margin-top: 0;
+  }
+
+  .certificates-page .certificates-page__section h3.settings-card__h3-with-icon {
+    margin: 0 0 12px 0;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+  }
+
   .certificate-description {
     font-size: 14px;
     color: #b0b0b0;

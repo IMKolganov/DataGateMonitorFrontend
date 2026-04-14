@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import type { GetVersionDatabaseResponse } from "../api/orval/model";
 import { getApiBaseUrl } from "../config/apiBase";
 import { errorMessage } from "../utils/errorMessage";
+import { getSignalRPreferredTransport } from "../utils/signalrTransport.ts";
 import { ACCESS_TOKEN_KEY } from "../utils/const.ts";
 
 import {
@@ -26,7 +27,7 @@ function buildGeoLiteHubConnection(): signalR.HubConnection {
   return new signalR.HubConnectionBuilder()
     .withUrl(hubUrl, {
       accessTokenFactory: () => localStorage.getItem(ACCESS_TOKEN_KEY) ?? "",
-      transport: signalR.HttpTransportType.WebSockets,
+      transport: getSignalRPreferredTransport(),
     })
     .withAutomaticReconnect()
     .build();

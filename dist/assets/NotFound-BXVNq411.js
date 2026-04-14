@@ -1,1 +1,0 @@
-import"./rolldown-runtime-B1FJdls4.js";import{c as e}from"./leaflet-DmdcKRzt.js";import{f as t}from"./mui-BplYFbnc.js";e();var n=t(),r=()=>(0,n.jsxs)(`div`,{style:{padding:`2rem`,textAlign:`center`},children:[(0,n.jsx)(`h1`,{children:`404 - Page Not Found`}),(0,n.jsx)(`p`,{children:`The page you’re looking for does not exist.`})]});export{r as default};

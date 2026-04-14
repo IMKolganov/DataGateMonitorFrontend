@@ -232,3 +232,14 @@
 .server-tags-block .server-tags-list {
   margin-left: 0;
 }
+
+/* Title + DataGrid / map: breathing room after server info card */
+.server-details__panel {
+  margin-top: 2rem;
+}
+
+.server-details__panel > h3.settings-card__h3-with-icon {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: var(--text-primary);
+}

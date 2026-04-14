@@ -2,7 +2,8 @@
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useParams } from "react-router-dom";
 import "../css/ServerDetails.css";
-import { FaSync } from "react-icons/fa";
+import "../css/Settings.css";
+import { FaMapMarkerAlt, FaSync, FaUsers } from "react-icons/fa";
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
 import ServerDetailsInfoDefault from "../components/servers/ServerDetailsInfo.tsx";
@@ -325,23 +326,35 @@ export function GeneralServerDetails() {
                 quotaPlanLabels={quotaPlanLabels}
             />
 
-            <h3>
-                VPN Clients ({isLive ? "Connected" : "Historical"})
-                {loadingClients && <span style={{ fontSize: 12, opacity: 0.7 }}> loading…</span>}
-            </h3>
+            <section className="server-details__panel" aria-labelledby="server-vpn-clients-heading">
+                <h3 id="server-vpn-clients-heading" className="settings-card__h3-with-icon">
+                    <FaUsers className="icon" aria-hidden />
+                    <span>
+                        VPN Clients ({isLive ? "Connected" : "Historical"})
+                        {loadingClients && (
+                            <span style={{ fontSize: 12, opacity: 0.7 }}> loading…</span>
+                        )}
+                    </span>
+                </h3>
 
-            <ClientsTable
-                clients={clients}
-                totalClients={totalClients}
-                page={page}
-                pageSize={pageSize}
-                onPageChange={setPage}
-                onPageSizeChange={setPageSize}
-                loading={loadingClients}
-            />
+                <ClientsTable
+                    clients={clients}
+                    totalClients={totalClients}
+                    page={page}
+                    pageSize={pageSize}
+                    onPageChange={setPage}
+                    onPageSizeChange={setPageSize}
+                    loading={loadingClients}
+                />
+            </section>
 
-            <h3>VPN Client Locations</h3>
-            <VpnMap clients={clients} serverLocation={serverLocation} serverName={serverName} />
+            <section className="server-details__panel" aria-labelledby="server-vpn-locations-heading">
+                <h3 id="server-vpn-locations-heading" className="settings-card__h3-with-icon">
+                    <FaMapMarkerAlt className="icon" aria-hidden />
+                    <span>VPN Client Locations</span>
+                </h3>
+                <VpnMap clients={clients} serverLocation={serverLocation} serverName={serverName} />
+            </section>
         </div>
     );
 }

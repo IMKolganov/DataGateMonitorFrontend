@@ -3,7 +3,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../css/ServerForm.css";
 import "../css/OvpnFileConfigForm.css";
-import { FaPlus, FaCopy, FaArrowLeft, FaSync } from "react-icons/fa";
+import "../css/Settings.css";
+import { FaPlus, FaCopy, FaArrowLeft, FaSync, FaHistory } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -85,7 +86,7 @@ const OvpnFileConfigForm: React.FC = () => {
   const [conflogPageSize, setConflogPageSize] = usePersistedPageSize(
     parsedVpnServerId > 0 ? `ovpn-conflog:${parsedVpnServerId}` : "ovpn-conflog:0",
     DEFAULT_CONFLOG_PAGE_SIZE,
-    "5,10,20,50",
+    "5,10,20,50,100",
   );
 
   // local UI state (kept in PascalCase to match form field names)
@@ -489,7 +490,10 @@ const OvpnFileConfigForm: React.FC = () => {
 
           {parsedVpnServerId > 0 && (
             <div className="conflog-history-section">
-              <h3 className="ovpn-config-section-title">Conflog history</h3>
+              <h3 className="ovpn-config-section-title settings-card__h3-with-icon">
+                <FaHistory className="icon" aria-hidden />
+                <span>Conflog history</span>
+              </h3>
               <p className="form-hint">
                 History of fetched configuration logs for this server. Use &quot;Fetch and save&quot; to load the latest conflog from the server API.
               </p>
@@ -561,7 +565,7 @@ const OvpnFileConfigForm: React.FC = () => {
                   <StyledDataGrid
                     rows={conflogRows}
                     columns={conflogColumns}
-                    pageSizeOptions={[5, 10, 20, 50]}
+                    pageSizeOptions={[5, 10, 20, 50, 100]}
                     paginationMode="server"
                     rowCount={conflogTotalCount}
                     paginationModel={{
