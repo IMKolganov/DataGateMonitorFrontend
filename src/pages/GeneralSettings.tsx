@@ -1,6 +1,6 @@
 // src/pages/GeneralSettings.tsx
 import { useEffect, useMemo, useState } from "react";
-import { FaSave } from "react-icons/fa";
+import { FaSave, FaSlidersH } from "react-icons/fa";
 import "../css/Settings.css";
 
 // orval-generated hooks & types
@@ -163,7 +163,10 @@ export function GeneralSettings() {
       )}
 
       <div className="settings-polling">
-        <h2>OpenVPN Polling Interval</h2>
+        <h2 className="settings-page__h2-with-icon">
+          <FaSlidersH className="icon" aria-hidden />
+          <span>OpenVPN Polling Interval</span>
+        </h2>
         <div style={{ borderTop: "1px solid #d1d5da" }}></div>
 
         <div className="settings-item">
@@ -189,7 +192,7 @@ export function GeneralSettings() {
             onClick={handleSave}
             disabled={loading || setSettingMutation.isPending}
           >
-            <span className="icon">{FaSave({ className: "icon" })}</span> Save
+            <FaSave className="icon" aria-hidden /> Save
           </button>
         </div>
 

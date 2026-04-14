@@ -17,6 +17,9 @@ const tooltipFormatter = ((value, name) => {
   return [value, name ?? ""];
 }) as NonNullable<TooltipProps["formatter"]>;
 
+/** Fixed px height avoids Recharts measuring 0×0 when % height resolves badly in flex/hidden layouts. */
+const CHART_PX = 280;
+
 export default function OverviewChart({
   data, loading, error,
 }: {
@@ -30,7 +33,19 @@ export default function OverviewChart({
   const statusSuffix = loading ? " — loading..." : error ? " — failed" : "";
 
   return (
-    <div className="overview-chart-wrap" style={{ border: "1px solid var(--border-color)", borderRadius: 12, background: "var(--bg-body)", padding: 12, height: 360, marginBottom: 12 }}>
+    <div
+      className="overview-chart-wrap"
+      style={{
+        border: "1px solid var(--border-color)",
+        borderRadius: 12,
+        background: "var(--bg-body)",
+        padding: 12,
+        marginBottom: 12,
+        display: "flex",
+        flexDirection: "column",
+        minWidth: 0,
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -39,6 +54,7 @@ export default function OverviewChart({
           justifyContent: "space-between",
           gap: 10,
           marginBottom: 8,
+          flexShrink: 0,
         }}
       >
         <div>
@@ -74,7 +90,15 @@ export default function OverviewChart({
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height="100%">
+      <div
+        style={{
+          width: "100%",
+          height: CHART_PX,
+          minWidth: 0,
+          minHeight: CHART_PX,
+        }}
+      >
+        <ResponsiveContainer width="100%" height={CHART_PX}>
         <AreaChart data={data} margin={{ top: 10, right: mode === "combined" || mode === "traffic" ? 20 : 12, left: 0, bottom: 28 }}>
           <defs>
             <linearGradient id="fillActive" x1="0" y1="0" x2="0" y2="1">
@@ -129,7 +153,8 @@ export default function OverviewChart({
             <Area yAxisId="right" type="monotone" dataKey="mb" name="Traffic, MB" stroke="#3fb950" fill="url(#fillMb)" strokeWidth={2} dot={false} />
           )}
         </AreaChart>
-      </ResponsiveContainer>
+        </ResponsiveContainer>
+      </div>
 
       {!!error && (
         <div style={{ marginTop: 8, color: "#f85149", fontSize: 12 }}>

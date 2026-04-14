@@ -1,7 +1,16 @@
 // src/pages/ServerDetails.tsx
 import { useNavigate, NavLink, Outlet, useParams, useLocation } from "react-router-dom";
 import { useMemo } from "react";
-import { FaArrowLeft } from "react-icons/fa";
+import type { IconType } from "react-icons";
+import {
+  FaArrowLeft,
+  FaBolt,
+  FaChartLine,
+  FaCogs,
+  FaKey,
+  FaServer,
+  FaTerminal,
+} from "react-icons/fa";
 import "../css/ServerDetails.css";
 
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/open-vpn-servers/open-vpn-servers";
@@ -12,15 +21,30 @@ type Tab = {
     label: string;
     path: string;
     adminOnly?: boolean;
+    Icon: IconType;
+    /** Prefix for the mobile dropdown (emoji; native options cannot show SVG). */
+    mobilePrefix: string;
 };
 
 const ALL_SERVER_TABS: Tab[] = [
-    { label: "General", path: "", adminOnly: true },
-    { label: "Manage Certificates", path: "certificates", adminOnly: true },
-    { label: "Web console", path: "console", adminOnly: true },
-    { label: "Configurations", path: "ovpn-file-config", adminOnly: true },
-    { label: "Statistics", path: "statistics" },
-    { label: "Events", path: "events" },
+    { label: "General", path: "", adminOnly: true, Icon: FaServer, mobilePrefix: "🖥️" },
+    {
+        label: "Manage Certificates",
+        path: "certificates",
+        adminOnly: true,
+        Icon: FaKey,
+        mobilePrefix: "🔐",
+    },
+    { label: "Web console", path: "console", adminOnly: true, Icon: FaTerminal, mobilePrefix: "⌨️" },
+    {
+        label: "Configurations",
+        path: "ovpn-file-config",
+        adminOnly: true,
+        Icon: FaCogs,
+        mobilePrefix: "⚙️",
+    },
+    { label: "Statistics", path: "statistics", Icon: FaChartLine, mobilePrefix: "📈" },
+    { label: "Events", path: "events", Icon: FaBolt, mobilePrefix: "⚡" },
 ];
 
 export function ServerDetails() {
@@ -71,23 +95,29 @@ export function ServerDetails() {
                 <div className="header-bar">
                     <div className="left-buttons">
                         <button className="btn secondary" onClick={() => navigate("/")}>
-                            {FaArrowLeft({ className: "icon" })} Back
+                            <FaArrowLeft className="icon" aria-hidden /> Back
                         </button>
                     </div>
                 </div>
             </div>
 
             <div className="tabs desktop-tabs">
-                {tabs.map((tab) => (
-                    <NavLink
-                        key={tab.path}
-                        to={`/servers/${vpnServerId}/${tab.path}`}
-                        end={tab.path === ""}
-                        className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
-                    >
-                        {tab.label}
-                    </NavLink>
-                ))}
+                {tabs.map((tab) => {
+                    const Icon = tab.Icon;
+                    return (
+                        <NavLink
+                            key={tab.path || "general"}
+                            to={`/servers/${vpnServerId}/${tab.path}`}
+                            end={tab.path === ""}
+                            className={({ isActive }) =>
+                                [isActive ? "tab active-tab" : "tab", "tab--with-icon"].join(" ")
+                            }
+                        >
+                            <Icon className="icon" aria-hidden />
+                            <span>{tab.label}</span>
+                        </NavLink>
+                    );
+                })}
             </div>
 
             <select
@@ -96,8 +126,8 @@ export function ServerDetails() {
                 onChange={(e) => navigate(`/servers/${vpnServerId}/${e.target.value}`)}
             >
                 {tabs.map((tab) => (
-                    <option key={tab.path} value={tab.path}>
-                        {tab.label}
+                    <option key={tab.path || "general"} value={tab.path}>
+                        {tab.mobilePrefix} {tab.label}
                     </option>
                 ))}
             </select>

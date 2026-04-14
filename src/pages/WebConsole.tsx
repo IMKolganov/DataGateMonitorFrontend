@@ -1,12 +1,11 @@
 // src/pages/WebConsole.tsx
 import { useEffect, useState, useRef, useCallback } from "react";
 import "../css/Console.css";
-import { FaArrowRight, FaTrash, FaInfoCircle, FaList } from "react-icons/fa";
+import { FaArrowRight, FaTrash, FaInfoCircle, FaList, FaTerminal } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import {
   HubConnectionBuilder,
   HubConnection,
-  HttpTransportType,
   LogLevel,
   HubConnectionState,
 } from "@microsoft/signalr";
@@ -18,6 +17,7 @@ import {
   loadCommandHistory,
 } from "../utils/consoleStorage";
 import { getSignalRUrl, getAccessTokenOrLogout } from "../utils/signalr-url";
+import { getSignalRPreferredTransport } from "../utils/signalrTransport.ts";
 import { ACCESS_TOKEN_REFRESHED_EVENT } from "../utils/auth/accessTokenEvents.ts";
 import { highlightOvpMgmtLine } from "../utils/ovpMgmtHighlight";
 import { OVP_MGMT_COMMANDS } from "../utils/ovpMgmtCommands";
@@ -70,7 +70,7 @@ export function WebConsole() {
         const url = getSignalRUrl(vpnServerId);
         const connection = new HubConnectionBuilder()
           .withUrl(url, {
-            transport: HttpTransportType.WebSockets,
+            transport: getSignalRPreferredTransport(),
             accessTokenFactory: () => getAccessTokenOrLogout(),
           })
           .configureLogging(LogLevel.Information)
@@ -272,7 +272,10 @@ export function WebConsole() {
 
   return (
     <div className="web-console-page">
-      <h2 className="console-page-title">Web Console</h2>
+      <h2 className="console-page-title console-page-title--with-icon">
+        <FaTerminal className="icon" aria-hidden />
+        <span>Web Console</span>
+      </h2>
       <div className="header-bar">
         <div className="left-buttons">
           <button className="btn danger" onClick={clearConsole}>

@@ -1,4 +1,4 @@
-import { FaTrash } from "react-icons/fa";
+import { FaServer, FaTrash } from "react-icons/fa";
 import {
   useGetApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanId,
   getGetApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdQueryKey,
@@ -120,7 +120,12 @@ export function QuotaPlanAllowedServersModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
-          <h3>Allowed servers: {planName}</h3>
+          <h3 className="settings-card__h3-with-icon">
+            <FaServer className="icon" aria-hidden />
+            <span>
+              Allowed servers: {planName}
+            </span>
+          </h3>
           <button
             type="button"
             className="modal-close"

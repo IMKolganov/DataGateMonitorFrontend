@@ -8,7 +8,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
 
 /** Same target for `/api` proxy and (in dev) direct SignalR URL — avoids broken WS upgrade via Vite. */
-const defaultProxyTarget = process.env.VITE_PROXY_TARGET ?? "http://localhost:5081";
+const defaultProxyTarget = process.env.VITE_PROXY_TARGET ?? "https://api.datagateapp.com/";
 
 export default defineConfig(({ mode }) => {
   const isDev = mode === "development";
