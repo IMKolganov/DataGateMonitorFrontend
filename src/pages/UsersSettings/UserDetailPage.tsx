@@ -1,6 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaKey, FaPlus, FaEdit, FaTrash, FaSync, FaShieldAlt } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaKey,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSync,
+  FaShieldAlt,
+  FaUser,
+  FaCog,
+  FaPaperPlane,
+  FaClipboardList,
+  FaListUl,
+  FaChartBar,
+  FaIdCard,
+  FaSave,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
   useGetApiUsersGetByIdId,
@@ -42,6 +58,8 @@ import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
+import { UserVpnConnectionsSection } from "./UserVpnConnectionsSection";
+import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
 import StyledDataGrid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
 import type { GridColDef } from "@mui/x-data-grid";
@@ -81,7 +99,7 @@ export function UserDetailPage() {
   const [telegramMessagesPageSize, setTelegramMessagesPageSize] = usePersistedPageSize(
     `user-detail-telegram:${userId ?? "0"}`,
     10,
-    "5,10,20,50",
+    "5,10,20,50,100",
   );
 
   const createAssignmentMutation = usePostApiUserQuotaPlansCreate();
@@ -347,10 +365,16 @@ export function UserDetailPage() {
         </div>
       </div>
 
-      <h2>User details</h2>
+      <h2 className="settings-page__h2-with-icon">
+        <FaIdCard className="icon" aria-hidden />
+        <span>User details</span>
+      </h2>
 
       <section className="settings-card" style={{ marginBottom: 24 }}>
-        <h3>Profile</h3>
+        <h3 className="settings-card__h3-with-icon">
+          <FaUser className="icon" aria-hidden />
+          <span>Profile</span>
+        </h3>
         <dl className="user-detail-dl">
           <dt>ID</dt>
           <dd>{user.id ?? "—"}</dd>
@@ -393,8 +417,29 @@ export function UserDetailPage() {
         </dl>
       </section>
 
+      {user.id != null && (
+        <section className="settings-card" style={{ marginBottom: 24 }}>
+          <h3 className="settings-card__h3-with-icon">
+            <FaChartBar className="icon" aria-hidden />
+            <span>Traffic quota</span>
+          </h3>
+          <UserTrafficQuotaProgress
+            userId={user.id}
+            externalId={user.externalId}
+            quotaPlans={quotaPlans}
+            userQuotaAssignments={userAssignments}
+            suppressInlineTitle
+          />
+        </section>
+      )}
+
+      <UserVpnConnectionsSection externalId={user.externalId} />
+
       <section className="settings-card" style={{ marginBottom: 24 }}>
-        <h3>Admin actions</h3>
+        <h3 className="settings-card__h3-with-icon">
+          <FaCog className="icon" aria-hidden />
+          <span>Admin actions</span>
+        </h3>
         <p className="settings-item-description">
           Request a one-time password reset code for this user. The code will be
           written to the server console (if the account exists and supports password login).
@@ -410,9 +455,9 @@ export function UserDetailPage() {
 
       {canManageRoles && (
         <section className="settings-card" style={{ marginBottom: 24 }}>
-          <h3>
-            <FaShieldAlt className="icon" style={{ marginRight: 8 }} />
-            Access role
+          <h3 className="settings-card__h3-with-icon">
+            <FaShieldAlt className="icon" aria-hidden />
+            <span>Access role</span>
           </h3>
           <p className="settings-item-description">
             Role used for authorization on the server. The &quot;Admin&quot; field in the profile above may still
@@ -453,7 +498,7 @@ export function UserDetailPage() {
                   onClick={handleSaveRole}
                   disabled={!roleDirty || setRoleMutation.isPending}
                 >
-                  Save role
+                  <FaSave className="icon" aria-hidden /> Save role
                 </button>
               </div>
               {currentRoleAssignment?.roleName != null && (
@@ -468,7 +513,10 @@ export function UserDetailPage() {
 
       {isTelegramUser && (
         <section className="settings-card" style={{ marginBottom: 24 }}>
-          <h3>Telegram bot messages</h3>
+          <h3 className="settings-card__h3-with-icon">
+            <FaPaperPlane className="icon" aria-hidden />
+            <span>Telegram bot messages</span>
+          </h3>
           <p className="settings-item-description">
             Incoming messages from this user in the Telegram bot.
           </p>
@@ -508,7 +556,7 @@ export function UserDetailPage() {
                       { field: "text", headerName: "Text", flex: 2, minWidth: 120 },
                       { field: "file", headerName: "File", flex: 1, minWidth: 100 },
                     ] as GridColDef[]}
-                    pageSizeOptions={[5, 10, 20, 50]}
+                    pageSizeOptions={[5, 10, 20, 50, 100]}
                     paginationMode="server"
                     rowCount={telegramMessagesTotalCount}
                     paginationModel={{
@@ -536,7 +584,10 @@ export function UserDetailPage() {
       )}
 
       <section className="settings-card" style={{ marginBottom: 24 }}>
-        <h3>User quota plan assignments</h3>
+        <h3 className="settings-card__h3-with-icon">
+          <FaClipboardList className="icon" aria-hidden />
+          <span>User quota plan assignments</span>
+        </h3>
         <p className="settings-item-description">
           Assign quota plans to this user. Effective from/to define the period when the plan applies.
         </p>
@@ -632,7 +683,10 @@ export function UserDetailPage() {
       </section>
 
       <section className="settings-card">
-        <h3>Available quota plans</h3>
+        <h3 className="settings-card__h3-with-icon">
+          <FaListUl className="icon" aria-hidden />
+          <span>Available quota plans</span>
+        </h3>
         <p className="settings-item-description">
           All quota plans defined in the system. Assign them above. Server-side restrictions may apply.
         </p>

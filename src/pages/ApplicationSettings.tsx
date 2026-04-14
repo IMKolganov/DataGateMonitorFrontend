@@ -1,7 +1,8 @@
 // src/pages/ApplicationSettings.tsx
 import { useEffect, useState } from "react";
-import { FaPlus, FaSync } from "react-icons/fa";
+import { FaLaptopCode, FaPlus, FaSync, FaTerminal } from "react-icons/fa";
 import "../css/ApplicationSettings.css";
+import "../css/Settings.css";
 import ApplicationTable from "../components/settings/ApplicationTable.tsx";
 
 import {
@@ -123,7 +124,10 @@ export function ApplicationSettings() {
 
   return (
     <div>
-      <h2>Application Settings</h2>
+      <h2 className="settings-page__h2-with-icon">
+        <FaLaptopCode className="icon" aria-hidden />
+        <span>Application Settings</span>
+      </h2>
       <div style={{ borderTop: "1px solid #d1d5da" }}></div>
 
       <p className="app-settings-description">
@@ -182,7 +186,10 @@ export function ApplicationSettings() {
         </p>
       </div>
 
-      <h3>Example: Authenticate with API</h3>
+      <h3 className="settings-card__h3-with-icon">
+        <FaTerminal className="icon" aria-hidden />
+        <span>Example: Authenticate with API</span>
+      </h3>
       <pre className="code-block">
 {`curl -X POST https://api.example.com/auth/token \\
   -H "Content-Type: application/json" \\

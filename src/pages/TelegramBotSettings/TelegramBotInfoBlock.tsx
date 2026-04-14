@@ -1,9 +1,14 @@
 // src/pages/TelegramBotSettings/TelegramBotInfoBlock.tsx
+import { FaInfoCircle } from "react-icons/fa";
+import "../../css/Settings.css";
 
 export function TelegramBotInfoBlock() {
   return (
     <div className="app-warning">
-      <h3>What is this Telegram bot?</h3>
+      <h3 className="settings-card__h3-with-icon">
+        <FaInfoCircle className="icon" aria-hidden />
+        <span>What is this Telegram bot?</span>
+      </h3>
       <p>
         This Telegram bot is designed to help <strong>end users (VPN clients)</strong> easily receive their OpenVPN
         configuration files via Telegram. Once connected and verified, the bot provides each user with their personal

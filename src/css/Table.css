@@ -123,6 +123,16 @@
   max-width: min(720px, 92vw);
 }
 
+/* Server Events: about block */
+.events-page__about-body p,
+.events-page__about-body ul {
+  margin: 0 0 0.75rem 0;
+}
+
+.events-page__about-body ul {
+  padding-left: 1.25rem;
+}
+
 .notification-details-modal .notification-details-body pre {
   margin: 0;
   white-space: pre-wrap;

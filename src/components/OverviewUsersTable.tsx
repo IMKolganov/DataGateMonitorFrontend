@@ -2,10 +2,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { Link, useParams } from "react-router-dom";
+import { FaUsers } from "react-icons/fa";
 import StyledDataGrid from "./ui/TableStyle.tsx";
 import CustomThemeProvider from "./ui/ThemeProvider.tsx";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
 import "../css/Table.css";
+import "../css/Settings.css";
 import { errorMessage } from "../utils/errorMessage";
 
 import {
@@ -135,7 +137,10 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
 
   return (
     <div style={{ width: "100%", minWidth: 0 }}>
-      <h3>Users in Selection</h3>
+      <h3 className="settings-card__h3-with-icon">
+        <FaUsers className="icon" aria-hidden />
+        <span>Users in Selection</span>
+      </h3>
       <CustomThemeProvider>
         <div
           className="data-grid-wrap"

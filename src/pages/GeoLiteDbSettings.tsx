@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "../css/Settings.css";
-import { FaSave } from "react-icons/fa";
+import { FaDatabase, FaSave } from "react-icons/fa";
 import { GeoLiteDbDownloader } from "./GeoLiteDbDownloader";
 
 // orval-generated imports
@@ -25,6 +25,7 @@ export function GeoLiteDbSettings() {
   const [geoIpDbPath, setGeoIpDbPath] = useState<string>("Fetching...");
   const [geoIpDownloadUrl, setGeoIpDownloadUrl] = useState<string>("Fetching...");
   const [geoIpLicenseKey, setGeoIpLicenseKey] = useState<string>("Fetching...");
+  const [geoIpAutoUpdateIntervalDays, setGeoIpAutoUpdateIntervalDays] = useState<number>(0);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
 
   // Use PascalCase keys in params and inner models for data type
@@ -32,6 +33,9 @@ export function GeoLiteDbSettings() {
     const qDownloadUrl  = useGetApiSettingsGet<SettingResponse>({ Key: "GeoIp_Download_Url" });
     const qAccountId    = useGetApiSettingsGet<SettingResponse>({ Key: "GeoIp_Account_ID" });
     const qLicenseKey   = useGetApiSettingsGet<SettingResponse>({ Key: "GeoIp_License_Key" });
+    const qAutoUpdateDays = useGetApiSettingsGet<SettingResponse>({
+      Key: "GeoIp_Auto_Update_Interval_Days",
+    });
 
   // DB version (inner model)
   const qDbVersion = useGetApiGeoLiteGetVerionDb<GetVersionDatabaseResponse>();
@@ -43,7 +47,8 @@ export function GeoLiteDbSettings() {
       qDbPath.isFetched &&
       qDownloadUrl.isFetched &&
       qAccountId.isFetched &&
-      qLicenseKey.isFetched;
+      qLicenseKey.isFetched &&
+      qAutoUpdateDays.isFetched;
 
     if (!allSettled) return;
 
@@ -51,11 +56,17 @@ export function GeoLiteDbSettings() {
     const safeValue = (resp: SettingResponse | undefined): string =>
       String(resp?.value ?? "");
 
+    const safeInt = (resp: SettingResponse | undefined): number => {
+      const raw = safeValue(resp);
+      const n = parseInt(raw, 10);
+      return Number.isFinite(n) && !Number.isNaN(n) ? n : 0;
+    };
 
     setGeoIpDbPath(safeValue(qDbPath.data));
     setGeoIpDownloadUrl(safeValue(qDownloadUrl.data));
     setGeoIpAccountId(safeValue(qAccountId.data));
     setGeoIpLicenseKey(safeValue(qLicenseKey.data));
+    setGeoIpAutoUpdateIntervalDays(safeInt(qAutoUpdateDays.data));
 
     setInitialLoading(false);
   }, [
@@ -63,17 +74,19 @@ export function GeoLiteDbSettings() {
     qDownloadUrl.isFetched,
     qAccountId.isFetched,
     qLicenseKey.isFetched,
+    qAutoUpdateDays.isFetched,
     qDbPath.data,
     qDownloadUrl.data,
     qAccountId.data,
     qLicenseKey.data,
+    qAutoUpdateDays.data,
   ]);
 
   // Save handler
   const handleSave = async (
     key: string,
     value: string,
-    type: "string" | "number"
+    type: "string" | "int"
   ) => {
     try {
       await mSetSetting.mutateAsync({
@@ -98,6 +111,9 @@ export function GeoLiteDbSettings() {
         case "GeoIp_License_Key":
           qLicenseKey.refetch();
           break;
+        case "GeoIp_Auto_Update_Interval_Days":
+          qAutoUpdateDays.refetch();
+          break;
       }
     } catch (err: unknown) {
       const data = axios.isAxiosError(err) ? err.response?.data : undefined;
@@ -120,15 +136,19 @@ export function GeoLiteDbSettings() {
     qDbPath.isLoading ||
     qDownloadUrl.isLoading ||
     qAccountId.isLoading ||
-    qLicenseKey.isLoading;
+    qLicenseKey.isLoading ||
+    qAutoUpdateDays.isLoading;
 
   const versionText = qDbVersion.data?.databaseVersion ?? ""; // <-- correct field
 
   return (
     <div>
-      <h2>
-        GeoLite2 Settings{" "}
-        {versionText ? <small style={{ opacity: 0.6 }}>— DB {versionText}</small> : null}
+      <h2 className="settings-page__h2-with-icon">
+        <FaDatabase className="icon" aria-hidden />
+        <span>
+          GeoLite2 Settings{" "}
+          {versionText ? <small style={{ opacity: 0.6 }}>— DB {versionText}</small> : null}
+        </span>
       </h2>
       <div style={{ borderTop: "1px solid #d1d5da" }}></div>
 
@@ -213,6 +233,40 @@ export function GeoLiteDbSettings() {
                 {FaSave({ className: "icon" })} Save
               </button>
             </div>
+
+            <h4>Auto-update interval (days):</h4>
+            <div className="settings-item">
+              <input
+                type="number"
+                min={0}
+                step={1}
+                value={geoIpAutoUpdateIntervalDays}
+                onChange={(e) => setGeoIpAutoUpdateIntervalDays(Number(e.target.value))}
+                className="input"
+              />
+              <button
+                className="btn primary"
+                onClick={() => {
+                  const n = Math.max(0, Math.floor(geoIpAutoUpdateIntervalDays));
+                  if (!Number.isFinite(n)) {
+                    toast.error("Interval must be a non-negative integer.");
+                    return;
+                  }
+                  handleSave(
+                    "GeoIp_Auto_Update_Interval_Days",
+                    String(n),
+                    "int"
+                  );
+                }}
+                disabled={mSetSetting.isPending}
+              >
+                {FaSave({ className: "icon" })} Save
+              </button>
+            </div>
+            <p className="settings-item-description">
+              0 disables automatic GeoLite2 checks. A positive value N lets the backend check for a
+              newer database only when the local file is at least N days old (by modification time).
+            </p>
           </div>
 
           <h2>GeoLite2 Downloader</h2>

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { FaEdit, FaPlus, FaSave, FaTimes } from "react-icons/fa";
 import type {
   CreateOrUpdateQuotaPlanRequest,
   QuotaPlanDto,
@@ -104,7 +105,10 @@ export function QuotaPlanFormModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content quota-plan-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h3>{editPlan ? "Edit quota plan" : "Add quota plan"}</h3>
+          <h3 className="settings-card__h3-with-icon">
+            {editPlan ? <FaEdit className="icon" aria-hidden /> : <FaPlus className="icon" aria-hidden />}
+            <span>{editPlan ? "Edit quota plan" : "Add quota plan"}</span>
+          </h3>
           <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
             ×
           </button>
@@ -244,9 +248,10 @@ export function QuotaPlanFormModal({
           </div>
           <div className="modal-actions">
             <button type="button" className="btn secondary" onClick={onClose}>
-              Cancel
+              <FaTimes className="icon" aria-hidden /> Cancel
             </button>
             <button type="submit" className="btn primary" disabled={isSubmitting}>
+              <FaSave className="icon" aria-hidden />
               {isSubmitting ? "Saving…" : editPlan ? "Update" : "Create"}
             </button>
           </div>

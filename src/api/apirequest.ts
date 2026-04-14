@@ -7,12 +7,13 @@ import {
   REFRESH_TOKEN_KEY,
 } from "../utils/const.ts";
 import { notifyAccessTokenRefreshed } from "../utils/auth/accessTokenEvents.ts";
+import { authErrFields, authLog } from "../utils/auth/authLog.ts";
 import type { RefreshRequest, RefreshResponse } from "./orval/model";
 
 let refreshPromise: Promise<string> | null = null;
 
 /** Only these refresh failures should end the browser session (logout). */
-function shouldLogoutOnRefreshError(err: unknown): boolean {
+export function shouldLogoutOnRefreshError(err: unknown): boolean {
   if (!err || typeof err !== "object") return false;
   const e = err as { name?: string; message?: string; response?: { status?: number } };
   if (e.message === "No refresh token") return true;
@@ -51,6 +52,7 @@ export const apiRequest = async <T>(
 
   // If token is required but missing -> soft logout (no reload loop)
   if (!token && !skipAuth && !isAuthEndpoint(url)) {
+    authLog("apiRequest: no access token, redirecting to login", { url, method });
     softLogout();
     throw new Error("User is not authenticated");
   }
@@ -81,8 +83,11 @@ export const apiRequest = async <T>(
         pathname !== "/login";
 
     if (shouldTryRefresh) {
+      authLog("apiRequest: 401, attempting token refresh", { url, method, pathname });
       try {
         const newToken = await getOrCreateRefresh();
+
+        authLog("apiRequest: refresh OK, retrying request", { url, method });
 
         // Reschedule JWT expiry timer (avoids stale timer if login ever stays in SPA without full reload)
         void import("../utils/auth/authSession").then(({ scheduleAutoLogout }) => {
@@ -101,6 +106,12 @@ export const apiRequest = async <T>(
 
         return retryResponse.data as ApiResponse<T>;
       } catch (refreshErr) {
+        authLog("apiRequest: refresh failed after 401", {
+          ...authErrFields(refreshErr),
+          willLogout: shouldLogoutOnRefreshError(refreshErr),
+          url,
+          method,
+        });
         if (shouldLogoutOnRefreshError(refreshErr)) {
           logout();
         }
@@ -182,6 +193,7 @@ const refreshAccessToken = async (): Promise<string> => {
 
   const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
   if (!refreshToken) {
+    authLog("refreshAccessToken: abort — no refresh token in storage");
     throw new Error("No refresh token");
   }
 
@@ -191,37 +203,47 @@ const refreshAccessToken = async (): Promise<string> => {
     // deviceId: localStorage.getItem("deviceId") ?? null,
   };
 
-  // IMPORTANT: raw axios call (do not call apiRequest / ogmMutator here)
-  const resp = await axios.post<ApiResponse<RefreshResponse>>(
-      `${API_BASE_URL}/api/auth/refresh`,
-      body,
-      { headers: { "Content-Type": "application/json" } },
-  );
+  try {
+    // IMPORTANT: raw axios call (do not call apiRequest / ogmMutator here)
+    const resp = await axios.post<ApiResponse<RefreshResponse>>(
+        `${API_BASE_URL}/api/auth/refresh`,
+        body,
+        { headers: { "Content-Type": "application/json" } },
+    );
 
-  const payload = resp.data;
-  const data = payload?.data;
+    const payload = resp.data;
+    const data = payload?.data;
 
-  const newAccess = data?.token;
-  if (!payload?.success || !newAccess) {
-    const e = new Error(payload?.errorMessage ?? "Refresh failed");
-    e.name = "RefreshAuthFailure";
-    throw e;
+    const newAccess = data?.token;
+    if (!payload?.success || !newAccess) {
+      authLog("refreshAccessToken: API returned failure envelope", {
+        success: payload?.success,
+        errorMessage: payload?.errorMessage ?? null,
+      });
+      const e = new Error(payload?.errorMessage ?? "Refresh failed");
+      e.name = "RefreshAuthFailure";
+      throw e;
+    }
+
+    localStorage.setItem(ACCESS_TOKEN_KEY, newAccess);
+
+    const newRefresh = data?.refreshToken;
+    if (newRefresh) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, newRefresh);
+    }
+
+    const newRefreshExp = data?.refreshExpiration;
+    if (newRefreshExp) {
+      localStorage.setItem(REFRESH_TOKEN_EXPIRATION, newRefreshExp);
+    }
+
+    notifyAccessTokenRefreshed();
+    authLog("refreshAccessToken: success, new access token stored");
+    return newAccess;
+  } catch (err) {
+    authLog("refreshAccessToken: error", authErrFields(err));
+    throw err;
   }
-
-  localStorage.setItem(ACCESS_TOKEN_KEY, newAccess);
-
-  const newRefresh = data?.refreshToken;
-  if (newRefresh) {
-    localStorage.setItem(REFRESH_TOKEN_KEY, newRefresh);
-  }
-
-  const newRefreshExp = data?.refreshExpiration;
-  if (newRefreshExp) {
-    localStorage.setItem(REFRESH_TOKEN_EXPIRATION, newRefreshExp);
-  }
-
-  notifyAccessTokenRefreshed();
-  return newAccess;
 };
 
 // Ensures only one refresh in parallel
