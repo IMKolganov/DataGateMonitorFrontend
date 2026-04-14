@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
-import { FaPlus, FaSync, FaEdit, FaTrash, FaStar, FaServer } from "react-icons/fa";
+import { FaPlus, FaSync, FaEdit, FaTrash, FaStar, FaServer, FaClipboardList } from "react-icons/fa";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
@@ -42,7 +42,7 @@ export function QuotaPlansSettings() {
   const [quotaPlansPageSize, setQuotaPlansPageSize] = usePersistedPageSize(
     "quota-plans",
     10,
-    "5,10,20,50",
+    "5,10,20,50,100",
   );
 
   const getAllMutation = usePostApiQuotaPlansGetAll();
@@ -267,7 +267,10 @@ export function QuotaPlansSettings() {
 
   return (
     <div>
-      <h2>Quota plans</h2>
+      <h2 className="settings-page__h2-with-icon">
+        <FaClipboardList className="icon" aria-hidden />
+        <span>Quota plans</span>
+      </h2>
       <div style={{ borderTop: "1px solid var(--border-color)", marginTop: 8 }} />
 
       <p className="settings-item-description" style={{ marginBottom: 16 }}>
@@ -313,7 +316,7 @@ export function QuotaPlansSettings() {
             <StyledDataGrid
               rows={rows}
               columns={columns}
-              pageSizeOptions={[5, 10, 20, 50]}
+              pageSizeOptions={[5, 10, 20, 50, 100]}
               paginationMode="client"
               paginationModel={{ page: quotaPlansGridPage, pageSize: quotaPlansPageSize }}
               onPaginationModelChange={(m) => {

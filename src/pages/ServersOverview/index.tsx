@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { FaChartLine } from "react-icons/fa";
 
 import { errorMessage } from "../../utils/errorMessage";
 import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
@@ -9,6 +10,9 @@ import { OverviewUsersTable } from "../../components/OverviewUsersTable";
 import StatsCards from "./StatsCards";
 import OverviewChart from "./OverviewChart";
 import GeoMap from "./GeoMap";
+import { StatisticsScopeBanner } from "./StatisticsScopeBanner";
+import { OverviewUserProfileCard } from "./OverviewUserProfileCard";
+import "../../css/Settings.css";
 import { addDays, endOfToday, startOfToday, toChartPoints, toUsersSeriesChartPoints, mergeChartWithUsersSeries, buildFallbackOverviewResponse, normalizeGrouping } from "./helpers";
 import type { ChartPoint, MergedChartPoint } from "./types";
 
@@ -18,16 +22,24 @@ import { keepPreviousData } from "@tanstack/react-query";
 import {
   useGetApiOpenVpnClientsOverviewSeries,
   useGetApiOpenVpnClientsOverviewSummary,
+  useGetApiOpenVpnClientsOverviewUsers,
   useGetApiOpenVpnClientsOverviewUsersSeries,
 } from "../../api/orval/open-vpn-server-clients/open-vpn-server-clients";
+import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/open-vpn-servers-v2/open-vpn-servers-v2";
+import { useGetApiUsersGetAll } from "../../api/orval/user/user";
 import type {
+  GetAllUsersResponse,
   OverviewSeriesResponse,
   OverviewTotalsResponse,
+  OverviewUsersResponse,
   OverviewUsersSeriesResponse,
+  OpenVpnServersV2Response,
   GetApiOpenVpnClientsOverviewSeriesParams,
   GetApiOpenVpnClientsOverviewSummaryParams,
 } from "../../api/orval/model";
 import { OverviewGrouping } from "../../api/orval/model";
+import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
+import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 
 
 
@@ -211,17 +223,98 @@ export default function ServersOverview() {
 
   const totalsForCards = useMemo(() => safeTotals, [safeTotals]);
 
-  const title = vpnServerId
-    ? externalId
-      ? `Server Statistics (server #${vpnServerId}, externalId: ${externalId})`
-      : `Server Statistics (server #${vpnServerId})`
-    : "All Servers Overview";
+  const overviewLabelParams = useMemo(
+    () => ({
+      From: from.toISOString(),
+      To: to.toISOString(),
+      ExternalId: externalId,
+      VpnServerId: vpnServerId,
+    }),
+    [from, to, externalId, vpnServerId],
+  );
+
+  const usersLabelQuery = useGetApiUsersGetAll(
+    { Page: 1, PageSize: 500 },
+    { query: { enabled: Boolean(externalId), staleTime: 60_000 } },
+  );
+
+  const overviewLabelQuery = useGetApiOpenVpnClientsOverviewUsers<OverviewUsersResponse>(
+    overviewLabelParams,
+    {
+      query: {
+        enabled: Boolean(externalId && overviewLabelParams.From && overviewLabelParams.To),
+        staleTime: 10_000,
+      },
+    },
+  );
+
+  const serversLabelQuery = useGetApiV2OpenVpnServersGetAll(
+    {},
+    { query: { enabled: vpnServerId != null } },
+  );
+
+  const userDisplayName = useMemo(() => {
+    if (!externalId) return "";
+    const payload = unwrapMaybeApiResponse<GetAllUsersResponse>(
+      usersLabelQuery.data as GetAllUsersResponse | ApiEnvelope<GetAllUsersResponse> | undefined,
+    );
+    const fromDash = (payload?.users ?? []).find((u) => u.externalId === externalId)?.displayName?.trim();
+    if (fromDash) return fromDash;
+    const items = overviewLabelQuery.data?.overviewUserItems ?? [];
+    const row =
+      items.find((i) => i.externalId === externalId) ?? (items.length > 0 ? items[0] : undefined);
+    return row?.displayName?.trim() ?? "";
+  }, [externalId, usersLabelQuery.data, overviewLabelQuery.data]);
+
+  const vpnServerDisplayName = useMemo(() => {
+    if (vpnServerId == null) return "";
+    const list =
+      (serversLabelQuery.data as OpenVpnServersV2Response | undefined)?.openVpnServers ?? [];
+    const s = list.find((x) => x.id === vpnServerId);
+    return s?.serverName?.trim() ?? "";
+  }, [serversLabelQuery.data, vpnServerId]);
+
+  const titleUserPart = userDisplayName || "User";
+  const titleServerPart =
+    vpnServerId != null ? vpnServerDisplayName || `VPN server #${vpnServerId}` : "";
+
+  const title = useMemo(() => {
+    if (externalId && vpnServerId != null) {
+      return `User statistics — ${titleUserPart} · ${titleServerPart}`;
+    }
+    if (externalId) {
+      return `User statistics — ${titleUserPart} · all VPN servers`;
+    }
+    if (vpnServerId != null) {
+      return `Server statistics — ${titleServerPart}`;
+    }
+    return "All servers overview";
+  }, [externalId, vpnServerId, titleUserPart, titleServerPart]);
 
   return (
     <div style={{ padding: 16, backgroundColor: "var(--bg-content)", color: "var(--text-secondary)", minHeight: "100vh" }}>
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
-        <h2 style={{ margin: 0 }}>{title}</h2>
+        <h2 className="settings-page__h2-with-icon" style={{ margin: 0 }}>
+          <FaChartLine className="icon" aria-hidden />
+          <span>{title}</span>
+        </h2>
       </div>
+
+      <StatisticsScopeBanner
+        externalId={externalId}
+        vpnServerId={vpnServerId}
+        userDisplayName={userDisplayName}
+        vpnServerDisplayName={vpnServerDisplayName}
+      />
+
+      {externalId ? (
+        <OverviewUserProfileCard
+          externalId={externalId}
+          vpnServerId={vpnServerId}
+          from={from}
+          to={to}
+        />
+      ) : null}
 
       <DateRangeFilter from={from} to={to} grouping={grouping} onChange={onFilterChange} />
       <StatsCards totals={totalsForCards} loading={loadingTotals} />

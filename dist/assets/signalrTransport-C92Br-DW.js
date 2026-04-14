@@ -1,0 +1,1 @@
+import{n as e}from"./signalr--pjw0mu8.js";function t(){return`/api`}var n=e.WebSockets|e.ServerSentEvents|e.LongPolling;e.ServerSentEvents|e.LongPolling;function r(){return n}export{t as n,r as t};

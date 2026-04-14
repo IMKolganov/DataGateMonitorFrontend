@@ -8,13 +8,26 @@ import { isCanceledError } from "../../utils/queryCanceled";
 import { getStoredPageSize, setStoredPageSize } from "../../hooks/usePersistedPageSize";
 
 const DEFAULT_PAGE_SIZE = 10;
-const USERS_PAGE_SIZE_KEY = "settings-users";
-const PAGE_SIZE_OPTIONS = [5, 10, 20, 50, 100] as const;
 
-export function useUsers() {
+/** MIT `DataGrid` caps `pageSize` at 100; `DataGridPro` is required above that. */
+const PAGE_SIZE_OPTIONS_DATAGRID = [5, 10, 20, 50, 100] as const;
+
+/** User quotas page uses a plain list + API paging (no DataGrid), so larger pages are allowed. */
+const PAGE_SIZE_OPTIONS_LIST = [5, 10, 20, 50, 100, 200, 500, 1000] as const;
+
+const STORAGE_KEY_DATAGRID = "settings-users";
+const STORAGE_KEY_LIST = "settings-users-quotas";
+
+export type UseUsersMode = "datagrid" | "list";
+
+export function useUsers(options?: { mode?: UseUsersMode }) {
+  const mode = options?.mode ?? "datagrid";
+  const pageSizeOptions = mode === "list" ? PAGE_SIZE_OPTIONS_LIST : PAGE_SIZE_OPTIONS_DATAGRID;
+  const storageKey = mode === "list" ? STORAGE_KEY_LIST : STORAGE_KEY_DATAGRID;
+
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>(() => ({
     page: 0,
-    pageSize: getStoredPageSize(USERS_PAGE_SIZE_KEY, DEFAULT_PAGE_SIZE, [...PAGE_SIZE_OPTIONS]),
+    pageSize: getStoredPageSize(storageKey, DEFAULT_PAGE_SIZE, [...pageSizeOptions]),
   }));
   const [manualRefreshing, setManualRefreshing] = useState(false);
 
@@ -43,11 +56,11 @@ export function useUsers() {
     setPaginationModel((prev) => {
       if (prev.page === model.page && prev.pageSize === model.pageSize) return prev;
       if (model.pageSize !== prev.pageSize) {
-        setStoredPageSize(USERS_PAGE_SIZE_KEY, model.pageSize);
+        setStoredPageSize(storageKey, model.pageSize);
       }
       return model;
     });
-  }, []);
+  }, [storageKey]);
 
   const handleRefresh = async () => {
     if (qUsers.isFetching || manualRefreshing) return;
@@ -76,6 +89,7 @@ export function useUsers() {
     totalCount,
     paginationModel,
     onPaginationModelChange,
+    pageSizeOptions,
     anyLoading,
     refreshing,
     errorMessage,

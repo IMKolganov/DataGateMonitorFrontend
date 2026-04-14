@@ -1,3 +1,4 @@
+import { FaClipboardList, FaEdit, FaSave, FaTimes } from "react-icons/fa";
 import type {
   CreateOrUpdateUserQuotaPlanRequest,
   UserQuotaPlanDto,
@@ -77,7 +78,10 @@ export function UserQuotaPlanAssignmentModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
-          <h3>{isEdit ? "Edit assignment" : "Assign quota plan"}</h3>
+          <h3 className="settings-card__h3-with-icon">
+            {isEdit ? <FaEdit className="icon" aria-hidden /> : <FaClipboardList className="icon" aria-hidden />}
+            <span>{isEdit ? "Edit assignment" : "Assign quota plan"}</span>
+          </h3>
           <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
             &times;
           </button>
@@ -134,9 +138,10 @@ export function UserQuotaPlanAssignmentModal({
           </div>
           <div className="modal-actions">
             <button type="button" className="btn secondary" onClick={onClose}>
-              Cancel
+              <FaTimes className="icon" aria-hidden /> Cancel
             </button>
             <button type="submit" className="btn primary" disabled={isSubmitting}>
+              <FaSave className="icon" aria-hidden />
               {isSubmitting ? "Saving…" : isEdit ? "Update" : "Assign"}
             </button>
           </div>
