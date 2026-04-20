@@ -7,10 +7,10 @@ import "../css/Certificates.css";
 import "../css/Settings.css";
 
 // Import generated model type
-import type { OpenVpnServerResponse } from "../api/orval/model";
+import type { VpnServerResponse } from "../api/orval/model";
 
 // Import generated hook
-import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/open-vpn-servers/open-vpn-servers";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 
 // Helper to unwrap ApiResponse<T>
 function unwrap<T>(resp: unknown): T | undefined {
@@ -37,8 +37,8 @@ const Certificates: React.FC = () => {
     },
   });
 
-  const apiPayload = unwrap<OpenVpnServerResponse>(serverQuery.data);
-  const serverName = apiPayload?.openVpnServer?.serverName ?? "(unknown)";
+  const apiPayload = unwrap<VpnServerResponse>(serverQuery.data);
+  const serverName = apiPayload?.vpnServer?.serverName ?? "(unknown)";
 
   return (
     <div className="certificates-page">

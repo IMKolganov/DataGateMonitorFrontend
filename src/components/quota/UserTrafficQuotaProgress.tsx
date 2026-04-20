@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useGetApiOpenVpnClientsOverviewSummary } from "../../api/orval/open-vpn-server-clients/open-vpn-server-clients";
+import { useGetApiOpenVpnClientsOverviewSummary } from "../../api/orval/vpn-server-clients/vpn-server-clients";
 import { useGetApiUserQuotaPlansGetByUserIdUserId } from "../../api/orval/user-quota-plan/user-quota-plan";
 import { postApiQuotaPlansGetAll } from "../../api/orval/quota-plan/quota-plan";
 import type {
@@ -16,6 +16,9 @@ import { unwrapMaybeApiResponse } from "../../pages/TelegramBotSettings/unwrapAp
 import { formatBytes } from "../../utils/utils";
 
 import "../../css/Settings.css";
+
+/** Stable fallback so hooks that depend on `quotaPlans` do not see a new `[]` every render. */
+const EMPTY_QUOTA_PLANS: QuotaPlanDto[] = [];
 
 export type UserTrafficQuotaProgressProps = {
   userId: number;
@@ -95,8 +98,10 @@ export function UserTrafficQuotaProgress({
     );
   }, [assignmentsProp, assignmentsQueryData]);
 
-  const quotaPlans: QuotaPlanDto[] =
-    (quotaPlansProp !== undefined ? quotaPlansProp : quotaPlansQuery.data) ?? [];
+  const quotaPlans = useMemo((): QuotaPlanDto[] => {
+    if (quotaPlansProp !== undefined) return quotaPlansProp ?? EMPTY_QUOTA_PLANS;
+    return quotaPlansQuery.data ?? EMPTY_QUOTA_PLANS;
+  }, [quotaPlansProp, quotaPlansQuery.data]);
 
   const activeAssignment = useMemo(() => pickActiveAssignment(assignments), [assignments]);
 

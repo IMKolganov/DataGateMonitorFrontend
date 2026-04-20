@@ -7,7 +7,7 @@ import type {
   MonitorServerCertificate as Certificate,
   RevokeCertificateRequest,
 } from "../../api/orval/model";
-import { postApiOpenVpnCertsRevoke } from "../../api/orval/open-vpn-server-certs/open-vpn-server-certs.ts";
+import { postApiOpenVpnCertsRevoke } from "../../api/orval/vpn-server-certs/vpn-server-certs.ts";
 import "../../css/Table.css";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";

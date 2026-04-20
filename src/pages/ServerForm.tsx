@@ -12,12 +12,12 @@ import {
   usePutApiOpenVpnServersUpdate,
   getApiOpenVpnServersGetVpnServerId,
   getApiOpenVpnServersGetMicroserviceInfoByUrl,
-} from "../api/orval/open-vpn-servers/open-vpn-servers";
+} from "../api/orval/vpn-servers/vpn-servers";
 
 import {
   useGetApiOpenVpnConfigsGetVpnServerId,
   usePostApiOpenVpnConfigsAddUpdate,
-} from "../api/orval/open-vpn-server-ovpn-file-config/open-vpn-server-ovpn-file-config";
+} from "../api/orval/vpn-server-ovpn-file-config/vpn-server-ovpn-file-config";
 
 import {
   useGetApiTagsGetAll,
@@ -30,12 +30,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import type {
   AddServerRequest,
   UpdateServerRequest,
-  OpenVpnServerDto,
+  VpnServerDto,
   OvpnFileConfigResponse,
   QuotaPlanDto,
   QuotaPlansResponse,
   QuotaPlanAllowedServerDto,
-  OpenVpnServerResponse,
+  VpnServerResponse,
 } from "../api/orval/model";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 import { usePostApiQuotaPlansGetAll } from "../api/orval/quota-plan/quota-plan";
@@ -45,11 +45,11 @@ import {
   deleteApiQuotaPlanAllowedServersDeleteId,
   getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey,
 } from "../api/orval/quota-plan-allowed-server/quota-plan-allowed-server";
-import { getGetApiV2OpenVpnServersGetAllWithStatusQueryKey } from "../api/orval/open-vpn-servers-v2/open-vpn-servers-v2";
+import { getGetApiV2OpenVpnServersGetAllWithStatusQueryKey } from "../api/orval/vpn-servers-v2/vpn-servers-v2";
 import {
   getGetApiOpenVpnServersGetVpnServerIdQueryKey,
   getGetApiOpenVpnServersGetServerWithStatusVpnServerIdQueryKey,
-} from "../api/orval/open-vpn-servers/open-vpn-servers";
+} from "../api/orval/vpn-servers/vpn-servers";
 import type { ApiEnvelope } from "./TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 import { errorMessage } from "../utils/errorMessage";
@@ -61,21 +61,21 @@ function asRecord(v: unknown): Record<string, unknown> | null {
   return typeof v === "object" && v !== null ? (v as Record<string, unknown>) : null;
 }
 
-function unwrapServerDto(raw: GetByIdResult | undefined): OpenVpnServerDto | null {
+function unwrapServerDto(raw: GetByIdResult | undefined): VpnServerDto | null {
   if (!raw) return null;
 
   const top = asRecord(raw);
   if (!top) return null;
   const data = asRecord(top["data"]);
   const s =
-    (top["openVpnServer"] as unknown) ??
-    data?.["openVpnServer"] ??
+    (top["vpnServer"] as unknown) ??
+    data?.["vpnServer"] ??
     raw;
 
   if (!s || typeof s !== "object") return null;
   const o = s as Record<string, unknown>;
 
-  const dto: OpenVpnServerDto = {
+  const dto: VpnServerDto = {
     id: typeof o["id"] === "number" ? o["id"] : o["id"] != null ? Number(o["id"]) : undefined,
     serverName: (o["serverName"] as string | null | undefined) ?? null,
     isOnline: Boolean(o["isOnline"] ?? false),
@@ -108,15 +108,15 @@ function getAllowedItemsByVpnServer(raw: unknown): QuotaPlanAllowedServerDto[] {
 }
 
 function unwrapNewServerIdFromAdd(raw: unknown): number | null {
-  const top = unwrapMaybeApiResponse<OpenVpnServerResponse>(
-    raw as OpenVpnServerResponse | ApiEnvelope<OpenVpnServerResponse> | undefined,
+  const top = unwrapMaybeApiResponse<VpnServerResponse>(
+    raw as VpnServerResponse | ApiEnvelope<VpnServerResponse> | undefined,
   );
   const rawRec = asRecord(raw);
   const nested = rawRec ? asRecord(rawRec["data"]) : null;
   const fromRaw =
-    (rawRec?.["openVpnServer"] as { id?: number } | undefined)?.id ??
-    (nested?.["openVpnServer"] as { id?: number } | undefined)?.id;
-  const id = top?.openVpnServer?.id ?? fromRaw;
+    (rawRec?.["vpnServer"] as { id?: number } | undefined)?.id ??
+    (nested?.["vpnServer"] as { id?: number } | undefined)?.id;
+  const id = top?.vpnServer?.id ?? fromRaw;
   return typeof id === "number" && id > 0 ? id : null;
 }
 
@@ -229,7 +229,7 @@ const ServerForm: React.FC = () => {
   const updateMutation = usePutApiOpenVpnServersUpdate();
   const saveOvpnConfigMutation = usePostApiOpenVpnConfigsAddUpdate();
 
-  const [serverData, setServerData] = React.useState<OpenVpnServerDto>({
+  const [serverData, setServerData] = React.useState<VpnServerDto>({
     id: idNum || undefined,
     serverName: "",
     isOnline: false,
