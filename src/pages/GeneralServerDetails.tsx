@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useParams } from "react-router-dom";
 import "../css/ServerDetails.css";
 import "../css/Settings.css";
-import { FaMapMarkerAlt, FaSync, FaUsers } from "react-icons/fa";
+import { FaInfoCircle, FaMapMarkerAlt, FaSync, FaUsers } from "react-icons/fa";
+import { isOpenVpnStack } from "../constants/vpnServerType";
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
 import ServerDetailsInfoDefault from "../components/servers/ServerDetailsInfo.tsx";
@@ -152,9 +153,36 @@ export function GeneralServerDetails() {
         [numericServerId, page, pageSize]
     );
 
+    const serverWithStatusQuery = useGetApiOpenVpnServersGetServerWithStatusVpnServerId(
+        numericServerId ?? 0,
+        {
+            query: {
+                enabled: Number.isFinite(numericServerId),
+                staleTime: 30000,
+                retry: 1,
+            },
+        }
+    );
+
+    const serverBasicQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId ?? 0, {
+        query: {
+            enabled: Number.isFinite(numericServerId) && !serverWithStatusQuery.data,
+            staleTime: 30000,
+            retry: 1,
+        },
+    });
+
+    const serverKindReady = serverWithStatusQuery.isSuccess || serverBasicQuery.isSuccess;
+    const scopedStackType =
+        (serverWithStatusQuery.data as unknown as VpnServerWithStatusResponse | undefined)
+            ?.vpnServerWithStatus?.vpnServerResponses?.vpnServer?.serverType ??
+        (serverBasicQuery.data as unknown as VpnServerResponse | undefined)?.vpnServer?.serverType;
+    const openVpnQueriesEnabled =
+        Number.isFinite(numericServerId) && serverKindReady && isOpenVpnStack(scopedStackType);
+
     const connectedQuery = useGetApiOpenVpnClientsGetAllConnected(connectedParams, {
         query: {
-            enabled: Number.isFinite(numericServerId) && isLive,
+            enabled: Number.isFinite(numericServerId) && isLive && openVpnQueriesEnabled,
             staleTime: 10000,
             retry: 1,
         },
@@ -162,7 +190,7 @@ export function GeneralServerDetails() {
 
     const historyQuery = useGetApiOpenVpnClientsGetAllHistory(historyParams, {
         query: {
-            enabled: Number.isFinite(numericServerId) && !isLive,
+            enabled: Number.isFinite(numericServerId) && !isLive && openVpnQueriesEnabled,
             staleTime: 10000,
             retry: 1,
         },
@@ -185,28 +213,9 @@ export function GeneralServerDetails() {
         }
     }, [activeClientsResponse?.totalCount]);
 
-    const serverWithStatusQuery = useGetApiOpenVpnServersGetServerWithStatusVpnServerId(
-        numericServerId ?? 0,
-        {
-            query: {
-                enabled: Number.isFinite(numericServerId),
-                staleTime: 30000,
-                retry: 1,
-            },
-        }
-    );
-
-    const serverBasicQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId ?? 0, {
-        query: {
-            enabled: Number.isFinite(numericServerId) && !serverWithStatusQuery.data,
-            staleTime: 30000,
-            retry: 1,
-        },
-    });
-
     const ovpnConfigQuery = useGetApiOpenVpnConfigsGetVpnServerId(numericServerId ?? 0, {
         query: {
-            enabled: Number.isFinite(numericServerId),
+            enabled: Number.isFinite(numericServerId) && openVpnQueriesEnabled,
             staleTime: 30000,
             retry: 1,
         },
@@ -219,7 +228,7 @@ export function GeneralServerDetails() {
     const latestConflogQuery = useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
         numericServerId ?? 0,
         { page: 1, pageSize: 1 },
-        { query: { enabled: Number.isFinite(numericServerId) } }
+        { query: { enabled: Number.isFinite(numericServerId) && openVpnQueriesEnabled } }
     );
     const latestConflogItems = (latestConflogQuery.data as { items?: { payload?: ConflogPayload }[] } | undefined)?.items ?? [];
     const latestConflogPayload: ConflogPayload | null = latestConflogItems[0]?.payload ?? null;
@@ -268,12 +277,14 @@ export function GeneralServerDetails() {
     }, [isLive]);
 
     const handleRefresh = () => {
-        if (isLive) connectedQuery.refetch();
-        else historyQuery.refetch();
+        if (openVpnQueriesEnabled) {
+            if (isLive) connectedQuery.refetch();
+            else historyQuery.refetch();
+            latestConflogQuery.refetch();
+        }
 
         serverWithStatusQuery.refetch();
         serverBasicQuery.refetch();
-        latestConflogQuery.refetch();
 
         if (Number.isFinite(numericServerId)) {
             queryClient.invalidateQueries({
@@ -308,11 +319,13 @@ export function GeneralServerDetails() {
                         Refresh
                     </button>
 
-                    <label className="square-toggle">
-                        <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
-                        <span className="toggle-slider"></span>
-                        <span className="toggle-text">{isLive ? "Live" : "History"}</span>
-                    </label>
+                    {openVpnQueriesEnabled ? (
+                        <label className="square-toggle">
+                            <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
+                            <span className="toggle-slider"></span>
+                            <span className="toggle-text">{isLive ? "Live" : "History"}</span>
+                        </label>
+                    ) : null}
                 </div>
             </div>
 
@@ -320,41 +333,62 @@ export function GeneralServerDetails() {
                 serverInfo={serverInfo}
                 toHumanReadableSize={toHumanReadableSize}
                 loading={loadingServer}
-                configIp={configIp}
-                configPort={configPort}
-                latestConflogPayload={latestConflogPayload}
+                configIp={openVpnQueriesEnabled ? configIp : null}
+                configPort={openVpnQueriesEnabled ? configPort : null}
+                latestConflogPayload={openVpnQueriesEnabled ? latestConflogPayload : null}
                 quotaPlanLabels={quotaPlanLabels}
             />
 
-            <section className="server-details__panel" aria-labelledby="server-vpn-clients-heading">
-                <h3 id="server-vpn-clients-heading" className="settings-card__h3-with-icon">
-                    <FaUsers className="icon" aria-hidden />
-                    <span>
-                        VPN Clients ({isLive ? "Connected" : "Historical"})
-                        {loadingClients && (
-                            <span style={{ fontSize: 12, opacity: 0.7 }}> loading…</span>
-                        )}
-                    </span>
-                </h3>
+            {openVpnQueriesEnabled ? (
+                <>
+                    <section className="server-details__panel" aria-labelledby="server-vpn-clients-heading">
+                        <h3 id="server-vpn-clients-heading" className="settings-card__h3-with-icon">
+                            <FaUsers className="icon" aria-hidden />
+                            <span>
+                                VPN Clients ({isLive ? "Connected" : "Historical"})
+                                {loadingClients && (
+                                    <span style={{ fontSize: 12, opacity: 0.7 }}> loading…</span>
+                                )}
+                            </span>
+                        </h3>
 
-                <ClientsTable
-                    clients={clients}
-                    totalClients={totalClients}
-                    page={page}
-                    pageSize={pageSize}
-                    onPageChange={setPage}
-                    onPageSizeChange={setPageSize}
-                    loading={loadingClients}
-                />
-            </section>
+                        <ClientsTable
+                            clients={clients}
+                            totalClients={totalClients}
+                            page={page}
+                            pageSize={pageSize}
+                            onPageChange={setPage}
+                            onPageSizeChange={setPageSize}
+                            loading={loadingClients}
+                        />
+                    </section>
 
-            <section className="server-details__panel" aria-labelledby="server-vpn-locations-heading">
-                <h3 id="server-vpn-locations-heading" className="settings-card__h3-with-icon">
-                    <FaMapMarkerAlt className="icon" aria-hidden />
-                    <span>VPN Client Locations</span>
-                </h3>
-                <VpnMap clients={clients} serverLocation={serverLocation} serverName={serverName} />
-            </section>
+                    <section className="server-details__panel" aria-labelledby="server-vpn-locations-heading">
+                        <h3 id="server-vpn-locations-heading" className="settings-card__h3-with-icon">
+                            <FaMapMarkerAlt className="icon" aria-hidden />
+                            <span>VPN Client Locations</span>
+                        </h3>
+                        <VpnMap clients={clients} serverLocation={serverLocation} serverName={serverName} />
+                    </section>
+                </>
+            ) : serverKindReady ? (
+                <section className="server-details__panel" aria-labelledby="server-xray-stack-heading">
+                    <h3 id="server-xray-stack-heading" className="settings-card__h3-with-icon">
+                        <FaInfoCircle className="icon" aria-hidden />
+                        <span>Xray (VLESS)</span>
+                    </h3>
+                    <p style={{ lineHeight: 1.55, maxWidth: "52rem" }}>
+                        OpenVPN client lists, .ovpn configuration, and conflog-derived fields do not apply to this
+                        server. Use your Xray control path and the node API URL below for operations.
+                    </p>
+                    {serverEntity?.apiUrl ? (
+                        <p style={{ marginTop: 8 }}>
+                            <span className="detail-label">Node API URL: </span>
+                            <code>{serverEntity.apiUrl}</code>
+                        </p>
+                    ) : null}
+                </section>
+            ) : null}
         </div>
     );
 }

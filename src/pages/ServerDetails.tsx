@@ -1,6 +1,6 @@
 // src/pages/ServerDetails.tsx
 import { useNavigate, NavLink, Outlet, useParams, useLocation } from "react-router-dom";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { IconType } from "react-icons";
 import {
   FaArrowLeft,
@@ -16,6 +16,14 @@ import "../css/ServerDetails.css";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import type { VpnServerResponse } from "../api/orval/model";
+import { VpnServerType } from "../constants/vpnServerType";
+
+/** Subpaths under `/servers/:id/...` that only apply to OpenVPN. */
+function isOpenVpnOnlySubpath(relative: string): boolean {
+  if (!relative) return false;
+  const keys = ["certificates", "console", "ovpn-file-config", "events", "statistics"];
+  return keys.some((k) => relative === k || relative.startsWith(`${k}/`));
+}
 
 type Tab = {
     label: string;
@@ -55,11 +63,6 @@ export function ServerDetails() {
     const user = getCurrentUser();
     const canSeeAdminTabs = isAdmin(user);
 
-    const tabs = useMemo(() => {
-        if (canSeeAdminTabs) return ALL_SERVER_TABS;
-        return ALL_SERVER_TABS.filter((t) => !t.adminOnly);
-    }, [canSeeAdminTabs]);
-
     const currentPath =
         location.pathname.split(`/servers/${vpnServerId}/`)[1] ?? "";
 
@@ -77,7 +80,34 @@ export function ServerDetails() {
     });
 
     const payload = serverQuery.data as VpnServerResponse | undefined;
+    const isXrayServer =
+        serverQuery.isSuccess && payload?.vpnServer?.serverType === VpnServerType.Xray;
+
+    const tabs = useMemo(() => {
+        let base = canSeeAdminTabs ? ALL_SERVER_TABS : ALL_SERVER_TABS.filter((t) => !t.adminOnly);
+        if (isXrayServer) {
+            const openVpnOnly = new Set([
+                "certificates",
+                "console",
+                "ovpn-file-config",
+                "events",
+                "statistics",
+            ]);
+            base = base.filter((t) => !openVpnOnly.has(t.path));
+            if (base.length === 0) {
+                base = [{ label: "Overview", path: "", adminOnly: false, Icon: FaServer, mobilePrefix: "🖥️" }];
+            }
+        }
+        return base;
+    }, [canSeeAdminTabs, isXrayServer]);
+
     const vpnServerName = payload?.vpnServer?.serverName ?? "(unknown)";
+
+    useEffect(() => {
+        if (!serverQuery.isSuccess || !isXrayServer || !vpnServerId) return;
+        if (!isOpenVpnOnlySubpath(currentPath)) return;
+        navigate(`/servers/${vpnServerId}`, { replace: true });
+    }, [serverQuery.isSuccess, isXrayServer, currentPath, navigate, vpnServerId]);
 
     const safeCurrentPath = useMemo(() => {
         const exists = tabs.some((t) => t.path === currentPath);

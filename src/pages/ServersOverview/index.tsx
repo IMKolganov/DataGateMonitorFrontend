@@ -1,6 +1,6 @@
 // src/pages/servers/ServersOverview.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaChartLine } from "react-icons/fa";
 
@@ -25,6 +25,7 @@ import {
   useGetApiOpenVpnClientsOverviewUsers,
   useGetApiOpenVpnClientsOverviewUsersSeries,
 } from "../../api/orval/vpn-server-clients/vpn-server-clients";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../../api/orval/vpn-servers/vpn-servers";
 import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
 import { useGetApiUsersGetAll } from "../../api/orval/user/user";
 import type {
@@ -34,9 +35,11 @@ import type {
   OverviewUsersResponse,
   OverviewUsersSeriesResponse,
   VpnServersV2Response,
+  VpnServerResponse,
   GetApiOpenVpnClientsOverviewSeriesParams,
   GetApiOpenVpnClientsOverviewSummaryParams,
 } from "../../api/orval/model";
+import { isOpenVpnStack } from "../../constants/vpnServerType";
 import { OverviewGrouping } from "../../api/orval/model";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
@@ -88,6 +91,24 @@ export default function ServersOverview() {
     return Number.isFinite(n) ? n : undefined;
   }, [vpnServerIdParam]);
 
+  const scopedServerQuery = useGetApiOpenVpnServersGetVpnServerId(vpnServerId ?? 0, {
+    query: {
+      enabled: vpnServerId != null && vpnServerId > 0,
+      staleTime: 10_000,
+      retry: 1,
+    },
+  });
+  const scopedServerPayload = scopedServerQuery.data as VpnServerResponse | undefined;
+  const scopedServerIsXray =
+    vpnServerId != null &&
+    scopedServerQuery.isSuccess &&
+    !isOpenVpnStack(scopedServerPayload?.vpnServer?.serverType);
+  /** Avoid OpenVPN-overview API calls with an Xray server id before we know the stack (or after we know it is Xray). */
+  const overviewChartsEnabled =
+    vpnServerId == null ||
+    scopedServerQuery.isError ||
+    (scopedServerQuery.isSuccess && !scopedServerIsXray);
+
   const externalId = externalIdParam || undefined;
 
   const lastErrorKey = useRef<string>("");
@@ -134,7 +155,7 @@ export default function ServersOverview() {
   // NOTE: no onError inside options.query — not supported by the generated types
   const seriesQuery = useGetApiOpenVpnClientsOverviewSeries(seriesParams, {
     query: {
-      enabled: true,
+      enabled: overviewChartsEnabled,
       staleTime: 10_000,
       retry: 1,
       placeholderData: keepPreviousData,
@@ -143,7 +164,7 @@ export default function ServersOverview() {
 
   const totalsQuery = useGetApiOpenVpnClientsOverviewSummary(totalsParams, {
     query: {
-      enabled: true,
+      enabled: overviewChartsEnabled,
       staleTime: 10_000,
       retry: 1,
       placeholderData: keepPreviousData,
@@ -152,7 +173,7 @@ export default function ServersOverview() {
 
   const usersSeriesQuery = useGetApiOpenVpnClientsOverviewUsersSeries(seriesParams, {
     query: {
-      enabled: true,
+      enabled: overviewChartsEnabled,
       staleTime: 10_000,
       retry: 1,
       placeholderData: keepPreviousData,
@@ -290,6 +311,52 @@ export default function ServersOverview() {
     }
     return "All servers overview";
   }, [externalId, vpnServerId, titleUserPart, titleServerPart]);
+
+  if (vpnServerId != null && scopedServerQuery.isPending) {
+    return (
+      <div
+        style={{
+          padding: 16,
+          backgroundColor: "var(--bg-content)",
+          color: "var(--text-secondary)",
+          minHeight: "100vh",
+        }}
+      >
+        <h2 className="settings-page__h2-with-icon">
+          <FaChartLine className="icon" aria-hidden />
+          <span>Server statistics</span>
+        </h2>
+        <p>Loading server…</p>
+      </div>
+    );
+  }
+
+  if (scopedServerIsXray) {
+    return (
+      <div
+        style={{
+          padding: 16,
+          backgroundColor: "var(--bg-content)",
+          color: "var(--text-secondary)",
+          minHeight: "100vh",
+        }}
+      >
+        <h2 className="settings-page__h2-with-icon">
+          <FaChartLine className="icon" aria-hidden />
+          <span>Server statistics — {titleServerPart}</span>
+        </h2>
+        <p style={{ maxWidth: "42rem", lineHeight: 1.55 }}>
+          Charts and tables here aggregate <strong>OpenVPN</strong> client sessions. They do not apply to{" "}
+          <strong>Xray (VLESS)</strong> servers yet.
+        </p>
+        <p style={{ marginTop: 16 }}>
+          <Link className="btn secondary" to={`/servers/${vpnServerId}`}>
+            ← Back to server overview
+          </Link>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: 16, backgroundColor: "var(--bg-content)", color: "var(--text-secondary)", minHeight: "100vh" }}>
