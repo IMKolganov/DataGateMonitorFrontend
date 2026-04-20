@@ -32,6 +32,10 @@ import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../utils/errorMessage";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
+import type { VpnServerResponse } from "../api/orval/model";
+import { isOpenVpnStack } from "../constants/vpnServerType";
+import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 
 /** Extract proto from config template (e.g. "proto tcp" or "proto udp") */
 function extractProtoFromTemplate(template: string): string | null {
@@ -80,6 +84,17 @@ const OvpnFileConfigForm: React.FC = () => {
   const queryClient = useQueryClient();
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const parsedVpnServerId = Number(vpnServerId) || 0;
+  const serverKindQuery = useGetApiOpenVpnServersGetVpnServerId(parsedVpnServerId, {
+    query: {
+      enabled: parsedVpnServerId > 0,
+      staleTime: 10_000,
+      retry: 1,
+    },
+  });
+  const openVpnPageEnabled =
+    parsedVpnServerId > 0 &&
+    serverKindQuery.isSuccess &&
+    isOpenVpnStack((serverKindQuery.data as VpnServerResponse | undefined)?.vpnServer?.serverType);
   const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const [conflogPage, setConflogPage] = useState(1);
@@ -115,7 +130,7 @@ const OvpnFileConfigForm: React.FC = () => {
     parsedVpnServerId,
     {
       query: {
-        enabled: parsedVpnServerId > 0, // skip for "create new" w/o id
+        enabled: parsedVpnServerId > 0 && openVpnPageEnabled,
         staleTime: 0,
         retry: 1,
       },
@@ -137,14 +152,14 @@ const OvpnFileConfigForm: React.FC = () => {
     useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
       parsedVpnServerId,
       conflogHistoryParams,
-      { query: { enabled: parsedVpnServerId > 0 } }
+      { query: { enabled: parsedVpnServerId > 0 && openVpnPageEnabled } }
     );
 
   const latestConflogParams = useMemo(() => ({ page: 1, pageSize: 1 }), []);
   const { data: latestConflogResp } = useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
     parsedVpnServerId,
     latestConflogParams,
-    { query: { enabled: parsedVpnServerId > 0 } }
+    { query: { enabled: parsedVpnServerId > 0 && openVpnPageEnabled } }
   );
   const latestConflogItem = (latestConflogResp as { items?: ConflogRow[] } | undefined)?.items?.[0];
   const latestPayload = latestConflogItem?.payload;
@@ -283,6 +298,26 @@ const OvpnFileConfigForm: React.FC = () => {
   }, [isError, error]);
 
   const loading = useMemo(() => isFetching || saveMutation.isPending, [isFetching, saveMutation.isPending]);
+
+  if (parsedVpnServerId > 0 && serverKindQuery.isSuccess && !openVpnPageEnabled) {
+    return (
+      <OpenVpnServerFeaturePlaceholder
+        vpnServerId={String(vpnServerId)}
+        featureLabel="OpenVPN file configuration"
+      >
+        <p style={{ marginTop: 8 }}>.ovpn templates and conflog are only used for OpenVPN servers.</p>
+      </OpenVpnServerFeaturePlaceholder>
+    );
+  }
+
+  if (parsedVpnServerId > 0 && serverKindQuery.isPending) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading server…</p>
+      </div>
+    );
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
