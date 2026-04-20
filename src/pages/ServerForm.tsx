@@ -31,6 +31,7 @@ import type {
   AddServerRequest,
   UpdateServerRequest,
   VpnServerDto,
+  VpnServerType as OrvalVpnServerType,
   OvpnFileConfigResponse,
   QuotaPlanDto,
   QuotaPlansResponse,
@@ -76,14 +77,18 @@ function unwrapServerDto(raw: GetByIdResult | undefined): VpnServerDto | null {
   if (!s || typeof s !== "object") return null;
   const o = s as Record<string, unknown>;
 
+  const rawServerType =
+    typeof o["serverType"] === "number"
+      ? o["serverType"]
+      : o["serverType"] != null
+        ? Number(o["serverType"])
+        : VpnServerType.OpenVpn;
+  const serverType: OrvalVpnServerType =
+    rawServerType === VpnServerType.Xray ? (VpnServerType.Xray as OrvalVpnServerType) : (VpnServerType.OpenVpn as OrvalVpnServerType);
+
   const dto: VpnServerDto = {
     id: typeof o["id"] === "number" ? o["id"] : o["id"] != null ? Number(o["id"]) : undefined,
-    serverType:
-      typeof o["serverType"] === "number"
-        ? o["serverType"]
-        : o["serverType"] != null
-          ? Number(o["serverType"])
-          : VpnServerType.OpenVpn,
+    serverType,
     serverName: (o["serverName"] as string | null | undefined) ?? null,
     isOnline: Boolean(o["isOnline"] ?? false),
     isDefault: Boolean(o["isDefault"] ?? false),
@@ -422,7 +427,9 @@ const ServerForm: React.FC = () => {
     return ok;
   };
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleTextChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
 
     if (name === "serverName") {
@@ -431,7 +438,8 @@ const ServerForm: React.FC = () => {
     }
 
     if (name === "serverType") {
-      const nextType = Number(value) === VpnServerType.Xray ? VpnServerType.Xray : VpnServerType.OpenVpn;
+      const nextType: OrvalVpnServerType =
+        Number(value) === VpnServerType.Xray ? (VpnServerType.Xray as OrvalVpnServerType) : (VpnServerType.OpenVpn as OrvalVpnServerType);
       setServerData((p) => ({
         ...p,
         serverType: nextType,
