@@ -11,6 +11,8 @@ export interface UpdateServerRequest {
    * @maximum 2147483647
    */
   id: number;
+  /** 0 = OpenVPN, 1 = Xray */
+  serverType?: number;
   /** @minLength 1 */
   serverName: string;
   isOnline?: boolean;

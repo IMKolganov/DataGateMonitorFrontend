@@ -7,6 +7,8 @@
 
 export interface OpenVpnServerDto {
   id?: number;
+  /** 0 = OpenVPN, 1 = Xray (see <c>VpnServerType</c> on backend). */
+  serverType?: number;
   /** @nullable */
   serverName?: string | null;
   isOnline?: boolean;

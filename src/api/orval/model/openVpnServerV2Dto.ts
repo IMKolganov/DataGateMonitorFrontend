@@ -8,6 +8,8 @@ import type { QuotaPlanGroupDto } from "./quotaPlanGroupDto";
 
 export interface OpenVpnServerV2Dto {
   id?: number;
+  /** 0 = OpenVPN, 1 = Xray */
+  serverType?: number;
   /** @nullable */
   serverName?: string | null;
   isOnline?: boolean;
