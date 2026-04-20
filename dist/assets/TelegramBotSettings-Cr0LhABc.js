@@ -6,7 +6,7 @@ telegrambot:
     args:
       TARGETARCH: \${TARGETARCH}
       BUILD_CONFIGURATION: \${BUILD_CONFIGURATION}
-  container_name: open-vpn-gate-monitor-telegrambot
+  container_name: datagate-monitor-telegrambot
   restart: always
   networks:
     - backend_network
