@@ -22,9 +22,26 @@ import { ACCESS_TOKEN_REFRESHED_EVENT } from "../utils/auth/accessTokenEvents.ts
 import { highlightOvpMgmtLine } from "../utils/ovpMgmtHighlight";
 import { OVP_MGMT_COMMANDS } from "../utils/ovpMgmtCommands";
 import { errorMessage } from "../utils/errorMessage";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
+import type { VpnServerResponse } from "../api/orval/model";
+import { isOpenVpnStack } from "../constants/vpnServerType";
+import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 
 export function WebConsole() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
+  const numericServerId = Number(vpnServerId || 0);
+  const serverQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId, {
+    query: {
+      enabled: numericServerId > 0,
+      staleTime: 10_000,
+      retry: 1,
+    },
+  });
+  const serverPayload = serverQuery.data as VpnServerResponse | undefined;
+  const skipOpenVpnConsole =
+    numericServerId > 0 &&
+    serverQuery.isSuccess &&
+    !isOpenVpnStack(serverPayload?.vpnServer?.serverType);
   const [messages, setMessages] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const [showCmdList, setShowCmdList] = useState(false);
@@ -59,6 +76,8 @@ export function WebConsole() {
 
   useEffect(() => {
     if (!vpnServerId) return;
+    if (numericServerId > 0 && serverQuery.isPending) return;
+    if (skipOpenVpnConsole) return;
 
     const setupSignalR = async () => {
       try {
@@ -127,7 +146,7 @@ export function WebConsole() {
       connectionRef.current?.stop();
       connectionRef.current = null;
     };
-  }, [vpnServerId, hubSessionKey]);
+  }, [vpnServerId, hubSessionKey, numericServerId, serverQuery.isPending, skipOpenVpnConsole]);
 
   useEffect(() => {
     if (messages.length === 0) return;
@@ -269,6 +288,24 @@ export function WebConsole() {
     historyIndexRef.current = -1;
     await clearHistoryDB(vpnServerId);
   };
+
+  if (skipOpenVpnConsole) {
+    return (
+      <OpenVpnServerFeaturePlaceholder vpnServerId={String(vpnServerId)} featureLabel="Web console">
+        <p style={{ marginTop: 8 }}>
+          The management console talks to the OpenVPN telnet-style API. Xray nodes do not expose this interface here.
+        </p>
+      </OpenVpnServerFeaturePlaceholder>
+    );
+  }
+
+  if (numericServerId > 0 && serverQuery.isPending) {
+    return (
+      <div className="server-details__panel" style={{ padding: 16 }}>
+        <p>Loading server…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="web-console-page">

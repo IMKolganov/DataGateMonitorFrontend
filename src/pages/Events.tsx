@@ -13,6 +13,10 @@ import {
   useGetApiOpenVpnEventsGetByServer,
   getApiOpenVpnEventsGetByServer,
 } from "../api/orval/vpn-server-event/vpn-server-event";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
+import type { VpnServerResponse } from "../api/orval/model";
+import { isOpenVpnStack } from "../constants/vpnServerType";
+import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import type { VpnServerEventLogDto } from "../api/orval/model";
 
@@ -108,6 +112,20 @@ function normalize<TItem = Item>(raw: Resp): Normalized<TItem> {
 
 const Events: React.FC = () => {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
+  const numericServerId = Number(vpnServerId || 0);
+
+  const serverQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId, {
+    query: {
+      enabled: numericServerId > 0,
+      staleTime: 10_000,
+      retry: 1,
+    },
+  });
+  const serverPayload = serverQuery.data as VpnServerResponse | undefined;
+  const eventsApiEnabled =
+    numericServerId > 0 &&
+    serverQuery.isSuccess &&
+    isOpenVpnStack(serverPayload?.vpnServer?.serverType);
 
   // Keep DataGrid model in URL-less state via React state lifted into grid (server pagination)
   const [page, setPage] = React.useState(0);       // DataGrid is 0-based
@@ -118,14 +136,13 @@ const Events: React.FC = () => {
   );
 
   const params = useMemo(() => {
-    const idNum = Number(vpnServerId || 0);
     return {
       // IMPORTANT: Orval params are PascalCase (as seen on other endpoints: From/To)
-      VpnServerId: idNum,
+      VpnServerId: numericServerId,
       Page: page + 1,       // API is 1-based
       PageSize: pageSize,
     };
-  }, [vpnServerId, page, pageSize]);
+  }, [numericServerId, page, pageSize]);
 
   const {
     data: resp,
@@ -133,7 +150,7 @@ const Events: React.FC = () => {
     refetch,
   } = useGetApiOpenVpnEventsGetByServer<Resp>(params, {
     query: {
-      enabled: !!Number(vpnServerId),
+      enabled: eventsApiEnabled,
       // v5 way to keep previous page data during refetch
       placeholderData: (prev) => prev as Resp,
       // optionally tune caching:
@@ -184,6 +201,28 @@ const Events: React.FC = () => {
       createDate: safeFormatDate(e?.createDate),
     }));
   }, [normalized.items]);
+
+  if (
+    numericServerId > 0 &&
+    serverQuery.isSuccess &&
+    !isOpenVpnStack(serverPayload?.vpnServer?.serverType)
+  ) {
+    return (
+      <OpenVpnServerFeaturePlaceholder vpnServerId={String(vpnServerId)} featureLabel="Events">
+        <p style={{ marginTop: 8 }}>
+          OpenVPN management event logs are not produced for Xray (VLESS) nodes.
+        </p>
+      </OpenVpnServerFeaturePlaceholder>
+    );
+  }
+
+  if (numericServerId > 0 && serverQuery.isPending) {
+    return (
+      <div className="server-details__panel" style={{ padding: 16 }}>
+        <p>Loading server…</p>
+      </div>
+    );
+  }
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 80 },

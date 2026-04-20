@@ -11,6 +11,8 @@ import type { VpnServerResponse } from "../api/orval/model";
 
 // Import generated hook
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
+import { isOpenVpnStack } from "../constants/vpnServerType";
+import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 
 // Helper to unwrap ApiResponse<T>
 function unwrap<T>(resp: unknown): T | undefined {
@@ -39,6 +41,28 @@ const Certificates: React.FC = () => {
 
   const apiPayload = unwrap<VpnServerResponse>(serverQuery.data);
   const serverName = apiPayload?.vpnServer?.serverName ?? "(unknown)";
+
+  if (
+    numericId &&
+    serverQuery.isSuccess &&
+    !isOpenVpnStack(apiPayload?.vpnServer?.serverType)
+  ) {
+    return (
+      <OpenVpnServerFeaturePlaceholder vpnServerId={vpnServerId || ""} featureLabel="Certificates & OVPN files">
+        <p style={{ marginTop: 8 }}>
+          EasyRSA certificates and issued .ovpn profiles are only used for OpenVPN servers.
+        </p>
+      </OpenVpnServerFeaturePlaceholder>
+    );
+  }
+
+  if (numericId && serverQuery.isPending) {
+    return (
+      <div className="certificates-page">
+        <p>Loading server…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="certificates-page">
