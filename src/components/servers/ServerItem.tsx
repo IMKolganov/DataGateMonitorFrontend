@@ -16,6 +16,7 @@ import type {
     VpnServerWithStatusV2Dto,
 } from "../../api/orval/model";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
+import { vpnServerTypeLabel } from "../../constants/vpnServerType";
 
 interface Props {
     /** v2 includes quota plan groups and accessibility; v1 kept for detail pages still on legacy GET. */
@@ -111,6 +112,7 @@ const ServerItem: React.FC<Props> = ({
         vpnServerId;
 
     const name = vpnServer?.serverName ?? "";
+    const stackLabel = vpnServerTypeLabel(vpnServer?.serverType as number | undefined);
     const isOnlineFromApi = !!vpnServer?.isOnline;
     const isOnline = wsOnline === null ? isOnlineFromApi : wsOnline;
     const isDefault = !!vpnServer?.isDefault;
@@ -132,6 +134,16 @@ const ServerItem: React.FC<Props> = ({
                 <div className="server-info">
                     <strong className="server-name">
                         ({vpnServerId !== 0 ? vpnServerId : resolvedId}) {name}
+                        <span
+                            style={{
+                                marginLeft: 8,
+                                fontSize: 11,
+                                fontWeight: 600,
+                                color: "var(--text-secondary)",
+                            }}
+                        >
+                            {stackLabel}
+                        </span>
                     </strong>
                     {quotaPlanGroups.length > 0 && (
                         <div

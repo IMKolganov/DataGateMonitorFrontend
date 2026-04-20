@@ -54,6 +54,7 @@ import type { ApiEnvelope } from "./TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 import { errorMessage } from "../utils/errorMessage";
 import axios from "axios";
+import { VpnServerType, vpnServerTypeLabel } from "../constants/vpnServerType";
 
 type GetByIdResult = Awaited<ReturnType<typeof getApiOpenVpnServersGetVpnServerId>>;
 
@@ -77,6 +78,12 @@ function unwrapServerDto(raw: GetByIdResult | undefined): VpnServerDto | null {
 
   const dto: VpnServerDto = {
     id: typeof o["id"] === "number" ? o["id"] : o["id"] != null ? Number(o["id"]) : undefined,
+    serverType:
+      typeof o["serverType"] === "number"
+        ? o["serverType"]
+        : o["serverType"] != null
+          ? Number(o["serverType"])
+          : VpnServerType.OpenVpn,
     serverName: (o["serverName"] as string | null | undefined) ?? null,
     isOnline: Boolean(o["isOnline"] ?? false),
     isDefault: Boolean(o["isDefault"] ?? false),
@@ -205,10 +212,6 @@ const ServerForm: React.FC = () => {
     query: { enabled: !!idNum },
   });
 
-  const { data: ovpnConfigData } = useGetApiOpenVpnConfigsGetVpnServerId(idNum, {
-    query: { enabled: idNum > 0 },
-  });
-
   const { data: tagsResp } = useGetApiTagsGetAll();
 
   const getPlansMutation = usePostApiQuotaPlansGetAll();
@@ -231,6 +234,7 @@ const ServerForm: React.FC = () => {
 
   const [serverData, setServerData] = React.useState<VpnServerDto>({
     id: idNum || undefined,
+    serverType: VpnServerType.OpenVpn,
     serverName: "",
     isOnline: false,
     isDefault: false,
@@ -240,6 +244,12 @@ const ServerForm: React.FC = () => {
     isEnableWss: false,
     createDate: new Date().toISOString(),
     lastUpdate: new Date().toISOString(),
+  });
+
+  const isOpenVpnForQueries = (serverData.serverType ?? VpnServerType.OpenVpn) === VpnServerType.OpenVpn;
+
+  const { data: ovpnConfigData } = useGetApiOpenVpnConfigsGetVpnServerId(idNum, {
+    query: { enabled: idNum > 0 && isOpenVpnForQueries },
   });
 
   const [selectedTagIds, setSelectedTagIds] = React.useState<number[]>([]);
@@ -349,6 +359,7 @@ const ServerForm: React.FC = () => {
       ...prev,
       ...dto,
       id: dto.id ?? prev.id ?? (idNum || undefined),
+      serverType: dto.serverType ?? VpnServerType.OpenVpn,
       serverName: dto.serverName ?? "",
       apiUrl: dto.apiUrl ?? null,
       latitude: dto.latitude ?? null,
@@ -391,7 +402,8 @@ const ServerForm: React.FC = () => {
       ok = false;
     }
 
-    if (idNum > 0) {
+    const isOpenVpnServer = (serverData.serverType ?? VpnServerType.OpenVpn) === VpnServerType.OpenVpn;
+    if (idNum > 0 && isOpenVpnServer) {
       if (!String(ovpnConfig.vpnServerIp ?? "").trim()) {
         next.vpnServerIp = "VPN Server IP is required.";
         ok = false;
@@ -415,6 +427,19 @@ const ServerForm: React.FC = () => {
 
     if (name === "serverName") {
       setServerData((p) => ({ ...p, serverName: value }));
+      return;
+    }
+
+    if (name === "serverType") {
+      const nextType = Number(value) === VpnServerType.Xray ? VpnServerType.Xray : VpnServerType.OpenVpn;
+      setServerData((p) => ({
+        ...p,
+        serverType: nextType,
+        apiUrl:
+          nextType === VpnServerType.Xray && !String(p.apiUrl ?? "").trim()
+            ? "http://xray:5010/"
+            : p.apiUrl,
+      }));
       return;
     }
 
@@ -532,8 +557,10 @@ const ServerForm: React.FC = () => {
 
     try {
       if (idNum) {
+        const isOpenVpnServer = (serverData.serverType ?? VpnServerType.OpenVpn) === VpnServerType.OpenVpn;
         const payload: UpdateServerRequest = {
           id: Number(serverData.id ?? idNum),
+          serverType: serverData.serverType ?? VpnServerType.OpenVpn,
           serverName: String(serverData.serverName ?? "").trim(),
           apiUrl: serverData.apiUrl ?? null,
           isDefault: serverData.isDefault ?? false,
@@ -546,14 +573,16 @@ const ServerForm: React.FC = () => {
 
         await updateMutation.mutateAsync({ data: payload });
 
-        await saveOvpnConfigMutation.mutateAsync({
-          data: {
-            vpnServerId: idNum,
-            vpnServerIp: String(ovpnConfig.vpnServerIp ?? "").trim(),
-            vpnServerPort: ovpnConfig.vpnServerPort || 1194,
-            configTemplate: ovpnConfig.configTemplate || null,
-          },
-        });
+        if (isOpenVpnServer) {
+          await saveOvpnConfigMutation.mutateAsync({
+            data: {
+              vpnServerId: idNum,
+              vpnServerIp: String(ovpnConfig.vpnServerIp ?? "").trim(),
+              vpnServerPort: ovpnConfig.vpnServerPort || 1194,
+              configTemplate: ovpnConfig.configTemplate || null,
+            },
+          });
+        }
 
         const prevRaw =
           queryClient.getQueryData(
@@ -574,9 +603,12 @@ const ServerForm: React.FC = () => {
         }
 
         invalidateQuotaCaches(idNum);
-        toast.success("Server and OpenVPN config updated successfully!");
+        toast.success(
+          isOpenVpnServer ? "Server and OpenVPN config updated successfully!" : "Server updated successfully!",
+        );
       } else {
         const payload: AddServerRequest = {
+          serverType: serverData.serverType ?? VpnServerType.OpenVpn,
           serverName: String(serverData.serverName ?? "").trim(),
           apiUrl: serverData.apiUrl ?? null,
           isDefault: serverData.isDefault ?? false,
@@ -584,6 +616,7 @@ const ServerForm: React.FC = () => {
           latitude: serverData.latitude ?? null,
           longitude: serverData.longitude ?? null,
           isEnableWss: serverData.isEnableWss ?? false,
+          quotaPlanIds: selectedQuotaPlanIds,
           tagIds: selectedTagIds,
         };
 
@@ -653,6 +686,32 @@ const ServerForm: React.FC = () => {
               {errors.serverName && <p className="error-message">{errors.serverName}</p>}
             </div>
 
+            <div className="form-group">
+              <label htmlFor="ServerType">VPN stack</label>
+              {idNum ? (
+                <p className="form-hint" style={{ marginTop: 4 }}>
+                  {vpnServerTypeLabel(serverData.serverType)} (type cannot be changed after create)
+                </p>
+              ) : (
+                <select
+                  id="ServerType"
+                  name="serverType"
+                  value={String(serverData.serverType ?? VpnServerType.OpenVpn)}
+                  onChange={handleTextChange}
+                  disabled={isFetching}
+                >
+                  <option value={String(VpnServerType.OpenVpn)}>OpenVPN</option>
+                  <option value={String(VpnServerType.Xray)}>Xray (VLESS)</option>
+                </select>
+              )}
+              {!idNum && (
+                <p className="form-hint" style={{ marginTop: 6 }}>
+                  Xray uses the DataGateXRayManager sidecar; default API URL for Docker Compose is{" "}
+                  <code>http://xray:5010/</code>.
+                </p>
+              )}
+            </div>
+
             <div className="form-group checkbox-container">
               <label className="checkbox-label">
                 <input
@@ -712,7 +771,11 @@ const ServerForm: React.FC = () => {
                   name="apiUrl"
                   value={serverData.apiUrl ?? ""}
                   onChange={handleTextChange}
-                  placeholder="e.g. http://95.111.204.102:4009/"
+                  placeholder={
+                    (serverData.serverType ?? VpnServerType.OpenVpn) === VpnServerType.Xray
+                      ? "e.g. http://xray:5010/"
+                      : "e.g. http://openvpn_udp:5010/"
+                  }
                   disabled={isFetching}
                 />
                 <button
@@ -883,7 +946,7 @@ const ServerForm: React.FC = () => {
               </div>
             </div>
 
-            {idNum > 0 && (
+            {idNum > 0 && (serverData.serverType ?? VpnServerType.OpenVpn) === VpnServerType.OpenVpn && (
               <>
                 <h3 className="ovpn-config-section-title">OpenVPN file config</h3>
                 <div className="form-group">
@@ -969,7 +1032,12 @@ const ServerForm: React.FC = () => {
                   <button
                       type="submit"
                       className="btn primary"
-                      disabled={addMutation.isPending || updateMutation.isPending || saveOvpnConfigMutation.isPending}
+                      disabled={
+                    addMutation.isPending ||
+                    updateMutation.isPending ||
+                    (((serverData.serverType ?? VpnServerType.OpenVpn) === VpnServerType.OpenVpn) &&
+                      saveOvpnConfigMutation.isPending)
+                  }
                   >
                     {FaPlus({ className: "icon" })} {idNum ? "Update Server" : "Add Server"}
                   </button>
