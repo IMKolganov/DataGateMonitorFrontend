@@ -13,9 +13,9 @@ import {
 } from "react-icons/fa";
 import "../css/ServerDetails.css";
 
-import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/open-vpn-servers/open-vpn-servers";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
-import type { OpenVpnServerResponse } from "../api/orval/model";
+import type { VpnServerResponse } from "../api/orval/model";
 
 type Tab = {
     label: string;
@@ -76,8 +76,8 @@ export function ServerDetails() {
         },
     });
 
-    const payload = serverQuery.data as OpenVpnServerResponse | undefined;
-    const vpnServerName = payload?.openVpnServer?.serverName ?? "(unknown)";
+    const payload = serverQuery.data as VpnServerResponse | undefined;
+    const vpnServerName = payload?.vpnServer?.serverName ?? "(unknown)";
 
     const safeCurrentPath = useMemo(() => {
         const exists = tabs.some((t) => t.path === currentPath);

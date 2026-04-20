@@ -11,13 +11,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   useGetApiOpenVpnConfigsGetVpnServerId,
   usePostApiOpenVpnConfigsAddUpdate,
-} from "../api/orval/open-vpn-server-ovpn-file-config/open-vpn-server-ovpn-file-config";
+} from "../api/orval/vpn-server-ovpn-file-config/vpn-server-ovpn-file-config";
 
 import {
   useGetApiOpenVpnServersConflogHistoryByServerVpnServerId,
   usePostApiOpenVpnServersConflogFetchAndSaveByServerVpnServerId,
   getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryKey,
-} from "../api/orval/open-vpn-server-conflog/open-vpn-server-conflog";
+} from "../api/orval/vpn-server-conflog/vpn-server-conflog";
 
 import type {
   AddOrUpdateOvpnFileConfigRequest,

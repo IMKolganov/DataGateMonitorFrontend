@@ -24,8 +24,8 @@ import {
   useGetApiOpenVpnClientsOverviewSummary,
   useGetApiOpenVpnClientsOverviewUsers,
   useGetApiOpenVpnClientsOverviewUsersSeries,
-} from "../../api/orval/open-vpn-server-clients/open-vpn-server-clients";
-import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/open-vpn-servers-v2/open-vpn-servers-v2";
+} from "../../api/orval/vpn-server-clients/vpn-server-clients";
+import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
 import { useGetApiUsersGetAll } from "../../api/orval/user/user";
 import type {
   GetAllUsersResponse,
@@ -33,7 +33,7 @@ import type {
   OverviewTotalsResponse,
   OverviewUsersResponse,
   OverviewUsersSeriesResponse,
-  OpenVpnServersV2Response,
+  VpnServersV2Response,
   GetApiOpenVpnClientsOverviewSeriesParams,
   GetApiOpenVpnClientsOverviewSummaryParams,
 } from "../../api/orval/model";
@@ -269,7 +269,7 @@ export default function ServersOverview() {
   const vpnServerDisplayName = useMemo(() => {
     if (vpnServerId == null) return "";
     const list =
-      (serversLabelQuery.data as OpenVpnServersV2Response | undefined)?.openVpnServers ?? [];
+      (serversLabelQuery.data as VpnServersV2Response | undefined)?.vpnServers ?? [];
     const s = list.find((x) => x.id === vpnServerId);
     return s?.serverName?.trim() ?? "";
   }, [serversLabelQuery.data, vpnServerId]);

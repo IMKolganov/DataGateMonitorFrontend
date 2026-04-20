@@ -9,10 +9,10 @@ import {
   useGetApiV2OpenVpnServersGetAll,
   getGetApiV2OpenVpnServersGetAllQueryKey,
   getGetApiV2OpenVpnServersGetAllWithStatusQueryKey,
-} from "../../api/orval/open-vpn-servers-v2/open-vpn-servers-v2";
+} from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
 import type {
   QuotaPlanAllowedServerDto,
-  OpenVpnServersV2Response,
+  VpnServersV2Response,
   GetQuotaPlanAllowedServersByQuotaPlanIdResponse,
 } from "../../api/orval/model";
 import { useQueryClient } from "@tanstack/react-query";
@@ -42,7 +42,7 @@ export function QuotaPlanAllowedServersModal({
 
   const { data: serversData } = useGetApiV2OpenVpnServersGetAll({});
   const servers =
-    (serversData as OpenVpnServersV2Response | undefined)?.openVpnServers ?? [];
+    (serversData as VpnServersV2Response | undefined)?.vpnServers ?? [];
 
   const createMutation = usePostApiQuotaPlanAllowedServersCreate();
   const deleteMutation = useDeleteApiQuotaPlanAllowedServersDeleteId();

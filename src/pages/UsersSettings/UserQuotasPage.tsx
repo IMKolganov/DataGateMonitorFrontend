@@ -5,7 +5,7 @@ import { FaChartPie, FaChevronLeft, FaChevronRight, FaSync, FaTable } from "reac
 import {
   getApiOpenVpnClientsOverviewSummary,
   getGetApiOpenVpnClientsOverviewSummaryQueryKey,
-} from "../../api/orval/open-vpn-server-clients/open-vpn-server-clients";
+} from "../../api/orval/vpn-server-clients/vpn-server-clients";
 import type { OverviewTotalsResponse, UserDto } from "../../api/orval/model";
 import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
 import { useUsers } from "./useUsers";

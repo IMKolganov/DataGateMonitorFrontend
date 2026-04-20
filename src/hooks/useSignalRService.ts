@@ -5,7 +5,7 @@ import {
     HubConnectionBuilder,
     LogLevel,
 } from "@microsoft/signalr";
-import { postApiOpenVpnServersRunNow } from "../api/orval/open-vpn-servers/open-vpn-servers";
+import { postApiOpenVpnServersRunNow } from "../api/orval/vpn-servers/vpn-servers";
 import type { ServiceStatusDto } from "../api/orval/model";
 import { ServiceStatus as ServiceStatusEnum } from "../api/orval/model";
 import {ACCESS_TOKEN_KEY} from "../utils/const.ts";
