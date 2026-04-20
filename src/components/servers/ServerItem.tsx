@@ -11,15 +11,15 @@ import { BsClock, BsFillBookmarkStarFill, BsTag, BsLink45Deg, BsHddNetwork } fro
 import { IoMdPerson } from "react-icons/io";
 import type {
     ServiceStatus,
-    OpenVpnServerV2Dto,
-    OpenVpnServerWithStatusDto,
-    OpenVpnServerWithStatusV2Dto,
+    VpnServerV2Dto,
+    VpnServerWithStatusDto,
+    VpnServerWithStatusV2Dto,
 } from "../../api/orval/model";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 
 interface Props {
     /** v2 includes quota plan groups and accessibility; v1 kept for detail pages still on legacy GET. */
-    server: OpenVpnServerWithStatusDto | OpenVpnServerWithStatusV2Dto;
+    server: VpnServerWithStatusDto | VpnServerWithStatusV2Dto;
     vpnServerId: number;
     /** null until the status-stream hub sends service status for this server. */
     serviceStatus: ServiceStatus | null;
@@ -103,26 +103,26 @@ const ServerItem: React.FC<Props> = ({
     const user = getCurrentUser();
     const canManage = isAdmin(user);
 
-    const openVpnServer = server.openVpnServerResponses?.openVpnServer ?? null;
+    const vpnServer = server.vpnServerResponses?.vpnServer ?? null;
 
     const resolvedId =
-        openVpnServer?.id ??
-        server.openVpnServerStatusLogResponse?.vpnServerId ??
+        vpnServer?.id ??
+        server.vpnServerStatusLogResponse?.vpnServerId ??
         vpnServerId;
 
-    const name = openVpnServer?.serverName ?? "";
-    const isOnlineFromApi = !!openVpnServer?.isOnline;
+    const name = vpnServer?.serverName ?? "";
+    const isOnlineFromApi = !!vpnServer?.isOnline;
     const isOnline = wsOnline === null ? isOnlineFromApi : wsOnline;
-    const isDefault = !!openVpnServer?.isDefault;
+    const isDefault = !!vpnServer?.isDefault;
 
     const connectedClients =
         wsCountConnectedClients ?? server.countConnectedClients ?? 0;
 
-    const apiUrl = openVpnServer?.apiUrl ?? null;
-    const statusLog = server.openVpnServerStatusLogResponse;
+    const apiUrl = vpnServer?.apiUrl ?? null;
+    const statusLog = server.vpnServerStatusLogResponse;
     const serverIp = statusLog?.serverRemoteIp ?? statusLog?.serverLocalIp ?? null;
 
-    const v2Server = openVpnServer as OpenVpnServerV2Dto | null;
+    const v2Server = vpnServer as VpnServerV2Dto | null;
     const quotaPlanGroups = v2Server?.quotaPlanGroups?.filter((g) => g?.name) ?? [];
     const accessibleByQuotaPlan = v2Server?.isAccessibleForUserQuotaPlan;
 
@@ -210,14 +210,14 @@ const ServerItem: React.FC<Props> = ({
                 )}
             </div>
 
-            {Array.isArray(openVpnServer?.tags) && openVpnServer.tags.length > 0 && (
+            {Array.isArray(vpnServer?.tags) && vpnServer.tags.length > 0 && (
                 <div className="server-tags-block">
                     <div className="detail-row-tags-heading">
                         <BsTag className="detail-icon" />
                         <span className="detail-label">Tags:</span>
                     </div>
                     <span className="server-tags-list">
-                        {openVpnServer.tags.map((tag) => (
+                        {vpnServer.tags.map((tag) => (
                             <span key={tag} className="server-tag-pill">
                                 {tag}
                             </span>

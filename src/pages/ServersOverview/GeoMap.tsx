@@ -2,8 +2,8 @@
 import { useMemo } from "react";
 
 import GeoPointsMap from "../../components/settings/GeoPointsMap.tsx";
-import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/open-vpn-servers-v2/open-vpn-servers-v2";
-import type { OpenVpnServerV2Dto, OpenVpnServersV2Response } from "../../api/orval/model";
+import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
+import type { VpnServerV2Dto, VpnServersV2Response } from "../../api/orval/model";
 
 type Props = {
   from: Date | string;
@@ -12,7 +12,7 @@ type Props = {
   externalId?: string | null;
 };
 
-function withLatLng(s: OpenVpnServerV2Dto): s is OpenVpnServerV2Dto & {
+function withLatLng(s: VpnServerV2Dto): s is VpnServerV2Dto & {
   id: number;
   latitude: number;
   longitude: number;
@@ -30,7 +30,7 @@ export default function GeoMap({ from, to, vpnServerId = null, externalId = null
   const { data: serversData } = useGetApiV2OpenVpnServersGetAll({});
 
   const vpnServerMarkers = useMemo(() => {
-    const list = (serversData as OpenVpnServersV2Response | undefined)?.openVpnServers ?? [];
+    const list = (serversData as VpnServersV2Response | undefined)?.vpnServers ?? [];
     const withCoords = list.filter((s) => !s.isDeleted).filter(withLatLng);
 
     if (vpnServerId != null) {

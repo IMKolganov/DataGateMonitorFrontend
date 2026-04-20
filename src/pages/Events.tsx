@@ -12,13 +12,13 @@ import "../css/ServerDetails.css";
 import {
   useGetApiOpenVpnEventsGetByServer,
   getApiOpenVpnEventsGetByServer,
-} from "../api/orval/open-vpn-server-event/open-vpn-server-event";
+} from "../api/orval/vpn-server-event/vpn-server-event";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
-import type { OpenVpnServerEventLogDto } from "../api/orval/model";
+import type { VpnServerEventLogDto } from "../api/orval/model";
 
 // Resp is already unwrapped by ogmMutator (ApiResponse<T> -> T)
 type Resp = Awaited<ReturnType<typeof getApiOpenVpnEventsGetByServer>>;
-type Item = OpenVpnServerEventLogDto;
+type Item = VpnServerEventLogDto;
 
 type Normalized<TItem> = {
   items: TItem[];

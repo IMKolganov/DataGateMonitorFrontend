@@ -11,25 +11,25 @@ import ServerDetailsInfoDefault from "../components/servers/ServerDetailsInfo.ts
 import {
     useGetApiOpenVpnClientsGetAllConnected,
     useGetApiOpenVpnClientsGetAllHistory,
-} from "../api/orval/open-vpn-server-clients/open-vpn-server-clients";
+} from "../api/orval/vpn-server-clients/vpn-server-clients";
 
 import type {
     GetApiOpenVpnClientsGetAllConnectedParams,
     GetApiOpenVpnClientsGetAllHistoryParams,
     ConnectedClientsResponse,
     VpnClientInfoDto,
-    OpenVpnServerWithStatusDto,
-    OpenVpnServerDto,
-    OpenVpnServerWithStatusResponse,
-    OpenVpnServerResponse,
+    VpnServerWithStatusDto,
+    VpnServerDto,
+    VpnServerWithStatusResponse,
+    VpnServerResponse,
 } from "../api/orval/model";
 
 import {
     useGetApiOpenVpnServersGetServerWithStatusVpnServerId,
     useGetApiOpenVpnServersGetVpnServerId,
-} from "../api/orval/open-vpn-servers/open-vpn-servers";
-import { useGetApiOpenVpnConfigsGetVpnServerId } from "../api/orval/open-vpn-server-ovpn-file-config/open-vpn-server-ovpn-file-config";
-import { useGetApiOpenVpnServersConflogHistoryByServerVpnServerId } from "../api/orval/open-vpn-server-conflog/open-vpn-server-conflog";
+} from "../api/orval/vpn-servers/vpn-servers";
+import { useGetApiOpenVpnConfigsGetVpnServerId } from "../api/orval/vpn-server-ovpn-file-config/vpn-server-ovpn-file-config";
+import { useGetApiOpenVpnServersConflogHistoryByServerVpnServerId } from "../api/orval/vpn-server-conflog/vpn-server-conflog";
 import { usePostApiQuotaPlansGetAll } from "../api/orval/quota-plan/quota-plan";
 import {
     useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId,
@@ -227,15 +227,15 @@ export function GeneralServerDetails() {
     const loadingServer = serverWithStatusQuery.isFetching || serverBasicQuery.isFetching;
 
     const serverWithStatusPayload = serverWithStatusQuery.data as unknown as
-        | OpenVpnServerWithStatusResponse
+        | VpnServerWithStatusResponse
         | undefined;
-    const serverWithStatus: OpenVpnServerWithStatusDto | undefined =
-        serverWithStatusPayload?.openVpnServerWithStatus;
+    const serverWithStatus: VpnServerWithStatusDto | undefined =
+        serverWithStatusPayload?.vpnServerWithStatus;
 
-    const serverBasicPayload = serverBasicQuery.data as unknown as OpenVpnServerResponse | undefined;
+    const serverBasicPayload = serverBasicQuery.data as unknown as VpnServerResponse | undefined;
 
-    const serverEntity: OpenVpnServerDto | undefined =
-        serverWithStatus?.openVpnServerResponses?.openVpnServer ?? serverBasicPayload?.openVpnServer;
+    const serverEntity: VpnServerDto | undefined =
+        serverWithStatus?.vpnServerResponses?.vpnServer ?? serverBasicPayload?.vpnServer;
 
     const serverLocation = useMemo<[number, number] | null>(() => {
         const lat = serverEntity?.latitude;
@@ -249,13 +249,13 @@ export function GeneralServerDetails() {
 
     const serverInfo = useMemo(() => {
         const withStatus = serverWithStatusQuery.data as unknown as
-            | OpenVpnServerWithStatusResponse
+            | VpnServerWithStatusResponse
             | undefined;
-        if (withStatus?.openVpnServerWithStatus) {
-            return withStatus.openVpnServerWithStatus;
+        if (withStatus?.vpnServerWithStatus) {
+            return withStatus.vpnServerWithStatus;
         }
 
-        const basic = serverBasicQuery.data as unknown as OpenVpnServerResponse | undefined;
+        const basic = serverBasicQuery.data as unknown as VpnServerResponse | undefined;
         if (basic) {
             return basic;
         }

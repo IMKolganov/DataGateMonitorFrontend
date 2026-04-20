@@ -8,7 +8,7 @@ import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { toast } from "react-toastify";
 
-import { getApiOpenVpnClientsOverviewPoints } from "../../api/orval/open-vpn-server-clients/open-vpn-server-clients.ts";
+import { getApiOpenVpnClientsOverviewPoints } from "../../api/orval/vpn-server-clients/vpn-server-clients.ts";
 import type {
     GeoPointAggDto,
     GetApiOpenVpnClientsOverviewPointsParams,

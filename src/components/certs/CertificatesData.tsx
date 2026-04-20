@@ -13,7 +13,7 @@ import {
 
 import {
   useGetApiOpenVpnCertsVpnServerIdGetAll,
-} from "../../api/orval/open-vpn-server-certs/open-vpn-server-certs.ts";
+} from "../../api/orval/vpn-server-certs/vpn-server-certs.ts";
 
 import type {
   GetAllCertificatesResponse,
