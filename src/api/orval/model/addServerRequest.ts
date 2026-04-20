@@ -6,6 +6,8 @@
  */
 
 export interface AddServerRequest {
+  /** 0 = OpenVPN, 1 = Xray */
+  serverType?: number;
   /** @minLength 1 */
   serverName: string;
   isOnline?: boolean;
