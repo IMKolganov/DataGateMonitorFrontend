@@ -132,11 +132,14 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId, stack = "openvpn" }) =
   // Toasts for query errors
   useEffect(() => {
     if (filesQuery.isError) {
-      toast.error(`Failed to load OVPN files: ${getErrorMessage(filesQuery.error)}`, {
-        toastId: "files-load-error",
-      });
+      toast.error(
+        `Failed to load ${isXrayStack ? "client links" : "OVPN files"}: ${getErrorMessage(filesQuery.error)}`,
+        {
+          toastId: "files-load-error",
+        },
+      );
     }
-  }, [filesQuery.isError, filesQuery.error]);
+  }, [filesQuery.isError, filesQuery.error, isXrayStack]);
 
   useEffect(() => {
     if (certsQuery.isError) {
@@ -149,15 +152,15 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId, stack = "openvpn" }) =
   // Helpers
   const refetchFiles = async () =>
     toast.promise(filesQuery.refetch(), {
-      pending: "Refreshing OVPN files…",
-      success: "OVPN files are up to date",
+      pending: isXrayStack ? "Refreshing client links…" : "Refreshing OVPN files…",
+      success: isXrayStack ? "Client links are up to date" : "OVPN files are up to date",
       error: {
         render({ data }: { data?: unknown }) {
           const err =
             data && typeof data === "object" && data !== null && "error" in data
               ? (data as { error: unknown }).error
               : data;
-          return `Failed to refresh OVPN files: ${getErrorMessage(err)}`;
+          return `Failed to refresh ${isXrayStack ? "client links" : "OVPN files"}: ${getErrorMessage(err)}`;
         },
       },
     });
@@ -166,7 +169,7 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId, stack = "openvpn" }) =
     try {
       await filesQuery.refetch();
     } catch (e) {
-      toast.error(`Failed to refresh OVPN files: ${getErrorMessage(e)}`, {
+      toast.error(`Failed to refresh ${isXrayStack ? "client links" : "OVPN files"}: ${getErrorMessage(e)}`, {
         toastId: "files-refetch-error",
       });
     }

@@ -94,8 +94,7 @@ const OvpnFileConfigForm: React.FC = () => {
   const serverType = (serverKindQuery.data as VpnServerResponse | undefined)?.vpnServer?.serverType;
   const openVpnPageEnabled =
     parsedVpnServerId > 0 && serverKindQuery.isSuccess && isOpenVpnStack(serverType);
-  const isXrayStack =
-    parsedVpnServerId > 0 && serverKindQuery.isSuccess && serverType === VpnServerType.Xray;
+  const isXrayStack = parsedVpnServerId > 0 && serverType === VpnServerType.Xray;
   const exportConfigPageEnabled = openVpnPageEnabled || isXrayStack;
   const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
