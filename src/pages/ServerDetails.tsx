@@ -80,8 +80,8 @@ export function ServerDetails() {
     });
 
     const payload = serverQuery.data as VpnServerResponse | undefined;
-    const isXrayServer =
-        serverQuery.isSuccess && payload?.vpnServer?.serverType === VpnServerType.Xray;
+    /** Use payload when present (incl. cached data while refetching) so OpenVPN-only tabs do not flash for Xray. */
+    const isXrayServer = payload?.vpnServer?.serverType === VpnServerType.Xray;
 
     const tabs = useMemo(() => {
         let base = canSeeAdminTabs ? ALL_SERVER_TABS : ALL_SERVER_TABS.filter((t) => !t.adminOnly);
@@ -107,10 +107,10 @@ export function ServerDetails() {
     const vpnServerName = payload?.vpnServer?.serverName ?? "(unknown)";
 
     useEffect(() => {
-        if (!serverQuery.isSuccess || !isXrayServer || !vpnServerId) return;
+        if (!isXrayServer || !vpnServerId) return;
         if (!isXrayBlockedSubpath(currentPath)) return;
         navigate(`/servers/${vpnServerId}`, { replace: true });
-    }, [serverQuery.isSuccess, isXrayServer, currentPath, navigate, vpnServerId]);
+    }, [isXrayServer, currentPath, navigate, vpnServerId]);
 
     const safeCurrentPath = useMemo(() => {
         const exists = tabs.some((t) => t.path === currentPath);
