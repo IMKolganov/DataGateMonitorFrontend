@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useParams } from "react-router-dom";
 import "../css/ServerDetails.css";
 import "../css/Settings.css";
-import { FaInfoCircle, FaMapMarkerAlt, FaSync, FaUsers } from "react-icons/fa";
-import { isOpenVpnStack } from "../constants/vpnServerType";
+import { FaMapMarkerAlt, FaSync, FaUsers } from "react-icons/fa";
+import { isOpenVpnStack, VpnServerType } from "../constants/vpnServerType";
 import ClientsTable from "../components/ClientsTable";
 import VpnMap from "../components/VpnMap";
 import ServerDetailsInfoDefault from "../components/servers/ServerDetailsInfo.tsx";
@@ -40,6 +40,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { QuotaPlansResponse, QuotaPlanAllowedServerDto } from "../api/orval/model";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
+import { formatDateWithOffset } from "../utils/utils";
 
 type ConflogPayload = {
     application?: string | null;
@@ -179,10 +180,13 @@ export function GeneralServerDetails() {
         (serverBasicQuery.data as unknown as VpnServerResponse | undefined)?.vpnServer?.serverType;
     const openVpnQueriesEnabled =
         Number.isFinite(numericServerId) && serverKindReady && isOpenVpnStack(scopedStackType);
+    const xrayClientsEnabled =
+        Number.isFinite(numericServerId) && serverKindReady && scopedStackType === VpnServerType.Xray;
+    const clientInsightsEnabled = openVpnQueriesEnabled || xrayClientsEnabled;
 
     const connectedQuery = useGetApiOpenVpnClientsGetAllConnected(connectedParams, {
         query: {
-            enabled: Number.isFinite(numericServerId) && isLive && openVpnQueriesEnabled,
+            enabled: Number.isFinite(numericServerId) && isLive && clientInsightsEnabled,
             staleTime: 10000,
             retry: 1,
         },
@@ -190,7 +194,7 @@ export function GeneralServerDetails() {
 
     const historyQuery = useGetApiOpenVpnClientsGetAllHistory(historyParams, {
         query: {
-            enabled: Number.isFinite(numericServerId) && !isLive && openVpnQueriesEnabled,
+            enabled: Number.isFinite(numericServerId) && !isLive && clientInsightsEnabled,
             staleTime: 10000,
             retry: 1,
         },
@@ -198,6 +202,17 @@ export function GeneralServerDetails() {
 
     const loadingClients =
         (isLive ? connectedQuery.isFetching : historyQuery.isFetching) ?? false;
+
+    const xrayClientsQueryErrorMessage =
+        isLive && connectedQuery.isError
+            ? connectedQuery.error instanceof Error
+                ? connectedQuery.error.message
+                : String(connectedQuery.error ?? "Request failed")
+            : !isLive && historyQuery.isError
+              ? historyQuery.error instanceof Error
+                  ? historyQuery.error.message
+                  : String(historyQuery.error ?? "Request failed")
+              : null;
 
     const activeClientsResponse =
         (isLive ? connectedQuery.data : historyQuery.data) as unknown as
@@ -277,9 +292,11 @@ export function GeneralServerDetails() {
     }, [isLive]);
 
     const handleRefresh = () => {
-        if (openVpnQueriesEnabled) {
+        if (clientInsightsEnabled) {
             if (isLive) connectedQuery.refetch();
             else historyQuery.refetch();
+        }
+        if (openVpnQueriesEnabled) {
             latestConflogQuery.refetch();
         }
 
@@ -319,7 +336,7 @@ export function GeneralServerDetails() {
                         Refresh
                     </button>
 
-                    {openVpnQueriesEnabled ? (
+                    {clientInsightsEnabled ? (
                         <label className="square-toggle">
                             <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
                             <span className="toggle-slider"></span>
@@ -339,18 +356,69 @@ export function GeneralServerDetails() {
                 quotaPlanLabels={quotaPlanLabels}
             />
 
-            {openVpnQueriesEnabled ? (
+            {clientInsightsEnabled ? (
                 <>
                     <section className="server-details__panel" aria-labelledby="server-vpn-clients-heading">
                         <h3 id="server-vpn-clients-heading" className="settings-card__h3-with-icon">
                             <FaUsers className="icon" aria-hidden />
                             <span>
-                                VPN Clients ({isLive ? "Connected" : "Historical"})
+                                {xrayClientsEnabled ? "Clients (synced)" : "VPN Clients"} (
+                                {isLive ? "Connected" : "Historical"})
                                 {loadingClients && (
                                     <span style={{ fontSize: 12, opacity: 0.7 }}> loading…</span>
                                 )}
                             </span>
                         </h3>
+
+                        {xrayClientsEnabled ? (
+                            <p
+                                className="server-details__muted"
+                                style={{ fontSize: 13, opacity: 0.92, margin: "0 0 12px", lineHeight: 1.45 }}
+                            >
+                                Sessions are synced from the node agent at{" "}
+                                <code style={{ wordBreak: "break-all" }}>{serverEntity?.apiUrl ?? "—"}</code>
+                                {" "}
+                                by the dashboard background service (same polling interval setting as OpenVPN,{" "}
+                                <code>OpenVPN_Polling_Interval</code>). This page refetches the stored list about every
+                                10 seconds while open; the &quot;Last poll&quot; time is when the backend last talked to
+                                the node.
+                                {serverEntity?.xrayClientsPolledAt ? (
+                                    <>
+                                        {" "}
+                                        Last poll: {formatDateWithOffset(new Date(serverEntity.xrayClientsPolledAt))}.
+                                    </>
+                                ) : null}
+                            </p>
+                        ) : null}
+
+                        {xrayClientsEnabled &&
+                        clients.length === 0 &&
+                        !loadingClients &&
+                        (Boolean(serverEntity?.xrayClientsPollError) || Boolean(xrayClientsQueryErrorMessage)) ? (
+                            <div
+                                role="alert"
+                                style={{
+                                    marginBottom: 12,
+                                    padding: "10px 12px",
+                                    borderRadius: 8,
+                                    background: "rgba(248, 81, 73, 0.12)",
+                                    border: "1px solid rgba(248, 81, 73, 0.35)",
+                                    fontSize: 13,
+                                }}
+                            >
+                                <strong>No sessions shown because polling failed.</strong>
+                                {serverEntity?.xrayClientsPollError ? (
+                                    <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>
+                                        {serverEntity.xrayClientsPollError}
+                                    </div>
+                                ) : null}
+                                {xrayClientsQueryErrorMessage ? (
+                                    <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>
+                                        {xrayClientsQueryErrorMessage}
+                                    </div>
+                                ) : null}
+                            </div>
+                        ) : null}
 
                         <ClientsTable
                             clients={clients}
@@ -360,34 +428,27 @@ export function GeneralServerDetails() {
                             onPageChange={setPage}
                             onPageSizeChange={setPageSize}
                             loading={loadingClients}
+                            clientsStack={xrayClientsEnabled ? "xray" : "openvpn"}
+                            vpnServerId={numericServerId}
+                            xrayPollError={serverEntity?.xrayClientsPollError ?? null}
+                            xrayQueryErrorMessage={xrayClientsQueryErrorMessage}
+                            onXraySessionsChanged={() => {
+                                if (isLive) void connectedQuery.refetch();
+                                else void historyQuery.refetch();
+                                void serverWithStatusQuery.refetch();
+                                void serverBasicQuery.refetch();
+                            }}
                         />
                     </section>
 
                     <section className="server-details__panel" aria-labelledby="server-vpn-locations-heading">
                         <h3 id="server-vpn-locations-heading" className="settings-card__h3-with-icon">
                             <FaMapMarkerAlt className="icon" aria-hidden />
-                            <span>VPN Client Locations</span>
+                            <span>{xrayClientsEnabled ? "Client locations" : "VPN Client Locations"}</span>
                         </h3>
                         <VpnMap clients={clients} serverLocation={serverLocation} serverName={serverName} />
                     </section>
                 </>
-            ) : serverKindReady ? (
-                <section className="server-details__panel" aria-labelledby="server-xray-stack-heading">
-                    <h3 id="server-xray-stack-heading" className="settings-card__h3-with-icon">
-                        <FaInfoCircle className="icon" aria-hidden />
-                        <span>Xray (VLESS)</span>
-                    </h3>
-                    <p style={{ lineHeight: 1.55, maxWidth: "52rem" }}>
-                        OpenVPN client lists, .ovpn configuration, and conflog-derived fields do not apply to this
-                        server. Use your Xray control path and the node API URL below for operations.
-                    </p>
-                    {serverEntity?.apiUrl ? (
-                        <p style={{ marginTop: 8 }}>
-                            <span className="detail-label">Node API URL: </span>
-                            <code>{serverEntity.apiUrl}</code>
-                        </p>
-                    ) : null}
-                </section>
             ) : null}
         </div>
     );

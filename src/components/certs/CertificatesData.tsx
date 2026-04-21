@@ -27,6 +27,8 @@ import "../../css/ServerDetails.css";
 
 interface Props {
   vpnServerId: string;
+  /** OpenVPN: certificates + .ovpn. Xray: same APIs issue VLESS links; optional EasyRSA-style certs via Xray manager. */
+  stack?: "openvpn" | "xray";
 }
 
 enum CertificateStatus {
@@ -91,9 +93,10 @@ function pickArray(payload: unknown): unknown[] {
   return [];
 }
 
-const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
+const CertificatesData: React.FC<Props> = ({ vpnServerId, stack = "openvpn" }) => {
   const numericId = useMemo(() => Number(vpnServerId), [vpnServerId]);
   const isValidId = Number.isFinite(numericId) && numericId > 0;
+  const isXrayStack = stack === "xray";
 
   const [selectedStatus, setSelectedStatus] = useState<CertificateStatus | null>(null);
 
@@ -203,22 +206,33 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
       >
         <h3 id="certificates-ovpn-heading" className="settings-card__h3-with-icon">
           <FaFileArchive className="icon" aria-hidden />
-          <span>Issued OVPN Files</span>
+          <span>{isXrayStack ? "Issued VLESS client links" : "Issued OVPN Files"}</span>
         </h3>
 
         <div className="certificates-page__add-block">
           <h4 className="certificates-page__subtitle certificates-page__add-block-title">
             <FaPlus className="icon" aria-hidden />
-            Make New OVPN File for Client
+            {isXrayStack ? "Create client link" : "Make New OVPN File for Client"}
           </h4>
           <p className="certificate-description certificates-page__add-block-desc">
-            Enter the <strong>Common Name (CN)</strong> and an <strong>External ID</strong> to generate a new OVPN file.
+            {isXrayStack ? (
+              <>
+                Enter a <strong>Common Name (CN)</strong> and <strong>External ID</strong>. The dashboard calls
+                DataGateXRayManager to build a short-lived cert and a link file from your{" "}
+                <strong>Client export template</strong> (server settings).
+              </>
+            ) : (
+              <>
+                Enter the <strong>Common Name (CN)</strong> and an <strong>External ID</strong> to generate a new OVPN
+                file.
+              </>
+            )}
           </p>
 
           <AddOvpnFile
             vpnServerId={vpnServerId}
             onSuccess={async () => {
-              toast.success("OVPN file created");
+              toast.success(isXrayStack ? "Client link created" : "OVPN file created");
               await refetchFiles();
             }}
           />
@@ -229,7 +243,7 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
           vpnServerId={vpnServerId}
           loading={filesQuery.isFetching}
           onRevoke={async () => {
-            toast.success("OVPN file revoked", { toastId: "ovpn-revoked" });
+            toast.success(isXrayStack ? "Client link revoked" : "OVPN file revoked", { toastId: "ovpn-revoked" });
             await silentRefetchFiles();
           }}
         />
@@ -241,8 +255,15 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
       >
         <h3 id="certificates-list-heading" className="settings-card__h3-with-icon">
           <FaCertificate className="icon" aria-hidden />
-          <span>Certificates</span>
+          <span>{isXrayStack ? "Xray user certificates" : "Certificates"}</span>
         </h3>
+
+        {isXrayStack ? (
+          <p className="certificate-description certificates-page__add-block-desc" style={{ marginBottom: 12 }}>
+            Optional: manage standalone certs on the node. Issuing a <strong>client link</strong> above also creates a
+            user certificate via DataGateXRayManager.
+          </p>
+        ) : null}
 
         <div className="certificates-page__add-block">
           <h4 className="certificates-page__subtitle certificates-page__add-block-title">
@@ -272,11 +293,7 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
               className="input"
               value={selectedStatus ?? ""}
               onChange={(e) =>
-                setSelectedStatus(
-                  e.target.value === ""
-                    ? null
-                    : (Number(e.target.value) as CertificateStatus),
-                )
+                setSelectedStatus(e.target.value === "" ? null : (Number(e.target.value) as CertificateStatus))
               }
             >
               <option value="">All</option>
