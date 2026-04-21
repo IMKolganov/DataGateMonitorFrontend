@@ -1,8 +1,8 @@
 // src/pages/WebConsole.tsx
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useLayoutEffect, useState, useRef, useCallback } from "react";
 import "../css/Console.css";
 import { FaArrowRight, FaTrash, FaInfoCircle, FaList, FaTerminal } from "react-icons/fa";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   HubConnectionBuilder,
   HubConnection,
@@ -25,10 +25,10 @@ import { errorMessage } from "../utils/errorMessage";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import type { VpnServerResponse } from "../api/orval/model";
 import { isOpenVpnStack } from "../constants/vpnServerType";
-import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 
 export function WebConsole() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
+  const navigate = useNavigate();
   const numericServerId = Number(vpnServerId || 0);
   const serverQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId, {
     query: {
@@ -38,10 +38,18 @@ export function WebConsole() {
     },
   });
   const serverPayload = serverQuery.data as VpnServerResponse | undefined;
-  const skipOpenVpnConsole =
+  const serverType = serverPayload?.vpnServer?.serverType;
+  /** Management console exists only for OpenVPN; any other known stack leaves this route immediately. */
+  const consoleNotSupported =
     numericServerId > 0 &&
-    serverQuery.isSuccess &&
-    !isOpenVpnStack(serverPayload?.vpnServer?.serverType);
+    serverType !== undefined &&
+    serverType !== null &&
+    !isOpenVpnStack(serverType);
+
+  useLayoutEffect(() => {
+    if (!vpnServerId || !consoleNotSupported) return;
+    navigate(`/servers/${vpnServerId}`, { replace: true });
+  }, [vpnServerId, consoleNotSupported, navigate]);
   const [messages, setMessages] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const [showCmdList, setShowCmdList] = useState(false);
@@ -77,7 +85,7 @@ export function WebConsole() {
   useEffect(() => {
     if (!vpnServerId) return;
     if (numericServerId > 0 && serverQuery.isPending) return;
-    if (skipOpenVpnConsole) return;
+    if (consoleNotSupported) return;
 
     const setupSignalR = async () => {
       try {
@@ -146,7 +154,7 @@ export function WebConsole() {
       connectionRef.current?.stop();
       connectionRef.current = null;
     };
-  }, [vpnServerId, hubSessionKey, numericServerId, serverQuery.isPending, skipOpenVpnConsole]);
+  }, [vpnServerId, hubSessionKey, numericServerId, serverQuery.isPending, consoleNotSupported]);
 
   useEffect(() => {
     if (messages.length === 0) return;
@@ -289,14 +297,8 @@ export function WebConsole() {
     await clearHistoryDB(vpnServerId);
   };
 
-  if (skipOpenVpnConsole) {
-    return (
-      <OpenVpnServerFeaturePlaceholder vpnServerId={String(vpnServerId)} featureLabel="Web console">
-        <p style={{ marginTop: 8 }}>
-          The management console talks to the OpenVPN telnet-style API. Xray nodes do not expose this interface here.
-        </p>
-      </OpenVpnServerFeaturePlaceholder>
-    );
+  if (consoleNotSupported) {
+    return null;
   }
 
   if (numericServerId > 0 && serverQuery.isPending) {
