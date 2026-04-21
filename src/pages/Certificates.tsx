@@ -40,8 +40,10 @@ const Certificates: React.FC = () => {
 
   const apiPayload = unwrap<VpnServerResponse>(serverQuery.data);
   const serverName = apiPayload?.vpnServer?.serverName ?? "(unknown)";
-  const isXray =
-    Boolean(numericId && serverQuery.isSuccess && apiPayload?.vpnServer?.serverType === VpnServerType.Xray);
+  /** Match server type from payload (incl. cache) so the title does not flash OpenVPN copy for Xray. */
+  const isXray = Boolean(
+    numericId && apiPayload?.vpnServer?.serverType === VpnServerType.Xray,
+  );
 
   if (numericId && serverQuery.isSuccess && !isOpenVpnStack(apiPayload?.vpnServer?.serverType) && !isXray) {
     return (

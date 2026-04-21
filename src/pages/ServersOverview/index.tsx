@@ -39,7 +39,7 @@ import type {
   GetApiOpenVpnClientsOverviewSeriesParams,
   GetApiOpenVpnClientsOverviewSummaryParams,
 } from "../../api/orval/model";
-import { isOpenVpnStack } from "../../constants/vpnServerType";
+import { VpnServerType } from "../../constants/vpnServerType";
 import { OverviewGrouping } from "../../api/orval/model";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
@@ -100,9 +100,7 @@ export default function ServersOverview() {
   });
   const scopedServerPayload = scopedServerQuery.data as VpnServerResponse | undefined;
   const scopedServerIsXray =
-    vpnServerId != null &&
-    scopedServerQuery.isSuccess &&
-    !isOpenVpnStack(scopedServerPayload?.vpnServer?.serverType);
+    vpnServerId != null && scopedServerPayload?.vpnServer?.serverType === VpnServerType.Xray;
   /** Avoid OpenVPN-overview API calls with an Xray server id before we know the stack (or after we know it is Xray). */
   const overviewChartsEnabled =
     vpnServerId == null ||
