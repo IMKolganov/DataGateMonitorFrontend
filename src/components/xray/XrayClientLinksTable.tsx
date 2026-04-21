@@ -9,11 +9,15 @@ import type {
   DownloadFileResponse,
   DownloadFileResponseApiResponse,
 } from "../../api/orval/model";
-import { usePostApiOpenVpnFilesRevokeFile, usePostApiOpenVpnFilesDownloadFile } from "../../api/orval/open-vpn-files/open-vpn-files.ts";
+import {
+  postApiXrayClientLinksDownloadFile,
+  postApiXrayClientLinksRevokeFile,
+} from "../../api/xrayClientLinks.ts";
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import type { OvpnRowInput } from "../ovpn-files/OvpnFilesTable.tsx";
 import "../../css/Table.css";
 
 const safeFormatDate = (input?: string | null): string => {
@@ -22,34 +26,13 @@ const safeFormatDate = (input?: string | null): string => {
   return isNaN(date.getTime()) ? "Invalid date" : formatDateWithOffset(date);
 };
 
-export type OvpnRowInput =
-  | { issuedOvpnFile?: IssuedOvpnFileDto }
-  | Record<string, unknown>
-  | IssuedOvpnFileDto;
-
-interface Props {
-  ovpnFiles: OvpnRowInput[];
-  vpnServerId: string;
-  onRevoke: () => Promise<void> | void;
-  loading: boolean;
-}
-
-function unwrapOvpnItem(x: OvpnRowInput): IssuedOvpnFileDto | null {
+function unwrapLinkRow(x: OvpnRowInput): IssuedOvpnFileDto | null {
   if (!x) return null;
   if ((x as IssuedOvpnFileDto).commonName != null || (x as IssuedOvpnFileDto).id != null) {
     return x as IssuedOvpnFileDto;
   }
   const rec = x as Record<string, unknown>;
-  const candidates = [
-    "issuedOvpnFile",
-    "issuedOvpnFileDto",
-    "ovpnFile",
-    "file",
-    "item",
-    "value",
-    "data",
-  ];
-  for (const k of candidates) {
+  for (const k of ["issuedOvpnFile", "issuedOvpnFileDto", "ovpnFile", "file", "item", "value", "data"]) {
     const v = rec[k];
     if (v && typeof v === "object" && v !== null) {
       const o = v as IssuedOvpnFileDto;
@@ -64,58 +47,54 @@ function unwrapOvpnItem(x: OvpnRowInput): IssuedOvpnFileDto | null {
   return null;
 }
 
-const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loading }) => {
-  const { mutateAsync: revokeMutate, isPending: revokePending } = usePostApiOpenVpnFilesRevokeFile();
-  const { mutateAsync: downloadMutate, isPending: downloadPending } = usePostApiOpenVpnFilesDownloadFile();
+interface Props {
+  links: OvpnRowInput[];
+  vpnServerId: string;
+  onRevoke: () => Promise<void> | void;
+  loading: boolean;
+}
 
+const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, loading }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [issuedToFilter, setIssuedToFilter] = useState("");
-  const [ovpnFilesGridPage, setOvpnFilesGridPage] = useState(0);
-  const [ovpnFilesPageSize, setOvpnFilesPageSize] = usePersistedPageSize(
-    `ovpn-files:${vpnServerId}`,
-    10,
-    "5,10,20,100",
-  );
+  const [gridPage, setGridPage] = useState(0);
+  const [pageSize, setPageSize] = usePersistedPageSize(`xray-client-links:${vpnServerId}`, 10, "5,10,20,100");
 
   const items: IssuedOvpnFileDto[] = useMemo(() => {
-    const arr = Array.isArray(ovpnFiles) ? ovpnFiles : [];
+    const arr = Array.isArray(links) ? links : [];
     return arr
-      .map(unwrapOvpnItem)
+      .map(unwrapLinkRow)
       .filter((x): x is IssuedOvpnFileDto => !!x && (x.id != null || x.commonName != null));
-  }, [ovpnFiles]);
+  }, [links]);
 
   const handleRevoke = useCallback(
-    async (ovpnFileId: number, commonName: string) => {
-      if (!window.confirm(`Are you sure you want to revoke OVPN file ${commonName}?`)) return;
+    async (linkId: number, commonName: string) => {
+      if (!window.confirm(`Revoke VLESS client link for ${commonName}?`)) return;
       try {
         const data: RevokeFileRequest = {
           vpnServerId: Number(vpnServerId),
-          ovpnFileId: ovpnFileId,
+          ovpnFileId: linkId,
           commonName,
         };
-
-        await revokeMutate({ data });
+        await postApiXrayClientLinksRevokeFile(data);
         await onRevoke();
       } catch (err: unknown) {
         const e = err as { response?: { data?: { message?: string } }; message?: string };
-
-        const msg = e.response?.data?.message || e.message || "Error revoking OVPN file.";
-
+        const msg = e.response?.data?.message || e.message || "Error revoking client link.";
         toast.error(msg);
       }
     },
-    [vpnServerId, revokeMutate, onRevoke],
+    [vpnServerId, onRevoke],
   );
 
   const handleDownload = useCallback(
-    async (issuedOvpnFileId: number) => {
+    async (issuedFileId: number) => {
       try {
         const payload: DownloadFileRequest = {
           vpnServerId: Number(vpnServerId),
-          issuedOvpnFileId,
+          issuedOvpnFileId: issuedFileId,
         };
-
-        const apiResult = (await downloadMutate({ data: payload })) as
+        const apiResult = (await postApiXrayClientLinksDownloadFile(payload)) as
           | DownloadFileResponseApiResponse
           | DownloadFileResponse;
 
@@ -128,8 +107,11 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
         const raw = atob(b64);
         const bytes = new Uint8Array([...raw].map((c) => c.charCodeAt(0)));
 
-        const blob = new Blob([bytes], { type: "application/x-openvpn-profile" });
-        const fileName = resp?.issuedOvpn?.fileName ?? `client_${issuedOvpnFileId}.ovpn`;
+        const fileName = resp?.issuedOvpn?.fileName ?? `client_${issuedFileId}.txt`;
+        const mime = /\.(txt|json)$/i.test(fileName)
+          ? "text/plain;charset=utf-8"
+          : "application/octet-stream";
+        const blob = new Blob([bytes], { type: mime });
 
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -140,16 +122,13 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
         a.remove();
         URL.revokeObjectURL(url);
 
-        toast.success("File downloaded.");
+        toast.success("Downloaded.");
       } catch (err: unknown) {
         const e = err as { response?: { data?: { message?: string } }; message?: string };
-
-        const msg = e.response?.data?.message || e.message || "Error downloading file.";
-
-        toast.error(msg);
+        toast.error(e.response?.data?.message || e.message || "Error downloading file.");
       }
     },
-    [downloadMutate, vpnServerId],
+    [vpnServerId],
   );
 
   const filtered = useMemo(() => {
@@ -161,26 +140,22 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
     });
   }, [items, searchQuery, issuedToFilter]);
 
-  const rows = filtered.map((issuedOvpnFile, index) => {
-    const id =
-      issuedOvpnFile.id != null
-        ? String(issuedOvpnFile.id)
-        : `${issuedOvpnFile.commonName ?? "cn"}-${index}`;
-
+  const rows = filtered.map((row, index) => {
+    const id = row.id != null ? String(row.id) : `${row.commonName ?? "cn"}-${index}`;
     return {
       id,
-      externalId: issuedOvpnFile.externalId || "",
-      commonName: issuedOvpnFile.commonName || "",
-      fileName: issuedOvpnFile.fileName || "",
-      filePath: issuedOvpnFile.filePath || "",
-      issuedAt: safeFormatDate(issuedOvpnFile.issuedAt),
-      issuedTo: issuedOvpnFile.issuedTo || "",
-      certFilePath: issuedOvpnFile.certFilePath || "",
-      keyFilePath: issuedOvpnFile.keyFilePath || "",
-      isRevoked: issuedOvpnFile.isRevoked,
-      message: issuedOvpnFile.message || "",
-      lastUpdate: safeFormatDate(issuedOvpnFile.lastUpdate),
-      createDate: safeFormatDate(issuedOvpnFile.createDate),
+      externalId: row.externalId || "",
+      commonName: row.commonName || "",
+      fileName: row.fileName || "",
+      filePath: row.filePath || "",
+      issuedAt: safeFormatDate(row.issuedAt),
+      issuedTo: row.issuedTo || "",
+      certFilePath: row.certFilePath || "",
+      keyFilePath: row.keyFilePath || "",
+      isRevoked: row.isRevoked,
+      message: row.message || "",
+      lastUpdate: safeFormatDate(row.lastUpdate),
+      createDate: safeFormatDate(row.createDate),
     };
   });
 
@@ -189,13 +164,13 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
     { field: "externalId", headerName: "External ID", flex: 1, minWidth: 120 },
     { field: "commonName", headerName: "Common Name", flex: 1, minWidth: 160 },
     { field: "fileName", headerName: "File Name", flex: 1, minWidth: 160 },
-    { field: "issuedAt", headerName: "Issued Date", flex: 0.8, minWidth: 140 },
+    { field: "issuedAt", headerName: "Issued", flex: 0.8, minWidth: 140 },
     {
       field: "isRevoked",
       headerName: "Status",
       flex: 0.6,
       minWidth: 120,
-      renderCell: (params) => (params.value ? "❌ Revoked" : "✅ Active"),
+      renderCell: (params) => (params.value ? "Revoked" : "Active"),
     },
     {
       field: "actions",
@@ -206,19 +181,14 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       renderCell: (params) => (
         <div className="action-container">
           {!params.row.isRevoked && (
-            <button
-              className="btn danger"
-              onClick={() => handleRevoke(Number(params.row.id), params.row.commonName)}
-              disabled={revokePending}
-            >
+            <button className="btn danger" onClick={() => handleRevoke(Number(params.row.id), params.row.commonName)}>
               Revoke
             </button>
           )}
           <button
             className="btn secondary"
             onClick={() => handleDownload(Number(params.row.id))}
-            disabled={downloadPending}
-            title="Download OVPN"
+            title="Download client link file"
           >
             <FaDownload className="icon" style={{ marginRight: 6 }} />
             Download
@@ -261,15 +231,15 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           columns={columns}
           pageSizeOptions={[5, 10, 20, 100]}
           paginationMode="client"
-          paginationModel={{ page: ovpnFilesGridPage, pageSize: ovpnFilesPageSize }}
+          paginationModel={{ page: gridPage, pageSize }}
           onPaginationModelChange={(m) => {
-            setOvpnFilesGridPage(m.page);
-            setOvpnFilesPageSize(m.pageSize);
+            setGridPage(m.page);
+            setPageSize(m.pageSize);
           }}
           localeText={{
-            noRowsLabel: loading ? "🔄 Loading OVPN files..." : "📭 No OVPN files found",
+            noRowsLabel: loading ? "Loading client links…" : "No client links yet",
           }}
-          loading={loading || revokePending || downloadPending}
+          loading={loading}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
         />
       </div>
@@ -277,4 +247,4 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
   );
 };
 
-export default OvpnFilesTable;
+export default XrayClientLinksTable;

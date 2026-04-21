@@ -54,6 +54,20 @@ export default defineConfig(({ mode }) => {
 
     preview: {
       port,
+      proxy: {
+        "/api/hubs": {
+          target: proxyTarget,
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
+        "/api": {
+          target: proxyTarget,
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
+      },
     },
 
     define: {
