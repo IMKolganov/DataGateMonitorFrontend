@@ -31,4 +31,8 @@ export interface VpnServerV2Dto {
   /** @nullable */
   quotaPlanGroups?: QuotaPlanGroupDto[] | null;
   isAccessibleForUserQuotaPlan?: boolean;
+  /** @nullable */
+  xrayClientsPolledAt?: string | null;
+  /** @nullable */
+  xrayClientsPollError?: string | null;
 }

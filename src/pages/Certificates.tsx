@@ -11,8 +11,7 @@ import type { VpnServerResponse } from "../api/orval/model";
 
 // Import generated hook
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
-import { isOpenVpnStack } from "../constants/vpnServerType";
-import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
+import { isOpenVpnStack, VpnServerType } from "../constants/vpnServerType";
 
 // Helper to unwrap ApiResponse<T>
 function unwrap<T>(resp: unknown): T | undefined {
@@ -41,18 +40,14 @@ const Certificates: React.FC = () => {
 
   const apiPayload = unwrap<VpnServerResponse>(serverQuery.data);
   const serverName = apiPayload?.vpnServer?.serverName ?? "(unknown)";
+  const isXray =
+    Boolean(numericId && serverQuery.isSuccess && apiPayload?.vpnServer?.serverType === VpnServerType.Xray);
 
-  if (
-    numericId &&
-    serverQuery.isSuccess &&
-    !isOpenVpnStack(apiPayload?.vpnServer?.serverType)
-  ) {
+  if (numericId && serverQuery.isSuccess && !isOpenVpnStack(apiPayload?.vpnServer?.serverType) && !isXray) {
     return (
-      <OpenVpnServerFeaturePlaceholder vpnServerId={vpnServerId || ""} featureLabel="Certificates & OVPN files">
-        <p style={{ marginTop: 8 }}>
-          EasyRSA certificates and issued .ovpn profiles are only used for OpenVPN servers.
-        </p>
-      </OpenVpnServerFeaturePlaceholder>
+      <div className="certificates-page">
+        <p>This server type does not support issued client files from the dashboard.</p>
+      </div>
     );
   }
 
@@ -69,12 +64,12 @@ const Certificates: React.FC = () => {
       <h2 className="certificates-page__title settings-page__h2-with-icon">
         <FaKey className="icon" aria-hidden />
         <span>
-          VPN Certificates &amp; OVPN Files for Server{" "}
+          {isXray ? "VLESS client links" : "VPN Certificates & OVPN Files"} for Server{" "}
           {serverQuery.isLoading ? "…" : serverName || vpnServerId}
         </span>
       </h2>
 
-      <CertificatesData vpnServerId={vpnServerId || ""} />
+      <CertificatesData vpnServerId={vpnServerId || ""} stack={isXray ? "xray" : "openvpn"} />
     </div>
   );
 };

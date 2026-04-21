@@ -18,11 +18,11 @@ import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import type { VpnServerResponse } from "../api/orval/model";
 import { VpnServerType } from "../constants/vpnServerType";
 
-/** Subpaths under `/servers/:id/...` that only apply to OpenVPN. */
-function isOpenVpnOnlySubpath(relative: string): boolean {
-  if (!relative) return false;
-  const keys = ["certificates", "console", "ovpn-file-config", "events", "statistics"];
-  return keys.some((k) => relative === k || relative.startsWith(`${k}/`));
+/** Subpaths under `/servers/:id/...` that do not apply to Xray (OpenVPN-only UI). */
+function isXrayBlockedSubpath(relative: string): boolean {
+    if (!relative) return false;
+    const keys = ["console", "events", "statistics"];
+    return keys.some((k) => relative === k || relative.startsWith(`${k}/`));
 }
 
 type Tab = {
@@ -86,14 +86,17 @@ export function ServerDetails() {
     const tabs = useMemo(() => {
         let base = canSeeAdminTabs ? ALL_SERVER_TABS : ALL_SERVER_TABS.filter((t) => !t.adminOnly);
         if (isXrayServer) {
-            const openVpnOnly = new Set([
-                "certificates",
-                "console",
-                "ovpn-file-config",
-                "events",
-                "statistics",
-            ]);
-            base = base.filter((t) => !openVpnOnly.has(t.path));
+            const xrayHidden = new Set(["console", "events", "statistics"]);
+            base = base.filter((t) => !xrayHidden.has(t.path));
+            base = base.map((t) => {
+                if (t.path === "certificates") {
+                    return { ...t, label: "Client links (VLESS)" };
+                }
+                if (t.path === "ovpn-file-config") {
+                    return { ...t, label: "Client export template" };
+                }
+                return t;
+            });
             if (base.length === 0) {
                 base = [{ label: "Overview", path: "", adminOnly: false, Icon: FaServer, mobilePrefix: "🖥️" }];
             }
@@ -105,7 +108,7 @@ export function ServerDetails() {
 
     useEffect(() => {
         if (!serverQuery.isSuccess || !isXrayServer || !vpnServerId) return;
-        if (!isOpenVpnOnlySubpath(currentPath)) return;
+        if (!isXrayBlockedSubpath(currentPath)) return;
         navigate(`/servers/${vpnServerId}`, { replace: true });
     }, [serverQuery.isSuccess, isXrayServer, currentPath, navigate, vpnServerId]);
 

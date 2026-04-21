@@ -27,4 +27,8 @@ export interface VpnServerDto {
   dcoIsEnabled?: boolean | null;
   /** @nullable */
   tags?: string[] | null;
+  /** @nullable */
+  xrayClientsPolledAt?: string | null;
+  /** @nullable */
+  xrayClientsPollError?: string | null;
 }
