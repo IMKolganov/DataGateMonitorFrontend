@@ -13,9 +13,12 @@ import { axiosResponseDataMessage, axiosResponseDetail, errorMessage } from "../
 interface Props {
   vpnServerId: string;
   onSuccess: () => void;
+  /** Xray: same API issues VLESS links; labels point to export template, not OpenVPN .ovpn. */
+  stack?: "openvpn" | "xray";
 }
 
-const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
+const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess, stack = "openvpn" }) => {
+  const isXray = stack === "xray";
   const [newCommonName, setNewCommonName] = useState<string>("");
   const [newExternalId, setNewExternalId] = useState<string>("");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -54,8 +57,11 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
 
       setNewCommonName("");
       setNewExternalId("");
-      setMessage({ type: "success", text: "OVPN file added successfully!" });
-      toast.success("OVPN file created");
+      setMessage({
+        type: "success",
+        text: isXray ? "Client link created successfully." : "OVPN file added successfully!",
+      });
+      toast.success(isXray ? "Client link created" : "OVPN file created");
       onSuccess();
     } catch (error: unknown) {
       const data = axios.isAxiosError(error) ? error.response?.data : undefined;
@@ -63,14 +69,14 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
         axiosResponseDataMessage(data) ??
         (axios.isAxiosError(error) ? error.message : undefined) ??
         errorMessage(error) ??
-        "Failed to add OVPN file.";
+        isXray ? "Failed to create client link." : "Failed to add OVPN file.";
       const detail = axiosResponseDetail(data);
       const text = detail ? `${errMsg} Details: ${detail}` : errMsg;
 
       setMessage({ type: "error", text });
       toast.error(errMsg);
     }
-  }, [addMutate, vpnServerId, newExternalId, newCommonName, onSuccess, validate]);
+  }, [addMutate, vpnServerId, newExternalId, newCommonName, onSuccess, validate, isXray]);
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -112,17 +118,38 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
 
       <button className="btn primary" onClick={handleAddOvpnFile} disabled={isPending}>
         <FaPlus className="icon" />
-        {isPending ? "Adding..." : "Make new OVPN file"}
+        {isPending ? "Adding..." : isXray ? "Create client link" : "Make new OVPN file"}
       </button>
 
       <button
         className="btn secondary"
+        type="button"
         onClick={() => navigate(`/servers/${vpnServerId}/ovpn-file-config/`)}
         disabled={isPending}
+        title={
+          isXray
+            ? "Open the VLESS client export template (IP, port, placeholders such as {{vless_uri}})"
+            : "Open OpenVPN .ovpn generation template settings"
+        }
       >
         <FaCog className="icon" />
-        Change config OVPN file
+        {isXray ? "Edit export template" : "Change config OVPN file"}
       </button>
+
+      <p className="certificate-description" style={{ marginTop: 10, maxWidth: 720, lineHeight: 1.45 }}>
+        {isXray ? (
+          <>
+            Primary button calls the dashboard API to issue a <strong>VLESS client link</strong> (not an{" "}
+            <code>.ovpn</code> file). Secondary opens <strong>Client export template</strong> — the same tab labeled{" "}
+            <strong>Client export template</strong> in the server menu for Xray.
+          </>
+        ) : (
+          <>
+            Primary creates a new <code>.ovpn</code> for a client. Secondary opens <strong>Configurations</strong> to
+            edit the OpenVPN file template.
+          </>
+        )}
+      </p>
 
       {message && (
         <p className={message.type === "success" ? "message-success" : "message-error"}>

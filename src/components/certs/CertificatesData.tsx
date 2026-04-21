@@ -234,8 +234,8 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId, stack = "openvpn" }) =
 
           <AddOvpnFile
             vpnServerId={vpnServerId}
+            stack={stack}
             onSuccess={async () => {
-              toast.success(isXrayStack ? "Client link created" : "OVPN file created");
               await refetchFiles();
             }}
           />

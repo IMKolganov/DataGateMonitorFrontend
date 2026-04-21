@@ -410,6 +410,45 @@ const OvpnFileConfigForm: React.FC = () => {
               : "Add New Ovpn File Config"}
           </h2>
 
+          {isXrayStack ? (
+            <div
+              className="server-details__muted"
+              role="note"
+              style={{
+                margin: "0 0 16px",
+                padding: "12px 14px",
+                borderRadius: 8,
+                border: "1px solid var(--border-default, #30363d)",
+                background: "rgba(56, 139, 253, 0.08)",
+                maxWidth: 900,
+                lineHeight: 1.5,
+                fontSize: 14,
+              }}
+            >
+              <strong>Xray (VLESS)</strong> — this screen is only the <strong>export template</strong> (text with
+              placeholders like <code>{"{{vless_uri}}"}</code>). It is <strong>not</strong> an OpenVPN server profile.
+              Issued links are created under <strong>Client links (VLESS)</strong> → <strong>Create client link</strong>.
+            </div>
+          ) : (
+            <div
+              className="server-details__muted"
+              role="note"
+              style={{
+                margin: "0 0 16px",
+                padding: "12px 14px",
+                borderRadius: 8,
+                border: "1px solid var(--border-default, #30363d)",
+                maxWidth: 900,
+                lineHeight: 1.5,
+                fontSize: 14,
+              }}
+            >
+              <strong>OpenVPN</strong> — template drives generated <code>.ovpn</code> files. New files:{" "}
+              <strong>Configurations</strong> is linked from <strong>Make new OVPN file</strong> → &quot;Change config
+              OVPN file&quot;, or tab <strong>Configurations</strong>.
+            </div>
+          )}
+
           <div className="header-containe">
             <div className="header-bar">
               <div className="left-buttons">
@@ -464,7 +503,7 @@ const OvpnFileConfigForm: React.FC = () => {
             <div className="form-group">
               <div className="config-template-container">
                 <div className="toolbar">
-                  <span>Config Template</span>
+                  <span>{isXrayStack ? "VLESS export template" : "Config Template"}</span>
                   <button
                     className="copy-button"
                     type="button"
