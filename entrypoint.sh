@@ -2,6 +2,8 @@
 set -e
 
 : "${BACKEND_URL:=}"
+BACKEND_INTERNAL_URL="${BACKEND_INTERNAL_URL:-http://backend:5581}"
+export BACKEND_INTERNAL_URL
 : "${VITE_GOOGLE_CLIENT_ID:=}"
 
 cat > /usr/share/nginx/html/env.js <<EOF
@@ -11,6 +13,6 @@ window.__ENV__ = {
 };
 EOF
 
-envsubst '${BACKEND_URL}' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf
+envsubst '${BACKEND_INTERNAL_URL}' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf
 
 exec nginx -g 'daemon off;'
