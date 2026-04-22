@@ -22,7 +22,6 @@ import type {
 
 import type {
   GetAllUsersResponseApiResponse,
-  GetApiUsersGetAllParams,
   RegisterUserFromTgBotRequest,
   StringApiResponse,
   UsersResponseApiResponse,
@@ -120,46 +119,39 @@ export const usePostApiUsersRegisterFromTgbot = <
   );
 };
 export const getApiUsersGetAll = (
-  params?: GetApiUsersGetAllParams,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
   return ogmMutator<GetAllUsersResponseApiResponse>(
-    { url: `/api/users/get-all`, method: "GET", params, signal },
+    { url: `/api/users/get-all`, method: "GET", signal },
     options,
   );
 };
 
-export const getGetApiUsersGetAllQueryKey = (
-  params?: GetApiUsersGetAllParams,
-) => {
-  return [`/api/users/get-all`, ...(params ? [params] : [])] as const;
+export const getGetApiUsersGetAllQueryKey = () => {
+  return [`/api/users/get-all`] as const;
 };
 
 export const getGetApiUsersGetAllQueryOptions = <
   TData = Awaited<ReturnType<typeof getApiUsersGetAll>>,
   TError = unknown,
->(
-  params?: GetApiUsersGetAllParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getApiUsersGetAll>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof ogmMutator>;
-  },
-) => {
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getApiUsersGetAll>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getGetApiUsersGetAllQueryKey(params);
+  const queryKey = queryOptions?.queryKey ?? getGetApiUsersGetAllQueryKey();
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiUsersGetAll>>
-  > = ({ signal }) => getApiUsersGetAll(params, requestOptions, signal);
+  > = ({ signal }) => getApiUsersGetAll(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiUsersGetAll>>,
@@ -177,7 +169,6 @@ export function useGetApiUsersGetAll<
   TData = Awaited<ReturnType<typeof getApiUsersGetAll>>,
   TError = unknown,
 >(
-  params: undefined | GetApiUsersGetAllParams,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -204,7 +195,6 @@ export function useGetApiUsersGetAll<
   TData = Awaited<ReturnType<typeof getApiUsersGetAll>>,
   TError = unknown,
 >(
-  params?: GetApiUsersGetAllParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -231,7 +221,6 @@ export function useGetApiUsersGetAll<
   TData = Awaited<ReturnType<typeof getApiUsersGetAll>>,
   TError = unknown,
 >(
-  params?: GetApiUsersGetAllParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -251,7 +240,6 @@ export function useGetApiUsersGetAll<
   TData = Awaited<ReturnType<typeof getApiUsersGetAll>>,
   TError = unknown,
 >(
-  params?: GetApiUsersGetAllParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -266,7 +254,7 @@ export function useGetApiUsersGetAll<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetApiUsersGetAllQueryOptions(params, options);
+  const queryOptions = getGetApiUsersGetAllQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
