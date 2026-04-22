@@ -36,9 +36,8 @@ export function StatisticsScopeBanner({
     return (
       <div style={bannerStyle} role="status">
         The charts and tables below include traffic for{" "}
-        <strong style={{ color: "var(--text-primary)" }}>all VPN servers</strong> and{" "}
-        <strong style={{ color: "var(--text-primary)" }}>all OpenVPN users</strong> in the
-        selected period.
+        <strong style={{ color: "var(--text-primary)" }}>all VPN servers</strong> (OpenVPN and Xray) and{" "}
+        <strong style={{ color: "var(--text-primary)" }}>all users</strong> in the selected period.
       </div>
     );
   }
