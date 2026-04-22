@@ -11,19 +11,181 @@ import { apiRequest } from "../api/apirequest.ts";
 import { errorMessage } from "../utils/errorMessage";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 
-type StackLabel = "OpenVPN" | "Xray";
-type CategoryLabel = "Read" | "Mutate" | "Download";
+/** Matches backend ApplicationNotificationKind enum order (int values 0–26). */
+type NotificationKindRow = {
+  kind: number;
+  section: string;
+  title: string;
+  description: string;
+};
 
-/** Matches backend enum int values. */
-const StackOpenVpn = 0;
-const StackXray = 1;
-const CatRead = 0;
-const CatMutate = 1;
-const CatDownload = 2;
+const KIND_ROWS: NotificationKindRow[] = [
+  {
+    kind: 0,
+    section: "OpenVPN profiles (API)",
+    title: "Read",
+    description: "List or fetch profiles (by server, external id, token, etc.).",
+  },
+  {
+    kind: 1,
+    section: "OpenVPN profiles (API)",
+    title: "Mutate",
+    description: "Issue, revoke, or token-related changes.",
+  },
+  {
+    kind: 2,
+    section: "OpenVPN profiles (API)",
+    title: "Download",
+    description: "When a profile file is downloaded via the API.",
+  },
+  {
+    kind: 3,
+    section: "Xray client links (API)",
+    title: "Read",
+    description: "List or fetch client links (by server, external id, token, etc.).",
+  },
+  {
+    kind: 4,
+    section: "Xray client links (API)",
+    title: "Mutate",
+    description: "Issue, revoke, or token-related changes.",
+  },
+  {
+    kind: 5,
+    section: "Xray client links (API)",
+    title: "Download",
+    description: "When a client link payload is downloaded via the API.",
+  },
+  {
+    kind: 6,
+    section: "Certificate API",
+    title: "Read all",
+    description: "Certificate microservice: list or read certificate metadata.",
+  },
+  {
+    kind: 7,
+    section: "Certificate API",
+    title: "Certificate created",
+    description: "A new certificate was created.",
+  },
+  {
+    kind: 8,
+    section: "Certificate API",
+    title: "Certificate revoked",
+    description: "A certificate was revoked.",
+  },
+  {
+    kind: 9,
+    section: "VPN servers (OpenVPN API)",
+    title: "Server became available",
+    description: "A VPN server responded again after being unavailable.",
+  },
+  {
+    kind: 10,
+    section: "VPN servers (OpenVPN API)",
+    title: "Server added",
+    description: "A new OpenVPN server was registered.",
+  },
+  {
+    kind: 11,
+    section: "VPN servers (OpenVPN API)",
+    title: "Server updated",
+    description: "OpenVPN server configuration changed.",
+  },
+  {
+    kind: 12,
+    section: "VPN servers (OpenVPN API)",
+    title: "Server deleted",
+    description: "An OpenVPN server was removed.",
+  },
+  {
+    kind: 13,
+    section: "VPN servers (OpenVPN API)",
+    title: "Server became unavailable",
+    description: "A VPN server stopped responding or failed health checks.",
+  },
+  {
+    kind: 14,
+    section: "VPN servers (OpenVPN API)",
+    title: "Server sync error",
+    description: "Synchronization with the server API failed.",
+  },
+  {
+    kind: 15,
+    section: "VPN servers (OpenVPN API)",
+    title: "Server no response",
+    description: "The server API did not respond in time.",
+  },
+  {
+    kind: 16,
+    section: "OpenVPN microservice",
+    title: "Send command failed",
+    description: "Sending a command to the OpenVPN microservice failed.",
+  },
+  {
+    kind: 17,
+    section: "OpenVPN microservice",
+    title: "Reconnect failed",
+    description: "Reconnecting to the microservice failed.",
+  },
+  {
+    kind: 18,
+    section: "OpenVPN microservice",
+    title: "Event hub connection failed",
+    description: "Event hub connection to the microservice failed.",
+  },
+  {
+    kind: 19,
+    section: "OpenVPN microservice",
+    title: "Proxy client lookup failed",
+    description: "Resolving a client through the microservice proxy failed.",
+  },
+  {
+    kind: 20,
+    section: "GeoLite",
+    title: "Auto update succeeded",
+    description: "GeoLite database was updated successfully.",
+  },
+  {
+    kind: 21,
+    section: "GeoLite",
+    title: "Auto update failed",
+    description: "GeoLite automatic update failed.",
+  },
+  {
+    kind: 22,
+    section: "Application",
+    title: "Unhandled exception",
+    description: "An unhandled exception was reported by the backend.",
+  },
+  {
+    kind: 23,
+    section: "Application",
+    title: "File created",
+    description: "A monitored file was created.",
+  },
+  {
+    kind: 24,
+    section: "Application",
+    title: "Certificate issued",
+    description: "In-app certificate issuance event.",
+  },
+  {
+    kind: 25,
+    section: "Application",
+    title: "Server monitor down",
+    description: "A monitored dependency was reported as down.",
+  },
+  {
+    kind: 26,
+    section: "Application",
+    title: "Server monitor up",
+    description: "A monitored dependency recovered.",
+  },
+];
 
 type PrefItem = {
-  stack: number;
-  category: number;
+  kind: number;
   enabled: boolean;
 };
 
@@ -31,66 +193,6 @@ type PrefsPayload = {
   globallyEnabled: boolean;
   preferences: PrefItem[];
 };
-
-type NotificationVpnRowDef = {
-  gridId: number;
-  stack: StackLabel;
-  stackValue: number;
-  category: CategoryLabel;
-  categoryValue: number;
-  description: string;
-};
-
-const ROWS: NotificationVpnRowDef[] = [
-  {
-    gridId: 1,
-    stack: "OpenVPN",
-    stackValue: StackOpenVpn,
-    category: "Read",
-    categoryValue: CatRead,
-    description: "List or fetch profiles (by server, external id, token, etc.).",
-  },
-  {
-    gridId: 2,
-    stack: "OpenVPN",
-    stackValue: StackOpenVpn,
-    category: "Mutate",
-    categoryValue: CatMutate,
-    description: "Issue, revoke, or token-related changes.",
-  },
-  {
-    gridId: 3,
-    stack: "OpenVPN",
-    stackValue: StackOpenVpn,
-    category: "Download",
-    categoryValue: CatDownload,
-    description: "When a profile file is downloaded via the API.",
-  },
-  {
-    gridId: 4,
-    stack: "Xray",
-    stackValue: StackXray,
-    category: "Read",
-    categoryValue: CatRead,
-    description: "List or fetch client links (by server, external id, token, etc.).",
-  },
-  {
-    gridId: 5,
-    stack: "Xray",
-    stackValue: StackXray,
-    category: "Mutate",
-    categoryValue: CatMutate,
-    description: "Issue, revoke, or token-related changes.",
-  },
-  {
-    gridId: 6,
-    stack: "Xray",
-    stackValue: StackXray,
-    category: "Download",
-    categoryValue: CatDownload,
-    description: "When a client link payload is downloaded via the API.",
-  },
-];
 
 const PREFS_QUERY_KEY = ["vpn-profile-notification-preferences"] as const;
 
@@ -146,13 +248,12 @@ export default function NotificationVpnProfileSettings() {
   });
 
   const payload = prefsQuery.data;
-  const rowKey = (stack: number, cat: number) => `${stack}-${cat}`;
 
-  const enabledByRow = useMemo(() => {
-    const m: Record<string, boolean> = {};
+  const enabledByKind = useMemo(() => {
+    const m = new Map<number, boolean>();
     if (!payload?.preferences) return m;
     for (const p of payload.preferences) {
-      m[rowKey(p.stack, p.category)] = p.enabled;
+      if (typeof p.kind === "number") m.set(p.kind, p.enabled);
     }
     return m;
   }, [payload]);
@@ -161,7 +262,7 @@ export default function NotificationVpnProfileSettings() {
     setGlobalBusy(true);
     try {
       await putMutation.mutateAsync({ globallyEnabled: next });
-      toast.success(next ? "All VPN profile notifications enabled" : "All VPN profile notifications disabled");
+      toast.success(next ? "All admin notifications enabled" : "All admin notifications disabled");
     } catch (e: unknown) {
       toast.error(errorMessage(e) || "Failed to save");
     } finally {
@@ -170,20 +271,14 @@ export default function NotificationVpnProfileSettings() {
   };
 
   const handleToggleRow = useCallback(
-    async (row: NotificationVpnRowDef, next: boolean) => {
-      const key = rowKey(row.stackValue, row.categoryValue);
+    async (row: NotificationKindRow, next: boolean) => {
+      const key = String(row.kind);
       setSavingRowKey(key);
       try {
         await putMutation.mutateAsync({
-          preferences: [
-            {
-              stack: row.stackValue,
-              category: row.categoryValue,
-              enabled: next,
-            },
-          ],
+          preferences: [{ kind: row.kind, enabled: next }],
         });
-        toast.success(`${row.stack} — ${row.category}: saved`);
+        toast.success(`${row.section} — ${row.title}: saved`);
       } catch (e: unknown) {
         toast.error(errorMessage(e) || "Failed to save");
       } finally {
@@ -193,10 +288,10 @@ export default function NotificationVpnProfileSettings() {
     [putMutation],
   );
 
-  const handleEnableAllCategories = async (enabled: boolean) => {
+  const handleEnableAllKinds = async (enabled: boolean) => {
     try {
       await setAllMutation.mutateAsync(enabled);
-      toast.success(enabled ? "All categories enabled" : "All categories disabled");
+      toast.success(enabled ? "All notification kinds enabled" : "All notification kinds disabled");
     } catch (e: unknown) {
       toast.error(errorMessage(e) || "Failed to save");
     }
@@ -204,17 +299,17 @@ export default function NotificationVpnProfileSettings() {
 
   const gridRows = useMemo(
     () =>
-      ROWS.map((row) => ({
+      KIND_ROWS.map((row) => ({
         ...row,
-        enabled: enabledByRow[rowKey(row.stackValue, row.categoryValue)] ?? false,
+        enabled: enabledByKind.get(row.kind) ?? false,
       })),
-    [enabledByRow],
+    [enabledByKind],
   );
 
   const columns: GridColDef[] = useMemo(
     () => [
-      { field: "stack", headerName: "Stack", width: 110 },
-      { field: "category", headerName: "Category", width: 100 },
+      { field: "section", headerName: "Area", width: 220 },
+      { field: "title", headerName: "Kind", width: 160 },
       { field: "description", headerName: "Description", flex: 1, minWidth: 220 },
       {
         field: "enabled",
@@ -223,8 +318,8 @@ export default function NotificationVpnProfileSettings() {
         sortable: false,
         filterable: false,
         renderCell: (params) => {
-          const row = params.row as NotificationVpnRowDef & { enabled: boolean };
-          const key = rowKey(row.stackValue, row.categoryValue);
+          const row = params.row as NotificationKindRow & { enabled: boolean };
+          const key = String(row.kind);
           const busy = savingRowKey === key;
           return (
             <label className="checkbox-label" style={{ margin: 0, alignItems: "center", gap: 8 }}>
@@ -270,12 +365,13 @@ export default function NotificationVpnProfileSettings() {
         <span>VPN profile notifications</span>
       </h2>
       <p className="settings-description" style={{ marginBottom: 16 }}>
-        Master switch turns off every admin notification for OpenVPN profiles and Xray client links. When it is on,
-        you can enable or disable each stack and category separately, or use the bulk actions for all six categories.
+        Master switch turns off every admin notification covered below. When it is on, you can enable or disable each
+        notification kind separately, or use bulk actions for all kinds at once. Numeric{" "}
+        <code>kind</code> in the API matches the backend enum order (0–26).
       </p>
 
       <div className="settings-group" style={{ marginBottom: 16 }}>
-        <h4>All VPN profile notifications</h4>
+        <h4>All admin notifications (this page)</h4>
         <label className="checkbox-label" style={{ gap: 10 }}>
           <input
             type="checkbox"
@@ -294,17 +390,17 @@ export default function NotificationVpnProfileSettings() {
           type="button"
           className="btn secondary"
           disabled={!globalOn || setAllMutation.isPending}
-          onClick={() => void handleEnableAllCategories(true)}
+          onClick={() => void handleEnableAllKinds(true)}
         >
-          Enable all categories
+          Enable all kinds
         </button>
         <button
           type="button"
           className="btn secondary"
           disabled={!globalOn || setAllMutation.isPending}
-          onClick={() => void handleEnableAllCategories(false)}
+          onClick={() => void handleEnableAllKinds(false)}
         >
-          Disable all categories
+          Disable all kinds
         </button>
       </div>
 
@@ -321,7 +417,7 @@ export default function NotificationVpnProfileSettings() {
           }}
         >
           <StyledDataGrid
-            getRowId={(r) => r.gridId}
+            getRowId={(r) => r.kind}
             rows={gridRows}
             columns={columns}
             pageSizeOptions={[5, 10, 20]}
