@@ -1,6 +1,6 @@
 // src/pages/servers/ServersOverview.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaChartLine } from "react-icons/fa";
 
@@ -35,11 +35,9 @@ import type {
   OverviewUsersResponse,
   OverviewUsersSeriesResponse,
   VpnServersV2Response,
-  VpnServerResponse,
   GetApiOpenVpnClientsOverviewSeriesParams,
   GetApiOpenVpnClientsOverviewSummaryParams,
 } from "../../api/orval/model";
-import { VpnServerType } from "../../constants/vpnServerType";
 import { OverviewGrouping } from "../../api/orval/model";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
@@ -98,14 +96,11 @@ export default function ServersOverview() {
       retry: 1,
     },
   });
-  const scopedServerPayload = scopedServerQuery.data as VpnServerResponse | undefined;
-  const scopedServerIsXray =
-    vpnServerId != null && scopedServerPayload?.vpnServer?.serverType === VpnServerType.Xray;
-  /** Avoid OpenVPN-overview API calls with an Xray server id before we know the stack (or after we know it is Xray). */
+  /** OpenVPN and Xray both persist samples in `VpnServerClientTraffic`; wait for server fetch when scoped by id. */
   const overviewChartsEnabled =
     vpnServerId == null ||
     scopedServerQuery.isError ||
-    (scopedServerQuery.isSuccess && !scopedServerIsXray);
+    scopedServerQuery.isSuccess;
 
   const externalId = externalIdParam || undefined;
 
@@ -325,33 +320,6 @@ export default function ServersOverview() {
           <span>Server statistics</span>
         </h2>
         <p>Loading server…</p>
-      </div>
-    );
-  }
-
-  if (scopedServerIsXray) {
-    return (
-      <div
-        style={{
-          padding: 16,
-          backgroundColor: "var(--bg-content)",
-          color: "var(--text-secondary)",
-          minHeight: "100vh",
-        }}
-      >
-        <h2 className="settings-page__h2-with-icon">
-          <FaChartLine className="icon" aria-hidden />
-          <span>Server statistics — {titleServerPart}</span>
-        </h2>
-        <p style={{ maxWidth: "42rem", lineHeight: 1.55 }}>
-          Charts and tables here aggregate <strong>OpenVPN</strong> client sessions. They do not apply to{" "}
-          <strong>Xray (VLESS)</strong> servers yet.
-        </p>
-        <p style={{ marginTop: 16 }}>
-          <Link className="btn secondary" to={`/servers/${vpnServerId}`}>
-            ← Back to server overview
-          </Link>
-        </p>
       </div>
     );
   }
