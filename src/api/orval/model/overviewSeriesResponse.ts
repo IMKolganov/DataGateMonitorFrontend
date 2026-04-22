@@ -12,5 +12,5 @@ export interface OverviewSeriesResponse {
   meta?: OverviewMetaDto;
   summary?: OverviewSummaryDto;
   /** @nullable */
-  overviewSeriesRows?: OverviewSeriesRowDto[] | null;
+  series?: OverviewSeriesRowDto[] | null;
 }

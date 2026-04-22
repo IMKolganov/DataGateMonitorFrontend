@@ -4,23 +4,12 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
-import type { VpnServerType } from "./vpnServerType";
 
 export interface AddServerRequest {
-  serverType?: VpnServerType;
   /** @minLength 1 */
   serverName: string;
   isOnline?: boolean;
   isDefault?: boolean;
   /** @nullable */
   apiUrl?: string | null;
-  /** @nullable */
-  latitude?: number | null;
-  /** @nullable */
-  longitude?: number | null;
-  isEnableWss?: boolean;
-  /** @nullable */
-  quotaPlanIds?: number[] | null;
-  /** @nullable */
-  tagIds?: number[] | null;
 }
