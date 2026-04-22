@@ -9,6 +9,8 @@ import type { VpnClientInfoDto } from "../api/orval/model";
 import "../css/Table.css";
 import { apiRequest } from "../api/apirequest";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
+import { toast } from "react-toastify";
+import { FaBolt, FaBan } from "react-icons/fa";
 
 type ClientDto = VpnClientInfoDto;
 
@@ -66,12 +68,13 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                     { data: { commonName } }
                 );
                 if (!resp.success) {
-                    window.alert(resp.errorMessage ?? "Request failed");
+                    toast.error(resp.errorMessage ?? "Request failed");
                     return;
                 }
+                toast.success(path === "kick-user" ? "Session dropped; client can reconnect." : "Client revoked on node.");
                 onXraySessionsChanged?.();
             } catch (e) {
-                window.alert(e instanceof Error ? e.message : "Request failed");
+                toast.error(e instanceof Error ? e.message : "Request failed");
             } finally {
                 setActionBusyKey(null);
             }
@@ -131,44 +134,46 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
             ...base,
             {
                 field: "xrayActions",
-                headerName: "Xray",
+                headerName: "Actions",
                 sortable: false,
                 filterable: false,
-                width: 200,
+                width: 260,
                 renderCell: (params) => {
                     const cn = (params.row as { _cn?: string })._cn ?? "";
                     if (!cn) return null;
                     const busyKick = actionBusyKey === `kick-user:${cn}`;
                     const busyDisable = actionBusyKey === `disable-user:${cn}`;
                     return (
-                        <span style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                        <div className="action-container">
                             <button
                                 type="button"
                                 className="btn secondary"
-                                style={{ fontSize: 12, padding: "4px 8px" }}
                                 disabled={busyKick || busyDisable}
+                                title="Drop active sessions; client stays issued and can reconnect."
                                 onClick={() => void postXrayAction("kick-user", cn)}
                             >
-                                {busyKick ? "…" : "Kick"}
+                                <FaBolt className="icon" aria-hidden />
+                                {busyKick ? "…" : "Drop session"}
                             </button>
                             <button
                                 type="button"
-                                className="btn secondary"
-                                style={{ fontSize: 12, padding: "4px 8px" }}
+                                className="btn danger"
                                 disabled={busyKick || busyDisable}
+                                title="Revoke client on this node (same as revoking an issued link)."
                                 onClick={() => {
                                     if (
                                         !window.confirm(
-                                            `Disable (revoke) Xray user "${cn}" on this server? They must obtain a new profile.`
+                                            `Revoke Xray client "${cn}" on this server? Their profile will stop working; issue a new link if needed.`
                                         )
                                     )
                                         return;
                                     void postXrayAction("disable-user", cn);
                                 }}
                             >
-                                {busyDisable ? "…" : "Disable"}
+                                <FaBan className="icon" aria-hidden />
+                                {busyDisable ? "…" : "Revoke"}
                             </button>
-                        </span>
+                        </div>
                     );
                 },
             } satisfies GridColDef,
