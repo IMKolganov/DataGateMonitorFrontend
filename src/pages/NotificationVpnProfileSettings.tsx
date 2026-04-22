@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import type { GridColDef } from "@mui/x-data-grid";
 import { toast } from "react-toastify";
 import { FaBell } from "react-icons/fa";
@@ -7,7 +7,13 @@ import "../css/Settings.css";
 import "../css/Table.css";
 import StyledDataGrid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
-import { apiRequest } from "../api/apirequest.ts";
+import type { GetVpnProfileNotificationPreferencesResponse } from "../api/orval/model";
+import {
+  getGetApiVpnProfileNotificationPreferencesQueryKey,
+  useGetApiVpnProfileNotificationPreferences,
+  usePostApiVpnProfileNotificationPreferencesSetAllCategories,
+  usePutApiVpnProfileNotificationPreferences,
+} from "../api/orval/vpn-profile-notification-preferences/vpn-profile-notification-preferences";
 import { errorMessage } from "../utils/errorMessage";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 
@@ -184,25 +190,6 @@ const KIND_ROWS: NotificationKindRow[] = [
   },
 ];
 
-type PrefItem = {
-  kind: number;
-  enabled: boolean;
-};
-
-type PrefsPayload = {
-  globallyEnabled: boolean;
-  preferences: PrefItem[];
-};
-
-const PREFS_QUERY_KEY = ["vpn-profile-notification-preferences"] as const;
-
-function unwrapData<T>(wrapper: unknown): T {
-  if (wrapper && typeof wrapper === "object" && "data" in wrapper) {
-    return (wrapper as { data: T }).data;
-  }
-  return wrapper as T;
-}
-
 export default function NotificationVpnProfileSettings() {
   const [gridPage, setGridPage] = useState(0);
   const [pageSize, setPageSize] = usePersistedPageSize(
@@ -214,37 +201,21 @@ export default function NotificationVpnProfileSettings() {
   const [globalBusy, setGlobalBusy] = useState(false);
   const queryClient = useQueryClient();
 
-  const prefsQuery = useQuery({
-    queryKey: PREFS_QUERY_KEY,
-    queryFn: async ({ signal }) => {
-      const res = await apiRequest<PrefsPayload>("get", "/api/vpn-profile-notification-preferences", { signal });
-      return unwrapData<PrefsPayload>(res);
-    },
-    staleTime: 30_000,
+  const invalidatePrefs = () =>
+    void queryClient.invalidateQueries({
+      queryKey: getGetApiVpnProfileNotificationPreferencesQueryKey(),
+    });
+
+  const prefsQuery = useGetApiVpnProfileNotificationPreferences<GetVpnProfileNotificationPreferencesResponse>({
+    query: { staleTime: 30_000 },
   });
 
-  const putMutation = useMutation({
-    mutationFn: async (body: { globallyEnabled?: boolean; preferences?: PrefItem[] }) => {
-      const res = await apiRequest<PrefsPayload>("put", "/api/vpn-profile-notification-preferences", {
-        data: body,
-      });
-      return unwrapData<PrefsPayload>(res);
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: PREFS_QUERY_KEY });
-    },
+  const putMutation = usePutApiVpnProfileNotificationPreferences({
+    mutation: { onSuccess: invalidatePrefs },
   });
 
-  const setAllMutation = useMutation({
-    mutationFn: async (enabled: boolean) => {
-      const res = await apiRequest<PrefsPayload>("post", "/api/vpn-profile-notification-preferences/set-all-categories", {
-        data: { enabled },
-      });
-      return unwrapData<PrefsPayload>(res);
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: PREFS_QUERY_KEY });
-    },
+  const setAllMutation = usePostApiVpnProfileNotificationPreferencesSetAllCategories({
+    mutation: { onSuccess: invalidatePrefs },
   });
 
   const payload = prefsQuery.data;
@@ -253,7 +224,7 @@ export default function NotificationVpnProfileSettings() {
     const m = new Map<number, boolean>();
     if (!payload?.preferences) return m;
     for (const p of payload.preferences) {
-      if (typeof p.kind === "number") m.set(p.kind, p.enabled);
+      if (typeof p.kind === "number") m.set(p.kind, Boolean(p.enabled));
     }
     return m;
   }, [payload]);
@@ -261,7 +232,7 @@ export default function NotificationVpnProfileSettings() {
   const handleToggleGlobal = async (next: boolean) => {
     setGlobalBusy(true);
     try {
-      await putMutation.mutateAsync({ globallyEnabled: next });
+      await putMutation.mutateAsync({ data: { globallyEnabled: next } });
       toast.success(next ? "All admin notifications enabled" : "All admin notifications disabled");
     } catch (e: unknown) {
       toast.error(errorMessage(e) || "Failed to save");
@@ -276,7 +247,7 @@ export default function NotificationVpnProfileSettings() {
       setSavingRowKey(key);
       try {
         await putMutation.mutateAsync({
-          preferences: [{ kind: row.kind, enabled: next }],
+          data: { preferences: [{ kind: row.kind, enabled: next }] },
         });
         toast.success(`${row.section} — ${row.title}: saved`);
       } catch (e: unknown) {
@@ -290,7 +261,7 @@ export default function NotificationVpnProfileSettings() {
 
   const handleEnableAllKinds = async (enabled: boolean) => {
     try {
-      await setAllMutation.mutateAsync(enabled);
+      await setAllMutation.mutateAsync({ data: { enabled } });
       toast.success(enabled ? "All notification kinds enabled" : "All notification kinds disabled");
     } catch (e: unknown) {
       toast.error(errorMessage(e) || "Failed to save");

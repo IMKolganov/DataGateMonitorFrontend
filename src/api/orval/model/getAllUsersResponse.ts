@@ -7,9 +7,6 @@
 import type { UserDto } from "./userDto";
 
 export interface GetAllUsersResponse {
-  page?: number;
-  pageSize?: number;
-  totalCount?: number;
   /** @nullable */
   users?: UserDto[] | null;
 }

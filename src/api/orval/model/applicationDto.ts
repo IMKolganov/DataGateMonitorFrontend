@@ -12,8 +12,6 @@ export interface ApplicationDto {
   clientSecret?: string | null;
   /** @nullable */
   name?: string | null;
-  isRevoked?: boolean;
-  isSystem?: boolean;
   createDate?: string;
   lastUpdate?: string;
 }

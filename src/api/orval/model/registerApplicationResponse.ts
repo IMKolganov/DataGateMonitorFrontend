@@ -12,6 +12,4 @@ export interface RegisterApplicationResponse {
   clientId?: string | null;
   /** @nullable */
   clientSecret?: string | null;
-  isRevoked?: boolean;
-  isSystem?: boolean;
 }
