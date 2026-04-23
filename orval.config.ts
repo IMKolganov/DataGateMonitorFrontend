@@ -1,11 +1,13 @@
 /**
- * Orval input: `backend/Schems/swagger.json` (OpenAPI 3 JSON).
- * Regenerate: save `GET /swaggerjson` from a running backend, then merge any paths/schemas
- * that exist only in `swagger.yaml` (e.g. newer endpoints not yet deployed).
+ * Orval fetches OpenAPI from a running backend (Swashbuckle).
+ * Override with env: `OPENAPI_URL=https://host:port/swagger/v1/swagger.json`
  */
+const openApiUrl =
+  process.env.OPENAPI_URL ?? "http://127.0.0.1:5581/swagger/v1/swagger.json";
+
 export default {
   ogm: {
-    input: "../backend/Schems/swagger.json",
+    input: openApiUrl,
 
     // Where to put generated files
     output: {
