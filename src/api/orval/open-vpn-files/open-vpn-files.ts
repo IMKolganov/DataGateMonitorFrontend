@@ -22,6 +22,7 @@ import type {
 
 import type {
   AddFileRequest,
+  DownloadFileByCnRequest,
   DownloadFileRequest,
   DownloadFileResponseApiResponse,
   OvpnFileResponseApiResponse,
@@ -1549,6 +1550,93 @@ export const usePostApiOpenVpnFilesDownloadFile = <
 > => {
   return useMutation(
     getPostApiOpenVpnFilesDownloadFileMutationOptions(options),
+    queryClient,
+  );
+};
+export const postApiOpenVpnFilesDownloadFileByCn = (
+  downloadFileByCnRequest: DownloadFileByCnRequest,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<DownloadFileResponseApiResponse>(
+    {
+      url: `/api/open-vpn-files/download-file-by-cn`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: downloadFileByCnRequest,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiOpenVpnFilesDownloadFileByCnMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
+    TError,
+    { data: DownloadFileByCnRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
+  TError,
+  { data: DownloadFileByCnRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiOpenVpnFilesDownloadFileByCn"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
+    { data: DownloadFileByCnRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiOpenVpnFilesDownloadFileByCn(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiOpenVpnFilesDownloadFileByCnMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>
+>;
+export type PostApiOpenVpnFilesDownloadFileByCnMutationBody =
+  DownloadFileByCnRequest;
+export type PostApiOpenVpnFilesDownloadFileByCnMutationError = unknown;
+
+export const usePostApiOpenVpnFilesDownloadFileByCn = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
+      TError,
+      { data: DownloadFileByCnRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
+  TError,
+  { data: DownloadFileByCnRequest },
+  TContext
+> => {
+  return useMutation(
+    getPostApiOpenVpnFilesDownloadFileByCnMutationOptions(options),
     queryClient,
   );
 };

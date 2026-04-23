@@ -8,5 +8,5 @@ import type { ServiceStatusDto } from "./serviceStatusDto";
 
 export interface ServiceStatusesResponse {
   /** @nullable */
-  serviceStatus?: ServiceStatusDto[] | null;
+  serviceStatuses?: ServiceStatusDto[] | null;
 }

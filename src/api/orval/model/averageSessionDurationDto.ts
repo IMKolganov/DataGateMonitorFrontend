@@ -11,10 +11,6 @@ export interface AverageSessionDurationDto {
   /** @nullable */
   commonName?: string | null;
   /** @nullable */
-  tgUsername?: string | null;
-  /** @nullable */
-  tgFirstName?: string | null;
-  /** @nullable */
-  tgLastName?: string | null;
+  displayName?: string | null;
   avgDurationMinutes?: number;
 }

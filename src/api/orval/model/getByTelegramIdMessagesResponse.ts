@@ -4,9 +4,8 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
-import type { MessageDto } from "./messageDto";
+import type { MessageDtoPagedResponse } from "./messageDtoPagedResponse";
 
 export interface GetByTelegramIdMessagesResponse {
-  /** @nullable */
-  messages?: MessageDto[] | null;
+  messages?: MessageDtoPagedResponse;
 }

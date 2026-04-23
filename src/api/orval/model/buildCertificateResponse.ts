@@ -4,8 +4,8 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
-import type { ServerCertificate } from "./serverCertificate";
+import type { MonitorServerCertificate } from "./monitorServerCertificate";
 
 export interface BuildCertificateResponse {
-  serverCertificate?: ServerCertificate;
+  monitorServerCertificate?: MonitorServerCertificate;
 }

@@ -1,11 +1,11 @@
 /**
- * OpenAPI input: committed spec in monorepo (`../backend/Schems/swagger.yaml`).
- * To regenerate from a running API instead, temporarily set `input` to
- * `http://localhost:5581/swagger/v1/swagger.yaml` and run `npm run gen:api`.
+ * Orval input: `backend/Schems/swagger.json` (OpenAPI 3 JSON).
+ * Regenerate: save `GET /swaggerjson` from a running backend, then merge any paths/schemas
+ * that exist only in `swagger.yaml` (e.g. newer endpoints not yet deployed).
  */
 export default {
   ogm: {
-    input: "../backend/Schems/swagger.yaml",
+    input: "../backend/Schems/swagger.json",
 
     // Where to put generated files
     output: {

@@ -8,5 +8,5 @@ import type { ApplicationDto } from "./applicationDto";
 
 export interface ApplicationsResponse {
   /** @nullable */
-  application?: ApplicationDto[] | null;
+  applications?: ApplicationDto[] | null;
 }
