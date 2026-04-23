@@ -21,9 +21,9 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  ObjectApiResponse,
-  StringApiResponse,
-  XrayNodeUserActionRequest,
+  ApiSystemObject,
+  ApiSystemString,
+  XrayNodeRequestsXrayNodeUserActionRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -32,16 +32,16 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export const postApiVpnServersVpnServerIdXrayKickUser = (
   vpnServerId: number,
-  xrayNodeUserActionRequest: XrayNodeUserActionRequest,
+  xrayNodeRequestsXrayNodeUserActionRequest: XrayNodeRequestsXrayNodeUserActionRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<ObjectApiResponse>(
+  return ogmMutator<ApiSystemObject>(
     {
       url: `/api/vpn-servers/${vpnServerId}/xray/kick-user`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: xrayNodeUserActionRequest,
+      data: xrayNodeRequestsXrayNodeUserActionRequest,
       signal,
     },
     options,
@@ -55,14 +55,14 @@ export const getPostApiVpnServersVpnServerIdXrayKickUserMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>,
     TError,
-    { vpnServerId: number; data: XrayNodeUserActionRequest },
+    { vpnServerId: number; data: XrayNodeRequestsXrayNodeUserActionRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>,
   TError,
-  { vpnServerId: number; data: XrayNodeUserActionRequest },
+  { vpnServerId: number; data: XrayNodeRequestsXrayNodeUserActionRequest },
   TContext
 > => {
   const mutationKey = ["postApiVpnServersVpnServerIdXrayKickUser"];
@@ -76,7 +76,7 @@ export const getPostApiVpnServersVpnServerIdXrayKickUserMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>,
-    { vpnServerId: number; data: XrayNodeUserActionRequest }
+    { vpnServerId: number; data: XrayNodeRequestsXrayNodeUserActionRequest }
   > = (props) => {
     const { vpnServerId, data } = props ?? {};
 
@@ -95,7 +95,7 @@ export type PostApiVpnServersVpnServerIdXrayKickUserMutationResult =
     Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>
   >;
 export type PostApiVpnServersVpnServerIdXrayKickUserMutationBody =
-  XrayNodeUserActionRequest;
+  XrayNodeRequestsXrayNodeUserActionRequest;
 export type PostApiVpnServersVpnServerIdXrayKickUserMutationError = unknown;
 
 export const usePostApiVpnServersVpnServerIdXrayKickUser = <
@@ -106,7 +106,7 @@ export const usePostApiVpnServersVpnServerIdXrayKickUser = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>,
       TError,
-      { vpnServerId: number; data: XrayNodeUserActionRequest },
+      { vpnServerId: number; data: XrayNodeRequestsXrayNodeUserActionRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -115,7 +115,7 @@ export const usePostApiVpnServersVpnServerIdXrayKickUser = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>,
   TError,
-  { vpnServerId: number; data: XrayNodeUserActionRequest },
+  { vpnServerId: number; data: XrayNodeRequestsXrayNodeUserActionRequest },
   TContext
 > => {
   return useMutation(
@@ -125,16 +125,16 @@ export const usePostApiVpnServersVpnServerIdXrayKickUser = <
 };
 export const postApiVpnServersVpnServerIdXrayDisableUser = (
   vpnServerId: number,
-  xrayNodeUserActionRequest: XrayNodeUserActionRequest,
+  xrayNodeRequestsXrayNodeUserActionRequest: XrayNodeRequestsXrayNodeUserActionRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<ObjectApiResponse>(
+  return ogmMutator<ApiSystemObject>(
     {
       url: `/api/vpn-servers/${vpnServerId}/xray/disable-user`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: xrayNodeUserActionRequest,
+      data: xrayNodeRequestsXrayNodeUserActionRequest,
       signal,
     },
     options,
@@ -148,14 +148,14 @@ export const getPostApiVpnServersVpnServerIdXrayDisableUserMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayDisableUser>>,
     TError,
-    { vpnServerId: number; data: XrayNodeUserActionRequest },
+    { vpnServerId: number; data: XrayNodeRequestsXrayNodeUserActionRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayDisableUser>>,
   TError,
-  { vpnServerId: number; data: XrayNodeUserActionRequest },
+  { vpnServerId: number; data: XrayNodeRequestsXrayNodeUserActionRequest },
   TContext
 > => {
   const mutationKey = ["postApiVpnServersVpnServerIdXrayDisableUser"];
@@ -169,7 +169,7 @@ export const getPostApiVpnServersVpnServerIdXrayDisableUserMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayDisableUser>>,
-    { vpnServerId: number; data: XrayNodeUserActionRequest }
+    { vpnServerId: number; data: XrayNodeRequestsXrayNodeUserActionRequest }
   > = (props) => {
     const { vpnServerId, data } = props ?? {};
 
@@ -188,7 +188,7 @@ export type PostApiVpnServersVpnServerIdXrayDisableUserMutationResult =
     Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayDisableUser>>
   >;
 export type PostApiVpnServersVpnServerIdXrayDisableUserMutationBody =
-  XrayNodeUserActionRequest;
+  XrayNodeRequestsXrayNodeUserActionRequest;
 export type PostApiVpnServersVpnServerIdXrayDisableUserMutationError = unknown;
 
 export const usePostApiVpnServersVpnServerIdXrayDisableUser = <
@@ -199,7 +199,7 @@ export const usePostApiVpnServersVpnServerIdXrayDisableUser = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayDisableUser>>,
       TError,
-      { vpnServerId: number; data: XrayNodeUserActionRequest },
+      { vpnServerId: number; data: XrayNodeRequestsXrayNodeUserActionRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -208,7 +208,7 @@ export const usePostApiVpnServersVpnServerIdXrayDisableUser = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayDisableUser>>,
   TError,
-  { vpnServerId: number; data: XrayNodeUserActionRequest },
+  { vpnServerId: number; data: XrayNodeRequestsXrayNodeUserActionRequest },
   TContext
 > => {
   return useMutation(
@@ -221,7 +221,7 @@ export const getApiVpnServersVpnServerIdXrayHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/vpn-servers/${vpnServerId}/xray/healthcheck`,
       method: "GET",
@@ -411,7 +411,7 @@ export const getApiVpnServersVpnServerIdXrayHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/vpn-servers/${vpnServerId}/xray/healthcheck-with-jwt`,
       method: "GET",

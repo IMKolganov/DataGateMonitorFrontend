@@ -21,11 +21,11 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  BooleanApiResponse,
-  CreateOrUpdateTagRequest,
-  StringApiResponse,
-  TagResponseApiResponse,
-  TagsResponseApiResponse,
+  ApiSystemBoolean,
+  ApiSystemString,
+  ApiTagsResponsesTagResponse,
+  ApiTagsResponsesTagsResponse,
+  TagsRequestsCreateOrUpdateTagRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -36,7 +36,7 @@ export const getApiTagsGetAll = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<TagsResponseApiResponse>(
+  return ogmMutator<ApiTagsResponsesTagsResponse>(
     { url: `/api/tags/get-all`, method: "GET", signal },
     options,
   );
@@ -179,7 +179,7 @@ export const getApiTagsGetId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<TagResponseApiResponse>(
+  return ogmMutator<ApiTagsResponsesTagResponse>(
     { url: `/api/tags/get/${id}`, method: "GET", signal },
     options,
   );
@@ -334,16 +334,16 @@ export function useGetApiTagsGetId<
 }
 
 export const postApiTagsCreate = (
-  createOrUpdateTagRequest: CreateOrUpdateTagRequest,
+  tagsRequestsCreateOrUpdateTagRequest: TagsRequestsCreateOrUpdateTagRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<TagResponseApiResponse>(
+  return ogmMutator<ApiTagsResponsesTagResponse>(
     {
       url: `/api/tags/create`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: createOrUpdateTagRequest,
+      data: tagsRequestsCreateOrUpdateTagRequest,
       signal,
     },
     options,
@@ -357,14 +357,14 @@ export const getPostApiTagsCreateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiTagsCreate>>,
     TError,
-    { data: CreateOrUpdateTagRequest },
+    { data: TagsRequestsCreateOrUpdateTagRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiTagsCreate>>,
   TError,
-  { data: CreateOrUpdateTagRequest },
+  { data: TagsRequestsCreateOrUpdateTagRequest },
   TContext
 > => {
   const mutationKey = ["postApiTagsCreate"];
@@ -378,7 +378,7 @@ export const getPostApiTagsCreateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiTagsCreate>>,
-    { data: CreateOrUpdateTagRequest }
+    { data: TagsRequestsCreateOrUpdateTagRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -391,7 +391,8 @@ export const getPostApiTagsCreateMutationOptions = <
 export type PostApiTagsCreateMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiTagsCreate>>
 >;
-export type PostApiTagsCreateMutationBody = CreateOrUpdateTagRequest;
+export type PostApiTagsCreateMutationBody =
+  TagsRequestsCreateOrUpdateTagRequest;
 export type PostApiTagsCreateMutationError = unknown;
 
 export const usePostApiTagsCreate = <TError = unknown, TContext = unknown>(
@@ -399,7 +400,7 @@ export const usePostApiTagsCreate = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiTagsCreate>>,
       TError,
-      { data: CreateOrUpdateTagRequest },
+      { data: TagsRequestsCreateOrUpdateTagRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -408,23 +409,23 @@ export const usePostApiTagsCreate = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiTagsCreate>>,
   TError,
-  { data: CreateOrUpdateTagRequest },
+  { data: TagsRequestsCreateOrUpdateTagRequest },
   TContext
 > => {
   return useMutation(getPostApiTagsCreateMutationOptions(options), queryClient);
 };
 export const putApiTagsUpdateId = (
   id: number,
-  createOrUpdateTagRequest: CreateOrUpdateTagRequest,
+  tagsRequestsCreateOrUpdateTagRequest: TagsRequestsCreateOrUpdateTagRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<TagResponseApiResponse>(
+  return ogmMutator<ApiTagsResponsesTagResponse>(
     {
       url: `/api/tags/update/${id}`,
       method: "PUT",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: createOrUpdateTagRequest,
+      data: tagsRequestsCreateOrUpdateTagRequest,
       signal,
     },
     options,
@@ -438,14 +439,14 @@ export const getPutApiTagsUpdateIdMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putApiTagsUpdateId>>,
     TError,
-    { id: number; data: CreateOrUpdateTagRequest },
+    { id: number; data: TagsRequestsCreateOrUpdateTagRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof putApiTagsUpdateId>>,
   TError,
-  { id: number; data: CreateOrUpdateTagRequest },
+  { id: number; data: TagsRequestsCreateOrUpdateTagRequest },
   TContext
 > => {
   const mutationKey = ["putApiTagsUpdateId"];
@@ -459,7 +460,7 @@ export const getPutApiTagsUpdateIdMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof putApiTagsUpdateId>>,
-    { id: number; data: CreateOrUpdateTagRequest }
+    { id: number; data: TagsRequestsCreateOrUpdateTagRequest }
   > = (props) => {
     const { id, data } = props ?? {};
 
@@ -472,7 +473,8 @@ export const getPutApiTagsUpdateIdMutationOptions = <
 export type PutApiTagsUpdateIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof putApiTagsUpdateId>>
 >;
-export type PutApiTagsUpdateIdMutationBody = CreateOrUpdateTagRequest;
+export type PutApiTagsUpdateIdMutationBody =
+  TagsRequestsCreateOrUpdateTagRequest;
 export type PutApiTagsUpdateIdMutationError = unknown;
 
 export const usePutApiTagsUpdateId = <TError = unknown, TContext = unknown>(
@@ -480,7 +482,7 @@ export const usePutApiTagsUpdateId = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof putApiTagsUpdateId>>,
       TError,
-      { id: number; data: CreateOrUpdateTagRequest },
+      { id: number; data: TagsRequestsCreateOrUpdateTagRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -489,7 +491,7 @@ export const usePutApiTagsUpdateId = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof putApiTagsUpdateId>>,
   TError,
-  { id: number; data: CreateOrUpdateTagRequest },
+  { id: number; data: TagsRequestsCreateOrUpdateTagRequest },
   TContext
 > => {
   return useMutation(
@@ -502,7 +504,7 @@ export const deleteApiTagsDeleteId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<BooleanApiResponse>(
+  return ogmMutator<ApiSystemBoolean>(
     { url: `/api/tags/delete/${id}`, method: "DELETE", signal },
     options,
   );
@@ -578,7 +580,7 @@ export const getApiTagsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/tags/healthcheck`, method: "GET", signal },
     options,
   );
@@ -724,7 +726,7 @@ export const getApiTagsHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/tags/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

@@ -4,7 +4,9 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
+import type { EnumsVpnServerType } from "./enumsVpnServerType";
 
 export type GetApiOpenVpnServersGetMicroserviceInfoByUrlParams = {
   baseUrl?: string;
+  serverType?: EnumsVpnServerType;
 };

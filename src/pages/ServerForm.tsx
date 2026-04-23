@@ -37,6 +37,7 @@ import type {
   QuotaPlansResponse,
   QuotaPlanAllowedServerDto,
   VpnServerResponse,
+  GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
 } from "../api/orval/model";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 import { usePostApiQuotaPlansGetAll } from "../api/orval/quota-plan/quota-plan";
@@ -156,8 +157,25 @@ async function syncQuotaPlanAssignments(
   }
 }
 
+function unwrapMicroserviceDiagnosticsPayload(raw: unknown): Record<string, unknown> | null {
+  const top = asRecord(raw);
+  if (!top) return null;
+  const envData = asRecord(top["data"]);
+  const diagnostics = envData ?? top;
+  if (diagnostics && (diagnostics["openVpn"] != null || diagnostics["xray"] != null)) {
+    const st = diagnostics["serverType"];
+    const openVpn = asRecord(diagnostics["openVpn"]);
+    const xray = asRecord(diagnostics["xray"]);
+    if (st === 1 && xray) return xray;
+    if (openVpn) return openVpn;
+    if (xray) return xray;
+  }
+  return top;
+}
+
 function ApiCheckSuccessSummary({ data }: { data: unknown }) {
-  const rec = asRecord(data);
+  const wire = unwrapMicroserviceDiagnosticsPayload(data);
+  const rec = wire;
   const cfg =
     rec && typeof rec["config"] === "object" && rec["config"] !== null
       ? asRecord(rec["config"])
@@ -512,9 +530,12 @@ const ServerForm: React.FC = () => {
     }
     setApiCheck({ status: "loading" });
     try {
-      const data = await getApiOpenVpnServersGetMicroserviceInfoByUrl({
+      // Backend accepts optional query `serverType`; pinned OpenAPI may lag until `npm run gen:api` from live Swagger.
+      const params = {
         baseUrl: targetUrl,
-      });
+        serverType: (serverData.serverType ?? VpnServerType.OpenVpn) as OrvalVpnServerType,
+      } as GetApiOpenVpnServersGetMicroserviceInfoByUrlParams;
+      const data = await getApiOpenVpnServersGetMicroserviceInfoByUrl(params);
       setApiCheck({ status: "success", data });
       toast.success("Server responded successfully");
     } catch (err: unknown) {
@@ -527,7 +548,7 @@ const ServerForm: React.FC = () => {
       setApiCheck({ status: "error", error: msg });
       toast.error("Check failed: " + msg);
     }
-  }, [serverData.apiUrl]);
+  }, [serverData.apiUrl, serverData.serverType]);
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;

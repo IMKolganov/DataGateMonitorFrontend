@@ -18,10 +18,10 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  AverageSessionDurationsResponseApiResponse,
-  GeoConnectionsResponseApiResponse,
-  StringApiResponse,
-  TrafficByClientsResponseApiResponse,
+  ApiSystemString,
+  ApiVpnServerStatisticsResponsesAverageSessionDurationsResponse,
+  ApiVpnServerStatisticsResponsesGeoConnectionsResponse,
+  ApiVpnServerStatisticsResponsesTrafficByClientsResponse,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -33,7 +33,7 @@ export const getApiOpenVpnStatisticsGetVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<TrafficByClientsResponseApiResponse>(
+  return ogmMutator<ApiVpnServerStatisticsResponsesTrafficByClientsResponse>(
     {
       url: `/api/open-vpn-statistics/get/${vpnServerId}`,
       method: "GET",
@@ -204,7 +204,7 @@ export const getApiOpenVpnStatisticsGetConnectionsByLocationVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GeoConnectionsResponseApiResponse>(
+  return ogmMutator<ApiVpnServerStatisticsResponsesGeoConnectionsResponse>(
     {
       url: `/api/open-vpn-statistics/get-connections-by-location/${vpnServerId}`,
       method: "GET",
@@ -454,7 +454,7 @@ export const getApiOpenVpnStatisticsGetAverageSessionDurationVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<AverageSessionDurationsResponseApiResponse>(
+  return ogmMutator<ApiVpnServerStatisticsResponsesAverageSessionDurationsResponse>(
     {
       url: `/api/open-vpn-statistics/get-average-session-duration/${vpnServerId}`,
       method: "GET",
@@ -703,7 +703,7 @@ export const getApiOpenVpnStatisticsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/open-vpn-statistics/healthcheck`, method: "GET", signal },
     options,
   );
@@ -852,7 +852,7 @@ export const getApiOpenVpnStatisticsHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/open-vpn-statistics/healthcheck-with-jwt`,
       method: "GET",

@@ -21,13 +21,13 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  CreateOrUpdateQuotaPlanAllowedServerRequest,
-  GetAllQuotaPlanAllowedServersResponseApiResponse,
+  ApiQuotaPlanAllowedServersResponsesGetAllQuotaPlanAllowedServersResponse,
+  ApiQuotaPlanAllowedServersResponsesGetQuotaPlanAllowedServersByQuotaPlanIdResponse,
+  ApiQuotaPlanAllowedServersResponsesGetQuotaPlanAllowedServersByVpnServerIdResponse,
+  ApiQuotaPlanAllowedServersResponsesQuotaPlanAllowedServerResponse,
+  ApiSystemString,
   GetApiQuotaPlanAllowedServersGetAllParams,
-  GetQuotaPlanAllowedServersByQuotaPlanIdResponseApiResponse,
-  GetQuotaPlanAllowedServersByVpnServerIdResponseApiResponse,
-  QuotaPlanAllowedServerResponseApiResponse,
-  StringApiResponse,
+  QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -39,7 +39,7 @@ export const getApiQuotaPlanAllowedServersGetAll = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetAllQuotaPlanAllowedServersResponseApiResponse>(
+  return ogmMutator<ApiQuotaPlanAllowedServersResponsesGetAllQuotaPlanAllowedServersResponse>(
     {
       url: `/api/quota-plan-allowed-servers/get-all`,
       method: "GET",
@@ -209,7 +209,7 @@ export const getApiQuotaPlanAllowedServersGetId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<QuotaPlanAllowedServerResponseApiResponse>(
+  return ogmMutator<ApiQuotaPlanAllowedServersResponsesQuotaPlanAllowedServerResponse>(
     { url: `/api/quota-plan-allowed-servers/get/${id}`, method: "GET", signal },
     options,
   );
@@ -373,7 +373,7 @@ export const getApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetQuotaPlanAllowedServersByQuotaPlanIdResponseApiResponse>(
+  return ogmMutator<ApiQuotaPlanAllowedServersResponsesGetQuotaPlanAllowedServersByQuotaPlanIdResponse>(
     {
       url: `/api/quota-plan-allowed-servers/get-by-quota-plan-id/${quotaPlanId}`,
       method: "GET",
@@ -615,7 +615,7 @@ export const getApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetQuotaPlanAllowedServersByVpnServerIdResponseApiResponse>(
+  return ogmMutator<ApiQuotaPlanAllowedServersResponsesGetQuotaPlanAllowedServersByVpnServerIdResponse>(
     {
       url: `/api/quota-plan-allowed-servers/get-by-vpn-server-id/${vpnServerId}`,
       method: "GET",
@@ -853,16 +853,16 @@ export function useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId<
 }
 
 export const postApiQuotaPlanAllowedServersCreate = (
-  createOrUpdateQuotaPlanAllowedServerRequest: CreateOrUpdateQuotaPlanAllowedServerRequest,
+  quotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<QuotaPlanAllowedServerResponseApiResponse>(
+  return ogmMutator<ApiQuotaPlanAllowedServersResponsesQuotaPlanAllowedServerResponse>(
     {
       url: `/api/quota-plan-allowed-servers/create`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: createOrUpdateQuotaPlanAllowedServerRequest,
+      data: quotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest,
       signal,
     },
     options,
@@ -876,14 +876,18 @@ export const getPostApiQuotaPlanAllowedServersCreateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>,
     TError,
-    { data: CreateOrUpdateQuotaPlanAllowedServerRequest },
+    {
+      data: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest;
+    },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>,
   TError,
-  { data: CreateOrUpdateQuotaPlanAllowedServerRequest },
+  {
+    data: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest;
+  },
   TContext
 > => {
   const mutationKey = ["postApiQuotaPlanAllowedServersCreate"];
@@ -897,7 +901,9 @@ export const getPostApiQuotaPlanAllowedServersCreateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>,
-    { data: CreateOrUpdateQuotaPlanAllowedServerRequest }
+    {
+      data: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest;
+    }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -911,7 +917,7 @@ export type PostApiQuotaPlanAllowedServersCreateMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>
 >;
 export type PostApiQuotaPlanAllowedServersCreateMutationBody =
-  CreateOrUpdateQuotaPlanAllowedServerRequest;
+  QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest;
 export type PostApiQuotaPlanAllowedServersCreateMutationError = unknown;
 
 export const usePostApiQuotaPlanAllowedServersCreate = <
@@ -922,7 +928,9 @@ export const usePostApiQuotaPlanAllowedServersCreate = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>,
       TError,
-      { data: CreateOrUpdateQuotaPlanAllowedServerRequest },
+      {
+        data: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest;
+      },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -931,7 +939,9 @@ export const usePostApiQuotaPlanAllowedServersCreate = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>,
   TError,
-  { data: CreateOrUpdateQuotaPlanAllowedServerRequest },
+  {
+    data: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest;
+  },
   TContext
 > => {
   return useMutation(
@@ -940,16 +950,16 @@ export const usePostApiQuotaPlanAllowedServersCreate = <
   );
 };
 export const putApiQuotaPlanAllowedServersUpdate = (
-  createOrUpdateQuotaPlanAllowedServerRequest: CreateOrUpdateQuotaPlanAllowedServerRequest,
+  quotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/quota-plan-allowed-servers/update`,
       method: "PUT",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: createOrUpdateQuotaPlanAllowedServerRequest,
+      data: quotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest,
       signal,
     },
     options,
@@ -963,14 +973,18 @@ export const getPutApiQuotaPlanAllowedServersUpdateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>,
     TError,
-    { data: CreateOrUpdateQuotaPlanAllowedServerRequest },
+    {
+      data: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest;
+    },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>,
   TError,
-  { data: CreateOrUpdateQuotaPlanAllowedServerRequest },
+  {
+    data: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest;
+  },
   TContext
 > => {
   const mutationKey = ["putApiQuotaPlanAllowedServersUpdate"];
@@ -984,7 +998,9 @@ export const getPutApiQuotaPlanAllowedServersUpdateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>,
-    { data: CreateOrUpdateQuotaPlanAllowedServerRequest }
+    {
+      data: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest;
+    }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -998,7 +1014,7 @@ export type PutApiQuotaPlanAllowedServersUpdateMutationResult = NonNullable<
   Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>
 >;
 export type PutApiQuotaPlanAllowedServersUpdateMutationBody =
-  CreateOrUpdateQuotaPlanAllowedServerRequest;
+  QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest;
 export type PutApiQuotaPlanAllowedServersUpdateMutationError = unknown;
 
 export const usePutApiQuotaPlanAllowedServersUpdate = <
@@ -1009,7 +1025,9 @@ export const usePutApiQuotaPlanAllowedServersUpdate = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>,
       TError,
-      { data: CreateOrUpdateQuotaPlanAllowedServerRequest },
+      {
+        data: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest;
+      },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1018,7 +1036,9 @@ export const usePutApiQuotaPlanAllowedServersUpdate = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>,
   TError,
-  { data: CreateOrUpdateQuotaPlanAllowedServerRequest },
+  {
+    data: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest;
+  },
   TContext
 > => {
   return useMutation(
@@ -1031,7 +1051,7 @@ export const deleteApiQuotaPlanAllowedServersDeleteId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/quota-plan-allowed-servers/delete/${id}`,
       method: "DELETE",
@@ -1115,7 +1135,7 @@ export const getApiQuotaPlanAllowedServersHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/quota-plan-allowed-servers/healthcheck`,
       method: "GET",
@@ -1269,7 +1289,7 @@ export const getApiQuotaPlanAllowedServersHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/quota-plan-allowed-servers/healthcheck-with-jwt`,
       method: "GET",

@@ -21,10 +21,10 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  ApiSettingsResponsesSettingResponse,
+  ApiSystemString,
   GetApiSettingsGetParams,
   PostApiSettingsSetParams,
-  SettingResponseApiResponse,
-  StringApiResponse,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -36,7 +36,7 @@ export const getApiSettingsGet = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<SettingResponseApiResponse>(
+  return ogmMutator<ApiSettingsResponsesSettingResponse>(
     { url: `/api/settings/get`, method: "GET", params, signal },
     options,
   );
@@ -193,7 +193,7 @@ export const postApiSettingsSet = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<SettingResponseApiResponse>(
+  return ogmMutator<ApiSettingsResponsesSettingResponse>(
     { url: `/api/settings/set`, method: "POST", params, signal },
     options,
   );
@@ -269,7 +269,7 @@ export const getApiSettingsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/settings/healthcheck`, method: "GET", signal },
     options,
   );
@@ -416,7 +416,7 @@ export const getApiSettingsHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/settings/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );
