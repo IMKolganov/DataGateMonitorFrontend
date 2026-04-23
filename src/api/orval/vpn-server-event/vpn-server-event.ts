@@ -18,11 +18,11 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  ConnectionStatusResponseApiResponse,
-  ConnectionStatusesResponseApiResponse,
+  ApiSystemString,
+  ApiVpnServerEventResponsesConnectionStatusResponse,
+  ApiVpnServerEventResponsesConnectionStatusesResponse,
+  ApiVpnServerEventResponsesVpnServerEventResponse,
   GetApiOpenVpnEventsGetByServerParams,
-  StringApiResponse,
-  VpnServerEventResponseApiResponse,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -34,7 +34,7 @@ export const getApiOpenVpnEventsGetByServer = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServerEventResponseApiResponse>(
+  return ogmMutator<ApiVpnServerEventResponsesVpnServerEventResponse>(
     {
       url: `/api/open-vpn-events/get-by-server`,
       method: "GET",
@@ -202,7 +202,7 @@ export const getApiOpenVpnEventsStatus = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<ConnectionStatusesResponseApiResponse>(
+  return ogmMutator<ApiVpnServerEventResponsesConnectionStatusesResponse>(
     { url: `/api/open-vpn-events/status`, method: "GET", signal },
     options,
   );
@@ -350,7 +350,7 @@ export const getApiOpenVpnEventsStatusVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<ConnectionStatusResponseApiResponse>(
+  return ogmMutator<ApiVpnServerEventResponsesConnectionStatusResponse>(
     {
       url: `/api/open-vpn-events/status/${vpnServerId}`,
       method: "GET",
@@ -520,7 +520,7 @@ export const getApiOpenVpnEventsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/open-vpn-events/healthcheck`, method: "GET", signal },
     options,
   );
@@ -667,7 +667,7 @@ export const getApiOpenVpnEventsHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/open-vpn-events/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

@@ -21,15 +21,15 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  BooleanApiResponse,
+  ApiNotificationsResponsesGetNotificationsResponse,
+  ApiNotificationsResponsesUnreadCountResponse,
+  ApiSystemBoolean,
+  ApiSystemInt32,
+  ApiSystemString,
   GetApiNotificationsGetAllParams,
-  GetNotificationsResponseApiResponse,
-  Int32ApiResponse,
-  NotificationRequest,
   PostApiNotificationsNotificationIdDeliveredParams,
   PostApiNotificationsNotificationIdReadParams,
-  StringApiResponse,
-  UnreadCountResponseApiResponse,
+  ServicesOthersModelsNotificationRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -37,16 +37,16 @@ import { ogmMutator } from "../../mutator";
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export const postApiNotificationsNotifyAdmins = (
-  notificationRequest: NotificationRequest,
+  servicesOthersModelsNotificationRequest: ServicesOthersModelsNotificationRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<Int32ApiResponse>(
+  return ogmMutator<ApiSystemInt32>(
     {
       url: `/api/notifications/notify-admins`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: notificationRequest,
+      data: servicesOthersModelsNotificationRequest,
       signal,
     },
     options,
@@ -60,14 +60,14 @@ export const getPostApiNotificationsNotifyAdminsMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>,
     TError,
-    { data: NotificationRequest },
+    { data: ServicesOthersModelsNotificationRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>,
   TError,
-  { data: NotificationRequest },
+  { data: ServicesOthersModelsNotificationRequest },
   TContext
 > => {
   const mutationKey = ["postApiNotificationsNotifyAdmins"];
@@ -81,7 +81,7 @@ export const getPostApiNotificationsNotifyAdminsMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>,
-    { data: NotificationRequest }
+    { data: ServicesOthersModelsNotificationRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -94,7 +94,8 @@ export const getPostApiNotificationsNotifyAdminsMutationOptions = <
 export type PostApiNotificationsNotifyAdminsMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>
 >;
-export type PostApiNotificationsNotifyAdminsMutationBody = NotificationRequest;
+export type PostApiNotificationsNotifyAdminsMutationBody =
+  ServicesOthersModelsNotificationRequest;
 export type PostApiNotificationsNotifyAdminsMutationError = unknown;
 
 export const usePostApiNotificationsNotifyAdmins = <
@@ -105,7 +106,7 @@ export const usePostApiNotificationsNotifyAdmins = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>,
       TError,
-      { data: NotificationRequest },
+      { data: ServicesOthersModelsNotificationRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -114,7 +115,7 @@ export const usePostApiNotificationsNotifyAdmins = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>,
   TError,
-  { data: NotificationRequest },
+  { data: ServicesOthersModelsNotificationRequest },
   TContext
 > => {
   return useMutation(
@@ -128,7 +129,7 @@ export const postApiNotificationsNotificationIdDelivered = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<BooleanApiResponse>(
+  return ogmMutator<ApiSystemBoolean>(
     {
       url: `/api/notifications/${notificationId}/delivered`,
       method: "POST",
@@ -234,7 +235,7 @@ export const postApiNotificationsNotificationIdRead = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<BooleanApiResponse>(
+  return ogmMutator<ApiSystemBoolean>(
     {
       url: `/api/notifications/${notificationId}/read`,
       method: "POST",
@@ -338,7 +339,7 @@ export const getApiNotificationsGetAll = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetNotificationsResponseApiResponse>(
+  return ogmMutator<ApiNotificationsResponsesGetNotificationsResponse>(
     { url: `/api/notifications/get-all`, method: "GET", params, signal },
     options,
   );
@@ -497,7 +498,7 @@ export const postApiNotificationsMarkReadAll = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<BooleanApiResponse>(
+  return ogmMutator<ApiSystemBoolean>(
     { url: `/api/notifications/mark-read-all`, method: "POST", signal },
     options,
   );
@@ -574,7 +575,7 @@ export const getApiNotificationsUnreadCount = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<UnreadCountResponseApiResponse>(
+  return ogmMutator<ApiNotificationsResponsesUnreadCountResponse>(
     { url: `/api/notifications/unread-count`, method: "GET", signal },
     options,
   );
@@ -721,7 +722,7 @@ export const getApiNotificationsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/notifications/healthcheck`, method: "GET", signal },
     options,
   );
@@ -868,7 +869,7 @@ export const getApiNotificationsHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/notifications/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

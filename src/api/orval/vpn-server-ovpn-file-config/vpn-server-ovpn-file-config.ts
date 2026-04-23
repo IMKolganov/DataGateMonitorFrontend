@@ -21,9 +21,9 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  AddOrUpdateOvpnFileConfigRequest,
-  OvpnFileConfigResponseApiResponse,
-  StringApiResponse,
+  ApiSystemString,
+  ApiVpnServerOvpnFileConfigResponsesOvpnFileConfigResponse,
+  VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -35,7 +35,7 @@ export const getApiOpenVpnConfigsGetVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFileConfigResponseApiResponse>(
+  return ogmMutator<ApiVpnServerOvpnFileConfigResponsesOvpnFileConfigResponse>(
     { url: `/api/open-vpn-configs/get/${vpnServerId}`, method: "GET", signal },
     options,
   );
@@ -198,16 +198,16 @@ export function useGetApiOpenVpnConfigsGetVpnServerId<
 }
 
 export const postApiOpenVpnConfigsAddUpdate = (
-  addOrUpdateOvpnFileConfigRequest: AddOrUpdateOvpnFileConfigRequest,
+  vpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest: VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFileConfigResponseApiResponse>(
+  return ogmMutator<ApiVpnServerOvpnFileConfigResponsesOvpnFileConfigResponse>(
     {
       url: `/api/open-vpn-configs/add-update`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: addOrUpdateOvpnFileConfigRequest,
+      data: vpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest,
       signal,
     },
     options,
@@ -221,14 +221,14 @@ export const getPostApiOpenVpnConfigsAddUpdateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiOpenVpnConfigsAddUpdate>>,
     TError,
-    { data: AddOrUpdateOvpnFileConfigRequest },
+    { data: VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiOpenVpnConfigsAddUpdate>>,
   TError,
-  { data: AddOrUpdateOvpnFileConfigRequest },
+  { data: VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest },
   TContext
 > => {
   const mutationKey = ["postApiOpenVpnConfigsAddUpdate"];
@@ -242,7 +242,7 @@ export const getPostApiOpenVpnConfigsAddUpdateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiOpenVpnConfigsAddUpdate>>,
-    { data: AddOrUpdateOvpnFileConfigRequest }
+    { data: VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -256,7 +256,7 @@ export type PostApiOpenVpnConfigsAddUpdateMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiOpenVpnConfigsAddUpdate>>
 >;
 export type PostApiOpenVpnConfigsAddUpdateMutationBody =
-  AddOrUpdateOvpnFileConfigRequest;
+  VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest;
 export type PostApiOpenVpnConfigsAddUpdateMutationError = unknown;
 
 export const usePostApiOpenVpnConfigsAddUpdate = <
@@ -267,7 +267,7 @@ export const usePostApiOpenVpnConfigsAddUpdate = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiOpenVpnConfigsAddUpdate>>,
       TError,
-      { data: AddOrUpdateOvpnFileConfigRequest },
+      { data: VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -276,7 +276,7 @@ export const usePostApiOpenVpnConfigsAddUpdate = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiOpenVpnConfigsAddUpdate>>,
   TError,
-  { data: AddOrUpdateOvpnFileConfigRequest },
+  { data: VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest },
   TContext
 > => {
   return useMutation(
@@ -288,7 +288,7 @@ export const getApiOpenVpnConfigsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/open-vpn-configs/healthcheck`, method: "GET", signal },
     options,
   );
@@ -435,7 +435,7 @@ export const getApiOpenVpnConfigsHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/open-vpn-configs/healthcheck-with-jwt`,
       method: "GET",

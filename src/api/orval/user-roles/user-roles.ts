@@ -21,10 +21,10 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  RolesResponseApiResponse,
-  SetUserRoleRequest,
-  StringApiResponse,
-  UserRoleAssignmentResponseApiResponse,
+  ApiSystemString,
+  ApiUserRolesResponsesRolesResponse,
+  ApiUserRolesResponsesUserRoleAssignmentResponse,
+  UserRolesRequestsSetUserRoleRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -35,7 +35,7 @@ export const getApiUserRolesGetAllRoles = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<RolesResponseApiResponse>(
+  return ogmMutator<ApiUserRolesResponsesRolesResponse>(
     { url: `/api/user-roles/get-all-roles`, method: "GET", signal },
     options,
   );
@@ -183,7 +183,7 @@ export const getApiUserRolesByUserUserId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<UserRoleAssignmentResponseApiResponse>(
+  return ogmMutator<ApiUserRolesResponsesUserRoleAssignmentResponse>(
     { url: `/api/user-roles/by-user/${userId}`, method: "GET", signal },
     options,
   );
@@ -343,16 +343,16 @@ export function useGetApiUserRolesByUserUserId<
 }
 
 export const putApiUserRolesSet = (
-  setUserRoleRequest: SetUserRoleRequest,
+  userRolesRequestsSetUserRoleRequest: UserRolesRequestsSetUserRoleRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<UserRoleAssignmentResponseApiResponse>(
+  return ogmMutator<ApiUserRolesResponsesUserRoleAssignmentResponse>(
     {
       url: `/api/user-roles/set`,
       method: "PUT",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: setUserRoleRequest,
+      data: userRolesRequestsSetUserRoleRequest,
       signal,
     },
     options,
@@ -366,14 +366,14 @@ export const getPutApiUserRolesSetMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putApiUserRolesSet>>,
     TError,
-    { data: SetUserRoleRequest },
+    { data: UserRolesRequestsSetUserRoleRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof putApiUserRolesSet>>,
   TError,
-  { data: SetUserRoleRequest },
+  { data: UserRolesRequestsSetUserRoleRequest },
   TContext
 > => {
   const mutationKey = ["putApiUserRolesSet"];
@@ -387,7 +387,7 @@ export const getPutApiUserRolesSetMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof putApiUserRolesSet>>,
-    { data: SetUserRoleRequest }
+    { data: UserRolesRequestsSetUserRoleRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -400,7 +400,8 @@ export const getPutApiUserRolesSetMutationOptions = <
 export type PutApiUserRolesSetMutationResult = NonNullable<
   Awaited<ReturnType<typeof putApiUserRolesSet>>
 >;
-export type PutApiUserRolesSetMutationBody = SetUserRoleRequest;
+export type PutApiUserRolesSetMutationBody =
+  UserRolesRequestsSetUserRoleRequest;
 export type PutApiUserRolesSetMutationError = unknown;
 
 export const usePutApiUserRolesSet = <TError = unknown, TContext = unknown>(
@@ -408,7 +409,7 @@ export const usePutApiUserRolesSet = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof putApiUserRolesSet>>,
       TError,
-      { data: SetUserRoleRequest },
+      { data: UserRolesRequestsSetUserRoleRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -417,7 +418,7 @@ export const usePutApiUserRolesSet = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof putApiUserRolesSet>>,
   TError,
-  { data: SetUserRoleRequest },
+  { data: UserRolesRequestsSetUserRoleRequest },
   TContext
 > => {
   return useMutation(
@@ -429,7 +430,7 @@ export const getApiUserRolesHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/user-roles/healthcheck`, method: "GET", signal },
     options,
   );
@@ -576,7 +577,7 @@ export const getApiUserRolesHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/user-roles/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

@@ -18,11 +18,11 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  ApiSystemString,
+  ApiVpnServersResponsesVpnServerWithStatusesV2Response,
+  ApiVpnServersResponsesVpnServersV2Response,
   GetApiV2OpenVpnServersGetAllParams,
   GetApiV2OpenVpnServersGetAllWithStatusParams,
-  StringApiResponse,
-  VpnServerWithStatusesV2ResponseApiResponse,
-  VpnServersV2ResponseApiResponse,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -34,7 +34,7 @@ export const getApiV2OpenVpnServersGetAll = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServersV2ResponseApiResponse>(
+  return ogmMutator<ApiVpnServersResponsesVpnServersV2Response>(
     { url: `/api/v2/open-vpn-servers/get-all`, method: "GET", params, signal },
     options,
   );
@@ -198,7 +198,7 @@ export const getApiV2OpenVpnServersGetAllWithStatus = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServerWithStatusesV2ResponseApiResponse>(
+  return ogmMutator<ApiVpnServersResponsesVpnServerWithStatusesV2Response>(
     {
       url: `/api/v2/open-vpn-servers/get-all-with-status`,
       method: "GET",
@@ -367,7 +367,7 @@ export const getApiV2OpenVpnServersHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/v2/open-vpn-servers/healthcheck`, method: "GET", signal },
     options,
   );
@@ -515,7 +515,7 @@ export const getApiV2OpenVpnServersHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/v2/open-vpn-servers/healthcheck-with-jwt`,
       method: "GET",

@@ -18,7 +18,13 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  ConnectedClientsResponseApiResponse,
+  ApiDataBaseServicesQueryVpnServerClientTableOverviewUsersResponse,
+  ApiSystemString,
+  ApiVpnServerClientsResponsesConnectedClientsResponse,
+  ApiVpnServerClientsResponsesOverviewPointsResponse,
+  ApiVpnServerClientsResponsesOverviewSeriesResponse,
+  ApiVpnServerClientsResponsesOverviewTotalsResponse,
+  ApiVpnServerClientsResponsesOverviewUsersSeriesResponse,
   GetApiOpenVpnClientsGetAllConnectedParams,
   GetApiOpenVpnClientsGetAllHistoryParams,
   GetApiOpenVpnClientsOverviewPointsParams,
@@ -33,12 +39,6 @@ import type {
   GetApiV2VpnSessionsOverviewSummaryParams,
   GetApiV2VpnSessionsOverviewUsersParams,
   GetApiV2VpnSessionsOverviewUsersSeriesParams,
-  OverviewPointsResponseApiResponse,
-  OverviewSeriesResponseApiResponse,
-  OverviewTotalsResponseApiResponse,
-  OverviewUsersResponseApiResponse,
-  OverviewUsersSeriesResponseApiResponse,
-  StringApiResponse,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -50,7 +50,7 @@ export const getApiOpenVpnClientsGetAllConnected = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<ConnectedClientsResponseApiResponse>(
+  return ogmMutator<ApiVpnServerClientsResponsesConnectedClientsResponse>(
     {
       url: `/api/open-vpn-clients/get-all-connected`,
       method: "GET",
@@ -220,7 +220,7 @@ export const getApiV2VpnSessionsGetAllConnected = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<ConnectedClientsResponseApiResponse>(
+  return ogmMutator<ApiVpnServerClientsResponsesConnectedClientsResponse>(
     {
       url: `/api/v2/vpn-sessions/get-all-connected`,
       method: "GET",
@@ -390,7 +390,7 @@ export const getApiOpenVpnClientsGetAllHistory = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<ConnectedClientsResponseApiResponse>(
+  return ogmMutator<ApiVpnServerClientsResponsesConnectedClientsResponse>(
     {
       url: `/api/open-vpn-clients/get-all-history`,
       method: "GET",
@@ -560,7 +560,7 @@ export const getApiV2VpnSessionsGetAllHistory = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<ConnectedClientsResponseApiResponse>(
+  return ogmMutator<ApiVpnServerClientsResponsesConnectedClientsResponse>(
     {
       url: `/api/v2/vpn-sessions/get-all-history`,
       method: "GET",
@@ -730,7 +730,7 @@ export const getApiOpenVpnClientsOverviewSeries = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OverviewSeriesResponseApiResponse>(
+  return ogmMutator<ApiVpnServerClientsResponsesOverviewSeriesResponse>(
     {
       url: `/api/open-vpn-clients/overview/series`,
       method: "GET",
@@ -900,7 +900,7 @@ export const getApiV2VpnSessionsOverviewSeries = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OverviewSeriesResponseApiResponse>(
+  return ogmMutator<ApiVpnServerClientsResponsesOverviewSeriesResponse>(
     {
       url: `/api/v2/vpn-sessions/overview/series`,
       method: "GET",
@@ -1070,7 +1070,7 @@ export const getApiOpenVpnClientsOverviewSummary = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OverviewTotalsResponseApiResponse>(
+  return ogmMutator<ApiVpnServerClientsResponsesOverviewTotalsResponse>(
     {
       url: `/api/open-vpn-clients/overview/summary`,
       method: "GET",
@@ -1240,7 +1240,7 @@ export const getApiV2VpnSessionsOverviewSummary = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OverviewTotalsResponseApiResponse>(
+  return ogmMutator<ApiVpnServerClientsResponsesOverviewTotalsResponse>(
     {
       url: `/api/v2/vpn-sessions/overview/summary`,
       method: "GET",
@@ -1410,7 +1410,7 @@ export const getApiOpenVpnClientsOverviewPoints = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OverviewPointsResponseApiResponse>(
+  return ogmMutator<ApiVpnServerClientsResponsesOverviewPointsResponse>(
     {
       url: `/api/open-vpn-clients/overview/points`,
       method: "GET",
@@ -1580,7 +1580,7 @@ export const getApiV2VpnSessionsOverviewPoints = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OverviewPointsResponseApiResponse>(
+  return ogmMutator<ApiVpnServerClientsResponsesOverviewPointsResponse>(
     {
       url: `/api/v2/vpn-sessions/overview/points`,
       method: "GET",
@@ -1750,7 +1750,7 @@ export const getApiOpenVpnClientsOverviewUsers = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OverviewUsersResponseApiResponse>(
+  return ogmMutator<ApiDataBaseServicesQueryVpnServerClientTableOverviewUsersResponse>(
     {
       url: `/api/open-vpn-clients/overview/users`,
       method: "GET",
@@ -1920,7 +1920,7 @@ export const getApiV2VpnSessionsOverviewUsers = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OverviewUsersResponseApiResponse>(
+  return ogmMutator<ApiDataBaseServicesQueryVpnServerClientTableOverviewUsersResponse>(
     {
       url: `/api/v2/vpn-sessions/overview/users`,
       method: "GET",
@@ -2090,7 +2090,7 @@ export const getApiOpenVpnClientsOverviewUsersSeries = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OverviewUsersSeriesResponseApiResponse>(
+  return ogmMutator<ApiVpnServerClientsResponsesOverviewUsersSeriesResponse>(
     {
       url: `/api/open-vpn-clients/overview/users/series`,
       method: "GET",
@@ -2260,7 +2260,7 @@ export const getApiV2VpnSessionsOverviewUsersSeries = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OverviewUsersSeriesResponseApiResponse>(
+  return ogmMutator<ApiVpnServerClientsResponsesOverviewUsersSeriesResponse>(
     {
       url: `/api/v2/vpn-sessions/overview/users/series`,
       method: "GET",
@@ -2429,7 +2429,7 @@ export const getApiOpenVpnClientsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/open-vpn-clients/healthcheck`, method: "GET", signal },
     options,
   );
@@ -2576,7 +2576,7 @@ export const getApiV2VpnSessionsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/v2/vpn-sessions/healthcheck`, method: "GET", signal },
     options,
   );
@@ -2723,7 +2723,7 @@ export const getApiOpenVpnClientsHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/open-vpn-clients/healthcheck-with-jwt`,
       method: "GET",
@@ -2877,7 +2877,7 @@ export const getApiV2VpnSessionsHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/v2/vpn-sessions/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

@@ -21,9 +21,10 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  GetVpnProfileNotificationPreferencesResponseApiResponse,
-  PutVpnProfileNotificationPreferencesRequest,
-  SetAllVpnProfileNotificationCategoriesRequest,
+  ApiSystemString,
+  ApiVpnProfileNotificationPreferencesGetVpnProfileNotificationPreferencesResponse,
+  VpnProfileNotificationPreferencesPutVpnProfileNotificationPreferencesRequest,
+  VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -34,7 +35,7 @@ export const getApiVpnProfileNotificationPreferences = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetVpnProfileNotificationPreferencesResponseApiResponse>(
+  return ogmMutator<ApiVpnProfileNotificationPreferencesGetVpnProfileNotificationPreferencesResponse>(
     { url: `/api/vpn-profile-notification-preferences`, method: "GET", signal },
     options,
   );
@@ -181,16 +182,16 @@ export function useGetApiVpnProfileNotificationPreferences<
 }
 
 export const putApiVpnProfileNotificationPreferences = (
-  putVpnProfileNotificationPreferencesRequest: PutVpnProfileNotificationPreferencesRequest,
+  vpnProfileNotificationPreferencesPutVpnProfileNotificationPreferencesRequest: VpnProfileNotificationPreferencesPutVpnProfileNotificationPreferencesRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetVpnProfileNotificationPreferencesResponseApiResponse>(
+  return ogmMutator<ApiVpnProfileNotificationPreferencesGetVpnProfileNotificationPreferencesResponse>(
     {
       url: `/api/vpn-profile-notification-preferences`,
       method: "PUT",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: putVpnProfileNotificationPreferencesRequest,
+      data: vpnProfileNotificationPreferencesPutVpnProfileNotificationPreferencesRequest,
       signal,
     },
     options,
@@ -204,14 +205,18 @@ export const getPutApiVpnProfileNotificationPreferencesMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putApiVpnProfileNotificationPreferences>>,
     TError,
-    { data: PutVpnProfileNotificationPreferencesRequest },
+    {
+      data: VpnProfileNotificationPreferencesPutVpnProfileNotificationPreferencesRequest;
+    },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof putApiVpnProfileNotificationPreferences>>,
   TError,
-  { data: PutVpnProfileNotificationPreferencesRequest },
+  {
+    data: VpnProfileNotificationPreferencesPutVpnProfileNotificationPreferencesRequest;
+  },
   TContext
 > => {
   const mutationKey = ["putApiVpnProfileNotificationPreferences"];
@@ -225,7 +230,9 @@ export const getPutApiVpnProfileNotificationPreferencesMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof putApiVpnProfileNotificationPreferences>>,
-    { data: PutVpnProfileNotificationPreferencesRequest }
+    {
+      data: VpnProfileNotificationPreferencesPutVpnProfileNotificationPreferencesRequest;
+    }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -239,7 +246,7 @@ export type PutApiVpnProfileNotificationPreferencesMutationResult = NonNullable<
   Awaited<ReturnType<typeof putApiVpnProfileNotificationPreferences>>
 >;
 export type PutApiVpnProfileNotificationPreferencesMutationBody =
-  PutVpnProfileNotificationPreferencesRequest;
+  VpnProfileNotificationPreferencesPutVpnProfileNotificationPreferencesRequest;
 export type PutApiVpnProfileNotificationPreferencesMutationError = unknown;
 
 export const usePutApiVpnProfileNotificationPreferences = <
@@ -250,7 +257,9 @@ export const usePutApiVpnProfileNotificationPreferences = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof putApiVpnProfileNotificationPreferences>>,
       TError,
-      { data: PutVpnProfileNotificationPreferencesRequest },
+      {
+        data: VpnProfileNotificationPreferencesPutVpnProfileNotificationPreferencesRequest;
+      },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -259,7 +268,9 @@ export const usePutApiVpnProfileNotificationPreferences = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof putApiVpnProfileNotificationPreferences>>,
   TError,
-  { data: PutVpnProfileNotificationPreferencesRequest },
+  {
+    data: VpnProfileNotificationPreferencesPutVpnProfileNotificationPreferencesRequest;
+  },
   TContext
 > => {
   return useMutation(
@@ -268,16 +279,16 @@ export const usePutApiVpnProfileNotificationPreferences = <
   );
 };
 export const postApiVpnProfileNotificationPreferencesSetAllCategories = (
-  setAllVpnProfileNotificationCategoriesRequest: SetAllVpnProfileNotificationCategoriesRequest,
+  vpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest: VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetVpnProfileNotificationPreferencesResponseApiResponse>(
+  return ogmMutator<ApiVpnProfileNotificationPreferencesGetVpnProfileNotificationPreferencesResponse>(
     {
       url: `/api/vpn-profile-notification-preferences/set-all-categories`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: setAllVpnProfileNotificationCategoriesRequest,
+      data: vpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest,
       signal,
     },
     options,
@@ -293,7 +304,9 @@ export const getPostApiVpnProfileNotificationPreferencesSetAllCategoriesMutation
         >
       >,
       TError,
-      { data: SetAllVpnProfileNotificationCategoriesRequest },
+      {
+        data: VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest;
+      },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -304,7 +317,9 @@ export const getPostApiVpnProfileNotificationPreferencesSetAllCategoriesMutation
       >
     >,
     TError,
-    { data: SetAllVpnProfileNotificationCategoriesRequest },
+    {
+      data: VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest;
+    },
     TContext
   > => {
     const mutationKey = [
@@ -324,7 +339,9 @@ export const getPostApiVpnProfileNotificationPreferencesSetAllCategoriesMutation
           typeof postApiVpnProfileNotificationPreferencesSetAllCategories
         >
       >,
-      { data: SetAllVpnProfileNotificationCategoriesRequest }
+      {
+        data: VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest;
+      }
     > = (props) => {
       const { data } = props ?? {};
 
@@ -346,7 +363,7 @@ export type PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationResu
     >
   >;
 export type PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationBody =
-  SetAllVpnProfileNotificationCategoriesRequest;
+  VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest;
 export type PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationError =
   unknown;
 
@@ -362,7 +379,9 @@ export const usePostApiVpnProfileNotificationPreferencesSetAllCategories = <
         >
       >,
       TError,
-      { data: SetAllVpnProfileNotificationCategoriesRequest },
+      {
+        data: VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest;
+      },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -373,7 +392,9 @@ export const usePostApiVpnProfileNotificationPreferencesSetAllCategories = <
     ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>
   >,
   TError,
-  { data: SetAllVpnProfileNotificationCategoriesRequest },
+  {
+    data: VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest;
+  },
   TContext
 > => {
   return useMutation(
@@ -383,3 +404,430 @@ export const usePostApiVpnProfileNotificationPreferencesSetAllCategories = <
     queryClient,
   );
 };
+export const getApiVpnProfileNotificationPreferencesHealthcheck = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<ApiSystemString>(
+    {
+      url: `/api/vpn-profile-notification-preferences/healthcheck`,
+      method: "GET",
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetApiVpnProfileNotificationPreferencesHealthcheckQueryKey =
+  () => {
+    return [`/api/vpn-profile-notification-preferences/healthcheck`] as const;
+  };
+
+export const getGetApiVpnProfileNotificationPreferencesHealthcheckQueryOptions =
+  <
+    TData = Awaited<
+      ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+    >,
+    TError = unknown,
+  >(options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  }) => {
+    const { query: queryOptions, request: requestOptions } = options ?? {};
+
+    const queryKey =
+      queryOptions?.queryKey ??
+      getGetApiVpnProfileNotificationPreferencesHealthcheckQueryKey();
+
+    const queryFn: QueryFunction<
+      Awaited<
+        ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+      >
+    > = ({ signal }) =>
+      getApiVpnProfileNotificationPreferencesHealthcheck(
+        requestOptions,
+        signal,
+      );
+
+    return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+      Awaited<
+        ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+      >,
+      TError,
+      TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+  };
+
+export type GetApiVpnProfileNotificationPreferencesHealthcheckQueryResult =
+  NonNullable<
+    Awaited<
+      ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+    >
+  >;
+export type GetApiVpnProfileNotificationPreferencesHealthcheckQueryError =
+  unknown;
+
+export function useGetApiVpnProfileNotificationPreferencesHealthcheck<
+  TData = Awaited<
+    ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+  >,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<
+              typeof getApiVpnProfileNotificationPreferencesHealthcheck
+            >
+          >,
+          TError,
+          Awaited<
+            ReturnType<
+              typeof getApiVpnProfileNotificationPreferencesHealthcheck
+            >
+          >
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiVpnProfileNotificationPreferencesHealthcheck<
+  TData = Awaited<
+    ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+  >,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<
+              typeof getApiVpnProfileNotificationPreferencesHealthcheck
+            >
+          >,
+          TError,
+          Awaited<
+            ReturnType<
+              typeof getApiVpnProfileNotificationPreferencesHealthcheck
+            >
+          >
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiVpnProfileNotificationPreferencesHealthcheck<
+  TData = Awaited<
+    ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+  >,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetApiVpnProfileNotificationPreferencesHealthcheck<
+  TData = Awaited<
+    ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+  >,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheck>
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetApiVpnProfileNotificationPreferencesHealthcheckQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const getApiVpnProfileNotificationPreferencesHealthcheckWithJwt = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<ApiSystemString>(
+    {
+      url: `/api/vpn-profile-notification-preferences/healthcheck-with-jwt`,
+      method: "GET",
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetApiVpnProfileNotificationPreferencesHealthcheckWithJwtQueryKey =
+  () => {
+    return [
+      `/api/vpn-profile-notification-preferences/healthcheck-with-jwt`,
+    ] as const;
+  };
+
+export const getGetApiVpnProfileNotificationPreferencesHealthcheckWithJwtQueryOptions =
+  <
+    TData = Awaited<
+      ReturnType<
+        typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+      >
+    >,
+    TError = unknown,
+  >(options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<
+            typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+          >
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  }) => {
+    const { query: queryOptions, request: requestOptions } = options ?? {};
+
+    const queryKey =
+      queryOptions?.queryKey ??
+      getGetApiVpnProfileNotificationPreferencesHealthcheckWithJwtQueryKey();
+
+    const queryFn: QueryFunction<
+      Awaited<
+        ReturnType<
+          typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+        >
+      >
+    > = ({ signal }) =>
+      getApiVpnProfileNotificationPreferencesHealthcheckWithJwt(
+        requestOptions,
+        signal,
+      );
+
+    return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+      Awaited<
+        ReturnType<
+          typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+        >
+      >,
+      TError,
+      TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+  };
+
+export type GetApiVpnProfileNotificationPreferencesHealthcheckWithJwtQueryResult =
+  NonNullable<
+    Awaited<
+      ReturnType<
+        typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+      >
+    >
+  >;
+export type GetApiVpnProfileNotificationPreferencesHealthcheckWithJwtQueryError =
+  unknown;
+
+export function useGetApiVpnProfileNotificationPreferencesHealthcheckWithJwt<
+  TData = Awaited<
+    ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt>
+  >,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<
+            typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+          >
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<
+              typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+            >
+          >,
+          TError,
+          Awaited<
+            ReturnType<
+              typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+            >
+          >
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiVpnProfileNotificationPreferencesHealthcheckWithJwt<
+  TData = Awaited<
+    ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt>
+  >,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<
+            typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+          >
+        >,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<
+              typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+            >
+          >,
+          TError,
+          Awaited<
+            ReturnType<
+              typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+            >
+          >
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiVpnProfileNotificationPreferencesHealthcheckWithJwt<
+  TData = Awaited<
+    ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt>
+  >,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<
+            typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+          >
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetApiVpnProfileNotificationPreferencesHealthcheckWithJwt<
+  TData = Awaited<
+    ReturnType<typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt>
+  >,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<
+          ReturnType<
+            typeof getApiVpnProfileNotificationPreferencesHealthcheckWithJwt
+          >
+        >,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetApiVpnProfileNotificationPreferencesHealthcheckWithJwtQueryOptions(
+      options,
+    );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}

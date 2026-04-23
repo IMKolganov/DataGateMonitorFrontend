@@ -21,12 +21,12 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  FetchAndSaveConflogRequest,
+  ApiSystemString,
+  ApiVpnServerConflogResponsesVpnServerConflogPageResponse,
+  ApiVpnServerConflogResponsesVpnServerConflogResponse,
   GetApiOpenVpnServersConflogGetPageParams,
   GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams,
-  StringApiResponse,
-  VpnServerConflogPageResponseApiResponse,
-  VpnServerConflogResponseApiResponse,
+  VpnServerConflogRequestsFetchAndSaveConflogRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -34,16 +34,16 @@ import { ogmMutator } from "../../mutator";
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export const postApiOpenVpnServersConflogFetchAndSave = (
-  fetchAndSaveConflogRequest: FetchAndSaveConflogRequest,
+  vpnServerConflogRequestsFetchAndSaveConflogRequest: VpnServerConflogRequestsFetchAndSaveConflogRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServerConflogResponseApiResponse>(
+  return ogmMutator<ApiVpnServerConflogResponsesVpnServerConflogResponse>(
     {
       url: `/api/open-vpn-servers/conflog/fetch-and-save`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: fetchAndSaveConflogRequest,
+      data: vpnServerConflogRequestsFetchAndSaveConflogRequest,
       signal,
     },
     options,
@@ -57,14 +57,14 @@ export const getPostApiOpenVpnServersConflogFetchAndSaveMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiOpenVpnServersConflogFetchAndSave>>,
     TError,
-    { data: FetchAndSaveConflogRequest },
+    { data: VpnServerConflogRequestsFetchAndSaveConflogRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiOpenVpnServersConflogFetchAndSave>>,
   TError,
-  { data: FetchAndSaveConflogRequest },
+  { data: VpnServerConflogRequestsFetchAndSaveConflogRequest },
   TContext
 > => {
   const mutationKey = ["postApiOpenVpnServersConflogFetchAndSave"];
@@ -78,7 +78,7 @@ export const getPostApiOpenVpnServersConflogFetchAndSaveMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiOpenVpnServersConflogFetchAndSave>>,
-    { data: FetchAndSaveConflogRequest }
+    { data: VpnServerConflogRequestsFetchAndSaveConflogRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -93,7 +93,7 @@ export type PostApiOpenVpnServersConflogFetchAndSaveMutationResult =
     Awaited<ReturnType<typeof postApiOpenVpnServersConflogFetchAndSave>>
   >;
 export type PostApiOpenVpnServersConflogFetchAndSaveMutationBody =
-  FetchAndSaveConflogRequest;
+  VpnServerConflogRequestsFetchAndSaveConflogRequest;
 export type PostApiOpenVpnServersConflogFetchAndSaveMutationError = unknown;
 
 export const usePostApiOpenVpnServersConflogFetchAndSave = <
@@ -104,7 +104,7 @@ export const usePostApiOpenVpnServersConflogFetchAndSave = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiOpenVpnServersConflogFetchAndSave>>,
       TError,
-      { data: FetchAndSaveConflogRequest },
+      { data: VpnServerConflogRequestsFetchAndSaveConflogRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -113,7 +113,7 @@ export const usePostApiOpenVpnServersConflogFetchAndSave = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiOpenVpnServersConflogFetchAndSave>>,
   TError,
-  { data: FetchAndSaveConflogRequest },
+  { data: VpnServerConflogRequestsFetchAndSaveConflogRequest },
   TContext
 > => {
   return useMutation(
@@ -126,7 +126,7 @@ export const postApiOpenVpnServersConflogFetchAndSaveByServerVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServerConflogResponseApiResponse>(
+  return ogmMutator<ApiVpnServerConflogResponsesVpnServerConflogResponse>(
     {
       url: `/api/open-vpn-servers/conflog/fetch-and-save-by-server/${vpnServerId}`,
       method: "POST",
@@ -241,7 +241,7 @@ export const getApiOpenVpnServersConflogGetId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServerConflogResponseApiResponse>(
+  return ogmMutator<ApiVpnServerConflogResponsesVpnServerConflogResponse>(
     { url: `/api/open-vpn-servers/conflog/get/${id}`, method: "GET", signal },
     options,
   );
@@ -406,7 +406,7 @@ export const getApiOpenVpnServersConflogHistoryByServerVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServerConflogPageResponseApiResponse>(
+  return ogmMutator<ApiVpnServerConflogResponsesVpnServerConflogPageResponse>(
     {
       url: `/api/open-vpn-servers/conflog/history-by-server/${vpnServerId}`,
       method: "GET",
@@ -655,7 +655,7 @@ export const getApiOpenVpnServersConflogGetPage = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServerConflogPageResponseApiResponse>(
+  return ogmMutator<ApiVpnServerConflogResponsesVpnServerConflogPageResponse>(
     {
       url: `/api/open-vpn-servers/conflog/get-page`,
       method: "GET",
@@ -824,7 +824,7 @@ export const getApiOpenVpnServersConflogHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/open-vpn-servers/conflog/healthcheck`, method: "GET", signal },
     options,
   );
@@ -974,7 +974,7 @@ export const getApiOpenVpnServersConflogHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/open-vpn-servers/conflog/healthcheck-with-jwt`,
       method: "GET",

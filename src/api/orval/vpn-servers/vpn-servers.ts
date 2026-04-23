@@ -21,18 +21,18 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  AddServerRequest,
+  ApiSystemString,
+  ApiVpnServersDtoVpnMicroserviceDiagnosticsDto,
+  ApiVpnServersResponsesServiceStatusesResponse,
+  ApiVpnServersResponsesVpnServerResponse,
+  ApiVpnServersResponsesVpnServerWithStatusResponse,
+  ApiVpnServersResponsesVpnServerWithStatusesResponse,
+  ApiVpnServersResponsesVpnServersResponse,
   GetApiOpenVpnServersGetAllParams,
   GetApiOpenVpnServersGetAllWithStatusParams,
   GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
-  RootInfoResponseApiResponse,
-  ServiceStatusesResponseApiResponse,
-  StringApiResponse,
-  UpdateServerRequest,
-  VpnServerResponseApiResponse,
-  VpnServerWithStatusResponseApiResponse,
-  VpnServerWithStatusesResponseApiResponse,
-  VpnServersResponseApiResponse,
+  VpnServersRequestsAddServerRequest,
+  VpnServersRequestsUpdateServerRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -44,7 +44,7 @@ export const getApiOpenVpnServersGetAllWithStatus = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServerWithStatusesResponseApiResponse>(
+  return ogmMutator<ApiVpnServersResponsesVpnServerWithStatusesResponse>(
     {
       url: `/api/open-vpn-servers/get-all-with-status`,
       method: "GET",
@@ -214,7 +214,7 @@ export const getApiOpenVpnServersGetServerWithStatusVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServerWithStatusResponseApiResponse>(
+  return ogmMutator<ApiVpnServersResponsesVpnServerWithStatusResponse>(
     {
       url: `/api/open-vpn-servers/get-server-with-status/${vpnServerId}`,
       method: "GET",
@@ -441,7 +441,7 @@ export const getApiOpenVpnServersGetMicroserviceInfoVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<RootInfoResponseApiResponse>(
+  return ogmMutator<ApiVpnServersDtoVpnMicroserviceDiagnosticsDto>(
     {
       url: `/api/open-vpn-servers/get-microservice-info/${vpnServerId}`,
       method: "GET",
@@ -668,7 +668,7 @@ export const getApiOpenVpnServersGetMicroserviceInfoByUrl = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<RootInfoResponseApiResponse>(
+  return ogmMutator<ApiVpnServersDtoVpnMicroserviceDiagnosticsDto>(
     {
       url: `/api/open-vpn-servers/get-microservice-info-by-url`,
       method: "GET",
@@ -872,7 +872,7 @@ export const getApiOpenVpnServersGetAll = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServersResponseApiResponse>(
+  return ogmMutator<ApiVpnServersResponsesVpnServersResponse>(
     { url: `/api/open-vpn-servers/get-all`, method: "GET", params, signal },
     options,
   );
@@ -1036,7 +1036,7 @@ export const getApiOpenVpnServersGetVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServerResponseApiResponse>(
+  return ogmMutator<ApiVpnServersResponsesVpnServerResponse>(
     { url: `/api/open-vpn-servers/get/${vpnServerId}`, method: "GET", signal },
     options,
   );
@@ -1199,16 +1199,16 @@ export function useGetApiOpenVpnServersGetVpnServerId<
 }
 
 export const postApiOpenVpnServersAdd = (
-  addServerRequest: AddServerRequest,
+  vpnServersRequestsAddServerRequest: VpnServersRequestsAddServerRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServerResponseApiResponse>(
+  return ogmMutator<ApiVpnServersResponsesVpnServerResponse>(
     {
       url: `/api/open-vpn-servers/add`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: addServerRequest,
+      data: vpnServersRequestsAddServerRequest,
       signal,
     },
     options,
@@ -1222,14 +1222,14 @@ export const getPostApiOpenVpnServersAddMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiOpenVpnServersAdd>>,
     TError,
-    { data: AddServerRequest },
+    { data: VpnServersRequestsAddServerRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiOpenVpnServersAdd>>,
   TError,
-  { data: AddServerRequest },
+  { data: VpnServersRequestsAddServerRequest },
   TContext
 > => {
   const mutationKey = ["postApiOpenVpnServersAdd"];
@@ -1243,7 +1243,7 @@ export const getPostApiOpenVpnServersAddMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiOpenVpnServersAdd>>,
-    { data: AddServerRequest }
+    { data: VpnServersRequestsAddServerRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1256,7 +1256,8 @@ export const getPostApiOpenVpnServersAddMutationOptions = <
 export type PostApiOpenVpnServersAddMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiOpenVpnServersAdd>>
 >;
-export type PostApiOpenVpnServersAddMutationBody = AddServerRequest;
+export type PostApiOpenVpnServersAddMutationBody =
+  VpnServersRequestsAddServerRequest;
 export type PostApiOpenVpnServersAddMutationError = unknown;
 
 export const usePostApiOpenVpnServersAdd = <
@@ -1267,7 +1268,7 @@ export const usePostApiOpenVpnServersAdd = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiOpenVpnServersAdd>>,
       TError,
-      { data: AddServerRequest },
+      { data: VpnServersRequestsAddServerRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1276,7 +1277,7 @@ export const usePostApiOpenVpnServersAdd = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiOpenVpnServersAdd>>,
   TError,
-  { data: AddServerRequest },
+  { data: VpnServersRequestsAddServerRequest },
   TContext
 > => {
   return useMutation(
@@ -1285,16 +1286,16 @@ export const usePostApiOpenVpnServersAdd = <
   );
 };
 export const putApiOpenVpnServersUpdate = (
-  updateServerRequest: UpdateServerRequest,
+  vpnServersRequestsUpdateServerRequest: VpnServersRequestsUpdateServerRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<VpnServerResponseApiResponse>(
+  return ogmMutator<ApiVpnServersResponsesVpnServerResponse>(
     {
       url: `/api/open-vpn-servers/update`,
       method: "PUT",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: updateServerRequest,
+      data: vpnServersRequestsUpdateServerRequest,
       signal,
     },
     options,
@@ -1308,14 +1309,14 @@ export const getPutApiOpenVpnServersUpdateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putApiOpenVpnServersUpdate>>,
     TError,
-    { data: UpdateServerRequest },
+    { data: VpnServersRequestsUpdateServerRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof putApiOpenVpnServersUpdate>>,
   TError,
-  { data: UpdateServerRequest },
+  { data: VpnServersRequestsUpdateServerRequest },
   TContext
 > => {
   const mutationKey = ["putApiOpenVpnServersUpdate"];
@@ -1329,7 +1330,7 @@ export const getPutApiOpenVpnServersUpdateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof putApiOpenVpnServersUpdate>>,
-    { data: UpdateServerRequest }
+    { data: VpnServersRequestsUpdateServerRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1342,7 +1343,8 @@ export const getPutApiOpenVpnServersUpdateMutationOptions = <
 export type PutApiOpenVpnServersUpdateMutationResult = NonNullable<
   Awaited<ReturnType<typeof putApiOpenVpnServersUpdate>>
 >;
-export type PutApiOpenVpnServersUpdateMutationBody = UpdateServerRequest;
+export type PutApiOpenVpnServersUpdateMutationBody =
+  VpnServersRequestsUpdateServerRequest;
 export type PutApiOpenVpnServersUpdateMutationError = unknown;
 
 export const usePutApiOpenVpnServersUpdate = <
@@ -1353,7 +1355,7 @@ export const usePutApiOpenVpnServersUpdate = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof putApiOpenVpnServersUpdate>>,
       TError,
-      { data: UpdateServerRequest },
+      { data: VpnServersRequestsUpdateServerRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1362,7 +1364,7 @@ export const usePutApiOpenVpnServersUpdate = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof putApiOpenVpnServersUpdate>>,
   TError,
-  { data: UpdateServerRequest },
+  { data: VpnServersRequestsUpdateServerRequest },
   TContext
 > => {
   return useMutation(
@@ -1462,7 +1464,7 @@ export const getApiOpenVpnServersStatus = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<ServiceStatusesResponseApiResponse>(
+  return ogmMutator<ApiVpnServersResponsesServiceStatusesResponse>(
     { url: `/api/open-vpn-servers/status`, method: "GET", signal },
     options,
   );
@@ -1609,7 +1611,7 @@ export const postApiOpenVpnServersRunNow = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/open-vpn-servers/run-now`, method: "POST", signal },
     options,
   );
@@ -1686,7 +1688,7 @@ export const getApiOpenVpnServersHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/open-vpn-servers/healthcheck`, method: "GET", signal },
     options,
   );
@@ -1833,7 +1835,7 @@ export const getApiOpenVpnServersHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/open-vpn-servers/healthcheck-with-jwt`,
       method: "GET",

@@ -19,11 +19,10 @@ import {
   getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryKey,
 } from "../api/orval/vpn-server-conflog/vpn-server-conflog";
 
-import type {
-  AddOrUpdateOvpnFileConfigRequest,
-  OvpnFileConfigResponse,
-  RootInfoResponse,
-} from "../api/orval/model";
+import type { DataGateMonitorSharedModelsDataGateMonitorVpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest as AddOrUpdateOvpnFileConfigRequest } from "../api/orval/model/dataGateMonitorSharedModelsDataGateMonitorVpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest";
+import type { DataGateMonitorSharedModelsDataGateMonitorVpnServerOvpnFileConfigResponsesOvpnFileConfigResponse as OvpnFileConfigResponse } from "../api/orval/model/dataGateMonitorSharedModelsDataGateMonitorVpnServerOvpnFileConfigResponsesOvpnFileConfigResponse";
+import type { DataGateMonitorSharedModelsDataGateMonitorVpnServersResponsesVpnServerResponse as VpnServerResponse } from "../api/orval/model/dataGateMonitorSharedModelsDataGateMonitorVpnServersResponsesVpnServerResponse";
+import type { DataGateMonitorSharedModelsDataGateOpenVpnManagerInfoRootOpenVpnInfoResponse as RootOpenVpnInfoResponse } from "../api/orval/model/dataGateMonitorSharedModelsDataGateOpenVpnManagerInfoRootOpenVpnInfoResponse";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
@@ -33,7 +32,6 @@ import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../utils/errorMessage";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
-import type { VpnServerResponse } from "../api/orval/model";
 import { isOpenVpnStack, VpnServerType } from "../constants/vpnServerType";
 import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 
@@ -75,7 +73,7 @@ interface ConflogRow {
   id?: number;
   vpnServerId?: number | null;
   requestUrl?: string | null;
-  payload?: RootInfoResponse;
+  payload?: RootOpenVpnInfoResponse;
   createDate?: string;
 }
 
