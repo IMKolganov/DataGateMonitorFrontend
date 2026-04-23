@@ -13,6 +13,8 @@ export interface ConnectionStatusDto {
   host?: string | null;
   port?: number;
   /** @nullable */
+  state?: string | null;
+  /** @nullable */
   connectionId?: string | null;
   lastStateChangedUtc?: string;
   /** @nullable */

@@ -4,8 +4,8 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
-import type { OpenVpnServerEventLogDtoPagedResponse } from "./openVpnServerEventLogDtoPagedResponse";
+import type { VpnServerEventLogDtoPagedResponse } from "./vpnServerEventLogDtoPagedResponse";
 
 export interface VpnServerEventResponse {
-  events?: OpenVpnServerEventLogDtoPagedResponse;
+  events?: VpnServerEventLogDtoPagedResponse;
 }

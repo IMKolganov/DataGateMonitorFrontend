@@ -23,9 +23,9 @@ import type {
 import type {
   AddMessageRequest,
   AddMessageResponseApiResponse,
-  GetAllByTelegramIdMessagesRequest,
   GetAllMessagesResponseApiResponse,
-  GetByIdMessageRequest,
+  GetApiTgbotIncomingMessageLogsGetAllParams,
+  GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
   GetByIdMessageResponseApiResponse,
   GetByTelegramIdMessagesResponseApiResponse,
   StringApiResponse,
@@ -122,41 +122,56 @@ export const usePostApiTgbotIncomingMessageLogsAdd = <
   );
 };
 export const getApiTgbotIncomingMessageLogsGetAll = (
+  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
   return ogmMutator<GetAllMessagesResponseApiResponse>(
-    { url: `/api/tgbot-incoming-message-logs/get-all`, method: "GET", signal },
+    {
+      url: `/api/tgbot-incoming-message-logs/get-all`,
+      method: "GET",
+      params,
+      signal,
+    },
     options,
   );
 };
 
-export const getGetApiTgbotIncomingMessageLogsGetAllQueryKey = () => {
-  return [`/api/tgbot-incoming-message-logs/get-all`] as const;
+export const getGetApiTgbotIncomingMessageLogsGetAllQueryKey = (
+  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
+) => {
+  return [
+    `/api/tgbot-incoming-message-logs/get-all`,
+    ...(params ? [params] : []),
+  ] as const;
 };
 
 export const getGetApiTgbotIncomingMessageLogsGetAllQueryOptions = <
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
   TError = unknown,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<
-      Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
-      TError,
-      TData
-    >
-  >;
-  request?: SecondParameter<typeof ogmMutator>;
-}) => {
+>(
+  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetApiTgbotIncomingMessageLogsGetAllQueryKey();
+    queryOptions?.queryKey ??
+    getGetApiTgbotIncomingMessageLogsGetAllQueryKey(params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>
   > = ({ signal }) =>
-    getApiTgbotIncomingMessageLogsGetAll(requestOptions, signal);
+    getApiTgbotIncomingMessageLogsGetAll(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
@@ -174,6 +189,7 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
   TError = unknown,
 >(
+  params: undefined | GetApiTgbotIncomingMessageLogsGetAllParams,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -200,6 +216,7 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
   TError = unknown,
 >(
+  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -226,6 +243,7 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
   TError = unknown,
 >(
+  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -245,6 +263,7 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetAll>>,
   TError = unknown,
 >(
+  params?: GetApiTgbotIncomingMessageLogsGetAllParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -259,8 +278,10 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions =
-    getGetApiTgbotIncomingMessageLogsGetAllQueryOptions(options);
+  const queryOptions = getGetApiTgbotIncomingMessageLogsGetAllQueryOptions(
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,
@@ -270,44 +291,52 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
-export const getApiTgbotIncomingMessageLogsGetByTelegramUserid = (
-  getAllByTelegramIdMessagesRequest: GetAllByTelegramIdMessagesRequest,
+export const getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId = (
+  telegramId: number,
+  params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
   return ogmMutator<GetByTelegramIdMessagesResponseApiResponse>(
     {
-      url: `/api/tgbot-incoming-message-logs/get-by-telegram-userid`,
+      url: `/api/tgbot-incoming-message-logs/get-by-telegram-userid/${telegramId}`,
       method: "GET",
-      headers: { "Content-Type": "application/json-patch+json" },
+      params,
       signal,
     },
     options,
   );
 };
 
-export const getGetApiTgbotIncomingMessageLogsGetByTelegramUseridQueryKey = (
-  getAllByTelegramIdMessagesRequest?: GetAllByTelegramIdMessagesRequest,
-) => {
-  return [
-    `/api/tgbot-incoming-message-logs/get-by-telegram-userid`,
-    getAllByTelegramIdMessagesRequest,
-  ] as const;
-};
+export const getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryKey =
+  (
+    telegramId: number,
+    params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
+  ) => {
+    return [
+      `/api/tgbot-incoming-message-logs/get-by-telegram-userid/${telegramId}`,
+      ...(params ? [params] : []),
+    ] as const;
+  };
 
-export const getGetApiTgbotIncomingMessageLogsGetByTelegramUseridQueryOptions =
+export const getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryOptions =
   <
     TData = Awaited<
-      ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+      ReturnType<
+        typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+      >
     >,
     TError = unknown,
   >(
-    getAllByTelegramIdMessagesRequest: GetAllByTelegramIdMessagesRequest,
+    telegramId: number,
+    params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
     options?: {
       query?: Partial<
         UseQueryOptions<
           Awaited<
-            ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+            ReturnType<
+              typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+            >
           >,
           TError,
           TData
@@ -320,51 +349,71 @@ export const getGetApiTgbotIncomingMessageLogsGetByTelegramUseridQueryOptions =
 
     const queryKey =
       queryOptions?.queryKey ??
-      getGetApiTgbotIncomingMessageLogsGetByTelegramUseridQueryKey(
-        getAllByTelegramIdMessagesRequest,
+      getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryKey(
+        telegramId,
+        params,
       );
 
     const queryFn: QueryFunction<
       Awaited<
-        ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+        ReturnType<
+          typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+        >
       >
     > = ({ signal }) =>
-      getApiTgbotIncomingMessageLogsGetByTelegramUserid(
-        getAllByTelegramIdMessagesRequest,
+      getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId(
+        telegramId,
+        params,
         requestOptions,
         signal,
       );
 
-    return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    return {
+      queryKey,
+      queryFn,
+      enabled: !!telegramId,
+      ...queryOptions,
+    } as UseQueryOptions<
       Awaited<
-        ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+        ReturnType<
+          typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+        >
       >,
       TError,
       TData
     > & { queryKey: DataTag<QueryKey, TData, TError> };
   };
 
-export type GetApiTgbotIncomingMessageLogsGetByTelegramUseridQueryResult =
+export type GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryResult =
   NonNullable<
     Awaited<
-      ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+      ReturnType<
+        typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+      >
     >
   >;
-export type GetApiTgbotIncomingMessageLogsGetByTelegramUseridQueryError =
+export type GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryError =
   unknown;
 
-export function useGetApiTgbotIncomingMessageLogsGetByTelegramUserid<
+export function useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId<
   TData = Awaited<
-    ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+    ReturnType<
+      typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+    >
   >,
   TError = unknown,
 >(
-  getAllByTelegramIdMessagesRequest: GetAllByTelegramIdMessagesRequest,
+  telegramId: number,
+  params:
+    | undefined
+    | GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
   options: {
     query: Partial<
       UseQueryOptions<
         Awaited<
-          ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+          ReturnType<
+            typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+          >
         >,
         TError,
         TData
@@ -373,11 +422,15 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUserid<
       Pick<
         DefinedInitialDataOptions<
           Awaited<
-            ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+            ReturnType<
+              typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+            >
           >,
           TError,
           Awaited<
-            ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+            ReturnType<
+              typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+            >
           >
         >,
         "initialData"
@@ -388,18 +441,23 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUserid<
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetApiTgbotIncomingMessageLogsGetByTelegramUserid<
+export function useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId<
   TData = Awaited<
-    ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+    ReturnType<
+      typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+    >
   >,
   TError = unknown,
 >(
-  getAllByTelegramIdMessagesRequest: GetAllByTelegramIdMessagesRequest,
+  telegramId: number,
+  params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
         Awaited<
-          ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+          ReturnType<
+            typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+          >
         >,
         TError,
         TData
@@ -408,11 +466,15 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUserid<
       Pick<
         UndefinedInitialDataOptions<
           Awaited<
-            ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+            ReturnType<
+              typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+            >
           >,
           TError,
           Awaited<
-            ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+            ReturnType<
+              typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+            >
           >
         >,
         "initialData"
@@ -423,18 +485,23 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUserid<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
-export function useGetApiTgbotIncomingMessageLogsGetByTelegramUserid<
+export function useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId<
   TData = Awaited<
-    ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+    ReturnType<
+      typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+    >
   >,
   TError = unknown,
 >(
-  getAllByTelegramIdMessagesRequest: GetAllByTelegramIdMessagesRequest,
+  telegramId: number,
+  params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
         Awaited<
-          ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+          ReturnType<
+            typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+          >
         >,
         TError,
         TData
@@ -447,18 +514,23 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUserid<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
-export function useGetApiTgbotIncomingMessageLogsGetByTelegramUserid<
+export function useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId<
   TData = Awaited<
-    ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+    ReturnType<
+      typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+    >
   >,
   TError = unknown,
 >(
-  getAllByTelegramIdMessagesRequest: GetAllByTelegramIdMessagesRequest,
+  telegramId: number,
+  params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
         Awaited<
-          ReturnType<typeof getApiTgbotIncomingMessageLogsGetByTelegramUserid>
+          ReturnType<
+            typeof getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId
+          >
         >,
         TError,
         TData
@@ -471,8 +543,9 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUserid<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions =
-    getGetApiTgbotIncomingMessageLogsGetByTelegramUseridQueryOptions(
-      getAllByTelegramIdMessagesRequest,
+    getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryOptions(
+      telegramId,
+      params,
       options,
     );
 
@@ -485,7 +558,6 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUserid<
 }
 
 export const getApiTgbotIncomingMessageLogsGetById = (
-  getByIdMessageRequest: GetByIdMessageRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
@@ -493,52 +565,39 @@ export const getApiTgbotIncomingMessageLogsGetById = (
     {
       url: `/api/tgbot-incoming-message-logs/get-by-id`,
       method: "GET",
-      headers: { "Content-Type": "application/json-patch+json" },
       signal,
     },
     options,
   );
 };
 
-export const getGetApiTgbotIncomingMessageLogsGetByIdQueryKey = (
-  getByIdMessageRequest?: GetByIdMessageRequest,
-) => {
-  return [
-    `/api/tgbot-incoming-message-logs/get-by-id`,
-    getByIdMessageRequest,
-  ] as const;
+export const getGetApiTgbotIncomingMessageLogsGetByIdQueryKey = () => {
+  return [`/api/tgbot-incoming-message-logs/get-by-id`] as const;
 };
 
 export const getGetApiTgbotIncomingMessageLogsGetByIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetById>>,
   TError = unknown,
->(
-  getByIdMessageRequest: GetByIdMessageRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetById>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof ogmMutator>;
-  },
-) => {
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetById>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
     queryOptions?.queryKey ??
-    getGetApiTgbotIncomingMessageLogsGetByIdQueryKey(getByIdMessageRequest);
+    getGetApiTgbotIncomingMessageLogsGetByIdQueryKey();
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetById>>
   > = ({ signal }) =>
-    getApiTgbotIncomingMessageLogsGetById(
-      getByIdMessageRequest,
-      requestOptions,
-      signal,
-    );
+    getApiTgbotIncomingMessageLogsGetById(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetById>>,
@@ -556,7 +615,6 @@ export function useGetApiTgbotIncomingMessageLogsGetById<
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetById>>,
   TError = unknown,
 >(
-  getByIdMessageRequest: GetByIdMessageRequest,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -583,7 +641,6 @@ export function useGetApiTgbotIncomingMessageLogsGetById<
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetById>>,
   TError = unknown,
 >(
-  getByIdMessageRequest: GetByIdMessageRequest,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -610,7 +667,6 @@ export function useGetApiTgbotIncomingMessageLogsGetById<
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetById>>,
   TError = unknown,
 >(
-  getByIdMessageRequest: GetByIdMessageRequest,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -630,7 +686,6 @@ export function useGetApiTgbotIncomingMessageLogsGetById<
   TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetById>>,
   TError = unknown,
 >(
-  getByIdMessageRequest: GetByIdMessageRequest,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -645,10 +700,8 @@ export function useGetApiTgbotIncomingMessageLogsGetById<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
-  const queryOptions = getGetApiTgbotIncomingMessageLogsGetByIdQueryOptions(
-    getByIdMessageRequest,
-    options,
-  );
+  const queryOptions =
+    getGetApiTgbotIncomingMessageLogsGetByIdQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

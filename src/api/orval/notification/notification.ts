@@ -22,11 +22,14 @@ import type {
 
 import type {
   BooleanApiResponse,
+  GetApiNotificationsGetAllParams,
+  GetNotificationsResponseApiResponse,
   Int32ApiResponse,
   NotificationRequest,
   PostApiNotificationsNotificationIdDeliveredParams,
   PostApiNotificationsNotificationIdReadParams,
   StringApiResponse,
+  UnreadCountResponseApiResponse,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -330,6 +333,390 @@ export const usePostApiNotificationsNotificationIdRead = <
     queryClient,
   );
 };
+export const getApiNotificationsGetAll = (
+  params?: GetApiNotificationsGetAllParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<GetNotificationsResponseApiResponse>(
+    { url: `/api/notifications/get-all`, method: "GET", params, signal },
+    options,
+  );
+};
+
+export const getGetApiNotificationsGetAllQueryKey = (
+  params?: GetApiNotificationsGetAllParams,
+) => {
+  return [`/api/notifications/get-all`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetApiNotificationsGetAllQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+  TError = unknown,
+>(
+  params?: GetApiNotificationsGetAllParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetApiNotificationsGetAllQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiNotificationsGetAll>>
+  > = ({ signal }) => getApiNotificationsGetAll(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiNotificationsGetAllQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiNotificationsGetAll>>
+>;
+export type GetApiNotificationsGetAllQueryError = unknown;
+
+export function useGetApiNotificationsGetAll<
+  TData = Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+  TError = unknown,
+>(
+  params: undefined | GetApiNotificationsGetAllParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+          TError,
+          Awaited<ReturnType<typeof getApiNotificationsGetAll>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiNotificationsGetAll<
+  TData = Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+  TError = unknown,
+>(
+  params?: GetApiNotificationsGetAllParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+          TError,
+          Awaited<ReturnType<typeof getApiNotificationsGetAll>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiNotificationsGetAll<
+  TData = Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+  TError = unknown,
+>(
+  params?: GetApiNotificationsGetAllParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetApiNotificationsGetAll<
+  TData = Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+  TError = unknown,
+>(
+  params?: GetApiNotificationsGetAllParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiNotificationsGetAll>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiNotificationsGetAllQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const postApiNotificationsMarkReadAll = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<BooleanApiResponse>(
+    { url: `/api/notifications/mark-read-all`, method: "POST", signal },
+    options,
+  );
+};
+
+export const getPostApiNotificationsMarkReadAllMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["postApiNotificationsMarkReadAll"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>,
+    void
+  > = () => {
+    return postApiNotificationsMarkReadAll(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiNotificationsMarkReadAllMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>
+>;
+
+export type PostApiNotificationsMarkReadAllMutationError = unknown;
+
+export const usePostApiNotificationsMarkReadAll = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>,
+      TError,
+      void,
+      TContext
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(
+    getPostApiNotificationsMarkReadAllMutationOptions(options),
+    queryClient,
+  );
+};
+export const getApiNotificationsUnreadCount = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<UnreadCountResponseApiResponse>(
+    { url: `/api/notifications/unread-count`, method: "GET", signal },
+    options,
+  );
+};
+
+export const getGetApiNotificationsUnreadCountQueryKey = () => {
+  return [`/api/notifications/unread-count`] as const;
+};
+
+export const getGetApiNotificationsUnreadCountQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetApiNotificationsUnreadCountQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>
+  > = ({ signal }) => getApiNotificationsUnreadCount(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiNotificationsUnreadCountQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>
+>;
+export type GetApiNotificationsUnreadCountQueryError = unknown;
+
+export function useGetApiNotificationsUnreadCount<
+  TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+          TError,
+          Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiNotificationsUnreadCount<
+  TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+          TError,
+          Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiNotificationsUnreadCount<
+  TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetApiNotificationsUnreadCount<
+  TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiNotificationsUnreadCountQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
 export const getApiNotificationsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
