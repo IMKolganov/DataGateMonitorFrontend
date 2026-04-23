@@ -4,9 +4,9 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
-import type { OverviewUserItem } from "./overviewUserItem";
+import type { OverviewUserDto } from "./overviewUserDto";
 
 export interface OverviewUsersResponse {
   /** @nullable */
-  overviewUserItems?: OverviewUserItem[] | null;
+  overviewUserItems?: OverviewUserDto[] | null;
 }
