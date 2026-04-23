@@ -21,16 +21,16 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  AddFileRequest,
-  DownloadFileByCnRequest,
-  DownloadFileRequest,
-  DownloadFileResponseApiResponse,
-  OvpnFileResponseApiResponse,
-  OvpnFileWithTokenResponseApiResponse,
-  OvpnFilesResponseApiResponse,
-  OvpnFilesWithTokensResponseApiResponse,
-  RevokeFileRequest,
-  StringApiResponse,
+  ApiOpenVpnFilesResponsesDownloadFileResponse,
+  ApiOpenVpnFilesResponsesOvpnFileResponse,
+  ApiOpenVpnFilesResponsesOvpnFileWithTokenResponse,
+  ApiOpenVpnFilesResponsesOvpnFilesResponse,
+  ApiOpenVpnFilesResponsesOvpnFilesWithTokensResponse,
+  ApiSystemString,
+  OpenVpnFilesRequestsAddFileRequest,
+  OpenVpnFilesRequestsDownloadFileByCnRequest,
+  OpenVpnFilesRequestsDownloadFileRequest,
+  OpenVpnFilesRequestsRevokeFileRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -42,7 +42,7 @@ export const getApiXrayClientLinksByTokenToken = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFileResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFileResponse>(
     { url: `/api/xray-client-links/by-token/${token}`, method: "GET", signal },
     options,
   );
@@ -207,7 +207,7 @@ export const getApiXrayClientLinksGetAllVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFilesResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesResponse>(
     {
       url: `/api/xray-client-links/get-all/${vpnServerId}`,
       method: "GET",
@@ -379,7 +379,7 @@ export const getApiXrayClientLinksGetAllVpnServerIdExternalId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFilesResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesResponse>(
     {
       url: `/api/xray-client-links/get-all/${vpnServerId}/${externalId}`,
       method: "GET",
@@ -600,7 +600,7 @@ export const getApiXrayClientLinksGetAllWithTokenVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFilesWithTokensResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesWithTokensResponse>(
     {
       url: `/api/xray-client-links/get-all-with-token/${vpnServerId}`,
       method: "GET",
@@ -806,7 +806,7 @@ export const getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFilesWithTokensResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesWithTokensResponse>(
     {
       url: `/api/xray-client-links/get-all-with-token/${vpnServerId}/${externalId}`,
       method: "GET",
@@ -1056,7 +1056,7 @@ export const getApiXrayClientLinksGetFilesExternalId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFilesResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesResponse>(
     {
       url: `/api/xray-client-links/get-files/${externalId}`,
       method: "GET",
@@ -1223,16 +1223,16 @@ export function useGetApiXrayClientLinksGetFilesExternalId<
 }
 
 export const postApiXrayClientLinksAdd = (
-  addFileRequest: AddFileRequest,
+  openVpnFilesRequestsAddFileRequest: OpenVpnFilesRequestsAddFileRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFileResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFileResponse>(
     {
       url: `/api/xray-client-links/add`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: addFileRequest,
+      data: openVpnFilesRequestsAddFileRequest,
       signal,
     },
     options,
@@ -1246,14 +1246,14 @@ export const getPostApiXrayClientLinksAddMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>,
     TError,
-    { data: AddFileRequest },
+    { data: OpenVpnFilesRequestsAddFileRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>,
   TError,
-  { data: AddFileRequest },
+  { data: OpenVpnFilesRequestsAddFileRequest },
   TContext
 > => {
   const mutationKey = ["postApiXrayClientLinksAdd"];
@@ -1267,7 +1267,7 @@ export const getPostApiXrayClientLinksAddMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>,
-    { data: AddFileRequest }
+    { data: OpenVpnFilesRequestsAddFileRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1280,7 +1280,8 @@ export const getPostApiXrayClientLinksAddMutationOptions = <
 export type PostApiXrayClientLinksAddMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>
 >;
-export type PostApiXrayClientLinksAddMutationBody = AddFileRequest;
+export type PostApiXrayClientLinksAddMutationBody =
+  OpenVpnFilesRequestsAddFileRequest;
 export type PostApiXrayClientLinksAddMutationError = unknown;
 
 export const usePostApiXrayClientLinksAdd = <
@@ -1291,7 +1292,7 @@ export const usePostApiXrayClientLinksAdd = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>,
       TError,
-      { data: AddFileRequest },
+      { data: OpenVpnFilesRequestsAddFileRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1300,7 +1301,7 @@ export const usePostApiXrayClientLinksAdd = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>,
   TError,
-  { data: AddFileRequest },
+  { data: OpenVpnFilesRequestsAddFileRequest },
   TContext
 > => {
   return useMutation(
@@ -1309,16 +1310,16 @@ export const usePostApiXrayClientLinksAdd = <
   );
 };
 export const postApiXrayClientLinksAddWithToken = (
-  addFileRequest: AddFileRequest,
+  openVpnFilesRequestsAddFileRequest: OpenVpnFilesRequestsAddFileRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFileWithTokenResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFileWithTokenResponse>(
     {
       url: `/api/xray-client-links/add-with-token`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: addFileRequest,
+      data: openVpnFilesRequestsAddFileRequest,
       signal,
     },
     options,
@@ -1332,14 +1333,14 @@ export const getPostApiXrayClientLinksAddWithTokenMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>,
     TError,
-    { data: AddFileRequest },
+    { data: OpenVpnFilesRequestsAddFileRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>,
   TError,
-  { data: AddFileRequest },
+  { data: OpenVpnFilesRequestsAddFileRequest },
   TContext
 > => {
   const mutationKey = ["postApiXrayClientLinksAddWithToken"];
@@ -1353,7 +1354,7 @@ export const getPostApiXrayClientLinksAddWithTokenMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>,
-    { data: AddFileRequest }
+    { data: OpenVpnFilesRequestsAddFileRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1366,7 +1367,8 @@ export const getPostApiXrayClientLinksAddWithTokenMutationOptions = <
 export type PostApiXrayClientLinksAddWithTokenMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>
 >;
-export type PostApiXrayClientLinksAddWithTokenMutationBody = AddFileRequest;
+export type PostApiXrayClientLinksAddWithTokenMutationBody =
+  OpenVpnFilesRequestsAddFileRequest;
 export type PostApiXrayClientLinksAddWithTokenMutationError = unknown;
 
 export const usePostApiXrayClientLinksAddWithToken = <
@@ -1377,7 +1379,7 @@ export const usePostApiXrayClientLinksAddWithToken = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>,
       TError,
-      { data: AddFileRequest },
+      { data: OpenVpnFilesRequestsAddFileRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1386,7 +1388,7 @@ export const usePostApiXrayClientLinksAddWithToken = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>,
   TError,
-  { data: AddFileRequest },
+  { data: OpenVpnFilesRequestsAddFileRequest },
   TContext
 > => {
   return useMutation(
@@ -1395,16 +1397,16 @@ export const usePostApiXrayClientLinksAddWithToken = <
   );
 };
 export const postApiXrayClientLinksRevokeFile = (
-  revokeFileRequest: RevokeFileRequest,
+  openVpnFilesRequestsRevokeFileRequest: OpenVpnFilesRequestsRevokeFileRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFileResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFileResponse>(
     {
       url: `/api/xray-client-links/revoke-file`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: revokeFileRequest,
+      data: openVpnFilesRequestsRevokeFileRequest,
       signal,
     },
     options,
@@ -1418,14 +1420,14 @@ export const getPostApiXrayClientLinksRevokeFileMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>,
     TError,
-    { data: RevokeFileRequest },
+    { data: OpenVpnFilesRequestsRevokeFileRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>,
   TError,
-  { data: RevokeFileRequest },
+  { data: OpenVpnFilesRequestsRevokeFileRequest },
   TContext
 > => {
   const mutationKey = ["postApiXrayClientLinksRevokeFile"];
@@ -1439,7 +1441,7 @@ export const getPostApiXrayClientLinksRevokeFileMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>,
-    { data: RevokeFileRequest }
+    { data: OpenVpnFilesRequestsRevokeFileRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1452,7 +1454,8 @@ export const getPostApiXrayClientLinksRevokeFileMutationOptions = <
 export type PostApiXrayClientLinksRevokeFileMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>
 >;
-export type PostApiXrayClientLinksRevokeFileMutationBody = RevokeFileRequest;
+export type PostApiXrayClientLinksRevokeFileMutationBody =
+  OpenVpnFilesRequestsRevokeFileRequest;
 export type PostApiXrayClientLinksRevokeFileMutationError = unknown;
 
 export const usePostApiXrayClientLinksRevokeFile = <
@@ -1463,7 +1466,7 @@ export const usePostApiXrayClientLinksRevokeFile = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>,
       TError,
-      { data: RevokeFileRequest },
+      { data: OpenVpnFilesRequestsRevokeFileRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1472,7 +1475,7 @@ export const usePostApiXrayClientLinksRevokeFile = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>,
   TError,
-  { data: RevokeFileRequest },
+  { data: OpenVpnFilesRequestsRevokeFileRequest },
   TContext
 > => {
   return useMutation(
@@ -1481,16 +1484,16 @@ export const usePostApiXrayClientLinksRevokeFile = <
   );
 };
 export const postApiXrayClientLinksDownloadFile = (
-  downloadFileRequest: DownloadFileRequest,
+  openVpnFilesRequestsDownloadFileRequest: OpenVpnFilesRequestsDownloadFileRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<DownloadFileResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesDownloadFileResponse>(
     {
       url: `/api/xray-client-links/download-file`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: downloadFileRequest,
+      data: openVpnFilesRequestsDownloadFileRequest,
       signal,
     },
     options,
@@ -1504,14 +1507,14 @@ export const getPostApiXrayClientLinksDownloadFileMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>,
     TError,
-    { data: DownloadFileRequest },
+    { data: OpenVpnFilesRequestsDownloadFileRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>,
   TError,
-  { data: DownloadFileRequest },
+  { data: OpenVpnFilesRequestsDownloadFileRequest },
   TContext
 > => {
   const mutationKey = ["postApiXrayClientLinksDownloadFile"];
@@ -1525,7 +1528,7 @@ export const getPostApiXrayClientLinksDownloadFileMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>,
-    { data: DownloadFileRequest }
+    { data: OpenVpnFilesRequestsDownloadFileRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1539,7 +1542,7 @@ export type PostApiXrayClientLinksDownloadFileMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>
 >;
 export type PostApiXrayClientLinksDownloadFileMutationBody =
-  DownloadFileRequest;
+  OpenVpnFilesRequestsDownloadFileRequest;
 export type PostApiXrayClientLinksDownloadFileMutationError = unknown;
 
 export const usePostApiXrayClientLinksDownloadFile = <
@@ -1550,7 +1553,7 @@ export const usePostApiXrayClientLinksDownloadFile = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>,
       TError,
-      { data: DownloadFileRequest },
+      { data: OpenVpnFilesRequestsDownloadFileRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1559,7 +1562,7 @@ export const usePostApiXrayClientLinksDownloadFile = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>,
   TError,
-  { data: DownloadFileRequest },
+  { data: OpenVpnFilesRequestsDownloadFileRequest },
   TContext
 > => {
   return useMutation(
@@ -1568,16 +1571,16 @@ export const usePostApiXrayClientLinksDownloadFile = <
   );
 };
 export const postApiXrayClientLinksDownloadFileByCn = (
-  downloadFileByCnRequest: DownloadFileByCnRequest,
+  openVpnFilesRequestsDownloadFileByCnRequest: OpenVpnFilesRequestsDownloadFileByCnRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<DownloadFileResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesDownloadFileResponse>(
     {
       url: `/api/xray-client-links/download-file-by-cn`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: downloadFileByCnRequest,
+      data: openVpnFilesRequestsDownloadFileByCnRequest,
       signal,
     },
     options,
@@ -1591,14 +1594,14 @@ export const getPostApiXrayClientLinksDownloadFileByCnMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>,
     TError,
-    { data: DownloadFileByCnRequest },
+    { data: OpenVpnFilesRequestsDownloadFileByCnRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>,
   TError,
-  { data: DownloadFileByCnRequest },
+  { data: OpenVpnFilesRequestsDownloadFileByCnRequest },
   TContext
 > => {
   const mutationKey = ["postApiXrayClientLinksDownloadFileByCn"];
@@ -1612,7 +1615,7 @@ export const getPostApiXrayClientLinksDownloadFileByCnMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>,
-    { data: DownloadFileByCnRequest }
+    { data: OpenVpnFilesRequestsDownloadFileByCnRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1626,7 +1629,7 @@ export type PostApiXrayClientLinksDownloadFileByCnMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>
 >;
 export type PostApiXrayClientLinksDownloadFileByCnMutationBody =
-  DownloadFileByCnRequest;
+  OpenVpnFilesRequestsDownloadFileByCnRequest;
 export type PostApiXrayClientLinksDownloadFileByCnMutationError = unknown;
 
 export const usePostApiXrayClientLinksDownloadFileByCn = <
@@ -1637,7 +1640,7 @@ export const usePostApiXrayClientLinksDownloadFileByCn = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>,
       TError,
-      { data: DownloadFileByCnRequest },
+      { data: OpenVpnFilesRequestsDownloadFileByCnRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1646,7 +1649,7 @@ export const usePostApiXrayClientLinksDownloadFileByCn = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>,
   TError,
-  { data: DownloadFileByCnRequest },
+  { data: OpenVpnFilesRequestsDownloadFileByCnRequest },
   TContext
 > => {
   return useMutation(
@@ -1658,7 +1661,7 @@ export const getApiXrayClientLinksHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/xray-client-links/healthcheck`, method: "GET", signal },
     options,
   );
@@ -1805,7 +1808,7 @@ export const getApiXrayClientLinksHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/xray-client-links/healthcheck-with-jwt`,
       method: "GET",

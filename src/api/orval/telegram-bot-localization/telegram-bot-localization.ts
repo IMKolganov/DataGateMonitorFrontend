@@ -21,12 +21,12 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  GetTelegramUserLanguageResponseApiResponse,
-  GetTextForTelegramUserResponseApiResponse,
-  IsExistTelegramUserLanguagePreferenceResponseApiResponse,
-  SetTelegramUserLanguageRequest,
-  SetTelegramUserLanguageResponseApiResponse,
-  StringApiResponse,
+  ApiSystemString,
+  ApiTelegramBotLocalizationResponsesGetTelegramUserLanguageResponse,
+  ApiTelegramBotLocalizationResponsesGetTextForTelegramUserResponse,
+  ApiTelegramBotLocalizationResponsesIsExistTelegramUserLanguagePreferenceResponse,
+  ApiTelegramBotLocalizationResponsesSetTelegramUserLanguageResponse,
+  TelegramBotLocalizationRequestsSetTelegramUserLanguageRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -34,16 +34,16 @@ import { ogmMutator } from "../../mutator";
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export const postApiTgbotLocalizationsSetTgUserLanguage = (
-  setTelegramUserLanguageRequest: SetTelegramUserLanguageRequest,
+  telegramBotLocalizationRequestsSetTelegramUserLanguageRequest: TelegramBotLocalizationRequestsSetTelegramUserLanguageRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<SetTelegramUserLanguageResponseApiResponse>(
+  return ogmMutator<ApiTelegramBotLocalizationResponsesSetTelegramUserLanguageResponse>(
     {
       url: `/api/tgbot-localizations/set-tg-user-language`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: setTelegramUserLanguageRequest,
+      data: telegramBotLocalizationRequestsSetTelegramUserLanguageRequest,
       signal,
     },
     options,
@@ -57,14 +57,14 @@ export const getPostApiTgbotLocalizationsSetTgUserLanguageMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiTgbotLocalizationsSetTgUserLanguage>>,
     TError,
-    { data: SetTelegramUserLanguageRequest },
+    { data: TelegramBotLocalizationRequestsSetTelegramUserLanguageRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiTgbotLocalizationsSetTgUserLanguage>>,
   TError,
-  { data: SetTelegramUserLanguageRequest },
+  { data: TelegramBotLocalizationRequestsSetTelegramUserLanguageRequest },
   TContext
 > => {
   const mutationKey = ["postApiTgbotLocalizationsSetTgUserLanguage"];
@@ -78,7 +78,7 @@ export const getPostApiTgbotLocalizationsSetTgUserLanguageMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiTgbotLocalizationsSetTgUserLanguage>>,
-    { data: SetTelegramUserLanguageRequest }
+    { data: TelegramBotLocalizationRequestsSetTelegramUserLanguageRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -93,7 +93,7 @@ export type PostApiTgbotLocalizationsSetTgUserLanguageMutationResult =
     Awaited<ReturnType<typeof postApiTgbotLocalizationsSetTgUserLanguage>>
   >;
 export type PostApiTgbotLocalizationsSetTgUserLanguageMutationBody =
-  SetTelegramUserLanguageRequest;
+  TelegramBotLocalizationRequestsSetTelegramUserLanguageRequest;
 export type PostApiTgbotLocalizationsSetTgUserLanguageMutationError = unknown;
 
 export const usePostApiTgbotLocalizationsSetTgUserLanguage = <
@@ -104,7 +104,7 @@ export const usePostApiTgbotLocalizationsSetTgUserLanguage = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiTgbotLocalizationsSetTgUserLanguage>>,
       TError,
-      { data: SetTelegramUserLanguageRequest },
+      { data: TelegramBotLocalizationRequestsSetTelegramUserLanguageRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -113,7 +113,7 @@ export const usePostApiTgbotLocalizationsSetTgUserLanguage = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiTgbotLocalizationsSetTgUserLanguage>>,
   TError,
-  { data: SetTelegramUserLanguageRequest },
+  { data: TelegramBotLocalizationRequestsSetTelegramUserLanguageRequest },
   TContext
 > => {
   return useMutation(
@@ -126,7 +126,7 @@ export const getApiTgbotLocalizationsGetTgUserLanguageTelegramId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetTelegramUserLanguageResponseApiResponse>(
+  return ogmMutator<ApiTelegramBotLocalizationResponsesGetTelegramUserLanguageResponse>(
     {
       url: `/api/tgbot-localizations/get-tg-user-language/${telegramId}`,
       method: "GET",
@@ -354,7 +354,7 @@ export const getApiTgbotLocalizationsIsExistTgUserLanguagePreferenceTelegramId =
     options?: SecondParameter<typeof ogmMutator>,
     signal?: AbortSignal,
   ) => {
-    return ogmMutator<IsExistTelegramUserLanguagePreferenceResponseApiResponse>(
+    return ogmMutator<ApiTelegramBotLocalizationResponsesIsExistTelegramUserLanguagePreferenceResponse>(
       {
         url: `/api/tgbot-localizations/is-exist-tg-user-language-preference/${telegramId}`,
         method: "GET",
@@ -605,7 +605,7 @@ export const getApiTgbotLocalizationsGetTextForTgUserTelegramIdKey = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetTextForTelegramUserResponseApiResponse>(
+  return ogmMutator<ApiTelegramBotLocalizationResponsesGetTextForTelegramUserResponse>(
     {
       url: `/api/tgbot-localizations/get-text-for-tg-user/${telegramId}/${key}`,
       method: "GET",
@@ -846,7 +846,7 @@ export const getApiTgbotLocalizationsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/tgbot-localizations/healthcheck`, method: "GET", signal },
     options,
   );
@@ -995,7 +995,7 @@ export const getApiTgbotLocalizationsHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/tgbot-localizations/healthcheck-with-jwt`,
       method: "GET",

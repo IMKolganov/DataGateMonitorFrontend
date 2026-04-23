@@ -21,12 +21,12 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  BuildCertificateRequest,
-  BuildCertificateResponseApiResponse,
-  GetAllCertificatesResponseApiResponse,
-  RevokeCertificateRequest,
-  RevokeCertificateResponseApiResponse,
-  StringApiResponse,
+  ApiSystemString,
+  ApiVpnServerCertsResponsesBuildCertificateResponse,
+  ApiVpnServerCertsResponsesGetAllCertificatesResponse,
+  ApiVpnServerCertsResponsesRevokeCertificateResponse,
+  VpnServerCertsRequestsBuildCertificateRequest,
+  VpnServerCertsRequestsRevokeCertificateRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -38,7 +38,7 @@ export const getApiOpenVpnCertsVpnServerIdGetAll = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetAllCertificatesResponseApiResponse>(
+  return ogmMutator<ApiVpnServerCertsResponsesGetAllCertificatesResponse>(
     {
       url: `/api/open-vpn-certs/${vpnServerId}/get-all`,
       method: "GET",
@@ -205,16 +205,16 @@ export function useGetApiOpenVpnCertsVpnServerIdGetAll<
 }
 
 export const postApiOpenVpnCertsBuild = (
-  buildCertificateRequest: BuildCertificateRequest,
+  vpnServerCertsRequestsBuildCertificateRequest: VpnServerCertsRequestsBuildCertificateRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<BuildCertificateResponseApiResponse>(
+  return ogmMutator<ApiVpnServerCertsResponsesBuildCertificateResponse>(
     {
       url: `/api/open-vpn-certs/build`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: buildCertificateRequest,
+      data: vpnServerCertsRequestsBuildCertificateRequest,
       signal,
     },
     options,
@@ -228,14 +228,14 @@ export const getPostApiOpenVpnCertsBuildMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiOpenVpnCertsBuild>>,
     TError,
-    { data: BuildCertificateRequest },
+    { data: VpnServerCertsRequestsBuildCertificateRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiOpenVpnCertsBuild>>,
   TError,
-  { data: BuildCertificateRequest },
+  { data: VpnServerCertsRequestsBuildCertificateRequest },
   TContext
 > => {
   const mutationKey = ["postApiOpenVpnCertsBuild"];
@@ -249,7 +249,7 @@ export const getPostApiOpenVpnCertsBuildMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiOpenVpnCertsBuild>>,
-    { data: BuildCertificateRequest }
+    { data: VpnServerCertsRequestsBuildCertificateRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -262,7 +262,8 @@ export const getPostApiOpenVpnCertsBuildMutationOptions = <
 export type PostApiOpenVpnCertsBuildMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiOpenVpnCertsBuild>>
 >;
-export type PostApiOpenVpnCertsBuildMutationBody = BuildCertificateRequest;
+export type PostApiOpenVpnCertsBuildMutationBody =
+  VpnServerCertsRequestsBuildCertificateRequest;
 export type PostApiOpenVpnCertsBuildMutationError = unknown;
 
 export const usePostApiOpenVpnCertsBuild = <
@@ -273,7 +274,7 @@ export const usePostApiOpenVpnCertsBuild = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiOpenVpnCertsBuild>>,
       TError,
-      { data: BuildCertificateRequest },
+      { data: VpnServerCertsRequestsBuildCertificateRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -282,7 +283,7 @@ export const usePostApiOpenVpnCertsBuild = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiOpenVpnCertsBuild>>,
   TError,
-  { data: BuildCertificateRequest },
+  { data: VpnServerCertsRequestsBuildCertificateRequest },
   TContext
 > => {
   return useMutation(
@@ -291,16 +292,16 @@ export const usePostApiOpenVpnCertsBuild = <
   );
 };
 export const postApiOpenVpnCertsRevoke = (
-  revokeCertificateRequest: RevokeCertificateRequest,
+  vpnServerCertsRequestsRevokeCertificateRequest: VpnServerCertsRequestsRevokeCertificateRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<RevokeCertificateResponseApiResponse>(
+  return ogmMutator<ApiVpnServerCertsResponsesRevokeCertificateResponse>(
     {
       url: `/api/open-vpn-certs/revoke`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: revokeCertificateRequest,
+      data: vpnServerCertsRequestsRevokeCertificateRequest,
       signal,
     },
     options,
@@ -314,14 +315,14 @@ export const getPostApiOpenVpnCertsRevokeMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>,
     TError,
-    { data: RevokeCertificateRequest },
+    { data: VpnServerCertsRequestsRevokeCertificateRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>,
   TError,
-  { data: RevokeCertificateRequest },
+  { data: VpnServerCertsRequestsRevokeCertificateRequest },
   TContext
 > => {
   const mutationKey = ["postApiOpenVpnCertsRevoke"];
@@ -335,7 +336,7 @@ export const getPostApiOpenVpnCertsRevokeMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>,
-    { data: RevokeCertificateRequest }
+    { data: VpnServerCertsRequestsRevokeCertificateRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -348,7 +349,8 @@ export const getPostApiOpenVpnCertsRevokeMutationOptions = <
 export type PostApiOpenVpnCertsRevokeMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>
 >;
-export type PostApiOpenVpnCertsRevokeMutationBody = RevokeCertificateRequest;
+export type PostApiOpenVpnCertsRevokeMutationBody =
+  VpnServerCertsRequestsRevokeCertificateRequest;
 export type PostApiOpenVpnCertsRevokeMutationError = unknown;
 
 export const usePostApiOpenVpnCertsRevoke = <
@@ -359,7 +361,7 @@ export const usePostApiOpenVpnCertsRevoke = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>,
       TError,
-      { data: RevokeCertificateRequest },
+      { data: VpnServerCertsRequestsRevokeCertificateRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -368,7 +370,7 @@ export const usePostApiOpenVpnCertsRevoke = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>,
   TError,
-  { data: RevokeCertificateRequest },
+  { data: VpnServerCertsRequestsRevokeCertificateRequest },
   TContext
 > => {
   return useMutation(
@@ -380,7 +382,7 @@ export const getApiOpenVpnCertsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/open-vpn-certs/healthcheck`, method: "GET", signal },
     options,
   );
@@ -527,7 +529,7 @@ export const getApiOpenVpnCertsHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/open-vpn-certs/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

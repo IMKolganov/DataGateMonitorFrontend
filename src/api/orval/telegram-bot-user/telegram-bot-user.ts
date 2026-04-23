@@ -21,12 +21,12 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  BooleanApiResponse,
-  GetAdminsResponseApiResponse,
-  GetAllTelegramUsersResponseApiResponse,
-  StringApiResponse,
-  TelegramUserActionRequest,
-  UserRequestApiResponse,
+  ApiSystemBoolean,
+  ApiSystemString,
+  ApiTelegramBotUserRequestsUserRequest,
+  ApiTelegramBotUserResponsesGetAdminsResponse,
+  ApiTelegramBotUserResponsesGetAllTelegramUsersResponse,
+  TelegramBotUserRequestsTelegramUserActionRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -38,7 +38,7 @@ export const getApiTgbotUsersCheckExistsTelegramId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<BooleanApiResponse>(
+  return ogmMutator<ApiSystemBoolean>(
     {
       url: `/api/tgbot-users/check-exists/${telegramId}`,
       method: "GET",
@@ -209,7 +209,7 @@ export const getApiTgbotUsersGetTelegramId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<UserRequestApiResponse>(
+  return ogmMutator<ApiTelegramBotUserRequestsUserRequest>(
     { url: `/api/tgbot-users/get/${telegramId}`, method: "GET", signal },
     options,
   );
@@ -375,7 +375,7 @@ export const getApiTgbotUsersGetAdmins = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetAdminsResponseApiResponse>(
+  return ogmMutator<ApiTelegramBotUserResponsesGetAdminsResponse>(
     { url: `/api/tgbot-users/get-admins`, method: "GET", signal },
     options,
   );
@@ -522,7 +522,7 @@ export const getApiTgbotUsersGetAll = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetAllTelegramUsersResponseApiResponse>(
+  return ogmMutator<ApiTelegramBotUserResponsesGetAllTelegramUsersResponse>(
     { url: `/api/tgbot-users/get-all`, method: "GET", signal },
     options,
   );
@@ -666,16 +666,16 @@ export function useGetApiTgbotUsersGetAll<
 }
 
 export const postApiTgbotUsersBlock = (
-  telegramUserActionRequest: TelegramUserActionRequest,
+  telegramBotUserRequestsTelegramUserActionRequest: TelegramBotUserRequestsTelegramUserActionRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<BooleanApiResponse>(
+  return ogmMutator<ApiSystemBoolean>(
     {
       url: `/api/tgbot-users/block`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: telegramUserActionRequest,
+      data: telegramBotUserRequestsTelegramUserActionRequest,
       signal,
     },
     options,
@@ -689,14 +689,14 @@ export const getPostApiTgbotUsersBlockMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiTgbotUsersBlock>>,
     TError,
-    { data: TelegramUserActionRequest },
+    { data: TelegramBotUserRequestsTelegramUserActionRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiTgbotUsersBlock>>,
   TError,
-  { data: TelegramUserActionRequest },
+  { data: TelegramBotUserRequestsTelegramUserActionRequest },
   TContext
 > => {
   const mutationKey = ["postApiTgbotUsersBlock"];
@@ -710,7 +710,7 @@ export const getPostApiTgbotUsersBlockMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiTgbotUsersBlock>>,
-    { data: TelegramUserActionRequest }
+    { data: TelegramBotUserRequestsTelegramUserActionRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -723,7 +723,8 @@ export const getPostApiTgbotUsersBlockMutationOptions = <
 export type PostApiTgbotUsersBlockMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiTgbotUsersBlock>>
 >;
-export type PostApiTgbotUsersBlockMutationBody = TelegramUserActionRequest;
+export type PostApiTgbotUsersBlockMutationBody =
+  TelegramBotUserRequestsTelegramUserActionRequest;
 export type PostApiTgbotUsersBlockMutationError = unknown;
 
 export const usePostApiTgbotUsersBlock = <TError = unknown, TContext = unknown>(
@@ -731,7 +732,7 @@ export const usePostApiTgbotUsersBlock = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiTgbotUsersBlock>>,
       TError,
-      { data: TelegramUserActionRequest },
+      { data: TelegramBotUserRequestsTelegramUserActionRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -740,7 +741,7 @@ export const usePostApiTgbotUsersBlock = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiTgbotUsersBlock>>,
   TError,
-  { data: TelegramUserActionRequest },
+  { data: TelegramBotUserRequestsTelegramUserActionRequest },
   TContext
 > => {
   return useMutation(
@@ -749,16 +750,16 @@ export const usePostApiTgbotUsersBlock = <TError = unknown, TContext = unknown>(
   );
 };
 export const postApiTgbotUsersUnblock = (
-  telegramUserActionRequest: TelegramUserActionRequest,
+  telegramBotUserRequestsTelegramUserActionRequest: TelegramBotUserRequestsTelegramUserActionRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<BooleanApiResponse>(
+  return ogmMutator<ApiSystemBoolean>(
     {
       url: `/api/tgbot-users/unblock`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: telegramUserActionRequest,
+      data: telegramBotUserRequestsTelegramUserActionRequest,
       signal,
     },
     options,
@@ -772,14 +773,14 @@ export const getPostApiTgbotUsersUnblockMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiTgbotUsersUnblock>>,
     TError,
-    { data: TelegramUserActionRequest },
+    { data: TelegramBotUserRequestsTelegramUserActionRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiTgbotUsersUnblock>>,
   TError,
-  { data: TelegramUserActionRequest },
+  { data: TelegramBotUserRequestsTelegramUserActionRequest },
   TContext
 > => {
   const mutationKey = ["postApiTgbotUsersUnblock"];
@@ -793,7 +794,7 @@ export const getPostApiTgbotUsersUnblockMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiTgbotUsersUnblock>>,
-    { data: TelegramUserActionRequest }
+    { data: TelegramBotUserRequestsTelegramUserActionRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -806,7 +807,8 @@ export const getPostApiTgbotUsersUnblockMutationOptions = <
 export type PostApiTgbotUsersUnblockMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiTgbotUsersUnblock>>
 >;
-export type PostApiTgbotUsersUnblockMutationBody = TelegramUserActionRequest;
+export type PostApiTgbotUsersUnblockMutationBody =
+  TelegramBotUserRequestsTelegramUserActionRequest;
 export type PostApiTgbotUsersUnblockMutationError = unknown;
 
 export const usePostApiTgbotUsersUnblock = <
@@ -817,7 +819,7 @@ export const usePostApiTgbotUsersUnblock = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiTgbotUsersUnblock>>,
       TError,
-      { data: TelegramUserActionRequest },
+      { data: TelegramBotUserRequestsTelegramUserActionRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -826,7 +828,7 @@ export const usePostApiTgbotUsersUnblock = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiTgbotUsersUnblock>>,
   TError,
-  { data: TelegramUserActionRequest },
+  { data: TelegramBotUserRequestsTelegramUserActionRequest },
   TContext
 > => {
   return useMutation(
@@ -835,16 +837,16 @@ export const usePostApiTgbotUsersUnblock = <
   );
 };
 export const postApiTgbotUsersSetAdmin = (
-  telegramUserActionRequest: TelegramUserActionRequest,
+  telegramBotUserRequestsTelegramUserActionRequest: TelegramBotUserRequestsTelegramUserActionRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<BooleanApiResponse>(
+  return ogmMutator<ApiSystemBoolean>(
     {
       url: `/api/tgbot-users/set-admin`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: telegramUserActionRequest,
+      data: telegramBotUserRequestsTelegramUserActionRequest,
       signal,
     },
     options,
@@ -858,14 +860,14 @@ export const getPostApiTgbotUsersSetAdminMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiTgbotUsersSetAdmin>>,
     TError,
-    { data: TelegramUserActionRequest },
+    { data: TelegramBotUserRequestsTelegramUserActionRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiTgbotUsersSetAdmin>>,
   TError,
-  { data: TelegramUserActionRequest },
+  { data: TelegramBotUserRequestsTelegramUserActionRequest },
   TContext
 > => {
   const mutationKey = ["postApiTgbotUsersSetAdmin"];
@@ -879,7 +881,7 @@ export const getPostApiTgbotUsersSetAdminMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiTgbotUsersSetAdmin>>,
-    { data: TelegramUserActionRequest }
+    { data: TelegramBotUserRequestsTelegramUserActionRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -892,7 +894,8 @@ export const getPostApiTgbotUsersSetAdminMutationOptions = <
 export type PostApiTgbotUsersSetAdminMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiTgbotUsersSetAdmin>>
 >;
-export type PostApiTgbotUsersSetAdminMutationBody = TelegramUserActionRequest;
+export type PostApiTgbotUsersSetAdminMutationBody =
+  TelegramBotUserRequestsTelegramUserActionRequest;
 export type PostApiTgbotUsersSetAdminMutationError = unknown;
 
 export const usePostApiTgbotUsersSetAdmin = <
@@ -903,7 +906,7 @@ export const usePostApiTgbotUsersSetAdmin = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiTgbotUsersSetAdmin>>,
       TError,
-      { data: TelegramUserActionRequest },
+      { data: TelegramBotUserRequestsTelegramUserActionRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -912,7 +915,7 @@ export const usePostApiTgbotUsersSetAdmin = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiTgbotUsersSetAdmin>>,
   TError,
-  { data: TelegramUserActionRequest },
+  { data: TelegramBotUserRequestsTelegramUserActionRequest },
   TContext
 > => {
   return useMutation(
@@ -921,16 +924,16 @@ export const usePostApiTgbotUsersSetAdmin = <
   );
 };
 export const postApiTgbotUsersUnsetAdmin = (
-  telegramUserActionRequest: TelegramUserActionRequest,
+  telegramBotUserRequestsTelegramUserActionRequest: TelegramBotUserRequestsTelegramUserActionRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<BooleanApiResponse>(
+  return ogmMutator<ApiSystemBoolean>(
     {
       url: `/api/tgbot-users/unset-admin`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: telegramUserActionRequest,
+      data: telegramBotUserRequestsTelegramUserActionRequest,
       signal,
     },
     options,
@@ -944,14 +947,14 @@ export const getPostApiTgbotUsersUnsetAdminMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiTgbotUsersUnsetAdmin>>,
     TError,
-    { data: TelegramUserActionRequest },
+    { data: TelegramBotUserRequestsTelegramUserActionRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiTgbotUsersUnsetAdmin>>,
   TError,
-  { data: TelegramUserActionRequest },
+  { data: TelegramBotUserRequestsTelegramUserActionRequest },
   TContext
 > => {
   const mutationKey = ["postApiTgbotUsersUnsetAdmin"];
@@ -965,7 +968,7 @@ export const getPostApiTgbotUsersUnsetAdminMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiTgbotUsersUnsetAdmin>>,
-    { data: TelegramUserActionRequest }
+    { data: TelegramBotUserRequestsTelegramUserActionRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -978,7 +981,8 @@ export const getPostApiTgbotUsersUnsetAdminMutationOptions = <
 export type PostApiTgbotUsersUnsetAdminMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiTgbotUsersUnsetAdmin>>
 >;
-export type PostApiTgbotUsersUnsetAdminMutationBody = TelegramUserActionRequest;
+export type PostApiTgbotUsersUnsetAdminMutationBody =
+  TelegramBotUserRequestsTelegramUserActionRequest;
 export type PostApiTgbotUsersUnsetAdminMutationError = unknown;
 
 export const usePostApiTgbotUsersUnsetAdmin = <
@@ -989,7 +993,7 @@ export const usePostApiTgbotUsersUnsetAdmin = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiTgbotUsersUnsetAdmin>>,
       TError,
-      { data: TelegramUserActionRequest },
+      { data: TelegramBotUserRequestsTelegramUserActionRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -998,7 +1002,7 @@ export const usePostApiTgbotUsersUnsetAdmin = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiTgbotUsersUnsetAdmin>>,
   TError,
-  { data: TelegramUserActionRequest },
+  { data: TelegramBotUserRequestsTelegramUserActionRequest },
   TContext
 > => {
   return useMutation(
@@ -1010,7 +1014,7 @@ export const getApiTgbotUsersHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/tgbot-users/healthcheck`, method: "GET", signal },
     options,
   );
@@ -1157,7 +1161,7 @@ export const getApiTgbotUsersHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/tgbot-users/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

@@ -4,12 +4,12 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
-import type { OverviewGrouping } from "./overviewGrouping";
+import type { EnumsOverviewGrouping } from "./enumsOverviewGrouping";
 
 export type GetApiV2VpnSessionsOverviewUsersSeriesParams = {
   From: string;
   To: string;
-  Grouping?: OverviewGrouping;
+  Grouping?: EnumsOverviewGrouping;
   VpnServerId?: number;
   ExternalId?: string;
 };
