@@ -21,11 +21,11 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  GetAllUsersResponseApiResponse,
+  ApiSystemString,
+  ApiUserResponsesGetAllUsersResponse,
+  ApiUserResponsesUsersResponse,
   GetApiUsersGetAllParams,
-  RegisterUserFromTgBotRequest,
-  StringApiResponse,
-  UsersResponseApiResponse,
+  UserRequestsRegisterUserFromTgBotRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -33,16 +33,16 @@ import { ogmMutator } from "../../mutator";
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export const postApiUsersRegisterFromTgbot = (
-  registerUserFromTgBotRequest: RegisterUserFromTgBotRequest,
+  userRequestsRegisterUserFromTgBotRequest: UserRequestsRegisterUserFromTgBotRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<UsersResponseApiResponse>(
+  return ogmMutator<ApiUserResponsesUsersResponse>(
     {
       url: `/api/users/register-from-tgbot`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: registerUserFromTgBotRequest,
+      data: userRequestsRegisterUserFromTgBotRequest,
       signal,
     },
     options,
@@ -56,14 +56,14 @@ export const getPostApiUsersRegisterFromTgbotMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiUsersRegisterFromTgbot>>,
     TError,
-    { data: RegisterUserFromTgBotRequest },
+    { data: UserRequestsRegisterUserFromTgBotRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiUsersRegisterFromTgbot>>,
   TError,
-  { data: RegisterUserFromTgBotRequest },
+  { data: UserRequestsRegisterUserFromTgBotRequest },
   TContext
 > => {
   const mutationKey = ["postApiUsersRegisterFromTgbot"];
@@ -77,7 +77,7 @@ export const getPostApiUsersRegisterFromTgbotMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiUsersRegisterFromTgbot>>,
-    { data: RegisterUserFromTgBotRequest }
+    { data: UserRequestsRegisterUserFromTgBotRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -91,7 +91,7 @@ export type PostApiUsersRegisterFromTgbotMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiUsersRegisterFromTgbot>>
 >;
 export type PostApiUsersRegisterFromTgbotMutationBody =
-  RegisterUserFromTgBotRequest;
+  UserRequestsRegisterUserFromTgBotRequest;
 export type PostApiUsersRegisterFromTgbotMutationError = unknown;
 
 export const usePostApiUsersRegisterFromTgbot = <
@@ -102,7 +102,7 @@ export const usePostApiUsersRegisterFromTgbot = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiUsersRegisterFromTgbot>>,
       TError,
-      { data: RegisterUserFromTgBotRequest },
+      { data: UserRequestsRegisterUserFromTgBotRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -111,7 +111,7 @@ export const usePostApiUsersRegisterFromTgbot = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiUsersRegisterFromTgbot>>,
   TError,
-  { data: RegisterUserFromTgBotRequest },
+  { data: UserRequestsRegisterUserFromTgBotRequest },
   TContext
 > => {
   return useMutation(
@@ -124,7 +124,7 @@ export const getApiUsersGetAll = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetAllUsersResponseApiResponse>(
+  return ogmMutator<ApiUserResponsesGetAllUsersResponse>(
     { url: `/api/users/get-all`, method: "GET", params, signal },
     options,
   );
@@ -281,7 +281,7 @@ export const getApiUsersGetByIdId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<UsersResponseApiResponse>(
+  return ogmMutator<ApiUserResponsesUsersResponse>(
     { url: `/api/users/get-by-id/${id}`, method: "GET", signal },
     options,
   );
@@ -441,7 +441,7 @@ export const getApiUsersGetByExternalIdExternalId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<UsersResponseApiResponse>(
+  return ogmMutator<ApiUserResponsesUsersResponse>(
     {
       url: `/api/users/get-by-external-id/${externalId}`,
       method: "GET",
@@ -611,7 +611,7 @@ export const getApiUsersHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/users/healthcheck`, method: "GET", signal },
     options,
   );
@@ -758,7 +758,7 @@ export const getApiUsersHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/users/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

@@ -3,7 +3,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import { FaBan, FaUserShield } from "react-icons/fa";
-import type { TelegramBotUserDto, TelegramUserActionRequest } from "../../api/orval/model";
+import type { TelegramBotUserDto, TelegramUserActionRequest } from "../../api/orvalModelShim";
 import {
   usePostApiTgbotUsersBlock,
   usePostApiTgbotUsersUnblock,

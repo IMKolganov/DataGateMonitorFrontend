@@ -24,8 +24,9 @@ import {
   useGetApiOpenVpnClientsOverviewSummary,
   useGetApiOpenVpnClientsOverviewUsers,
   useGetApiOpenVpnClientsOverviewUsersSeries,
-} from "../../api/orval/open-vpn-server-clients/open-vpn-server-clients";
-import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/open-vpn-servers-v2/open-vpn-servers-v2";
+} from "../../api/orval/vpn-server-clients/vpn-server-clients";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../../api/orval/vpn-servers/vpn-servers";
+import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
 import { useGetApiUsersGetAll } from "../../api/orval/user/user";
 import type {
   GetAllUsersResponse,
@@ -33,11 +34,11 @@ import type {
   OverviewTotalsResponse,
   OverviewUsersResponse,
   OverviewUsersSeriesResponse,
-  OpenVpnServersV2Response,
+  VpnServersV2Response,
   GetApiOpenVpnClientsOverviewSeriesParams,
   GetApiOpenVpnClientsOverviewSummaryParams,
-} from "../../api/orval/model";
-import { OverviewGrouping } from "../../api/orval/model";
+} from "../../api/orvalModelShim";
+import { OverviewGrouping } from "../../api/orvalModelShim";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 
@@ -88,6 +89,19 @@ export default function ServersOverview() {
     return Number.isFinite(n) ? n : undefined;
   }, [vpnServerIdParam]);
 
+  const scopedServerQuery = useGetApiOpenVpnServersGetVpnServerId(vpnServerId ?? 0, {
+    query: {
+      enabled: vpnServerId != null && vpnServerId > 0,
+      staleTime: 10_000,
+      retry: 1,
+    },
+  });
+  /** OpenVPN and Xray both persist samples in `VpnServerClientTraffic`; wait for server fetch when scoped by id. */
+  const overviewChartsEnabled =
+    vpnServerId == null ||
+    scopedServerQuery.isError ||
+    scopedServerQuery.isSuccess;
+
   const externalId = externalIdParam || undefined;
 
   const lastErrorKey = useRef<string>("");
@@ -134,7 +148,7 @@ export default function ServersOverview() {
   // NOTE: no onError inside options.query — not supported by the generated types
   const seriesQuery = useGetApiOpenVpnClientsOverviewSeries(seriesParams, {
     query: {
-      enabled: true,
+      enabled: overviewChartsEnabled,
       staleTime: 10_000,
       retry: 1,
       placeholderData: keepPreviousData,
@@ -143,7 +157,7 @@ export default function ServersOverview() {
 
   const totalsQuery = useGetApiOpenVpnClientsOverviewSummary(totalsParams, {
     query: {
-      enabled: true,
+      enabled: overviewChartsEnabled,
       staleTime: 10_000,
       retry: 1,
       placeholderData: keepPreviousData,
@@ -152,7 +166,7 @@ export default function ServersOverview() {
 
   const usersSeriesQuery = useGetApiOpenVpnClientsOverviewUsersSeries(seriesParams, {
     query: {
-      enabled: true,
+      enabled: overviewChartsEnabled,
       staleTime: 10_000,
       retry: 1,
       placeholderData: keepPreviousData,
@@ -269,7 +283,7 @@ export default function ServersOverview() {
   const vpnServerDisplayName = useMemo(() => {
     if (vpnServerId == null) return "";
     const list =
-      (serversLabelQuery.data as OpenVpnServersV2Response | undefined)?.openVpnServers ?? [];
+      (serversLabelQuery.data as VpnServersV2Response | undefined)?.vpnServers ?? [];
     const s = list.find((x) => x.id === vpnServerId);
     return s?.serverName?.trim() ?? "";
   }, [serversLabelQuery.data, vpnServerId]);
@@ -290,6 +304,25 @@ export default function ServersOverview() {
     }
     return "All servers overview";
   }, [externalId, vpnServerId, titleUserPart, titleServerPart]);
+
+  if (vpnServerId != null && scopedServerQuery.isPending) {
+    return (
+      <div
+        style={{
+          padding: 16,
+          backgroundColor: "var(--bg-content)",
+          color: "var(--text-secondary)",
+          minHeight: "100vh",
+        }}
+      >
+        <h2 className="settings-page__h2-with-icon">
+          <FaChartLine className="icon" aria-hidden />
+          <span>Server statistics</span>
+        </h2>
+        <p>Loading server…</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: 16, backgroundColor: "var(--bg-content)", color: "var(--text-secondary)", minHeight: "100vh" }}>

@@ -7,10 +7,11 @@ import "../css/Certificates.css";
 import "../css/Settings.css";
 
 // Import generated model type
-import type { OpenVpnServerResponse } from "../api/orval/model";
+import type { VpnServerResponse } from "../api/orvalModelShim";
 
 // Import generated hook
-import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/open-vpn-servers/open-vpn-servers";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
+import { isOpenVpnStack, VpnServerType } from "../constants/vpnServerType";
 
 // Helper to unwrap ApiResponse<T>
 function unwrap<T>(resp: unknown): T | undefined {
@@ -37,20 +38,40 @@ const Certificates: React.FC = () => {
     },
   });
 
-  const apiPayload = unwrap<OpenVpnServerResponse>(serverQuery.data);
-  const serverName = apiPayload?.openVpnServer?.serverName ?? "(unknown)";
+  const apiPayload = unwrap<VpnServerResponse>(serverQuery.data);
+  const serverName = apiPayload?.vpnServer?.serverName ?? "(unknown)";
+  /** Match server type from payload (incl. cache) so the title does not flash OpenVPN copy for Xray. */
+  const isXray = Boolean(
+    numericId && apiPayload?.vpnServer?.serverType === VpnServerType.Xray,
+  );
+
+  if (numericId && serverQuery.isSuccess && !isOpenVpnStack(apiPayload?.vpnServer?.serverType) && !isXray) {
+    return (
+      <div className="certificates-page">
+        <p>This server type does not support issued client files from the dashboard.</p>
+      </div>
+    );
+  }
+
+  if (numericId && serverQuery.isPending) {
+    return (
+      <div className="certificates-page">
+        <p>Loading server…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="certificates-page">
       <h2 className="certificates-page__title settings-page__h2-with-icon">
         <FaKey className="icon" aria-hidden />
         <span>
-          VPN Certificates &amp; OVPN Files for Server{" "}
+          {isXray ? "VLESS client links" : "VPN Certificates & OVPN Files"} for Server{" "}
           {serverQuery.isLoading ? "…" : serverName || vpnServerId}
         </span>
       </h2>
 
-      <CertificatesData vpnServerId={vpnServerId || ""} />
+      <CertificatesData vpnServerId={vpnServerId || ""} stack={isXray ? "xray" : "openvpn"} />
     </div>
   );
 };

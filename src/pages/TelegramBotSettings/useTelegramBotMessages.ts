@@ -10,7 +10,7 @@ import type {
     GetAllMessagesResponse,
     MessageDto,
     GetApiTgbotIncomingMessageLogsGetAllParams,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import { isCanceledError } from "../../utils/queryCanceled";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 

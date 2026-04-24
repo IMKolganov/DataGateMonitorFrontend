@@ -3,8 +3,8 @@ import type { ChartPoint, UsersSeriesChartPoint, MergedChartPoint } from "./type
 import type {
   OverviewSeriesResponse,
   OverviewSeriesRowDto,
-} from "../../api/orval/model";
-import type { OverviewUsersSeriesRowDto } from "../../api/orval/model";
+} from "../../api/orvalModelShim";
+import type { OverviewUsersSeriesRowDto } from "../../api/orvalModelShim";
 
 /* ---- time helpers ---- */
 export function startOfToday() { const n = new Date(); n.setHours(0,0,0,0); return n; }

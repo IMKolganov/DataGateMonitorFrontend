@@ -6,7 +6,7 @@ import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import { toast } from "react-toastify";
 
-import type { ApplicationDto, RevokeApplicationRequest } from "../../api/orval/model";
+import type { ApplicationDto, RevokeApplicationRequest } from "../../api/orvalModelShim";
 import { usePostApiApplicationsRevoke } from "../../api/orval/applications/applications.ts";
 import "../../css/Table.css";
 import { errorMessage } from "../../utils/errorMessage";

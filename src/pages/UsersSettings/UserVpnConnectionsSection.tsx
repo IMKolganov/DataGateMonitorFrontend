@@ -5,13 +5,13 @@ import StyledDataGrid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
 import type { GridColDef } from "@mui/x-data-grid";
 import { keepPreviousData } from "@tanstack/react-query";
-import { useGetApiOpenVpnClientsOverviewUsersSeries } from "../../api/orval/open-vpn-server-clients/open-vpn-server-clients";
-import { OverviewGrouping } from "../../api/orval/model";
+import { useGetApiOpenVpnClientsOverviewUsersSeries } from "../../api/orval/vpn-server-clients/vpn-server-clients";
+import { OverviewGrouping } from "../../api/orvalModelShim";
 import type {
   GetApiOpenVpnClientsOverviewUsersSeriesParams,
   OverviewUsersSeriesResponse,
-} from "../../api/orval/model";
-import type { OverviewUsersSeriesResponseApiResponse } from "../../api/orval/model";
+} from "../../api/orvalModelShim";
+import type { OverviewUsersSeriesResponseApiResponse } from "../../api/orvalModelShim";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { isCanceledError } from "../../utils/queryCanceled";

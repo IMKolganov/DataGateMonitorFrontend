@@ -1,4 +1,4 @@
-import type { OverviewSeriesResponse } from "../../api/orval/model";
+import type { OverviewSeriesResponse } from "../../api/orvalModelShim";
 
 export default function ApiJsonPanel({ data }: { data: OverviewSeriesResponse }) {
   const json = JSON.stringify(data, null, 2);

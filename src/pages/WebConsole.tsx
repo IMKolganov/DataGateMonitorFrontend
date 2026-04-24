@@ -1,8 +1,8 @@
 // src/pages/WebConsole.tsx
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useLayoutEffect, useState, useRef, useCallback } from "react";
 import "../css/Console.css";
 import { FaArrowRight, FaTrash, FaInfoCircle, FaList, FaTerminal } from "react-icons/fa";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   HubConnectionBuilder,
   HubConnection,
@@ -22,9 +22,34 @@ import { ACCESS_TOKEN_REFRESHED_EVENT } from "../utils/auth/accessTokenEvents.ts
 import { highlightOvpMgmtLine } from "../utils/ovpMgmtHighlight";
 import { OVP_MGMT_COMMANDS } from "../utils/ovpMgmtCommands";
 import { errorMessage } from "../utils/errorMessage";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
+import type { VpnServerResponse } from "../api/orvalModelShim";
+import { isOpenVpnStack } from "../constants/vpnServerType";
 
 export function WebConsole() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
+  const navigate = useNavigate();
+  const numericServerId = Number(vpnServerId || 0);
+  const serverQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId, {
+    query: {
+      enabled: numericServerId > 0,
+      staleTime: 10_000,
+      retry: 1,
+    },
+  });
+  const serverPayload = serverQuery.data as VpnServerResponse | undefined;
+  const serverType = serverPayload?.vpnServer?.serverType;
+  /** Management console exists only for OpenVPN; any other known stack leaves this route immediately. */
+  const consoleNotSupported =
+    numericServerId > 0 &&
+    serverType !== undefined &&
+    serverType !== null &&
+    !isOpenVpnStack(serverType);
+
+  useLayoutEffect(() => {
+    if (!vpnServerId || !consoleNotSupported) return;
+    navigate(`/servers/${vpnServerId}`, { replace: true });
+  }, [vpnServerId, consoleNotSupported, navigate]);
   const [messages, setMessages] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const [showCmdList, setShowCmdList] = useState(false);
@@ -59,6 +84,8 @@ export function WebConsole() {
 
   useEffect(() => {
     if (!vpnServerId) return;
+    if (numericServerId > 0 && serverQuery.isPending) return;
+    if (consoleNotSupported) return;
 
     const setupSignalR = async () => {
       try {
@@ -127,7 +154,7 @@ export function WebConsole() {
       connectionRef.current?.stop();
       connectionRef.current = null;
     };
-  }, [vpnServerId, hubSessionKey]);
+  }, [vpnServerId, hubSessionKey, numericServerId, serverQuery.isPending, consoleNotSupported]);
 
   useEffect(() => {
     if (messages.length === 0) return;
@@ -269,6 +296,18 @@ export function WebConsole() {
     historyIndexRef.current = -1;
     await clearHistoryDB(vpnServerId);
   };
+
+  if (consoleNotSupported) {
+    return null;
+  }
+
+  if (numericServerId > 0 && serverQuery.isPending) {
+    return (
+      <div className="server-details__panel" style={{ padding: 16 }}>
+        <p>Loading server…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="web-console-page">

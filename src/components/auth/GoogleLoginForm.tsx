@@ -3,7 +3,7 @@ import { usePostApiAuthGoogleLogin } from "../../api/orval/auth/auth";
 import type {
     GoogleLoginRequest,
     GoogleLoginResponse,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import { scheduleAutoLogout } from "../../utils/auth/authSession";
 import { getRuntimeEnv } from "../../utils/runtimeEnv";
 import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY} from "../../utils/const.ts";

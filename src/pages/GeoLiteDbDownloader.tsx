@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { FaDatabase } from "react-icons/fa";
 import * as signalR from "@microsoft/signalr";
 import { toast } from "react-toastify";
-import type { GetVersionDatabaseResponse } from "../api/orval/model";
+import type { GetVersionDatabaseResponse } from "../api/orvalModelShim";
 import { getApiBaseUrl } from "../config/apiBase";
 import { errorMessage } from "../utils/errorMessage";
 import { getSignalRPreferredTransport } from "../utils/signalrTransport.ts";

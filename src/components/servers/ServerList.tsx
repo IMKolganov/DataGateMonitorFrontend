@@ -12,19 +12,19 @@ import ServiceControls from "../ServiceControls";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { buildServerSwitchPath } from "../../utils/buildServerSwitchPath";
 
-import { deleteApiOpenVpnServersDeleteVpnServerId } from "../../api/orval/open-vpn-servers/open-vpn-servers";
-import { getApiV2OpenVpnServersGetAllWithStatus } from "../../api/orval/open-vpn-servers-v2/open-vpn-servers-v2";
+import { deleteApiOpenVpnServersDeleteVpnServerId } from "../../api/orval/vpn-servers/vpn-servers";
+import { getApiV2OpenVpnServersGetAllWithStatus } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
 
-import { ServiceStatus } from "../../api/orval/model";
+import { ServiceStatus } from "../../api/orvalModelShim";
 import type {
   ServiceStatusDto,
-  OpenVpnServerWithStatusV2Dto,
-  OpenVpnServerWithStatusesV2Response,
-} from "../../api/orval/model";
+  VpnServerWithStatusV2Dto,
+  VpnServerWithStatusesV2Response,
+} from "../../api/orvalModelShim";
 
 type GetAllWithStatusData = Awaited<ReturnType<typeof getApiV2OpenVpnServersGetAllWithStatus>>;
 
-type OrvalServerItem = OpenVpnServerWithStatusV2Dto;
+type OrvalServerItem = VpnServerWithStatusV2Dto;
 
 type MappedServer = {
   id: number;
@@ -77,15 +77,15 @@ function pickServiceDataEntry(
 }
 
 const extractList = (resp: GetAllWithStatusData): OrvalServerItem[] => {
-  const payload = resp as OpenVpnServerWithStatusesV2Response;
-  const list = payload.openVpnServerWithStatuses ?? null;
+  const payload = resp as VpnServerWithStatusesV2Response;
+  const list = payload.vpnServerWithStatuses ?? null;
   return Array.isArray(list) ? list : [];
 };
 
 const resolveServerId = (item: OrvalServerItem): number => {
   const id =
-      item.openVpnServerResponses?.openVpnServer?.id ??
-      item.openVpnServerStatusLogResponse?.vpnServerId;
+      item.vpnServerResponses?.vpnServer?.id ??
+      item.vpnServerStatusLogResponse?.vpnServerId;
 
   return typeof id === "number" && Number.isFinite(id) && id !== 0 ? id : 0;
 };

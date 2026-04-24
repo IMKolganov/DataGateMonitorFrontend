@@ -2,6 +2,7 @@ import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
 import type { IconType } from "react-icons";
 import {
   FaArrowLeft,
+  FaBell,
   FaClipboardList,
   FaCog,
   FaDatabase,
@@ -25,6 +26,7 @@ const SETTINGS_TABS: SettingsTab[] = [
   { label: "API Clients", path: "applications", Icon: FaLaptopCode, mobilePrefix: "🔌" },
   { label: "Quotas", path: "quotas", Icon: FaClipboardList, mobilePrefix: "📋" },
   { label: "GeoLite DB", path: "geolitedb", Icon: FaDatabase, mobilePrefix: "🌐" },
+  { label: "VPN notifications", path: "vpn-notifications", Icon: FaBell, mobilePrefix: "🔔" },
   { label: "Telegram Bot", path: "telegrambot", Icon: FaTelegram, mobilePrefix: "✈️" },
   { label: "Users", path: "users", Icon: FaUsers, mobilePrefix: "👥" },
 ];
