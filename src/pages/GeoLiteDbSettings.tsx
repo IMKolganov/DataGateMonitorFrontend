@@ -14,7 +14,7 @@ import type {
   PostApiSettingsSetParams,
   SettingResponse,
   GetVersionDatabaseResponse,
-} from "../api/orval/model";
+} from "../api/orvalModelShim";
 
 import { useGetApiGeoLiteGetVerionDb } from "../api/orval/geo-lite/geo-lite";
 import axios from "axios";

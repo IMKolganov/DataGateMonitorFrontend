@@ -6,7 +6,7 @@ import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type {
   MonitorServerCertificate as Certificate,
   RevokeCertificateRequest,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import { postApiOpenVpnCertsRevoke } from "../../api/orval/vpn-server-certs/vpn-server-certs.ts";
 import "../../css/Table.css";
 import { toast } from "react-toastify";

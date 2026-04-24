@@ -6,8 +6,8 @@ import {
     LogLevel,
 } from "@microsoft/signalr";
 import { postApiOpenVpnServersRunNow } from "../api/orval/vpn-servers/vpn-servers";
-import type { ServiceStatusDto } from "../api/orval/model";
-import { ServiceStatus as ServiceStatusEnum } from "../api/orval/model";
+import type { ServiceStatusDto } from "../api/orvalModelShim";
+import { ServiceStatus as ServiceStatusEnum } from "../api/orvalModelShim";
 import {ACCESS_TOKEN_KEY} from "../utils/const.ts";
 import { errorMessage } from "../utils/errorMessage.ts";
 import { getStatusStreamHubUrl } from "../utils/signalrHubUrl.ts";

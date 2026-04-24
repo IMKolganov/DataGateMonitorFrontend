@@ -7,7 +7,7 @@ import {
 import type {
   GetAllTelegramUsersResponse,
   TelegramBotUserDto,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 
 import type { ApiEnvelope } from "./unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "./unwrapApiResponse";

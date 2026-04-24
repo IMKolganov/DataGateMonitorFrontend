@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { postApiAuthRegister } from "../../api/orval/auth/auth";
-import type { RegisterUserRequest } from "../../api/orval/model";
+import type { RegisterUserRequest } from "../../api/orvalModelShim";
 import { FaUserPlus } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
 import "../../css/Login.css";

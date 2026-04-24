@@ -3,7 +3,7 @@ import { useMemo } from "react";
 
 import GeoPointsMap from "../../components/settings/GeoPointsMap.tsx";
 import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
-import type { VpnServerV2Dto, VpnServersV2Response } from "../../api/orval/model";
+import type { VpnServerV2Dto, VpnServersV2Response } from "../../api/orvalModelShim";
 
 type Props = {
   from: Date | string;

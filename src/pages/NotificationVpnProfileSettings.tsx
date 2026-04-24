@@ -7,7 +7,10 @@ import "../css/Settings.css";
 import "../css/Table.css";
 import StyledDataGrid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
-import type { GetVpnProfileNotificationPreferencesResponse } from "../api/orval/model";
+import type {
+  EnumsApplicationNotificationKind,
+  GetVpnProfileNotificationPreferencesResponse,
+} from "../api/orvalModelShim";
 import {
   getGetApiVpnProfileNotificationPreferencesQueryKey,
   useGetApiVpnProfileNotificationPreferences,
@@ -247,7 +250,9 @@ export default function NotificationVpnProfileSettings() {
       setSavingRowKey(key);
       try {
         await putMutation.mutateAsync({
-          data: { preferences: [{ kind: row.kind, enabled: next }] },
+          data: {
+            preferences: [{ kind: row.kind as EnumsApplicationNotificationKind, enabled: next }],
+          },
         });
         toast.success(`${row.section} — ${row.title}: saved`);
       } catch (e: unknown) {

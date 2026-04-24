@@ -14,7 +14,7 @@ import {
 import type {
   GetAllCertificatesResponse,
   MonitorServerCertificate,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import axios from "axios";
 import { errorMessage as baseErrorMessage } from "../../utils/errorMessage";
 import { pickArray } from "../../utils/pickPayloadArray.ts";

@@ -14,11 +14,11 @@ import {
   getApiOpenVpnEventsGetByServer,
 } from "../api/orval/vpn-server-event/vpn-server-event";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
-import type { VpnServerResponse } from "../api/orval/model";
+import type { VpnServerResponse } from "../api/orvalModelShim";
 import { isOpenVpnStack } from "../constants/vpnServerType";
 import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
-import type { VpnServerEventLogDto } from "../api/orval/model";
+import type { VpnServerEventLogDto } from "../api/orvalModelShim";
 
 // Resp is already unwrapped by ogmMutator (ApiResponse<T> -> T)
 type Resp = Awaited<ReturnType<typeof getApiOpenVpnEventsGetByServer>>;

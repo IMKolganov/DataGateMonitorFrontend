@@ -8,7 +8,7 @@ import type {
   DownloadFileRequest,
   DownloadFileResponse,
   DownloadFileResponseApiResponse,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import { usePostApiOpenVpnFilesRevokeFile, usePostApiOpenVpnFilesDownloadFile } from "../../api/orval/open-vpn-files/open-vpn-files.ts";
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
