@@ -4,7 +4,7 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
-import type { NotificationSeverity } from "./notificationSeverity";
+import type { EnumsNotificationSeverity } from "./enumsNotificationSeverity";
 
 export type GetApiNotificationsGetAllParams = {
   /**
@@ -18,7 +18,7 @@ export type GetApiNotificationsGetAllParams = {
    */
   PageSize?: number;
   IsRead?: boolean;
-  Severities?: NotificationSeverity[];
+  Severities?: EnumsNotificationSeverity[];
   /**
    * @maxLength 256
    */

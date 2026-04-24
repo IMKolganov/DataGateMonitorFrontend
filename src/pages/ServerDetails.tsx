@@ -1,6 +1,6 @@
 // src/pages/ServerDetails.tsx
 import { useNavigate, NavLink, Outlet, useParams, useLocation } from "react-router-dom";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { IconType } from "react-icons";
 import {
   FaArrowLeft,
@@ -13,9 +13,17 @@ import {
 } from "react-icons/fa";
 import "../css/ServerDetails.css";
 
-import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/open-vpn-servers/open-vpn-servers";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
-import type { OpenVpnServerResponse } from "../api/orval/model";
+import type { VpnServerResponse } from "../api/orvalModelShim";
+import { VpnServerType } from "../constants/vpnServerType";
+
+/** Subpaths under `/servers/:id/...` that do not apply to Xray (OpenVPN-only UI). */
+function isXrayBlockedSubpath(relative: string): boolean {
+    if (!relative) return false;
+    const keys = ["console", "events", "statistics"];
+    return keys.some((k) => relative === k || relative.startsWith(`${k}/`));
+}
 
 type Tab = {
     label: string;
@@ -55,11 +63,6 @@ export function ServerDetails() {
     const user = getCurrentUser();
     const canSeeAdminTabs = isAdmin(user);
 
-    const tabs = useMemo(() => {
-        if (canSeeAdminTabs) return ALL_SERVER_TABS;
-        return ALL_SERVER_TABS.filter((t) => !t.adminOnly);
-    }, [canSeeAdminTabs]);
-
     const currentPath =
         location.pathname.split(`/servers/${vpnServerId}/`)[1] ?? "";
 
@@ -76,8 +79,38 @@ export function ServerDetails() {
         },
     });
 
-    const payload = serverQuery.data as OpenVpnServerResponse | undefined;
-    const vpnServerName = payload?.openVpnServer?.serverName ?? "(unknown)";
+    const payload = serverQuery.data as VpnServerResponse | undefined;
+    /** Use payload when present (incl. cached data while refetching) so OpenVPN-only tabs do not flash for Xray. */
+    const isXrayServer = payload?.vpnServer?.serverType === VpnServerType.Xray;
+
+    const tabs = useMemo(() => {
+        let base = canSeeAdminTabs ? ALL_SERVER_TABS : ALL_SERVER_TABS.filter((t) => !t.adminOnly);
+        if (isXrayServer) {
+            const xrayHidden = new Set(["console", "events", "statistics"]);
+            base = base.filter((t) => !xrayHidden.has(t.path));
+            base = base.map((t) => {
+                if (t.path === "certificates") {
+                    return { ...t, label: "Client links (VLESS)" };
+                }
+                if (t.path === "ovpn-file-config") {
+                    return { ...t, label: "Client export template" };
+                }
+                return t;
+            });
+            if (base.length === 0) {
+                base = [{ label: "Overview", path: "", adminOnly: false, Icon: FaServer, mobilePrefix: "🖥️" }];
+            }
+        }
+        return base;
+    }, [canSeeAdminTabs, isXrayServer]);
+
+    const vpnServerName = payload?.vpnServer?.serverName ?? "(unknown)";
+
+    useEffect(() => {
+        if (!isXrayServer || !vpnServerId) return;
+        if (!isXrayBlockedSubpath(currentPath)) return;
+        navigate(`/servers/${vpnServerId}`, { replace: true });
+    }, [isXrayServer, currentPath, navigate, vpnServerId]);
 
     const safeCurrentPath = useMemo(() => {
         const exists = tabs.some((t) => t.path === currentPath);

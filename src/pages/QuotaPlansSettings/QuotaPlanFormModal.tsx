@@ -4,8 +4,8 @@ import type {
   CreateOrUpdateQuotaPlanRequest,
   QuotaPlanDto,
   QuotaOverlimitAction,
-} from "../../api/orval/model";
-import { QuotaOverlimitAction as OverlimitActionEnum } from "../../api/orval/model";
+} from "../../api/orvalModelShim";
+import { QuotaOverlimitAction as OverlimitActionEnum } from "../../api/orvalModelShim";
 
 const OVERLIMIT_LABELS: Record<number, string> = {
   0: "None",

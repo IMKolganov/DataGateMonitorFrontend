@@ -31,6 +31,7 @@ const WebConsole = lazy(() => import("./pages/WebConsole"));
 const Events = lazy(() => import("./pages/Events"));
 const GeneralSettings = lazy(() => import("./pages/GeneralSettings"));
 const GeoLiteDbSettings = lazy(() => import("./pages/GeoLiteDbSettings"));
+const NotificationVpnProfileSettings = lazy(() => import("./pages/NotificationVpnProfileSettings"));
 const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
 const UsersSettings = lazy(() => import("./pages/UsersSettings/UsersSettings"));
 const UserQuotasPage = lazy(() => import("./pages/UsersSettings/UserQuotasPage"));
@@ -121,6 +122,7 @@ function App() {
                       <Route path="applications" element={withSuspense(<ApplicationSettings />)} />
                       <Route path="quotas" element={withSuspense(<QuotaPlansSettings />)} />
                       <Route path="geolitedb" element={withSuspense(<GeoLiteDbSettings />)} />
+                      <Route path="vpn-notifications" element={withSuspense(<NotificationVpnProfileSettings />)} />
                       <Route path="telegrambot" element={withSuspense(<TelegramBotSettings />)} />
                       <Route path="users/quotas" element={withSuspense(<UserQuotasPage />)} />
                       <Route path="users" element={withSuspense(<UsersSettings />)} />

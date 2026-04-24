@@ -4,9 +4,8 @@ import { FaPlus, FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-// orval
 import { usePostApiOpenVpnFilesAdd } from "../../api/orval/open-vpn-files/open-vpn-files.ts";
-import type { AddFileRequest } from "../../api/orval/model";
+import type { AddFileRequest } from "../../api/orvalModelShim";
 import axios from "axios";
 import { axiosResponseDataMessage, axiosResponseDetail, errorMessage } from "../../utils/errorMessage";
 
@@ -16,11 +15,10 @@ interface Props {
 }
 
 const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
-  const [newCommonName, setNewCommonName] = useState<string>("");
-  const [newExternalId, setNewExternalId] = useState<string>("");
+  const [newCommonName, setNewCommonName] = useState("");
+  const [newExternalId, setNewExternalId] = useState("");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // orval mutation (ogmMutator returns unwrapped data in this project)
   const { mutateAsync: addMutate, isPending } = usePostApiOpenVpnFilesAdd();
 
   const navigate = useNavigate();
@@ -42,8 +40,6 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
     setMessage(null);
 
     try {
-      // Minimal request body. If your AddFileRequest has more fields (e.g. profile type),
-      // extend the object below accordingly.
       const data = {
         vpnServerId: Number(vpnServerId),
         externalId: newExternalId.trim(),
@@ -78,7 +74,7 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
         void handleAddOvpnFile();
       }
     },
-    [handleAddOvpnFile, isPending]
+    [handleAddOvpnFile, isPending],
   );
 
   return (
@@ -110,24 +106,29 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
         disabled={isPending}
       />
 
-      <button className="btn primary" onClick={handleAddOvpnFile} disabled={isPending}>
+      <button className="btn primary" onClick={() => void handleAddOvpnFile()} disabled={isPending}>
         <FaPlus className="icon" />
         {isPending ? "Adding..." : "Make new OVPN file"}
       </button>
 
       <button
         className="btn secondary"
+        type="button"
         onClick={() => navigate(`/servers/${vpnServerId}/ovpn-file-config/`)}
         disabled={isPending}
+        title="Open OpenVPN .ovpn generation template settings"
       >
         <FaCog className="icon" />
         Change config OVPN file
       </button>
 
+      <p className="certificate-description" style={{ marginTop: 10, maxWidth: 720, lineHeight: 1.45 }}>
+        Creates a new <code>.ovpn</code> for a client. Secondary opens <strong>Configurations</strong> to edit the
+        OpenVPN file template.
+      </p>
+
       {message && (
-        <p className={message.type === "success" ? "message-success" : "message-error"}>
-          {message.text}
-        </p>
+        <p className={message.type === "success" ? "message-success" : "message-error"}>{message.text}</p>
       )}
     </div>
   );

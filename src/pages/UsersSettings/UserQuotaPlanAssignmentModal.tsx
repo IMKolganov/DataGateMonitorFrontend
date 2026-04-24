@@ -3,7 +3,7 @@ import type {
   CreateOrUpdateUserQuotaPlanRequest,
   UserQuotaPlanDto,
   QuotaPlanDto,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 
 type Props = {
   isOpen: boolean;

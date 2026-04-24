@@ -3,7 +3,7 @@ import React from "react";
 import { BsClock, BsCpu, BsHddNetwork, BsFillBookmarkStarFill, BsPerson, BsTag } from "react-icons/bs";
 import { RiBarChart2Line, RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer, IoMdPerson } from "react-icons/io";
-import type { OpenVpnServerResponse, OpenVpnServerWithStatusDto } from "../../api/orval/model";
+import type { VpnServerResponse, VpnServerWithStatusDto } from "../../api/orvalModelShim";
 
 export type ConflogPayloadSummary = {
   application?: string | null;
@@ -18,7 +18,7 @@ export type ConflogPayloadSummary = {
 
 /** Props may carry fields from either API shape (merged in GeneralServerDetails). */
 export type ServerDetailsServerInfo =
-  | (Partial<OpenVpnServerWithStatusDto> & Partial<OpenVpnServerResponse>)
+  | (Partial<VpnServerWithStatusDto> & Partial<VpnServerResponse>)
   | null
   | undefined;
 
@@ -58,16 +58,16 @@ const ServerDetailsInfo: React.FC<Props> = ({
   const safe = serverInfo ?? {};
 
   const server = (() => {
-    const wr = safe.openVpnServerResponses;
-    const inner = wr?.openVpnServer;
+    const wr = safe.vpnServerResponses;
+    const inner = wr?.vpnServer;
     if (wr && inner) {
-      const wrapperId = (wr as OpenVpnServerResponse & { id?: number }).id;
+      const wrapperId = (wr as VpnServerResponse & { id?: number }).id;
       return { ...inner, id: wrapperId ?? inner.id };
     }
-    return safe.openVpnServer ?? null;
+    return safe.vpnServer ?? null;
   })();
 
-  const status = safe.openVpnServerStatusLogResponse ?? null;
+  const status = safe.vpnServerStatusLogResponse ?? null;
 
   // Early state: if nothing and not loading
   if (!server && !loading) return <p>No server information available.</p>;

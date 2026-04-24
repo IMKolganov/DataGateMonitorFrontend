@@ -21,12 +21,12 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  GeoLiteUpdateResponseApiResponse,
-  GeoLiteVersionCheckResponseApiResponse,
-  GetDatabasePathResponseApiResponse,
-  GetGeoInfoResponseApiResponse,
-  GetVersionDatabaseResponseApiResponse,
-  StringApiResponse,
+  ApiGeoLiteResponsesGeoLiteUpdateResponse,
+  ApiGeoLiteResponsesGeoLiteVersionCheckResponse,
+  ApiGeoLiteResponsesGetDatabasePathResponse,
+  ApiGeoLiteResponsesGetGeoInfoResponse,
+  ApiGeoLiteResponsesGetVersionDatabaseResponse,
+  ApiSystemString,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -37,7 +37,7 @@ export const getApiGeoLiteGetDatabasePath = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetDatabasePathResponseApiResponse>(
+  return ogmMutator<ApiGeoLiteResponsesGetDatabasePathResponse>(
     { url: `/api/geo-lite/get-database-path`, method: "GET", signal },
     options,
   );
@@ -185,7 +185,7 @@ export const getApiGeoLiteGetGeoInfoIpAddress = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetGeoInfoResponseApiResponse>(
+  return ogmMutator<ApiGeoLiteResponsesGetGeoInfoResponse>(
     { url: `/api/geo-lite/get-geo-info/${ipAddress}`, method: "GET", signal },
     options,
   );
@@ -351,7 +351,7 @@ export const getApiGeoLiteGetVerionDb = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetVersionDatabaseResponseApiResponse>(
+  return ogmMutator<ApiGeoLiteResponsesGetVersionDatabaseResponse>(
     { url: `/api/geo-lite/get-verion-db`, method: "GET", signal },
     options,
   );
@@ -498,7 +498,7 @@ export const postApiGeoLiteUpdateDb = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GeoLiteUpdateResponseApiResponse>(
+  return ogmMutator<ApiGeoLiteResponsesGeoLiteUpdateResponse>(
     { url: `/api/geo-lite/update-db`, method: "POST", signal },
     options,
   );
@@ -572,7 +572,7 @@ export const getApiGeoLiteCheckNewVersion = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GeoLiteVersionCheckResponseApiResponse>(
+  return ogmMutator<ApiGeoLiteResponsesGeoLiteVersionCheckResponse>(
     { url: `/api/geo-lite/check-new-version`, method: "GET", signal },
     options,
   );
@@ -719,7 +719,7 @@ export const getApiGeoLiteHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/geo-lite/healthcheck`, method: "GET", signal },
     options,
   );
@@ -866,7 +866,7 @@ export const getApiGeoLiteHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/geo-lite/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

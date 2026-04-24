@@ -17,7 +17,7 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { StringApiResponse } from "../model";
+import type { ApiSystemString } from "../model";
 
 import { ogmMutator } from "../../mutator";
 
@@ -27,7 +27,7 @@ export const getApiBaseHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/base/healthcheck`, method: "GET", signal },
     options,
   );
@@ -173,7 +173,7 @@ export const getApiBaseHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/base/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

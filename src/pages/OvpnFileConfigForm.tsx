@@ -11,19 +11,20 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   useGetApiOpenVpnConfigsGetVpnServerId,
   usePostApiOpenVpnConfigsAddUpdate,
-} from "../api/orval/open-vpn-server-ovpn-file-config/open-vpn-server-ovpn-file-config";
+} from "../api/orval/vpn-server-ovpn-file-config/vpn-server-ovpn-file-config";
 
 import {
   useGetApiOpenVpnServersConflogHistoryByServerVpnServerId,
   usePostApiOpenVpnServersConflogFetchAndSaveByServerVpnServerId,
   getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryKey,
-} from "../api/orval/open-vpn-server-conflog/open-vpn-server-conflog";
+} from "../api/orval/vpn-server-conflog/vpn-server-conflog";
 
 import type {
   AddOrUpdateOvpnFileConfigRequest,
   OvpnFileConfigResponse,
-  RootInfoResponse,
-} from "../api/orval/model";
+  VpnServerResponse,
+  RootOpenVpnInfoResponse,
+} from "../api/orvalModelShim";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
@@ -32,6 +33,9 @@ import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../utils/errorMessage";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
+import { isOpenVpnStack, VpnServerType } from "../constants/vpnServerType";
+import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 
 /** Extract proto from config template (e.g. "proto tcp" or "proto udp") */
 function extractProtoFromTemplate(template: string): string | null {
@@ -71,7 +75,7 @@ interface ConflogRow {
   id?: number;
   vpnServerId?: number | null;
   requestUrl?: string | null;
-  payload?: RootInfoResponse;
+  payload?: RootOpenVpnInfoResponse;
   createDate?: string;
 }
 
@@ -80,6 +84,18 @@ const OvpnFileConfigForm: React.FC = () => {
   const queryClient = useQueryClient();
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const parsedVpnServerId = Number(vpnServerId) || 0;
+  const serverKindQuery = useGetApiOpenVpnServersGetVpnServerId(parsedVpnServerId, {
+    query: {
+      enabled: parsedVpnServerId > 0,
+      staleTime: 10_000,
+      retry: 1,
+    },
+  });
+  const serverType = (serverKindQuery.data as VpnServerResponse | undefined)?.vpnServer?.serverType;
+  const openVpnPageEnabled =
+    parsedVpnServerId > 0 && serverKindQuery.isSuccess && isOpenVpnStack(serverType);
+  const isXrayStack = parsedVpnServerId > 0 && serverType === VpnServerType.Xray;
+  const exportConfigPageEnabled = openVpnPageEnabled || isXrayStack;
   const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const [conflogPage, setConflogPage] = useState(1);
@@ -115,7 +131,7 @@ const OvpnFileConfigForm: React.FC = () => {
     parsedVpnServerId,
     {
       query: {
-        enabled: parsedVpnServerId > 0, // skip for "create new" w/o id
+        enabled: parsedVpnServerId > 0 && exportConfigPageEnabled,
         staleTime: 0,
         retry: 1,
       },
@@ -137,14 +153,14 @@ const OvpnFileConfigForm: React.FC = () => {
     useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
       parsedVpnServerId,
       conflogHistoryParams,
-      { query: { enabled: parsedVpnServerId > 0 } }
+      { query: { enabled: parsedVpnServerId > 0 && openVpnPageEnabled } }
     );
 
   const latestConflogParams = useMemo(() => ({ page: 1, pageSize: 1 }), []);
   const { data: latestConflogResp } = useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
     parsedVpnServerId,
     latestConflogParams,
-    { query: { enabled: parsedVpnServerId > 0 } }
+    { query: { enabled: parsedVpnServerId > 0 && openVpnPageEnabled } }
   );
   const latestConflogItem = (latestConflogResp as { items?: ConflogRow[] } | undefined)?.items?.[0];
   const latestPayload = latestConflogItem?.payload;
@@ -284,6 +300,26 @@ const OvpnFileConfigForm: React.FC = () => {
 
   const loading = useMemo(() => isFetching || saveMutation.isPending, [isFetching, saveMutation.isPending]);
 
+  if (parsedVpnServerId > 0 && serverKindQuery.isSuccess && !exportConfigPageEnabled) {
+    return (
+      <OpenVpnServerFeaturePlaceholder
+        vpnServerId={String(vpnServerId)}
+        featureLabel="Client export configuration"
+      >
+        <p style={{ marginTop: 8 }}>This server type does not use the dashboard export template.</p>
+      </OpenVpnServerFeaturePlaceholder>
+    );
+  }
+
+  if (parsedVpnServerId > 0 && serverKindQuery.isPending) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading server…</p>
+      </div>
+    );
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setServerConfig((prev) => ({
@@ -339,8 +375,8 @@ const OvpnFileConfigForm: React.FC = () => {
       await toast.promise(
         saveMutation.mutateAsync({ data: payload }),
         {
-          pending: "Saving OpenVPN file config…",
-          success: "OpenVPN file config saved",
+          pending: isXrayStack ? "Saving client export template…" : "Saving OpenVPN file config…",
+          success: isXrayStack ? "Client export template saved" : "OpenVPN file config saved",
           error: {
             render({ data }) {
               return getErrorMessage(data);
@@ -367,8 +403,51 @@ const OvpnFileConfigForm: React.FC = () => {
       ) : (
         <div className="server-form-container">
           <h2 className="server-form-header">
-            {vpnServerId ? "Edit OpenVPN File Config" : "Add New Ovpn File Config"}
+            {vpnServerId
+              ? isXrayStack
+                ? "Edit VLESS client export template"
+                : "Edit OpenVPN File Config"
+              : "Add New Ovpn File Config"}
           </h2>
+
+          {isXrayStack ? (
+            <div
+              className="server-details__muted"
+              role="note"
+              style={{
+                margin: "0 0 16px",
+                padding: "12px 14px",
+                borderRadius: 8,
+                border: "1px solid var(--border-default, #30363d)",
+                background: "rgba(56, 139, 253, 0.08)",
+                maxWidth: 900,
+                lineHeight: 1.5,
+                fontSize: 14,
+              }}
+            >
+              <strong>Xray (VLESS)</strong> — this screen is only the <strong>export template</strong> (text with
+              placeholders like <code>{"{{vless_uri}}"}</code>). It is <strong>not</strong> an OpenVPN server profile.
+              Issued links are created under <strong>Client links (VLESS)</strong> → <strong>Create client link</strong>.
+            </div>
+          ) : (
+            <div
+              className="server-details__muted"
+              role="note"
+              style={{
+                margin: "0 0 16px",
+                padding: "12px 14px",
+                borderRadius: 8,
+                border: "1px solid var(--border-default, #30363d)",
+                maxWidth: 900,
+                lineHeight: 1.5,
+                fontSize: 14,
+              }}
+            >
+              <strong>OpenVPN</strong> — template drives generated <code>.ovpn</code> files. New files:{" "}
+              <strong>Configurations</strong> is linked from <strong>Make new OVPN file</strong> → &quot;Change config
+              OVPN file&quot;, or tab <strong>Configurations</strong>.
+            </div>
+          )}
 
           <div className="header-containe">
             <div className="header-bar">
@@ -424,7 +503,7 @@ const OvpnFileConfigForm: React.FC = () => {
             <div className="form-group">
               <div className="config-template-container">
                 <div className="toolbar">
-                  <span>Config Template</span>
+                  <span>{isXrayStack ? "VLESS export template" : "Config Template"}</span>
                   <button
                     className="copy-button"
                     type="button"
@@ -463,32 +542,48 @@ const OvpnFileConfigForm: React.FC = () => {
 
           <div className="form-hint-container">
             <h4>What are these settings?</h4>
-            <p>
-              <strong>VPN Server IP</strong> — the public IP address or domain name of your OpenVPN server. This value is
-              inserted into the generated .ovpn configuration file, allowing clients to connect to the correct server.
-            </p>
-            <p>
-              <strong>VPN Server Port</strong> — the port your OpenVPN server is configured to listen on (usually <code>1194</code>).
-              This must match the <code>port</code> directive in your <code>server.conf</code> (or <code>openvpn.conf</code>) file.
-            </p>
-            <p>⚠️ If the IP or port are incorrect, VPN clients will not be able to connect.</p>
+            {isXrayStack ? (
+              <>
+                <p>
+                  <strong>VPN Server IP / Port</strong> — public endpoint embedded in generated VLESS URIs and templates
+                  (e.g. <code>{"{{server_ip}}"}</code>, <code>{"{{server_port}}"}</code>).
+                </p>
+                <h4>VLESS link template</h4>
+                <p>
+                  Use placeholders: <code>{"{{vless_uri}}"}</code>, <code>{"{{uuid}}"}</code>,{" "}
+                  <code>{"{{friendly_name}}"}</code>, <code>{"{{server_ip}}"}</code>, <code>{"{{server_port}}"}</code>.
+                  Include <code>{"{{vless_uri}}"}</code> to emit a shareable <code>vless://</code> line.
+                </p>
+              </>
+            ) : (
+              <>
+                <p>
+                  <strong>VPN Server IP</strong> — the public IP address or domain name of your OpenVPN server. This value
+                  is inserted into the generated .ovpn configuration file, allowing clients to connect to the correct server.
+                </p>
+                <p>
+                  <strong>VPN Server Port</strong> — the port your OpenVPN server is configured to listen on (usually{" "}
+                  <code>1194</code>). This must match the <code>port</code> directive in your <code>server.conf</code> (or{" "}
+                  <code>openvpn.conf</code>) file.
+                </p>
+                <p>⚠️ If the IP or port are incorrect, VPN clients will not be able to connect.</p>
 
-            <h4>What is the OpenVPN Config Template?</h4>
-            <p>
-              The <strong>Config Template</strong> defines how the generated <code>.ovpn</code> file will look.
-              You can include dynamic placeholders like <code>{"{{server_ip}}"}</code>, <code>{"{{client_cert}}"}</code>, etc.
-            </p>
-            <p>These placeholders will be replaced with actual values when generating client configs:</p>
-            <pre className="ovpn-template-sample">
-              {highlightOvpnConfig(SAMPLE_TEMPLATE)}
-            </pre>
-            <p>
-              ⚠️ Do not remove or change the placeholders unless you understand their purpose.
-              Each one is automatically replaced with correct values for the selected VPN server and user certificate.
-            </p>
+                <h4>What is the OpenVPN Config Template?</h4>
+                <p>
+                  The <strong>Config Template</strong> defines how the generated <code>.ovpn</code> file will look. You can
+                  include dynamic placeholders like <code>{"{{server_ip}}"}</code>, <code>{"{{client_cert}}"}</code>, etc.
+                </p>
+                <p>These placeholders will be replaced with actual values when generating client configs:</p>
+                <pre className="ovpn-template-sample">{highlightOvpnConfig(SAMPLE_TEMPLATE)}</pre>
+                <p>
+                  ⚠️ Do not remove or change the placeholders unless you understand their purpose. Each one is automatically
+                  replaced with correct values for the selected VPN server and user certificate.
+                </p>
+              </>
+            )}
           </div>
 
-          {parsedVpnServerId > 0 && (
+          {parsedVpnServerId > 0 && openVpnPageEnabled ? (
             <div className="conflog-history-section">
               <h3 className="ovpn-config-section-title settings-card__h3-with-icon">
                 <FaHistory className="icon" aria-hidden />
@@ -585,7 +680,7 @@ const OvpnFileConfigForm: React.FC = () => {
                 </div>
               </CustomThemeProvider>
             </div>
-          )}
+          ) : null}
         </div>
       )}
     </div>
