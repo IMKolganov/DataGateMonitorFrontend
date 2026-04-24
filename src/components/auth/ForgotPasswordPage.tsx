@@ -7,7 +7,7 @@ import {
 import type {
   AdminForgotPasswordRequest,
   AdminResetPasswordRequest,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import { FaPaperPlane, FaKey } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
 import "../../css/Login.css";

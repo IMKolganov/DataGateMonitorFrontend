@@ -11,7 +11,7 @@ import {
 import type {
   GetApiSettingsGetParams,
   PostApiSettingsSetParams,
-} from "../api/orval/model";
+} from "../api/orvalModelShim";
 import { errorMessage } from "../utils/errorMessage";
 
 const KEY_INTERVAL = "OpenVPN_Polling_Interval";

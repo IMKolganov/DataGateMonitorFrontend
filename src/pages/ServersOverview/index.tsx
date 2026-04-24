@@ -37,8 +37,8 @@ import type {
   VpnServersV2Response,
   GetApiOpenVpnClientsOverviewSeriesParams,
   GetApiOpenVpnClientsOverviewSummaryParams,
-} from "../../api/orval/model";
-import { OverviewGrouping } from "../../api/orval/model";
+} from "../../api/orvalModelShim";
+import { OverviewGrouping } from "../../api/orvalModelShim";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 

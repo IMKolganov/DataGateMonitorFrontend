@@ -1,8 +1,8 @@
 // src/components/ServiceControls.tsx
 import { FaPlay } from "react-icons/fa";
 import { useEffect, useMemo, useState } from "react";
-import type { ServiceStatusDto } from "../api/orval/model";
-import type { ServiceStatus } from "../api/orval/model";
+import type { ServiceStatusDto } from "../api/orvalModelShim";
+import type { ServiceStatus } from "../api/orvalModelShim";
 import { humanizeSignalRStatusStreamError } from "../utils/signalrFriendlyError";
 
 type Props = {

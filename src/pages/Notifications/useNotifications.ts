@@ -16,7 +16,7 @@ import type {
   UnreadCountResponse,
   GetApiNotificationsGetAllParams,
   NotificationSeverity,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import { getCurrentUser } from "../../utils/auth/authSelectors";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import { serializeNotificationsGetAllParams } from "../../utils/notificationsQuerySerialize";

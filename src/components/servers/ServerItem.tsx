@@ -14,7 +14,7 @@ import type {
     VpnServerV2Dto,
     VpnServerWithStatusDto,
     VpnServerWithStatusV2Dto,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { vpnServerTypeLabel } from "../../constants/vpnServerType";
 

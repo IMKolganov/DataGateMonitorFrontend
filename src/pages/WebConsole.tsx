@@ -23,7 +23,7 @@ import { highlightOvpMgmtLine } from "../utils/ovpMgmtHighlight";
 import { OVP_MGMT_COMMANDS } from "../utils/ovpMgmtCommands";
 import { errorMessage } from "../utils/errorMessage";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
-import type { VpnServerResponse } from "../api/orval/model";
+import type { VpnServerResponse } from "../api/orvalModelShim";
 import { isOpenVpnStack } from "../constants/vpnServerType";
 
 export function WebConsole() {

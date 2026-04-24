@@ -12,7 +12,7 @@ import { getApiOpenVpnClientsOverviewPoints } from "../../api/orval/vpn-server-c
 import type {
     GeoPointAggDto,
     GetApiOpenVpnClientsOverviewPointsParams,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 
 export type VpnServerMapMarker = {
     id?: number;

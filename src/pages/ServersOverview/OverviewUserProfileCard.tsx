@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import { useGetApiUsersGetAll } from "../../api/orval/user/user";
 import { useGetApiOpenVpnClientsOverviewUsers } from "../../api/orval/vpn-server-clients/vpn-server-clients";
-import type { GetAllUsersResponse, OverviewUsersResponse, UserDto } from "../../api/orval/model";
+import type { GetAllUsersResponse, OverviewUsersResponse, UserDto } from "../../api/orvalModelShim";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { formatBytes } from "../../utils/utils";

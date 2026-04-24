@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { postApiAuthResetPassword } from "../../api/orval/auth/auth";
-import type { AdminResetPasswordRequest } from "../../api/orval/model";
+import type { AdminResetPasswordRequest } from "../../api/orvalModelShim";
 import { FaKey } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
 import "../../css/Login.css";

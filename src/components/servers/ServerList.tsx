@@ -15,12 +15,12 @@ import { buildServerSwitchPath } from "../../utils/buildServerSwitchPath";
 import { deleteApiOpenVpnServersDeleteVpnServerId } from "../../api/orval/vpn-servers/vpn-servers";
 import { getApiV2OpenVpnServersGetAllWithStatus } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
 
-import { ServiceStatus } from "../../api/orval/model";
+import { ServiceStatus } from "../../api/orvalModelShim";
 import type {
   ServiceStatusDto,
   VpnServerWithStatusV2Dto,
   VpnServerWithStatusesV2Response,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 
 type GetAllWithStatusData = Awaited<ReturnType<typeof getApiV2OpenVpnServersGetAllWithStatus>>;
 

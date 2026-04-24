@@ -5,7 +5,7 @@ import { formatBytes, formatDateWithOffset } from "../utils/utils";
 import StyledDataGrid from "./ui/TableStyle.tsx";
 import CustomThemeProvider from "./ui/ThemeProvider.tsx";
 import { Link, useParams } from "react-router-dom";
-import type { VpnClientInfoDto } from "../api/orval/model";
+import type { VpnClientInfoDto } from "../api/orvalModelShim";
 import "../css/Table.css";
 import { apiRequest } from "../api/apirequest";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";

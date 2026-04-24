@@ -19,10 +19,12 @@ import {
   getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryKey,
 } from "../api/orval/vpn-server-conflog/vpn-server-conflog";
 
-import type { DataGateMonitorSharedModelsDataGateMonitorVpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest as AddOrUpdateOvpnFileConfigRequest } from "../api/orval/model/dataGateMonitorSharedModelsDataGateMonitorVpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest";
-import type { DataGateMonitorSharedModelsDataGateMonitorVpnServerOvpnFileConfigResponsesOvpnFileConfigResponse as OvpnFileConfigResponse } from "../api/orval/model/dataGateMonitorSharedModelsDataGateMonitorVpnServerOvpnFileConfigResponsesOvpnFileConfigResponse";
-import type { DataGateMonitorSharedModelsDataGateMonitorVpnServersResponsesVpnServerResponse as VpnServerResponse } from "../api/orval/model/dataGateMonitorSharedModelsDataGateMonitorVpnServersResponsesVpnServerResponse";
-import type { DataGateMonitorSharedModelsDataGateOpenVpnManagerInfoRootOpenVpnInfoResponse as RootOpenVpnInfoResponse } from "../api/orval/model/dataGateMonitorSharedModelsDataGateOpenVpnManagerInfoRootOpenVpnInfoResponse";
+import type {
+  AddOrUpdateOvpnFileConfigRequest,
+  OvpnFileConfigResponse,
+  VpnServerResponse,
+  RootOpenVpnInfoResponse,
+} from "../api/orvalModelShim";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import StyledDataGrid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";

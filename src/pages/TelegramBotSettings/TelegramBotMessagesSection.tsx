@@ -1,7 +1,7 @@
 // src/pages/TelegramBotSettings/TelegramBotMessagesSection.tsx
 import { FaInbox, FaSync } from "react-icons/fa";
 import TelegramBotMessagesTable from "./TelegramBotMessagesTable";
-import type { MessageDto } from "../../api/orval/model";
+import type { MessageDto } from "../../api/orvalModelShim";
 
 import "../../css/Settings.css";
 import "../../css/TelegramBotUsers.css";

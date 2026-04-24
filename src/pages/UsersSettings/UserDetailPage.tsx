@@ -46,11 +46,11 @@ import type {
   RoleDto,
   RolesResponse,
   UserRoleAssignmentResponse,
-} from "../../api/orval/model";
-import type { UsersResponse } from "../../api/orval/model";
-import type { GetUserQuotaPlansByUserIdResponse } from "../../api/orval/model";
-import type { GetByTelegramIdMessagesResponseApiResponse } from "../../api/orval/model";
-import type { MessageDto } from "../../api/orval/model";
+} from "../../api/orvalModelShim";
+import type { UsersResponse } from "../../api/orvalModelShim";
+import type { GetUserQuotaPlansByUserIdResponse } from "../../api/orvalModelShim";
+import type { GetByTelegramIdMessagesResponseApiResponse } from "../../api/orvalModelShim";
+import type { MessageDto } from "../../api/orvalModelShim";
 import { useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { isCanceledError } from "../../utils/queryCanceled";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";

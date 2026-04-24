@@ -15,7 +15,7 @@ import "../css/ServerDetails.css";
 
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
-import type { VpnServerResponse } from "../api/orval/model";
+import type { VpnServerResponse } from "../api/orvalModelShim";
 import { VpnServerType } from "../constants/vpnServerType";
 
 /** Subpaths under `/servers/:id/...` that do not apply to Xray (OpenVPN-only UI). */

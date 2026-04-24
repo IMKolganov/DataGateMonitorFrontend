@@ -23,7 +23,7 @@ import type {
     VpnServerDto,
     VpnServerWithStatusResponse,
     VpnServerResponse,
-} from "../api/orval/model";
+} from "../api/orvalModelShim";
 
 import {
     useGetApiOpenVpnServersGetServerWithStatusVpnServerId,
@@ -37,7 +37,7 @@ import {
     getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey,
 } from "../api/orval/quota-plan-allowed-server/quota-plan-allowed-server";
 import { useQueryClient } from "@tanstack/react-query";
-import type { QuotaPlansResponse, QuotaPlanAllowedServerDto } from "../api/orval/model";
+import type { QuotaPlansResponse, QuotaPlanAllowedServerDto } from "../api/orvalModelShim";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import { formatDateWithOffset } from "../utils/utils";
