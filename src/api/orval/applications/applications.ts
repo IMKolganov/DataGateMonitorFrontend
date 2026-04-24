@@ -21,11 +21,11 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  ApplicationsResponseApiResponse,
-  RegisterApplicationRequest,
-  RegisterApplicationResponseApiResponse,
-  RevokeApplicationRequest,
-  StringApiResponse,
+  ApiApplicationsResponsesApplicationsResponse,
+  ApiApplicationsResponsesRegisterApplicationResponse,
+  ApiSystemString,
+  ApplicationsRequestsRegisterApplicationRequest,
+  ApplicationsRequestsRevokeApplicationRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -33,16 +33,16 @@ import { ogmMutator } from "../../mutator";
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export const postApiApplicationsRegister = (
-  registerApplicationRequest: RegisterApplicationRequest,
+  applicationsRequestsRegisterApplicationRequest: ApplicationsRequestsRegisterApplicationRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<RegisterApplicationResponseApiResponse>(
+  return ogmMutator<ApiApplicationsResponsesRegisterApplicationResponse>(
     {
       url: `/api/applications/register`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: registerApplicationRequest,
+      data: applicationsRequestsRegisterApplicationRequest,
       signal,
     },
     options,
@@ -56,14 +56,14 @@ export const getPostApiApplicationsRegisterMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiApplicationsRegister>>,
     TError,
-    { data: RegisterApplicationRequest },
+    { data: ApplicationsRequestsRegisterApplicationRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiApplicationsRegister>>,
   TError,
-  { data: RegisterApplicationRequest },
+  { data: ApplicationsRequestsRegisterApplicationRequest },
   TContext
 > => {
   const mutationKey = ["postApiApplicationsRegister"];
@@ -77,7 +77,7 @@ export const getPostApiApplicationsRegisterMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiApplicationsRegister>>,
-    { data: RegisterApplicationRequest }
+    { data: ApplicationsRequestsRegisterApplicationRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -91,7 +91,7 @@ export type PostApiApplicationsRegisterMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiApplicationsRegister>>
 >;
 export type PostApiApplicationsRegisterMutationBody =
-  RegisterApplicationRequest;
+  ApplicationsRequestsRegisterApplicationRequest;
 export type PostApiApplicationsRegisterMutationError = unknown;
 
 export const usePostApiApplicationsRegister = <
@@ -102,7 +102,7 @@ export const usePostApiApplicationsRegister = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiApplicationsRegister>>,
       TError,
-      { data: RegisterApplicationRequest },
+      { data: ApplicationsRequestsRegisterApplicationRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -111,7 +111,7 @@ export const usePostApiApplicationsRegister = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiApplicationsRegister>>,
   TError,
-  { data: RegisterApplicationRequest },
+  { data: ApplicationsRequestsRegisterApplicationRequest },
   TContext
 > => {
   return useMutation(
@@ -123,7 +123,7 @@ export const getApiApplicationsGetAll = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<ApplicationsResponseApiResponse>(
+  return ogmMutator<ApiApplicationsResponsesApplicationsResponse>(
     { url: `/api/applications/get-all`, method: "GET", signal },
     options,
   );
@@ -267,16 +267,16 @@ export function useGetApiApplicationsGetAll<
 }
 
 export const postApiApplicationsRevoke = (
-  revokeApplicationRequest: RevokeApplicationRequest,
+  applicationsRequestsRevokeApplicationRequest: ApplicationsRequestsRevokeApplicationRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/applications/revoke`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: revokeApplicationRequest,
+      data: applicationsRequestsRevokeApplicationRequest,
       signal,
     },
     options,
@@ -290,14 +290,14 @@ export const getPostApiApplicationsRevokeMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiApplicationsRevoke>>,
     TError,
-    { data: RevokeApplicationRequest },
+    { data: ApplicationsRequestsRevokeApplicationRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiApplicationsRevoke>>,
   TError,
-  { data: RevokeApplicationRequest },
+  { data: ApplicationsRequestsRevokeApplicationRequest },
   TContext
 > => {
   const mutationKey = ["postApiApplicationsRevoke"];
@@ -311,7 +311,7 @@ export const getPostApiApplicationsRevokeMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiApplicationsRevoke>>,
-    { data: RevokeApplicationRequest }
+    { data: ApplicationsRequestsRevokeApplicationRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -324,7 +324,8 @@ export const getPostApiApplicationsRevokeMutationOptions = <
 export type PostApiApplicationsRevokeMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiApplicationsRevoke>>
 >;
-export type PostApiApplicationsRevokeMutationBody = RevokeApplicationRequest;
+export type PostApiApplicationsRevokeMutationBody =
+  ApplicationsRequestsRevokeApplicationRequest;
 export type PostApiApplicationsRevokeMutationError = unknown;
 
 export const usePostApiApplicationsRevoke = <
@@ -335,7 +336,7 @@ export const usePostApiApplicationsRevoke = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiApplicationsRevoke>>,
       TError,
-      { data: RevokeApplicationRequest },
+      { data: ApplicationsRequestsRevokeApplicationRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -344,7 +345,7 @@ export const usePostApiApplicationsRevoke = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiApplicationsRevoke>>,
   TError,
-  { data: RevokeApplicationRequest },
+  { data: ApplicationsRequestsRevokeApplicationRequest },
   TContext
 > => {
   return useMutation(
@@ -356,7 +357,7 @@ export const getApiApplicationsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/applications/healthcheck`, method: "GET", signal },
     options,
   );
@@ -503,7 +504,7 @@ export const getApiApplicationsHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/applications/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

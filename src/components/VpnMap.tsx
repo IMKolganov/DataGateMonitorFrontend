@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import Cookies from "js-cookie";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import type { VpnClientInfoDto } from "../api/orval/model";
+import type { VpnClientInfoDto } from "../api/orvalModelShim";
 
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";

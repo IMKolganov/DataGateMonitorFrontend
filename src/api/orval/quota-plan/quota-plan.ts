@@ -21,11 +21,11 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  CreateOrUpdateQuotaPlanRequest,
-  GetQuotaPlansRequest,
-  QuotaPlanResponseApiResponse,
-  QuotaPlansResponseApiResponse,
-  StringApiResponse,
+  ApiQuotaPlansResponsesQuotaPlanResponse,
+  ApiQuotaPlansResponsesQuotaPlansResponse,
+  ApiSystemString,
+  QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest,
+  QuotaPlansRequestsGetQuotaPlansRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -33,16 +33,16 @@ import { ogmMutator } from "../../mutator";
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export const postApiQuotaPlansGetAll = (
-  getQuotaPlansRequest: GetQuotaPlansRequest,
+  quotaPlansRequestsGetQuotaPlansRequest: QuotaPlansRequestsGetQuotaPlansRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<QuotaPlansResponseApiResponse>(
+  return ogmMutator<ApiQuotaPlansResponsesQuotaPlansResponse>(
     {
       url: `/api/quota-plans/get-all`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: getQuotaPlansRequest,
+      data: quotaPlansRequestsGetQuotaPlansRequest,
       signal,
     },
     options,
@@ -56,14 +56,14 @@ export const getPostApiQuotaPlansGetAllMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiQuotaPlansGetAll>>,
     TError,
-    { data: GetQuotaPlansRequest },
+    { data: QuotaPlansRequestsGetQuotaPlansRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiQuotaPlansGetAll>>,
   TError,
-  { data: GetQuotaPlansRequest },
+  { data: QuotaPlansRequestsGetQuotaPlansRequest },
   TContext
 > => {
   const mutationKey = ["postApiQuotaPlansGetAll"];
@@ -77,7 +77,7 @@ export const getPostApiQuotaPlansGetAllMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiQuotaPlansGetAll>>,
-    { data: GetQuotaPlansRequest }
+    { data: QuotaPlansRequestsGetQuotaPlansRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -90,7 +90,8 @@ export const getPostApiQuotaPlansGetAllMutationOptions = <
 export type PostApiQuotaPlansGetAllMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiQuotaPlansGetAll>>
 >;
-export type PostApiQuotaPlansGetAllMutationBody = GetQuotaPlansRequest;
+export type PostApiQuotaPlansGetAllMutationBody =
+  QuotaPlansRequestsGetQuotaPlansRequest;
 export type PostApiQuotaPlansGetAllMutationError = unknown;
 
 export const usePostApiQuotaPlansGetAll = <
@@ -101,7 +102,7 @@ export const usePostApiQuotaPlansGetAll = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiQuotaPlansGetAll>>,
       TError,
-      { data: GetQuotaPlansRequest },
+      { data: QuotaPlansRequestsGetQuotaPlansRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -110,7 +111,7 @@ export const usePostApiQuotaPlansGetAll = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiQuotaPlansGetAll>>,
   TError,
-  { data: GetQuotaPlansRequest },
+  { data: QuotaPlansRequestsGetQuotaPlansRequest },
   TContext
 > => {
   return useMutation(
@@ -123,7 +124,7 @@ export const getApiQuotaPlansGetId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<QuotaPlanResponseApiResponse>(
+  return ogmMutator<ApiQuotaPlansResponsesQuotaPlanResponse>(
     { url: `/api/quota-plans/get/${id}`, method: "GET", signal },
     options,
   );
@@ -279,16 +280,16 @@ export function useGetApiQuotaPlansGetId<
 }
 
 export const postApiQuotaPlansCreate = (
-  createOrUpdateQuotaPlanRequest: CreateOrUpdateQuotaPlanRequest,
+  quotaPlansRequestsCreateOrUpdateQuotaPlanRequest: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<QuotaPlanResponseApiResponse>(
+  return ogmMutator<ApiQuotaPlansResponsesQuotaPlanResponse>(
     {
       url: `/api/quota-plans/create`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: createOrUpdateQuotaPlanRequest,
+      data: quotaPlansRequestsCreateOrUpdateQuotaPlanRequest,
       signal,
     },
     options,
@@ -302,14 +303,14 @@ export const getPostApiQuotaPlansCreateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiQuotaPlansCreate>>,
     TError,
-    { data: CreateOrUpdateQuotaPlanRequest },
+    { data: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiQuotaPlansCreate>>,
   TError,
-  { data: CreateOrUpdateQuotaPlanRequest },
+  { data: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest },
   TContext
 > => {
   const mutationKey = ["postApiQuotaPlansCreate"];
@@ -323,7 +324,7 @@ export const getPostApiQuotaPlansCreateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiQuotaPlansCreate>>,
-    { data: CreateOrUpdateQuotaPlanRequest }
+    { data: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -337,7 +338,7 @@ export type PostApiQuotaPlansCreateMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiQuotaPlansCreate>>
 >;
 export type PostApiQuotaPlansCreateMutationBody =
-  CreateOrUpdateQuotaPlanRequest;
+  QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest;
 export type PostApiQuotaPlansCreateMutationError = unknown;
 
 export const usePostApiQuotaPlansCreate = <
@@ -348,7 +349,7 @@ export const usePostApiQuotaPlansCreate = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiQuotaPlansCreate>>,
       TError,
-      { data: CreateOrUpdateQuotaPlanRequest },
+      { data: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -357,7 +358,7 @@ export const usePostApiQuotaPlansCreate = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiQuotaPlansCreate>>,
   TError,
-  { data: CreateOrUpdateQuotaPlanRequest },
+  { data: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest },
   TContext
 > => {
   return useMutation(
@@ -366,16 +367,16 @@ export const usePostApiQuotaPlansCreate = <
   );
 };
 export const putApiQuotaPlansUpdate = (
-  createOrUpdateQuotaPlanRequest: CreateOrUpdateQuotaPlanRequest,
+  quotaPlansRequestsCreateOrUpdateQuotaPlanRequest: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/quota-plans/update`,
       method: "PUT",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: createOrUpdateQuotaPlanRequest,
+      data: quotaPlansRequestsCreateOrUpdateQuotaPlanRequest,
       signal,
     },
     options,
@@ -389,14 +390,14 @@ export const getPutApiQuotaPlansUpdateMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>,
     TError,
-    { data: CreateOrUpdateQuotaPlanRequest },
+    { data: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>,
   TError,
-  { data: CreateOrUpdateQuotaPlanRequest },
+  { data: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest },
   TContext
 > => {
   const mutationKey = ["putApiQuotaPlansUpdate"];
@@ -410,7 +411,7 @@ export const getPutApiQuotaPlansUpdateMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>,
-    { data: CreateOrUpdateQuotaPlanRequest }
+    { data: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -423,7 +424,8 @@ export const getPutApiQuotaPlansUpdateMutationOptions = <
 export type PutApiQuotaPlansUpdateMutationResult = NonNullable<
   Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>
 >;
-export type PutApiQuotaPlansUpdateMutationBody = CreateOrUpdateQuotaPlanRequest;
+export type PutApiQuotaPlansUpdateMutationBody =
+  QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest;
 export type PutApiQuotaPlansUpdateMutationError = unknown;
 
 export const usePutApiQuotaPlansUpdate = <TError = unknown, TContext = unknown>(
@@ -431,7 +433,7 @@ export const usePutApiQuotaPlansUpdate = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>,
       TError,
-      { data: CreateOrUpdateQuotaPlanRequest },
+      { data: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -440,7 +442,7 @@ export const usePutApiQuotaPlansUpdate = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>,
   TError,
-  { data: CreateOrUpdateQuotaPlanRequest },
+  { data: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest },
   TContext
 > => {
   return useMutation(
@@ -453,7 +455,7 @@ export const deleteApiQuotaPlansDeleteId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/quota-plans/delete/${id}`, method: "DELETE", signal },
     options,
   );
@@ -533,7 +535,7 @@ export const postApiQuotaPlansSetDefaultId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/quota-plans/set-default/${id}`, method: "POST", signal },
     options,
   );
@@ -612,7 +614,7 @@ export const getApiQuotaPlansHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/quota-plans/healthcheck`, method: "GET", signal },
     options,
   );
@@ -759,7 +761,7 @@ export const getApiQuotaPlansHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/quota-plans/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

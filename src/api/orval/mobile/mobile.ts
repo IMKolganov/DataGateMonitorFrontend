@@ -21,9 +21,9 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  InstallationIdRequest,
-  InstallationIdResponseApiResponse,
-  StringApiResponse,
+  ApiMobileResponsesInstallationIdResponse,
+  ApiSystemString,
+  MobileRequestsInstallationIdRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -31,16 +31,16 @@ import { ogmMutator } from "../../mutator";
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export const postApiMobileAddAndroidInstallationId = (
-  installationIdRequest: InstallationIdRequest,
+  mobileRequestsInstallationIdRequest: MobileRequestsInstallationIdRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<InstallationIdResponseApiResponse>(
+  return ogmMutator<ApiMobileResponsesInstallationIdResponse>(
     {
       url: `/api/mobile/add-android-installation-id`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: installationIdRequest,
+      data: mobileRequestsInstallationIdRequest,
       signal,
     },
     options,
@@ -54,14 +54,14 @@ export const getPostApiMobileAddAndroidInstallationIdMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiMobileAddAndroidInstallationId>>,
     TError,
-    { data: InstallationIdRequest },
+    { data: MobileRequestsInstallationIdRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiMobileAddAndroidInstallationId>>,
   TError,
-  { data: InstallationIdRequest },
+  { data: MobileRequestsInstallationIdRequest },
   TContext
 > => {
   const mutationKey = ["postApiMobileAddAndroidInstallationId"];
@@ -75,7 +75,7 @@ export const getPostApiMobileAddAndroidInstallationIdMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiMobileAddAndroidInstallationId>>,
-    { data: InstallationIdRequest }
+    { data: MobileRequestsInstallationIdRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -89,7 +89,7 @@ export type PostApiMobileAddAndroidInstallationIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiMobileAddAndroidInstallationId>>
 >;
 export type PostApiMobileAddAndroidInstallationIdMutationBody =
-  InstallationIdRequest;
+  MobileRequestsInstallationIdRequest;
 export type PostApiMobileAddAndroidInstallationIdMutationError = unknown;
 
 export const usePostApiMobileAddAndroidInstallationId = <
@@ -100,7 +100,7 @@ export const usePostApiMobileAddAndroidInstallationId = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiMobileAddAndroidInstallationId>>,
       TError,
-      { data: InstallationIdRequest },
+      { data: MobileRequestsInstallationIdRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -109,7 +109,7 @@ export const usePostApiMobileAddAndroidInstallationId = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiMobileAddAndroidInstallationId>>,
   TError,
-  { data: InstallationIdRequest },
+  { data: MobileRequestsInstallationIdRequest },
   TContext
 > => {
   return useMutation(
@@ -121,7 +121,7 @@ export const getApiMobileHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/mobile/healthcheck`, method: "GET", signal },
     options,
   );
@@ -268,7 +268,7 @@ export const getApiMobileHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/mobile/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

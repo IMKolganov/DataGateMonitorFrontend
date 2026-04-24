@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
 import { useGetApiUsersGetAll } from "../../api/orval/user/user";
-import type { GetAllUsersResponse, UserDto } from "../../api/orval/model";
+import type { GetAllUsersResponse, UserDto } from "../../api/orvalModelShim";
 import type { GridPaginationModel } from "@mui/x-data-grid";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";

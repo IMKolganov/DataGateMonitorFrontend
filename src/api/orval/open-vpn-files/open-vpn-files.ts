@@ -21,16 +21,16 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  AddFileRequest,
-  DownloadFileByCnRequest,
-  DownloadFileRequest,
-  DownloadFileResponseApiResponse,
-  OvpnFileResponseApiResponse,
-  OvpnFileWithTokenResponseApiResponse,
-  OvpnFilesResponseApiResponse,
-  OvpnFilesWithTokensResponseApiResponse,
-  RevokeFileRequest,
-  StringApiResponse,
+  ApiOpenVpnFilesResponsesDownloadFileResponse,
+  ApiOpenVpnFilesResponsesOvpnFileResponse,
+  ApiOpenVpnFilesResponsesOvpnFileWithTokenResponse,
+  ApiOpenVpnFilesResponsesOvpnFilesResponse,
+  ApiOpenVpnFilesResponsesOvpnFilesWithTokensResponse,
+  ApiSystemString,
+  OpenVpnFilesRequestsAddFileRequest,
+  OpenVpnFilesRequestsDownloadFileByCnRequest,
+  OpenVpnFilesRequestsDownloadFileRequest,
+  OpenVpnFilesRequestsRevokeFileRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -42,7 +42,7 @@ export const getApiOpenVpnFilesByTokenToken = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFileResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFileResponse>(
     { url: `/api/open-vpn-files/by-token/${token}`, method: "GET", signal },
     options,
   );
@@ -206,7 +206,7 @@ export const getApiOpenVpnFilesGetAllVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFilesResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesResponse>(
     {
       url: `/api/open-vpn-files/get-all/${vpnServerId}`,
       method: "GET",
@@ -378,7 +378,7 @@ export const getApiOpenVpnFilesGetAllVpnServerIdExternalId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFilesResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesResponse>(
     {
       url: `/api/open-vpn-files/get-all/${vpnServerId}/${externalId}`,
       method: "GET",
@@ -594,7 +594,7 @@ export const getApiOpenVpnFilesGetAllWithTokenVpnServerId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFilesWithTokensResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesWithTokensResponse>(
     {
       url: `/api/open-vpn-files/get-all-with-token/${vpnServerId}`,
       method: "GET",
@@ -800,7 +800,7 @@ export const getApiOpenVpnFilesGetAllWithTokenVpnServerIdExternalId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFilesWithTokensResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesWithTokensResponse>(
     {
       url: `/api/open-vpn-files/get-all-with-token/${vpnServerId}/${externalId}`,
       method: "GET",
@@ -1046,7 +1046,7 @@ export const getApiOpenVpnFilesGetFilesExternalId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFilesResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesResponse>(
     {
       url: `/api/open-vpn-files/get-files/${externalId}`,
       method: "GET",
@@ -1213,16 +1213,16 @@ export function useGetApiOpenVpnFilesGetFilesExternalId<
 }
 
 export const postApiOpenVpnFilesAdd = (
-  addFileRequest: AddFileRequest,
+  openVpnFilesRequestsAddFileRequest: OpenVpnFilesRequestsAddFileRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFileResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFileResponse>(
     {
       url: `/api/open-vpn-files/add`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: addFileRequest,
+      data: openVpnFilesRequestsAddFileRequest,
       signal,
     },
     options,
@@ -1236,14 +1236,14 @@ export const getPostApiOpenVpnFilesAddMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiOpenVpnFilesAdd>>,
     TError,
-    { data: AddFileRequest },
+    { data: OpenVpnFilesRequestsAddFileRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiOpenVpnFilesAdd>>,
   TError,
-  { data: AddFileRequest },
+  { data: OpenVpnFilesRequestsAddFileRequest },
   TContext
 > => {
   const mutationKey = ["postApiOpenVpnFilesAdd"];
@@ -1257,7 +1257,7 @@ export const getPostApiOpenVpnFilesAddMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiOpenVpnFilesAdd>>,
-    { data: AddFileRequest }
+    { data: OpenVpnFilesRequestsAddFileRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1270,7 +1270,8 @@ export const getPostApiOpenVpnFilesAddMutationOptions = <
 export type PostApiOpenVpnFilesAddMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiOpenVpnFilesAdd>>
 >;
-export type PostApiOpenVpnFilesAddMutationBody = AddFileRequest;
+export type PostApiOpenVpnFilesAddMutationBody =
+  OpenVpnFilesRequestsAddFileRequest;
 export type PostApiOpenVpnFilesAddMutationError = unknown;
 
 export const usePostApiOpenVpnFilesAdd = <TError = unknown, TContext = unknown>(
@@ -1278,7 +1279,7 @@ export const usePostApiOpenVpnFilesAdd = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiOpenVpnFilesAdd>>,
       TError,
-      { data: AddFileRequest },
+      { data: OpenVpnFilesRequestsAddFileRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1287,7 +1288,7 @@ export const usePostApiOpenVpnFilesAdd = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiOpenVpnFilesAdd>>,
   TError,
-  { data: AddFileRequest },
+  { data: OpenVpnFilesRequestsAddFileRequest },
   TContext
 > => {
   return useMutation(
@@ -1296,16 +1297,16 @@ export const usePostApiOpenVpnFilesAdd = <TError = unknown, TContext = unknown>(
   );
 };
 export const postApiOpenVpnFilesAddWithToken = (
-  addFileRequest: AddFileRequest,
+  openVpnFilesRequestsAddFileRequest: OpenVpnFilesRequestsAddFileRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFileWithTokenResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFileWithTokenResponse>(
     {
       url: `/api/open-vpn-files/add-with-token`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: addFileRequest,
+      data: openVpnFilesRequestsAddFileRequest,
       signal,
     },
     options,
@@ -1319,14 +1320,14 @@ export const getPostApiOpenVpnFilesAddWithTokenMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiOpenVpnFilesAddWithToken>>,
     TError,
-    { data: AddFileRequest },
+    { data: OpenVpnFilesRequestsAddFileRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiOpenVpnFilesAddWithToken>>,
   TError,
-  { data: AddFileRequest },
+  { data: OpenVpnFilesRequestsAddFileRequest },
   TContext
 > => {
   const mutationKey = ["postApiOpenVpnFilesAddWithToken"];
@@ -1340,7 +1341,7 @@ export const getPostApiOpenVpnFilesAddWithTokenMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiOpenVpnFilesAddWithToken>>,
-    { data: AddFileRequest }
+    { data: OpenVpnFilesRequestsAddFileRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1353,7 +1354,8 @@ export const getPostApiOpenVpnFilesAddWithTokenMutationOptions = <
 export type PostApiOpenVpnFilesAddWithTokenMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiOpenVpnFilesAddWithToken>>
 >;
-export type PostApiOpenVpnFilesAddWithTokenMutationBody = AddFileRequest;
+export type PostApiOpenVpnFilesAddWithTokenMutationBody =
+  OpenVpnFilesRequestsAddFileRequest;
 export type PostApiOpenVpnFilesAddWithTokenMutationError = unknown;
 
 export const usePostApiOpenVpnFilesAddWithToken = <
@@ -1364,7 +1366,7 @@ export const usePostApiOpenVpnFilesAddWithToken = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiOpenVpnFilesAddWithToken>>,
       TError,
-      { data: AddFileRequest },
+      { data: OpenVpnFilesRequestsAddFileRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1373,7 +1375,7 @@ export const usePostApiOpenVpnFilesAddWithToken = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiOpenVpnFilesAddWithToken>>,
   TError,
-  { data: AddFileRequest },
+  { data: OpenVpnFilesRequestsAddFileRequest },
   TContext
 > => {
   return useMutation(
@@ -1382,16 +1384,16 @@ export const usePostApiOpenVpnFilesAddWithToken = <
   );
 };
 export const postApiOpenVpnFilesRevokeFile = (
-  revokeFileRequest: RevokeFileRequest,
+  openVpnFilesRequestsRevokeFileRequest: OpenVpnFilesRequestsRevokeFileRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<OvpnFileResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesOvpnFileResponse>(
     {
       url: `/api/open-vpn-files/revoke-file`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: revokeFileRequest,
+      data: openVpnFilesRequestsRevokeFileRequest,
       signal,
     },
     options,
@@ -1405,14 +1407,14 @@ export const getPostApiOpenVpnFilesRevokeFileMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiOpenVpnFilesRevokeFile>>,
     TError,
-    { data: RevokeFileRequest },
+    { data: OpenVpnFilesRequestsRevokeFileRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiOpenVpnFilesRevokeFile>>,
   TError,
-  { data: RevokeFileRequest },
+  { data: OpenVpnFilesRequestsRevokeFileRequest },
   TContext
 > => {
   const mutationKey = ["postApiOpenVpnFilesRevokeFile"];
@@ -1426,7 +1428,7 @@ export const getPostApiOpenVpnFilesRevokeFileMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiOpenVpnFilesRevokeFile>>,
-    { data: RevokeFileRequest }
+    { data: OpenVpnFilesRequestsRevokeFileRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1439,7 +1441,8 @@ export const getPostApiOpenVpnFilesRevokeFileMutationOptions = <
 export type PostApiOpenVpnFilesRevokeFileMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiOpenVpnFilesRevokeFile>>
 >;
-export type PostApiOpenVpnFilesRevokeFileMutationBody = RevokeFileRequest;
+export type PostApiOpenVpnFilesRevokeFileMutationBody =
+  OpenVpnFilesRequestsRevokeFileRequest;
 export type PostApiOpenVpnFilesRevokeFileMutationError = unknown;
 
 export const usePostApiOpenVpnFilesRevokeFile = <
@@ -1450,7 +1453,7 @@ export const usePostApiOpenVpnFilesRevokeFile = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiOpenVpnFilesRevokeFile>>,
       TError,
-      { data: RevokeFileRequest },
+      { data: OpenVpnFilesRequestsRevokeFileRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1459,7 +1462,7 @@ export const usePostApiOpenVpnFilesRevokeFile = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiOpenVpnFilesRevokeFile>>,
   TError,
-  { data: RevokeFileRequest },
+  { data: OpenVpnFilesRequestsRevokeFileRequest },
   TContext
 > => {
   return useMutation(
@@ -1468,16 +1471,16 @@ export const usePostApiOpenVpnFilesRevokeFile = <
   );
 };
 export const postApiOpenVpnFilesDownloadFile = (
-  downloadFileRequest: DownloadFileRequest,
+  openVpnFilesRequestsDownloadFileRequest: OpenVpnFilesRequestsDownloadFileRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<DownloadFileResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesDownloadFileResponse>(
     {
       url: `/api/open-vpn-files/download-file`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: downloadFileRequest,
+      data: openVpnFilesRequestsDownloadFileRequest,
       signal,
     },
     options,
@@ -1491,14 +1494,14 @@ export const getPostApiOpenVpnFilesDownloadFileMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFile>>,
     TError,
-    { data: DownloadFileRequest },
+    { data: OpenVpnFilesRequestsDownloadFileRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFile>>,
   TError,
-  { data: DownloadFileRequest },
+  { data: OpenVpnFilesRequestsDownloadFileRequest },
   TContext
 > => {
   const mutationKey = ["postApiOpenVpnFilesDownloadFile"];
@@ -1512,7 +1515,7 @@ export const getPostApiOpenVpnFilesDownloadFileMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFile>>,
-    { data: DownloadFileRequest }
+    { data: OpenVpnFilesRequestsDownloadFileRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1525,7 +1528,8 @@ export const getPostApiOpenVpnFilesDownloadFileMutationOptions = <
 export type PostApiOpenVpnFilesDownloadFileMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFile>>
 >;
-export type PostApiOpenVpnFilesDownloadFileMutationBody = DownloadFileRequest;
+export type PostApiOpenVpnFilesDownloadFileMutationBody =
+  OpenVpnFilesRequestsDownloadFileRequest;
 export type PostApiOpenVpnFilesDownloadFileMutationError = unknown;
 
 export const usePostApiOpenVpnFilesDownloadFile = <
@@ -1536,7 +1540,7 @@ export const usePostApiOpenVpnFilesDownloadFile = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFile>>,
       TError,
-      { data: DownloadFileRequest },
+      { data: OpenVpnFilesRequestsDownloadFileRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1545,7 +1549,7 @@ export const usePostApiOpenVpnFilesDownloadFile = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFile>>,
   TError,
-  { data: DownloadFileRequest },
+  { data: OpenVpnFilesRequestsDownloadFileRequest },
   TContext
 > => {
   return useMutation(
@@ -1554,16 +1558,16 @@ export const usePostApiOpenVpnFilesDownloadFile = <
   );
 };
 export const postApiOpenVpnFilesDownloadFileByCn = (
-  downloadFileByCnRequest: DownloadFileByCnRequest,
+  openVpnFilesRequestsDownloadFileByCnRequest: OpenVpnFilesRequestsDownloadFileByCnRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<DownloadFileResponseApiResponse>(
+  return ogmMutator<ApiOpenVpnFilesResponsesDownloadFileResponse>(
     {
       url: `/api/open-vpn-files/download-file-by-cn`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: downloadFileByCnRequest,
+      data: openVpnFilesRequestsDownloadFileByCnRequest,
       signal,
     },
     options,
@@ -1577,14 +1581,14 @@ export const getPostApiOpenVpnFilesDownloadFileByCnMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
     TError,
-    { data: DownloadFileByCnRequest },
+    { data: OpenVpnFilesRequestsDownloadFileByCnRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
   TError,
-  { data: DownloadFileByCnRequest },
+  { data: OpenVpnFilesRequestsDownloadFileByCnRequest },
   TContext
 > => {
   const mutationKey = ["postApiOpenVpnFilesDownloadFileByCn"];
@@ -1598,7 +1602,7 @@ export const getPostApiOpenVpnFilesDownloadFileByCnMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
-    { data: DownloadFileByCnRequest }
+    { data: OpenVpnFilesRequestsDownloadFileByCnRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -1612,7 +1616,7 @@ export type PostApiOpenVpnFilesDownloadFileByCnMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>
 >;
 export type PostApiOpenVpnFilesDownloadFileByCnMutationBody =
-  DownloadFileByCnRequest;
+  OpenVpnFilesRequestsDownloadFileByCnRequest;
 export type PostApiOpenVpnFilesDownloadFileByCnMutationError = unknown;
 
 export const usePostApiOpenVpnFilesDownloadFileByCn = <
@@ -1623,7 +1627,7 @@ export const usePostApiOpenVpnFilesDownloadFileByCn = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
       TError,
-      { data: DownloadFileByCnRequest },
+      { data: OpenVpnFilesRequestsDownloadFileByCnRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -1632,7 +1636,7 @@ export const usePostApiOpenVpnFilesDownloadFileByCn = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiOpenVpnFilesDownloadFileByCn>>,
   TError,
-  { data: DownloadFileByCnRequest },
+  { data: OpenVpnFilesRequestsDownloadFileByCnRequest },
   TContext
 > => {
   return useMutation(
@@ -1644,7 +1648,7 @@ export const getApiOpenVpnFilesHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/open-vpn-files/healthcheck`, method: "GET", signal },
     options,
   );
@@ -1791,7 +1795,7 @@ export const getApiOpenVpnFilesHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     { url: `/api/open-vpn-files/healthcheck-with-jwt`, method: "GET", signal },
     options,
   );

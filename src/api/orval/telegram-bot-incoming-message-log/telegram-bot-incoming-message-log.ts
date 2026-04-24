@@ -21,14 +21,14 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  AddMessageRequest,
-  AddMessageResponseApiResponse,
-  GetAllMessagesResponseApiResponse,
+  ApiSystemString,
+  ApiTelegramBotIncomingMessageLogResponsesAddMessageResponse,
+  ApiTelegramBotIncomingMessageLogResponsesGetAllMessagesResponse,
+  ApiTelegramBotIncomingMessageLogResponsesGetByIdMessageResponse,
+  ApiTelegramBotIncomingMessageLogResponsesGetByTelegramIdMessagesResponse,
   GetApiTgbotIncomingMessageLogsGetAllParams,
   GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
-  GetByIdMessageResponseApiResponse,
-  GetByTelegramIdMessagesResponseApiResponse,
-  StringApiResponse,
+  TelegramBotIncomingMessageLogRequestsAddMessageRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -36,16 +36,16 @@ import { ogmMutator } from "../../mutator";
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 export const postApiTgbotIncomingMessageLogsAdd = (
-  addMessageRequest: AddMessageRequest,
+  telegramBotIncomingMessageLogRequestsAddMessageRequest: TelegramBotIncomingMessageLogRequestsAddMessageRequest,
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<AddMessageResponseApiResponse>(
+  return ogmMutator<ApiTelegramBotIncomingMessageLogResponsesAddMessageResponse>(
     {
       url: `/api/tgbot-incoming-message-logs/add`,
       method: "POST",
       headers: { "Content-Type": "application/json-patch+json" },
-      data: addMessageRequest,
+      data: telegramBotIncomingMessageLogRequestsAddMessageRequest,
       signal,
     },
     options,
@@ -59,14 +59,14 @@ export const getPostApiTgbotIncomingMessageLogsAddMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postApiTgbotIncomingMessageLogsAdd>>,
     TError,
-    { data: AddMessageRequest },
+    { data: TelegramBotIncomingMessageLogRequestsAddMessageRequest },
     TContext
   >;
   request?: SecondParameter<typeof ogmMutator>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postApiTgbotIncomingMessageLogsAdd>>,
   TError,
-  { data: AddMessageRequest },
+  { data: TelegramBotIncomingMessageLogRequestsAddMessageRequest },
   TContext
 > => {
   const mutationKey = ["postApiTgbotIncomingMessageLogsAdd"];
@@ -80,7 +80,7 @@ export const getPostApiTgbotIncomingMessageLogsAddMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postApiTgbotIncomingMessageLogsAdd>>,
-    { data: AddMessageRequest }
+    { data: TelegramBotIncomingMessageLogRequestsAddMessageRequest }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -93,7 +93,8 @@ export const getPostApiTgbotIncomingMessageLogsAddMutationOptions = <
 export type PostApiTgbotIncomingMessageLogsAddMutationResult = NonNullable<
   Awaited<ReturnType<typeof postApiTgbotIncomingMessageLogsAdd>>
 >;
-export type PostApiTgbotIncomingMessageLogsAddMutationBody = AddMessageRequest;
+export type PostApiTgbotIncomingMessageLogsAddMutationBody =
+  TelegramBotIncomingMessageLogRequestsAddMessageRequest;
 export type PostApiTgbotIncomingMessageLogsAddMutationError = unknown;
 
 export const usePostApiTgbotIncomingMessageLogsAdd = <
@@ -104,7 +105,7 @@ export const usePostApiTgbotIncomingMessageLogsAdd = <
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postApiTgbotIncomingMessageLogsAdd>>,
       TError,
-      { data: AddMessageRequest },
+      { data: TelegramBotIncomingMessageLogRequestsAddMessageRequest },
       TContext
     >;
     request?: SecondParameter<typeof ogmMutator>;
@@ -113,7 +114,7 @@ export const usePostApiTgbotIncomingMessageLogsAdd = <
 ): UseMutationResult<
   Awaited<ReturnType<typeof postApiTgbotIncomingMessageLogsAdd>>,
   TError,
-  { data: AddMessageRequest },
+  { data: TelegramBotIncomingMessageLogRequestsAddMessageRequest },
   TContext
 > => {
   return useMutation(
@@ -126,7 +127,7 @@ export const getApiTgbotIncomingMessageLogsGetAll = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetAllMessagesResponseApiResponse>(
+  return ogmMutator<ApiTelegramBotIncomingMessageLogResponsesGetAllMessagesResponse>(
     {
       url: `/api/tgbot-incoming-message-logs/get-all`,
       method: "GET",
@@ -297,7 +298,7 @@ export const getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetByTelegramIdMessagesResponseApiResponse>(
+  return ogmMutator<ApiTelegramBotIncomingMessageLogResponsesGetByTelegramIdMessagesResponse>(
     {
       url: `/api/tgbot-incoming-message-logs/get-by-telegram-userid/${telegramId}`,
       method: "GET",
@@ -561,7 +562,7 @@ export const getApiTgbotIncomingMessageLogsGetById = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<GetByIdMessageResponseApiResponse>(
+  return ogmMutator<ApiTelegramBotIncomingMessageLogResponsesGetByIdMessageResponse>(
     {
       url: `/api/tgbot-incoming-message-logs/get-by-id`,
       method: "GET",
@@ -715,7 +716,7 @@ export const getApiTgbotIncomingMessageLogsHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/tgbot-incoming-message-logs/healthcheck`,
       method: "GET",
@@ -869,7 +870,7 @@ export const getApiTgbotIncomingMessageLogsHealthcheckWithJwt = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<StringApiResponse>(
+  return ogmMutator<ApiSystemString>(
     {
       url: `/api/tgbot-incoming-message-logs/healthcheck-with-jwt`,
       method: "GET",

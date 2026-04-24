@@ -9,7 +9,7 @@ import {
   useGetApiApplicationsGetAll,
   usePostApiApplicationsRegister,
 } from "../api/orval/applications/applications";
-import type { RegisterApplicationRequest, ApplicationDto } from "../api/orval/model";
+import type { RegisterApplicationRequest, ApplicationDto } from "../api/orvalModelShim";
 import axios from "axios";
 import { errorMessage as formatError } from "../utils/errorMessage";
 

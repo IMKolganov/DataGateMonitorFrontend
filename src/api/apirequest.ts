@@ -8,7 +8,7 @@ import {
 } from "../utils/const.ts";
 import { notifyAccessTokenRefreshed } from "../utils/auth/accessTokenEvents.ts";
 import { authErrFields, authLog } from "../utils/auth/authLog.ts";
-import type { RefreshRequest, RefreshResponse } from "./orval/model";
+import type { RefreshRequest, RefreshResponse } from "./orvalModelShim";
 
 let refreshPromise: Promise<string> | null = null;
 
