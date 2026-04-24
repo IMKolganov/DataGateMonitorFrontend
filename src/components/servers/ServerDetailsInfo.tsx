@@ -3,7 +3,7 @@ import React from "react";
 import { BsClock, BsCpu, BsHddNetwork, BsFillBookmarkStarFill, BsPerson, BsTag } from "react-icons/bs";
 import { RiBarChart2Line, RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer, IoMdPerson } from "react-icons/io";
-import type { VpnServerResponse, VpnServerWithStatusDto } from "../../api/orval/model";
+import type { VpnServerResponse, VpnServerWithStatusDto } from "../../api/orvalModelShim";
 
 export type ConflogPayloadSummary = {
   application?: string | null;

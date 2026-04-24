@@ -14,7 +14,7 @@ import type {
   QuotaPlanAllowedServerDto,
   VpnServersV2Response,
   GetQuotaPlanAllowedServersByQuotaPlanIdResponse,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import "../../css/Settings.css";

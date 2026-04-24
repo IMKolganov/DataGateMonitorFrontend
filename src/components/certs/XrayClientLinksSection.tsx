@@ -5,7 +5,7 @@ import axios from "axios";
 import XrayClientLinksTable from "../xray/XrayClientLinksTable.tsx";
 import AddXrayClientLink from "../xray/AddXrayClientLink.tsx";
 import { useGetApiXrayClientLinksGetAllVpnServerId } from "../../api/xrayClientLinks.ts";
-import type { OvpnFilesResponse } from "../../api/orval/model";
+import type { OvpnFilesResponse } from "../../api/orvalModelShim";
 import type { OvpnRowInput } from "../ovpn-files/OvpnFilesTable.tsx";
 import { pickArray } from "../../utils/pickPayloadArray.ts";
 import { errorMessage as baseErrorMessage } from "../../utils/errorMessage";

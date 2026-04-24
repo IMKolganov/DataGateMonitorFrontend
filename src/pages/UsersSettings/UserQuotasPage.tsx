@@ -6,7 +6,7 @@ import {
   getApiOpenVpnClientsOverviewSummary,
   getGetApiOpenVpnClientsOverviewSummaryQueryKey,
 } from "../../api/orval/vpn-server-clients/vpn-server-clients";
-import type { OverviewTotalsResponse, UserDto } from "../../api/orval/model";
+import type { OverviewTotalsResponse, UserDto } from "../../api/orvalModelShim";
 import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
 import { useUsers } from "./useUsers";
 import "../../css/Settings.css";

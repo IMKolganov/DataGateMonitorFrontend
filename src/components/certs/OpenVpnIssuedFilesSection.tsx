@@ -5,7 +5,7 @@ import axios from "axios";
 import OvpnFilesTable, { type OvpnRowInput } from "../ovpn-files/OvpnFilesTable.tsx";
 import AddOvpnFile from "../ovpn-files/AddOvpnFile.tsx";
 import { useGetApiOpenVpnFilesGetAllVpnServerId } from "../../api/orval/open-vpn-files/open-vpn-files.ts";
-import type { OvpnFilesResponse } from "../../api/orval/model";
+import type { OvpnFilesResponse } from "../../api/orvalModelShim";
 import { pickArray } from "../../utils/pickPayloadArray.ts";
 import { errorMessage as baseErrorMessage } from "../../utils/errorMessage";
 

@@ -18,7 +18,7 @@ import type {
   OvpnFileResponseApiResponse,
   OvpnFilesResponseApiResponse,
   RevokeFileRequest,
-} from "./orval/model";
+} from "./orvalModelShim";
 import { ogmMutator } from "./mutator";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];

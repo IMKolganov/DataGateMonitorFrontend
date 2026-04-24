@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { postApiXrayClientLinksAdd } from "../../api/xrayClientLinks.ts";
-import type { AddFileRequest } from "../../api/orval/model";
+import type { AddFileRequest } from "../../api/orvalModelShim";
 import axios from "axios";
 import { axiosResponseDataMessage, axiosResponseDetail, errorMessage } from "../../utils/errorMessage";
 

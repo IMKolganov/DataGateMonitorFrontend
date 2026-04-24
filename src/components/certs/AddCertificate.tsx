@@ -5,7 +5,7 @@ import { FaPlus } from "react-icons/fa";
 
 // orval
 import { postApiOpenVpnCertsBuild } from "../../api/orval/vpn-server-certs/vpn-server-certs.ts";
-import type { BuildCertificateRequest } from "../../api/orval/model";
+import type { BuildCertificateRequest } from "../../api/orvalModelShim";
 import axios from "axios";
 import { axiosResponseDataMessage, axiosResponseDetail, errorMessage } from "../../utils/errorMessage";
 

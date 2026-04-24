@@ -10,7 +10,7 @@ import type {
   QuotaPlanDto,
   QuotaPlansResponse,
   UserQuotaPlanDto,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import type { ApiEnvelope } from "../../pages/TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../../pages/TelegramBotSettings/unwrapApiResponse";
 import { formatBytes } from "../../utils/utils";

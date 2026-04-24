@@ -1,4 +1,4 @@
-import type { GetApiNotificationsGetAllParams } from "../api/orval/model";
+import type { GetApiNotificationsGetAllParams } from "../api/orvalModelShim";
 
 /**
  * Serializes notification list query params for ASP.NET model binding:

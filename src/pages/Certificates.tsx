@@ -7,7 +7,7 @@ import "../css/Certificates.css";
 import "../css/Settings.css";
 
 // Import generated model type
-import type { VpnServerResponse } from "../api/orval/model";
+import type { VpnServerResponse } from "../api/orvalModelShim";
 
 // Import generated hook
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";

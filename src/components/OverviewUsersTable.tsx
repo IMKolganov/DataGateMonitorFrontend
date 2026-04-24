@@ -19,7 +19,7 @@ import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import type {
   OverviewUsersResponse,
   OverviewUserDto,
-} from "../api/orval/model";
+} from "../api/orvalModelShim";
 
 export interface OverviewUsersTableProps {
   from: Date;

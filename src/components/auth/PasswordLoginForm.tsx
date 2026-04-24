@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { postApiAuthLogin } from "../../api/orval/auth/auth";
-import type { LoginRequest, LoginResponse } from "../../api/orval/model";
+import type { LoginRequest, LoginResponse } from "../../api/orvalModelShim";
 import { FaDoorOpen } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
 import { scheduleAutoLogout } from "../../utils/auth/authSession";

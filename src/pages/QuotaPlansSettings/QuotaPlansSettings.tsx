@@ -16,7 +16,7 @@ import type {
   QuotaPlanDto,
   CreateOrUpdateQuotaPlanRequest,
   QuotaPlansResponse,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { QuotaPlanFormModal } from "./QuotaPlanFormModal";

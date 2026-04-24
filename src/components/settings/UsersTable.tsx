@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
-import type { UserDto } from "../../api/orval/model";
+import type { UserDto } from "../../api/orvalModelShim";
 import "../../css/Table.css";
 
 interface UsersTableProps {

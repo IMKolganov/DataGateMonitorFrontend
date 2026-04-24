@@ -1,6 +1,6 @@
 import { FaBell, FaCheckDouble, FaSync } from "react-icons/fa";
 import NotificationsTable from "../../components/notifications/NotificationsTable";
-import type { NotificationItemDto } from "../../api/orval/model";
+import type { NotificationItemDto } from "../../api/orvalModelShim";
 import type { NotificationReadFilter } from "./useNotifications";
 import "../../css/Settings.css";
 import "../../css/TelegramBotUsers.css";

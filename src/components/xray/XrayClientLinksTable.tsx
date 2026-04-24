@@ -8,7 +8,7 @@ import type {
   DownloadFileRequest,
   DownloadFileResponse,
   DownloadFileResponseApiResponse,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import {
   postApiXrayClientLinksDownloadFile,
   postApiXrayClientLinksRevokeFile,

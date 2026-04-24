@@ -38,7 +38,7 @@ import type {
   QuotaPlanAllowedServerDto,
   VpnServerResponse,
   GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
-} from "../api/orval/model";
+} from "../api/orvalModelShim";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 import { usePostApiQuotaPlansGetAll } from "../api/orval/quota-plan/quota-plan";
 import {
