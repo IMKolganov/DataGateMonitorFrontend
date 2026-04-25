@@ -9,6 +9,7 @@ import type { VpnServersResponsesVpnServerV2Response } from "./vpnServersRespons
 
 export interface VpnServersDtoVpnServerWithStatusV2Dto {
   vpnServerResponses?: VpnServersResponsesVpnServerV2Response;
+  openVpnServerResponses?: VpnServersResponsesVpnServerV2Response;
   vpnServerStatusLogResponse?: VpnServersResponsesVpnServerStatusLogResponse;
   countConnectedClients?: number;
   countSessions?: number;

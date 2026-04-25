@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import GoogleLoginForm from "../../components/auth/GoogleLoginForm";
 import { axiosResponseDataMessage, axiosResponseDetail, errorMessage } from "../../utils/errorMessage";
 import { getXrayLanguage, setXrayLanguage, XRAY_LANGUAGE_OPTIONS, XRAY_TRANSLATIONS } from "./i18n";
+import { appVersion } from "../../version";
 import "../../css/XrayPortal.css";
 
 const XrayLoginPage: React.FC = () => {
@@ -190,8 +191,8 @@ const XrayLoginPage: React.FC = () => {
           </p>
 
           <p className="xray-warning">{t.warningIos}</p>
-          <p className="xray-note">© 2026 DataGate Monitor v.1.3.58</p>
         </div>
+        <p className="xray-note xray-login-version">© {new Date().getFullYear()} DataGate Monitor v.{appVersion}</p>
       </div>
     </div>
   );
