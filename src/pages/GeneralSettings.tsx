@@ -13,6 +13,7 @@ import { errorMessage } from "../utils/errorMessage";
 const KEY_INTERVAL = "OpenVPN_Polling_Interval";
 const KEY_UNIT = "OpenVPN_Polling_Interval_Unit";
 const KEY_REQUIRE_EMAIL_CONFIRMATION = "Auth_Require_Email_Confirmation_On_Register";
+const KEY_EMAIL_CONFIRMATION_CODE_TTL_MINUTES = "Auth_Email_Confirmation_Code_Ttl_Minutes";
 
 // Allowed units (keep in sync with backend enum/validation)
 const ALLOWED_UNITS = ["seconds", "minutes"] as const;
@@ -22,6 +23,7 @@ export function GeneralSettings() {
   const [intervalType, setIntervalType] = useState<Unit>("seconds");
   const [intervalValue, setIntervalValue] = useState<number>(0);
   const [requireEmailConfirmation, setRequireEmailConfirmation] = useState<boolean>(true);
+  const [emailConfirmationCodeTtlMinutes, setEmailConfirmationCodeTtlMinutes] = useState<number>(30);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
@@ -36,6 +38,10 @@ export function GeneralSettings() {
   );
   const requireEmailConfirmationParams = useMemo(
     () => ({ Key: KEY_REQUIRE_EMAIL_CONFIRMATION }),
+    []
+  );
+  const emailConfirmationCodeTtlMinutesParams = useMemo(
+    () => ({ Key: KEY_EMAIL_CONFIRMATION_CODE_TTL_MINUTES }),
     []
   );
 
@@ -88,11 +94,28 @@ export function GeneralSettings() {
       gcTime: 5 * 60 * 1000,
     },
   });
+  const {
+    data: emailConfirmationCodeTtlMinutesResp,
+    isFetching: isFetchingEmailConfirmationCodeTtlMinutes,
+    isLoading: isLoadingEmailConfirmationCodeTtlMinutes,
+    error: loadEmailConfirmationCodeTtlMinutesErr,
+  } = useGetApiSettingsGet(emailConfirmationCodeTtlMinutesParams, {
+    query: {
+      staleTime: 0,
+      gcTime: 5 * 60 * 1000,
+    },
+  });
 
   const initialLoading =
-    isLoadingInterval || isLoadingUnit || isLoadingRequireEmailConfirmation;
+    isLoadingInterval ||
+    isLoadingUnit ||
+    isLoadingRequireEmailConfirmation ||
+    isLoadingEmailConfirmationCodeTtlMinutes;
   const loading =
-    isFetchingInterval || isFetchingUnit || isFetchingRequireEmailConfirmation;
+    isFetchingInterval ||
+    isFetchingUnit ||
+    isFetchingRequireEmailConfirmation ||
+    isFetchingEmailConfirmationCodeTtlMinutes;
 
   // When responses arrive, hydrate local UI state
   useEffect(() => {
@@ -113,7 +136,12 @@ export function GeneralSettings() {
     } else if (requireEmailConfirmationRaw === "false") {
       setRequireEmailConfirmation(false);
     }
-  }, [intervalResp, unitResp, requireEmailConfirmationResp]);
+
+    const ttlRaw = Number(pickSettingValue(emailConfirmationCodeTtlMinutesResp));
+    if (!Number.isNaN(ttlRaw)) {
+      setEmailConfirmationCodeTtlMinutes(ttlRaw);
+    }
+  }, [intervalResp, unitResp, requireEmailConfirmationResp, emailConfirmationCodeTtlMinutesResp]);
 
 
   // Orval mutation for setting values
@@ -130,6 +158,10 @@ export function GeneralSettings() {
     }
     if (!Number.isFinite(intervalValue) || intervalValue < 0) {
       setErrorDetails("Interval value must be a non-negative number.");
+      return;
+    }
+    if (!Number.isFinite(emailConfirmationCodeTtlMinutes) || emailConfirmationCodeTtlMinutes < 1) {
+      setErrorDetails("Email confirmation code lifetime must be at least 1 minute.");
       return;
     }
 
@@ -153,11 +185,17 @@ export function GeneralSettings() {
         Value: String(requireEmailConfirmation),
         Type: "bool",
       };
+      const saveEmailConfirmationCodeTtlMinutesParams = {
+        Key: KEY_EMAIL_CONFIRMATION_CODE_TTL_MINUTES,
+        Value: String(emailConfirmationCodeTtlMinutes),
+        Type: "int",
+      };
 
       await Promise.all([
         setSettingMutation.mutateAsync({ params: saveIntervalParams }),
         setSettingMutation.mutateAsync({ params: saveUnitParams }),
         setSettingMutation.mutateAsync({ params: saveRequireEmailConfirmationParams }),
+        setSettingMutation.mutateAsync({ params: saveEmailConfirmationCodeTtlMinutesParams }),
       ]);
 
       setSuccessMessage("Settings successfully updated.");
@@ -176,7 +214,10 @@ export function GeneralSettings() {
   }
 
   const anyLoadError =
-    loadIntervalErr || loadUnitErr || loadRequireEmailConfirmationErr;
+    loadIntervalErr ||
+    loadUnitErr ||
+    loadRequireEmailConfirmationErr ||
+    loadEmailConfirmationCodeTtlMinutesErr;
 
   return (
     <div>
@@ -246,6 +287,21 @@ export function GeneralSettings() {
           If enabled, users registering with login/password must confirm email before sign-in.
           Google sign-in is not affected.
         </p>
+
+        <div className="settings-item" style={{ marginTop: 12 }}>
+          <label htmlFor="email-confirmation-code-ttl" style={{ minWidth: 320 }}>
+            Email confirmation code lifetime (minutes)
+          </label>
+          <input
+            id="email-confirmation-code-ttl"
+            type="number"
+            min={1}
+            max={1440}
+            value={emailConfirmationCodeTtlMinutes}
+            onChange={(e) => setEmailConfirmationCodeTtlMinutes(Number(e.target.value))}
+            className="input polling-interval-input"
+          />
+        </div>
       </div>
     </div>
   );
