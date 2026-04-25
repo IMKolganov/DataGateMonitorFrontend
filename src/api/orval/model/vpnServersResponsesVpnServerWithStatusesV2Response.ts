@@ -9,4 +9,8 @@ import type { VpnServersDtoVpnServerWithStatusV2Dto } from "./vpnServersDtoVpnSe
 export interface VpnServersResponsesVpnServerWithStatusesV2Response {
   /** @nullable */
   vpnServerWithStatuses?: VpnServersDtoVpnServerWithStatusV2Dto[] | null;
+  /** @nullable */
+  readonly openVpnServerWithStatuses?:
+    | readonly VpnServersDtoVpnServerWithStatusV2Dto[]
+    | null;
 }

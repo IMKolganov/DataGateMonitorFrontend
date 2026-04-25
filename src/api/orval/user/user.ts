@@ -22,7 +22,9 @@ import type {
 
 import type {
   ApiSystemString,
+  ApiUserResponsesConfirmUserEmailResponse,
   ApiUserResponsesGetAllUsersResponse,
+  ApiUserResponsesGetUserEmailConfirmationStatusResponse,
   ApiUserResponsesUsersResponse,
   GetApiUsersGetAllParams,
   UserRequestsRegisterUserFromTgBotRequest,
@@ -607,6 +609,255 @@ export function useGetApiUsersGetByExternalIdExternalId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
+export const getApiUsersEmailConfirmationStatusId = (
+  id: number,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<ApiUserResponsesGetUserEmailConfirmationStatusResponse>(
+    {
+      url: `/api/users/email-confirmation-status/${id}`,
+      method: "GET",
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetApiUsersEmailConfirmationStatusIdQueryKey = (id: number) => {
+  return [`/api/users/email-confirmation-status/${id}`] as const;
+};
+
+export const getGetApiUsersEmailConfirmationStatusIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+  TError = unknown,
+>(
+  id: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetApiUsersEmailConfirmationStatusIdQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>
+  > = ({ signal }) =>
+    getApiUsersEmailConfirmationStatusId(id, requestOptions, signal);
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiUsersEmailConfirmationStatusIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>
+>;
+export type GetApiUsersEmailConfirmationStatusIdQueryError = unknown;
+
+export function useGetApiUsersEmailConfirmationStatusId<
+  TData = Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+  TError = unknown,
+>(
+  id: number,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiUsersEmailConfirmationStatusId<
+  TData = Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+  TError = unknown,
+>(
+  id: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiUsersEmailConfirmationStatusId<
+  TData = Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+  TError = unknown,
+>(
+  id: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetApiUsersEmailConfirmationStatusId<
+  TData = Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+  TError = unknown,
+>(
+  id: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiUsersEmailConfirmationStatusId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiUsersEmailConfirmationStatusIdQueryOptions(
+    id,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const postApiUsersConfirmEmailId = (
+  id: number,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<ApiUserResponsesConfirmUserEmailResponse>(
+    { url: `/api/users/confirm-email/${id}`, method: "POST", signal },
+    options,
+  );
+};
+
+export const getPostApiUsersConfirmEmailIdMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiUsersConfirmEmailId>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiUsersConfirmEmailId>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["postApiUsersConfirmEmailId"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiUsersConfirmEmailId>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return postApiUsersConfirmEmailId(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiUsersConfirmEmailIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiUsersConfirmEmailId>>
+>;
+
+export type PostApiUsersConfirmEmailIdMutationError = unknown;
+
+export const usePostApiUsersConfirmEmailId = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiUsersConfirmEmailId>>,
+      TError,
+      { id: number },
+      TContext
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiUsersConfirmEmailId>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(
+    getPostApiUsersConfirmEmailIdMutationOptions(options),
+    queryClient,
+  );
+};
 export const getApiUsersHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,

@@ -21,6 +21,8 @@ import { toast } from "react-toastify";
 import {
   useGetApiUsersGetByIdId,
   getGetApiUsersGetAllQueryKey,
+  useGetApiUsersEmailConfirmationStatusId,
+  usePostApiUsersConfirmEmailId,
 } from "../../api/orval/user/user";
 import { usePostApiAuthForgotPassword } from "../../api/orval/auth/auth";
 import { usePostApiQuotaPlansGetAll } from "../../api/orval/quota-plan/quota-plan";
@@ -46,6 +48,7 @@ import type {
   RoleDto,
   RolesResponse,
   UserRoleAssignmentResponse,
+  UserResponsesGetUserEmailConfirmationStatusResponse,
 } from "../../api/orvalModelShim";
 import type { UsersResponse } from "../../api/orvalModelShim";
 import type { GetUserQuotaPlansByUserIdResponse } from "../../api/orvalModelShim";
@@ -208,6 +211,40 @@ export function UserDetailPage() {
         ? "Failed to load messages"
         : null;
 
+  const {
+    data: emailStatusRaw,
+    isLoading: emailStatusLoading,
+    refetch: refetchEmailStatus,
+  } = useGetApiUsersEmailConfirmationStatusId(userIdValid ? id : 0, {
+    query: {
+      enabled: userIdValid && Boolean(user?.email),
+    },
+  });
+
+  const emailStatusPayload = unwrapMaybeApiResponse<UserResponsesGetUserEmailConfirmationStatusResponse>(
+    emailStatusRaw as
+      | UserResponsesGetUserEmailConfirmationStatusResponse
+      | ApiEnvelope<UserResponsesGetUserEmailConfirmationStatusResponse>
+      | undefined,
+  );
+  const isEmailConfirmed = emailStatusPayload?.isEmailConfirmed;
+
+  const confirmEmailMutation = usePostApiUsersConfirmEmailId({
+    mutation: {
+      onSuccess: async () => {
+        toast.success("Email confirmed");
+        await queryClient.invalidateQueries({ queryKey: getGetApiUsersGetAllQueryKey() });
+        await refetchEmailStatus();
+      },
+      onError: (e: unknown) => {
+        const err = e as { response?: { data?: { message?: string } }; message?: string };
+        toast.error(
+          err?.response?.data?.message ?? (err as Error)?.message ?? "Failed to confirm email",
+        );
+      },
+    },
+  });
+
   const invalidateUserQuota = () =>
     queryClient.invalidateQueries({
       queryKey: getGetApiUserQuotaPlansGetByUserIdUserIdQueryKey(id),
@@ -322,6 +359,11 @@ export function UserDetailPage() {
     setRoleMutation.mutate({ data: { userId: id, roleId: pendingRoleId } });
   };
 
+  const handleConfirmEmailManually = () => {
+    if (!userIdValid || !user?.email) return;
+    confirmEmailMutation.mutate({ id });
+  };
+
   if (!Number.isFinite(id)) {
     return (
       <div>
@@ -382,6 +424,18 @@ export function UserDetailPage() {
           <dd>{user.displayName ?? "—"}</dd>
           <dt>Email</dt>
           <dd>{user.email ?? "—"}</dd>
+          <dt>Email confirmed</dt>
+          <dd>
+            {!user.email
+              ? "No email"
+              : emailStatusLoading
+                ? "Loading..."
+                : isEmailConfirmed === true
+                  ? "Yes"
+                  : isEmailConfirmed === false
+                    ? "No"
+                    : "—"}
+          </dd>
           <dt>Sign-in method</dt>
           <dd>
             {user.provider
@@ -451,6 +505,15 @@ export function UserDetailPage() {
         >
           <FaKey className="icon" /> Send password reset code
         </button>
+        <div style={{ marginTop: 12 }}>
+          <button
+            className="btn primary"
+            onClick={handleConfirmEmailManually}
+            disabled={confirmEmailMutation.isPending || !user.email || isEmailConfirmed === true}
+          >
+            <FaSave className="icon" /> Confirm email manually
+          </button>
+        </div>
       </section>
 
       {canManageRoles && (

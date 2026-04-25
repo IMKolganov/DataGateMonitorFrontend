@@ -29,6 +29,7 @@ import type {
   ApiAuthResponsesRegisterUserResponse,
   ApiAuthResponsesTelegramRequestLoginCodeResponse,
   ApiAuthResponsesTokenResponse,
+  ApiServicesApiAuthEmailConfirmationModelsConfirmEmailResponse,
   ApiSystemString,
   AuthRequestsAdminForgotPasswordRequest,
   AuthRequestsAdminResetPasswordRequest,
@@ -41,6 +42,8 @@ import type {
   AuthRequestsTelegramRequestLoginCodeRequest,
   AuthRequestsTokenRequest,
   MicrosoftAspNetCoreMvcProblemDetails,
+  ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest,
+  ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -367,6 +370,190 @@ export const usePostApiAuthRegister = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(
     getPostApiAuthRegisterMutationOptions(options),
+    queryClient,
+  );
+};
+export const postApiAuthEmailRequestConfirmation = (
+  servicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest: ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<ApiSystemString>(
+    {
+      url: `/api/auth/email/request-confirmation`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: servicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiAuthEmailRequestConfirmationMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>,
+    TError,
+    {
+      data: ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest;
+    },
+    TContext
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>,
+  TError,
+  {
+    data: ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest;
+  },
+  TContext
+> => {
+  const mutationKey = ["postApiAuthEmailRequestConfirmation"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>,
+    {
+      data: ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest;
+    }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiAuthEmailRequestConfirmation(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiAuthEmailRequestConfirmationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>
+>;
+export type PostApiAuthEmailRequestConfirmationMutationBody =
+  ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest;
+export type PostApiAuthEmailRequestConfirmationMutationError = unknown;
+
+export const usePostApiAuthEmailRequestConfirmation = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>,
+      TError,
+      {
+        data: ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest;
+      },
+      TContext
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>,
+  TError,
+  {
+    data: ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest;
+  },
+  TContext
+> => {
+  return useMutation(
+    getPostApiAuthEmailRequestConfirmationMutationOptions(options),
+    queryClient,
+  );
+};
+export const postApiAuthEmailConfirm = (
+  servicesApiAuthEmailConfirmationModelsConfirmEmailRequest: ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<ApiServicesApiAuthEmailConfirmationModelsConfirmEmailResponse>(
+    {
+      url: `/api/auth/email/confirm`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: servicesApiAuthEmailConfirmationModelsConfirmEmailRequest,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiAuthEmailConfirmMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiAuthEmailConfirm>>,
+    TError,
+    { data: ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiAuthEmailConfirm>>,
+  TError,
+  { data: ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiAuthEmailConfirm"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiAuthEmailConfirm>>,
+    { data: ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiAuthEmailConfirm(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiAuthEmailConfirmMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiAuthEmailConfirm>>
+>;
+export type PostApiAuthEmailConfirmMutationBody =
+  ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest;
+export type PostApiAuthEmailConfirmMutationError = unknown;
+
+export const usePostApiAuthEmailConfirm = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiAuthEmailConfirm>>,
+      TError,
+      { data: ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiAuthEmailConfirm>>,
+  TError,
+  { data: ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest },
+  TContext
+> => {
+  return useMutation(
+    getPostApiAuthEmailConfirmMutationOptions(options),
     queryClient,
   );
 };

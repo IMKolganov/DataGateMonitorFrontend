@@ -8,4 +8,5 @@ import type { VpnServersDtoVpnServerV2Dto } from "./vpnServersDtoVpnServerV2Dto"
 
 export interface VpnServersResponsesVpnServerV2Response {
   vpnServer?: VpnServersDtoVpnServerV2Dto;
+  openVpnServer?: VpnServersDtoVpnServerV2Dto;
 }
