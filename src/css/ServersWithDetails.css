@@ -54,16 +54,40 @@
 .servers-mobile-home-switcher {
   display: flex;
   flex-direction: row;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: 6px;
+  padding: 6px 8px;
   flex-shrink: 0;
   background-color: var(--bg-content);
   border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  max-height: 64px;
+  overflow: hidden;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    padding 0.2s ease,
+    max-height 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.servers-mobile-home-switcher--hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-bottom-color: transparent;
 }
 
 .servers-mobile-home-switcher__btn {
   flex: 1;
   justify-content: center;
+  min-height: 32px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
 }
 
 .server-list-panel.server-list-panel--mobile-fill {
