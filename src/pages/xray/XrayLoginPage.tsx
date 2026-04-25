@@ -190,6 +190,7 @@ const XrayLoginPage: React.FC = () => {
           </p>
 
           <p className="xray-warning">{t.warningIos}</p>
+          <p className="xray-note">© 2026 DataGate Monitor v.1.3.58</p>
         </div>
       </div>
     </div>
