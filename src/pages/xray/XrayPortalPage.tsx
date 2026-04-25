@@ -19,6 +19,10 @@ import { getXrayLanguage, setXrayLanguage, XRAY_LANGUAGE_OPTIONS, XRAY_TRANSLATI
 import { appVersion } from "../../version";
 import "../../css/XrayPortal.css";
 
+const NAME_IDENTIFIER_CLAIM = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
+const EMAIL_CLAIM = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress";
+const DISPLAY_NAME_CLAIM = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name";
+
 function normalizeServers(payload: VpnServersV2Response | undefined): VpnServerV2Dto[] {
   return payload?.vpnServers?.filter(Boolean) ?? [];
 }
@@ -30,6 +34,16 @@ function decodeBase64Utf8(value: string): string {
   } catch {
     return value;
   }
+}
+
+function claimString(source: Record<string, unknown>, ...keys: string[]): string {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+  return "";
 }
 
 const XrayPortalPage: React.FC = () => {
@@ -48,8 +62,18 @@ const XrayPortalPage: React.FC = () => {
   const userInfo = useMemo(() => {
     try {
       const token = decodeToken(accessToken);
-      const rawId = token.nameid ?? token.sub ?? "";
-      const rawName = token.displayName ?? token.email ?? token.nameid ?? token.sub ?? "user";
+      const claims = token as Record<string, unknown>;
+      const rawId = claimString(claims, "nameid", "sub", NAME_IDENTIFIER_CLAIM);
+      const rawName = claimString(
+        claims,
+        "displayName",
+        "email",
+        EMAIL_CLAIM,
+        DISPLAY_NAME_CLAIM,
+        "nameid",
+        "sub",
+        NAME_IDENTIFIER_CLAIM,
+      );
       return {
         externalId: String(rawId || "user"),
         issuedTo: String(rawName || "user"),
