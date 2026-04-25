@@ -153,6 +153,10 @@
   text-align: center;
 }
 
+.xray-login-version {
+  text-align: center;
+}
+
 .xray-telegram-button {
   display: inline-flex;
   align-items: center;
