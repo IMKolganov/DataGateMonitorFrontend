@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import type { VpnClientInfoDto } from "../api/orvalModelShim";
+import "../css/VpnMap.css";
 
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
@@ -137,16 +138,8 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName }) 
   );
 
   return (
-      <div style={{ height: "650px", width: "100%", marginTop: "20px" }}>
-        <div
-            style={{
-              marginBottom: "10px",
-              textAlign: "right",
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-            }}
-        >
+      <div className="vpn-map-root">
+        <div className="vpn-map-toolbar">
           <strong>Map Style:</strong>
           <select
               className="btn secondary dropdown-select"
@@ -173,7 +166,7 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName }) 
           </select>
         </div>
 
-        <MapContainer style={{ height: "600px", width: "100%" }} center={defaultCenter} zoom={4}>
+        <MapContainer className="map-container-full-size" center={defaultCenter} zoom={4}>
           <ChangeView center={defaultCenter} zoom={4} />
           <TileLayer
               url={tileLayers[selectedLayer].url}
