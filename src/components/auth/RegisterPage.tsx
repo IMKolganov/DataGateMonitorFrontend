@@ -8,7 +8,11 @@ import "../../css/Login.css";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
-const RegisterPage: React.FC = () => {
+interface RegisterPageProps {
+  loginPath?: string;
+}
+
+const RegisterPage: React.FC<RegisterPageProps> = ({ loginPath = "/login" }) => {
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -47,7 +51,7 @@ const RegisterPage: React.FC = () => {
 
       await postApiAuthRegister(req);
 
-      navigate("/login", { replace: true, state: { registered: true } });
+      navigate(loginPath, { replace: true, state: { registered: true } });
     } catch (err: unknown) {
       let detailedMessage = "Registration failed.";
 
@@ -183,7 +187,7 @@ const RegisterPage: React.FC = () => {
 
         <div className="register-container">
           <p>
-            Already have an account? <Link to="/login">Sign in</Link>
+            Already have an account? <Link to={loginPath}>Sign in</Link>
           </p>
         </div>
       </div>

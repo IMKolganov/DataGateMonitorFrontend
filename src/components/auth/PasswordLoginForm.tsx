@@ -9,7 +9,11 @@ import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY} from "../
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
-const PasswordLoginForm: React.FC = () => {
+interface PasswordLoginFormProps {
+  redirectPath?: string;
+}
+
+const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({ redirectPath = "/" }) => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -51,7 +55,7 @@ const PasswordLoginForm: React.FC = () => {
         localStorage.setItem(REFRESH_TOKEN_EXPIRATION, refreshExpiration);
       }
       scheduleAutoLogout(token);
-      window.location.href = "/";
+      window.location.href = redirectPath;
     } catch (err: unknown) {
       let detailedMessage = "We could not log you in.";
 
