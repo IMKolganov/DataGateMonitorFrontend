@@ -8,14 +8,11 @@ import {
   useGetApiSettingsGet,
   usePostApiSettingsSet,
 } from "../api/orval/settings/settings";
-import type {
-  GetApiSettingsGetParams,
-  PostApiSettingsSetParams,
-} from "../api/orvalModelShim";
 import { errorMessage } from "../utils/errorMessage";
 
 const KEY_INTERVAL = "OpenVPN_Polling_Interval";
 const KEY_UNIT = "OpenVPN_Polling_Interval_Unit";
+const KEY_REQUIRE_EMAIL_CONFIRMATION = "Auth_Require_Email_Confirmation_On_Register";
 
 // Allowed units (keep in sync with backend enum/validation)
 const ALLOWED_UNITS = ["seconds", "minutes"] as const;
@@ -24,16 +21,21 @@ type Unit = (typeof ALLOWED_UNITS)[number];
 export function GeneralSettings() {
   const [intervalType, setIntervalType] = useState<Unit>("seconds");
   const [intervalValue, setIntervalValue] = useState<number>(0);
+  const [requireEmailConfirmation, setRequireEmailConfirmation] = useState<boolean>(true);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
   // Load current settings via Orval hooks (two lightweight queries)
-  const intervalParams = useMemo<GetApiSettingsGetParams>(
+  const intervalParams = useMemo(
     () => ({ Key: KEY_INTERVAL }),
     []
   );
-  const unitParams = useMemo<GetApiSettingsGetParams>(
+  const unitParams = useMemo(
     () => ({ Key: KEY_UNIT }),
+    []
+  );
+  const requireEmailConfirmationParams = useMemo(
+    () => ({ Key: KEY_REQUIRE_EMAIL_CONFIRMATION }),
     []
   );
 
@@ -75,9 +77,22 @@ export function GeneralSettings() {
       gcTime: 5 * 60 * 1000,
     },
   });
+  const {
+    data: requireEmailConfirmationResp,
+    isFetching: isFetchingRequireEmailConfirmation,
+    isLoading: isLoadingRequireEmailConfirmation,
+    error: loadRequireEmailConfirmationErr,
+  } = useGetApiSettingsGet(requireEmailConfirmationParams, {
+    query: {
+      staleTime: 0,
+      gcTime: 5 * 60 * 1000,
+    },
+  });
 
-  const initialLoading = isLoadingInterval || isLoadingUnit;
-  const loading = isFetchingInterval || isFetchingUnit;
+  const initialLoading =
+    isLoadingInterval || isLoadingUnit || isLoadingRequireEmailConfirmation;
+  const loading =
+    isFetchingInterval || isFetchingUnit || isFetchingRequireEmailConfirmation;
 
   // When responses arrive, hydrate local UI state
   useEffect(() => {
@@ -90,7 +105,15 @@ export function GeneralSettings() {
     if (ALLOWED_UNITS.includes(unitRaw as Unit)) {
       setIntervalType(unitRaw as Unit);
     }
-  }, [intervalResp, unitResp]);
+
+    const requireEmailConfirmationRaw =
+      (pickSettingValue(requireEmailConfirmationResp) ?? "").toLowerCase();
+    if (requireEmailConfirmationRaw === "true") {
+      setRequireEmailConfirmation(true);
+    } else if (requireEmailConfirmationRaw === "false") {
+      setRequireEmailConfirmation(false);
+    }
+  }, [intervalResp, unitResp, requireEmailConfirmationResp]);
 
 
   // Orval mutation for setting values
@@ -112,7 +135,7 @@ export function GeneralSettings() {
 
     try {
       // Save interval value
-      const saveIntervalParams: PostApiSettingsSetParams = {
+      const saveIntervalParams = {
         Key: KEY_INTERVAL,
         // backend expects string value; keep parity with previous behavior
         Value: String(intervalValue),
@@ -120,15 +143,21 @@ export function GeneralSettings() {
       };
 
       // Save unit value
-      const saveUnitParams: PostApiSettingsSetParams = {
+      const saveUnitParams = {
         Key: KEY_UNIT,
         Value: intervalType,
         Type: "string",
+      };
+      const saveRequireEmailConfirmationParams = {
+        Key: KEY_REQUIRE_EMAIL_CONFIRMATION,
+        Value: String(requireEmailConfirmation),
+        Type: "bool",
       };
 
       await Promise.all([
         setSettingMutation.mutateAsync({ params: saveIntervalParams }),
         setSettingMutation.mutateAsync({ params: saveUnitParams }),
+        setSettingMutation.mutateAsync({ params: saveRequireEmailConfirmationParams }),
       ]);
 
       setSuccessMessage("Settings successfully updated.");
@@ -146,16 +175,12 @@ export function GeneralSettings() {
     );
   }
 
-  const anyLoadError = loadIntervalErr || loadUnitErr;
+  const anyLoadError =
+    loadIntervalErr || loadUnitErr || loadRequireEmailConfirmationErr;
 
   return (
     <div>
       {successMessage && <p className="success-message">{successMessage}</p>}
-      {errorDetails && !anyLoadError && (
-        <p className="error-message">
-          {errorDetails}
-        </p>
-      )}
       {errorDetails && !anyLoadError && (
         <p className="error-message">
           {errorDetails}
@@ -198,6 +223,28 @@ export function GeneralSettings() {
 
         <p className="settings-item-description">
           Interval for the backend service that runs on the server and periodically polls VPN servers for status and data. 0 = disabled.
+        </p>
+      </div>
+
+      <div className="settings-polling">
+        <h2 className="settings-page__h2-with-icon">
+          <FaSlidersH className="icon" aria-hidden />
+          <span>Authentication</span>
+        </h2>
+        <div style={{ borderTop: "1px solid #d1d5da" }}></div>
+
+        <label className="settings-item" style={{ gap: 10 }}>
+          <input
+            type="checkbox"
+            checked={requireEmailConfirmation}
+            onChange={(e) => setRequireEmailConfirmation(e.target.checked)}
+          />
+          <span>Require email confirmation for password registration</span>
+        </label>
+
+        <p className="settings-item-description">
+          If enabled, users registering with login/password must confirm email before sign-in.
+          Google sign-in is not affected.
         </p>
       </div>
     </div>
