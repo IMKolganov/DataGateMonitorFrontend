@@ -7,6 +7,7 @@ import Cookies from "js-cookie";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { toast } from "react-toastify";
+import "../../css/GeoPointsMap.css";
 
 import { getApiOpenVpnClientsOverviewPoints } from "../../api/orval/vpn-server-clients/vpn-server-clients.ts";
 import type {
@@ -234,6 +235,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                                                               zoom = 4,
                                                               vpnServerMarkers = [],
                                                           }) => {
+    const wrapperRef = useRef<HTMLDivElement | null>(null);
     const [selectedLayer, setSelectedLayer] = useState<keyof typeof tileLayers>(
         (Cookies.get("selectedMapLayer") as keyof typeof tileLayers) || "Carto Dark"
     );
@@ -245,7 +247,33 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
     );
     const [points, setPoints] = useState<GeoPointAggDto[]>([]);
     const [hideZeroTraffic, setHideZeroTraffic] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
     const abortRef = useRef<AbortController | null>(null);
+
+    useEffect(() => {
+        const onFullscreenChange = () => {
+            const next = document.fullscreenElement === wrapperRef.current;
+            setIsFullscreen(next);
+        };
+        document.addEventListener("fullscreenchange", onFullscreenChange);
+        return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = async () => {
+        try {
+            if (document.fullscreenElement === wrapperRef.current) {
+                await document.exitFullscreen();
+                return;
+            }
+            await wrapperRef.current?.requestFullscreen();
+        } catch (e: unknown) {
+            const msg =
+                typeof e === "object" && e && "message" in e
+                    ? String((e as { message?: unknown }).message)
+                    : "Fullscreen is not available in this browser context.";
+            toast.error(msg);
+        }
+    };
 
     useEffect(() => {
         Cookies.set("selectedMapLayer", selectedLayer, { expires: 365 });
@@ -319,18 +347,17 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
         return latlngs.length ? L.latLngBounds(latlngs) : null;
     }, [filteredPoints, vpnServerMarkers]);
 
+    const rootClassName = isFullscreen
+        ? "geo-points-map geo-points-map--fullscreen"
+        : "geo-points-map";
+
     return (
-        <div style={{ height: "650px", width: "100%", marginTop: 20 }}>
-            <div
-                style={{
-                    marginBottom: 10,
-                    display: "flex",
-                    gap: 10,
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                }}
-            >
-                <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        <div
+            ref={wrapperRef}
+            className={rootClassName}
+        >
+            <div className="geo-points-map__toolbar">
+                <div className="geo-points-map__controls">
                     <strong>Map Style:</strong>
                     <select
                         className="btn secondary dropdown-select"
@@ -378,7 +405,13 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                 </button>
             </div>
 
-            <MapContainer style={{ height: 600, width: "100%" }} center={center} zoom={zoom}>
+            <MapContainer
+                className="geo-points-map__container"
+                center={center}
+                zoom={zoom}
+            >
+                <InvalidateMapSize trigger={isFullscreen} />
+                <FullscreenControl isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
                 <ChangeView center={center} zoom={zoom} />
                 <TileLayer
                     url={tileLayers[selectedLayer].url}
@@ -410,7 +443,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                             icon={icon}
                         >
                             <Popup>
-                                <div style={{ minWidth: 220 }}>
+                                <div className="geo-points-map__popup-content">
                                     <strong>{p.country ?? "Unknown country"}</strong>
                                     <br />
                                     {p.region ?? "Unknown region"}
@@ -433,24 +466,14 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                 {bounds && <FitBounds bounds={bounds} />}
             </MapContainer>
 
-            <div
-                style={{
-                    marginTop: 8,
-                    fontSize: 12,
-                    opacity: 0.85,
-                    display: "flex",
-                    gap: 12,
-                    flexWrap: "wrap",
-                    alignItems: "center",
-                }}
-            >
+            <div className="geo-points-map__legend">
                 {vpnServerMarkers.length > 0 && (
                     <>
                         <LegendItem
                             colorUrl={serverIcon.options.iconUrl as string}
                             label="VPN server (location)"
                         />
-                        <span style={{ opacity: 0.45, userSelect: "none" }} aria-hidden="true">
+                        <span className="geo-points-map__legend-separator" aria-hidden="true">
                             |
                         </span>
                     </>
@@ -491,11 +514,64 @@ const FitBounds: React.FC<{ bounds: L.LatLngBounds }> = ({ bounds }) => {
     return null;
 };
 
+const InvalidateMapSize: React.FC<{ trigger: boolean }> = ({ trigger }) => {
+    const map = useMap();
+    useEffect(() => {
+        const id = window.setTimeout(() => {
+            try {
+                map.invalidateSize();
+            } catch {
+                /* map may be unmounted while toggling fullscreen */
+            }
+        }, 50);
+        return () => clearTimeout(id);
+    }, [map, trigger]);
+    return null;
+};
+
+const FullscreenControl: React.FC<{
+    isFullscreen: boolean;
+    onToggle: () => void;
+}> = ({ isFullscreen, onToggle }) => {
+    const map = useMap();
+
+    useEffect(() => {
+        const control = new L.Control({ position: "topleft" });
+
+        control.onAdd = () => {
+            const container = L.DomUtil.create("div", "leaflet-bar");
+            const button = L.DomUtil.create("a", "", container);
+
+            button.href = "#";
+            button.setAttribute("role", "button");
+            button.setAttribute("aria-label", isFullscreen ? "Exit fullscreen" : "Enter fullscreen");
+            button.title = isFullscreen ? "Exit fullscreen" : "Fullscreen";
+            button.innerHTML = "⤢";
+
+            L.DomEvent.disableClickPropagation(container);
+            L.DomEvent.disableScrollPropagation(container);
+            L.DomEvent.on(button, "click", (e: Event) => {
+                L.DomEvent.preventDefault(e);
+                onToggle();
+            });
+
+            return container;
+        };
+
+        control.addTo(map);
+        return () => {
+            control.remove();
+        };
+    }, [map, onToggle, isFullscreen]);
+
+    return null;
+};
+
 const LegendItem: React.FC<{ colorUrl: string; label: string }> = ({
                                                                        colorUrl,
                                                                        label,
                                                                    }) => (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+    <span className="geo-points-map__legend-item">
     <img src={colorUrl} width={14} height={22} alt="" />
         {label}
   </span>

@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
+import { getCurrentUser } from "../utils/auth/authSelectors";
 
 const PREFIX = "datagrid-pageSize";
+
+function getScopedStorageKey(storageKey: string): string {
+  const user = getCurrentUser();
+  const userPart = user?.id && Number.isFinite(user.id) ? String(user.id) : "anon";
+  return `${PREFIX}:${userPart}:${storageKey}`;
+}
 
 export function getStoredPageSize(
   storageKey: string,
@@ -8,7 +15,7 @@ export function getStoredPageSize(
   allowedOptions: readonly number[],
 ): number {
   try {
-    const raw = localStorage.getItem(`${PREFIX}:${storageKey}`);
+    const raw = localStorage.getItem(getScopedStorageKey(storageKey));
     if (raw == null) return defaultSize;
     const n = Number.parseInt(raw, 10);
     if (!Number.isFinite(n) || n <= 0) return defaultSize;
@@ -21,7 +28,7 @@ export function getStoredPageSize(
 
 export function setStoredPageSize(storageKey: string, pageSize: number): void {
   try {
-    localStorage.setItem(`${PREFIX}:${storageKey}`, String(pageSize));
+    localStorage.setItem(getScopedStorageKey(storageKey), String(pageSize));
   } catch {
     // quota / private mode
   }
