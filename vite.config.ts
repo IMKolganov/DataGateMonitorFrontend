@@ -9,13 +9,13 @@ const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
 
 function normalizeProxyBase(url: string): string {
   const trimmed = url.trim();
-  if (!trimmed) return "http://localhost:5581/";
+  if (!trimmed) return "https://dev-api.datagateapp.com/";
   return trimmed.endsWith("/") ? trimmed : `${trimmed}/`;
 }
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const proxyTarget = normalizeProxyBase(env.VITE_PROXY_TARGET ?? "http://localhost:5581/");
+  const proxyTarget = normalizeProxyBase(env.VITE_PROXY_TARGET ?? "https://dev-api.datagateapp.com/");
   const port = Number.parseInt(env.VITE_PORT || "", 10) || 5582;
 
   const isDev = mode === "development";
