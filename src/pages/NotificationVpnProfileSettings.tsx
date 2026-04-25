@@ -198,7 +198,7 @@ export default function NotificationVpnProfileSettings() {
   const [pageSize, setPageSize] = usePersistedPageSize(
     "notification-vpn-profile-settings",
     10,
-    "5,10,20",
+    "5,10,20,50,100",
   );
   const [savingRowKey, setSavingRowKey] = useState<string | null>(null);
   const [globalBusy, setGlobalBusy] = useState(false);
@@ -396,7 +396,7 @@ export default function NotificationVpnProfileSettings() {
             getRowId={(r) => r.kind}
             rows={gridRows}
             columns={columns}
-            pageSizeOptions={[5, 10, 20]}
+            pageSizeOptions={[5, 10, 20, 50, 100]}
             paginationMode="client"
             paginationModel={{ page: gridPage, pageSize }}
             onPaginationModelChange={(m) => {

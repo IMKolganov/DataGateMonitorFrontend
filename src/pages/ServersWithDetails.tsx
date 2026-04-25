@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Outlet, useLocation, useMatch } from "react-router-dom";
 import ServerList from "../components/servers/ServerList.tsx";
 import { useMediaQuery } from "react-responsive";
@@ -10,6 +10,8 @@ type MobileServersHomeTab = "list" | "overview";
 function ServersWithDetails() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileHomeTab, setMobileHomeTab] = useState<MobileServersHomeTab>("list");
+  const [hideMobileSwitcher, setHideMobileSwitcher] = useState(false);
+  const lastMobileScrollTop = useRef(0);
   const isMobile = useMediaQuery({ maxWidth: 768 });
   const location = useLocation();
   const serversIndexMatch = useMatch({ path: "/servers", end: true });
@@ -23,6 +25,34 @@ function ServersWithDetails() {
   useEffect(() => {
     if (isMobile) setCollapsed(false);
   }, [isMobile]);
+
+  useEffect(() => {
+    // When the user switches tabs, keep controls visible and reset direction tracking.
+    setHideMobileSwitcher(false);
+    lastMobileScrollTop.current = 0;
+  }, [mobileHomeTab]);
+
+  const onMobilePaneScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
+    const y = e.currentTarget.scrollTop;
+    const prev = lastMobileScrollTop.current;
+    const delta = y - prev;
+    lastMobileScrollTop.current = y;
+
+    // Always reveal controls near the top.
+    if (y <= 8) {
+      if (hideMobileSwitcher) setHideMobileSwitcher(false);
+      return;
+    }
+
+    // Ignore tiny jitter.
+    if (Math.abs(delta) < 10) return;
+
+    if (delta > 0 && !hideMobileSwitcher) {
+      setHideMobileSwitcher(true); // scrolling down
+    } else if (delta < 0 && hideMobileSwitcher) {
+      setHideMobileSwitcher(false); // scrolling up
+    }
+  };
 
   if (isMobile && isViewingDetails) {
     return (
@@ -47,7 +77,11 @@ function ServersWithDetails() {
   if (isMobile && isServersIndexOnly) {
     return (
       <div className="servers-with-details-root servers-with-details-root--mobile-home">
-        <div className="servers-mobile-home-switcher" role="tablist" aria-label="Servers page view">
+        <div
+          className={`servers-mobile-home-switcher${hideMobileSwitcher ? " servers-mobile-home-switcher--hidden" : ""}`}
+          role="tablist"
+          aria-label="Servers page view"
+        >
           <button
             type="button"
             role="tab"
@@ -68,11 +102,14 @@ function ServersWithDetails() {
           </button>
         </div>
         {mobileHomeTab === "list" ? (
-          <div className="server-list-panel server-list-panel--mobile-fill">
+          <div className="server-list-panel server-list-panel--mobile-fill" onScroll={onMobilePaneScroll}>
             <ServerList />
           </div>
         ) : (
-          <div className="server-details-panel-mobile servers-with-details-mobile-index-outlet">
+          <div
+            className="server-details-panel-mobile servers-with-details-mobile-index-outlet"
+            onScroll={onMobilePaneScroll}
+          >
             <Suspense fallback={<div className="center">Loading…</div>}>
               <Outlet />
             </Suspense>
