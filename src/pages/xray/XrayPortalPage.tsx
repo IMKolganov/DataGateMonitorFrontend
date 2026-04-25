@@ -2,9 +2,13 @@ import React, { useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { FaTelegramPlane } from "react-icons/fa";
 import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
-import { postApiXrayClientLinksAddWithToken } from "../../api/orval/xray-client-links/xray-client-links";
+import {
+  postApiXrayClientLinksAddWithToken,
+  postApiXrayClientLinksDownloadFileByCn,
+} from "../../api/orval/xray-client-links/xray-client-links";
 import type {
   AddFileRequest,
+  DownloadFileResponse,
   VpnServerV2Dto,
   VpnServersV2Response,
 } from "../../api/orvalModelShim";
@@ -12,16 +16,27 @@ import { ACCESS_TOKEN_KEY } from "../../utils/const";
 import { decodeToken } from "../../utils/auth/jwt";
 import { VpnServerType } from "../../constants/vpnServerType";
 import { getXrayLanguage, setXrayLanguage, XRAY_LANGUAGE_OPTIONS, XRAY_TRANSLATIONS } from "./i18n";
+import { appVersion } from "../../version";
 import "../../css/XrayPortal.css";
 
 function normalizeServers(payload: VpnServersV2Response | undefined): VpnServerV2Dto[] {
   return payload?.vpnServers?.filter(Boolean) ?? [];
 }
 
+function decodeBase64Utf8(value: string): string {
+  try {
+    const bytes = Uint8Array.from(atob(value), (c) => c.charCodeAt(0));
+    return new TextDecoder("utf-8").decode(bytes);
+  } catch {
+    return value;
+  }
+}
+
 const XrayPortalPage: React.FC = () => {
   const [busyServerId, setBusyServerId] = useState<number | null>(null);
   const [status, setStatus] = useState<string>("");
   const [generatedLink, setGeneratedLink] = useState<string>("");
+  const [generatedDetails, setGeneratedDetails] = useState<string>("");
   const [lang, setLang] = useState(getXrayLanguage);
   const t = XRAY_TRANSLATIONS[lang].portal;
 
@@ -72,28 +87,50 @@ const XrayPortalPage: React.FC = () => {
     setBusyServerId(server.id);
     setStatus("");
     setGeneratedLink("");
+    setGeneratedDetails("");
 
     try {
       const shortExternalId = userInfo.externalId.slice(0, 64);
-      const commonName = `xray-${shortExternalId}-${Date.now()}`;
+      const generatedCommonName = `xray-${shortExternalId}-${Date.now()}`;
       const payload: AddFileRequest = {
         vpnServerId: server.id,
         externalId: shortExternalId,
         issuedTo: userInfo.issuedTo.slice(0, 128),
-        commonName,
+        commonName: generatedCommonName,
       };
 
       const result = (await postApiXrayClientLinksAddWithToken(payload)) as {
+        issuedOvpnFile?: { vpnServerId?: number; commonName?: string | null };
         issuedOvpnFileToken?: { token?: string | null };
       };
-      const token = result.issuedOvpnFileToken?.token;
-      if (!token) {
+
+      const vpnServerId = result.issuedOvpnFile?.vpnServerId;
+      const commonName = result.issuedOvpnFile?.commonName?.trim();
+      if (!vpnServerId || !commonName) {
         setStatus(t.accessCreatedNoToken);
         return;
       }
 
-      const link = `${window.location.origin}/api/xray-client-links/by-token/${token}`;
-      setGeneratedLink(link);
+      const downloadPayload = {
+        vpnServerId,
+        commonName,
+      };
+      const downloaded = (await postApiXrayClientLinksDownloadFileByCn(downloadPayload)) as
+        | DownloadFileResponse
+        | { data?: DownloadFileResponse };
+      const envelope = downloaded as { data?: DownloadFileResponse };
+      const direct = downloaded as DownloadFileResponse;
+      const content = (envelope.data?.content ?? direct.content ?? "").trim();
+      const decoded = decodeBase64Utf8(content).trim();
+      const lines = decoded.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      const vlessLine = lines.find((line) => line.startsWith("vless://")) ?? "";
+      if (!vlessLine) {
+        setStatus(t.accessCreatedNoToken);
+        return;
+      }
+
+      setGeneratedLink(vlessLine);
+      setGeneratedDetails(decoded);
       setStatus(t.accessLinkReady);
     } catch (e: unknown) {
       setStatus(e instanceof Error ? e.message : t.failedCreateAccess);
@@ -179,6 +216,9 @@ const XrayPortalPage: React.FC = () => {
               {t.copy}
             </button>
           </div>
+          {generatedDetails && (
+            <pre className="xray-note xray-link-details">{generatedDetails}</pre>
+          )}
         </div>
       )}
 
@@ -212,6 +252,8 @@ const XrayPortalPage: React.FC = () => {
           <p className="xray-warning">{t.warningIos}</p>
         </article>
       </section>
+
+      <p className="xray-note xray-login-version">© {new Date().getFullYear()} DataGate Monitor v.{appVersion}</p>
     </div>
   );
 };
