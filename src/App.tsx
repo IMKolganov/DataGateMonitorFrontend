@@ -40,20 +40,30 @@ const QuotaPlansSettings = lazy(() => import("./pages/QuotaPlansSettings/QuotaPl
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
 const ServersOverview = lazy(() => import("./pages/ServersOverview"));
 const OvpnFileConfigForm = lazy(() => import("./pages/OvpnFileConfigForm"));
+const XrayLoginPage = lazy(() => import("./pages/xray/XrayLoginPage.tsx"));
+const XrayPortalPage = lazy(() => import("./pages/xray/XrayPortalPage.tsx"));
+const XrayRegisterPage = lazy(() => import("./pages/xray/XrayRegisterPage.tsx"));
 
 const isAuthenticated = () => !!localStorage.getItem(ACCESS_TOKEN_KEY);
 
 const PrivateRoute = ({ children }: { children: ReactNode }): React.ReactElement =>
   isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
 
+const XrayPrivateRoute = ({ children }: { children: ReactNode }): React.ReactElement =>
+  isAuthenticated() ? <>{children}</> : <Navigate to="/xray/login" replace />;
+
 // Small helper to hide header/footer on login
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const isAuthPage =
     location.pathname === "/login" ||
+    location.pathname === "/xray/login" ||
+    location.pathname === "/xray/register" ||
     location.pathname === "/register" ||
     location.pathname === "/forgot-password" ||
-    location.pathname === "/reset-password";
+    location.pathname === "/reset-password" ||
+    location.pathname === "/xray" ||
+    location.pathname.startsWith("/xray/");
 
   return (
     <>
@@ -85,9 +95,27 @@ function App() {
         <Layout>
           <Routes>
             <Route path="/login" element={withSuspense(<LoginPage />)} />
+            <Route path="/xray/login" element={withSuspense(<XrayLoginPage />)} />
+            <Route path="/xray/register" element={withSuspense(<XrayRegisterPage />)} />
             <Route path="/register" element={withSuspense(<RegisterPage />)} />
             <Route path="/forgot-password" element={withSuspense(<ForgotPasswordPage />)} />
             <Route path="/reset-password" element={withSuspense(<ResetPasswordPage />)} />
+            <Route
+              path="/xray"
+              element={
+                <XrayPrivateRoute>
+                  {withSuspense(<XrayPortalPage />)}
+                </XrayPrivateRoute>
+              }
+            />
+            <Route
+              path="/xray/*"
+              element={
+                <XrayPrivateRoute>
+                  {withSuspense(<XrayPortalPage />)}
+                </XrayPrivateRoute>
+              }
+            />
 
             <Route
               path="/*"
