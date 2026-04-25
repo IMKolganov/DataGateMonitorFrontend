@@ -3,19 +3,30 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { readFileSync } from "fs";
+import https from "https";
 import { visualizer } from "rollup-plugin-visualizer";
 
 const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
 
 function normalizeProxyBase(url: string): string {
   const trimmed = url.trim();
-  if (!trimmed) return "https://dev-api.datagateapp.com/";
+  if (!trimmed) return "https://api.datagateapp.com/";
   return trimmed.endsWith("/") ? trimmed : `${trimmed}/`;
+}
+
+function toProxyOrigin(url: string): string {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return "https://api.datagateapp.com";
+  }
 }
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const proxyTarget = normalizeProxyBase(env.VITE_PROXY_TARGET ?? "https://dev-api.datagateapp.com/");
+  const proxyBase = normalizeProxyBase(env.VITE_PROXY_TARGET ?? "https://api.datagateapp.com/");
+  const proxyTarget = toProxyOrigin(proxyBase);
+  const httpsIpv4Agent = new https.Agent({ family: 4, keepAlive: true });
   const port = Number.parseInt(env.VITE_PORT || "", 10) || 5582;
 
   const isDev = mode === "development";
@@ -42,12 +53,18 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           ws: true,
+          agent: httpsIpv4Agent,
+          proxyTimeout: 15000,
+          timeout: 15000,
         },
         "/api": {
           target: proxyTarget,
           changeOrigin: true,
           secure: false,
-          ws: true,
+          ws: false,
+          agent: httpsIpv4Agent,
+          proxyTimeout: 15000,
+          timeout: 15000,
         },
       },
     },
@@ -60,12 +77,18 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           ws: true,
+          agent: httpsIpv4Agent,
+          proxyTimeout: 15000,
+          timeout: 15000,
         },
         "/api": {
           target: proxyTarget,
           changeOrigin: true,
           secure: false,
-          ws: true,
+          ws: false,
+          agent: httpsIpv4Agent,
+          proxyTimeout: 15000,
+          timeout: 15000,
         },
       },
     },
@@ -74,6 +97,8 @@ export default defineConfig(({ mode }) => {
       __APP_VERSION__: JSON.stringify(packageJson.version),
       /** Injected only in dev build; status-stream connects here to bypass Vite WS proxy. */
       __VITE_SIGNALR_DEV_ORIGIN__: JSON.stringify(isDev ? signalrDevOrigin : ""),
+      /** Injected only in dev build; browser API client can call backend directly if Vite proxy is unstable. */
+      __VITE_API_DEV_ORIGIN__: JSON.stringify(isDev ? proxyTarget : ""),
     },
 
     build: {

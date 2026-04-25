@@ -31,7 +31,11 @@ declare global {
 const GOOGLE_SCRIPT_ID = "google-identity-script";
 const GOOGLE_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
 
-const GoogleLoginForm: React.FC = () => {
+interface GoogleLoginFormProps {
+  redirectPath?: string;
+}
+
+const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" }) => {
     const [error, setError] = useState<string>("");
     const [scriptReady, setScriptReady] = useState<boolean>(false);
 
@@ -66,7 +70,7 @@ const GoogleLoginForm: React.FC = () => {
                     localStorage.setItem(REFRESH_TOKEN_EXPIRATION, refreshExpiration);
                 }
                 scheduleAutoLogout(token);
-                window.location.href = "/";
+                window.location.href = redirectPath;
             } catch (err: unknown) {
                 let detailedMessage =
                     "We could not log you in with Google. Please try again.";
@@ -90,7 +94,7 @@ const GoogleLoginForm: React.FC = () => {
                 setError(detailedMessage);
             }
         },
-        [googleLogin],
+        [googleLogin, redirectPath],
     );
 
     const loadGoogleScript = () =>

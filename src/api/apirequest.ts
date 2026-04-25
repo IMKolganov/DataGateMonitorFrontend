@@ -11,6 +11,7 @@ import { authErrFields, authLog } from "../utils/auth/authLog.ts";
 import type { RefreshRequest, RefreshResponse } from "./orvalModelShim";
 
 let refreshPromise: Promise<string> | null = null;
+declare const __VITE_API_DEV_ORIGIN__: string;
 
 /** Only these refresh failures should end the browser session (logout). */
 export function shouldLogoutOnRefreshError(err: unknown): boolean {
@@ -134,8 +135,9 @@ export const fetchConfig = async (): Promise<Config> => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const host = window.location.host;
 
-    // Prefer config value if present, otherwise fall back to origin
-    API_BASE_URL = cfg.apiBaseUrl ?? origin;
+    // Prefer config value if present; in dev, allow direct backend origin injected from Vite config.
+    const devApiBase = typeof __VITE_API_DEV_ORIGIN__ === "string" ? __VITE_API_DEV_ORIGIN__.trim() : "";
+    API_BASE_URL = cfg.apiBaseUrl ?? (devApiBase || origin);
     WS_BASE_URL = `${protocol}//${host}`;
 
     return {
