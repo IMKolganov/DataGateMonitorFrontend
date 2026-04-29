@@ -1,1 +1,0 @@
-var e={OpenVpn:0,Xray:1};function t(t){return t===e.Xray?`Xray`:`OpenVPN`}function n(t){return t==null?!0:t!==e.Xray}export{n,t as r,e as t};

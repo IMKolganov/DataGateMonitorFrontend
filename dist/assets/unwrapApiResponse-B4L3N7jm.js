@@ -1,1 +1,0 @@
-function e(e){if(e)return typeof e==`object`&&e&&`data`in e?e.data:e}export{e as t};
