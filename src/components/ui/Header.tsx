@@ -7,6 +7,7 @@ import { logout } from "../../api/apirequest.ts";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { useNotificationsUnreadCount } from "../../pages/Notifications/useNotifications";
 import { useTheme } from "../../contexts/useTheme";
+import { UserAvatar } from "./UserAvatar";
 
 export function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -59,6 +60,12 @@ export function Header() {
 
                     {user && (
                         <li className="user-info">
+                            <UserAvatar
+                                src={user.avatarUrl}
+                                name={user.displayName || user.email || "User"}
+                                colorSeed={String(user.id)}
+                                size={36}
+                            />
                             <span className="user-name">
                                 {user.displayName || user.email || "User"}
                             </span>

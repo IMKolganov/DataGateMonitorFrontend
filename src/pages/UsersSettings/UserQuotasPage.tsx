@@ -8,6 +8,8 @@ import {
 } from "../../api/orval/vpn-server-clients/vpn-server-clients";
 import type { OverviewTotalsResponse, UserDto } from "../../api/orvalModelShim";
 import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
+import { UserAvatar } from "../../components/ui/UserAvatar.tsx";
+import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
 import { useUsers } from "./useUsers";
 import "../../css/Settings.css";
 
@@ -33,9 +35,17 @@ function QuotaRow({ u }: { u: UserDto }) {
   return (
     <section className="settings-card user-quota-list__row" style={{ marginBottom: 14 }}>
       <div className="user-quota-list__row-head">
-        <Link to={`/settings/users/${id}`} className="user-quota-list__user-link">
-          <strong>{title}</strong>
-        </Link>
+        <div className="user-quota-list__row-head-main">
+          <UserAvatar
+            src={readOptionalAvatarUrl(u as object)}
+            name={title}
+            colorSeed={`${id}|${u.email ?? ""}`}
+            size={40}
+          />
+          <Link to={`/settings/users/${id}`} className="user-quota-list__user-link">
+            <strong>{title}</strong>
+          </Link>
+        </div>
         <span className="user-quota-list__email">{u.email?.trim() || "—"}</span>
       </div>
       <UserTrafficQuotaProgress userId={id} externalId={u.externalId} compact />

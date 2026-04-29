@@ -6,6 +6,7 @@ import { postApiAuthLogin } from "../../api/orval/auth/auth";
 import type { LoginRequest, LoginResponse } from "../../api/orvalModelShim";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY } from "../../utils/const";
 import { scheduleAutoLogout } from "../../utils/auth/authSession";
+import { clearStoredProfileAvatarUrl } from "../../utils/auth/storedProfileAvatar";
 import { Link } from "react-router-dom";
 import GoogleLoginForm from "../../components/auth/GoogleLoginForm";
 import { axiosResponseDataMessage, axiosResponseDetail, errorMessage } from "../../utils/errorMessage";
@@ -45,6 +46,7 @@ const XrayLoginPage: React.FC = () => {
         throw new Error("Token was not returned.");
       }
 
+      clearStoredProfileAvatarUrl();
       localStorage.setItem(ACCESS_TOKEN_KEY, response.token);
       if (response.refreshToken) {
         localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);

@@ -286,6 +286,41 @@ h2.settings-page__h2-with-icon > .icon {
   flex-shrink: 0;
 }
 
+.user-detail-profile-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.user-detail-profile-banner__text {
+  min-width: 0;
+}
+
+.user-detail-profile-banner__name {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+  word-break: break-word;
+}
+
+.user-detail-profile-banner__sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  word-break: break-all;
+}
+
+.user-quota-list__row-head-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
 .user-detail-dl {
   display: grid;
   grid-template-columns: 160px 1fr;
@@ -459,7 +494,7 @@ h2.settings-page__h2-with-icon > .icon {
 .user-quota-list__row-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 10px;

@@ -9,6 +9,10 @@ export interface DecodedToken {
     email?: string;
     displayName?: string;
     role?: string;
+    /** If backend adds profile URL to access JWT, it wins over localStorage. */
+    avatarUrl?: string;
+    /** Google sub, Telegram id, etc. (not the dashboard numeric user id). */
+    externalId?: string;
     [key: string]: unknown;
 }
 

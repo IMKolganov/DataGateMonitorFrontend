@@ -14,12 +14,12 @@ import type {
 } from "../../api/orvalModelShim";
 import { ACCESS_TOKEN_KEY } from "../../utils/const";
 import { decodeToken } from "../../utils/auth/jwt";
+import { providerExternalIdFromJwtClaims } from "../../utils/auth/providerExternalIdFromJwt";
 import { VpnServerType } from "../../constants/vpnServerType";
 import { getXrayLanguage, setXrayLanguage, XRAY_LANGUAGE_OPTIONS, XRAY_TRANSLATIONS } from "./i18n";
 import { appVersion } from "../../version";
 import "../../css/XrayPortal.css";
 
-const NAME_IDENTIFIER_CLAIM = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
 const EMAIL_CLAIM = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress";
 const DISPLAY_NAME_CLAIM = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name";
 
@@ -55,28 +55,25 @@ const XrayPortalPage: React.FC = () => {
   const t = XRAY_TRANSLATIONS[lang].portal;
 
   const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
-  if (!accessToken) {
-    return <Navigate to="/xray/login" replace />;
-  }
 
   const userInfo = useMemo(() => {
+    if (!accessToken) {
+      return { externalId: "user", issuedTo: "user" };
+    }
     try {
       const token = decodeToken(accessToken);
       const claims = token as Record<string, unknown>;
-      const rawId = claimString(claims, "nameid", "sub", NAME_IDENTIFIER_CLAIM);
+      const providerExt = providerExternalIdFromJwtClaims(claims);
       const rawName = claimString(
         claims,
         "displayName",
         "email",
         EMAIL_CLAIM,
         DISPLAY_NAME_CLAIM,
-        "nameid",
-        "sub",
-        NAME_IDENTIFIER_CLAIM,
       );
       return {
-        externalId: String(rawId || "user"),
-        issuedTo: String(rawName || "user"),
+        externalId: providerExt || "user",
+        issuedTo: String(rawName || providerExt || "user"),
       };
     } catch {
       return {
@@ -89,6 +86,7 @@ const XrayPortalPage: React.FC = () => {
   const serversQuery = useGetApiV2OpenVpnServersGetAll(undefined, {
     query: {
       refetchOnWindowFocus: false,
+      enabled: Boolean(accessToken),
     },
   });
 
@@ -98,6 +96,10 @@ const XrayPortalPage: React.FC = () => {
       (server) => server.serverType === VpnServerType.Xray && server.isAccessibleForUserQuotaPlan !== false,
     );
   }, [serversQuery.data]);
+
+  if (!accessToken) {
+    return <Navigate to="/xray/login" replace />;
+  }
 
   const handleLogout = () => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
