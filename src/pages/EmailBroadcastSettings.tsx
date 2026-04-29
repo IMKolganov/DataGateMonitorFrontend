@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { FaEnvelope, FaPaperPlane, FaPlus, FaSync, FaSave, FaFileImport } from "react-icons/fa";
 import { toast } from "react-toastify";
 import type { GridColDef } from "@mui/x-data-grid";
@@ -16,21 +16,44 @@ import {
 import StyledDataGrid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import {
-  fetchEmailHistory,
-  sendAdminEmail,
-  fetchEmailTemplates,
-  fetchEmailTemplateById,
-  createEmailTemplate,
-  updateEmailTemplate,
-  deleteEmailTemplate,
-  type SentEmailLogDto,
-  type EmailBroadcastTemplateSummaryDto,
-} from "../api/adminEmailBroadcast.ts";
+  getApiAdminEmailBroadcastTemplatesId,
+  useDeleteApiAdminEmailBroadcastTemplatesId,
+  useGetApiAdminEmailBroadcastHistory,
+  useGetApiAdminEmailBroadcastTemplates,
+  usePostApiAdminEmailBroadcastSend,
+  usePostApiAdminEmailBroadcastTemplates,
+  usePutApiAdminEmailBroadcastTemplatesId,
+} from "../api/orval/admin-email-broadcast/admin-email-broadcast";
+import type { EmailBroadcastResponsesDtoEmailBroadcastTemplateDto } from "../api/orval/model/emailBroadcastResponsesDtoEmailBroadcastTemplateDto";
+import type { EmailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto } from "../api/orval/model/emailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto";
+import type { EmailBroadcastResponsesDtoSentEmailLogDto } from "../api/orval/model/emailBroadcastResponsesDtoSentEmailLogDto";
+import type { EmailBroadcastResponsesGetEmailTemplatesResponse } from "../api/orval/model/emailBroadcastResponsesGetEmailTemplatesResponse";
+import type { EmailBroadcastResponsesGetSentEmailHistoryResponse } from "../api/orval/model/emailBroadcastResponsesGetSentEmailHistoryResponse";
+import type { EmailBroadcastResponsesSendAdminEmailResponse } from "../api/orval/model/emailBroadcastResponsesSendAdminEmailResponse";
+import type { SentEmailLogDto } from "../api/orvalModelShim";
 import { formatDateWithOffset } from "../utils/utils.ts";
 import "../css/Settings.css";
 import "../css/Table.css";
 
 const defaultHtml = "<p>Hello,</p>\n<p></p>\n<p>— DataGateMonitor</p>";
+
+function unwrapHistory(
+  raw: unknown,
+): EmailBroadcastResponsesGetSentEmailHistoryResponse | undefined {
+  return raw as EmailBroadcastResponsesGetSentEmailHistoryResponse | undefined;
+}
+
+function unwrapTemplates(
+  raw: unknown,
+): EmailBroadcastResponsesGetEmailTemplatesResponse | undefined {
+  return raw as EmailBroadcastResponsesGetEmailTemplatesResponse | undefined;
+}
+
+function unwrapTemplateDto(
+  raw: unknown,
+): EmailBroadcastResponsesDtoEmailBroadcastTemplateDto | undefined {
+  return raw as EmailBroadcastResponsesDtoEmailBroadcastTemplateDto | undefined;
+}
 
 export default function EmailBroadcastSettings() {
   const [subject, setSubject] = useState("");
@@ -40,13 +63,8 @@ export default function EmailBroadcastSettings() {
 
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
-  const [rows, setRows] = useState<SentEmailLogDto[]>([]);
-  const [rowCount, setRowCount] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [bodyDialog, setBodyDialog] = useState<SentEmailLogDto | null>(null);
 
-  const [templates, setTemplates] = useState<EmailBroadcastTemplateSummaryDto[]>([]);
-  const [templatesLoading, setTemplatesLoading] = useState(false);
   const [tplDialogOpen, setTplDialogOpen] = useState(false);
   const [editingTplId, setEditingTplId] = useState<number | null>(null);
   const [tplName, setTplName] = useState("");
@@ -54,38 +72,53 @@ export default function EmailBroadcastSettings() {
   const [tplSubject, setTplSubject] = useState("");
   const [tplHtml, setTplHtml] = useState(defaultHtml);
 
-  const loadHistory = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await fetchEmailHistory(page + 1, pageSize);
-      setRows(data.items);
-      setRowCount(data.totalCount);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to load history");
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pageSize]);
+  const historyQuery = useGetApiAdminEmailBroadcastHistory(
+    { Page: page + 1, PageSize: pageSize },
+    {},
+  );
+  const historyPayload = unwrapHistory(historyQuery.data);
+  const rows: EmailBroadcastResponsesDtoSentEmailLogDto[] =
+    (historyPayload?.items ?? []) as EmailBroadcastResponsesDtoSentEmailLogDto[];
+  const rowCount = historyPayload?.totalCount ?? 0;
+  const loading = historyQuery.isPending || historyQuery.isFetching;
 
-  const loadTemplates = useCallback(async () => {
-    setTemplatesLoading(true);
-    try {
-      const list = await fetchEmailTemplates();
-      setTemplates(list);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to load templates");
-    } finally {
-      setTemplatesLoading(false);
-    }
-  }, []);
+  const templatesQuery = useGetApiAdminEmailBroadcastTemplates({});
+  const templatesPayload = unwrapTemplates(templatesQuery.data);
+  const templates: EmailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto[] =
+    (templatesPayload?.items ?? []) as EmailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto[];
+  const templatesLoading = templatesQuery.isPending || templatesQuery.isFetching;
 
-  useEffect(() => {
-    void loadHistory();
-  }, [loadHistory]);
+  const sendMutation = usePostApiAdminEmailBroadcastSend({
+    mutation: {
+      onSuccess: async () => {
+        await historyQuery.refetch();
+      },
+    },
+  });
 
-  useEffect(() => {
-    void loadTemplates();
-  }, [loadTemplates]);
+  const createTplMutation = usePostApiAdminEmailBroadcastTemplates({
+    mutation: {
+      onSuccess: async () => {
+        await templatesQuery.refetch();
+      },
+    },
+  });
+
+  const updateTplMutation = usePutApiAdminEmailBroadcastTemplatesId({
+    mutation: {
+      onSuccess: async () => {
+        await templatesQuery.refetch();
+      },
+    },
+  });
+
+  const deleteTplMutation = useDeleteApiAdminEmailBroadcastTemplatesId({
+    mutation: {
+      onSuccess: async () => {
+        await templatesQuery.refetch();
+      },
+    },
+  });
 
   const openCreateTemplate = () => {
     setEditingTplId(null);
@@ -98,12 +131,17 @@ export default function EmailBroadcastSettings() {
 
   const openEditTemplate = async (id: number) => {
     try {
-      const full = await fetchEmailTemplateById(id);
+      const raw = await getApiAdminEmailBroadcastTemplatesId(id);
+      const full = unwrapTemplateDto(raw);
+      if (!full?.name) {
+        toast.error("Invalid template response");
+        return;
+      }
       setEditingTplId(id);
       setTplName(full.name);
       setTplDescription(full.description ?? "");
-      setTplSubject(full.subject);
-      setTplHtml(full.bodyHtml);
+      setTplSubject(full.subject ?? "");
+      setTplHtml(full.bodyHtml ?? defaultHtml);
       setTplDialogOpen(true);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Load failed");
@@ -124,26 +162,21 @@ export default function EmailBroadcastSettings() {
       toast.error("HTML body is required.");
       return;
     }
+    const body = {
+      name,
+      description: tplDescription.trim() || null,
+      subject: tplSubject.trim(),
+      htmlBody: tplHtml,
+    };
     try {
       if (editingTplId == null) {
-        await createEmailTemplate({
-          name,
-          description: tplDescription.trim() || null,
-          subject: tplSubject.trim(),
-          htmlBody: tplHtml,
-        });
+        await createTplMutation.mutateAsync({ data: body });
         toast.success("Template created.");
       } else {
-        await updateEmailTemplate(editingTplId, {
-          name,
-          description: tplDescription.trim() || null,
-          subject: tplSubject.trim(),
-          htmlBody: tplHtml,
-        });
+        await updateTplMutation.mutateAsync({ id: editingTplId, data: body });
         toast.success("Template updated.");
       }
       setTplDialogOpen(false);
-      await loadTemplates();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Save failed");
     }
@@ -152,9 +185,8 @@ export default function EmailBroadcastSettings() {
   const removeTemplate = async (id: number, name: string) => {
     if (!window.confirm(`Delete template "${name}"?`)) return;
     try {
-      await deleteEmailTemplate(id);
+      await deleteTplMutation.mutateAsync({ id });
       toast.success("Deleted.");
-      await loadTemplates();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Delete failed");
     }
@@ -162,10 +194,15 @@ export default function EmailBroadcastSettings() {
 
   const applyTemplateToComposer = async (id: number) => {
     try {
-      const full = await fetchEmailTemplateById(id);
-      setSubject(full.subject);
-      setHtmlBody(full.bodyHtml);
-      setPreviewHtml(full.bodyHtml);
+      const raw = await getApiAdminEmailBroadcastTemplatesId(id);
+      const full = unwrapTemplateDto(raw);
+      if (!full?.name) {
+        toast.error("Invalid template response");
+        return;
+      }
+      setSubject(full.subject ?? "");
+      setHtmlBody(full.bodyHtml ?? defaultHtml);
+      setPreviewHtml(full.bodyHtml ?? defaultHtml);
       toast.success(`Loaded template "${full.name}" into the form.`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Load failed");
@@ -175,10 +212,10 @@ export default function EmailBroadcastSettings() {
   const templateGridRows = useMemo(
     () =>
       templates.map((t) => ({
-        id: t.id,
-        name: t.name,
+        id: t.id ?? 0,
+        name: t.name ?? "",
         description: t.description ?? "",
-        subject: t.subject,
+        subject: t.subject ?? "",
         updated: t.lastUpdate ? formatDateWithOffset(new Date(t.lastUpdate)) : "",
       })),
     [templates],
@@ -243,7 +280,7 @@ export default function EmailBroadcastSettings() {
       renderCell: (params) => {
         const row = rows.find((x) => x.id === params.id);
         return (
-          <Button size="small" variant="text" onClick={() => row && setBodyDialog(row)}>
+          <Button size="small" variant="text" onClick={() => row && setBodyDialog(row as SentEmailLogDto)}>
             View
           </Button>
         );
@@ -277,13 +314,18 @@ export default function EmailBroadcastSettings() {
         : `user id ${targetUserId} only`;
     if (!window.confirm(`Send this email to ${scope}?\n\nSubject: ${subject.trim()}`)) return;
     try {
-      const res = await sendAdminEmail({
-        subject: subject.trim(),
-        htmlBody,
-        targetUserId,
+      const res = await sendMutation.mutateAsync({
+        data: {
+          subject: subject.trim(),
+          htmlBody,
+          targetUserId,
+        },
       });
-      toast.success(`Done: ${res.succeeded} sent, ${res.failed} failed (${res.attempted} attempted).`);
-      await loadHistory();
+      const sendPayload = res as unknown as EmailBroadcastResponsesSendAdminEmailResponse;
+      const attempted = sendPayload?.attempted ?? 0;
+      const succeeded = sendPayload?.succeeded ?? 0;
+      const failed = sendPayload?.failed ?? 0;
+      toast.success(`Done: ${succeeded} sent, ${failed} failed (${attempted} attempted).`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Send failed");
     }
@@ -308,7 +350,7 @@ export default function EmailBroadcastSettings() {
         <Button variant="contained" size="small" startIcon={<FaPlus />} onClick={openCreateTemplate}>
           New template
         </Button>
-        <Button variant="outlined" size="small" startIcon={<FaSync />} onClick={() => void loadTemplates()}>
+        <Button variant="outlined" size="small" startIcon={<FaSync />} onClick={() => void templatesQuery.refetch()}>
           Refresh
         </Button>
       </Box>
@@ -352,7 +394,13 @@ export default function EmailBroadcastSettings() {
           <Button variant="outlined" startIcon={<FaEnvelope />} onClick={applyPreview}>
             Refresh preview
           </Button>
-          <Button variant="contained" color="primary" startIcon={<FaPaperPlane />} onClick={() => void onSend()}>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<FaPaperPlane />}
+            disabled={sendMutation.isPending}
+            onClick={() => void onSend()}
+          >
             Send
           </Button>
         </Box>
@@ -382,6 +430,11 @@ export default function EmailBroadcastSettings() {
       <Typography variant="subtitle1" sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
         <FaSync /> Sent mail log
       </Typography>
+      <Box sx={{ mb: 1 }}>
+        <Button variant="outlined" size="small" startIcon={<FaSync />} onClick={() => void historyQuery.refetch()}>
+          Refresh log
+        </Button>
+      </Box>
       <CustomThemeProvider>
         <StyledDataGrid
           rows={gridRows}
@@ -449,7 +502,12 @@ export default function EmailBroadcastSettings() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setTplDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" startIcon={<FaSave />} onClick={() => void saveTemplate()}>
+          <Button
+            variant="contained"
+            startIcon={<FaSave />}
+            disabled={createTplMutation.isPending || updateTplMutation.isPending}
+            onClick={() => void saveTemplate()}
+          >
             Save
           </Button>
         </DialogActions>

@@ -83,6 +83,10 @@ export type { VpnServersResponsesVpnServerWithStatusResponse as VpnServerWithSta
 export type { VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest as AddOrUpdateOvpnFileConfigRequest } from "./orval/model/vpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest";
 export type { DataGateOpenVpnManagerInfoRootOpenVpnInfoResponse as RootOpenVpnInfoResponse } from "./orval/model/dataGateOpenVpnManagerInfoRootOpenVpnInfoResponse";
 
+export type { EmailBroadcastResponsesDtoSentEmailLogDto as SentEmailLogDto } from "./orval/model/emailBroadcastResponsesDtoSentEmailLogDto";
+export type { EmailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto as EmailBroadcastTemplateSummaryDto } from "./orval/model/emailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto";
+export type { EmailBroadcastResponsesDtoEmailBroadcastTemplateDto as EmailBroadcastTemplateDto } from "./orval/model/emailBroadcastResponsesDtoEmailBroadcastTemplateDto";
+
 export { EnumsServiceStatus as ServiceStatus } from "./orval/model/enumsServiceStatus";
 export { EnumsOverviewGrouping as OverviewGrouping } from "./orval/model/enumsOverviewGrouping";
 export { EnumsQuotaOverlimitAction as QuotaOverlimitAction } from "./orval/model/enumsQuotaOverlimitAction";
