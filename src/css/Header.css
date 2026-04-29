@@ -67,6 +67,22 @@
   gap: 4px;
 }
 
+.nav-links li.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-links li.user-info .user-name {
+  font-size: 0.65em;
+  font-weight: 600;
+  color: var(--text-secondary);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .header-notifications-badge {
   position: absolute;
   top: -6px;

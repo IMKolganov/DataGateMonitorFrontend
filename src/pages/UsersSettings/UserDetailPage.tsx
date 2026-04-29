@@ -68,6 +68,8 @@ import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
 import type { GridColDef } from "@mui/x-data-grid";
 import "../../css/Settings.css";
 import "../../css/Table.css";
+import { UserAvatar } from "../../components/ui/UserAvatar.tsx";
+import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
 
 function formatBytes(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
@@ -417,6 +419,18 @@ export function UserDetailPage() {
           <FaUser className="icon" aria-hidden />
           <span>Profile</span>
         </h3>
+        <div className="user-detail-profile-banner">
+          <UserAvatar
+            src={readOptionalAvatarUrl(user as object)}
+            name={user.displayName ?? user.email ?? `User #${user.id ?? ""}`}
+            colorSeed={`${user.id ?? ""}|${user.email ?? ""}`}
+            size={56}
+          />
+          <div className="user-detail-profile-banner__text">
+            <p className="user-detail-profile-banner__name">{user.displayName?.trim() || "—"}</p>
+            <p className="user-detail-profile-banner__sub">{user.email?.trim() || "No email"}</p>
+          </div>
+        </div>
         <dl className="user-detail-dl">
           <dt>ID</dt>
           <dd>{user.id ?? "—"}</dd>

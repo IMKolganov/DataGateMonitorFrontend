@@ -12,6 +12,8 @@ import {
 } from "../../api/orval/telegram-bot-user/telegram-bot-user.ts";
 import "../../css/Table.css";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { UserAvatar } from "../ui/UserAvatar.tsx";
+import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
 
 interface TelegramBotUsersTableProps {
   users: TelegramBotUserDto[];
@@ -84,11 +86,14 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
       (users ?? []).map((u, idx) => {
         const id = u.id ?? u.telegramId ?? idx + 1;
         const telegramId = u.telegramId ?? 0;
+        const fullName = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || "-";
         return {
           id,
           telegramId,
           username: u.username ?? "-",
-          fullName: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || "-",
+          fullName,
+          displayNameForAvatar: fullName !== "-" ? fullName : u.username ?? String(telegramId),
+          avatarUrl: readOptionalAvatarUrl(u),
           createDate: u.createDate ? new Date(u.createDate).toLocaleString() : "-",
           lastUpdate: u.lastUpdate ? new Date(u.lastUpdate).toLocaleString() : "-",
           isAdmin: Boolean(u.isAdmin),
@@ -99,6 +104,21 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
   );
 
   const columns: GridColDef[] = [
+    {
+      field: "avatar",
+      headerName: "",
+      width: 56,
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: (params) => (
+        <UserAvatar
+          src={params.row.avatarUrl as string | undefined}
+          name={params.row.displayNameForAvatar as string}
+          colorSeed={String(params.row.telegramId)}
+          size={28}
+        />
+      ),
+    },
     { field: "id", headerName: "ID", width: 70 },
     { field: "telegramId", headerName: "Telegram ID", flex: 1 },
     { field: "username", headerName: "Username", flex: 1 },

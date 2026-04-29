@@ -6,9 +6,10 @@ import type {
 } from "../../api/orvalModelShim";
 import { scheduleAutoLogout } from "../../utils/auth/authSession";
 import { getRuntimeEnv } from "../../utils/runtimeEnv";
-import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY} from "../../utils/const.ts";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY } from "../../utils/const.ts";
 import axios from "axios";
 import { errorMessage } from "../../utils/errorMessage";
+import { setStoredProfileAvatarFromGoogleIdToken } from "../../utils/auth/storedProfileAvatar";
 
 type GoogleCredentialResponse = { credential?: string };
 
@@ -62,6 +63,7 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" })
                     throw new Error("No token returned by API.");
                 }
 
+                setStoredProfileAvatarFromGoogleIdToken(idToken);
                 localStorage.setItem(ACCESS_TOKEN_KEY, token);
                 if (refreshToken) {
                     localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
