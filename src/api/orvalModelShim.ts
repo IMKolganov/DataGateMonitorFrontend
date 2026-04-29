@@ -5,7 +5,6 @@
 export * from "./orval/model";
 
 export type { OpenVpnFilesRequestsAddFileRequest as AddFileRequest } from "./orval/model/openVpnFilesRequestsAddFileRequest";
-export type { VpnServersRequestsAddServerRequest as AddServerRequest } from "./orval/model/vpnServersRequestsAddServerRequest";
 export type { AuthRequestsAdminForgotPasswordRequest as AdminForgotPasswordRequest } from "./orval/model/authRequestsAdminForgotPasswordRequest";
 export type { AuthRequestsAdminResetPasswordRequest as AdminResetPasswordRequest } from "./orval/model/authRequestsAdminResetPasswordRequest";
 export type { ApplicationsDtoApplicationDto as ApplicationDto } from "./orval/model/applicationsDtoApplicationDto";
@@ -65,21 +64,22 @@ export type { SettingsResponsesSettingResponse as SettingResponse } from "./orva
 export type { TelegramBotUserResponsesDtoTelegramBotUserDto as TelegramBotUserDto } from "./orval/model/telegramBotUserResponsesDtoTelegramBotUserDto";
 export type { TelegramBotUserRequestsTelegramUserActionRequest as TelegramUserActionRequest } from "./orval/model/telegramBotUserRequestsTelegramUserActionRequest";
 export type { NotificationsResponsesUnreadCountResponse as UnreadCountResponse } from "./orval/model/notificationsResponsesUnreadCountResponse";
-export type { VpnServersRequestsUpdateServerRequest as UpdateServerRequest } from "./orval/model/vpnServersRequestsUpdateServerRequest";
 export type { UserResponsesDtoUserDto as UserDto } from "./orval/model/userResponsesDtoUserDto";
 export type { UserQuotaPlansDtoUserQuotaPlanDto as UserQuotaPlanDto } from "./orval/model/userQuotaPlansDtoUserQuotaPlanDto";
 export type { UserRolesResponsesUserRoleAssignmentResponse as UserRoleAssignmentResponse } from "./orval/model/userRolesResponsesUserRoleAssignmentResponse";
 export type { UserResponsesUsersResponse as UsersResponse } from "./orval/model/userResponsesUsersResponse";
 export type { VpnServersDtoVpnClientInfoDto as VpnClientInfoDto } from "./orval/model/vpnServersDtoVpnClientInfoDto";
 export type { VpnServersDtoVpnServerDto as VpnServerDto } from "./orval/model/vpnServersDtoVpnServerDto";
+export type { VpnServersRequestsAddServerRequest as AddServerRequest } from "./orval/model/vpnServersRequestsAddServerRequest";
+export type { VpnServersRequestsUpdateServerRequest as UpdateServerRequest } from "./orval/model/vpnServersRequestsUpdateServerRequest";
+export type { VpnServersDtoVpnServerV2Dto as VpnServerV2Dto } from "./orval/model/vpnServersDtoVpnServerV2Dto";
+export type { VpnServersDtoVpnServerWithStatusDto as VpnServerWithStatusDto } from "./orval/model/vpnServersDtoVpnServerWithStatusDto";
+export type { VpnServersDtoVpnServerWithStatusV2Dto as VpnServerWithStatusV2Dto } from "./orval/model/vpnServersDtoVpnServerWithStatusV2Dto";
 export type { VpnServerEventDtoVpnServerEventLogDto as VpnServerEventLogDto } from "./orval/model/vpnServerEventDtoVpnServerEventLogDto";
 export type { VpnServersResponsesVpnServerResponse as VpnServerResponse } from "./orval/model/vpnServersResponsesVpnServerResponse";
 export type { VpnServersResponsesVpnServersV2Response as VpnServersV2Response } from "./orval/model/vpnServersResponsesVpnServersV2Response";
-export type { VpnServersDtoVpnServerV2Dto as VpnServerV2Dto } from "./orval/model/vpnServersDtoVpnServerV2Dto";
-export type { VpnServersDtoVpnServerWithStatusDto as VpnServerWithStatusDto } from "./orval/model/vpnServersDtoVpnServerWithStatusDto";
 export type { VpnServersResponsesVpnServerWithStatusesV2Response as VpnServerWithStatusesV2Response } from "./orval/model/vpnServersResponsesVpnServerWithStatusesV2Response";
 export type { VpnServersResponsesVpnServerWithStatusResponse as VpnServerWithStatusResponse } from "./orval/model/vpnServersResponsesVpnServerWithStatusResponse";
-export type { VpnServersDtoVpnServerWithStatusV2Dto as VpnServerWithStatusV2Dto } from "./orval/model/vpnServersDtoVpnServerWithStatusV2Dto";
 export type { VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest as AddOrUpdateOvpnFileConfigRequest } from "./orval/model/vpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest";
 export type { DataGateOpenVpnManagerInfoRootOpenVpnInfoResponse as RootOpenVpnInfoResponse } from "./orval/model/dataGateOpenVpnManagerInfoRootOpenVpnInfoResponse";
 
