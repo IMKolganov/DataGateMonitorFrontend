@@ -56,6 +56,8 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => {
     },
     "& .MuiDataGrid-cell": {
       borderBottom: `1px solid ${borderColor}`,
+      display: "flex",
+      alignItems: "center",
     },
     "& .MuiDataGrid-row": {
       backgroundColor: rowBg,
