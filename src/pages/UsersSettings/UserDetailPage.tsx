@@ -70,6 +70,7 @@ import "../../css/Settings.css";
 import "../../css/Table.css";
 import { UserAvatar } from "../../components/ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
+import { telegramPhotoIdForProvider } from "../../utils/telegramNumericId.ts";
 
 function formatBytes(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
@@ -422,6 +423,7 @@ export function UserDetailPage() {
         <div className="user-detail-profile-banner">
           <UserAvatar
             src={readOptionalAvatarUrl(user as object)}
+            telegramPhotoTelegramId={telegramPhotoIdForProvider(user.provider, user.externalId)}
             name={user.displayName ?? user.email ?? `User #${user.id ?? ""}`}
             colorSeed={`${user.id ?? ""}|${user.email ?? ""}`}
             size={56}
