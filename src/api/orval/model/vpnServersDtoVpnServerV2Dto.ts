@@ -13,6 +13,8 @@ export interface VpnServersDtoVpnServerV2Dto {
   /** @nullable */
   serverName?: string | null;
   isOnline?: boolean;
+  /** When true, dashboard background polling should skip this server (backend contract). */
+  isDisabled?: boolean;
   isDefault?: boolean;
   /** @nullable */
   apiUrl?: string | null;
