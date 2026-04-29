@@ -1,0 +1,1 @@
+import{d as e}from"./apirequest-DS2Y413L.js";function t(t){return e(t)}function n(e){let n=t(e).exp*1e3;return{expiresAt:n,expiresInMs:n-Date.now()}}export{n,t};
