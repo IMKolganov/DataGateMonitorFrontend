@@ -212,7 +212,17 @@ const ServerList: React.FC = () => {
         totalBytesOut: s.raw.totalBytesOut,
       };
 
-      if (ws) {
+      if (serverRowIsDisabled(s.raw)) {
+        acc[id] = {
+          ...base,
+          ...(ws ?? {}),
+          status: NUMBER_0,
+          nextRunTime: "N/A",
+          errorMessage: null,
+          countConnectedClients: ws?.countConnectedClients ?? base.countConnectedClients,
+          countSessions: ws?.countSessions ?? base.countSessions,
+        };
+      } else if (ws) {
         acc[id] = {
           ...base,
           ...ws,
