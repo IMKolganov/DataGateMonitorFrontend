@@ -92,6 +92,7 @@ function unwrapServerDto(raw: GetByIdResult | undefined): VpnServerDto | null {
     serverType,
     serverName: (o["serverName"] as string | null | undefined) ?? null,
     isOnline: Boolean(o["isOnline"] ?? false),
+    isDisabled: Boolean(o["isDisabled"] ?? false),
     isDefault: Boolean(o["isDefault"] ?? false),
     apiUrl: (o["apiUrl"] as string | null | undefined) ?? null,
     latitude: (o["latitude"] as number | null | undefined) ?? null,
@@ -260,6 +261,7 @@ const ServerForm: React.FC = () => {
     serverType: VpnServerType.OpenVpn,
     serverName: "",
     isOnline: false,
+    isDisabled: false,
     isDefault: false,
     apiUrl: null,
     latitude: null,
@@ -388,6 +390,7 @@ const ServerForm: React.FC = () => {
       latitude: dto.latitude ?? null,
       longitude: dto.longitude ?? null,
       isOnline: dto.isOnline ?? false,
+      isDisabled: dto.isDisabled ?? false,
       isDefault: dto.isDefault ?? false,
       isEnableWss: dto.isEnableWss ?? false,
       lastUpdate: dto.lastUpdate ?? prev.lastUpdate,
@@ -563,6 +566,11 @@ const ServerForm: React.FC = () => {
       return;
     }
 
+    if (name === "isDisabled") {
+      setServerData((p) => ({ ...p, isDisabled: checked }));
+      return;
+    }
+
     if (name === "isEnableWss") {
       setServerData((p) => ({ ...p, isEnableWss: checked }));
       return;
@@ -594,6 +602,7 @@ const ServerForm: React.FC = () => {
           apiUrl: serverData.apiUrl ?? null,
           isDefault: serverData.isDefault ?? false,
           isOnline: serverData.isOnline ?? false,
+          isDisabled: serverData.isDisabled ?? false,
           latitude: serverData.latitude ?? null,
           longitude: serverData.longitude ?? null,
           isEnableWss: serverData.isEnableWss ?? false,
@@ -642,6 +651,7 @@ const ServerForm: React.FC = () => {
           apiUrl: serverData.apiUrl ?? null,
           isDefault: serverData.isDefault ?? false,
           isOnline: serverData.isOnline ?? false,
+          isDisabled: serverData.isDisabled ?? false,
           latitude: serverData.latitude ?? null,
           longitude: serverData.longitude ?? null,
           isEnableWss: serverData.isEnableWss ?? false,
@@ -771,6 +781,25 @@ const ServerForm: React.FC = () => {
                 <div className="checkbox-content">
                   <span className="checkbox-title">Online</span>
                   <span className="checkbox-description">Show this server as online.</span>
+                </div>
+              </label>
+            </div>
+
+            <div className="form-group checkbox-container">
+              <label className="checkbox-label">
+                <input
+                    type="checkbox"
+                    name="isDisabled"
+                    checked={Boolean(serverData.isDisabled)}
+                    onChange={handleCheckboxChange}
+                    disabled={isFetching}
+                />
+                <div className="checkbox-content">
+                  <span className="checkbox-title">Disable background polling</span>
+                  <span className="checkbox-description">
+                    When enabled, the dashboard background service must not poll this server (OpenVPN/Xray
+                    metrics). Requires API support for <code>isDisabled</code>.
+                  </span>
                 </div>
               </label>
             </div>

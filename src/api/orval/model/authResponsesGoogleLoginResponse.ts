@@ -13,6 +13,8 @@ export interface AuthResponsesGoogleLoginResponse {
   email?: string | null;
   isNewUser?: boolean;
   /** @nullable */
+  avatarUrl?: string | null;
+  /** @nullable */
   token?: string | null;
   expiration?: string;
   /** @nullable */
