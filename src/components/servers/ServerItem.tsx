@@ -116,6 +116,7 @@ const ServerItem: React.FC<Props> = ({
     const isOnlineFromApi = !!vpnServer?.isOnline;
     const isOnline = wsOnline === null ? isOnlineFromApi : wsOnline;
     const isDefault = !!vpnServer?.isDefault;
+    const isDisabled = Boolean(vpnServer?.isDisabled);
 
     const connectedClients =
         wsCountConnectedClients ?? server.countConnectedClients ?? 0;
@@ -144,6 +145,14 @@ const ServerItem: React.FC<Props> = ({
                         >
                             {stackLabel}
                         </span>
+                        {isDisabled && (
+                            <span
+                                className="server-disabled-pill"
+                                title="Background polling is off for this server; card stays clickable."
+                            >
+                                Polling off
+                            </span>
+                        )}
                     </strong>
                     {quotaPlanGroups.length > 0 && (
                         <div
