@@ -1,0 +1,1 @@
+var e=`http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier`;function t(e,t){for(let n of t){let t=e[n];if(typeof t==`string`&&t.trim().length>0)return t.trim()}return``}function n(n){return t(n,[`externalId`,`external_id`,`provider_external_id`])||t(n,[`nameid`,`sub`,e])}export{n as t};

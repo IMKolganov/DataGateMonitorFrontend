@@ -16,7 +16,6 @@ export interface VpnServersRequestsUpdateServerRequest {
   /** @minLength 1 */
   serverName: string;
   isOnline?: boolean;
-  isDisabled?: boolean;
   isDefault?: boolean;
   /** @nullable */
   apiUrl?: string | null;
@@ -29,4 +28,5 @@ export interface VpnServersRequestsUpdateServerRequest {
   quotaPlanIds?: number[] | null;
   /** @nullable */
   tagIds?: number[] | null;
+  isDisabled?: boolean;
 }

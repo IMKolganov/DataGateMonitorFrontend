@@ -54,6 +54,8 @@ export * from "./apiTelegramBotLocalizationResponsesSetTelegramUserLanguageRespo
 export * from "./apiTelegramBotUserRequestsUserRequest";
 export * from "./apiTelegramBotUserResponsesGetAdminsResponse";
 export * from "./apiTelegramBotUserResponsesGetAllTelegramUsersResponse";
+export * from "./apiTelegramBotUserResponsesTelegramBotUserProfilePhotoMetaResponse";
+export * from "./apiTelegramBotUserResponsesUpsertTelegramBotUserProfilePhotoResponse";
 export * from "./apiUserQuotaPlansResponsesGetAllUserQuotaPlansResponse";
 export * from "./apiUserQuotaPlansResponsesGetUserQuotaPlansByUserIdResponse";
 export * from "./apiUserQuotaPlansResponsesUserQuotaPlanResponse";
@@ -218,10 +220,13 @@ export * from "./telegramBotLocalizationResponsesGetTextForTelegramUserResponse"
 export * from "./telegramBotLocalizationResponsesIsExistTelegramUserLanguagePreferenceResponse";
 export * from "./telegramBotLocalizationResponsesSetTelegramUserLanguageResponse";
 export * from "./telegramBotUserRequestsTelegramUserActionRequest";
+export * from "./telegramBotUserRequestsUpsertTelegramBotUserProfilePhotoRequest";
 export * from "./telegramBotUserRequestsUserRequest";
 export * from "./telegramBotUserResponsesDtoTelegramBotUserDto";
 export * from "./telegramBotUserResponsesGetAdminsResponse";
 export * from "./telegramBotUserResponsesGetAllTelegramUsersResponse";
+export * from "./telegramBotUserResponsesTelegramBotUserProfilePhotoMetaResponse";
+export * from "./telegramBotUserResponsesUpsertTelegramBotUserProfilePhotoResponse";
 export * from "./userQuotaPlansDtoUserQuotaPlanDto";
 export * from "./userQuotaPlansRequestsCreateOrUpdateUserQuotaPlanRequest";
 export * from "./userQuotaPlansResponsesGetAllUserQuotaPlansResponse";
