@@ -7,12 +7,22 @@ import CustomThemeProvider from "./ui/ThemeProvider.tsx";
 import { Link, useParams } from "react-router-dom";
 import type { VpnClientInfoDto } from "../api/orvalModelShim";
 import "../css/Table.css";
+import { UserAvatar } from "./ui/UserAvatar.tsx";
+import { readOptionalAvatarUrl } from "../utils/readOptionalAvatarUrl.ts";
 import { apiRequest } from "../api/apirequest";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import { toast } from "react-toastify";
 import { FaBolt, FaBan } from "react-icons/fa";
 
 type ClientDto = VpnClientInfoDto;
+
+/** Backend may add `userId` before OpenAPI/orval is updated. */
+function pickClientUserId(client: object): string {
+    const v = (client as Record<string, unknown>)["userId"];
+    if (typeof v === "number" && Number.isFinite(v)) return String(v);
+    if (typeof v === "string" && /^\d+$/.test(v.trim())) return v.trim();
+    return "";
+}
 
 interface ClientsTableProps {
     clients: ClientDto[];
@@ -82,24 +92,51 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
         [serverIdForActions, onXraySessionsChanged]
     );
 
-    const rows = clients.map((client, index) => ({
-        id: client.id ?? page * pageSize + index + 1,
-        commonName: client.commonName ?? "",
-        externalId: client.externalId ?? "",
-        displayName: client.displayName ?? "",
-        remoteIp: client.remoteIp ?? "",
-        localIp: client.localIp ?? "",
-        bytesReceived: formatBytes(client.bytesReceived ?? 0),
-        bytesSent: formatBytes(client.bytesSent ?? 0),
-        connectedSince: client.connectedSince
-            ? formatDateWithOffset(new Date(client.connectedSince))
-            : "",
-        country: [client.country, client.region, client.city].filter(Boolean).join(", "),
-        _cn: client.commonName ?? "",
-    }));
+    const rows = clients.map((client, index) => {
+        const rowId = client.id ?? page * pageSize + index + 1;
+        const externalId = client.externalId ?? "";
+        const displayName = client.displayName ?? "";
+        const commonName = client.commonName ?? "";
+        const userId = pickClientUserId(client as object);
+        return {
+            id: rowId,
+            commonName,
+            externalId,
+            displayName,
+            displayNameForAvatar: displayName || commonName || externalId || "Client",
+            avatarUrl: readOptionalAvatarUrl(client as object),
+            avatarColorSeed: [userId && `u:${userId}`, externalId, displayName, commonName, String(rowId)]
+                .filter(Boolean)
+                .join("|"),
+            remoteIp: client.remoteIp ?? "",
+            localIp: client.localIp ?? "",
+            bytesReceived: formatBytes(client.bytesReceived ?? 0),
+            bytesSent: formatBytes(client.bytesSent ?? 0),
+            connectedSince: client.connectedSince
+                ? formatDateWithOffset(new Date(client.connectedSince))
+                : "",
+            country: [client.country, client.region, client.city].filter(Boolean).join(", "),
+            _cn: commonName,
+        };
+    });
 
     const columns: GridColDef[] = useMemo(() => {
         const base: GridColDef[] = [
+        {
+            field: "avatar",
+            headerName: "",
+            width: 56,
+            sortable: false,
+            disableColumnMenu: true,
+            renderCell: (params) => (
+                <UserAvatar
+                    src={params.row.avatarUrl as string | undefined}
+                    name={params.row.displayNameForAvatar as string}
+                    colorSeed={params.row.avatarColorSeed as string}
+                    size={28}
+                />
+            ),
+        },
         { field: "id", headerName: "ID", width: 70 },
         { field: "commonName", headerName: "Common Name", flex: 0.7 },
         {

@@ -1,6 +1,7 @@
 import { decodeToken } from "./jwt";
 import { SystemRoles } from "../../constants/systemRoles";
-import {ACCESS_TOKEN_KEY} from "../const.ts";
+import { ACCESS_TOKEN_KEY } from "../const.ts";
+import { getStoredProfileAvatarUrl } from "./storedProfileAvatar";
 
 const ROLE_CLAIM =
     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
@@ -13,6 +14,8 @@ export interface CurrentUser {
     displayName?: string;
     email?: string;
     role?: string;
+    /** Google (or future) profile image; from localStorage until API adds JWT claim. */
+    avatarUrl?: string;
 }
 
 export function getCurrentUser(): CurrentUser | null {
@@ -27,11 +30,17 @@ export function getCurrentUser(): CurrentUser | null {
             decoded[NAME_IDENTIFIER_CLAIM];
         const id = typeof rawId === "number" ? rawId : Number(rawId);
 
+        const jwtAvatar =
+            typeof decoded.avatarUrl === "string" && decoded.avatarUrl.startsWith("http")
+                ? decoded.avatarUrl
+                : undefined;
+
         return {
             id: Number.isFinite(id) ? id : 0,
             displayName: decoded.displayName,
             email: decoded.email,
             role: decoded[ROLE_CLAIM] as string | undefined,
+            avatarUrl: jwtAvatar ?? getStoredProfileAvatarUrl(),
         };
     } catch {
         return null;

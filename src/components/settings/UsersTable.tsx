@@ -5,6 +5,8 @@ import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type { UserDto } from "../../api/orvalModelShim";
 import "../../css/Table.css";
+import { UserAvatar } from "../ui/UserAvatar.tsx";
+import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
 
 interface UsersTableProps {
   users: UserDto[];
@@ -28,6 +30,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
         return {
           id,
           displayName: u.displayName ?? "-",
+          displayNameForAvatar: u.displayName ?? u.email ?? "-",
+          avatarUrl: readOptionalAvatarUrl(u),
           email: u.email ?? "-",
           provider: u.provider ?? "-",
           externalId: u.externalId ?? "-",
@@ -42,6 +46,21 @@ const UsersTable: React.FC<UsersTableProps> = ({
   );
 
   const columns: GridColDef[] = [
+    {
+      field: "avatar",
+      headerName: "",
+      width: 56,
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: (params) => (
+        <UserAvatar
+          src={params.row.avatarUrl as string | undefined}
+          name={params.row.displayNameForAvatar as string}
+          colorSeed={`${params.row.id}|${params.row.email}`}
+          size={28}
+        />
+      ),
+    },
     { field: "id", headerName: "ID", width: 70 },
     { field: "displayName", headerName: "Display Name", flex: 1 },
     { field: "email", headerName: "Email", flex: 1 },

@@ -6,6 +6,7 @@ import {
   REFRESH_TOKEN_EXPIRATION,
   REFRESH_TOKEN_KEY,
 } from "../utils/const.ts";
+import { clearStoredProfileAvatarUrl } from "../utils/auth/storedProfileAvatar.ts";
 import { notifyAccessTokenRefreshed } from "../utils/auth/accessTokenEvents.ts";
 import { authErrFields, authLog } from "../utils/auth/authLog.ts";
 import type { RefreshRequest, RefreshResponse } from "./orvalModelShim";
@@ -159,6 +160,7 @@ export const logout = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_EXPIRATION);
+  clearStoredProfileAvatarUrl();
 
   if (window.location.pathname !== "/login") {
     window.location.assign("/login");
@@ -169,6 +171,7 @@ const softLogout = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_EXPIRATION);
+  clearStoredProfileAvatarUrl();
 
   if (window.location.pathname !== "/login") {
     window.location.assign("/login");

@@ -5,8 +5,9 @@ import type { LoginRequest, LoginResponse } from "../../api/orvalModelShim";
 import { FaDoorOpen } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
 import { scheduleAutoLogout } from "../../utils/auth/authSession";
-import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY} from "../../utils/const.ts";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY } from "../../utils/const.ts";
 import axios from "axios";
+import { clearStoredProfileAvatarUrl } from "../../utils/auth/storedProfileAvatar";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
 interface PasswordLoginFormProps {
@@ -47,6 +48,7 @@ const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({ redirectPath = "/
         throw new Error("No token returned by API.");
       }
 
+      clearStoredProfileAvatarUrl();
       localStorage.setItem(ACCESS_TOKEN_KEY, token);
       if (refreshToken) {
         localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);

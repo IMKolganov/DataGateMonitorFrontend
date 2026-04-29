@@ -1,0 +1,1 @@
+function e(e){let t=e.avatarUrl;return typeof t==`string`&&t.length>0?t:void 0}export{e as t};
