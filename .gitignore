@@ -92,3 +92,6 @@ typings/
 
 .env.local
 .idea
+
+# Vite production build (regenerate with npm run build)
+dist/

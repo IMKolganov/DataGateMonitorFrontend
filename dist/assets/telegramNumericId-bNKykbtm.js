@@ -1,1 +1,0 @@
-function e(e){if(e==null)return;let t=typeof e==`number`?String(Math.trunc(e)):String(e).trim();if(!/^\d{5,20}$/.test(t))return;let n=Number(t);if(!(!Number.isSafeInteger(n)||n<=0))return n}function t(t,n){if((t??``).toLowerCase().includes(`telegram`))return e(n)}export{t as n,e as t};
