@@ -10,6 +10,7 @@ import {
   FaSlidersH,
   FaTelegram,
   FaUsers,
+  FaEnvelope,
 } from "react-icons/fa";
 import "../css/Settings.css";
 
@@ -29,6 +30,7 @@ const SETTINGS_TABS: SettingsTab[] = [
   { label: "VPN notifications", path: "vpn-notifications", Icon: FaBell, mobilePrefix: "🔔" },
   { label: "Telegram Bot", path: "telegrambot", Icon: FaTelegram, mobilePrefix: "✈️" },
   { label: "Users", path: "users", Icon: FaUsers, mobilePrefix: "👥" },
+  { label: "Email broadcast", path: "email-broadcast", Icon: FaEnvelope, mobilePrefix: "✉️" },
 ];
 
 export function Settings() {

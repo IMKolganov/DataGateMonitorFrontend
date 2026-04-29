@@ -36,6 +36,7 @@ const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
 const UsersSettings = lazy(() => import("./pages/UsersSettings/UsersSettings"));
 const UserQuotasPage = lazy(() => import("./pages/UsersSettings/UserQuotasPage"));
 const UserDetailPage = lazy(() => import("./pages/UsersSettings/UserDetailPage"));
+const EmailBroadcastSettings = lazy(() => import("./pages/EmailBroadcastSettings"));
 const QuotaPlansSettings = lazy(() => import("./pages/QuotaPlansSettings/QuotaPlansSettings"));
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
 const ServersOverview = lazy(() => import("./pages/ServersOverview"));
@@ -155,6 +156,7 @@ function App() {
                       <Route path="users/quotas" element={withSuspense(<UserQuotasPage />)} />
                       <Route path="users" element={withSuspense(<UsersSettings />)} />
                       <Route path="users/:userId" element={withSuspense(<UserDetailPage />)} />
+                      <Route path="email-broadcast" element={withSuspense(<EmailBroadcastSettings />)} />
                     </Route>
 
                     <Route path="/notifications" element={withSuspense(<NotificationsPage />)} />
