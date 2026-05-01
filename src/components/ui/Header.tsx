@@ -16,7 +16,7 @@ export function Header() {
     const { data: unreadCount = 0 } = useNotificationsUnreadCount();
 
     return (
-        <header className="header">
+        <header className={`header${menuOpen ? " header--nav-open" : ""}`}>
             <Link to="/" className="logo" onClick={() => setMenuOpen(false)}>
                 <div className="logo">
                     <img src="/favicon.png" alt="Logo" className="logo-icon" />

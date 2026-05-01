@@ -1,17 +1,21 @@
+import { useMemo } from "react";
 import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
 import type { IconType } from "react-icons";
 import {
   FaArrowLeft,
   FaBell,
+  FaBug,
   FaClipboardList,
   FaCog,
   FaDatabase,
+  FaEnvelope,
+  FaKey,
   FaLaptopCode,
   FaSlidersH,
   FaTelegram,
   FaUsers,
-  FaEnvelope,
 } from "react-icons/fa";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import "../css/Settings.css";
 
 type SettingsTab = {
@@ -22,7 +26,7 @@ type SettingsTab = {
   mobilePrefix: string;
 };
 
-const SETTINGS_TABS: SettingsTab[] = [
+const ALL_SETTINGS_TABS: SettingsTab[] = [
   { label: "General", path: "general", Icon: FaSlidersH, mobilePrefix: "⚙️" },
   { label: "API Clients", path: "applications", Icon: FaLaptopCode, mobilePrefix: "🔌" },
   { label: "Quotas", path: "quotas", Icon: FaClipboardList, mobilePrefix: "📋" },
@@ -31,16 +35,24 @@ const SETTINGS_TABS: SettingsTab[] = [
   { label: "Telegram Bot", path: "telegrambot", Icon: FaTelegram, mobilePrefix: "✈️" },
   { label: "Users", path: "users", Icon: FaUsers, mobilePrefix: "👥" },
   { label: "Email broadcast", path: "email-broadcast", Icon: FaEnvelope, mobilePrefix: "✉️" },
+  { label: "Android crashes", path: "android-crashes", Icon: FaBug, mobilePrefix: "🐞" },
+  { label: "Admin password", path: "admin-password", Icon: FaKey, mobilePrefix: "🔑" },
 ];
 
 export function Settings() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const tabs = SETTINGS_TABS;
+  const tabs = isAdmin(getCurrentUser())
+    ? ALL_SETTINGS_TABS
+    : ALL_SETTINGS_TABS.filter(
+        (t) => t.path !== "admin-password" && t.path !== "android-crashes",
+      );
 
   const pathRest = location.pathname.replace(/^\/settings\/?/, "") || "general";
   const currentTab = pathRest.startsWith("users") ? "users" : pathRest.split("/")[0];
+  const tabPaths = useMemo(() => new Set(tabs.map((t) => t.path)), [tabs]);
+  const selectTabValue = tabPaths.has(currentTab) ? currentTab : "general";
 
   const isTabActive = (path: string) => {
     if (path === "users") {
@@ -100,7 +112,7 @@ export function Settings() {
       {/* Mobile dropdown */}
       <select
         className="tabs-dropdown mobile-tabs"
-        value={currentTab}
+        value={selectTabValue}
         onChange={handleSelectChange}
       >
         {tabs.map((tab) => (

@@ -1,18 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FaEnvelope, FaPaperPlane, FaPlus, FaSync, FaSave, FaFileImport } from "react-icons/fa";
 import { toast } from "react-toastify";
 import type { GridColDef } from "@mui/x-data-grid";
-import {
-  TextField,
-  Button,
-  Box,
-  Typography,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from "@mui/material";
 import StyledDataGrid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import {
@@ -28,19 +17,231 @@ import type { EmailBroadcastResponsesDtoEmailBroadcastTemplateDto } from "../api
 import type { EmailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto } from "../api/orval/model/emailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto";
 import type { EmailBroadcastResponsesDtoSentEmailLogDto } from "../api/orval/model/emailBroadcastResponsesDtoSentEmailLogDto";
 import type { EmailBroadcastResponsesGetEmailTemplatesResponse } from "../api/orval/model/emailBroadcastResponsesGetEmailTemplatesResponse";
-import type { EmailBroadcastResponsesGetSentEmailHistoryResponse } from "../api/orval/model/emailBroadcastResponsesGetSentEmailHistoryResponse";
 import type { EmailBroadcastResponsesSendAdminEmailResponse } from "../api/orval/model/emailBroadcastResponsesSendAdminEmailResponse";
 import type { SentEmailLogDto } from "../api/orvalModelShim";
 import { formatDateWithOffset } from "../utils/utils.ts";
+import { usePersistedPageSize } from "../hooks/usePersistedPageSize.ts";
 import "../css/Settings.css";
 import "../css/Table.css";
 
-const defaultHtml = "<p>Hello,</p>\n<p></p>\n<p>— DataGateMonitor</p>";
+/** Default starter HTML for the broadcast editor. */
+const defaultHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="supported-color-schemes" content="light dark" />
+  <title>DataGate - email template</title>
+  <style type="text/css">
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
 
-function unwrapHistory(
-  raw: unknown,
-): EmailBroadcastResponsesGetSentEmailHistoryResponse | undefined {
-  return raw as EmailBroadcastResponsesGetSentEmailHistoryResponse | undefined;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.55;
+      color: #1f2328;
+      background-color: #f6f8fa;
+    }
+
+    .wrap { width: 100%; background-color: #f6f8fa; }
+    .shell { max-width: 600px; margin: 0 auto; }
+
+    .card {
+      background-color: #ffffff;
+      border: 1px solid #d0d7de;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .accent {
+      height: 4px;
+      line-height: 0;
+      font-size: 0;
+      background: linear-gradient(90deg, #238636, #2ea043);
+    }
+
+    .pad { padding: 28px 24px 24px; }
+
+    .email-title {
+      margin: 0 0 4px;
+      font-size: 22px;
+      font-weight: 600;
+      color: #1f2328;
+      letter-spacing: -0.02em;
+    }
+
+    .email-tagline {
+      margin: 0 0 24px;
+      font-size: 13px;
+      color: #656d76;
+    }
+
+    .email-lead {
+      margin: 0 0 16px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #24292f;
+    }
+
+    .email-body {
+      margin: 0 0 16px;
+      font-size: 15px;
+      color: #424a53;
+      line-height: 1.55;
+    }
+
+    .email-body:last-of-type { margin-bottom: 0; }
+
+    .email-body a {
+      color: #0969da;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .email-body a:hover { text-decoration: underline; }
+
+    .email-signoff {
+      margin: 0;
+      font-size: 15px;
+      color: #424a53;
+      line-height: 1.55;
+    }
+
+    .btn-wrap { margin-top: 16px; margin-bottom: 8px; }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 8px;
+      background-color: #238636;
+      color: #ffffff !important;
+      border: 1px solid #2ea043;
+    }
+
+    .footer {
+      padding: 20px 24px 28px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #656d76;
+      text-align: center;
+      border-top: 1px solid #d0d7de;
+      background-color: #f6f8fa;
+    }
+
+    .footer a { color: #0969da; text-decoration: none; font-weight: 500; }
+
+    .footer-muted { margin-bottom: 8px; }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        color: #e6edf3 !important;
+        background-color: #0d1117 !important;
+      }
+      .wrap { background-color: #0d1117 !important; }
+      .card {
+        background-color: #161b22 !important;
+        border-color: #30363d !important;
+      }
+      .email-title { color: #f0f6fc !important; }
+      .email-tagline { color: #9da7b3 !important; }
+      .email-lead { color: #e6edf3 !important; }
+      .email-body,
+      .email-signoff {
+        color: #c9d1d9 !important;
+      }
+      .email-body a { color: #79c0ff !important; }
+      .footer {
+        color: #9da7b3 !important;
+        border-top-color: #30363d !important;
+        background-color: #0d1117 !important;
+      }
+      .footer a { color: #79c0ff !important; }
+    }
+
+    @media only screen and (max-width: 620px) {
+      .pad { padding: 22px 18px 18px !important; }
+      .email-title { font-size: 20px !important; }
+      .btn { display: block !important; text-align: center !important; }
+    }
+  </style>
+</head>
+<body>
+<table role="presentation" class="wrap" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td align="center" style="padding:24px 12px;">
+      <table role="presentation" class="shell" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
+        <tr>
+          <td>
+            <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border:1px solid #d0d7de;border-radius:12px;">
+              <tr>
+                <td class="accent">&nbsp;</td>
+              </tr>
+              <tr>
+                <td class="pad">
+                  <p class="email-title">Basic DataGate template</p>
+                  <p class="email-tagline">Replace text below and save if needed.</p>
+
+                  <div class="btn-wrap">
+                    <a class="btn" href="https://datagateapp.com/download" target="_blank" rel="noopener noreferrer">
+                      Optional call to action
+                    </a>
+                  </div>
+
+                  <br />
+                  <p class="email-lead">Hello,</p>
+                  <p class="email-body">This is a base email template. Replace this text with your actual message content.</p>
+                  <p class="email-body">You can edit the title, body, links, and footer before sending or saving this template.</p>
+                  <p class="email-signoff">- The DataGate team</p>
+                </td>
+              </tr>
+              <tr>
+                <td class="footer">
+                  <div class="footer-muted">
+                    Open clients and server-side tools for full control of your VPN
+                  </div>
+                  <div class="footer-muted">
+                    <a href="https://datagateapp.com/" target="_blank" rel="noopener noreferrer">datagateapp.com</a>
+                  </div>
+                  <div>&copy; 2026 DataGate</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
+
+/** Same idea as Events.tsx: API may return camelCase or PascalCase after JSON options. */
+function normalizeSentHistory(raw: unknown): {
+  items: EmailBroadcastResponsesDtoSentEmailLogDto[];
+  totalCount: number;
+} {
+  if (raw == null || typeof raw !== "object") {
+    return { items: [], totalCount: 0 };
+  }
+  const o = raw as Record<string, unknown>;
+  const itemsRaw = o.items ?? o.Items;
+  const items = Array.isArray(itemsRaw)
+    ? (itemsRaw as EmailBroadcastResponsesDtoSentEmailLogDto[])
+    : [];
+  const tc = o.totalCount ?? o.TotalCount;
+  const totalCount =
+    typeof tc === "number" && Number.isFinite(tc) ? Math.max(0, tc) : items.length;
+  return { items, totalCount };
 }
 
 function unwrapTemplates(
@@ -61,8 +262,18 @@ export default function EmailBroadcastSettings() {
   const [targetUserIdRaw, setTargetUserIdRaw] = useState("");
   const [previewHtml, setPreviewHtml] = useState(defaultHtml);
 
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [historyPage, setHistoryPage] = useState(0);
+  const [historyPageSize, setHistoryPageSize] = usePersistedPageSize(
+    "email-broadcast-history",
+    10,
+    "5,10,20,50,100",
+  );
+  const [tplGridPage, setTplGridPage] = useState(0);
+  const [tplPageSize, setTplPageSize] = usePersistedPageSize(
+    "email-broadcast-templates",
+    10,
+    "5,10,20,50,100",
+  );
   const [bodyDialog, setBodyDialog] = useState<SentEmailLogDto | null>(null);
 
   const [tplDialogOpen, setTplDialogOpen] = useState(false);
@@ -72,15 +283,33 @@ export default function EmailBroadcastSettings() {
   const [tplSubject, setTplSubject] = useState("");
   const [tplHtml, setTplHtml] = useState(defaultHtml);
 
-  const historyQuery = useGetApiAdminEmailBroadcastHistory(
-    { Page: page + 1, PageSize: pageSize },
-    {},
+  const historyQueryParams = useMemo(
+    () => ({ Page: historyPage + 1, PageSize: historyPageSize }),
+    [historyPage, historyPageSize],
   );
-  const historyPayload = unwrapHistory(historyQuery.data);
-  const rows: EmailBroadcastResponsesDtoSentEmailLogDto[] =
-    (historyPayload?.items ?? []) as EmailBroadcastResponsesDtoSentEmailLogDto[];
-  const rowCount = historyPayload?.totalCount ?? 0;
+
+  const historyQuery = useGetApiAdminEmailBroadcastHistory(historyQueryParams, {
+    query: {
+      placeholderData: (prev) => prev,
+    },
+  });
+
+  const historyNormalized = useMemo(
+    () => normalizeSentHistory(historyQuery.data),
+    [historyQuery.data],
+  );
+  const rows = historyNormalized.items;
+  const rowCount = historyNormalized.totalCount;
   const loading = historyQuery.isPending || historyQuery.isFetching;
+
+  useEffect(() => {
+    if (rowCount <= 0) {
+      if (historyPage > 0) setHistoryPage(0);
+      return;
+    }
+    const maxPage = Math.max(0, Math.ceil(rowCount / historyPageSize) - 1);
+    if (historyPage > maxPage) setHistoryPage(maxPage);
+  }, [rowCount, historyPageSize, historyPage]);
 
   const templatesQuery = useGetApiAdminEmailBroadcastTemplates({});
   const templatesPayload = unwrapTemplates(templatesQuery.data);
@@ -229,23 +458,23 @@ export default function EmailBroadcastSettings() {
     {
       field: "actions",
       headerName: "",
-      width: 220,
+      width: 260,
       sortable: false,
       renderCell: (params) => {
         const id = Number(params.id);
         const name = String(params.row.name ?? "");
         return (
-          <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-            <Button size="small" variant="text" onClick={() => void applyTemplateToComposer(id)}>
+          <div className="action-container">
+            <button type="button" className="btn secondary" onClick={() => void applyTemplateToComposer(id)}>
               Use
-            </Button>
-            <Button size="small" variant="text" onClick={() => void openEditTemplate(id)}>
+            </button>
+            <button type="button" className="btn secondary" onClick={() => void openEditTemplate(id)}>
               Edit
-            </Button>
-            <Button size="small" color="error" variant="text" onClick={() => void removeTemplate(id, name)}>
+            </button>
+            <button type="button" className="btn danger" onClick={() => void removeTemplate(id, name)}>
               Delete
-            </Button>
-          </Box>
+            </button>
+          </div>
         );
       },
     },
@@ -253,8 +482,12 @@ export default function EmailBroadcastSettings() {
 
   const gridRows = useMemo(
     () =>
-      rows.map((r) => ({
-        id: r.id,
+      rows.map((r, idx) => ({
+        id:
+          r.id != null && Number.isFinite(Number(r.id))
+            ? Number(r.id)
+            : `log-${historyPage}-${historyPageSize}-${idx}-${String(r.createDate ?? "")}-${String(r.recipientEmail ?? "")}`,
+        raw: r as SentEmailLogDto,
         createDate: r.createDate ? formatDateWithOffset(new Date(r.createDate)) : "",
         recipientEmail: r.recipientEmail,
         recipientUserId: r.recipientUserId ?? "",
@@ -262,7 +495,7 @@ export default function EmailBroadcastSettings() {
         success: r.success ? "Yes" : "No",
         errorMessage: r.errorMessage ?? "",
       })),
-    [rows],
+    [rows, historyPage, historyPageSize],
   );
 
   const columns: GridColDef[] = [
@@ -278,11 +511,15 @@ export default function EmailBroadcastSettings() {
       width: 90,
       sortable: false,
       renderCell: (params) => {
-        const row = rows.find((x) => x.id === params.id);
+        const raw = (params.row as { raw?: SentEmailLogDto }).raw;
         return (
-          <Button size="small" variant="text" onClick={() => row && setBodyDialog(row as SentEmailLogDto)}>
+          <button
+            type="button"
+            className="btn secondary"
+            onClick={() => raw && setBodyDialog(raw)}
+          >
             View
-          </Button>
+          </button>
         );
       },
     },
@@ -308,11 +545,17 @@ export default function EmailBroadcastSettings() {
       toast.error("HTML body is required.");
       return;
     }
-    const scope =
+    const scopeRu =
       targetUserId == null
-        ? "ALL users that have an email address"
-        : `user id ${targetUserId} only`;
-    if (!window.confirm(`Send this email to ${scope}?\n\nSubject: ${subject.trim()}`)) return;
+        ? "всем пользователям панели, у кого в профиле указан email (массовая рассылка)"
+        : `только одному пользователю с ID ${targetUserId}`;
+    if (
+      !window.confirm(
+        `Вы уверены?\n\nБудет отправлено: ${scopeRu}.\nТема: «${subject.trim()}»`,
+      )
+    ) {
+      return;
+    }
     try {
       const res = await sendMutation.mutateAsync({
         data: {
@@ -332,186 +575,303 @@ export default function EmailBroadcastSettings() {
   };
 
   return (
-    <div className="content-wrapper wide-table settings">
+    <>
       <h2 className="settings-page__h2-with-icon">
         <FaEnvelope className="icon" aria-hidden />
         <span>Email broadcast</span>
       </h2>
 
-      <Alert severity="info" sx={{ mb: 2 }}>
-        Uses the configured email provider (SMTP or Resend). Save reusable layouts as templates, then Use them in
-        the composer. Leave &quot;Target user id&quot; empty to mail everyone with a non-empty email.
-      </Alert>
+      <p className="settings-item-description" style={{ marginBottom: 20, maxWidth: 960 }}>
+        Uses the configured email provider (SMTP or Resend). Save reusable layouts as templates, then use them in the
+        composer.{" "}
+        <strong>One recipient:</strong> enter their numeric user ID below (same as &quot;User Id&quot; in Sent mail log
+        or in Users). <strong>Everyone:</strong> leave the field empty — email goes to all dashboard users who have an
+        email saved.
+      </p>
 
-      <Typography variant="subtitle1" sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
-        <FaFileImport /> Templates
-      </Typography>
-      <Box sx={{ mb: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
-        <Button variant="contained" size="small" startIcon={<FaPlus />} onClick={openCreateTemplate}>
-          New template
-        </Button>
-        <Button variant="outlined" size="small" startIcon={<FaSync />} onClick={() => void templatesQuery.refetch()}>
-          Refresh
-        </Button>
-      </Box>
+      <h3 className="settings-card__h3-with-icon" style={{ marginBottom: 12 }}>
+        <FaFileImport className="icon" aria-hidden />
+        <span>Templates</span>
+      </h3>
+      <div className="header-bar" style={{ marginBottom: 12 }}>
+        <div className="left-buttons">
+          <button type="button" className="btn secondary" onClick={() => void templatesQuery.refetch()}>
+            <FaSync className={`icon ${templatesLoading ? "icon-spin" : ""}`} aria-hidden /> Refresh
+          </button>
+          <button type="button" className="btn primary" onClick={openCreateTemplate}>
+            <FaPlus className="icon" aria-hidden /> New template
+          </button>
+        </div>
+      </div>
       <CustomThemeProvider>
-        <StyledDataGrid
-          rows={templateGridRows}
-          columns={templateColumns}
-          loading={templatesLoading}
-          hideFooter
-          disableRowSelectionOnClick
-          autoHeight
-          sx={{ mb: 4 }}
-        />
+        <div
+          className="data-grid-wrap"
+          style={{
+            backgroundColor: "var(--bg-body)",
+            padding: 10,
+            borderRadius: 8,
+            marginBottom: 32,
+          }}
+        >
+          <StyledDataGrid
+            rows={templateGridRows}
+            columns={templateColumns}
+            loading={templatesLoading}
+            paginationMode="client"
+            paginationModel={{ page: tplGridPage, pageSize: tplPageSize }}
+            onPaginationModelChange={(m) => {
+              setTplGridPage(m.page);
+              setTplPageSize(m.pageSize);
+            }}
+            pageSizeOptions={[5, 10, 20, 50, 100]}
+            disableRowSelectionOnClick
+            slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
+            localeText={{ noRowsLabel: "No templates yet. Click «New template» to add one." }}
+          />
+        </div>
       </CustomThemeProvider>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 960, mb: 3 }}>
-        <TextField
-          label="Subject"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          fullWidth
-          required
-        />
-        <TextField
-          label="Target user id (optional)"
-          value={targetUserIdRaw}
-          onChange={(e) => setTargetUserIdRaw(e.target.value)}
-          helperText="Empty = all dashboard users with email"
-          fullWidth
-        />
-        <TextField
-          label="HTML body"
-          value={htmlBody}
-          onChange={(e) => setHtmlBody(e.target.value)}
-          multiline
-          minRows={10}
-          fullWidth
-          required
-        />
-        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-          <Button variant="outlined" startIcon={<FaEnvelope />} onClick={applyPreview}>
-            Refresh preview
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<FaPaperPlane />}
+      <div className="quota-plan-modal email-broadcast-composer" style={{ maxWidth: 960, marginBottom: 24 }}>
+        <div className="form-row">
+          <label htmlFor="email-broadcast-subject">Subject *</label>
+          <input
+            id="email-broadcast-subject"
+            type="text"
+            className="input"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            required
+            autoComplete="off"
+          />
+        </div>
+        <div className="form-row">
+          <label htmlFor="email-broadcast-target-user">Target user ID (optional)</label>
+          <input
+            id="email-broadcast-target-user"
+            type="text"
+            inputMode="numeric"
+            className="input"
+            value={targetUserIdRaw}
+            onChange={(e) => setTargetUserIdRaw(e.target.value)}
+            placeholder="e.g. 42 = one user only; leave empty = all users with email"
+            autoComplete="off"
+          />
+          <p className="settings-item-description" style={{ marginTop: 8, marginBottom: 0 }}>
+            Один адресат — положительное целое число (ID пользователя в системе). Всем сразу — оставьте поле пустым.
+          </p>
+        </div>
+        <div className="form-row">
+          <label htmlFor="email-broadcast-html">HTML body *</label>
+          <textarea
+            id="email-broadcast-html"
+            className="input"
+            value={htmlBody}
+            onChange={(e) => setHtmlBody(e.target.value)}
+            required
+            rows={12}
+            style={{ minHeight: 260 }}
+          />
+        </div>
+        <div className="settings-item" style={{ marginTop: 0, flexWrap: "wrap" }}>
+          <button type="button" className="btn secondary" onClick={applyPreview}>
+            <FaEnvelope className="icon" aria-hidden /> Refresh preview
+          </button>
+          <button
+            type="button"
+            className="btn primary"
             disabled={sendMutation.isPending}
             onClick={() => void onSend()}
           >
-            Send
-          </Button>
-        </Box>
-      </Box>
+            <FaPaperPlane className="icon" aria-hidden /> Send
+          </button>
+        </div>
+      </div>
 
-      <Typography variant="subtitle1" sx={{ mb: 1 }}>
-        Layout preview (sandboxed, scripts disabled)
-      </Typography>
-      <Box
-        sx={{
-          border: "1px solid #30363d",
-          borderRadius: 1,
+      <h3 className="settings-card__h3-with-icon" style={{ marginBottom: 12 }}>
+        <span>Layout preview (sandboxed, scripts disabled)</span>
+      </h3>
+      <div
+        style={{
+          border: "1px solid var(--border-color)",
+          borderRadius: 8,
           overflow: "hidden",
-          mb: 3,
-          minHeight: 200,
-          background: "#fff",
+          marginBottom: 24,
+          minHeight: 720,
+          background: "var(--bg-card)",
         }}
       >
         <iframe
           title="email-preview"
           sandbox=""
           srcDoc={previewHtml || "<p></p>"}
-          style={{ width: "100%", height: 280, border: "none", display: "block" }}
+          style={{ width: "100%", height: 800, border: "none", display: "block" }}
         />
-      </Box>
+      </div>
 
-      <Typography variant="subtitle1" sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
-        <FaSync /> Sent mail log
-      </Typography>
-      <Box sx={{ mb: 1 }}>
-        <Button variant="outlined" size="small" startIcon={<FaSync />} onClick={() => void historyQuery.refetch()}>
-          Refresh log
-        </Button>
-      </Box>
+      <h3 className="settings-card__h3-with-icon" style={{ marginBottom: 12 }}>
+        <FaSync className="icon" aria-hidden />
+        <span>Sent mail log</span>
+      </h3>
+      <div className="header-bar" style={{ marginBottom: 12 }}>
+        <div className="left-buttons">
+          <button type="button" className="btn secondary" onClick={() => void historyQuery.refetch()}>
+            <FaSync className={`icon ${loading ? "icon-spin" : ""}`} aria-hidden /> Refresh log
+          </button>
+        </div>
+      </div>
       <CustomThemeProvider>
-        <StyledDataGrid
-          rows={gridRows}
-          columns={columns}
-          rowCount={rowCount}
-          loading={loading}
-          paginationMode="server"
-          paginationModel={{ page, pageSize }}
-          onPaginationModelChange={(m) => {
-            setPage(m.page);
-            setPageSize(m.pageSize);
+        <div
+          className="data-grid-wrap"
+          style={{
+            backgroundColor: "var(--bg-body)",
+            padding: 10,
+            borderRadius: 8,
           }}
-          pageSizeOptions={[10, 20, 50]}
-          disableRowSelectionOnClick
-          autoHeight
-        />
+        >
+          <StyledDataGrid
+            rows={gridRows}
+            columns={columns}
+            rowCount={rowCount}
+            loading={loading}
+            paginationMode="server"
+            paginationModel={{ page: historyPage, pageSize: historyPageSize }}
+            onPaginationModelChange={(m) => {
+              setHistoryPage(m.page);
+              setHistoryPageSize(m.pageSize);
+            }}
+            pageSizeOptions={[5, 10, 20, 50, 100]}
+            disableRowSelectionOnClick
+            slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
+            localeText={{ noRowsLabel: "📭 No sent mail logged yet." }}
+          />
+        </div>
       </CustomThemeProvider>
 
-      <Dialog open={bodyDialog != null} onClose={() => setBodyDialog(null)} maxWidth="md" fullWidth>
-        <DialogTitle>Sent HTML — {bodyDialog?.recipientEmail}</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            {bodyDialog?.subject}
-          </Typography>
-          <Box sx={{ border: 1, borderColor: "divider", borderRadius: 1, overflow: "hidden" }}>
-            <iframe
-              title="sent-html"
-              sandbox=""
-              srcDoc={bodyDialog?.bodyHtml || "<p></p>"}
-              style={{ width: "100%", height: 360, border: "none", display: "block", background: "#fff" }}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setBodyDialog(null)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={tplDialogOpen} onClose={() => setTplDialogOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>{editingTplId == null ? "New template" : `Edit template #${editingTplId}`}</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-          <TextField label="Name" value={tplName} onChange={(e) => setTplName(e.target.value)} required fullWidth />
-          <TextField
-            label="Description"
-            value={tplDescription}
-            onChange={(e) => setTplDescription(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Subject"
-            value={tplSubject}
-            onChange={(e) => setTplSubject(e.target.value)}
-            required
-            fullWidth
-          />
-          <TextField
-            label="HTML body"
-            value={tplHtml}
-            onChange={(e) => setTplHtml(e.target.value)}
-            multiline
-            minRows={8}
-            fullWidth
-            required
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setTplDialogOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            startIcon={<FaSave />}
-            disabled={createTplMutation.isPending || updateTplMutation.isPending}
-            onClick={() => void saveTemplate()}
+      {bodyDialog != null && (
+        <div className="modal-overlay" onClick={() => setBodyDialog(null)}>
+          <div
+            className="modal-content"
+            style={{ maxWidth: 900, width: "100%" }}
+            onClick={(e) => e.stopPropagation()}
           >
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+            <div className="modal-header">
+              <h3>Sent HTML — {bodyDialog.recipientEmail}</h3>
+              <button type="button" className="modal-close" onClick={() => setBodyDialog(null)} aria-label="Close">
+                ×
+              </button>
+            </div>
+            <div style={{ padding: "0 20px 16px" }}>
+              <p className="settings-item-description" style={{ marginBottom: 12 }}>
+                {bodyDialog.subject}
+              </p>
+              <div
+                style={{
+                  border: "1px solid var(--border-color)",
+                  borderRadius: 8,
+                  overflow: "hidden",
+                }}
+              >
+                <iframe
+                  title="sent-html"
+                  sandbox=""
+                  srcDoc={bodyDialog.bodyHtml || "<p></p>"}
+                  style={{ width: "100%", height: 360, border: "none", display: "block", background: "#ffffff" }}
+                />
+              </div>
+            </div>
+            <div className="modal-actions" style={{ padding: "0 20px 20px" }}>
+              <button type="button" className="btn secondary" onClick={() => setBodyDialog(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tplDialogOpen && (
+        <div className="modal-overlay" onClick={() => setTplDialogOpen(false)}>
+          <div
+            className="modal-content quota-plan-modal"
+            style={{ maxWidth: 720, width: "100%" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h3 className="settings-card__h3-with-icon">
+                {editingTplId == null ? <FaPlus className="icon" aria-hidden /> : <FaSave className="icon" aria-hidden />}
+                <span>{editingTplId == null ? "New template" : `Edit template #${editingTplId}`}</span>
+              </h3>
+              <button type="button" className="modal-close" onClick={() => setTplDialogOpen(false)} aria-label="Close">
+                ×
+              </button>
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void saveTemplate();
+              }}
+            >
+              <div className="form-row">
+                <label htmlFor="tpl-name">Name *</label>
+                <input
+                  id="tpl-name"
+                  type="text"
+                  className="input"
+                  value={tplName}
+                  onChange={(e) => setTplName(e.target.value)}
+                  required
+                  autoComplete="off"
+                />
+              </div>
+              <div className="form-row">
+                <label htmlFor="tpl-description">Description</label>
+                <input
+                  id="tpl-description"
+                  type="text"
+                  className="input"
+                  value={tplDescription}
+                  onChange={(e) => setTplDescription(e.target.value)}
+                  autoComplete="off"
+                />
+              </div>
+              <div className="form-row">
+                <label htmlFor="tpl-subject">Subject *</label>
+                <input
+                  id="tpl-subject"
+                  type="text"
+                  className="input"
+                  value={tplSubject}
+                  onChange={(e) => setTplSubject(e.target.value)}
+                  required
+                  autoComplete="off"
+                />
+              </div>
+              <div className="form-row">
+                <label htmlFor="tpl-html">HTML body *</label>
+                <textarea
+                  id="tpl-html"
+                  className="input"
+                  value={tplHtml}
+                  onChange={(e) => setTplHtml(e.target.value)}
+                  required
+                  rows={10}
+                />
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn secondary" onClick={() => setTplDialogOpen(false)}>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn primary"
+                  disabled={createTplMutation.isPending || updateTplMutation.isPending}
+                >
+                  <FaSave className="icon" aria-hidden /> Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
