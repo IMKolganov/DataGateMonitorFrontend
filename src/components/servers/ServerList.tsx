@@ -90,6 +90,11 @@ const resolveServerId = (item: OrvalServerItem): number => {
   return typeof id === "number" && Number.isFinite(id) && id !== 0 ? id : 0;
 };
 
+function serverRowIsDisabled(raw: OrvalServerItem): boolean {
+  const v = raw.vpnServerResponses?.vpnServer ?? raw.openVpnServerResponses?.vpnServer;
+  return Boolean(v?.isDisabled);
+}
+
 const ServerList: React.FC = () => {
   const [servers, setServers] = useState<MappedServer[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -207,7 +212,17 @@ const ServerList: React.FC = () => {
         totalBytesOut: s.raw.totalBytesOut,
       };
 
-      if (ws) {
+      if (serverRowIsDisabled(s.raw)) {
+        acc[id] = {
+          ...base,
+          ...(ws ?? {}),
+          status: NUMBER_0,
+          nextRunTime: "N/A",
+          errorMessage: null,
+          countConnectedClients: ws?.countConnectedClients ?? base.countConnectedClients,
+          countSessions: ws?.countSessions ?? base.countSessions,
+        };
+      } else if (ws) {
         acc[id] = {
           ...base,
           ...ws,
@@ -294,7 +309,9 @@ const ServerList: React.FC = () => {
                   servers.map((server) => (
                       <li
                           key={server.id}
-                          className={`server-item clickable ${selectedServerId === server.id ? "selected" : ""}`}
+                          className={`server-item clickable ${selectedServerId === server.id ? "selected" : ""}${
+                              serverRowIsDisabled(server.raw) ? " server-item--polling-off" : ""
+                          }`}
                           onClick={() =>
                               navigate(
                                   buildServerSwitchPath(server.id, location.pathname, canAddServer),

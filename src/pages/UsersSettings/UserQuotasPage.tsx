@@ -10,6 +10,7 @@ import type { OverviewTotalsResponse, UserDto } from "../../api/orvalModelShim";
 import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
 import { UserAvatar } from "../../components/ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
+import { telegramPhotoIdForProvider } from "../../utils/telegramNumericId.ts";
 import { useUsers } from "./useUsers";
 import "../../css/Settings.css";
 
@@ -38,6 +39,7 @@ function QuotaRow({ u }: { u: UserDto }) {
         <div className="user-quota-list__row-head-main">
           <UserAvatar
             src={readOptionalAvatarUrl(u as object)}
+            telegramPhotoTelegramId={telegramPhotoIdForProvider(u.provider, u.externalId)}
             name={title}
             colorSeed={`${id}|${u.email ?? ""}`}
             size={40}

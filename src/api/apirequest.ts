@@ -156,6 +156,13 @@ export const ensureApiBaseUrl = async () => {
   }
 };
 
+/** Absolute API origin (trailing slash stripped) for authenticated fetches outside `apiRequest` (e.g. blob URLs for `<img>`). */
+export const getApiBaseUrlResolved = async (): Promise<string> => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not configured");
+  return API_BASE_URL.replace(/\/+$/, "");
+};
+
 export const logout = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);

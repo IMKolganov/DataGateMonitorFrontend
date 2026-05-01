@@ -113,6 +113,11 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
       renderCell: (params) => (
         <UserAvatar
           src={params.row.avatarUrl as string | undefined}
+          telegramPhotoTelegramId={
+            typeof params.row.telegramId === "number" && params.row.telegramId > 0
+              ? params.row.telegramId
+              : undefined
+          }
           name={params.row.displayNameForAvatar as string}
           colorSeed={String(params.row.telegramId)}
           size={28}

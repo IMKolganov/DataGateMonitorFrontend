@@ -44,9 +44,21 @@ const lightPalette = {
   },
 };
 
+/**
+ * Build theme with `palette.mode` set from the start so MUI derives `action`, `divider`, etc.
+ * for that mode. Merging `mode: "dark"` onto the default **light** `createTheme()` leaves
+ * light `action.disabled` on SvgIcon (e.g. DataGrid boolean “no” crosses) — nearly invisible
+ * on dark row backgrounds.
+ */
 function getAppTheme(mode: "light" | "dark") {
+  const data = mode === "dark" ? darkPalette : lightPalette;
   return createTheme({
-    palette: mode === "dark" ? darkPalette : lightPalette,
+    palette: {
+      mode: data.mode,
+      background: data.background,
+      text: data.text,
+      DataGrid: data.DataGrid,
+    },
   });
 }
 
