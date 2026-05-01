@@ -322,3 +322,27 @@
   .detail-link:hover {
     text-decoration: underline;
   }
+
+  /* Polling disabled in API: de-emphasize row but keep full click / navigation. */
+  .server-item.server-item--polling-off {
+    opacity: 0.78;
+    border-style: dashed;
+  }
+
+  .server-item.server-item--polling-off:hover {
+    opacity: 0.92;
+  }
+
+  .server-disabled-pill {
+    margin-left: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--bg-content-alt);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    vertical-align: middle;
+  }

@@ -23,4 +23,5 @@ export interface VpnServersRequestsAddServerRequest {
   quotaPlanIds?: number[] | null;
   /** @nullable */
   tagIds?: number[] | null;
+  isDisabled?: boolean;
 }

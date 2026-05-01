@@ -35,4 +35,5 @@ export interface VpnServersDtoVpnServerV2Dto {
   xrayClientsPolledAt?: string | null;
   /** @nullable */
   xrayClientsPollError?: string | null;
+  isDisabled?: boolean;
 }

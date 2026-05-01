@@ -26,7 +26,10 @@ import type {
   ApiTelegramBotUserRequestsUserRequest,
   ApiTelegramBotUserResponsesGetAdminsResponse,
   ApiTelegramBotUserResponsesGetAllTelegramUsersResponse,
+  ApiTelegramBotUserResponsesTelegramBotUserProfilePhotoMetaResponse,
+  ApiTelegramBotUserResponsesUpsertTelegramBotUserProfilePhotoResponse,
   TelegramBotUserRequestsTelegramUserActionRequest,
+  TelegramBotUserRequestsUpsertTelegramBotUserProfilePhotoRequest,
 } from "../model";
 
 import { ogmMutator } from "../../mutator";
@@ -656,6 +659,473 @@ export function useGetApiTgbotUsersGetAll<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetApiTgbotUsersGetAllQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const postApiTgbotUsersProfilePhoto = (
+  telegramBotUserRequestsUpsertTelegramBotUserProfilePhotoRequest: TelegramBotUserRequestsUpsertTelegramBotUserProfilePhotoRequest,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<ApiTelegramBotUserResponsesUpsertTelegramBotUserProfilePhotoResponse>(
+    {
+      url: `/api/tgbot-users/profile-photo`,
+      method: "POST",
+      headers: { "Content-Type": "application/json-patch+json" },
+      data: telegramBotUserRequestsUpsertTelegramBotUserProfilePhotoRequest,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getPostApiTgbotUsersProfilePhotoMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiTgbotUsersProfilePhoto>>,
+    TError,
+    { data: TelegramBotUserRequestsUpsertTelegramBotUserProfilePhotoRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof ogmMutator>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postApiTgbotUsersProfilePhoto>>,
+  TError,
+  { data: TelegramBotUserRequestsUpsertTelegramBotUserProfilePhotoRequest },
+  TContext
+> => {
+  const mutationKey = ["postApiTgbotUsersProfilePhoto"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiTgbotUsersProfilePhoto>>,
+    { data: TelegramBotUserRequestsUpsertTelegramBotUserProfilePhotoRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postApiTgbotUsersProfilePhoto(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostApiTgbotUsersProfilePhotoMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postApiTgbotUsersProfilePhoto>>
+>;
+export type PostApiTgbotUsersProfilePhotoMutationBody =
+  TelegramBotUserRequestsUpsertTelegramBotUserProfilePhotoRequest;
+export type PostApiTgbotUsersProfilePhotoMutationError = unknown;
+
+export const usePostApiTgbotUsersProfilePhoto = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiTgbotUsersProfilePhoto>>,
+      TError,
+      { data: TelegramBotUserRequestsUpsertTelegramBotUserProfilePhotoRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postApiTgbotUsersProfilePhoto>>,
+  TError,
+  { data: TelegramBotUserRequestsUpsertTelegramBotUserProfilePhotoRequest },
+  TContext
+> => {
+  return useMutation(
+    getPostApiTgbotUsersProfilePhotoMutationOptions(options),
+    queryClient,
+  );
+};
+export const getApiTgbotUsersProfilePhotoMetaTelegramId = (
+  telegramId: number,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<ApiTelegramBotUserResponsesTelegramBotUserProfilePhotoMetaResponse>(
+    {
+      url: `/api/tgbot-users/profile-photo-meta/${telegramId}`,
+      method: "GET",
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetApiTgbotUsersProfilePhotoMetaTelegramIdQueryKey = (
+  telegramId: number,
+) => {
+  return [`/api/tgbot-users/profile-photo-meta/${telegramId}`] as const;
+};
+
+export const getGetApiTgbotUsersProfilePhotoMetaTelegramIdQueryOptions = <
+  TData = Awaited<
+    ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>
+  >,
+  TError = unknown,
+>(
+  telegramId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetApiTgbotUsersProfilePhotoMetaTelegramIdQueryKey(telegramId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>>
+  > = ({ signal }) =>
+    getApiTgbotUsersProfilePhotoMetaTelegramId(
+      telegramId,
+      requestOptions,
+      signal,
+    );
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!telegramId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiTgbotUsersProfilePhotoMetaTelegramIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>>
+>;
+export type GetApiTgbotUsersProfilePhotoMetaTelegramIdQueryError = unknown;
+
+export function useGetApiTgbotUsersProfilePhotoMetaTelegramId<
+  TData = Awaited<
+    ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>
+  >,
+  TError = unknown,
+>(
+  telegramId: number,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>
+          >,
+          TError,
+          Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiTgbotUsersProfilePhotoMetaTelegramId<
+  TData = Awaited<
+    ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>
+  >,
+  TError = unknown,
+>(
+  telegramId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>
+          >,
+          TError,
+          Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiTgbotUsersProfilePhotoMetaTelegramId<
+  TData = Awaited<
+    ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>
+  >,
+  TError = unknown,
+>(
+  telegramId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetApiTgbotUsersProfilePhotoMetaTelegramId<
+  TData = Awaited<
+    ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>
+  >,
+  TError = unknown,
+>(
+  telegramId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoMetaTelegramId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetApiTgbotUsersProfilePhotoMetaTelegramIdQueryOptions(
+      telegramId,
+      options,
+    );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+export const getApiTgbotUsersProfilePhotoFileTelegramId = (
+  telegramId: number,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<void>(
+    {
+      url: `/api/tgbot-users/profile-photo-file/${telegramId}`,
+      method: "GET",
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetApiTgbotUsersProfilePhotoFileTelegramIdQueryKey = (
+  telegramId: number,
+) => {
+  return [`/api/tgbot-users/profile-photo-file/${telegramId}`] as const;
+};
+
+export const getGetApiTgbotUsersProfilePhotoFileTelegramIdQueryOptions = <
+  TData = Awaited<
+    ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>
+  >,
+  TError = unknown,
+>(
+  telegramId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetApiTgbotUsersProfilePhotoFileTelegramIdQueryKey(telegramId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>>
+  > = ({ signal }) =>
+    getApiTgbotUsersProfilePhotoFileTelegramId(
+      telegramId,
+      requestOptions,
+      signal,
+    );
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!telegramId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiTgbotUsersProfilePhotoFileTelegramIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>>
+>;
+export type GetApiTgbotUsersProfilePhotoFileTelegramIdQueryError = unknown;
+
+export function useGetApiTgbotUsersProfilePhotoFileTelegramId<
+  TData = Awaited<
+    ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>
+  >,
+  TError = unknown,
+>(
+  telegramId: number,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>
+          >,
+          TError,
+          Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiTgbotUsersProfilePhotoFileTelegramId<
+  TData = Awaited<
+    ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>
+  >,
+  TError = unknown,
+>(
+  telegramId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<
+            ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>
+          >,
+          TError,
+          Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiTgbotUsersProfilePhotoFileTelegramId<
+  TData = Awaited<
+    ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>
+  >,
+  TError = unknown,
+>(
+  telegramId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetApiTgbotUsersProfilePhotoFileTelegramId<
+  TData = Awaited<
+    ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>
+  >,
+  TError = unknown,
+>(
+  telegramId: number,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoFileTelegramId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetApiTgbotUsersProfilePhotoFileTelegramIdQueryOptions(
+      telegramId,
+      options,
+    );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

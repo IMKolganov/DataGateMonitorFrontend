@@ -10,6 +10,8 @@ export interface UserResponsesDtoUserDto {
   /** @nullable */
   displayName?: string | null;
   /** @nullable */
+  avatarUrl?: string | null;
+  /** @nullable */
   email?: string | null;
   isAdmin?: boolean;
   isBlocked?: boolean;

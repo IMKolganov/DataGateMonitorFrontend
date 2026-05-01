@@ -56,6 +56,13 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => {
     },
     "& .MuiDataGrid-cell": {
       borderBottom: `1px solid ${borderColor}`,
+      display: "flex",
+      alignItems: "center",
+    },
+    /* Boolean “false” uses SvgIcon color=disabled; ensure contrast on dark rows */
+    "& .MuiDataGrid-booleanCell": {
+      color: theme.palette.text.secondary,
+      opacity: 1,
     },
     "& .MuiDataGrid-row": {
       backgroundColor: rowBg,
