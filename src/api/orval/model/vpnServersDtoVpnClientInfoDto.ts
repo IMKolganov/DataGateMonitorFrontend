@@ -12,6 +12,8 @@ export interface VpnServersDtoVpnClientInfoDto {
   externalId?: string | null;
   /** @nullable */
   displayName?: string | null;
+  /** @nullable */
+  avatarUrl?: string | null;
   sessionId?: string;
   /** @nullable */
   commonName?: string | null;

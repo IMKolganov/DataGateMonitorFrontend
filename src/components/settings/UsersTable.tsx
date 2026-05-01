@@ -7,6 +7,7 @@ import type { UserDto } from "../../api/orvalModelShim";
 import "../../css/Table.css";
 import { UserAvatar } from "../ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
+import { telegramPhotoIdForProvider } from "../../utils/telegramNumericId.ts";
 
 interface UsersTableProps {
   users: UserDto[];
@@ -32,6 +33,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
           displayName: u.displayName ?? "-",
           displayNameForAvatar: u.displayName ?? u.email ?? "-",
           avatarUrl: readOptionalAvatarUrl(u),
+          telegramPhotoTelegramId: telegramPhotoIdForProvider(u.provider, u.externalId),
           email: u.email ?? "-",
           provider: u.provider ?? "-",
           externalId: u.externalId ?? "-",
@@ -55,6 +57,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
       renderCell: (params) => (
         <UserAvatar
           src={params.row.avatarUrl as string | undefined}
+          telegramPhotoTelegramId={params.row.telegramPhotoTelegramId as number | undefined}
           name={params.row.displayNameForAvatar as string}
           colorSeed={`${params.row.id}|${params.row.email}`}
           size={28}

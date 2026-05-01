@@ -9,6 +9,7 @@ import type { VpnClientInfoDto } from "../api/orvalModelShim";
 import "../css/Table.css";
 import { UserAvatar } from "./ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../utils/readOptionalAvatarUrl.ts";
+import { parseTelegramNumericId } from "../utils/telegramNumericId.ts";
 import { apiRequest } from "../api/apirequest";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import { toast } from "react-toastify";
@@ -105,6 +106,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
             displayName,
             displayNameForAvatar: displayName || commonName || externalId || "Client",
             avatarUrl: readOptionalAvatarUrl(client as object),
+            telegramPhotoTelegramId: parseTelegramNumericId(externalId || undefined),
             avatarColorSeed: [userId && `u:${userId}`, externalId, displayName, commonName, String(rowId)]
                 .filter(Boolean)
                 .join("|"),
@@ -131,6 +133,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
             renderCell: (params) => (
                 <UserAvatar
                     src={params.row.avatarUrl as string | undefined}
+                    telegramPhotoTelegramId={params.row.telegramPhotoTelegramId as number | undefined}
                     name={params.row.displayNameForAvatar as string}
                     colorSeed={params.row.avatarColorSeed as string}
                     size={28}
