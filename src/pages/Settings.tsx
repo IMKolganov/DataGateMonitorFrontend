@@ -14,6 +14,7 @@ import {
   FaSlidersH,
   FaTelegram,
   FaUsers,
+  FaWindows,
 } from "react-icons/fa";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import "../css/Settings.css";
@@ -36,6 +37,7 @@ const ALL_SETTINGS_TABS: SettingsTab[] = [
   { label: "Users", path: "users", Icon: FaUsers, mobilePrefix: "👥" },
   { label: "Email broadcast", path: "email-broadcast", Icon: FaEnvelope, mobilePrefix: "✉️" },
   { label: "Android crashes", path: "android-crashes", Icon: FaBug, mobilePrefix: "🐞" },
+  { label: "Windows crashes", path: "windows-crashes", Icon: FaWindows, mobilePrefix: "🪟" },
   { label: "Admin password", path: "admin-password", Icon: FaKey, mobilePrefix: "🔑" },
 ];
 
@@ -46,7 +48,10 @@ export function Settings() {
   const tabs = isAdmin(getCurrentUser())
     ? ALL_SETTINGS_TABS
     : ALL_SETTINGS_TABS.filter(
-        (t) => t.path !== "admin-password" && t.path !== "android-crashes",
+        (t) =>
+          t.path !== "admin-password" &&
+          t.path !== "android-crashes" &&
+          t.path !== "windows-crashes",
       );
 
   const pathRest = location.pathname.replace(/^\/settings\/?/, "") || "general";
