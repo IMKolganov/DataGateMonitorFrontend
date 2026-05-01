@@ -190,7 +190,8 @@
 .quota-plan-modal .form-row .input,
 .quota-plan-modal .form-row input[type="text"],
 .quota-plan-modal .form-row input[type="number"],
-.quota-plan-modal .form-row select {
+.quota-plan-modal .form-row select,
+.quota-plan-modal .form-row textarea {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -203,10 +204,18 @@
   font-size: 14px;
 }
 
+.quota-plan-modal .form-row textarea {
+  min-height: 160px;
+  resize: vertical;
+  line-height: 1.45;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
 .quota-plan-modal .form-row .input:focus,
 .quota-plan-modal .form-row input[type="text"]:focus,
 .quota-plan-modal .form-row input[type="number"]:focus,
-.quota-plan-modal .form-row select:focus {
+.quota-plan-modal .form-row select:focus,
+.quota-plan-modal .form-row textarea:focus {
   outline: none;
   border-color: var(--input-focus-border);
   box-shadow: 0 0 0 1px var(--input-focus-ring);

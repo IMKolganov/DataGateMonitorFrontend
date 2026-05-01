@@ -20,7 +20,7 @@ import {
 import { errorMessage } from "../utils/errorMessage";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 
-/** Matches backend ApplicationNotificationKind enum order (int values 0–26). */
+/** Matches backend ApplicationNotificationKind enum order (int values 0–28). */
 type NotificationKindRow = {
   kind: number;
   section: string;
@@ -190,6 +190,18 @@ const KIND_ROWS: NotificationKindRow[] = [
     section: "Application",
     title: "Server monitor up",
     description: "A monitored dependency recovered.",
+  },
+  {
+    kind: 27,
+    section: "Accounts",
+    title: "New user registered",
+    description: "A new dashboard user completed self-service registration.",
+  },
+  {
+    kind: 28,
+    section: "Accounts",
+    title: "User password changed",
+    description: "Password was changed via reset code or other auth flows (not successful login).",
   },
 ];
 
