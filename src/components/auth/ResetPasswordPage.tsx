@@ -92,7 +92,7 @@ const ResetPasswordPage: React.FC = () => {
           {error && <p className="error-message">{error}</p>}
           <form onSubmit={handleSubmit}>
             <div className="login-item">
-              <h4>Code from server console</h4>
+              <h4>One-time reset code</h4>
               <input
                 type="text"
                 name="code"

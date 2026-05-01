@@ -15,10 +15,10 @@ import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
 const MESSAGE_AFTER_FORGOT =
-  "If an admin account exists with this login and password login is enabled, the reset code has been written to the server console. Otherwise the user was not found.";
+  "If an admin account exists with this login and password login is enabled, the reset code is sent to the account email when configured and written to the server console. Otherwise the user was not found.";
 
-const HINT_CONSOLE =
-  "If you are an administrator with access to the server — open the application console and find the code. Then enter it below.";
+const HINT_CODE =
+  "Check your inbox for the code, or if you manage the server, read the application console. Then enter the code below.";
 
 const ForgotPasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -167,7 +167,7 @@ const ForgotPasswordPage: React.FC = () => {
                 {MESSAGE_AFTER_FORGOT}
               </p>
               <p className="login-info-text" style={{ marginBottom: 16 }}>
-                {HINT_CONSOLE}
+                {HINT_CODE}
               </p>
 
               {resetError && (
@@ -176,7 +176,7 @@ const ForgotPasswordPage: React.FC = () => {
 
               <form onSubmit={handleResetSubmit}>
                 <div className="login-item">
-                  <h4>Code from server console</h4>
+                  <h4>One-time reset code</h4>
                   <input
                     type="text"
                     name="code"
