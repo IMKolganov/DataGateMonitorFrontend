@@ -40,6 +40,7 @@ const GeneralSettings = lazy(() => import("./pages/GeneralSettings"));
 const GeoLiteDbSettings = lazy(() => import("./pages/GeoLiteDbSettings"));
 const NotificationVpnProfileSettings = lazy(() => import("./pages/NotificationVpnProfileSettings"));
 const AndroidCrashReportsSettings = lazy(() => import("./pages/AndroidCrashReportsSettings"));
+const WindowsCrashReportsSettings = lazy(() => import("./pages/WindowsCrashReportsSettings"));
 const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
 const UsersSettings = lazy(() => import("./pages/UsersSettings/UsersSettings"));
 const UserQuotasPage = lazy(() => import("./pages/UsersSettings/UserQuotasPage"));
@@ -171,6 +172,16 @@ function App() {
                         element={
                           isAdmin(getCurrentUser()) ? (
                             withSuspense(<AndroidCrashReportsSettings />)
+                          ) : (
+                            <Navigate to="/settings/general" replace />
+                          )
+                        }
+                      />
+                      <Route
+                        path="windows-crashes"
+                        element={
+                          isAdmin(getCurrentUser()) ? (
+                            withSuspense(<WindowsCrashReportsSettings />)
                           ) : (
                             <Navigate to="/settings/general" replace />
                           )
