@@ -54,6 +54,30 @@ type ConflogPayload = {
     };
 };
 
+const MIN_PROXY_TRAFFIC_FLOW_VERSION = "1.2.5.54";
+
+function parseVersionParts(raw: string): number[] {
+    return raw
+        .split(".")
+        .map((part) => Number.parseInt(part, 10))
+        .filter((part) => Number.isFinite(part));
+}
+
+function compareDotVersions(left: string, right: string): number {
+    const a = parseVersionParts(left);
+    const b = parseVersionParts(right);
+    const len = Math.max(a.length, b.length);
+
+    for (let i = 0; i < len; i += 1) {
+        const ai = a[i] ?? 0;
+        const bi = b[i] ?? 0;
+        if (ai > bi) return 1;
+        if (ai < bi) return -1;
+    }
+
+    return 0;
+}
+
 const ServerDetailsInfo = ServerDetailsInfoDefault as ComponentType<{
     serverInfo: unknown;
     toHumanReadableSize: (bytes: number) => string;
@@ -248,6 +272,33 @@ export function GeneralServerDetails() {
     );
     const latestConflogItems = (latestConflogQuery.data as { items?: { payload?: ConflogPayload }[] } | undefined)?.items ?? [];
     const latestConflogPayload: ConflogPayload | null = latestConflogItems[0]?.payload ?? null;
+    const openVpnRuntimeVersion = useMemo(() => {
+        const statusVersionRaw =
+            (serverWithStatusQuery.data as unknown as VpnServerWithStatusResponse | undefined)
+                ?.vpnServerWithStatus?.vpnServerStatusLogResponse?.version;
+        const statusVersion = typeof statusVersionRaw === "string" ? statusVersionRaw.trim() : "";
+        if (statusVersion.length > 0) return statusVersion;
+
+        const conflogVersion = latestConflogPayload?.version?.trim() ?? "";
+        return conflogVersion.length > 0 ? conflogVersion : null;
+    }, [serverWithStatusQuery.data, latestConflogPayload?.version]);
+
+    const proxyTrafficFlowSupported = useMemo(() => {
+        if (!openVpnQueriesEnabled) return false;
+        if (!openVpnRuntimeVersion) return false;
+        return compareDotVersions(openVpnRuntimeVersion, MIN_PROXY_TRAFFIC_FLOW_VERSION) >= 0;
+    }, [openVpnQueriesEnabled, openVpnRuntimeVersion]);
+
+    const proxyTrafficFlowUnsupportedReason = useMemo(() => {
+        if (!openVpnQueriesEnabled) return null;
+        if (!openVpnRuntimeVersion) {
+            return `unavailable (server version is unknown, required >= ${MIN_PROXY_TRAFFIC_FLOW_VERSION})`;
+        }
+        if (!proxyTrafficFlowSupported) {
+            return `unsupported on ${openVpnRuntimeVersion} (required >= ${MIN_PROXY_TRAFFIC_FLOW_VERSION})`;
+        }
+        return null;
+    }, [openVpnQueriesEnabled, openVpnRuntimeVersion, proxyTrafficFlowSupported]);
 
     const loadingServer = serverWithStatusQuery.isFetching || serverBasicQuery.isFetching;
 
@@ -262,7 +313,7 @@ export function GeneralServerDetails() {
     const serverEntity: VpnServerDto | undefined =
         serverWithStatus?.vpnServerResponses?.vpnServer ?? serverBasicPayload?.vpnServer;
 
-    const trafficFlowHub = useProxyTrafficFlow(isLive && openVpnQueriesEnabled, numericServerId);
+    const trafficFlowHub = useProxyTrafficFlow(isLive && proxyTrafficFlowSupported, numericServerId);
 
     const serverLocation = useMemo<[number, number] | null>(() => {
         const lat = serverEntity?.latitude;
@@ -454,15 +505,22 @@ export function GeneralServerDetails() {
                                 className="server-details__muted"
                                 style={{ fontSize: 12, opacity: 0.88, margin: "0 0 10px" }}
                             >
-                                Traffic stream: <code>{trafficFlowHub.connectionState}</code>
-                                {trafficFlowHub.lastError ? ` (${trafficFlowHub.lastError})` : ""}
+                                Traffic stream:{" "}
+                                {proxyTrafficFlowSupported ? (
+                                    <>
+                                        <code>{trafficFlowHub.connectionState}</code>
+                                        {trafficFlowHub.lastError ? ` (${trafficFlowHub.lastError})` : ""}
+                                    </>
+                                ) : (
+                                    <>{proxyTrafficFlowUnsupportedReason}</>
+                                )}
                             </p>
                         ) : null}
                         <VpnMap
                             clients={clients}
                             serverLocation={serverLocation}
                             serverName={serverName}
-                            trafficFlows={openVpnQueriesEnabled && isLive ? trafficFlowHub.flows : []}
+                            trafficFlows={openVpnQueriesEnabled && isLive && proxyTrafficFlowSupported ? trafficFlowHub.flows : []}
                         />
                     </section>
                 </>
