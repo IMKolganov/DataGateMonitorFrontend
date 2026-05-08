@@ -111,6 +111,14 @@ function withLatLng(s: VpnServerV2Dto): s is VpnServerV2Dto & {
   );
 }
 
+function readPayload<T>(value: T | { data?: T } | undefined): T | undefined {
+  if (!value) return undefined;
+  if (typeof value === "object" && "data" in value) {
+    return (value as { data?: T }).data;
+  }
+  return value as T;
+}
+
 // Strict totals for UI
 type SafeTotals = {
   sessionsCount: number;
@@ -323,8 +331,10 @@ export default function ServersOverview() {
 
   const userDisplayName = useMemo(() => {
     if (!externalId) return "";
-    const payload = usersLabelQuery.data as { data?: GetAllUsersResponse } | undefined;
-    const fromDash = (payload?.data?.users ?? []).find((u) => u.externalId === externalId)?.displayName?.trim();
+    const payload = readPayload<GetAllUsersResponse>(
+      usersLabelQuery.data as GetAllUsersResponse | { data?: GetAllUsersResponse } | undefined
+    );
+    const fromDash = (payload?.users ?? []).find((u) => u.externalId === externalId)?.displayName?.trim();
     if (fromDash) return fromDash;
     const items = overviewLabelQuery.data?.overviewUserItems ?? [];
     const row =
@@ -334,8 +344,10 @@ export default function ServersOverview() {
 
   const vpnServerDisplayName = useMemo(() => {
     if (vpnServerId == null) return "";
-    const list =
-      (serversLabelQuery.data as { data?: VpnServersV2Response } | undefined)?.data?.vpnServers ?? [];
+    const payload = readPayload<VpnServersV2Response>(
+      serversLabelQuery.data as VpnServersV2Response | { data?: VpnServersV2Response } | undefined
+    );
+    const list = payload?.vpnServers ?? [];
     const s = list.find((x) => x.id === vpnServerId);
     return s?.serverName?.trim() ?? "";
   }, [serversLabelQuery.data, vpnServerId]);
@@ -380,15 +392,35 @@ export default function ServersOverview() {
   );
 
   const allServerStatuses = useMemo(() => {
+    const payload = readPayload<{
+      vpnServerWithStatuses?: VpnServersDtoVpnServerWithStatusV2Dto[] | null;
+      openVpnServerWithStatuses?: readonly VpnServersDtoVpnServerWithStatusV2Dto[] | null;
+    }>(
+      allServersWithStatusQuery.data as
+        | {
+            vpnServerWithStatuses?: VpnServersDtoVpnServerWithStatusV2Dto[] | null;
+            openVpnServerWithStatuses?: readonly VpnServersDtoVpnServerWithStatusV2Dto[] | null;
+          }
+        | {
+            data?: {
+              vpnServerWithStatuses?: VpnServersDtoVpnServerWithStatusV2Dto[] | null;
+              openVpnServerWithStatuses?: readonly VpnServersDtoVpnServerWithStatusV2Dto[] | null;
+            };
+          }
+        | undefined
+    );
     const rows =
-      allServersWithStatusQuery.data?.data?.vpnServerWithStatuses ??
-      allServersWithStatusQuery.data?.data?.openVpnServerWithStatuses ??
+      payload?.vpnServerWithStatuses ??
+      payload?.openVpnServerWithStatuses ??
       [];
     return [...rows];
   }, [allServersWithStatusQuery.data]);
 
-  const allServersList = useMemo(() => {
-    return allServersListQuery.data?.data?.vpnServers ?? [];
+  const allServersList = useMemo<VpnServerV2Dto[]>(() => {
+    const payload = readPayload<VpnServersV2Response>(
+      allServersListQuery.data as VpnServersV2Response | { data?: VpnServersV2Response } | undefined
+    );
+    return payload?.vpnServers ?? [];
   }, [allServersListQuery.data]);
 
   const statusByServerId = useMemo(() => {
@@ -475,10 +507,14 @@ export default function ServersOverview() {
   const globalLiveClients = useMemo(() => {
     const all: VpnClientInfoDto[] = [];
     for (const q of allConnectedClientsQueries) {
+      const payload = readPayload<VpnServerClientsResponsesConnectedClientsResponse>(
+        q.data as
+          | VpnServerClientsResponsesConnectedClientsResponse
+          | { data?: VpnServerClientsResponsesConnectedClientsResponse }
+          | undefined
+      );
       const rows =
-        (
-          q.data as { data?: VpnServerClientsResponsesConnectedClientsResponse } | undefined
-        )?.data?.vpnClients ?? [];
+        payload?.vpnClients ?? [];
       for (const row of rows) all.push(row);
     }
     return all;
