@@ -331,11 +331,21 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
     }
   }, []);
 
+  const stableServerIdsKey = useMemo(() => {
+    return [...new Set(serverIds.filter((x) => Number.isFinite(x) && x > 0))]
+      .sort((a, b) => a - b)
+      .join(",");
+  }, [serverIds]);
+
   const stableServerIds = useMemo(
     () =>
-      [...new Set(serverIds.filter((x) => Number.isFinite(x) && x > 0))]
-        .sort((a, b) => a - b),
-    [serverIds]
+      stableServerIdsKey.length > 0
+        ? stableServerIdsKey
+            .split(",")
+            .map((x) => Number.parseInt(x, 10))
+            .filter((x) => Number.isFinite(x) && x > 0)
+        : [],
+    [stableServerIdsKey]
   );
 
   useEffect(() => {
@@ -474,7 +484,7 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
       alive = false;
       void stopAll();
     };
-  }, [enabled, sessionKey, stableServerIds, debugEnabled]);
+  }, [enabled, sessionKey, stableServerIdsKey, debugEnabled]);
 
   const flows = useMemo(() => Object.values(snapshot), [snapshot]);
   return { flows, connectionState, lastError };
