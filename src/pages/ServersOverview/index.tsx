@@ -16,24 +16,32 @@ import "../../css/Settings.css";
 import { addDays, endOfToday, startOfToday, toChartPoints, toUsersSeriesChartPoints, mergeChartWithUsersSeries, buildFallbackOverviewResponse, normalizeGrouping } from "./helpers";
 import type { ChartPoint, MergedChartPoint } from "./types";
 
-import { keepPreviousData } from "@tanstack/react-query";
+import { keepPreviousData, useQueries } from "@tanstack/react-query";
 
 // orval hooks & types
 import {
+  getApiOpenVpnClientsGetAllConnected,
   useGetApiOpenVpnClientsOverviewSeries,
   useGetApiOpenVpnClientsOverviewSummary,
   useGetApiOpenVpnClientsOverviewUsers,
   useGetApiOpenVpnClientsOverviewUsersSeries,
 } from "../../api/orval/vpn-server-clients/vpn-server-clients";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../../api/orval/vpn-servers/vpn-servers";
-import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
+import {
+  useGetApiV2OpenVpnServersGetAll,
+  useGetApiV2OpenVpnServersGetAllWithStatus,
+} from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
 import { useGetApiUsersGetAll } from "../../api/orval/user/user";
 import type {
+  ApiVpnServersResponsesVpnServerWithStatusesV2Response,
   GetAllUsersResponse,
   OverviewSeriesResponse,
   OverviewTotalsResponse,
   OverviewUsersResponse,
   OverviewUsersSeriesResponse,
+  VpnClientInfoDto,
+  VpnServerClientsResponsesConnectedClientsResponse,
+  VpnServersDtoVpnServerWithStatusV2Dto,
   VpnServersV2Response,
   GetApiOpenVpnClientsOverviewSeriesParams,
   GetApiOpenVpnClientsOverviewSummaryParams,
@@ -41,6 +49,8 @@ import type {
 import { OverviewGrouping } from "../../api/orvalModelShim";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
+import VpnMap from "../../components/VpnMap";
+import { useProxyTrafficFlowMany } from "../../hooks/useProxyTrafficFlow";
 
 
 
@@ -56,6 +66,29 @@ const UI_TO_API_GROUPING: Record<
 };
 
 const toApiGrouping = (g: Grouping) => UI_TO_API_GROUPING[g];
+
+const MIN_PROXY_TRAFFIC_FLOW_VERSION = "1.2.5.54";
+const OPENVPN_SERVER_TYPE = 0;
+
+function parseVersionParts(raw: string): number[] {
+  return raw
+    .split(".")
+    .map((part) => Number.parseInt(part, 10))
+    .filter((part) => Number.isFinite(part));
+}
+
+function compareDotVersions(left: string, right: string): number {
+  const a = parseVersionParts(left);
+  const b = parseVersionParts(right);
+  const len = Math.max(a.length, b.length);
+  for (let i = 0; i < len; i += 1) {
+    const ai = a[i] ?? 0;
+    const bi = b[i] ?? 0;
+    if (ai > bi) return 1;
+    if (ai < bi) return -1;
+  }
+  return 0;
+}
 
 // Strict totals for UI
 type SafeTotals = {
@@ -305,6 +338,90 @@ export default function ServersOverview() {
     return "All servers overview";
   }, [externalId, vpnServerId, titleUserPart, titleServerPart]);
 
+  const isGlobalServersPage = vpnServerId == null && !externalId;
+  const allServersWithStatusQuery = useGetApiV2OpenVpnServersGetAllWithStatus(
+    {},
+    {
+      query: {
+        enabled: isGlobalServersPage,
+        staleTime: 15_000,
+        refetchInterval: 30_000,
+      },
+    }
+  );
+
+  const allServerStatuses = useMemo(() => {
+    const envelope =
+      allServersWithStatusQuery.data as
+        | ApiVpnServersResponsesVpnServerWithStatusesV2Response
+        | undefined;
+    return envelope?.data?.vpnServerWithStatuses ?? [];
+  }, [allServersWithStatusQuery.data]);
+
+  const globalFlowEligibleServers = useMemo(() => {
+    return allServerStatuses.filter((row): row is VpnServersDtoVpnServerWithStatusV2Dto => {
+      const server = row.vpnServerResponses?.vpnServer;
+      if (!server || server.serverType !== OPENVPN_SERVER_TYPE) return false;
+      if (server.isDeleted || server.isDisabled) return false;
+      if (!Number.isFinite(server.id) || !Number.isFinite(server.latitude) || !Number.isFinite(server.longitude)) {
+        return false;
+      }
+      const versionRaw = row.vpnServerStatusLogResponse?.version;
+      const version = typeof versionRaw === "string" ? versionRaw.trim() : "";
+      if (!version) return false;
+      return compareDotVersions(version, MIN_PROXY_TRAFFIC_FLOW_VERSION) >= 0;
+    });
+  }, [allServerStatuses]);
+
+  const globalFlowServerIds = useMemo(
+    () =>
+      globalFlowEligibleServers
+        .map((row) => row.vpnServerResponses?.vpnServer?.id)
+        .filter((id): id is number => Number.isFinite(id)),
+    [globalFlowEligibleServers]
+  );
+
+  const globalFlowServerMarkers = useMemo(
+    () =>
+      globalFlowEligibleServers.map((row) => {
+        const server = row.vpnServerResponses!.vpnServer!;
+        return {
+          id: server.id as number,
+          name: server.serverName?.trim() || `VPN server #${server.id}`,
+          position: [server.latitude as number, server.longitude as number] as [number, number],
+        };
+      }),
+    [globalFlowEligibleServers]
+  );
+
+  const allConnectedClientsQueries = useQueries({
+    queries: globalFlowServerIds.map((serverId) => ({
+      queryKey: ["overview-live-connected-clients", serverId],
+      enabled: isGlobalServersPage,
+      queryFn: () => getApiOpenVpnClientsGetAllConnected({ VpnServerId: serverId, Page: 1, PageSize: 300 }),
+      staleTime: 12_000,
+      refetchInterval: 15_000,
+      retry: 1,
+    })),
+  });
+
+  const globalLiveClients = useMemo(() => {
+    const all: VpnClientInfoDto[] = [];
+    for (const q of allConnectedClientsQueries) {
+      const payload = unwrapMaybeApiResponse<VpnServerClientsResponsesConnectedClientsResponse>(
+        q.data as
+          | VpnServerClientsResponsesConnectedClientsResponse
+          | ApiEnvelope<VpnServerClientsResponsesConnectedClientsResponse>
+          | undefined
+      );
+      const rows = payload?.vpnClients ?? [];
+      for (const row of rows) all.push(row);
+    }
+    return all;
+  }, [allConnectedClientsQueries]);
+
+  const globalFlowHub = useProxyTrafficFlowMany(isGlobalServersPage, globalFlowServerIds);
+
   if (vpnServerId != null && scopedServerQuery.isPending) {
     return (
       <div
@@ -359,6 +476,22 @@ export default function ServersOverview() {
         vpnServerId={vpnServerId ?? null}
         externalId={externalId ?? null}
       />
+
+      {isGlobalServersPage ? (
+        <section style={{ marginTop: 14 }}>
+          <h3 style={{ margin: "0 0 8px" }}>Live proxy traffic map (all OpenVPN servers)</h3>
+          <p style={{ margin: "0 0 10px", fontSize: 12, opacity: 0.88 }}>
+            Stream: <code>{globalFlowHub.connectionState}</code>
+            {globalFlowHub.lastError ? ` (${globalFlowHub.lastError})` : ""} | Servers: {globalFlowServerIds.length} | Clients:{" "}
+            {globalLiveClients.length}
+          </p>
+          <VpnMap
+            clients={globalLiveClients}
+            trafficFlows={globalFlowHub.flows}
+            serverMarkers={globalFlowServerMarkers}
+          />
+        </section>
+      ) : null}
 
       <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} externalId={externalId ?? null} />
     </div>
