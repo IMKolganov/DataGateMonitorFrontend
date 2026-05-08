@@ -92,6 +92,16 @@ function collectClientIpCandidates(client: VpnClientInfoDto): string[] {
     if (typeof raw === "string") typedCandidates.push(raw);
   }
 
+  // Defensive fallback: pick any string field that looks like IP-ish data.
+  // This keeps matching alive even if backend DTO field names differ.
+  const ipLike = /(\d{1,3}(?:\.\d{1,3}){3})|(::[a-f0-9:]+)|([a-f0-9:]+:[a-f0-9:]+)/i;
+  for (const value of Object.values(dynamic)) {
+    if (typeof value !== "string") continue;
+    const s = value.trim();
+    if (!s) continue;
+    if (ipLike.test(s)) typedCandidates.push(s);
+  }
+
   return typedCandidates
     .filter((x): x is string => typeof x === "string")
     .map((x) => x.trim())
@@ -498,6 +508,39 @@ const VpnMap: React.FC<VpnMapProps> = ({
     return result;
   }, [trafficDebugEnabled, trafficFlows, serverLocationById, serverLocation, clientGeoByIdentity, clientGeoByIp]);
 
+  const clientDebugSample = useMemo(() => {
+    if (!trafficDebugEnabled || visibleClients.length === 0) return [];
+    return visibleClients.slice(0, 15).map((client) => ({
+      id: client.id ?? null,
+      vpnServerId: client.vpnServerId ?? null,
+      commonName: client.commonName ?? null,
+      username: client.username ?? null,
+      ipCandidates: collectClientIpCandidates(client).slice(0, 6),
+      identityCandidates: collectClientIdentityCandidates(client).slice(0, 6),
+      geo: [client.latitude, client.longitude],
+    }));
+  }, [trafficDebugEnabled, visibleClients]);
+
+  const flowDebugSample = useMemo(() => {
+    if (!trafficDebugEnabled || trafficFlows.length === 0) return [];
+    return trafficFlows.slice(0, 15).map((flow) => ({
+      connectionId: flow.connectionId,
+      serverId: flow.serverId ?? null,
+      state: flow.state,
+      isConnected: flow.isConnected,
+      isIdle: flow.isIdle,
+      realClientIp: flow.realClientIp ?? null,
+      username: flow.username ?? null,
+      clientRef: flow.clientRef ?? null,
+      email: flow.email ?? null,
+      c2sDelta: flow.clientToServerBytesDelta,
+      s2cDelta: flow.serverToClientBytesDelta,
+      c2sTotal: flow.clientToServerBytesTotal,
+      s2cTotal: flow.serverToClientBytesTotal,
+      emittedAtUtc: flow.emittedAtUtc,
+    }));
+  }, [trafficDebugEnabled, trafficFlows]);
+
   const visibleTrafficSegments = useMemo(() => {
     const maxDelta = visibleTrafficFlows.reduce((acc, flow) => {
       return Math.max(acc, flow.clientToServerBytesDelta ?? 0, flow.serverToClientBytesDelta ?? 0);
@@ -557,15 +600,26 @@ const VpnMap: React.FC<VpnMapProps> = ({
     if (!trafficDebugEnabled) return;
     if (trafficFlows.length === 0 && visibleTrafficSegments.length === 0) return;
 
+    const unmatchedByReason = unmatchedTrafficDebug.reduce<Record<string, number>>((acc, item) => {
+      acc[item.reason] = (acc[item.reason] ?? 0) + 1;
+      return acc;
+    }, {});
+
     // eslint-disable-next-line no-console
     console.debug("[TrafficFlowDebug] summary", {
       incomingFlows: trafficFlows.length,
       matchedFlows: visibleTrafficFlows.length,
       renderedSegments: visibleTrafficSegments.length,
       unmatchedFlows: unmatchedTrafficDebug.length,
+      unmatchedByReason,
       clientsWithCoords: visibleClients.length,
       serversOnMap: serverMarkers.length > 0 ? serverMarkers.length : (serverLocation ? 1 : 0),
     });
+
+    // eslint-disable-next-line no-console
+    console.debug("[TrafficFlowDebug] clients sample", clientDebugSample);
+    // eslint-disable-next-line no-console
+    console.debug("[TrafficFlowDebug] incoming flows sample", flowDebugSample);
 
     if (unmatchedTrafficDebug.length > 0) {
       // eslint-disable-next-line no-console
@@ -577,6 +631,8 @@ const VpnMap: React.FC<VpnMapProps> = ({
     visibleTrafficFlows.length,
     visibleTrafficSegments.length,
     unmatchedTrafficDebug,
+    clientDebugSample,
+    flowDebugSample,
     visibleClients.length,
     serverMarkers.length,
     serverLocation,
