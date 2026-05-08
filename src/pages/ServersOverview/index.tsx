@@ -366,9 +366,12 @@ export default function ServersOverview() {
       if (!Number.isFinite(server.id) || !Number.isFinite(server.latitude) || !Number.isFinite(server.longitude)) {
         return false;
       }
+
+      // On /servers the status endpoint may not always provide runtime version for every server.
+      // Keep unknown-version OpenVPN servers enabled so multi-server subscriptions still start.
       const versionRaw = row.vpnServerStatusLogResponse?.version;
       const version = typeof versionRaw === "string" ? versionRaw.trim() : "";
-      if (!version) return false;
+      if (!version) return true;
       return compareDotVersions(version, MIN_PROXY_TRAFFIC_FLOW_VERSION) >= 0;
     });
   }, [allServerStatuses]);
