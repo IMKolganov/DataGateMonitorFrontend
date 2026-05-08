@@ -226,7 +226,7 @@ export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) 
           const entries = parseBatch(payload);
           if (debugEnabled) {
             // eslint-disable-next-line no-console
-            console.debug("[TrafficFlowDebug][single] TrafficFlowUpdated received", {
+            console.info("[TrafficFlowDebug][single] TrafficFlowUpdated received", {
               serverId,
               rawType: Array.isArray(payload) ? "array" : typeof payload,
               entries: entries.length,
@@ -399,7 +399,7 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
               const entries = parseBatch(payload).map((e) => ({ ...e, serverId: sid }));
               if (debugEnabled) {
                 // eslint-disable-next-line no-console
-                console.debug("[TrafficFlowDebug][many] TrafficFlowUpdated received", {
+                console.info("[TrafficFlowDebug][many] TrafficFlowUpdated received", {
                   serverId: sid,
                   rawType: Array.isArray(payload) ? "array" : typeof payload,
                   entries: entries.length,
