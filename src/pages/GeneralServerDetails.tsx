@@ -262,17 +262,7 @@ export function GeneralServerDetails() {
     const serverEntity: VpnServerDto | undefined =
         serverWithStatus?.vpnServerResponses?.vpnServer ?? serverBasicPayload?.vpnServer;
 
-    const proxyTrafficHubOrigin = useMemo(() => {
-        const raw = serverEntity?.apiUrl?.trim();
-        if (!raw) return null;
-        try {
-            return new URL(raw).origin;
-        } catch {
-            return raw.replace(/\/api\/?$/i, "").replace(/\/$/, "");
-        }
-    }, [serverEntity?.apiUrl]);
-
-    const trafficFlowHub = useProxyTrafficFlow(isLive && openVpnQueriesEnabled, proxyTrafficHubOrigin);
+    const trafficFlowHub = useProxyTrafficFlow(isLive && openVpnQueriesEnabled, numericServerId);
 
     const serverLocation = useMemo<[number, number] | null>(() => {
         const lat = serverEntity?.latitude;
