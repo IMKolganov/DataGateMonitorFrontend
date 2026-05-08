@@ -33,7 +33,6 @@ import {
 } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
 import { useGetApiUsersGetAll } from "../../api/orval/user/user";
 import type {
-  ApiVpnServersResponsesVpnServerWithStatusesV2Response,
   GetAllUsersResponse,
   OverviewSeriesResponse,
   OverviewTotalsResponse,
@@ -47,8 +46,6 @@ import type {
   GetApiOpenVpnClientsOverviewSummaryParams,
 } from "../../api/orvalModelShim";
 import { OverviewGrouping } from "../../api/orvalModelShim";
-import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
-import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import VpnMap from "../../components/VpnMap";
 import { useProxyTrafficFlowMany } from "../../hooks/useProxyTrafficFlow";
 
@@ -311,10 +308,8 @@ export default function ServersOverview() {
 
   const userDisplayName = useMemo(() => {
     if (!externalId) return "";
-    const payload = unwrapMaybeApiResponse<GetAllUsersResponse>(
-      usersLabelQuery.data as GetAllUsersResponse | ApiEnvelope<GetAllUsersResponse> | undefined,
-    );
-    const fromDash = (payload?.users ?? []).find((u) => u.externalId === externalId)?.displayName?.trim();
+    const payload = usersLabelQuery.data as { data?: GetAllUsersResponse } | undefined;
+    const fromDash = (payload?.data?.users ?? []).find((u) => u.externalId === externalId)?.displayName?.trim();
     if (fromDash) return fromDash;
     const items = overviewLabelQuery.data?.overviewUserItems ?? [];
     const row =
@@ -325,7 +320,7 @@ export default function ServersOverview() {
   const vpnServerDisplayName = useMemo(() => {
     if (vpnServerId == null) return "";
     const list =
-      (serversLabelQuery.data as VpnServersV2Response | undefined)?.vpnServers ?? [];
+      (serversLabelQuery.data as { data?: VpnServersV2Response } | undefined)?.data?.vpnServers ?? [];
     const s = list.find((x) => x.id === vpnServerId);
     return s?.serverName?.trim() ?? "";
   }, [serversLabelQuery.data, vpnServerId]);
@@ -360,15 +355,9 @@ export default function ServersOverview() {
   );
 
   const allServerStatuses = useMemo(() => {
-    const envelope = unwrapMaybeApiResponse<ApiVpnServersResponsesVpnServerWithStatusesV2Response>(
-      allServersWithStatusQuery.data as
-        | ApiVpnServersResponsesVpnServerWithStatusesV2Response
-        | ApiEnvelope<ApiVpnServersResponsesVpnServerWithStatusesV2Response>
-        | undefined
-    );
     const rows =
-      envelope?.data?.vpnServerWithStatuses ??
-      envelope?.data?.openVpnServerWithStatuses ??
+      allServersWithStatusQuery.data?.data?.vpnServerWithStatuses ??
+      allServersWithStatusQuery.data?.data?.openVpnServerWithStatuses ??
       [];
     return [...rows];
   }, [allServersWithStatusQuery.data]);
@@ -426,13 +415,10 @@ export default function ServersOverview() {
   const globalLiveClients = useMemo(() => {
     const all: VpnClientInfoDto[] = [];
     for (const q of allConnectedClientsQueries) {
-      const payload = unwrapMaybeApiResponse<VpnServerClientsResponsesConnectedClientsResponse>(
-        q.data as
-          | VpnServerClientsResponsesConnectedClientsResponse
-          | ApiEnvelope<VpnServerClientsResponsesConnectedClientsResponse>
-          | undefined
-      );
-      const rows = payload?.vpnClients ?? [];
+      const rows =
+        (
+          q.data as { data?: VpnServerClientsResponsesConnectedClientsResponse } | undefined
+        )?.data?.vpnClients ?? [];
       for (const row of rows) all.push(row);
     }
     return all;
