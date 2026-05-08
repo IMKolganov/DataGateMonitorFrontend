@@ -410,7 +410,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
       .map((f) => {
         const to =
           typeof f.serverId === "number"
-            ? serverLocationById.get(f.serverId)
+            ? (serverLocationById.get(f.serverId) ?? serverLocation)
             : serverLocation;
         if (!to) return null;
 
@@ -461,7 +461,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
     for (const f of trafficFlows) {
       const to =
         typeof f.serverId === "number"
-          ? serverLocationById.get(f.serverId)
+          ? (serverLocationById.get(f.serverId) ?? serverLocation)
           : serverLocation;
       if (!to) {
         result.push({
@@ -541,6 +541,27 @@ const VpnMap: React.FC<VpnMapProps> = ({
     }));
   }, [trafficDebugEnabled, trafficFlows]);
 
+  const clientIpDebugList = useMemo(() => {
+    if (!trafficDebugEnabled || visibleClients.length === 0) return [];
+    return visibleClients.slice(0, 30).map((client) => ({
+      id: client.id ?? null,
+      serverId: client.vpnServerId ?? null,
+      ips: collectClientIpCandidates(client).map((ip) => normalizeIpForMatch(ip)).filter((x) => x.length > 0),
+    }));
+  }, [trafficDebugEnabled, visibleClients]);
+
+  const flowIpDebugList = useMemo(() => {
+    if (!trafficDebugEnabled || trafficFlows.length === 0) return [];
+    return trafficFlows.slice(0, 30).map((flow) => ({
+      connectionId: flow.connectionId,
+      serverId: flow.serverId ?? null,
+      realClientIp: flow.realClientIp ?? null,
+      realClientIpNormalized: normalizeIpForMatch(flow.realClientIp),
+      c2sDelta: flow.clientToServerBytesDelta,
+      s2cDelta: flow.serverToClientBytesDelta,
+    }));
+  }, [trafficDebugEnabled, trafficFlows]);
+
   const visibleTrafficSegments = useMemo(() => {
     const maxDelta = visibleTrafficFlows.reduce((acc, flow) => {
       return Math.max(acc, flow.clientToServerBytesDelta ?? 0, flow.serverToClientBytesDelta ?? 0);
@@ -606,7 +627,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
     }, {});
 
     // eslint-disable-next-line no-console
-    console.debug("[TrafficFlowDebug] summary", {
+    console.info("[TrafficFlowDebug] summary", {
       incomingFlows: trafficFlows.length,
       matchedFlows: visibleTrafficFlows.length,
       renderedSegments: visibleTrafficSegments.length,
@@ -617,13 +638,15 @@ const VpnMap: React.FC<VpnMapProps> = ({
     });
 
     // eslint-disable-next-line no-console
-    console.debug("[TrafficFlowDebug] clients sample", clientDebugSample);
+    console.info("[TrafficFlowDebug] clients sample", clientDebugSample);
     // eslint-disable-next-line no-console
-    console.debug("[TrafficFlowDebug] incoming flows sample", flowDebugSample);
+    console.info("[TrafficFlowDebug] incoming flows sample", flowDebugSample);
+    console.info("[TrafficFlowDebug] client IP list", clientIpDebugList);
+    console.info("[TrafficFlowDebug] flow IP list", flowIpDebugList);
 
     if (unmatchedTrafficDebug.length > 0) {
       // eslint-disable-next-line no-console
-      console.debug("[TrafficFlowDebug] unmatched sample", unmatchedTrafficDebug.slice(0, 10));
+      console.info("[TrafficFlowDebug] unmatched sample", unmatchedTrafficDebug.slice(0, 10));
     }
   }, [
     trafficDebugEnabled,
@@ -633,6 +656,8 @@ const VpnMap: React.FC<VpnMapProps> = ({
     unmatchedTrafficDebug,
     clientDebugSample,
     flowDebugSample,
+    clientIpDebugList,
+    flowIpDebugList,
     visibleClients.length,
     serverMarkers.length,
     serverLocation,
