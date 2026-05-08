@@ -25,3 +25,23 @@ export function getStatusStreamHubUrl(): string {
   }
   return `${getApiBaseUrl()}/hubs/status-stream`;
 }
+
+export function getProxyTrafficFlowHubUrl(overrideOrigin?: string | null): string {
+  const override = overrideOrigin?.trim();
+  if (override && override.length > 0) {
+    return `${override.replace(/\/$/, "")}/hubs/proxy-traffic-flow`;
+  }
+
+  const explicitProxyFlow = import.meta.env.VITE_PROXY_TRAFFIC_FLOW_ORIGIN?.trim();
+  if (explicitProxyFlow !== undefined && explicitProxyFlow.length > 0) {
+    return `${explicitProxyFlow.replace(/\/$/, "")}/hubs/proxy-traffic-flow`;
+  }
+
+  const explicit = import.meta.env.VITE_SIGNALR_ORIGIN?.trim();
+  if (explicit !== undefined && explicit.length > 0) {
+    return `${explicit.replace(/\/$/, "")}/hubs/proxy-traffic-flow`;
+  }
+
+  // Fallback for setups where backend reverse-proxies this hub under /api.
+  return `${getApiBaseUrl()}/hubs/proxy-traffic-flow`;
+}
