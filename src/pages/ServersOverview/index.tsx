@@ -40,6 +40,7 @@ import type {
   OverviewUsersSeriesResponse,
   VpnClientInfoDto,
   VpnServerClientsResponsesConnectedClientsResponse,
+  VpnServerV2Dto,
   VpnServersDtoVpnServerWithStatusV2Dto,
   VpnServersV2Response,
   GetApiOpenVpnClientsOverviewSeriesParams,
@@ -93,6 +94,20 @@ function getServerFromStatusRow(row: VpnServersDtoVpnServerWithStatusV2Dto) {
     row.vpnServerResponses?.openVpnServer ??
     row.openVpnServerResponses?.vpnServer ??
     row.openVpnServerResponses?.openVpnServer
+  );
+}
+
+function withLatLng(s: VpnServerV2Dto): s is VpnServerV2Dto & {
+  id: number;
+  latitude: number;
+  longitude: number;
+} {
+  return (
+    typeof s.id === "number" &&
+    typeof s.latitude === "number" &&
+    typeof s.longitude === "number" &&
+    Number.isFinite(s.latitude) &&
+    Number.isFinite(s.longitude)
   );
 }
 
@@ -353,6 +368,16 @@ export default function ServersOverview() {
       },
     }
   );
+  const allServersListQuery = useGetApiV2OpenVpnServersGetAll(
+    {},
+    {
+      query: {
+        enabled: isGlobalServersPage,
+        staleTime: 30_000,
+        refetchInterval: 30_000,
+      },
+    }
+  );
 
   const allServerStatuses = useMemo(() => {
     const rows =
@@ -362,36 +387,47 @@ export default function ServersOverview() {
     return [...rows];
   }, [allServersWithStatusQuery.data]);
 
-  const globalFlowEligibleServers = useMemo(() => {
-    return allServerStatuses.filter((row): row is VpnServersDtoVpnServerWithStatusV2Dto => {
-      const server = getServerFromStatusRow(row);
-      if (!server || server.serverType !== OPENVPN_SERVER_TYPE) return false;
-      if (server.isDeleted || server.isDisabled) return false;
-      if (!Number.isFinite(server.id) || !Number.isFinite(server.latitude) || !Number.isFinite(server.longitude)) {
-        return false;
-      }
+  const allServersList = useMemo(() => {
+    return allServersListQuery.data?.data?.vpnServers ?? [];
+  }, [allServersListQuery.data]);
 
-      // On /servers the status endpoint may not always provide runtime version for every server.
-      // Keep unknown-version OpenVPN servers enabled so multi-server subscriptions still start.
-      const versionRaw = row.vpnServerStatusLogResponse?.version;
+  const statusByServerId = useMemo(() => {
+    const m = new Map<number, VpnServersDtoVpnServerWithStatusV2Dto>();
+    for (const row of allServerStatuses) {
+      const id = getServerFromStatusRow(row)?.id;
+      if (typeof id === "number" && Number.isFinite(id)) {
+        m.set(id, row);
+      }
+    }
+    return m;
+  }, [allServerStatuses]);
+
+  const globalFlowEligibleServers = useMemo(() => {
+    const candidates = allServersList
+      .filter((s) => s.serverType === OPENVPN_SERVER_TYPE && !s.isDeleted && !s.isDisabled)
+      .filter(withLatLng);
+
+    return candidates.filter((server) => {
+      const statusRow = statusByServerId.get(server.id);
+      // Status/version can be missing; in that case keep server eligible.
+      const versionRaw = statusRow?.vpnServerStatusLogResponse?.version;
       const version = typeof versionRaw === "string" ? versionRaw.trim() : "";
       if (!version) return true;
       return compareDotVersions(version, MIN_PROXY_TRAFFIC_FLOW_VERSION) >= 0;
     });
-  }, [allServerStatuses]);
+  }, [allServersList, statusByServerId]);
 
   const globalFlowServerIds = useMemo(
     () =>
       globalFlowEligibleServers
-        .map((row) => getServerFromStatusRow(row)?.id)
+        .map((server) => server.id)
         .filter((id): id is number => Number.isFinite(id)),
     [globalFlowEligibleServers]
   );
 
   const globalFlowServerMarkers = useMemo(
     () =>
-      globalFlowEligibleServers.map((row) => {
-        const server = getServerFromStatusRow(row)!;
+      globalFlowEligibleServers.map((server) => {
         return {
           id: server.id as number,
           name: server.serverName?.trim() || `VPN server #${server.id}`,
@@ -400,6 +436,30 @@ export default function ServersOverview() {
       }),
     [globalFlowEligibleServers]
   );
+
+  useEffect(() => {
+    if (!isGlobalServersPage) return;
+
+    const payload = globalFlowEligibleServers.map((server) => {
+      const status = statusByServerId.get(server.id);
+      const versionRaw = status?.vpnServerStatusLogResponse?.version;
+      const version = typeof versionRaw === "string" ? versionRaw.trim() : "";
+      return {
+        id: server.id,
+        name: server.serverName?.trim() || `VPN server #${server.id}`,
+        version: version || null,
+        latitude: server.latitude ?? null,
+        longitude: server.longitude ?? null,
+      };
+    });
+
+    // eslint-disable-next-line no-console
+    console.info("[TrafficFlowOverview] map subscriptions", {
+      serversCount: globalFlowServerIds.length,
+      serverIds: globalFlowServerIds,
+      servers: payload,
+    });
+  }, [isGlobalServersPage, globalFlowEligibleServers, globalFlowServerIds, statusByServerId]);
 
   const allConnectedClientsQueries = useQueries({
     queries: globalFlowServerIds.map((serverId) => ({
