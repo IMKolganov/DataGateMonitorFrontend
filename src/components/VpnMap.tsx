@@ -83,6 +83,36 @@ function byServerKey(serverId: number | null | undefined, key: string): string {
   return key;
 }
 
+function collectClientIpCandidates(client: VpnClientInfoDto): string[] {
+  const typedCandidates = [client.proxyRealIp, client.remoteIp, client.localIp];
+  const dynamic = client as unknown as Record<string, unknown>;
+  const dynamicKeys = ["realClientIp", "ip", "clientIp", "address", "realIp", "remoteAddress"];
+  for (const k of dynamicKeys) {
+    const raw = dynamic[k];
+    if (typeof raw === "string") typedCandidates.push(raw);
+  }
+
+  return typedCandidates
+    .filter((x): x is string => typeof x === "string")
+    .map((x) => x.trim())
+    .filter((x) => x.length > 0);
+}
+
+function collectClientIdentityCandidates(client: VpnClientInfoDto): string[] {
+  const typedCandidates = [client.username, client.commonName, client.displayName, client.externalId];
+  const dynamic = client as unknown as Record<string, unknown>;
+  const dynamicKeys = ["email", "clientRef", "userName", "user"];
+  for (const k of dynamicKeys) {
+    const raw = dynamic[k];
+    if (typeof raw === "string") typedCandidates.push(raw);
+  }
+
+  return typedCandidates
+    .filter((x): x is string => typeof x === "string")
+    .map((x) => x.trim().toLowerCase())
+    .filter((x) => x.length > 0);
+}
+
 function intensityFromDelta(delta: number, maxDelta: number): number {
   if (delta <= 0) return 0;
   if (maxDelta <= 0) return 1;
@@ -264,6 +294,13 @@ const VpnMap: React.FC<VpnMapProps> = ({
     () => resolveRenderBudget(viewportSize.width, viewportSize.height, performanceMode),
     [viewportSize.width, viewportSize.height, performanceMode]
   );
+  const trafficDebugEnabled = useMemo(() => {
+    try {
+      return localStorage.getItem("trafficFlowDebug") === "1";
+    } catch {
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
     Cookies.set("selectedMapLayer", selectedLayer, { expires: 365 });
@@ -320,9 +357,8 @@ const VpnMap: React.FC<VpnMapProps> = ({
     for (const c of visibleClients) {
       if (typeof c.latitude !== "number" || typeof c.longitude !== "number") continue;
       const point: [number, number] = [c.latitude, c.longitude];
-      const candidates = [c.proxyRealIp ?? null, c.remoteIp ?? null];
+      const candidates = collectClientIpCandidates(c);
       for (const candidate of candidates) {
-        if (!candidate) continue;
         const raw = candidate.trim();
         if (raw && !index.has(raw)) index.set(raw, point);
         const byServerRaw = byServerKey(c.vpnServerId, raw);
@@ -341,9 +377,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
     for (const c of visibleClients) {
       if (typeof c.latitude !== "number" || typeof c.longitude !== "number") continue;
       const point: [number, number] = [c.latitude, c.longitude];
-      const candidates = [c.username, c.commonName, c.displayName]
-        .filter((x): x is string => typeof x === "string" && x.trim().length > 0)
-        .map((x) => x.trim().toLowerCase());
+      const candidates = collectClientIdentityCandidates(c);
       for (const key of candidates) {
         if (!index.has(key)) index.set(key, point);
         const byServerIdentity = byServerKey(c.vpnServerId, key);
@@ -372,17 +406,27 @@ const VpnMap: React.FC<VpnMapProps> = ({
 
         const ip = (f.realClientIp ?? "").trim();
         const normalizedIp = normalizeIpForMatch(ip);
-        const usernameKey = (f.username ?? f.clientRef ?? "").trim().toLowerCase();
+        const identityKeys = [f.username, f.clientRef, f.email]
+          .filter((x): x is string => typeof x === "string" && x.trim().length > 0)
+          .map((x) => x.trim().toLowerCase());
+        const primaryIdentity = identityKeys[0] ?? "";
         const serverScopedIp = byServerKey(f.serverId, ip);
         const serverScopedNormalizedIp = byServerKey(f.serverId, normalizedIp);
-        const serverScopedIdentity = byServerKey(f.serverId, usernameKey);
+        const scopedIdentityCandidates = identityKeys.map((key) => byServerKey(f.serverId, key));
+        const scopedIdentityMatch = scopedIdentityCandidates
+          .map((key) => (key ? clientGeoByIdentity.get(key) : undefined))
+          .find((x) => x != null);
+        const identityMatch = identityKeys
+          .map((key) => clientGeoByIdentity.get(key))
+          .find((x) => x != null);
         const from =
           (serverScopedIp ? clientGeoByIp.get(serverScopedIp) : undefined) ??
           (serverScopedNormalizedIp ? clientGeoByIp.get(serverScopedNormalizedIp) : undefined) ??
-          (serverScopedIdentity ? clientGeoByIdentity.get(serverScopedIdentity) : undefined) ??
+          scopedIdentityMatch ??
           clientGeoByIp.get(ip) ??
           (normalizedIp ? clientGeoByIp.get(normalizedIp) : undefined) ??
-          (usernameKey ? clientGeoByIdentity.get(usernameKey) : undefined);
+          identityMatch ??
+          (primaryIdentity ? clientGeoByIdentity.get(primaryIdentity) : undefined);
         if (!from) return null;
 
         const inDelta = Math.max(0, f.clientToServerBytesDelta ?? 0);
@@ -399,6 +443,60 @@ const VpnMap: React.FC<VpnMapProps> = ({
       })
       .slice(0, renderBudget.maxFlows);
   }, [trafficFlows, clientGeoByIp, clientGeoByIdentity, serverLocation, serverLocationById, renderBudget.maxFlows]);
+
+  const unmatchedTrafficDebug = useMemo(() => {
+    if (!trafficDebugEnabled || trafficFlows.length === 0) return [];
+
+    const result: Array<{ connectionId: string; serverId?: number; realClientIp?: string | null; reason: string }> = [];
+    for (const f of trafficFlows) {
+      const to =
+        typeof f.serverId === "number"
+          ? serverLocationById.get(f.serverId)
+          : serverLocation;
+      if (!to) {
+        result.push({
+          connectionId: f.connectionId,
+          serverId: f.serverId,
+          realClientIp: f.realClientIp,
+          reason: "no server location",
+        });
+        continue;
+      }
+
+      const ip = (f.realClientIp ?? "").trim();
+      const normalizedIp = normalizeIpForMatch(ip);
+      const identityKeys = [f.username, f.clientRef, f.email]
+        .filter((x): x is string => typeof x === "string" && x.trim().length > 0)
+        .map((x) => x.trim().toLowerCase());
+      const primaryIdentity = identityKeys[0] ?? "";
+      const serverScopedIp = byServerKey(f.serverId, ip);
+      const serverScopedNormalizedIp = byServerKey(f.serverId, normalizedIp);
+      const scopedIdentityCandidates = identityKeys.map((key) => byServerKey(f.serverId, key));
+      const scopedIdentityMatch = scopedIdentityCandidates
+        .map((key) => (key ? clientGeoByIdentity.get(key) : undefined))
+        .find((x) => x != null);
+      const identityMatch = identityKeys
+        .map((key) => clientGeoByIdentity.get(key))
+        .find((x) => x != null);
+      const from =
+        (serverScopedIp ? clientGeoByIp.get(serverScopedIp) : undefined) ??
+        (serverScopedNormalizedIp ? clientGeoByIp.get(serverScopedNormalizedIp) : undefined) ??
+        scopedIdentityMatch ??
+        clientGeoByIp.get(ip) ??
+        (normalizedIp ? clientGeoByIp.get(normalizedIp) : undefined) ??
+        identityMatch ??
+        (primaryIdentity ? clientGeoByIdentity.get(primaryIdentity) : undefined);
+      if (!from) {
+        result.push({
+          connectionId: f.connectionId,
+          serverId: f.serverId,
+          realClientIp: f.realClientIp,
+          reason: "no client geo match",
+        });
+      }
+    }
+    return result;
+  }, [trafficDebugEnabled, trafficFlows, serverLocationById, serverLocation, clientGeoByIdentity, clientGeoByIp]);
 
   const visibleTrafficSegments = useMemo(() => {
     const maxDelta = visibleTrafficFlows.reduce((acc, flow) => {
@@ -454,6 +552,35 @@ const VpnMap: React.FC<VpnMapProps> = ({
         });
     });
   }, [visibleTrafficFlows]);
+
+  useEffect(() => {
+    if (!trafficDebugEnabled) return;
+    if (trafficFlows.length === 0 && visibleTrafficSegments.length === 0) return;
+
+    // eslint-disable-next-line no-console
+    console.debug("[TrafficFlowDebug] summary", {
+      incomingFlows: trafficFlows.length,
+      matchedFlows: visibleTrafficFlows.length,
+      renderedSegments: visibleTrafficSegments.length,
+      unmatchedFlows: unmatchedTrafficDebug.length,
+      clientsWithCoords: visibleClients.length,
+      serversOnMap: serverMarkers.length > 0 ? serverMarkers.length : (serverLocation ? 1 : 0),
+    });
+
+    if (unmatchedTrafficDebug.length > 0) {
+      // eslint-disable-next-line no-console
+      console.debug("[TrafficFlowDebug] unmatched sample", unmatchedTrafficDebug.slice(0, 10));
+    }
+  }, [
+    trafficDebugEnabled,
+    trafficFlows.length,
+    visibleTrafficFlows.length,
+    visibleTrafficSegments.length,
+    unmatchedTrafficDebug,
+    visibleClients.length,
+    serverMarkers.length,
+    serverLocation,
+  ]);
 
   const globePointsData = useMemo(() => {
     const points: Array<{
