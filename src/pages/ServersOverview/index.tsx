@@ -90,6 +90,15 @@ function compareDotVersions(left: string, right: string): number {
   return 0;
 }
 
+function getServerFromStatusRow(row: VpnServersDtoVpnServerWithStatusV2Dto) {
+  return (
+    row.vpnServerResponses?.vpnServer ??
+    row.vpnServerResponses?.openVpnServer ??
+    row.openVpnServerResponses?.vpnServer ??
+    row.openVpnServerResponses?.openVpnServer
+  );
+}
+
 // Strict totals for UI
 type SafeTotals = {
   sessionsCount: number;
@@ -351,16 +360,22 @@ export default function ServersOverview() {
   );
 
   const allServerStatuses = useMemo(() => {
-    const envelope =
+    const envelope = unwrapMaybeApiResponse<ApiVpnServersResponsesVpnServerWithStatusesV2Response>(
       allServersWithStatusQuery.data as
         | ApiVpnServersResponsesVpnServerWithStatusesV2Response
-        | undefined;
-    return envelope?.data?.vpnServerWithStatuses ?? [];
+        | ApiEnvelope<ApiVpnServersResponsesVpnServerWithStatusesV2Response>
+        | undefined
+    );
+    const rows =
+      envelope?.data?.vpnServerWithStatuses ??
+      envelope?.data?.openVpnServerWithStatuses ??
+      [];
+    return [...rows];
   }, [allServersWithStatusQuery.data]);
 
   const globalFlowEligibleServers = useMemo(() => {
     return allServerStatuses.filter((row): row is VpnServersDtoVpnServerWithStatusV2Dto => {
-      const server = row.vpnServerResponses?.vpnServer;
+      const server = getServerFromStatusRow(row);
       if (!server || server.serverType !== OPENVPN_SERVER_TYPE) return false;
       if (server.isDeleted || server.isDisabled) return false;
       if (!Number.isFinite(server.id) || !Number.isFinite(server.latitude) || !Number.isFinite(server.longitude)) {
@@ -379,7 +394,7 @@ export default function ServersOverview() {
   const globalFlowServerIds = useMemo(
     () =>
       globalFlowEligibleServers
-        .map((row) => row.vpnServerResponses?.vpnServer?.id)
+        .map((row) => getServerFromStatusRow(row)?.id)
         .filter((id): id is number => Number.isFinite(id)),
     [globalFlowEligibleServers]
   );
@@ -387,7 +402,7 @@ export default function ServersOverview() {
   const globalFlowServerMarkers = useMemo(
     () =>
       globalFlowEligibleServers.map((row) => {
-        const server = row.vpnServerResponses!.vpnServer!;
+        const server = getServerFromStatusRow(row)!;
         return {
           id: server.id as number,
           name: server.serverName?.trim() || `VPN server #${server.id}`,
