@@ -414,9 +414,14 @@ const VpnMap: React.FC<VpnMapProps> = ({
       ];
 
       return directions
-        .filter((d) => d.delta > 0)
+        .filter((d) => {
+          if (d.delta > 0) return true;
+          if (d.key === "clientToServer") return Math.max(0, flow.clientToServerBytesTotal ?? 0) > 0;
+          return Math.max(0, flow.serverToClientBytesTotal ?? 0) > 0;
+        })
         .map((d) => {
-          const intensity = intensityFromDelta(d.delta, maxDelta);
+          const visualDelta = d.delta > 0 ? d.delta : 1;
+          const intensity = intensityFromDelta(visualDelta, maxDelta);
           const weight = 1.2 + intensity * 6.8;
           const opacityBase = 0.25 + intensity * 0.75;
           const opacity = flow.isIdle ? opacityBase * 0.45 : opacityBase;
