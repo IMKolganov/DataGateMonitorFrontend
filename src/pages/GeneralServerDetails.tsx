@@ -103,6 +103,7 @@ export function GeneralServerDetails() {
     const queryClient = useQueryClient();
 
     const [isLive, setIsLive] = useState(true);
+    const [liveRefreshSeconds, setLiveRefreshSeconds] = useState(5);
     const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = usePersistedPageSize(
         `clients:${vpnServerId ?? "0"}`,
@@ -170,6 +171,15 @@ export function GeneralServerDetails() {
         [numericServerId, page, pageSize]
     );
 
+    const mapConnectedParams: GetApiOpenVpnClientsGetAllConnectedParams = useMemo(
+        () => ({
+            VpnServerId: numericServerId ?? 0,
+            Page: 1,
+            PageSize: 1000,
+        }),
+        [numericServerId]
+    );
+
     const historyParams: GetApiOpenVpnClientsGetAllHistoryParams = useMemo(
         () => ({
             VpnServerId: numericServerId ?? 0,
@@ -213,6 +223,16 @@ export function GeneralServerDetails() {
         query: {
             enabled: Number.isFinite(numericServerId) && isLive && clientInsightsEnabled,
             staleTime: 10000,
+            refetchInterval: isLive && liveRefreshSeconds > 0 ? liveRefreshSeconds * 1000 : false,
+            retry: 1,
+        },
+    });
+
+    const mapConnectedQuery = useGetApiOpenVpnClientsGetAllConnected(mapConnectedParams, {
+        query: {
+            enabled: Number.isFinite(numericServerId) && isLive && clientInsightsEnabled,
+            staleTime: 10000,
+            refetchInterval: isLive && liveRefreshSeconds > 0 ? liveRefreshSeconds * 1000 : false,
             retry: 1,
         },
     });
@@ -245,6 +265,11 @@ export function GeneralServerDetails() {
             | undefined;
 
     const clients: VpnClientInfoDto[] = activeClientsResponse?.vpnClients ?? [];
+    const mapLiveClientsResponse =
+        mapConnectedQuery.data as unknown as ConnectedClientsResponse | undefined;
+    const mapClients: VpnClientInfoDto[] = isLive
+        ? mapLiveClientsResponse?.vpnClients ?? clients
+        : clients;
 
     useEffect(() => {
         const newTotal = activeClientsResponse?.totalCount;
@@ -345,6 +370,23 @@ export function GeneralServerDetails() {
         setPage(0);
     }, [isLive]);
 
+    useEffect(() => {
+        if (!Number.isFinite(numericServerId) || (numericServerId ?? 0) <= 0) return;
+        const storageKey = `server-live-refresh-seconds:${numericServerId}`;
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return;
+        const parsed = Number.parseInt(raw, 10);
+        if ([0, 1, 5, 10, 15].includes(parsed)) {
+            setLiveRefreshSeconds(parsed);
+        }
+    }, [numericServerId]);
+
+    useEffect(() => {
+        if (!Number.isFinite(numericServerId) || (numericServerId ?? 0) <= 0) return;
+        const storageKey = `server-live-refresh-seconds:${numericServerId}`;
+        localStorage.setItem(storageKey, String(liveRefreshSeconds));
+    }, [numericServerId, liveRefreshSeconds]);
+
     const handleRefresh = () => {
         if (clientInsightsEnabled) {
             if (isLive) connectedQuery.refetch();
@@ -391,11 +433,34 @@ export function GeneralServerDetails() {
                     </button>
 
                     {clientInsightsEnabled ? (
-                        <label className="square-toggle">
-                            <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
-                            <span className="toggle-slider"></span>
-                            <span className="toggle-text">{isLive ? "Live" : "History"}</span>
-                        </label>
+                        <>
+                            <label className="square-toggle">
+                                <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
+                                <span className="toggle-slider"></span>
+                                <span className="toggle-text">{isLive ? "Live" : "History"}</span>
+                            </label>
+                            {isLive ? (
+                                <label style={{ display: "inline-flex", alignItems: "center", gap: 8, marginLeft: 8 }}>
+                                    <span style={{ fontSize: 12, opacity: 0.85 }}>Auto refresh:</span>
+                                    <select
+                                        className="btn secondary dropdown-select"
+                                        value={liveRefreshSeconds}
+                                        onChange={(e) => {
+                                            const next = Number.parseInt(e.target.value, 10);
+                                            if ([0, 1, 5, 10, 15].includes(next)) {
+                                                setLiveRefreshSeconds(next);
+                                            }
+                                        }}
+                                    >
+                                        <option value={0}>Disabled</option>
+                                        <option value={1}>1s</option>
+                                        <option value={5}>5s</option>
+                                        <option value={10}>10s</option>
+                                        <option value={15}>15s</option>
+                                    </select>
+                                </label>
+                            ) : null}
+                        </>
                     ) : null}
                 </div>
             </div>
@@ -517,7 +582,7 @@ export function GeneralServerDetails() {
                             </p>
                         ) : null}
                         <VpnMap
-                            clients={clients}
+                            clients={mapClients}
                             serverLocation={serverLocation}
                             serverName={serverName}
                             trafficFlows={openVpnQueriesEnabled && isLive && proxyTrafficFlowSupported ? trafficFlowHub.flows : []}
