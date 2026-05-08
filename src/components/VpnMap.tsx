@@ -18,6 +18,7 @@ const MARKER_SHADOW =
 const markerColors = ["red", "blue", "green", "orange", "yellow", "violet", "grey", "black"] as const;
 type MarkerColor = (typeof markerColors)[number];
 type MapViewMode = "map" | "globe";
+type GlobeTrafficLayer = "arcs" | "submarine";
 const BASE_MAX_RENDERED_FLOWS = 300;
 const BASE_MAX_RENDERED_POINTS = 1200;
 type PerformanceMode = "auto" | "high" | "balanced" | "low";
@@ -47,7 +48,10 @@ interface VpnMapProps {
   serverLocation?: [number, number] | null;
   serverName?: string | null;
   trafficFlows?: ProxyTrafficFlowUpdate[];
+  serverMarkers?: { id: number; name: string; position: [number, number] }[];
 }
+
+type FlowDirection = "clientToServer" | "serverToClient";
 
 function normalizeIpForMatch(raw: string | null | undefined): string {
   if (!raw) return "";
@@ -69,6 +73,42 @@ function normalizeIpForMatch(raw: string | null | undefined): string {
   if (s.startsWith("::ffff:")) s = s.slice("::ffff:".length);
 
   return s.trim();
+}
+
+function byServerKey(serverId: number | null | undefined, key: string): string {
+  if (!key) return "";
+  if (typeof serverId === "number" && Number.isFinite(serverId)) {
+    return `${serverId}:${key}`;
+  }
+  return key;
+}
+
+function intensityFromDelta(delta: number, maxDelta: number): number {
+  if (delta <= 0) return 0;
+  if (maxDelta <= 0) return 1;
+  return Math.max(0, Math.min(1, Math.log10(delta + 1) / Math.log10(maxDelta + 1)));
+}
+
+function offsetPolylinePositions(
+  from: [number, number],
+  to: [number, number],
+  sign: 1 | -1
+): [[number, number], [number, number]] {
+  const dx = to[1] - from[1];
+  const dy = to[0] - from[0];
+  const len = Math.hypot(dx, dy);
+  if (len < 1e-9) return [from, to];
+
+  const nx = -dy / len;
+  const ny = dx / len;
+  const offset = Math.max(0.01, Math.min(0.05, len * 0.08));
+  const ox = nx * offset * sign;
+  const oy = ny * offset * sign;
+
+  return [
+    [from[0] + oy, from[1] + ox],
+    [to[0] + oy, to[1] + ox],
+  ];
 }
 
 const tileLayers = {
@@ -142,6 +182,10 @@ const viewModeLabels: Record<MapViewMode, string> = {
   map: "Map",
   globe: "Globe",
 };
+const globeTrafficLayerLabels: Record<GlobeTrafficLayer, string> = {
+  arcs: "Arcs",
+  submarine: "Submarine",
+};
 
 const Globe = React.lazy(() => import("react-globe.gl"));
 
@@ -185,7 +229,13 @@ function resolveRenderBudget(width: number, height: number, mode: PerformanceMod
   };
 }
 
-const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, trafficFlows = [] }) => {
+const VpnMap: React.FC<VpnMapProps> = ({
+  clients,
+  serverLocation,
+  serverName,
+  trafficFlows = [],
+  serverMarkers = [],
+}) => {
   const defaultCenter: [number, number] = [45, 37];
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [globeWidth, setGlobeWidth] = useState(900);
@@ -202,6 +252,9 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
   );
   const [performanceMode, setPerformanceMode] = useState<PerformanceMode>(
       (Cookies.get("selectedMapPerformanceMode") as PerformanceMode) || "auto"
+  );
+  const [globeTrafficLayer, setGlobeTrafficLayer] = useState<GlobeTrafficLayer>(
+      (Cookies.get("selectedGlobeTrafficLayer") as GlobeTrafficLayer) || "arcs"
   );
   const [viewportSize, setViewportSize] = useState(() => ({
     width: window.innerWidth,
@@ -224,6 +277,9 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
   useEffect(() => {
     Cookies.set("selectedMapPerformanceMode", performanceMode, { expires: 365 });
   }, [performanceMode]);
+  useEffect(() => {
+    Cookies.set("selectedGlobeTrafficLayer", globeTrafficLayer, { expires: 365 });
+  }, [globeTrafficLayer]);
 
   useEffect(() => {
     if (viewMode !== "globe") return;
@@ -269,8 +325,12 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
         if (!candidate) continue;
         const raw = candidate.trim();
         if (raw && !index.has(raw)) index.set(raw, point);
+        const byServerRaw = byServerKey(c.vpnServerId, raw);
+        if (byServerRaw && !index.has(byServerRaw)) index.set(byServerRaw, point);
         const normalized = normalizeIpForMatch(raw);
         if (normalized && !index.has(normalized)) index.set(normalized, point);
+        const byServerNormalized = byServerKey(c.vpnServerId, normalized);
+        if (byServerNormalized && !index.has(byServerNormalized)) index.set(byServerNormalized, point);
       }
     }
     return index;
@@ -286,19 +346,40 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
         .map((x) => x.trim().toLowerCase());
       for (const key of candidates) {
         if (!index.has(key)) index.set(key, point);
+        const byServerIdentity = byServerKey(c.vpnServerId, key);
+        if (byServerIdentity && !index.has(byServerIdentity)) index.set(byServerIdentity, point);
       }
     }
     return index;
   }, [visibleClients]);
 
+  const serverLocationById = useMemo(() => {
+    const index = new Map<number, [number, number]>();
+    for (const marker of serverMarkers) {
+      index.set(marker.id, marker.position);
+    }
+    return index;
+  }, [serverMarkers]);
+
   const visibleTrafficFlows = useMemo(() => {
-    if (!serverLocation) return [];
     return trafficFlows
       .map((f) => {
+        const to =
+          typeof f.serverId === "number"
+            ? serverLocationById.get(f.serverId)
+            : serverLocation;
+        if (!to) return null;
+
         const ip = (f.realClientIp ?? "").trim();
         const normalizedIp = normalizeIpForMatch(ip);
         const usernameKey = (f.username ?? f.clientRef ?? "").trim().toLowerCase();
+        const serverScopedIp = byServerKey(f.serverId, ip);
+        const serverScopedNormalizedIp = byServerKey(f.serverId, normalizedIp);
+        const serverScopedIdentity = byServerKey(f.serverId, usernameKey);
         const from =
+          (serverScopedIp ? clientGeoByIp.get(serverScopedIp) : undefined) ??
+          (serverScopedNormalizedIp ? clientGeoByIp.get(serverScopedNormalizedIp) : undefined) ??
+          (serverScopedIdentity ? clientGeoByIdentity.get(serverScopedIdentity) : undefined) ??
           clientGeoByIp.get(ip) ??
           (normalizedIp ? clientGeoByIp.get(normalizedIp) : undefined) ??
           (usernameKey ? clientGeoByIdentity.get(usernameKey) : undefined);
@@ -307,18 +388,8 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
         const inDelta = Math.max(0, f.clientToServerBytesDelta ?? 0);
         const outDelta = Math.max(0, f.serverToClientBytesDelta ?? 0);
         const activity = inDelta + outDelta;
-        const weight = Math.min(8, Math.max(1.5, 1.5 + Math.log10(activity + 1)));
-        const color =
-          f.state === "failed"
-            ? "#ff3b30"
-            : f.state === "disconnected"
-              ? "#888888"
-              : f.isIdle
-                ? "#7aa2ff"
-                : "#00e676";
-        const opacity = f.isIdle ? 0.35 : 0.9;
 
-        return { ...f, from, to: serverLocation, color, weight, opacity, activity };
+        return { ...f, from, to, activity };
       })
       .filter((x): x is NonNullable<typeof x> => x !== null)
       .sort((a, b) => {
@@ -327,7 +398,57 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
         return a.connectionId.localeCompare(b.connectionId);
       })
       .slice(0, renderBudget.maxFlows);
-  }, [trafficFlows, clientGeoByIp, clientGeoByIdentity, serverLocation, renderBudget.maxFlows]);
+  }, [trafficFlows, clientGeoByIp, clientGeoByIdentity, serverLocation, serverLocationById, renderBudget.maxFlows]);
+
+  const visibleTrafficSegments = useMemo(() => {
+    const maxDelta = visibleTrafficFlows.reduce((acc, flow) => {
+      return Math.max(acc, flow.clientToServerBytesDelta ?? 0, flow.serverToClientBytesDelta ?? 0);
+    }, 0);
+
+    return visibleTrafficFlows.flatMap((flow) => {
+      if (flow.state === "failed" || flow.state === "disconnected") return [];
+
+      const directions: Array<{ key: FlowDirection; delta: number }> = [
+        { key: "clientToServer", delta: Math.max(0, flow.clientToServerBytesDelta ?? 0) },
+        { key: "serverToClient", delta: Math.max(0, flow.serverToClientBytesDelta ?? 0) },
+      ];
+
+      return directions
+        .filter((d) => d.delta > 0)
+        .map((d) => {
+          const intensity = intensityFromDelta(d.delta, maxDelta);
+          const weight = 1.2 + intensity * 6.8;
+          const opacityBase = 0.25 + intensity * 0.75;
+          const opacity = flow.isIdle ? opacityBase * 0.45 : opacityBase;
+          const color = d.key === "clientToServer" ? "#ff9800" : "#00e5ff";
+          const mapPath = offsetPolylinePositions(
+            flow.from,
+            flow.to,
+            d.key === "clientToServer" ? 1 : -1
+          );
+
+          return {
+            id: `${flow.connectionId}:${d.key}`,
+            connectionId: flow.connectionId,
+            direction: d.key,
+            delta: d.delta,
+            color,
+            weight,
+            opacity,
+            intensity,
+            isIdle: flow.isIdle,
+            state: flow.state,
+            from: flow.from,
+            to: flow.to,
+            mapPath,
+            label:
+              d.key === "clientToServer"
+                ? `C→S Δ: ${d.delta} B/s`
+                : `S→C Δ: ${d.delta} B/s`,
+          };
+        });
+    });
+  }, [visibleTrafficFlows]);
 
   const globePointsData = useMemo(() => {
     const points: Array<{
@@ -340,7 +461,19 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
       radius: number;
     }> = [];
 
-    if (serverLocation) {
+    if (serverMarkers.length > 0) {
+      for (const marker of serverMarkers.slice(0, renderBudget.maxPoints)) {
+        points.push({
+          id: `server-${marker.id}`,
+          lat: marker.position[0],
+          lng: marker.position[1],
+          color: "#4fc3f7",
+          label: `<strong>${marker.name}</strong>`,
+          altitude: 0.06,
+          radius: 0.28,
+        });
+      }
+    } else if (serverLocation) {
       points.push({
         id: "server",
         lat: serverLocation[0],
@@ -365,41 +498,85 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
     }
 
     return points;
-  }, [visibleClients, serverLocation, serverName, renderBudget.maxPoints]);
+  }, [visibleClients, serverLocation, serverName, serverMarkers, renderBudget.maxPoints]);
 
   const globeArcsData = useMemo(() => {
-    return visibleTrafficFlows.map((flow) => {
-      const [startLat, startLng] = flow.from;
-      const [endLat, endLng] = flow.to;
+    return visibleTrafficSegments.map((segment) => {
+      const [startLat, startLng] =
+        segment.direction === "clientToServer" ? segment.from : segment.to;
+      const [endLat, endLng] =
+        segment.direction === "clientToServer" ? segment.to : segment.from;
       return {
-        id: flow.connectionId,
+        id: segment.id,
         startLat,
         startLng,
         endLat,
         endLng,
-        color: flow.color,
-        label: `<strong>${flow.connectionId}</strong><br/>State: ${flow.state}${flow.isIdle ? " (idle)" : " (active)"}<br/>C→S Δ: ${flow.clientToServerBytesDelta} B/s<br/>S→C Δ: ${flow.serverToClientBytesDelta} B/s`,
-        isIdle: flow.isIdle,
+        color: segment.color,
+        label: `<strong>${segment.connectionId}</strong><br/>${segment.label}<br/>State: ${segment.state}${segment.isIdle ? " (idle)" : " (active)"}`,
+        isIdle: segment.isIdle,
+        intensity: segment.intensity,
       };
     });
-  }, [visibleTrafficFlows]);
+  }, [visibleTrafficSegments]);
+
+  const globeCablePathsData = useMemo(() => {
+    return visibleTrafficSegments.map((segment) => {
+      const start =
+        segment.direction === "clientToServer"
+          ? { lat: segment.from[0], lng: segment.from[1] }
+          : { lat: segment.to[0], lng: segment.to[1] };
+      const end =
+        segment.direction === "clientToServer"
+          ? { lat: segment.to[0], lng: segment.to[1] }
+          : { lat: segment.from[0], lng: segment.from[1] };
+
+      const midLat = (start.lat + end.lat) / 2;
+      const midLng = (start.lng + end.lng) / 2;
+      const bendSign = segment.direction === "clientToServer" ? 1 : -1;
+      const bendFactor = 4 + segment.intensity * 6;
+      const alt = 0.008 + segment.intensity * 0.03;
+
+      return {
+        id: segment.id,
+        color: segment.color,
+        width: 0.2 + segment.intensity * 1.35,
+        isIdle: segment.isIdle,
+        intensity: segment.intensity,
+        label: `<strong>${segment.connectionId}</strong><br/>${segment.label}<br/>State: ${
+          segment.state
+        }${segment.isIdle ? " (idle)" : " (active)"}`,
+        points: [
+          { ...start, alt: 0.001 },
+          { lat: midLat + bendSign * bendFactor, lng: midLng - bendSign * (bendFactor * 0.6), alt },
+          { lat: midLat + bendSign * (bendFactor * 0.35), lng: midLng + bendSign * (bendFactor * 0.5), alt: alt * 0.9 },
+          { ...end, alt: 0.001 },
+        ],
+      };
+    });
+  }, [visibleTrafficSegments]);
 
   const renderedStats = useMemo(() => {
     return {
       renderedFlows: visibleTrafficFlows.length,
       totalFlows: trafficFlows.length,
       flowLimit: renderBudget.maxFlows,
+      renderedSegments: visibleTrafficSegments.length,
       renderedPoints: globePointsData.length,
-      totalPoints: visibleClients.length + (serverLocation ? 1 : 0),
+      totalPoints:
+        visibleClients.length + (serverMarkers.length > 0 ? serverMarkers.length : (serverLocation ? 1 : 0)),
+      totalServers: serverMarkers.length > 0 ? serverMarkers.length : (serverLocation ? 1 : 0),
       pointLimit: renderBudget.maxPoints,
     };
   }, [
     visibleTrafficFlows.length,
     trafficFlows.length,
     renderBudget.maxFlows,
+    visibleTrafficSegments.length,
     globePointsData.length,
     visibleClients.length,
     serverLocation,
+    serverMarkers.length,
     renderBudget.maxPoints,
   ]);
 
@@ -458,10 +635,28 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
                 </option>
             ))}
           </select>
+          {viewMode === "globe" ? (
+            <>
+              <strong>Traffic layer:</strong>
+              <select
+                  className="btn secondary dropdown-select"
+                  value={globeTrafficLayer}
+                  onChange={(e) => setGlobeTrafficLayer(e.target.value as GlobeTrafficLayer)}
+              >
+                {Object.keys(globeTrafficLayerLabels).map((key) => (
+                    <option key={key} value={key}>
+                      {globeTrafficLayerLabels[key as GlobeTrafficLayer]}
+                    </option>
+                ))}
+              </select>
+            </>
+          ) : null}
           <span className="vpn-map-stats">
-            Flows: {renderedStats.renderedFlows}/{renderedStats.totalFlows} (limit {renderedStats.flowLimit}) | Points:{" "}
+            Flows: {renderedStats.renderedFlows}/{renderedStats.totalFlows} (limit {renderedStats.flowLimit}) | Segments:{" "}
+            {renderedStats.renderedSegments} | Servers: {renderedStats.totalServers} | Points:{" "}
             {renderedStats.renderedPoints}/{renderedStats.totalPoints} (limit {renderedStats.pointLimit})
           </span>
+          <span className="vpn-map-stats">C→S: orange | S→C: cyan | thicker/brighter = more traffic</span>
         </div>
 
         {viewMode === "map" ? (
@@ -472,19 +667,29 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
                   attribution={tileLayers[selectedLayer].attribution}
               />
 
-              {serverLocation && (
-                  <Marker position={serverLocation} icon={serverIcon}>
-                    <Popup>
-                      <strong>{serverName ?? "VPN Server"}</strong>
-                      <br />
-                      🌎 Location: {serverLocation[0]}, {serverLocation[1]}
-                    </Popup>
-                  </Marker>
-              )}
+              {serverMarkers.length > 0
+                ? serverMarkers.map((marker) => (
+                    <Marker key={`server-${marker.id}`} position={marker.position} icon={serverIcon}>
+                      <Popup>
+                        <strong>{marker.name}</strong>
+                        <br />
+                        🌎 Location: {marker.position[0]}, {marker.position[1]}
+                      </Popup>
+                    </Marker>
+                  ))
+                : serverLocation && (
+                    <Marker position={serverLocation} icon={serverIcon}>
+                      <Popup>
+                        <strong>{serverName ?? "VPN Server"}</strong>
+                        <br />
+                        🌎 Location: {serverLocation[0]}, {serverLocation[1]}
+                      </Popup>
+                    </Marker>
+                  )}
 
               {visibleClients.map((client) => (
                   <Marker
-                      key={client.id}
+                      key={`${client.vpnServerId ?? "na"}:${client.id ?? client.remoteIp ?? client.commonName ?? "client"}`}
                       position={[client.latitude as number, client.longitude as number]}
                       icon={clientIcon}
                   >
@@ -500,20 +705,18 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
                   </Marker>
               ))}
 
-              {visibleTrafficFlows.map((flow) => (
+              {visibleTrafficSegments.map((segment) => (
                   <Polyline
-                      key={flow.connectionId}
-                      positions={[flow.from, flow.to]}
-                      pathOptions={{ color: flow.color, weight: flow.weight, opacity: flow.opacity }}
+                      key={segment.id}
+                      positions={segment.mapPath}
+                      pathOptions={{ color: segment.color, weight: segment.weight, opacity: segment.opacity }}
                   >
                     <Popup>
-                      <strong>{flow.connectionId}</strong>
+                      <strong>{segment.connectionId}</strong>
                       <br />
-                      State: {flow.state} {flow.isIdle ? "(idle)" : "(active)"}
+                      State: {segment.state} {segment.isIdle ? "(idle)" : "(active)"}
                       <br />
-                      C→S Δ: {flow.clientToServerBytesDelta} B/s
-                      <br />
-                      S→C Δ: {flow.serverToClientBytesDelta} B/s
+                      {segment.label}
                     </Popup>
                   </Polyline>
               ))}
@@ -537,7 +740,7 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
                     pointLabel="label"
                     pointsMerge
                     pointsTransitionDuration={0}
-                    arcsData={globeArcsData}
+                    arcsData={globeTrafficLayer === "arcs" ? globeArcsData : []}
                     arcStartLat="startLat"
                     arcStartLng="startLng"
                     arcEndLat="endLat"
@@ -545,10 +748,35 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
                     arcColor={(d: unknown) => [(d as { color: string }).color, (d as { color: string }).color]}
                     arcLabel="label"
                     arcCurveResolution={24}
-                    arcDashLength={0.25}
+                    arcDashLength={(d: unknown) => 0.16 + ((d as { intensity?: number }).intensity ?? 0) * 0.22}
                     arcDashGap={0.7}
-                    arcDashAnimateTime={(d: unknown) => ((d as { isIdle: boolean }).isIdle ? 0 : 1200)}
+                    arcDashAnimateTime={(d: unknown) => {
+                      const arc = d as { isIdle: boolean; intensity?: number };
+                      if (arc.isIdle) return 0;
+                      const intensity = arc.intensity ?? 0;
+                      return Math.max(450, 1400 - Math.round(intensity * 850));
+                    }}
                     arcsTransitionDuration={0}
+                    pathsData={globeTrafficLayer === "submarine" ? globeCablePathsData : []}
+                    pathPoints="points"
+                    pathPointLat="lat"
+                    pathPointLng="lng"
+                    pathPointAlt="alt"
+                    pathColor="color"
+                    pathStroke={(d: unknown) => (d as { width: number }).width}
+                    pathLabel="label"
+                    pathDashLength={(d: unknown) => {
+                      const cable = d as { intensity?: number };
+                      return 0.08 + (cable.intensity ?? 0) * 0.12;
+                    }}
+                    pathDashGap={0.2}
+                    pathDashAnimateTime={(d: unknown) => {
+                      const cable = d as { isIdle: boolean; intensity?: number };
+                      if (cable.isIdle) return 0;
+                      const intensity = cable.intensity ?? 0;
+                      return Math.max(350, 1200 - Math.round(intensity * 700));
+                    }}
+                    pathTransitionDuration={0}
                 />
               </Suspense>
             </div>

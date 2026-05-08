@@ -10,6 +10,7 @@ export type ProxyTrafficFlowState = "connected" | "disconnected" | "failed";
 export type ProxyTrafficFlowProtocol = "tcp" | "udp" | "unknown";
 
 export interface ProxyTrafficFlowUpdate {
+  serverId?: number;
   connectionId: string;
   protocol: ProxyTrafficFlowProtocol;
   state: ProxyTrafficFlowState;
@@ -215,15 +216,18 @@ export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) 
               }
             }
 
-            for (const e of entries) {
+            for (const baseEntry of entries) {
+              const e: ProxyTrafficFlowUpdate = { ...baseEntry, serverId: serverId ?? undefined };
+              const key = `${serverId}:${e.connectionId}`;
+
               if (!e.isConnected && (e.state === "disconnected" || e.state === "failed")) {
-                if (prev[e.connectionId]) delete ensureNext()[e.connectionId];
+                if (prev[key]) delete ensureNext()[key];
                 continue;
               }
 
-              const current = prev[e.connectionId];
+              const current = prev[key];
               if (current && sameFlow(current, e)) continue;
-              ensureNext()[e.connectionId] = e;
+              ensureNext()[key] = e;
             }
 
             return next ?? prev;
@@ -277,5 +281,153 @@ export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) 
 
   const flows = useMemo(() => Object.values(snapshot), [snapshot]);
 
+  return { flows, connectionState, lastError };
+}
+
+export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
+  const [connectionState, setConnectionState] = useState("init");
+  const [lastError, setLastError] = useState<string | null>(null);
+  const [sessionKey, setSessionKey] = useState(0);
+  const [snapshot, setSnapshot] = useState<Record<string, ProxyTrafficFlowUpdate>>({});
+  const connsRef = useRef<Map<number, HubConnection>>(new Map());
+
+  const stableServerIds = useMemo(
+    () =>
+      [...new Set(serverIds.filter((x) => Number.isFinite(x) && x > 0))]
+        .sort((a, b) => a - b),
+    [serverIds]
+  );
+
+  useEffect(() => {
+    const bump = () => setSessionKey((v) => v + 1);
+    window.addEventListener(ACCESS_TOKEN_REFRESHED_EVENT, bump);
+    return () => window.removeEventListener(ACCESS_TOKEN_REFRESHED_EVENT, bump);
+  }, []);
+
+  useEffect(() => {
+    const stopAll = async () => {
+      const entries = [...connsRef.current.values()];
+      connsRef.current.clear();
+      await Promise.all(entries.map((c) => c.stop().catch(() => undefined)));
+    };
+
+    if (!enabled || stableServerIds.length === 0) {
+      setConnectionState("disabled");
+      setLastError(null);
+      setSnapshot({});
+      void stopAll();
+      return;
+    }
+
+    let alive = true;
+    const run = async () => {
+      try {
+        const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+        if (!token) {
+          setConnectionState("no-token");
+          setLastError("No token in localStorage");
+          return;
+        }
+
+        setConnectionState("starting");
+        setLastError(null);
+
+        const nowServerSet = new Set(stableServerIds);
+        const staleConnections = [...connsRef.current.entries()].filter(([id]) => !nowServerSet.has(id));
+        await Promise.all(
+          staleConnections.map(async ([id, conn]) => {
+            connsRef.current.delete(id);
+            await conn.stop().catch(() => undefined);
+          })
+        );
+
+        await Promise.all(
+          stableServerIds.map(async (sid) => {
+            if (connsRef.current.has(sid)) return;
+
+            const hubUrl = `${getProxyTrafficFlowHubUrl()}?serverId=${encodeURIComponent(String(sid))}`;
+            const conn = new HubConnectionBuilder()
+              .withUrl(hubUrl, {
+                accessTokenFactory: () => localStorage.getItem(ACCESS_TOKEN_KEY) ?? "",
+                transport: getSignalRPreferredTransport(),
+              })
+              .withAutomaticReconnect([0, 2000, 5000, 10000])
+              .configureLogging(import.meta.env.DEV ? LogLevel.None : LogLevel.Information)
+              .build();
+
+            conn.on("TrafficFlowUpdated", (payload: unknown) => {
+              const entries = parseBatch(payload).map((e) => ({ ...e, serverId: sid }));
+              if (!alive || entries.length === 0) return;
+
+              setSnapshot((prev) => {
+                let next: Record<string, ProxyTrafficFlowUpdate> | null = null;
+                const ensureNext = () => {
+                  if (!next) next = { ...prev };
+                  return next;
+                };
+
+                const nowMs = Date.now();
+                for (const [id, existing] of Object.entries(prev)) {
+                  const emittedAtMs = parseUtcMs(existing.emittedAtUtc);
+                  if (emittedAtMs > 0 && nowMs - emittedAtMs > STALE_FLOW_TTL_MS) {
+                    delete ensureNext()[id];
+                  }
+                }
+
+                for (const e of entries) {
+                  const key = `${sid}:${e.connectionId}`;
+                  if (!e.isConnected && (e.state === "disconnected" || e.state === "failed")) {
+                    if (prev[key]) delete ensureNext()[key];
+                    continue;
+                  }
+                  const current = prev[key];
+                  if (current && sameFlow(current, e)) continue;
+                  ensureNext()[key] = e;
+                }
+
+                return next ?? prev;
+              });
+            });
+
+            conn.onclose((err) => {
+              if (!alive) return;
+              setConnectionState("closed");
+              setLastError(err ? String(err) : null);
+            });
+            conn.onreconnecting((err) => {
+              if (!alive) return;
+              setConnectionState("reconnecting");
+              setLastError(err ? String(err) : null);
+            });
+            conn.onreconnected(() => {
+              if (!alive) return;
+              setConnectionState("connected");
+              setLastError(null);
+            });
+
+            await conn.start();
+            connsRef.current.set(sid, conn);
+          })
+        );
+
+        if (!alive) return;
+        setConnectionState("connected");
+        setLastError(null);
+      } catch (e: unknown) {
+        if (!alive) return;
+        setConnectionState("error");
+        setLastError(errorMessage(e));
+      }
+    };
+
+    void run();
+
+    return () => {
+      alive = false;
+      void stopAll();
+    };
+  }, [enabled, sessionKey, stableServerIds]);
+
+  const flows = useMemo(() => Object.values(snapshot), [snapshot]);
   return { flows, connectionState, lastError };
 }
