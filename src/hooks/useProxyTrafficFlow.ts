@@ -144,7 +144,7 @@ function parseBatch(raw: unknown): ProxyTrafficFlowUpdate[] {
   return result;
 }
 
-export function useProxyTrafficFlow(enabled: boolean, hubOrigin?: string | null) {
+export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) {
   const [connectionState, setConnectionState] = useState("init");
   const [lastError, setLastError] = useState<string | null>(null);
   const [sessionKey, setSessionKey] = useState(0);
@@ -171,6 +171,12 @@ export function useProxyTrafficFlow(enabled: boolean, hubOrigin?: string | null)
     let alive = true;
     const run = async () => {
       try {
+        if (!Number.isFinite(serverId)) {
+          setConnectionState("no-server");
+          setLastError("No valid serverId for traffic flow hub");
+          return;
+        }
+
         const token = localStorage.getItem(ACCESS_TOKEN_KEY);
         if (!token) {
           setConnectionState("no-token");
@@ -178,8 +184,9 @@ export function useProxyTrafficFlow(enabled: boolean, hubOrigin?: string | null)
           return;
         }
 
+        const hubUrl = `${getProxyTrafficFlowHubUrl()}?serverId=${encodeURIComponent(String(serverId))}`;
         const conn = new HubConnectionBuilder()
-          .withUrl(getProxyTrafficFlowHubUrl(hubOrigin), {
+          .withUrl(hubUrl, {
             accessTokenFactory: () => localStorage.getItem(ACCESS_TOKEN_KEY) ?? "",
             transport: getSignalRPreferredTransport(),
           })
@@ -266,7 +273,7 @@ export function useProxyTrafficFlow(enabled: boolean, hubOrigin?: string | null)
         });
       }
     };
-  }, [enabled, sessionKey, hubOrigin]);
+  }, [enabled, sessionKey, serverId]);
 
   const flows = useMemo(() => Object.values(snapshot), [snapshot]);
 
