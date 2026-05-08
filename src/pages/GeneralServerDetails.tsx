@@ -41,6 +41,7 @@ import type { QuotaPlansResponse, QuotaPlanAllowedServerDto } from "../api/orval
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import { formatDateWithOffset } from "../utils/utils";
+import { useProxyTrafficFlow } from "../hooks/useProxyTrafficFlow";
 
 type ConflogPayload = {
     application?: string | null;
@@ -261,6 +262,18 @@ export function GeneralServerDetails() {
     const serverEntity: VpnServerDto | undefined =
         serverWithStatus?.vpnServerResponses?.vpnServer ?? serverBasicPayload?.vpnServer;
 
+    const proxyTrafficHubOrigin = useMemo(() => {
+        const raw = serverEntity?.apiUrl?.trim();
+        if (!raw) return null;
+        try {
+            return new URL(raw).origin;
+        } catch {
+            return raw.replace(/\/api\/?$/i, "").replace(/\/$/, "");
+        }
+    }, [serverEntity?.apiUrl]);
+
+    const trafficFlowHub = useProxyTrafficFlow(isLive && openVpnQueriesEnabled, proxyTrafficHubOrigin);
+
     const serverLocation = useMemo<[number, number] | null>(() => {
         const lat = serverEntity?.latitude;
         const lon = serverEntity?.longitude;
@@ -446,7 +459,21 @@ export function GeneralServerDetails() {
                             <FaMapMarkerAlt className="icon" aria-hidden />
                             <span>{xrayClientsEnabled ? "Client locations" : "VPN Client Locations"}</span>
                         </h3>
-                        <VpnMap clients={clients} serverLocation={serverLocation} serverName={serverName} />
+                        {openVpnQueriesEnabled && isLive ? (
+                            <p
+                                className="server-details__muted"
+                                style={{ fontSize: 12, opacity: 0.88, margin: "0 0 10px" }}
+                            >
+                                Traffic stream: <code>{trafficFlowHub.connectionState}</code>
+                                {trafficFlowHub.lastError ? ` (${trafficFlowHub.lastError})` : ""}
+                            </p>
+                        ) : null}
+                        <VpnMap
+                            clients={clients}
+                            serverLocation={serverLocation}
+                            serverName={serverName}
+                            trafficFlows={openVpnQueriesEnabled && isLive ? trafficFlowHub.flows : []}
+                        />
                     </section>
                 </>
             ) : null}
