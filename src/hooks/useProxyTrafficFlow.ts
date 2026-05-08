@@ -106,10 +106,28 @@ function pick<T = unknown>(obj: Record<string, unknown>, camel: string, pascal: 
 }
 
 function parseBatch(raw: unknown): ProxyTrafficFlowUpdate[] {
-  if (!Array.isArray(raw)) return [];
+  const normalizeToArray = (value: unknown): unknown[] => {
+    if (Array.isArray(value)) {
+      // Some relays/proxies can wrap payload into one extra nesting level: [[{...}]].
+      if (value.length === 1 && Array.isArray(value[0])) return value[0] as unknown[];
+      return value;
+    }
+    if (value && typeof value === "object") {
+      const r = value as Record<string, unknown>;
+      if (Array.isArray(r.items)) return r.items;
+      if (Array.isArray(r.flows)) return r.flows;
+      if (Array.isArray(r.updates)) return r.updates;
+      if (Array.isArray(r.data)) return r.data;
+      if (Array.isArray(r.value)) return r.value;
+    }
+    return [];
+  };
+
+  const source = normalizeToArray(raw);
+  if (!Array.isArray(source)) return [];
   const result: ProxyTrafficFlowUpdate[] = [];
 
-  for (const item of raw) {
+  for (const item of source) {
     if (!item || typeof item !== "object") continue;
     const o = item as Record<string, unknown>;
     const connectionId = asStringOrNull(pick(o, "connectionId", "ConnectionId"));
@@ -151,6 +169,13 @@ export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) 
   const [sessionKey, setSessionKey] = useState(0);
   const [snapshot, setSnapshot] = useState<Record<string, ProxyTrafficFlowUpdate>>({});
   const connRef = useRef<HubConnection | null>(null);
+  const debugEnabled = useMemo(() => {
+    try {
+      return localStorage.getItem("trafficFlowDebug") === "1";
+    } catch {
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
     const bump = () => setSessionKey((v) => v + 1);
@@ -199,6 +224,14 @@ export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) 
 
         conn.on("TrafficFlowUpdated", (payload: unknown) => {
           const entries = parseBatch(payload);
+          if (debugEnabled) {
+            // eslint-disable-next-line no-console
+            console.debug("[TrafficFlowDebug][single] TrafficFlowUpdated received", {
+              serverId,
+              rawType: Array.isArray(payload) ? "array" : typeof payload,
+              entries: entries.length,
+            });
+          }
           if (!alive || entries.length === 0) return;
 
           setSnapshot((prev) => {
@@ -277,7 +310,7 @@ export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) 
         });
       }
     };
-  }, [enabled, sessionKey, serverId]);
+  }, [enabled, sessionKey, serverId, debugEnabled]);
 
   const flows = useMemo(() => Object.values(snapshot), [snapshot]);
 
@@ -290,6 +323,13 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
   const [sessionKey, setSessionKey] = useState(0);
   const [snapshot, setSnapshot] = useState<Record<string, ProxyTrafficFlowUpdate>>({});
   const connsRef = useRef<Map<number, HubConnection>>(new Map());
+  const debugEnabled = useMemo(() => {
+    try {
+      return localStorage.getItem("trafficFlowDebug") === "1";
+    } catch {
+      return false;
+    }
+  }, []);
 
   const stableServerIds = useMemo(
     () =>
@@ -357,6 +397,14 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
 
             conn.on("TrafficFlowUpdated", (payload: unknown) => {
               const entries = parseBatch(payload).map((e) => ({ ...e, serverId: sid }));
+              if (debugEnabled) {
+                // eslint-disable-next-line no-console
+                console.debug("[TrafficFlowDebug][many] TrafficFlowUpdated received", {
+                  serverId: sid,
+                  rawType: Array.isArray(payload) ? "array" : typeof payload,
+                  entries: entries.length,
+                });
+              }
               if (!alive || entries.length === 0) return;
 
               setSnapshot((prev) => {
@@ -426,7 +474,7 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
       alive = false;
       void stopAll();
     };
-  }, [enabled, sessionKey, stableServerIds]);
+  }, [enabled, sessionKey, stableServerIds, debugEnabled]);
 
   const flows = useMemo(() => Object.values(snapshot), [snapshot]);
   return { flows, connectionState, lastError };
