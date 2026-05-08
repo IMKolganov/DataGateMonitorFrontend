@@ -49,6 +49,28 @@ interface VpnMapProps {
   trafficFlows?: ProxyTrafficFlowUpdate[];
 }
 
+function normalizeIpForMatch(raw: string | null | undefined): string {
+  if (!raw) return "";
+  let s = raw.trim().toLowerCase();
+  if (!s) return "";
+
+  // Some gateways/proxies may provide comma-separated forwarded values.
+  if (s.includes(",")) s = s.split(",")[0]?.trim() ?? s;
+
+  // [ipv6]:port -> ipv6
+  const bracketMatch = s.match(/^\[([^[\]]+)\](?::\d+)?$/);
+  if (bracketMatch?.[1]) s = bracketMatch[1];
+
+  // IPv4:port -> IPv4
+  const ipv4WithPort = s.match(/^(\d{1,3}(?:\.\d{1,3}){3}):\d+$/);
+  if (ipv4WithPort?.[1]) s = ipv4WithPort[1];
+
+  // ::ffff:IPv4 -> IPv4
+  if (s.startsWith("::ffff:")) s = s.slice("::ffff:".length);
+
+  return s.trim();
+}
+
 const tileLayers = {
   "Carto Dark": {
     url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
@@ -241,9 +263,15 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
     const index = new Map<string, [number, number]>();
     for (const c of visibleClients) {
       if (typeof c.latitude !== "number" || typeof c.longitude !== "number") continue;
-      const ip = (c.proxyRealIp ?? c.remoteIp ?? "").trim();
-      if (!ip) continue;
-      index.set(ip, [c.latitude, c.longitude]);
+      const point: [number, number] = [c.latitude, c.longitude];
+      const candidates = [c.proxyRealIp ?? null, c.remoteIp ?? null];
+      for (const candidate of candidates) {
+        if (!candidate) continue;
+        const raw = candidate.trim();
+        if (raw && !index.has(raw)) index.set(raw, point);
+        const normalized = normalizeIpForMatch(raw);
+        if (normalized && !index.has(normalized)) index.set(normalized, point);
+      }
     }
     return index;
   }, [visibleClients]);
@@ -268,8 +296,12 @@ const VpnMap: React.FC<VpnMapProps> = ({ clients, serverLocation, serverName, tr
     return trafficFlows
       .map((f) => {
         const ip = (f.realClientIp ?? "").trim();
+        const normalizedIp = normalizeIpForMatch(ip);
         const usernameKey = (f.username ?? f.clientRef ?? "").trim().toLowerCase();
-        const from = clientGeoByIp.get(ip) ?? (usernameKey ? clientGeoByIdentity.get(usernameKey) : undefined);
+        const from =
+          clientGeoByIp.get(ip) ??
+          (normalizedIp ? clientGeoByIp.get(normalizedIp) : undefined) ??
+          (usernameKey ? clientGeoByIdentity.get(usernameKey) : undefined);
         if (!from) return null;
 
         const inDelta = Math.max(0, f.clientToServerBytesDelta ?? 0);
