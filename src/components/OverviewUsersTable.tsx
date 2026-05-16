@@ -74,7 +74,10 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
     useGetApiOpenVpnClientsOverviewUsers<OverviewUsersResponse>(queryParams, {
       query: {
         enabled: Boolean(queryParams.From && queryParams.To),
-        staleTime: 10_000,
+        staleTime: Number.POSITIVE_INFINITY,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        refetchOnMount: false,
         retry: 1,
       },
     });

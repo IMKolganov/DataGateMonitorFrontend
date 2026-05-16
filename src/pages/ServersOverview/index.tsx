@@ -189,7 +189,6 @@ export default function ServersOverview() {
   const [to, setTo] = useState<Date>(endOfToday());
   const [grouping, setGrouping] = useState<Grouping>("auto");
   const [offlinePlaybackMode, setOfflinePlaybackMode] = useState(false);
-  const [offlinePulseTick, setOfflinePulseTick] = useState(0);
 
   const seriesParams: GetApiOpenVpnClientsOverviewSeriesParams = useMemo(
     () => ({
@@ -516,8 +515,10 @@ export default function ServersOverview() {
     {
       query: {
         enabled: isGlobalServersPage && offlinePlaybackMode,
-        staleTime: 10_000,
-        refetchInterval: 15_000,
+        staleTime: Number.POSITIVE_INFINITY,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        refetchOnMount: false,
         retry: 1,
       },
     }
@@ -526,17 +527,13 @@ export default function ServersOverview() {
   const offlineOverviewPointsQuery = useGetApiOpenVpnClientsOverviewPoints(offlineOverviewQueryParams, {
     query: {
       enabled: isGlobalServersPage && offlinePlaybackMode,
-      staleTime: 10_000,
-      refetchInterval: 15_000,
+      staleTime: Number.POSITIVE_INFINITY,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      refetchOnMount: false,
       retry: 1,
     },
   });
-
-  useEffect(() => {
-    if (!isGlobalServersPage || !offlinePlaybackMode) return;
-    const timer = window.setInterval(() => setOfflinePulseTick((v) => v + 1), 1000);
-    return () => window.clearInterval(timer);
-  }, [isGlobalServersPage, offlinePlaybackMode]);
 
   const offlinePlaybackUsers = useMemo(() => {
     const rows = (offlineOverviewUsersQuery.data?.overviewUserItems ?? []) as OverviewUserDto[];
@@ -558,6 +555,7 @@ export default function ServersOverview() {
           typeof p.longitude === "number" &&
           Number.isFinite(p.longitude)
       )
+      .filter((p) => ((p.totalBytesIn ?? 0) + (p.totalBytesOut ?? 0)) > 0)
       .slice(0, 600);
   }, [offlineOverviewPointsQuery.data]);
 
@@ -600,6 +598,13 @@ export default function ServersOverview() {
       const pseudoIp = `offline-user-${idx + 1}`;
       const displayName = u.displayName?.trim() || externalId;
 
+      const pointIn = point.totalBytesIn ?? 0;
+      const pointOut = point.totalBytesOut ?? 0;
+      const userIn = u.trafficInBytes ?? 0;
+      const userOut = u.trafficOutBytes ?? 0;
+      const bytesReceived = Math.max(userIn, pointIn);
+      const bytesSent = Math.max(userOut, pointOut);
+
       return {
         id: idx + 1,
         vpnServerId: serverId ?? undefined,
@@ -613,14 +618,16 @@ export default function ServersOverview() {
         city: point.region,
         latitude: point.latitude,
         longitude: point.longitude,
-        bytesReceived: u.trafficInBytes ?? 0,
-        bytesSent: u.trafficOutBytes ?? 0,
+        bytesReceived,
+        bytesSent,
         connectedSince: u.firstSeen ?? nowIso,
         isConnected: true,
       };
     });
 
-    const flows: ProxyTrafficFlowUpdate[] = clients.map((client, idx) => {
+    const activeClients = clients.filter((c) => ((c.bytesReceived ?? 0) + (c.bytesSent ?? 0)) > 0);
+
+    const flows: ProxyTrafficFlowUpdate[] = activeClients.map((client, idx) => {
       const sid =
         typeof client.vpnServerId === "number" && markerById.has(client.vpnServerId)
           ? client.vpnServerId
@@ -628,11 +635,11 @@ export default function ServersOverview() {
       const user = syntheticUsers[idx];
       const baseIn = Math.max(1, user.trafficInBytes ?? 0);
       const baseOut = Math.max(1, user.trafficOutBytes ?? 0);
-      const waveA = ((offlinePulseTick + idx * 3) % 10) + 1;
-      const waveB = ((offlinePulseTick * 2 + idx * 5) % 10) + 1;
+      const waveA = ((idx * 3) % 10) + 1;
+      const waveB = ((idx * 5) % 10) + 1;
       const c2sDelta = 40 + waveA * 35;
       const s2cDelta = 50 + waveB * 45;
-      const emittedIso = new Date(Date.now() + idx).toISOString();
+      const emittedIso = new Date(new Date(nowIso).getTime() + idx).toISOString();
       const connectionId = `offline:${client.externalId ?? idx + 1}:${sid}`;
 
       return {
@@ -652,8 +659,8 @@ export default function ServersOverview() {
         localProxyPort: 0,
         targetIp: "::ffff:127.0.0.1",
         targetPort: 0,
-        clientToServerBytesTotal: baseIn + offlinePulseTick * c2sDelta,
-        serverToClientBytesTotal: baseOut + offlinePulseTick * s2cDelta,
+        clientToServerBytesTotal: baseIn + c2sDelta * 10,
+        serverToClientBytesTotal: baseOut + s2cDelta * 10,
         clientToServerBytesDelta: c2sDelta,
         serverToClientBytesDelta: s2cDelta,
         connectedAtUtc: client.connectedSince ?? nowIso,
@@ -663,13 +670,12 @@ export default function ServersOverview() {
       };
     });
 
-    return { clients, flows };
+    return { clients: activeClients, flows };
   }, [
     offlinePlaybackMode,
     offlinePlaybackUsers,
     offlinePlaybackPoints,
     globalFlowServerMarkers,
-    offlinePulseTick,
   ]);
 
   const globalFlowHub = useProxyTrafficFlowMany(
@@ -744,6 +750,18 @@ export default function ServersOverview() {
               />
               Offline mode (looped animation from filtered overview data)
             </label>
+            {offlinePlaybackMode ? (
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={() => {
+                  void offlineOverviewUsersQuery.refetch();
+                  void offlineOverviewPointsQuery.refetch();
+                }}
+              >
+                Refresh offline data
+              </button>
+            ) : null}
           </div>
           <p style={{ margin: "0 0 10px", fontSize: 12, opacity: 0.88 }}>
             Stream:{" "}
@@ -752,11 +770,15 @@ export default function ServersOverview() {
             {globalFlowServerIds.length} | Clients:{" "}
             {offlinePlaybackMode ? offlinePlaybackData.clients.length : globalLiveClients.length}
           </p>
-          <VpnMap
-            clients={offlinePlaybackMode ? offlinePlaybackData.clients : globalLiveClients}
-            trafficFlows={offlinePlaybackMode ? offlinePlaybackData.flows : globalFlowHub.flows}
-            serverMarkers={globalFlowServerMarkers}
-          />
+          <h4 style={{ margin: "16px 0 8px" }}>All active connections map</h4>
+          <div style={{ marginTop: 8, paddingTop: 6 }}>
+            <VpnMap
+              clients={offlinePlaybackMode ? offlinePlaybackData.clients : globalLiveClients}
+              trafficFlows={offlinePlaybackMode ? offlinePlaybackData.flows : globalFlowHub.flows}
+              serverMarkers={globalFlowServerMarkers}
+              animationMode={offlinePlaybackMode ? "offline" : "live"}
+            />
+          </div>
         </section>
       ) : null}
 
