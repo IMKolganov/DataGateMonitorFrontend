@@ -11,6 +11,7 @@ type Props = {
   vpnServerId?: number | null;
   externalId?: string | null;
 };
+const DEFAULT_GEO_CENTER: [number, number] = [45, 37];
 
 function withLatLng(s: VpnServerV2Dto): s is VpnServerV2Dto & {
   id: number;
@@ -54,7 +55,7 @@ export default function GeoMap({ from, to, vpnServerId = null, externalId = null
       vpnServerId={vpnServerId}
       externalId={externalId}
       onlyWithCoordinates
-      center={[45, 37]}
+      center={DEFAULT_GEO_CENTER}
       zoom={4}
       vpnServerMarkers={vpnServerMarkers}
     />

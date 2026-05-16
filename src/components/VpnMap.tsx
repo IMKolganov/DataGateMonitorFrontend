@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import Cookies from "js-cookie";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -19,6 +19,7 @@ const markerColors = ["red", "blue", "green", "orange", "yellow", "violet", "gre
 type MarkerColor = (typeof markerColors)[number];
 type MapViewMode = "map" | "globe";
 type GlobeTrafficLayer = "arcs" | "submarine";
+const DEFAULT_MAP_CENTER: [number, number] = [45, 37];
 const BASE_MAX_RENDERED_FLOWS = 300;
 const BASE_MAX_RENDERED_POINTS = 1200;
 type PerformanceMode = "auto" | "high" | "balanced" | "low";
@@ -36,14 +37,6 @@ const createMarkerIcon = (color: MarkerColor, withShadow = true): L.Icon =>
   });
 
 const serverIcon = createMarkerIcon("blue");
-
-const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
-  const map = useMap();
-  useEffect(() => {
-    map.setView(center, zoom);
-  }, [map, center[0], center[1], zoom]);
-  return null;
-};
 
 interface VpnMapProps {
   clients: VpnClientInfoDto[];
@@ -318,7 +311,6 @@ const VpnMap: React.FC<VpnMapProps> = ({
   serverMarkers = [],
   animationMode = "live",
 }) => {
-  const defaultCenter: [number, number] = [45, 37];
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [globeWidth, setGlobeWidth] = useState(900);
   const [globeHeight, setGlobeHeight] = useState(580);
@@ -382,10 +374,13 @@ const VpnMap: React.FC<VpnMapProps> = ({
       const entry = entries[0];
       if (!entry) return;
       const width = Math.max(400, Math.round(entry.contentRect.width));
-      const height = Math.max(420, Math.round(entry.contentRect.height - 44));
-      setGlobeWidth(width);
-      setGlobeHeight(height);
-      setViewportSize({ width, height });
+      // Keep globe size stable: derive height from width to avoid resize feedback loops.
+      const height = Math.max(420, Math.min(820, Math.round(width * 0.62)));
+      setGlobeWidth((prev) => (prev === width ? prev : width));
+      setGlobeHeight((prev) => (prev === height ? prev : height));
+      setViewportSize((prev) =>
+        prev.width === width && prev.height === height ? prev : { width, height }
+      );
     });
     observe.observe(rootRef.current);
     return () => observe.disconnect();
@@ -1022,8 +1017,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
         </div>
 
         {viewMode === "map" ? (
-            <MapContainer className="map-container-full-size" center={defaultCenter} zoom={4}>
-              <ChangeView center={defaultCenter} zoom={4} />
+            <MapContainer className="map-container-full-size" center={DEFAULT_MAP_CENTER} zoom={4}>
               <TileLayer
                   url={tileLayers[selectedLayer].url}
                   attribution={tileLayers[selectedLayer].attribution}

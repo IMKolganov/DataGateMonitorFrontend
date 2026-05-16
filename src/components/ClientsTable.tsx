@@ -242,6 +242,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                 <StyledDataGrid
                     rows={rows}
                     columns={columns}
+                    autoHeight
                     pageSizeOptions={[5, 10, 20, 50, 100]}
                     paginationMode="server"
                     rowCount={totalClients}

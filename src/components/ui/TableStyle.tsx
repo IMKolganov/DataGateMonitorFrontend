@@ -80,11 +80,29 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => {
     "& .MuiDataGrid-virtualScroller": {
       overflowX: "auto",
       overflowY: "auto",
+      scrollbarGutter: "auto",
       ...scrollbarStyles,
     },
-    "& .MuiDataGrid-scrollbar": {
+    "& .MuiDataGrid-scrollbar--horizontal, & .MuiDataGrid-scrollbar--vertical": {
+      backgroundColor: scrollbarTrack,
+      scrollbarWidth: "thin",
+      scrollbarColor: `${scrollbarThumb} ${scrollbarTrack}`,
+    },
+    "& .MuiDataGrid-scrollbar--horizontal::-webkit-scrollbar": {
+      height: 8,
+    },
+    "& .MuiDataGrid-scrollbar--vertical::-webkit-scrollbar": {
+      width: 8,
+    },
+    "& .MuiDataGrid-scrollbar--horizontal::-webkit-scrollbar-track, & .MuiDataGrid-scrollbar--vertical::-webkit-scrollbar-track": {
       background: scrollbarTrack,
-      ...scrollbarStyles,
+    },
+    "& .MuiDataGrid-scrollbar--horizontal::-webkit-scrollbar-thumb, & .MuiDataGrid-scrollbar--vertical::-webkit-scrollbar-thumb": {
+      background: scrollbarThumb,
+      borderRadius: 4,
+    },
+    "& .MuiDataGrid-scrollbar--horizontal::-webkit-scrollbar-thumb:hover, & .MuiDataGrid-scrollbar--vertical::-webkit-scrollbar-thumb:hover": {
+      background: scrollbarThumbHover,
     },
   };
 });
@@ -94,12 +112,14 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => {
  * Use this as the default grid so users get horizontal scroll, column visibility, and column menu.
  */
 const AppDataGrid = React.forwardRef<HTMLDivElement, DataGridProps>(function AppDataGrid(props, ref) {
+  const { autoHeight, ...rest } = props;
   return (
     <StyledDataGrid
       ref={ref}
+      autoHeight={autoHeight ?? true}
       showToolbar
       slots={{ toolbar: GridToolbarWithExcelClipboard }}
-      {...props}
+      {...rest}
     />
   );
 });
