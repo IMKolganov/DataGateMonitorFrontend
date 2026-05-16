@@ -217,7 +217,7 @@ export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) 
             transport: getSignalRPreferredTransport(),
           })
           .withAutomaticReconnect([0, 2000, 5000, 10000])
-          .configureLogging(import.meta.env.DEV ? LogLevel.None : LogLevel.Information)
+          .configureLogging(LogLevel.None)
           .build();
 
         connRef.current = conn;
@@ -226,7 +226,7 @@ export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) 
           const entries = parseBatch(payload);
           if (debugEnabled) {
             // eslint-disable-next-line no-console
-            console.info("[TrafficFlowDebug][single] TrafficFlowUpdated received", {
+            console.debug("[TrafficFlowDebug][single] TrafficFlowUpdated received", {
               serverId,
               rawType: Array.isArray(payload) ? "array" : typeof payload,
               entries: entries.length,
@@ -402,14 +402,14 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
                 transport: getSignalRPreferredTransport(),
               })
               .withAutomaticReconnect([0, 2000, 5000, 10000])
-              .configureLogging(import.meta.env.DEV ? LogLevel.None : LogLevel.Information)
+              .configureLogging(LogLevel.None)
               .build();
 
             conn.on("TrafficFlowUpdated", (payload: unknown) => {
               const entries = parseBatch(payload).map((e) => ({ ...e, serverId: sid }));
               if (debugEnabled) {
                 // eslint-disable-next-line no-console
-                console.info("[TrafficFlowDebug][many] TrafficFlowUpdated received", {
+                console.debug("[TrafficFlowDebug][many] TrafficFlowUpdated received", {
                   serverId: sid,
                   rawType: Array.isArray(payload) ? "array" : typeof payload,
                   entries: entries.length,

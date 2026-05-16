@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import Cookies from "js-cookie";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -39,7 +39,9 @@ const serverIcon = createMarkerIcon("blue");
 
 const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
   const map = useMap();
-  map.setView(center, zoom);
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [map, center[0], center[1], zoom]);
   return null;
 };
 
@@ -49,9 +51,48 @@ interface VpnMapProps {
   serverName?: string | null;
   trafficFlows?: ProxyTrafficFlowUpdate[];
   serverMarkers?: { id: number; name: string; position: [number, number] }[];
+  animationMode?: "live" | "offline";
 }
 
 type FlowDirection = "clientToServer" | "serverToClient";
+type TrafficSegment = {
+  id: string;
+  connectionId: string;
+  direction: FlowDirection;
+  delta: number;
+  color: string;
+  weight: number;
+  opacity: number;
+  intensity: number;
+  isIdle: boolean;
+  state: ProxyTrafficFlowUpdate["state"];
+  from: [number, number];
+  to: [number, number];
+  mapPath: [[number, number], [number, number]];
+  label: string;
+};
+
+type GlobeArcDatum = {
+  id: string;
+  startLat: number;
+  startLng: number;
+  endLat: number;
+  endLng: number;
+  color: string;
+  label: string;
+  isIdle: boolean;
+  intensity: number;
+};
+
+type GlobeCableDatum = {
+  id: string;
+  color: string;
+  width: number;
+  isIdle: boolean;
+  intensity: number;
+  label: string;
+  points: Array<{ lat: number; lng: number; alt: number }>;
+};
 
 function normalizeIpForMatch(raw: string | null | undefined): string {
   if (!raw) return "";
@@ -275,6 +316,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
   serverName,
   trafficFlows = [],
   serverMarkers = [],
+  animationMode = "live",
 }) => {
   const defaultCenter: [number, number] = [45, 37];
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -296,6 +338,9 @@ const VpnMap: React.FC<VpnMapProps> = ({
   const [globeTrafficLayer, setGlobeTrafficLayer] = useState<GlobeTrafficLayer>(
       (Cookies.get("selectedGlobeTrafficLayer") as GlobeTrafficLayer) || "arcs"
   );
+  const segmentCacheRef = useRef<Map<string, TrafficSegment>>(new Map());
+  const arcCacheRef = useRef<Map<string, GlobeArcDatum>>(new Map());
+  const cableCacheRef = useRef<Map<string, GlobeCableDatum>>(new Map());
   const [viewportSize, setViewportSize] = useState(() => ({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -567,54 +612,82 @@ const VpnMap: React.FC<VpnMapProps> = ({
       return Math.max(acc, flow.clientToServerBytesDelta ?? 0, flow.serverToClientBytesDelta ?? 0);
     }, 0);
 
-    return visibleTrafficFlows.flatMap((flow) => {
-      if (flow.state === "failed" || flow.state === "disconnected") return [];
+    const nextIds = new Set<string>();
+    const result: TrafficSegment[] = [];
+
+    for (const flow of visibleTrafficFlows) {
+      if (flow.state === "failed" || flow.state === "disconnected") continue;
 
       const directions: Array<{ key: FlowDirection; delta: number }> = [
         { key: "clientToServer", delta: Math.max(0, flow.clientToServerBytesDelta ?? 0) },
         { key: "serverToClient", delta: Math.max(0, flow.serverToClientBytesDelta ?? 0) },
       ];
 
-      return directions
-        .filter((d) => {
-          if (d.delta > 0) return true;
-          if (d.key === "clientToServer") return Math.max(0, flow.clientToServerBytesTotal ?? 0) > 0;
-          return Math.max(0, flow.serverToClientBytesTotal ?? 0) > 0;
-        })
-        .map((d) => {
-          const visualDelta = d.delta > 0 ? d.delta : 1;
-          const intensity = intensityFromDelta(visualDelta, maxDelta);
-          const weight = 1.2 + intensity * 6.8;
-          const opacityBase = 0.25 + intensity * 0.75;
-          const opacity = flow.isIdle ? opacityBase * 0.45 : opacityBase;
-          const color = d.key === "clientToServer" ? "#ff9800" : "#00e5ff";
-          const mapPath = offsetPolylinePositions(
-            flow.from,
-            flow.to,
-            d.key === "clientToServer" ? 1 : -1
-          );
+      for (const d of directions) {
+        if (d.delta <= 0) continue;
 
-          return {
-            id: `${flow.connectionId}:${d.key}`,
-            connectionId: flow.connectionId,
-            direction: d.key,
-            delta: d.delta,
-            color,
-            weight,
-            opacity,
-            intensity,
-            isIdle: flow.isIdle,
-            state: flow.state,
-            from: flow.from,
-            to: flow.to,
-            mapPath,
-            label:
-              d.key === "clientToServer"
-                ? `C→S Δ: ${d.delta} B/s`
-                : `S→C Δ: ${d.delta} B/s`,
-          };
-        });
-    });
+        const id = `${flow.connectionId}:${d.key}`;
+        nextIds.add(id);
+        const intensity = intensityFromDelta(d.delta, maxDelta);
+        const weight = 1.2 + intensity * 6.8;
+        const opacityBase = 0.25 + intensity * 0.75;
+        const opacity = flow.isIdle ? opacityBase * 0.45 : opacityBase;
+        const color = d.key === "clientToServer" ? "#ff9800" : "#00e5ff";
+        const mapPath = offsetPolylinePositions(
+          flow.from,
+          flow.to,
+          d.key === "clientToServer" ? 1 : -1
+        );
+        const label =
+          d.key === "clientToServer"
+            ? `C→S Δ: ${d.delta} B/s`
+            : `S→C Δ: ${d.delta} B/s`;
+
+        const cached = segmentCacheRef.current.get(id);
+        if (cached) {
+          cached.connectionId = flow.connectionId;
+          cached.direction = d.key;
+          cached.delta = d.delta;
+          cached.color = color;
+          cached.weight = weight;
+          cached.opacity = opacity;
+          cached.intensity = intensity;
+          cached.isIdle = flow.isIdle;
+          cached.state = flow.state;
+          cached.from = flow.from;
+          cached.to = flow.to;
+          cached.mapPath = mapPath;
+          cached.label = label;
+          result.push(cached);
+          continue;
+        }
+
+        const created: TrafficSegment = {
+          id,
+          connectionId: flow.connectionId,
+          direction: d.key,
+          delta: d.delta,
+          color,
+          weight,
+          opacity,
+          intensity,
+          isIdle: flow.isIdle,
+          state: flow.state,
+          from: flow.from,
+          to: flow.to,
+          mapPath,
+          label,
+        };
+        segmentCacheRef.current.set(id, created);
+        result.push(created);
+      }
+    }
+
+    for (const key of [...segmentCacheRef.current.keys()]) {
+      if (!nextIds.has(key)) segmentCacheRef.current.delete(key);
+    }
+
+    return result;
   }, [visibleTrafficFlows]);
 
   useEffect(() => {
@@ -627,7 +700,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
     }, {});
 
     // eslint-disable-next-line no-console
-    console.info("[TrafficFlowDebug] summary", {
+    console.debug("[TrafficFlowDebug] summary", {
       incomingFlows: trafficFlows.length,
       matchedFlows: visibleTrafficFlows.length,
       renderedSegments: visibleTrafficSegments.length,
@@ -638,15 +711,15 @@ const VpnMap: React.FC<VpnMapProps> = ({
     });
 
     // eslint-disable-next-line no-console
-    console.info("[TrafficFlowDebug] clients sample", clientDebugSample);
+    console.debug("[TrafficFlowDebug] clients sample", clientDebugSample);
     // eslint-disable-next-line no-console
-    console.info("[TrafficFlowDebug] incoming flows sample", flowDebugSample);
-    console.info("[TrafficFlowDebug] client IP list", clientIpDebugList);
-    console.info("[TrafficFlowDebug] flow IP list", flowIpDebugList);
+    console.debug("[TrafficFlowDebug] incoming flows sample", flowDebugSample);
+    console.debug("[TrafficFlowDebug] client IP list", clientIpDebugList);
+    console.debug("[TrafficFlowDebug] flow IP list", flowIpDebugList);
 
     if (unmatchedTrafficDebug.length > 0) {
       // eslint-disable-next-line no-console
-      console.info("[TrafficFlowDebug] unmatched sample", unmatchedTrafficDebug.slice(0, 10));
+      console.debug("[TrafficFlowDebug] unmatched sample", unmatchedTrafficDebug.slice(0, 10));
     }
   }, [
     trafficDebugEnabled,
@@ -714,27 +787,59 @@ const VpnMap: React.FC<VpnMapProps> = ({
   }, [visibleClients, serverLocation, serverName, serverMarkers, renderBudget.maxPoints]);
 
   const globeArcsData = useMemo(() => {
-    return visibleTrafficSegments.map((segment) => {
+    const nextIds = new Set<string>();
+    const result: GlobeArcDatum[] = [];
+
+    for (const segment of visibleTrafficSegments) {
+      nextIds.add(segment.id);
       const [startLat, startLng] =
         segment.direction === "clientToServer" ? segment.from : segment.to;
       const [endLat, endLng] =
         segment.direction === "clientToServer" ? segment.to : segment.from;
-      return {
+      const label = `<strong>${segment.connectionId}</strong><br/>${segment.label}<br/>State: ${segment.state}${segment.isIdle ? " (idle)" : " (active)"}`;
+
+      const cached = arcCacheRef.current.get(segment.id);
+      if (cached) {
+        cached.startLat = startLat;
+        cached.startLng = startLng;
+        cached.endLat = endLat;
+        cached.endLng = endLng;
+        cached.color = segment.color;
+        cached.label = label;
+        cached.isIdle = segment.isIdle;
+        cached.intensity = segment.intensity;
+        result.push(cached);
+        continue;
+      }
+
+      const created: GlobeArcDatum = {
         id: segment.id,
         startLat,
         startLng,
         endLat,
         endLng,
         color: segment.color,
-        label: `<strong>${segment.connectionId}</strong><br/>${segment.label}<br/>State: ${segment.state}${segment.isIdle ? " (idle)" : " (active)"}`,
+        label,
         isIdle: segment.isIdle,
         intensity: segment.intensity,
       };
-    });
+      arcCacheRef.current.set(segment.id, created);
+      result.push(created);
+    }
+
+    for (const key of [...arcCacheRef.current.keys()]) {
+      if (!nextIds.has(key)) arcCacheRef.current.delete(key);
+    }
+
+    return result;
   }, [visibleTrafficSegments]);
 
   const globeCablePathsData = useMemo(() => {
-    return visibleTrafficSegments.map((segment) => {
+    const nextIds = new Set<string>();
+    const result: GlobeCableDatum[] = [];
+
+    for (const segment of visibleTrafficSegments) {
+      nextIds.add(segment.id);
       const start =
         segment.direction === "clientToServer"
           ? { lat: segment.from[0], lng: segment.from[1] }
@@ -749,24 +854,47 @@ const VpnMap: React.FC<VpnMapProps> = ({
       const bendSign = segment.direction === "clientToServer" ? 1 : -1;
       const bendFactor = 4 + segment.intensity * 6;
       const alt = 0.008 + segment.intensity * 0.03;
+      const width = 0.2 + segment.intensity * 1.35;
+      const label = `<strong>${segment.connectionId}</strong><br/>${segment.label}<br/>State: ${
+        segment.state
+      }${segment.isIdle ? " (idle)" : " (active)"}`;
+      const points = [
+        { ...start, alt: 0.001 },
+        { lat: midLat + bendSign * bendFactor, lng: midLng - bendSign * (bendFactor * 0.6), alt },
+        { lat: midLat + bendSign * (bendFactor * 0.35), lng: midLng + bendSign * (bendFactor * 0.5), alt: alt * 0.9 },
+        { ...end, alt: 0.001 },
+      ];
 
-      return {
+      const cached = cableCacheRef.current.get(segment.id);
+      if (cached) {
+        cached.color = segment.color;
+        cached.width = width;
+        cached.isIdle = segment.isIdle;
+        cached.intensity = segment.intensity;
+        cached.label = label;
+        cached.points = points;
+        result.push(cached);
+        continue;
+      }
+
+      const created: GlobeCableDatum = {
         id: segment.id,
         color: segment.color,
-        width: 0.2 + segment.intensity * 1.35,
+        width,
         isIdle: segment.isIdle,
         intensity: segment.intensity,
-        label: `<strong>${segment.connectionId}</strong><br/>${segment.label}<br/>State: ${
-          segment.state
-        }${segment.isIdle ? " (idle)" : " (active)"}`,
-        points: [
-          { ...start, alt: 0.001 },
-          { lat: midLat + bendSign * bendFactor, lng: midLng - bendSign * (bendFactor * 0.6), alt },
-          { lat: midLat + bendSign * (bendFactor * 0.35), lng: midLng + bendSign * (bendFactor * 0.5), alt: alt * 0.9 },
-          { ...end, alt: 0.001 },
-        ],
+        label,
+        points,
       };
-    });
+      cableCacheRef.current.set(segment.id, created);
+      result.push(created);
+    }
+
+    for (const key of [...cableCacheRef.current.keys()]) {
+      if (!nextIds.has(key)) cableCacheRef.current.delete(key);
+    }
+
+    return result;
   }, [visibleTrafficSegments]);
 
   const renderedStats = useMemo(() => {
@@ -792,6 +920,27 @@ const VpnMap: React.FC<VpnMapProps> = ({
     serverMarkers.length,
     renderBudget.maxPoints,
   ]);
+
+  const globeDash = useMemo(() => {
+    if (animationMode === "offline") {
+      return {
+        arcLength: 0.2,
+        arcGap: 0.65,
+        arcAnimateMs: 2200,
+        pathLength: 0.09,
+        pathGap: 0.24,
+        pathAnimateMs: 2100,
+      };
+    }
+    return {
+      arcLength: 0.18,
+      arcGap: 0.68,
+      arcAnimateMs: 1500,
+      pathLength: 0.1,
+      pathGap: 0.22,
+      pathAnimateMs: 1350,
+    };
+  }, [animationMode]);
 
   return (
       <div className="vpn-map-root" ref={rootRef}>
@@ -918,21 +1067,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
                   </Marker>
               ))}
 
-              {visibleTrafficSegments.map((segment) => (
-                  <Polyline
-                      key={segment.id}
-                      positions={segment.mapPath}
-                      pathOptions={{ color: segment.color, weight: segment.weight, opacity: segment.opacity }}
-                  >
-                    <Popup>
-                      <strong>{segment.connectionId}</strong>
-                      <br />
-                      State: {segment.state} {segment.isIdle ? "(idle)" : "(active)"}
-                      <br />
-                      {segment.label}
-                    </Popup>
-                  </Polyline>
-              ))}
+              {/* 2D map mode is intentionally static (no traffic line animation). */}
             </MapContainer>
         ) : (
             <div className="vpn-globe-root">
@@ -961,13 +1096,12 @@ const VpnMap: React.FC<VpnMapProps> = ({
                     arcColor={(d: unknown) => [(d as { color: string }).color, (d as { color: string }).color]}
                     arcLabel="label"
                     arcCurveResolution={24}
-                    arcDashLength={(d: unknown) => 0.16 + ((d as { intensity?: number }).intensity ?? 0) * 0.22}
-                    arcDashGap={0.7}
+                    arcDashLength={globeDash.arcLength}
+                    arcDashGap={globeDash.arcGap}
                     arcDashAnimateTime={(d: unknown) => {
-                      const arc = d as { isIdle: boolean; intensity?: number };
+                      const arc = d as { isIdle: boolean };
                       if (arc.isIdle) return 0;
-                      const intensity = arc.intensity ?? 0;
-                      return Math.max(450, 1400 - Math.round(intensity * 850));
+                      return globeDash.arcAnimateMs;
                     }}
                     arcsTransitionDuration={0}
                     pathsData={globeTrafficLayer === "submarine" ? globeCablePathsData : []}
@@ -978,16 +1112,12 @@ const VpnMap: React.FC<VpnMapProps> = ({
                     pathColor="color"
                     pathStroke={(d: unknown) => (d as { width: number }).width}
                     pathLabel="label"
-                    pathDashLength={(d: unknown) => {
-                      const cable = d as { intensity?: number };
-                      return 0.08 + (cable.intensity ?? 0) * 0.12;
-                    }}
-                    pathDashGap={0.2}
+                    pathDashLength={globeDash.pathLength}
+                    pathDashGap={globeDash.pathGap}
                     pathDashAnimateTime={(d: unknown) => {
-                      const cable = d as { isIdle: boolean; intensity?: number };
+                      const cable = d as { isIdle: boolean };
                       if (cable.isIdle) return 0;
-                      const intensity = cable.intensity ?? 0;
-                      return Math.max(350, 1200 - Math.round(intensity * 700));
+                      return globeDash.pathAnimateMs;
                     }}
                     pathTransitionDuration={0}
                 />
