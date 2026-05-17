@@ -12,6 +12,19 @@
   margin-bottom: 12px;
 }
 
+.status-stream-logs-slow-servers {
+  margin: 8px 0;
+}
+
+.status-stream-logs-slow-servers ul {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+
+.status-stream-logs-slow-servers li {
+  margin: 2px 0;
+}
+
 .status-stream-logs-error {
   color: #f85149;
 }
