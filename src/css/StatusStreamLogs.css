@@ -1,0 +1,48 @@
+.status-stream-logs-page {
+  padding: 16px;
+}
+
+.status-stream-logs-toolbar {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.status-stream-logs-summary {
+  margin-bottom: 12px;
+}
+
+.status-stream-logs-error {
+  color: #f85149;
+}
+
+.status-stream-logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-stream-log-item {
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #0d1117;
+}
+
+.status-stream-log-item summary {
+  cursor: pointer;
+  color: #c9d1d9;
+  user-select: none;
+}
+
+.status-stream-log-item pre {
+  margin: 10px 0 0;
+  max-height: 360px;
+  overflow: auto;
+  padding: 10px;
+  border-radius: 6px;
+  background: #161b22;
+  color: #e6edf3;
+  font-size: 12px;
+  line-height: 1.35;
+}

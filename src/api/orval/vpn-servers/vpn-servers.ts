@@ -24,13 +24,14 @@ import type {
   ApiSystemString,
   ApiVpnServersDtoVpnMicroserviceDiagnosticsDto,
   ApiVpnServersResponsesServiceStatusesResponse,
+  ApiVpnServersResponsesStatusStreamLogsResponse,
   ApiVpnServersResponsesVpnServerResponse,
   ApiVpnServersResponsesVpnServerWithStatusResponse,
-  ApiVpnServersResponsesVpnServerWithStatusesResponse,
   ApiVpnServersResponsesVpnServersResponse,
   GetApiOpenVpnServersGetAllParams,
   GetApiOpenVpnServersGetAllWithStatusParams,
   GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
+  GetApiOpenVpnServersStatusStreamLogsParams,
   VpnServersRequestsAddServerRequest,
   VpnServersRequestsUpdateServerRequest,
 } from "../model";
@@ -44,7 +45,7 @@ export const getApiOpenVpnServersGetAllWithStatus = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
 ) => {
-  return ogmMutator<ApiVpnServersResponsesVpnServerWithStatusesResponse>(
+  return ogmMutator<void>(
     {
       url: `/api/open-vpn-servers/get-all-with-status`,
       method: "GET",
@@ -1684,6 +1685,176 @@ export const usePostApiOpenVpnServersRunNow = <
     queryClient,
   );
 };
+export const getApiOpenVpnServersStatusStreamLogs = (
+  params?: GetApiOpenVpnServersStatusStreamLogsParams,
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<ApiVpnServersResponsesStatusStreamLogsResponse>(
+    {
+      url: `/api/open-vpn-servers/status-stream-logs`,
+      method: "GET",
+      params,
+      signal,
+    },
+    options,
+  );
+};
+
+export const getGetApiOpenVpnServersStatusStreamLogsQueryKey = (
+  params?: GetApiOpenVpnServersStatusStreamLogsParams,
+) => {
+  return [
+    `/api/open-vpn-servers/status-stream-logs`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetApiOpenVpnServersStatusStreamLogsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+  TError = unknown,
+>(
+  params?: GetApiOpenVpnServersStatusStreamLogsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetApiOpenVpnServersStatusStreamLogsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>
+  > = ({ signal }) =>
+    getApiOpenVpnServersStatusStreamLogs(params, requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetApiOpenVpnServersStatusStreamLogsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>
+>;
+export type GetApiOpenVpnServersStatusStreamLogsQueryError = unknown;
+
+export function useGetApiOpenVpnServersStatusStreamLogs<
+  TData = Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+  TError = unknown,
+>(
+  params: undefined | GetApiOpenVpnServersStatusStreamLogsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiOpenVpnServersStatusStreamLogs<
+  TData = Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+  TError = unknown,
+>(
+  params?: GetApiOpenVpnServersStatusStreamLogsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetApiOpenVpnServersStatusStreamLogs<
+  TData = Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+  TError = unknown,
+>(
+  params?: GetApiOpenVpnServersStatusStreamLogsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetApiOpenVpnServersStatusStreamLogs<
+  TData = Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+  TError = unknown,
+>(
+  params?: GetApiOpenVpnServersStatusStreamLogsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getApiOpenVpnServersStatusStreamLogs>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof ogmMutator>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetApiOpenVpnServersStatusStreamLogsQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
 export const getApiOpenVpnServersHealthcheck = (
   options?: SecondParameter<typeof ogmMutator>,
   signal?: AbortSignal,
