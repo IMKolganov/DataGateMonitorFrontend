@@ -1701,6 +1701,20 @@ export const getApiOpenVpnServersStatusStreamLogs = (
   );
 };
 
+export const deleteApiOpenVpnServersStatusStreamLogs = (
+  options?: SecondParameter<typeof ogmMutator>,
+  signal?: AbortSignal,
+) => {
+  return ogmMutator<ApiSystemString>(
+    {
+      url: `/api/open-vpn-servers/status-stream-logs`,
+      method: "DELETE",
+      signal,
+    },
+    options,
+  );
+};
+
 export const getGetApiOpenVpnServersStatusStreamLogsQueryKey = (
   params?: GetApiOpenVpnServersStatusStreamLogsParams,
 ) => {
