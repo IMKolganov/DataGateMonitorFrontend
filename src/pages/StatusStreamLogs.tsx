@@ -49,6 +49,13 @@ type ParsedOperationalLogPayload = {
 
 type EventHighlight = "error" | "ok" | "progress" | "neutral";
 
+type SlowServerEntry = {
+  serverId: number | null;
+  serverName: string | null;
+  durationMs: number;
+  timestampUtc: string | null;
+};
+
 function normalizeLog(input: VpnServersResponsesStatusStreamLogEntryResponse): VpnServersResponsesStatusStreamLogEntryResponse | null {
   if (!input.payloadJson || typeof input.payloadJson !== "string") return null;
   if (!input.timestampUtc || typeof input.timestampUtc !== "string") return null;
@@ -269,17 +276,31 @@ export default function StatusStreamLogs() {
   const summary = useMemo(
     () => {
       let errorEvents = 0;
+      const slowCandidates: SlowServerEntry[] = [];
       for (const log of logs) {
         const operational = parseOperationalPayload(log.payloadJson ?? "");
         if (!operational) continue;
         const highlight = getEventHighlight(operational.eventType, operational.level);
         if (highlight === "error") errorEvents++;
+        if (operational.eventType === "server-success" && operational.durationMs !== null) {
+          slowCandidates.push({
+            serverId: operational.serverId,
+            serverName: operational.serverName,
+            durationMs: operational.durationMs,
+            timestampUtc: log.timestampUtc ?? null,
+          });
+        }
       }
+
+      const topSlowServers = slowCandidates
+        .sort((a, b) => b.durationMs - a.durationMs)
+        .slice(0, 5);
 
       return {
         total: logs.length,
         serviceEvents: logs.filter((x) => parseOperationalPayload(x.payloadJson ?? "") !== null).length,
         errorEvents,
+        topSlowServers,
         fromRedis: logs.filter((x) => x.source === "redis").length,
         fromMemory: logs.filter((x) => x.source === "memory").length,
       };
@@ -318,6 +339,22 @@ export default function StatusStreamLogs() {
         <p>
           <strong>Redis source:</strong> {summary.fromRedis} | <strong>Memory source:</strong> {summary.fromMemory}
         </p>
+        <div className="status-stream-logs-slow-servers">
+          <strong>Top slow servers (success only):</strong>
+          {summary.topSlowServers.length === 0 ? (
+            <p>Not enough successful polls yet.</p>
+          ) : (
+            <ul>
+              {summary.topSlowServers.map((item) => (
+                <li
+                  key={`${item.serverId ?? "unknown"}:${item.timestampUtc ?? "no-ts"}:${item.durationMs}`}
+                >
+                  {item.serverName ?? "Unknown"} #{item.serverId ?? "—"} - {item.durationMs} ms
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
         <p>
           <strong>Last sync:</strong> {lastSyncUtc ? new Date(lastSyncUtc).toLocaleString() : "N/A"}
         </p>
