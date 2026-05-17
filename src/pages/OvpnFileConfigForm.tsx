@@ -43,6 +43,20 @@ function extractProtoFromTemplate(template: string): string | null {
   return m ? m[1].toLowerCase() : null;
 }
 
+function normalizeProto(value: unknown): "tcp" | "udp" | null {
+  if (typeof value !== "string") return null;
+  const v = value.trim().toLowerCase();
+  return v === "tcp" || v === "udp" ? v : null;
+}
+
+function applyProtoToTemplate(template: string, proto: "tcp" | "udp"): string {
+  if (!template.trim()) return template;
+  if (/^\s*proto\s+\S+/im.test(template)) {
+    return template.replace(/^\s*proto\s+\S+/im, `proto ${proto}`);
+  }
+  return `proto ${proto}\n${template}`;
+}
+
 const SAMPLE_TEMPLATE = `setenv FRIENDLY_NAME "{{friendly_name}}"
 client
 dev tun
@@ -120,6 +134,7 @@ const OvpnFileConfigForm: React.FC = () => {
   });
 
   const [copyStatus, setCopyStatus] = useState<"Copy" | "Copied!">("Copy");
+  const [autoDetectServerSettings, setAutoDetectServerSettings] = useState(true);
 
   // load config via orval hook (auto-unwrapped response)
   const {
@@ -216,7 +231,8 @@ const OvpnFileConfigForm: React.FC = () => {
   );
   const templatePort = ovpnFileConfig.VpnServerPort != null ? String(ovpnFileConfig.VpnServerPort) : null;
   const serverPort = latestConfig?.port != null ? String(latestConfig.port).trim() : null;
-  const serverProto = latestConfig?.proto != null ? String(latestConfig.proto).trim().toLowerCase() : null;
+  const serverProto = normalizeProto(latestConfig?.proto);
+  const detectedPort = latestConfig?.port != null ? Number(latestConfig.port) : null;
   const configMismatch = useMemo(() => {
     const mismatches: string[] = [];
     if (serverPort != null && templatePort != null && serverPort !== templatePort) {
@@ -287,6 +303,7 @@ const OvpnFileConfigForm: React.FC = () => {
       VpnServerPort: Number(data.vpnServerPort ?? 1194),
       ConfigTemplate: data.configTemplate ?? "",
     }));
+    setAutoDetectServerSettings(true);
   }, [data, parsedVpnServerId]);
 
   // toast on load error (once per state change)
@@ -336,11 +353,11 @@ const OvpnFileConfigForm: React.FC = () => {
       newErrors.VpnServerIp = "VPN Server IP is required.";
       isValid = false;
     }
-    if (
-      !ovpnFileConfig.VpnServerPort ||
-      ovpnFileConfig.VpnServerPort < 1 ||
-      ovpnFileConfig.VpnServerPort > 65535
-    ) {
+    const effectivePort =
+      autoDetectServerSettings && typeof detectedPort === "number" && Number.isFinite(detectedPort)
+        ? detectedPort
+        : ovpnFileConfig.VpnServerPort;
+    if (!effectivePort || effectivePort < 1 || effectivePort > 65535) {
       newErrors.VpnServerPort = "VPN Server Port must be between 1 and 65535.";
       isValid = false;
     }
@@ -364,11 +381,21 @@ const OvpnFileConfigForm: React.FC = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
+    const effectivePort =
+      autoDetectServerSettings && typeof detectedPort === "number" && Number.isFinite(detectedPort)
+        ? detectedPort
+        : ovpnFileConfig.VpnServerPort;
+    const effectiveTemplate =
+      autoDetectServerSettings && serverProto
+        ? applyProtoToTemplate(ovpnFileConfig.ConfigTemplate, serverProto)
+        : ovpnFileConfig.ConfigTemplate;
+
     const payload: AddOrUpdateOvpnFileConfigRequest = {
       vpnServerId: ovpnFileConfig.VpnServerId || parsedVpnServerId,
       vpnServerIp: ovpnFileConfig.VpnServerIp.trim(),
-      vpnServerPort: ovpnFileConfig.VpnServerPort,
-      configTemplate: ovpnFileConfig.ConfigTemplate,
+      vpnServerPort: effectivePort,
+      configTemplate: effectiveTemplate,
+      autoDetectServerSettings,
     };
 
     try {
@@ -420,7 +447,6 @@ const OvpnFileConfigForm: React.FC = () => {
                 borderRadius: 8,
                 border: "1px solid var(--border-default, #30363d)",
                 background: "rgba(56, 139, 253, 0.08)",
-                maxWidth: 900,
                 lineHeight: 1.5,
                 fontSize: 14,
               }}
@@ -438,7 +464,6 @@ const OvpnFileConfigForm: React.FC = () => {
                 padding: "12px 14px",
                 borderRadius: 8,
                 border: "1px solid var(--border-default, #30363d)",
-                maxWidth: 900,
                 lineHeight: 1.5,
                 fontSize: 14,
               }}
@@ -498,6 +523,22 @@ const OvpnFileConfigForm: React.FC = () => {
                 placeholder="Enter VPN Server Port"
               />
               {errors.VpnServerPort && <p className="error-message">{errors.VpnServerPort}</p>}
+            </div>
+
+            <div className="form-group checkbox-container">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={autoDetectServerSettings}
+                  onChange={(e) => setAutoDetectServerSettings(e.target.checked)}
+                />
+                <div className="checkbox-content">
+                  <span className="checkbox-title">Try auto-detect Port/Proto from latest server conflog</span>
+                  <span className="checkbox-description">
+                    When enabled, save uses detected values from server config ({detectedPort ?? "—"} / {serverProto ?? "—"}).
+                  </span>
+                </div>
+              </label>
             </div>
 
             <div className="form-group">

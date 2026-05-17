@@ -16,4 +16,5 @@ export interface VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest
   vpnServerPort?: number;
   /** @nullable */
   configTemplate?: string | null;
+  autoDetectServerSettings?: boolean;
 }

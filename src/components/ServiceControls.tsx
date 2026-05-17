@@ -8,6 +8,7 @@ import { humanizeSignalRStatusStreamError } from "../utils/signalrFriendlyError"
 type Props = {
   serviceData: Record<number, ServiceStatusDto>;
   onRunNow: () => void;
+  onOpenDetails?: () => void;
   /** From useSignalRService — helps tell connection errors from “no snapshot yet”. */
   hubConnectionState?: string;
   hubLastError?: string | null;
@@ -65,6 +66,7 @@ function getNextRunSeconds(entries: ServiceStatusDto[]): number | null {
 export default function ServiceControls({
   serviceData,
   onRunNow,
+  onOpenDetails,
   hubConnectionState,
   hubLastError,
 }: Props) {
@@ -180,9 +182,14 @@ export default function ServiceControls({
           <strong>Total Sessions:</strong> {totals.sessions.toLocaleString()}
         </p>
 
-        <button className="btn primary" onClick={onRunNow} disabled={anyRunning}>
-          <FaPlay className="icon" /> Sync All Now
-        </button>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button className="btn primary" onClick={onRunNow} disabled={anyRunning}>
+            <FaPlay className="icon" /> Sync All Now
+          </button>
+          <button className="btn secondary" onClick={onOpenDetails}>
+            Details
+          </button>
+        </div>
 
         <p className="description" style={{ marginTop: 12 }}>
           This service periodically queries the OpenVPN server to collect data about connected clients
