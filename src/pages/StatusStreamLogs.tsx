@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaSyncAlt, FaTrash } from "react-icons/fa";
-import { getApiOpenVpnServersStatusStreamLogs } from "../api/orval/vpn-servers/vpn-servers";
+import {
+  deleteApiOpenVpnServersStatusStreamLogs,
+  getApiOpenVpnServersStatusStreamLogs,
+} from "../api/orval/vpn-servers/vpn-servers";
 import type {
   ApiVpnServersResponsesStatusStreamLogsResponse,
   VpnServersResponsesStatusStreamLogEntryResponse,
@@ -9,6 +12,8 @@ import type {
 import "../css/StatusStreamLogs.css";
 
 const STORAGE_KEY = "status-stream-logs:v2";
+const INITIAL_FETCH_LIMIT = 300;
+const INCREMENTAL_FETCH_LIMIT = 60;
 
 type ParsedServiceStatus = {
   vpnServerId: number;
@@ -54,6 +59,15 @@ type SlowServerEntry = {
   serverName: string | null;
   durationMs: number;
   timestampUtc: string | null;
+};
+
+type SlowServerAggregate = {
+  serverId: number | null;
+  serverName: string | null;
+  maxDurationMs: number;
+  avgDurationMs: number;
+  samples: number;
+  lastDurationMs: number;
 };
 
 function normalizeLog(input: VpnServersResponsesStatusStreamLogEntryResponse): VpnServersResponsesStatusStreamLogEntryResponse | null {
@@ -232,15 +246,18 @@ function getHighlightLabel(highlight: EventHighlight): string {
 export default function StatusStreamLogs() {
   const [logs, setLogs] = useState<VpnServersResponsesStatusStreamLogEntryResponse[]>(() => loadStoredLogs());
   const [loading, setLoading] = useState(false);
+  const [clearingServerLogs, setClearingServerLogs] = useState(false);
   const [lastSyncUtc, setLastSyncUtc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const hasLoadedOnceRef = useRef(false);
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
+      const limit = hasLoadedOnceRef.current ? INCREMENTAL_FETCH_LIMIT : INITIAL_FETCH_LIMIT;
       const responseRaw = (await getApiOpenVpnServersStatusStreamLogs({
-        limit: 300,
+        limit,
       })) as unknown;
 
       const response = responseRaw as VpnServersResponsesStatusStreamLogsResponse;
@@ -257,6 +274,7 @@ export default function StatusStreamLogs() {
         saveStoredLogs(merged);
         return merged;
       });
+      hasLoadedOnceRef.current = true;
       setLastSyncUtc(new Date().toISOString());
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load logs");
@@ -292,8 +310,41 @@ export default function StatusStreamLogs() {
         }
       }
 
-      const topSlowServers = slowCandidates
-        .sort((a, b) => b.durationMs - a.durationMs)
+      const grouped = new Map<
+        string,
+        { serverId: number | null; serverName: string | null; samples: number; totalDurationMs: number; maxDurationMs: number; lastDurationMs: number; }
+      >();
+      for (const item of slowCandidates) {
+        const key = `${item.serverId ?? "unknown"}|${item.serverName ?? "unknown"}`;
+        const existing = grouped.get(key);
+        if (!existing) {
+          grouped.set(key, {
+            serverId: item.serverId,
+            serverName: item.serverName,
+            samples: 1,
+            totalDurationMs: item.durationMs,
+            maxDurationMs: item.durationMs,
+            lastDurationMs: item.durationMs,
+          });
+          continue;
+        }
+
+        existing.samples += 1;
+        existing.totalDurationMs += item.durationMs;
+        existing.maxDurationMs = Math.max(existing.maxDurationMs, item.durationMs);
+        existing.lastDurationMs = item.durationMs;
+      }
+
+      const topSlowServers: SlowServerAggregate[] = [...grouped.values()]
+        .map((x) => ({
+          serverId: x.serverId,
+          serverName: x.serverName,
+          maxDurationMs: x.maxDurationMs,
+          avgDurationMs: Math.round(x.totalDurationMs / x.samples),
+          samples: x.samples,
+          lastDurationMs: x.lastDurationMs,
+        }))
+        .sort((a, b) => b.maxDurationMs - a.maxDurationMs)
         .slice(0, 5);
 
       return {
@@ -313,13 +364,40 @@ export default function StatusStreamLogs() {
     saveStoredLogs([]);
   };
 
+  const clearServerLogs = useCallback(async () => {
+    const confirmed = window.confirm(
+      "Clear status-stream logs on backend too? This removes shared history for all clients.",
+    );
+    if (!confirmed) return;
+
+    setClearingServerLogs(true);
+    setError(null);
+    try {
+      await deleteApiOpenVpnServersStatusStreamLogs();
+      clearBrowserLogs();
+      hasLoadedOnceRef.current = false;
+      await fetchLogs();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to clear server logs");
+    } finally {
+      setClearingServerLogs(false);
+    }
+  }, [fetchLogs]);
+
   return (
     <div className="status-stream-logs-page">
       <h2>Status Stream Logs</h2>
 
       <div className="status-stream-logs-toolbar">
-        <button className="btn secondary" onClick={() => void fetchLogs()} disabled={loading}>
+        <button
+          className="btn secondary"
+          onClick={() => void fetchLogs()}
+          disabled={loading || clearingServerLogs}
+        >
           <FaSyncAlt className={`icon ${loading ? "icon-spin" : ""}`} /> Refresh
+        </button>
+        <button className="btn danger" onClick={() => void clearServerLogs()} disabled={clearingServerLogs}>
+          <FaTrash className="icon" /> Clear Server Logs
         </button>
         <button className="btn danger" onClick={clearBrowserLogs}>
           <FaTrash className="icon" /> Clear Browser Logs
@@ -340,16 +418,17 @@ export default function StatusStreamLogs() {
           <strong>Redis source:</strong> {summary.fromRedis} | <strong>Memory source:</strong> {summary.fromMemory}
         </p>
         <div className="status-stream-logs-slow-servers">
-          <strong>Top slow servers (success only):</strong>
+          <strong>Top slow servers (unique, success only):</strong>
           {summary.topSlowServers.length === 0 ? (
             <p>Not enough successful polls yet.</p>
           ) : (
             <ul>
               {summary.topSlowServers.map((item) => (
                 <li
-                  key={`${item.serverId ?? "unknown"}:${item.timestampUtc ?? "no-ts"}:${item.durationMs}`}
+                  key={`${item.serverId ?? "unknown"}:${item.serverName ?? "unknown"}`}
                 >
-                  {item.serverName ?? "Unknown"} #{item.serverId ?? "—"} - {item.durationMs} ms
+                  {item.serverName ?? "Unknown"} #{item.serverId ?? "—"} - max {item.maxDurationMs} ms, avg{" "}
+                  {item.avgDurationMs} ms, last {item.lastDurationMs} ms ({item.samples} samples)
                 </li>
               ))}
             </ul>
