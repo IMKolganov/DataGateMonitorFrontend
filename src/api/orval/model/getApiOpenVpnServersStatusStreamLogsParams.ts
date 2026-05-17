@@ -5,7 +5,6 @@
  * OpenAPI spec version: v1
  */
 
-export type GetApiOpenVpnServersGetAllParams = {
-  includeDeleted?: boolean;
-  withoutCache?: boolean;
+export type GetApiOpenVpnServersStatusStreamLogsParams = {
+  limit?: number;
 };

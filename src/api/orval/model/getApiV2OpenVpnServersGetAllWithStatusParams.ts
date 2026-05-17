@@ -7,4 +7,5 @@
 
 export type GetApiV2OpenVpnServersGetAllWithStatusParams = {
   includeDeleted?: boolean;
+  withoutCache?: boolean;
 };

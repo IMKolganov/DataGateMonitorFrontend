@@ -346,6 +346,7 @@ const ServerList: React.FC = () => {
         <ServiceControls
             serviceData={normalizedServiceControlsData}
             onRunNow={runServiceNow}
+            onOpenDetails={() => navigate("/servers/status-stream-logs")}
             hubConnectionState={hubConnectionState}
             hubLastError={hubLastError}
         />
