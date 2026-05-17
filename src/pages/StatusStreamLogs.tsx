@@ -37,6 +37,13 @@ type OperationalMetrics = {
   successServers?: number;
   timeoutServers?: number;
   failedServers?: number;
+  configuredMaxParallelism?: number;
+  observedMaxParallelism?: number;
+  processorCount?: number;
+  maxServerDurationMs?: number;
+  avgServerDurationMs?: number;
+  inFlight?: number;
+  managedThreadId?: number;
 };
 
 type ParsedOperationalLogPayload = {
@@ -211,6 +218,22 @@ function parseOperationalPayload(payloadJson: string): ParsedOperationalLogPaylo
             successServers: typeof metricsRaw.successServers === "number" ? metricsRaw.successServers : undefined,
             timeoutServers: typeof metricsRaw.timeoutServers === "number" ? metricsRaw.timeoutServers : undefined,
             failedServers: typeof metricsRaw.failedServers === "number" ? metricsRaw.failedServers : undefined,
+            configuredMaxParallelism:
+              typeof metricsRaw.configuredMaxParallelism === "number"
+                ? metricsRaw.configuredMaxParallelism
+                : undefined,
+            observedMaxParallelism:
+              typeof metricsRaw.observedMaxParallelism === "number"
+                ? metricsRaw.observedMaxParallelism
+                : undefined,
+            processorCount: typeof metricsRaw.processorCount === "number" ? metricsRaw.processorCount : undefined,
+            maxServerDurationMs:
+              typeof metricsRaw.maxServerDurationMs === "number" ? metricsRaw.maxServerDurationMs : undefined,
+            avgServerDurationMs:
+              typeof metricsRaw.avgServerDurationMs === "number" ? metricsRaw.avgServerDurationMs : undefined,
+            inFlight: typeof metricsRaw.inFlight === "number" ? metricsRaw.inFlight : undefined,
+            managedThreadId:
+              typeof metricsRaw.managedThreadId === "number" ? metricsRaw.managedThreadId : undefined,
           }
         : null,
     };
