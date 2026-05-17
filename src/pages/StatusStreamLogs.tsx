@@ -1,10 +1,53 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaSyncAlt, FaTrash } from "react-icons/fa";
 import { getApiOpenVpnServersStatusStreamLogs } from "../api/orval/vpn-servers/vpn-servers";
-import type { VpnServersResponsesStatusStreamLogEntryResponse } from "../api/orvalModelShim";
+import type {
+  ApiVpnServersResponsesStatusStreamLogsResponse,
+  VpnServersResponsesStatusStreamLogEntryResponse,
+  VpnServersResponsesStatusStreamLogsResponse,
+} from "../api/orvalModelShim";
 import "../css/StatusStreamLogs.css";
 
-const STORAGE_KEY = "status-stream-logs:v1";
+const STORAGE_KEY = "status-stream-logs:v2";
+
+type ParsedServiceStatus = {
+  vpnServerId: number;
+  status: number | null;
+  nextRunTime: string | null;
+  countConnectedClients: number | null;
+  countSessions: number | null;
+  errorMessage: string | null;
+};
+
+type ParsedLogPayload = {
+  timestampUtc: string | null;
+  statuses: ParsedServiceStatus[];
+};
+
+type OperationalMetrics = {
+  totalServers?: number;
+  disabledServers?: number;
+  toPollServers?: number;
+  processedServers?: number;
+  successServers?: number;
+  timeoutServers?: number;
+  failedServers?: number;
+};
+
+type ParsedOperationalLogPayload = {
+  kind: "polling-event";
+  eventType: string;
+  level: string | null;
+  message: string;
+  serverId: number | null;
+  serverName: string | null;
+  apiUrl: string | null;
+  durationMs: number | null;
+  details: string | null;
+  metrics: OperationalMetrics | null;
+};
+
+type EventHighlight = "error" | "ok" | "progress" | "neutral";
 
 function normalizeLog(input: VpnServersResponsesStatusStreamLogEntryResponse): VpnServersResponsesStatusStreamLogEntryResponse | null {
   if (!input.payloadJson || typeof input.payloadJson !== "string") return null;
@@ -64,6 +107,121 @@ function prettyPayload(payloadJson: string): string {
   }
 }
 
+function parsePayload(payloadJson: string): ParsedLogPayload | null {
+  try {
+    const parsed = JSON.parse(payloadJson) as {
+      timestampUtc?: unknown;
+      statuses?: Array<{
+        serviceStatus?: {
+          vpnServerId?: unknown;
+          status?: unknown;
+          nextRunTime?: unknown;
+          countConnectedClients?: unknown;
+          countSessions?: unknown;
+          errorMessage?: unknown;
+        };
+      }>;
+    };
+
+    const statuses = Array.isArray(parsed.statuses)
+      ? parsed.statuses
+          .map((item) => item?.serviceStatus)
+          .filter((x): x is NonNullable<typeof x> => !!x)
+          .map((s) => ({
+            vpnServerId: Number(s.vpnServerId ?? 0),
+            status: typeof s.status === "number" ? s.status : null,
+            nextRunTime: typeof s.nextRunTime === "string" ? s.nextRunTime : null,
+            countConnectedClients:
+              typeof s.countConnectedClients === "number" ? s.countConnectedClients : null,
+            countSessions: typeof s.countSessions === "number" ? s.countSessions : null,
+            errorMessage: typeof s.errorMessage === "string" ? s.errorMessage : null,
+          }))
+      : [];
+
+    return {
+      timestampUtc: typeof parsed.timestampUtc === "string" ? parsed.timestampUtc : null,
+      statuses,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function parseOperationalPayload(payloadJson: string): ParsedOperationalLogPayload | null {
+  try {
+    const parsed = JSON.parse(payloadJson) as {
+      kind?: unknown;
+      eventType?: unknown;
+      level?: unknown;
+      message?: unknown;
+      serverId?: unknown;
+      serverName?: unknown;
+      apiUrl?: unknown;
+      durationMs?: unknown;
+      details?: unknown;
+      metrics?: unknown;
+    };
+
+    if (parsed.kind !== "polling-event") return null;
+    if (typeof parsed.eventType !== "string") return null;
+    if (typeof parsed.message !== "string") return null;
+
+    const metricsRaw =
+      parsed.metrics && typeof parsed.metrics === "object" ? (parsed.metrics as Record<string, unknown>) : null;
+
+    return {
+      kind: "polling-event",
+      eventType: parsed.eventType,
+      level: typeof parsed.level === "string" ? parsed.level : null,
+      message: parsed.message,
+      serverId: typeof parsed.serverId === "number" ? parsed.serverId : null,
+      serverName: typeof parsed.serverName === "string" ? parsed.serverName : null,
+      apiUrl: typeof parsed.apiUrl === "string" ? parsed.apiUrl : null,
+      durationMs: typeof parsed.durationMs === "number" ? parsed.durationMs : null,
+      details: typeof parsed.details === "string" ? parsed.details : null,
+      metrics: metricsRaw
+        ? {
+            totalServers: typeof metricsRaw.totalServers === "number" ? metricsRaw.totalServers : undefined,
+            disabledServers:
+              typeof metricsRaw.disabledServers === "number" ? metricsRaw.disabledServers : undefined,
+            toPollServers: typeof metricsRaw.toPollServers === "number" ? metricsRaw.toPollServers : undefined,
+            processedServers:
+              typeof metricsRaw.processedServers === "number" ? metricsRaw.processedServers : undefined,
+            successServers: typeof metricsRaw.successServers === "number" ? metricsRaw.successServers : undefined,
+            timeoutServers: typeof metricsRaw.timeoutServers === "number" ? metricsRaw.timeoutServers : undefined,
+            failedServers: typeof metricsRaw.failedServers === "number" ? metricsRaw.failedServers : undefined,
+          }
+        : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function statusLabel(status: number | null): string {
+  if (status === 1) return "Running";
+  if (status === 2) return "Error";
+  if (status === 0) return "Idle";
+  return "Unknown";
+}
+
+function getEventHighlight(eventType: string, level: string | null): EventHighlight {
+  if (eventType === "server-error" || eventType === "server-timeout" || eventType === "cycle-failed") {
+    return "error";
+  }
+  if (eventType === "server-success") return "ok";
+  if (eventType === "server-start" || eventType === "cycle-start") return "progress";
+  if ((level ?? "").toLowerCase() === "error") return "error";
+  return "neutral";
+}
+
+function getHighlightLabel(highlight: EventHighlight): string {
+  if (highlight === "error") return "ERROR";
+  if (highlight === "ok") return "OK";
+  if (highlight === "progress") return "IN PROGRESS";
+  return "INFO";
+}
+
 export default function StatusStreamLogs() {
   const [logs, setLogs] = useState<VpnServersResponsesStatusStreamLogEntryResponse[]>(() => loadStoredLogs());
   const [loading, setLoading] = useState(false);
@@ -74,14 +232,18 @@ export default function StatusStreamLogs() {
     setLoading(true);
     setError(null);
     try {
-      const response = await getApiOpenVpnServersStatusStreamLogs({
+      const responseRaw = (await getApiOpenVpnServersStatusStreamLogs({
         limit: 300,
-      });
+      })) as unknown;
 
-      const incomingRaw = response?.data?.logs ?? [];
+      const response = responseRaw as VpnServersResponsesStatusStreamLogsResponse;
+      const responseEnvelope = responseRaw as ApiVpnServersResponsesStatusStreamLogsResponse;
+
+      const incomingRaw = response?.logs ?? responseEnvelope?.data?.logs ?? [];
       const incoming = incomingRaw
-        .map((x) => normalizeLog(x))
-        .filter((x): x is VpnServersResponsesStatusStreamLogEntryResponse => x !== null);
+        .map((x: VpnServersResponsesStatusStreamLogEntryResponse) => normalizeLog(x))
+        .filter((x): x is VpnServersResponsesStatusStreamLogEntryResponse => x !== null)
+        .filter((x) => parseOperationalPayload(x.payloadJson ?? "") !== null);
 
       setLogs((prev) => {
         const merged = mergeLogs(prev, incoming);
@@ -105,11 +267,23 @@ export default function StatusStreamLogs() {
   }, [fetchLogs]);
 
   const summary = useMemo(
-    () => ({
-      total: logs.length,
-      fromRedis: logs.filter((x) => x.source === "redis").length,
-      fromMemory: logs.filter((x) => x.source === "memory").length,
-    }),
+    () => {
+      let errorEvents = 0;
+      for (const log of logs) {
+        const operational = parseOperationalPayload(log.payloadJson ?? "");
+        if (!operational) continue;
+        const highlight = getEventHighlight(operational.eventType, operational.level);
+        if (highlight === "error") errorEvents++;
+      }
+
+      return {
+        total: logs.length,
+        serviceEvents: logs.filter((x) => parseOperationalPayload(x.payloadJson ?? "") !== null).length,
+        errorEvents,
+        fromRedis: logs.filter((x) => x.source === "redis").length,
+        fromMemory: logs.filter((x) => x.source === "memory").length,
+      };
+    },
     [logs],
   );
 
@@ -136,8 +310,13 @@ export default function StatusStreamLogs() {
           <strong>Total in browser:</strong> {summary.total}
         </p>
         <p>
-          <strong>Redis source:</strong> {summary.fromRedis} | <strong>Memory source:</strong>{" "}
-          {summary.fromMemory}
+          <strong>Operational events:</strong> {summary.serviceEvents}
+        </p>
+        <p className={summary.errorEvents > 0 ? "status-stream-logs-error-strong" : undefined}>
+          <strong>Error events:</strong> {summary.errorEvents}
+        </p>
+        <p>
+          <strong>Redis source:</strong> {summary.fromRedis} | <strong>Memory source:</strong> {summary.fromMemory}
         </p>
         <p>
           <strong>Last sync:</strong> {lastSyncUtc ? new Date(lastSyncUtc).toLocaleString() : "N/A"}
@@ -153,14 +332,114 @@ export default function StatusStreamLogs() {
         {logs.length === 0 ? (
           <p>No logs yet.</p>
         ) : (
-          logs.map((log) => (
-            <details key={logKey(log)} className="status-stream-log-item">
-              <summary>
-                {new Date(log.timestampUtc ?? "").toLocaleString()} | source: {log.source ?? "unknown"}
-              </summary>
-              <pre>{prettyPayload(log.payloadJson ?? "")}</pre>
-            </details>
-          ))
+          logs.map((log) => {
+            const operational = parseOperationalPayload(log.payloadJson ?? "");
+            const highlight = operational
+              ? getEventHighlight(operational.eventType, operational.level)
+              : "neutral";
+            const badge = operational ? getHighlightLabel(highlight) : "INFO";
+
+            return (
+              <details key={logKey(log)} className={`status-stream-log-item status-stream-log-item--${highlight}`}>
+                <summary>
+                  <span>{new Date(log.timestampUtc ?? "").toLocaleString()} | source: {log.source ?? "unknown"}</span>
+                  <span className={`status-stream-log-badge status-stream-log-badge--${highlight}`}>{badge}</span>
+                </summary>
+                {(() => {
+                  if (operational) {
+                  return (
+                    <div className="status-stream-log-readable">
+                      <p>
+                        <strong>{operational.message}</strong>
+                      </p>
+                      <p>
+                        <strong>Event:</strong> {operational.eventType} | <strong>Level:</strong>{" "}
+                        {operational.level ?? "info"}
+                      </p>
+                      {operational.serverId !== null && (
+                        <p>
+                          <strong>Server:</strong> #{operational.serverId}
+                          {operational.serverName ? ` (${operational.serverName})` : ""}
+                          {operational.apiUrl ? ` | ${operational.apiUrl}` : ""}
+                        </p>
+                      )}
+                      {operational.durationMs !== null && (
+                        <p>
+                          <strong>Duration:</strong> {operational.durationMs} ms
+                        </p>
+                      )}
+                      {operational.details && (
+                        <p>
+                          <strong>Reason:</strong> {operational.details}
+                        </p>
+                      )}
+                      {operational.metrics && (
+                        <p>
+                          <strong>Cycle stats:</strong>{" "}
+                          {Object.entries(operational.metrics)
+                            .filter(([, value]) => typeof value === "number")
+                            .map(([key, value]) => `${key}=${value}`)
+                            .join(", ")}
+                        </p>
+                      )}
+                      <details>
+                        <summary>Debug payload (raw JSON)</summary>
+                        <pre>{prettyPayload(log.payloadJson ?? "")}</pre>
+                      </details>
+                    </div>
+                  );
+                  }
+
+                  const payload = parsePayload(log.payloadJson ?? "");
+                  if (!payload) {
+                    return <pre>{prettyPayload(log.payloadJson ?? "")}</pre>;
+                  }
+
+                  return (
+                    <div className="status-stream-log-readable">
+                      <p>
+                        <strong>Payload timestamp:</strong>{" "}
+                        {payload.timestampUtc ? new Date(payload.timestampUtc).toLocaleString() : "N/A"}
+                      </p>
+                      <p>
+                        <strong>Servers in payload:</strong> {payload.statuses.length}
+                      </p>
+                      <div className="status-stream-log-table-wrap">
+                        <table className="status-stream-log-table">
+                          <thead>
+                            <tr>
+                              <th>Server ID</th>
+                              <th>Status</th>
+                              <th>Clients</th>
+                              <th>Sessions</th>
+                              <th>Next Run</th>
+                              <th>Error</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {payload.statuses.map((s) => (
+                              <tr key={`${logKey(log)}:${s.vpnServerId}`}>
+                                <td>{s.vpnServerId}</td>
+                                <td>{statusLabel(s.status)}</td>
+                                <td>{s.countConnectedClients ?? "—"}</td>
+                                <td>{s.countSessions ?? "—"}</td>
+                                <td>{s.nextRunTime ? new Date(s.nextRunTime).toLocaleString() : "—"}</td>
+                                <td>{s.errorMessage ?? "—"}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      <details>
+                        <summary>Debug payload (raw JSON)</summary>
+                        <pre>{prettyPayload(log.payloadJson ?? "")}</pre>
+                      </details>
+                    </div>
+                  );
+                })()}
+              </details>
+            );
+          })
         )}
       </div>
     </div>
