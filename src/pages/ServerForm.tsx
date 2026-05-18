@@ -12,6 +12,8 @@ import {
   usePutApiOpenVpnServersUpdate,
   getApiOpenVpnServersGetVpnServerId,
   getApiOpenVpnServersGetMicroserviceInfoByUrl,
+  getApiOpenVpnServersPostSetupVpnServerIdStatus,
+  postApiOpenVpnServersPostSetupVpnServerIdStart,
 } from "../api/orval/vpn-servers/vpn-servers";
 
 import {
@@ -39,6 +41,8 @@ import type {
   VpnServerResponse,
   GetApiOpenVpnServersGetMicroserviceInfoByUrlParams,
 } from "../api/orvalModelShim";
+import { VpnServersResponsesVpnServerPostSetupState } from "../api/orval/model/vpnServersResponsesVpnServerPostSetupState";
+import type { VpnServersResponsesVpnServerPostSetupStatusResponse } from "../api/orval/model/vpnServersResponsesVpnServerPostSetupStatusResponse";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 import { usePostApiQuotaPlansGetAll } from "../api/orval/quota-plan/quota-plan";
 import {
@@ -132,6 +136,187 @@ function unwrapNewServerIdFromAdd(raw: unknown): number | null {
     (nested?.["vpnServer"] as { id?: number } | undefined)?.id;
   const id = top?.vpnServer?.id ?? fromRaw;
   return typeof id === "number" && id > 0 ? id : null;
+}
+
+function unwrapPostSetupStatus(raw: unknown): VpnServersResponsesVpnServerPostSetupStatusResponse | null {
+  return (
+    unwrapMaybeApiResponse<VpnServersResponsesVpnServerPostSetupStatusResponse>(
+      raw as
+        | VpnServersResponsesVpnServerPostSetupStatusResponse
+        | ApiEnvelope<VpnServersResponsesVpnServerPostSetupStatusResponse>
+        | undefined,
+    ) ?? null
+  );
+}
+
+const POST_SETUP_MAX_POLLS = 60;
+const POST_SETUP_POLL_DELAY_MS = 1000;
+
+type PostSetupUiPhase = "idle" | "polling" | "succeeded" | "failed" | "timeout";
+
+type PostSetupUi = {
+  phase: PostSetupUiPhase;
+  status: VpnServersResponsesVpnServerPostSetupStatusResponse | null;
+};
+
+function postSetupStateLabel(
+  state: VpnServersResponsesVpnServerPostSetupState | undefined,
+): string {
+  switch (state) {
+    case VpnServersResponsesVpnServerPostSetupState.NUMBER_0:
+      return "Queued";
+    case VpnServersResponsesVpnServerPostSetupState.NUMBER_1:
+      return "Running";
+    case VpnServersResponsesVpnServerPostSetupState.NUMBER_2:
+      return "Completed";
+    case VpnServersResponsesVpnServerPostSetupState.NUMBER_3:
+      return "Failed";
+    default:
+      return "Unknown";
+  }
+}
+
+function postSetupStepLabel(step: string | null | undefined): string {
+  switch (step) {
+    case "queued":
+      return "Waiting to start";
+    case "running":
+      return "Resolving IP and default export config";
+    case "completed":
+      return "Finished";
+    case "failed":
+      return "Setup failed";
+    default:
+      return step?.trim() ? step : "Post-create setup";
+  }
+}
+
+async function pollPostSetupUntilFinished(
+  vpnServerId: number,
+  operationId: string,
+  onUpdate?: (status: VpnServersResponsesVpnServerPostSetupStatusResponse) => void,
+): Promise<VpnServersResponsesVpnServerPostSetupStatusResponse | null> {
+  let lastStatus: VpnServersResponsesVpnServerPostSetupStatusResponse | null = null;
+
+  for (let attempt = 0; attempt < POST_SETUP_MAX_POLLS; attempt += 1) {
+    const statusRaw = await getApiOpenVpnServersPostSetupVpnServerIdStatus(vpnServerId, { operationId });
+    const status = unwrapPostSetupStatus(statusRaw);
+    if (status) {
+      lastStatus = status;
+      onUpdate?.(status);
+    }
+    const state = status?.state;
+    if (
+      state === VpnServersResponsesVpnServerPostSetupState.NUMBER_2 ||
+      state === VpnServersResponsesVpnServerPostSetupState.NUMBER_3
+    ) {
+      return status;
+    }
+    await new Promise((resolve) => {
+      window.setTimeout(resolve, POST_SETUP_POLL_DELAY_MS);
+    });
+  }
+
+  return lastStatus;
+}
+
+function PostSetupProgressPanel({ ui }: { ui: PostSetupUi }) {
+  if (ui.phase === "idle") return null;
+
+  const state = ui.status?.state;
+  const isActive =
+    ui.phase === "polling" ||
+    state === VpnServersResponsesVpnServerPostSetupState.NUMBER_0 ||
+    state === VpnServersResponsesVpnServerPostSetupState.NUMBER_1;
+  const isSuccess =
+    ui.phase === "succeeded" || state === VpnServersResponsesVpnServerPostSetupState.NUMBER_2;
+  const isFailed =
+    ui.phase === "failed" || state === VpnServersResponsesVpnServerPostSetupState.NUMBER_3;
+  const isTimeout = ui.phase === "timeout";
+
+  const panelClass = [
+    "post-setup-panel",
+    isActive ? "post-setup-panel--active" : "",
+    isSuccess ? "post-setup-panel--success" : "",
+    isFailed ? "post-setup-panel--failed" : "",
+    isTimeout ? "post-setup-panel--timeout" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const details = ui.status?.details;
+  const detailEntries =
+    details && typeof details === "object"
+      ? Object.entries(details as Record<string, string>).filter(([, v]) => v != null && String(v).trim())
+      : [];
+
+  return (
+    <div
+      className={panelClass}
+      role="status"
+      aria-live="polite"
+      aria-busy={isActive}
+    >
+      <div className="post-setup-panel-title">Post-create setup</div>
+      <ul className="post-setup-steps">
+        <li className="post-setup-step post-setup-step--done">
+          <span className="post-setup-step-icon" aria-hidden>
+            ✓
+          </span>
+          <span>Server saved to database</span>
+        </li>
+        <li
+          className={[
+            "post-setup-step",
+            isSuccess ? "post-setup-step--done" : "",
+            isFailed ? "post-setup-step--failed" : "",
+            isActive ? "post-setup-step--active" : "",
+            isTimeout ? "post-setup-step--timeout" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          <span className="post-setup-step-icon" aria-hidden>
+            {isFailed ? "!" : isSuccess ? "✓" : "…"}
+          </span>
+          <span>{postSetupStepLabel(ui.status?.currentStep)}</span>
+        </li>
+      </ul>
+
+      <div className="post-setup-status-line">
+        <strong>Status:</strong> {postSetupStateLabel(state)}
+        {ui.status?.message ? (
+          <>
+            {" "}
+            — <span className="post-setup-message">{ui.status.message}</span>
+          </>
+        ) : null}
+      </div>
+
+      {isActive && (
+        <div className="post-setup-progress-track" aria-hidden>
+          <div className="post-setup-progress-bar post-setup-progress-bar--indeterminate" />
+        </div>
+      )}
+
+      {isTimeout && (
+        <p className="post-setup-hint">
+          Setup is taking longer than expected. The server was created; you can finish configuration on the edit page.
+        </p>
+      )}
+
+      {detailEntries.length > 0 && (
+        <dl className="post-setup-details">
+          {detailEntries.map(([key, value]) => (
+            <div key={key} className="post-setup-detail-row">
+              <dt>{key}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </div>
+  );
 }
 
 async function syncQuotaPlanAssignments(
@@ -241,11 +426,13 @@ const ServerForm: React.FC = () => {
   const getPlansMutation = usePostApiQuotaPlansGetAll();
   const [quotaPlans, setQuotaPlans] = React.useState<QuotaPlanDto[]>([]);
   const [selectedQuotaPlanIds, setSelectedQuotaPlanIds] = React.useState<number[]>([]);
+  const [quotaPlansHydrated, setQuotaPlansHydrated] = React.useState(false);
   const quotaInitForServerRef = React.useRef<number | null>(null);
 
-  const { data: allowedByServerRaw } = useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId(idNum, {
-    query: { enabled: idNum > 0 },
-  });
+  const { data: allowedByServerRaw, isFetched: allowedPlansFetched } =
+    useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId(idNum, {
+      query: { enabled: idNum > 0 },
+    });
 
   const allTags = React.useMemo(() => {
     const raw = tagsResp as { tags?: { id?: number; name?: string | null }[]; data?: { tags?: { id?: number; name?: string | null }[] } } | undefined;
@@ -279,6 +466,8 @@ const ServerForm: React.FC = () => {
 
   const [selectedTagIds, setSelectedTagIds] = React.useState<number[]>([]);
   const [newTagName, setNewTagName] = React.useState("");
+  const [postSetupUi, setPostSetupUi] = React.useState<PostSetupUi>({ phase: "idle", status: null });
+  const postSetupBusy = postSetupUi.phase === "polling";
   const createTagMutation = usePostApiTagsCreate({
     mutation: {
       onSuccess: (resp) => {
@@ -321,6 +510,7 @@ const ServerForm: React.FC = () => {
 
   React.useEffect(() => {
     quotaInitForServerRef.current = null;
+    setQuotaPlansHydrated(!idNum);
     if (!idNum) setSelectedQuotaPlanIds([]);
   }, [idNum]);
 
@@ -340,16 +530,25 @@ const ServerForm: React.FC = () => {
   }, [getPlansMutation.mutate]);
 
   React.useEffect(() => {
-    if (!idNum || !allowedByServerRaw) return;
-    if (quotaInitForServerRef.current === idNum) return;
-    const items = getAllowedItemsByVpnServer(allowedByServerRaw);
-    setSelectedQuotaPlanIds(
-      items
-        .map((i) => i.quotaPlanId)
-        .filter((x): x is number => typeof x === "number")
-    );
-    quotaInitForServerRef.current = idNum;
-  }, [idNum, allowedByServerRaw]);
+    if (!idNum) return;
+    if (allowedByServerRaw) {
+      if (quotaInitForServerRef.current === idNum) return;
+      const items = getAllowedItemsByVpnServer(allowedByServerRaw);
+      setSelectedQuotaPlanIds(
+        items
+          .map((i) => i.quotaPlanId)
+          .filter((x): x is number => typeof x === "number")
+      );
+      quotaInitForServerRef.current = idNum;
+      setQuotaPlansHydrated(true);
+      return;
+    }
+    if (allowedPlansFetched && quotaInitForServerRef.current !== idNum) {
+      setSelectedQuotaPlanIds([]);
+      quotaInitForServerRef.current = idNum;
+      setQuotaPlansHydrated(true);
+    }
+  }, [idNum, allowedByServerRaw, allowedPlansFetched]);
 
   const visibleQuotaPlans = React.useMemo(() => {
     return quotaPlans
@@ -607,6 +806,7 @@ const ServerForm: React.FC = () => {
           longitude: serverData.longitude ?? null,
           isEnableWss: serverData.isEnableWss ?? false,
           tagIds: selectedTagIds,
+          quotaPlanIds: selectedQuotaPlanIds,
         };
 
         await updateMutation.mutateAsync({ data: payload });
@@ -622,28 +822,11 @@ const ServerForm: React.FC = () => {
           });
         }
 
-        const prevRaw =
-          queryClient.getQueryData(
-            getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey(idNum)
-          ) ?? allowedByServerRaw;
-        const previousLinks = getAllowedItemsByVpnServer(prevRaw);
-
-        try {
-          await syncQuotaPlanAssignments(idNum, previousLinks, selectedQuotaPlanIds);
-        } catch (quotaErr: unknown) {
-          const msg =
-            quotaErr instanceof Error
-              ? quotaErr.message
-              : typeof quotaErr === "object" && quotaErr != null && "message" in quotaErr
-                ? String((quotaErr as { message: unknown }).message)
-                : "Quota plan links failed";
-          toast.error(`Server saved, but quota plans: ${msg}`);
-        }
-
         invalidateQuotaCaches(idNum);
         toast.success(
           isOpenVpnServer ? "Server and OpenVPN config updated successfully!" : "Server updated successfully!",
         );
+        navigate("/");
       } else {
         const payload: AddServerRequest = {
           serverType: serverData.serverType ?? VpnServerType.OpenVpn,
@@ -662,7 +845,69 @@ const ServerForm: React.FC = () => {
         const addResult = await addMutation.mutateAsync({ data: payload });
         const newId = unwrapNewServerIdFromAdd(addResult);
 
+        let navigateTo: string | null = "/";
+
         if (newId) {
+          setPostSetupUi({
+            phase: "polling",
+            status: {
+              vpnServerId: newId,
+              state: VpnServersResponsesVpnServerPostSetupState.NUMBER_0,
+              message: "Server saved. Starting post-create setup…",
+              currentStep: "queued",
+            },
+          });
+          await new Promise<void>((resolve) => {
+            window.setTimeout(resolve, 0);
+          });
+
+          try {
+            const setupStart = await postApiOpenVpnServersPostSetupVpnServerIdStart(newId);
+            const setupStatus = unwrapPostSetupStatus(setupStart);
+            if (setupStatus) {
+              setPostSetupUi({ phase: "polling", status: setupStatus });
+            }
+            const operationId = setupStatus?.operationId ?? "";
+            if (operationId) {
+              const finalStatus = await pollPostSetupUntilFinished(newId, operationId, (status) => {
+                setPostSetupUi({ phase: "polling", status });
+              });
+              const finalState = finalStatus?.state;
+              if (finalState === VpnServersResponsesVpnServerPostSetupState.NUMBER_3) {
+                setPostSetupUi({ phase: "failed", status: finalStatus });
+                toast.error(finalStatus?.message ?? "Post-create setup failed");
+                navigateTo = `/servers/edit/${newId}`;
+              } else if (finalState === VpnServersResponsesVpnServerPostSetupState.NUMBER_2) {
+                setPostSetupUi({ phase: "succeeded", status: finalStatus });
+                toast.success(finalStatus?.message ?? "Server added and configured successfully.");
+                await new Promise<void>((resolve) => {
+                  window.setTimeout(resolve, 800);
+                });
+              } else {
+                setPostSetupUi({ phase: "timeout", status: finalStatus });
+                toast.warning("Server was added, but post-create setup is still running.");
+                navigateTo = `/servers/edit/${newId}`;
+              }
+            } else {
+              setPostSetupUi({ phase: "failed", status: setupStatus });
+              toast.warning("Server added, but setup could not be tracked.");
+              navigateTo = `/servers/edit/${newId}`;
+            }
+          } catch (setupErr: unknown) {
+            const message = setupErr instanceof Error ? setupErr.message : "Failed to start post-create setup";
+            setPostSetupUi({
+              phase: "failed",
+              status: {
+                vpnServerId: newId,
+                state: VpnServersResponsesVpnServerPostSetupState.NUMBER_3,
+                message,
+                currentStep: "failed",
+              },
+            });
+            toast.warning(`Server added, but setup start failed: ${message}`);
+            navigateTo = `/servers/edit/${newId}`;
+          }
+
           if (selectedQuotaPlanIds.length > 0) {
             try {
               await syncQuotaPlanAssignments(newId, [], selectedQuotaPlanIds);
@@ -681,12 +926,13 @@ const ServerForm: React.FC = () => {
           queryClient.invalidateQueries({
             queryKey: getGetApiV2OpenVpnServersGetAllWithStatusQueryKey(undefined),
           });
+          toast.success("Server added successfully!");
         }
 
-        toast.success("Server added successfully!");
+        if (navigateTo) {
+          navigate(navigateTo);
+        }
       }
-
-      navigate("/");
     } catch (err: unknown) {
       const base = idNum ? "Failed to update server." : "Failed to add server.";
       let apiMsg = base;
@@ -972,7 +1218,9 @@ const ServerForm: React.FC = () => {
                 Select which quota plans may use this server. You can change this later when editing the server.
               </p>
               <div className="tags-checkbox-list">
-                {visibleQuotaPlans.length === 0 ? (
+                {idNum > 0 && !quotaPlansHydrated ? (
+                  <p className="quota-plans-loading">Loading assigned quota plans…</p>
+                ) : visibleQuotaPlans.length === 0 ? (
                   <span className="form-hint">
                     {getPlansMutation.isPending ? "Loading quota plans…" : "No quota plans defined. Create them under Settings → Quota plans."}
                   </span>
@@ -1079,10 +1327,17 @@ const ServerForm: React.FC = () => {
               </>
             )}
 
+            {!idNum && <PostSetupProgressPanel ui={postSetupUi} />}
+
             <div className="header-containe">
               <div className="header-bar">
                 <div className="left-buttons">
-                  <button type="button" className="btn secondary" onClick={() => navigate(`/`)}>
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    onClick={() => navigate(`/`)}
+                    disabled={postSetupBusy}
+                  >
                     {FaArrowLeft({ className: "icon" })} Back
                   </button>
                 </div>
@@ -1091,13 +1346,22 @@ const ServerForm: React.FC = () => {
                       type="submit"
                       className="btn primary"
                       disabled={
+                    postSetupBusy ||
+                    (idNum > 0 && !quotaPlansHydrated) ||
                     addMutation.isPending ||
                     updateMutation.isPending ||
                     (((serverData.serverType ?? VpnServerType.OpenVpn) === VpnServerType.OpenVpn) &&
                       saveOvpnConfigMutation.isPending)
                   }
                   >
-                    {FaPlus({ className: "icon" })} {idNum ? "Update Server" : "Add Server"}
+                    {FaPlus({ className: "icon" })}{" "}
+                    {postSetupBusy
+                      ? "Configuring server…"
+                      : addMutation.isPending
+                        ? "Saving server…"
+                        : idNum
+                          ? "Update Server"
+                          : "Add Server"}
                   </button>
                 </div>
               </div>
