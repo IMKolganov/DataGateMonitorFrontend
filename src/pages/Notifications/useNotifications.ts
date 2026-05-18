@@ -29,8 +29,10 @@ export function useNotificationsList(params?: GetApiNotificationsGetAllParams) {
   return useGetApiNotificationsGetAll(params);
 }
 
-export function useNotificationsUnreadCount() {
-  const query = useGetApiNotificationsUnreadCount();
+export function useNotificationsUnreadCount(options?: { enabled?: boolean }) {
+  const query = useGetApiNotificationsUnreadCount({
+    query: { enabled: options?.enabled ?? true },
+  });
   const payload = query.data as unknown as UnreadCountResponse | undefined;
   const count = payload?.count ?? 0;
   return { ...query, data: count };
