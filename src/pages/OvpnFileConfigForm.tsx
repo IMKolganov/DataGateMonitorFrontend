@@ -116,7 +116,6 @@ const OvpnFileConfigForm: React.FC = () => {
   const exportConfigPageEnabled = openVpnPageEnabled || isXrayStack;
   const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
-  const [conflogPage, setConflogPage] = useState(1);
   const [conflogPageSize, setConflogPageSize] = usePersistedPageSize(
     parsedVpnServerId > 0 ? `ovpn-conflog:${parsedVpnServerId}` : "ovpn-conflog:0",
     DEFAULT_CONFLOG_PAGE_SIZE,
@@ -162,14 +161,18 @@ const OvpnFileConfigForm: React.FC = () => {
   // mutation for save
   const saveMutation = usePostApiOpenVpnConfigsAddUpdate();
 
+  const [conflogPageState, setConflogPageState] = useState({ serverId: parsedVpnServerId, page: 1 });
+  if (conflogPageState.serverId !== parsedVpnServerId) {
+    setConflogPageState({ serverId: parsedVpnServerId, page: 1 });
+  }
+  const conflogPage = conflogPageState.page;
+  const setConflogPage = (page: number) =>
+    setConflogPageState((s) => ({ ...s, page }));
+
   const conflogHistoryParams = useMemo(
     () => ({ page: conflogPage, pageSize: conflogPageSize }),
     [conflogPage, conflogPageSize]
   );
-
-  useEffect(() => {
-    setConflogPage(1);
-  }, [parsedVpnServerId]);
   const { data: conflogHistoryResp, isFetching: isConflogLoading } =
     useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
       parsedVpnServerId,
@@ -298,9 +301,9 @@ const OvpnFileConfigForm: React.FC = () => {
     return errorMessage(err);
   };
 
-  // when data arrives, map to local PascalCase state
-  useEffect(() => {
-    if (!data) return;
+  const [configSource, setConfigSource] = useState(data);
+  if (data && data !== configSource) {
+    setConfigSource(data);
     setServerConfig((prev) => ({
       ...prev,
       Id: data.id ?? 0,
@@ -310,7 +313,7 @@ const OvpnFileConfigForm: React.FC = () => {
       ConfigTemplate: data.configTemplate ?? "",
     }));
     setAutoDetectServerSettings(true);
-  }, [data, parsedVpnServerId]);
+  }
 
   // toast on load error (once per state change)
   useEffect(() => {

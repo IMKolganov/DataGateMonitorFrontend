@@ -4,7 +4,7 @@ import { postApiAuthLogin } from "../../api/orval/auth/auth";
 import type { LoginRequest, LoginResponse } from "../../api/orvalModelShim";
 import { FaDoorOpen } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
-import { scheduleAutoLogout } from "../../utils/auth/authSession";
+import { scheduleAutoLogout } from "../../utils/auth/tokenExpiryScheduler";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY } from "../../utils/const.ts";
 import axios from "axios";
 import { clearStoredProfileAvatarUrl } from "../../utils/auth/storedProfileAvatar";

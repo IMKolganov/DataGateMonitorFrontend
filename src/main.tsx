@@ -1,5 +1,7 @@
 import { createRoot } from "react-dom/client";
+import "./utils/auth/authSession.ts";
 import "./index.css";
+import "./css/ui-patterns.css";
 import "./css/buttons.css";
 import "./css/tab.css";
 import "./css/input.css";
