@@ -41,7 +41,7 @@ export function NotificationsPage() {
         <FaBell className="icon" aria-hidden />
         <span>Notifications</span>
       </h2>
-      <div style={{ borderTop: "1px solid #d1d5da" }} />
+      <div className="settings-divider" />
       <p className="app-settings-description">
         Notifications for the current user. Mark as read when done.
       </p>

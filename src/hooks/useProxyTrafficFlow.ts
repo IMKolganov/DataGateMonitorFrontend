@@ -183,11 +183,20 @@ export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) 
     return () => window.removeEventListener(ACCESS_TOKEN_REFRESHED_EVENT, bump);
   }, []);
 
-  useEffect(() => {
-    if (!enabled) {
+  if (!enabled) {
+    if (
+      connectionState !== "disabled" ||
+      lastError !== null ||
+      Object.keys(snapshot).length > 0
+    ) {
       setConnectionState("disabled");
       setLastError(null);
       setSnapshot({});
+    }
+  }
+
+  useEffect(() => {
+    if (!enabled) {
       const current = connRef.current;
       connRef.current = null;
       if (current) void current.stop();
@@ -225,7 +234,7 @@ export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) 
         conn.on("TrafficFlowUpdated", (payload: unknown) => {
           const entries = parseBatch(payload);
           if (debugEnabled) {
-            // eslint-disable-next-line no-console
+             
             console.debug("[TrafficFlowDebug][single] TrafficFlowUpdated received", {
               serverId,
               rawType: Array.isArray(payload) ? "array" : typeof payload,
@@ -354,6 +363,19 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
     return () => window.removeEventListener(ACCESS_TOKEN_REFRESHED_EVENT, bump);
   }, []);
 
+  const hubDisabled = !enabled || stableServerIds.length === 0;
+  if (hubDisabled) {
+    if (
+      connectionState !== "disabled" ||
+      lastError !== null ||
+      Object.keys(snapshot).length > 0
+    ) {
+      setConnectionState("disabled");
+      setLastError(null);
+      setSnapshot({});
+    }
+  }
+
   useEffect(() => {
     const stopAll = async () => {
       const entries = [...connsRef.current.values()];
@@ -361,10 +383,7 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
       await Promise.all(entries.map((c) => c.stop().catch(() => undefined)));
     };
 
-    if (!enabled || stableServerIds.length === 0) {
-      setConnectionState("disabled");
-      setLastError(null);
-      setSnapshot({});
+    if (hubDisabled) {
       void stopAll();
       return;
     }
@@ -408,7 +427,7 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
             conn.on("TrafficFlowUpdated", (payload: unknown) => {
               const entries = parseBatch(payload).map((e) => ({ ...e, serverId: sid }));
               if (debugEnabled) {
-                // eslint-disable-next-line no-console
+                 
                 console.debug("[TrafficFlowDebug][many] TrafficFlowUpdated received", {
                   serverId: sid,
                   rawType: Array.isArray(payload) ? "array" : typeof payload,
@@ -484,7 +503,7 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
       alive = false;
       void stopAll();
     };
-  }, [enabled, sessionKey, stableServerIdsKey, debugEnabled]);
+  }, [enabled, sessionKey, hubDisabled, stableServerIds, stableServerIdsKey, debugEnabled]);
 
   const flows = useMemo(() => Object.values(snapshot), [snapshot]);
   return { flows, connectionState, lastError };

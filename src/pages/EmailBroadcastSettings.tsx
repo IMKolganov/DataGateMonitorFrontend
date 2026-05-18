@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { FaEnvelope, FaPaperPlane, FaPlus, FaSync, FaSave, FaFileImport } from "react-icons/fa";
 import { toast } from "react-toastify";
 import type { GridColDef } from "@mui/x-data-grid";
@@ -302,19 +302,25 @@ export default function EmailBroadcastSettings() {
   const rowCount = historyNormalized.totalCount;
   const loading = historyQuery.isPending || historyQuery.isFetching;
 
-  useEffect(() => {
+  const maxHistoryPage = Math.max(0, Math.ceil(rowCount / historyPageSize) - 1);
+  const [historyPageBounds, setHistoryPageBounds] = useState({ rowCount, maxHistoryPage });
+  if (
+    historyPageBounds.rowCount !== rowCount ||
+    historyPageBounds.maxHistoryPage !== maxHistoryPage
+  ) {
+    setHistoryPageBounds({ rowCount, maxHistoryPage });
     if (rowCount <= 0) {
-      if (historyPage > 0) setHistoryPage(0);
-      return;
+      if (historyPage !== 0) setHistoryPage(0);
+    } else if (historyPage > maxHistoryPage) {
+      setHistoryPage(maxHistoryPage);
     }
-    const maxPage = Math.max(0, Math.ceil(rowCount / historyPageSize) - 1);
-    if (historyPage > maxPage) setHistoryPage(maxPage);
-  }, [rowCount, historyPageSize, historyPage]);
+  }
 
   const templatesQuery = useGetApiAdminEmailBroadcastTemplates({});
-  const templatesPayload = unwrapTemplates(templatesQuery.data);
-  const templates: EmailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto[] =
-    (templatesPayload?.items ?? []) as EmailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto[];
+  const templates = useMemo((): EmailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto[] => {
+    const templatesPayload = unwrapTemplates(templatesQuery.data);
+    return (templatesPayload?.items ?? []) as EmailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto[];
+  }, [templatesQuery.data]);
   const templatesLoading = templatesQuery.isPending || templatesQuery.isFetching;
 
   const sendMutation = usePostApiAdminEmailBroadcastSend({

@@ -20,6 +20,7 @@ import RegisterPage from "./components/auth/RegisterPage";
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./components/auth/ResetPasswordPage";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./utils/const.ts";
+import { scheduleAutoLogout } from "./utils/auth/tokenExpiryScheduler.ts";
 import { RequireAdmin } from "./components/auth/RequireAdmin.tsx";
 import { withSuspense } from "./utils/withSuspense.tsx";
 
@@ -96,9 +97,7 @@ function App() {
     const access = localStorage.getItem(ACCESS_TOKEN_KEY);
     const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
     if (!access || !refresh) return;
-    void import("./utils/auth/authSession").then(({ scheduleAutoLogout }) => {
-      scheduleAutoLogout(access);
-    });
+    scheduleAutoLogout(access);
   }, []);
 
   return (

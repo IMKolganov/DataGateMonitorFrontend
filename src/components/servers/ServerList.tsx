@@ -1,5 +1,6 @@
 // src/components/ServerList.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FaSyncAlt, FaPlus } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
@@ -13,16 +14,16 @@ import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { buildServerSwitchPath } from "../../utils/buildServerSwitchPath";
 
 import { deleteApiOpenVpnServersDeleteVpnServerId } from "../../api/orval/vpn-servers/vpn-servers";
-import { getApiV2OpenVpnServersGetAllWithStatus } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
+import { getApiV3OpenVpnServersGetAllWithStatus } from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
 
 import { ServiceStatus } from "../../api/orvalModelShim";
 import type {
   ServiceStatusDto,
   VpnServerWithStatusV2Dto,
-  VpnServerWithStatusesV2Response,
+  VpnServerWithStatusesV3Response,
 } from "../../api/orvalModelShim";
 
-type GetAllWithStatusData = Awaited<ReturnType<typeof getApiV2OpenVpnServersGetAllWithStatus>>;
+type GetAllWithStatusData = Awaited<ReturnType<typeof getApiV3OpenVpnServersGetAllWithStatus>>;
 
 type OrvalServerItem = VpnServerWithStatusV2Dto;
 
@@ -77,7 +78,7 @@ function pickServiceDataEntry(
 }
 
 const extractList = (resp: GetAllWithStatusData): OrvalServerItem[] => {
-  const payload = resp as VpnServerWithStatusesV2Response;
+  const payload = resp as VpnServerWithStatusesV3Response;
   const list = payload.vpnServerWithStatuses ?? null;
   return Array.isArray(list) ? list : [];
 };
@@ -95,9 +96,10 @@ function serverRowIsDisabled(raw: OrvalServerItem): boolean {
   return Boolean(v?.isDisabled);
 }
 
+const V3_SERVERS_WITH_STATUS_KEY = ["v3", "open-vpn-servers", "with-status"] as const;
+
 const ServerList: React.FC = () => {
-  const [servers, setServers] = useState<MappedServer[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const queryClient = useQueryClient();
 
   const user = getCurrentUser();
   const canAddServer = isAdmin(user);
@@ -112,13 +114,17 @@ const ServerList: React.FC = () => {
   const match = location.pathname.match(/\/servers\/(\d+)/);
   const selectedServerId = match ? Number.parseInt(match[1], 10) : null;
 
-  const loadServers = async () => {
-    setLoading(true);
-    try {
-      const resp = await getApiV2OpenVpnServersGetAllWithStatus();
+  const {
+    data: baseServers = [],
+    isLoading: loading,
+    refetch: loadServers,
+  } = useQuery({
+    queryKey: V3_SERVERS_WITH_STATUS_KEY,
+    queryFn: async () => {
+      const resp = await getApiV3OpenVpnServersGetAllWithStatus();
       const list = extractList(resp);
 
-      const mapped: MappedServer[] = list.flatMap((item) => {
+      return list.flatMap((item) => {
         const id = resolveServerId(item);
         if (!id) return [];
 
@@ -129,29 +135,18 @@ const ServerList: React.FC = () => {
             serviceStatus: null,
             errorMessage: null,
             nextRunTime: "N/A",
-            // Snapshot from GET (DB); live values overwritten when the hub sends CountConnectedClients / CountSessions.
             wsCountConnectedClients: item.countConnectedClients,
             wsCountSessions: item.countSessions,
             wsOnline: null,
             raw: item,
           },
-        ];
+        ] satisfies MappedServer[];
       });
+    },
+  });
 
-      setServers(mapped);
-    } catch {
-      setServers([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadServers();
-  }, []);
-
-  useEffect(() => {
-    if (!serviceData) return;
+  const servers = useMemo(() => {
+    if (!serviceData) return baseServers;
 
     const normalized: Record<number, ServiceStatusDto> = {};
     for (const [key, value] of Object.entries(serviceData as Record<string, ServiceStatusDto>)) {
@@ -160,36 +155,35 @@ const ServerList: React.FC = () => {
       normalized[id] = value;
     }
 
-    setServers((prev) =>
-        prev.map((s) => {
-          const ws = pickServiceDataEntry(normalized, s.id);
-          if (!ws) return s;
+    return baseServers.map((s) => {
+      const ws = pickServiceDataEntry(normalized, s.id);
+      if (!ws) return s;
 
-          const onlineRaw = (ws as ServiceStatusDto & { isOnline?: boolean }).isOnline;
-          const nextWsOnline = typeof onlineRaw === "boolean" ? onlineRaw : s.wsOnline;
+      const onlineRaw = (ws as ServiceStatusDto & { isOnline?: boolean }).isOnline;
+      const nextWsOnline = typeof onlineRaw === "boolean" ? onlineRaw : s.wsOnline;
 
-          return {
-            ...s,
-            serviceStatus: wsStatusIsPresent(ws) ? coerceStatus(ws.status) : s.serviceStatus,
-            errorMessage: ws.errorMessage !== undefined ? ws.errorMessage : s.errorMessage,
-            nextRunTime:
-              ws.nextRunTime !== undefined && ws.nextRunTime !== "" ? ws.nextRunTime : s.nextRunTime,
-            // Prefer hub numbers when present (real-time); keep last REST/WS value if the payload omits counts.
-            wsCountConnectedClients:
-              ws.countConnectedClients !== undefined ? ws.countConnectedClients : s.wsCountConnectedClients,
-            wsCountSessions: ws.countSessions !== undefined ? ws.countSessions : s.wsCountSessions,
-            wsOnline: nextWsOnline,
-          };
-        }),
-    );
-  }, [serviceData]);
+      return {
+        ...s,
+        serviceStatus: wsStatusIsPresent(ws) ? coerceStatus(ws.status) : s.serviceStatus,
+        errorMessage: ws.errorMessage !== undefined ? ws.errorMessage : s.errorMessage,
+        nextRunTime:
+          ws.nextRunTime !== undefined && ws.nextRunTime !== "" ? ws.nextRunTime : s.nextRunTime,
+        wsCountConnectedClients:
+          ws.countConnectedClients !== undefined ? ws.countConnectedClients : s.wsCountConnectedClients,
+        wsCountSessions: ws.countSessions !== undefined ? ws.countSessions : s.wsCountSessions,
+        wsOnline: nextWsOnline,
+      };
+    });
+  }, [baseServers, serviceData]);
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this server?")) return;
 
     try {
       await deleteApiOpenVpnServersDeleteVpnServerId(id);
-      setServers((prev) => prev.filter((s) => s.id !== id));
+      queryClient.setQueryData<MappedServer[]>(V3_SERVERS_WITH_STATUS_KEY, (prev) =>
+        (prev ?? []).filter((s) => s.id !== id),
+      );
     } catch {
       // ignore
     }
@@ -252,7 +246,7 @@ const ServerList: React.FC = () => {
                   </button>
               )}
 
-              <button className="btn secondary" onClick={loadServers} disabled={loading}>
+              <button className="btn secondary" onClick={() => void loadServers()} disabled={loading}>
               <span className={`icon ${loading ? "icon-spin" : ""}`}>
                 {FaSyncAlt({ className: `icon ${loading ? "icon-spin" : ""}` })}
               </span>
@@ -269,34 +263,34 @@ const ServerList: React.FC = () => {
                   <div className="server-item-content">
                     <div className="server-header">
                       <div className="server-info">
-                        <span className="skeleton" style={{ width: 220, height: 20 }} />
+                        <span className="skeleton skeleton--w220-h20" />
                       </div>
-                      <span className="skeleton" style={{ width: 70, height: 22 }} />
+                      <span className="skeleton skeleton--w70-h22" />
                     </div>
                     <div className="server-details">
                       <div className="detail-row">
-                        <span className="skeleton" style={{ width: 14, height: 14 }} />
-                        <span className="skeleton" style={{ width: 140, height: 14 }} />
+                        <span className="skeleton skeleton--w14-h14" />
+                        <span className="skeleton skeleton--w140-h14" />
                       </div>
                       <div className="detail-row">
-                        <span className="skeleton" style={{ width: 14, height: 14 }} />
-                        <span className="skeleton" style={{ width: 180, height: 14 }} />
+                        <span className="skeleton skeleton--w14-h14" />
+                        <span className="skeleton skeleton--w180-h14" />
                       </div>
                       <div className="detail-row">
-                        <span className="skeleton" style={{ width: 14, height: 14 }} />
-                        <span className="skeleton" style={{ width: 100, height: 14 }} />
+                        <span className="skeleton skeleton--w14-h14" />
+                        <span className="skeleton skeleton--w100-h14" />
                       </div>
                     </div>
                     <div className="server-tags-block">
-                      <span className="skeleton" style={{ width: 60, height: 14 }} />
-                      <span className="skeleton" style={{ width: 80, height: 24, borderRadius: 6 }} />
-                      <span className="skeleton" style={{ width: 50, height: 24, borderRadius: 6 }} />
+                      <span className="skeleton skeleton--w60-h14" />
+                      <span className="skeleton skeleton--w80-h24" />
+                      <span className="skeleton skeleton--w50-h24" />
                     </div>
                     <div className="server-actions">
                       <div className="server-actions-buttons">
-                        <span className="skeleton" style={{ width: 70, height: 32, borderRadius: 6 }} />
-                        <span className="skeleton" style={{ width: 65, height: 32, borderRadius: 6 }} />
-                        <span className="skeleton" style={{ width: 75, height: 32, borderRadius: 6 }} />
+                        <span className="skeleton skeleton--w70-h32" />
+                        <span className="skeleton skeleton--w65-h32" />
+                        <span className="skeleton skeleton--w75-h32" />
                       </div>
                     </div>
                   </div>

@@ -5,7 +5,7 @@ import axios from "axios";
 import { postApiAuthLogin } from "../../api/orval/auth/auth";
 import type { LoginRequest, LoginResponse } from "../../api/orvalModelShim";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY } from "../../utils/const";
-import { scheduleAutoLogout } from "../../utils/auth/authSession";
+import { scheduleAutoLogout } from "../../utils/auth/tokenExpiryScheduler";
 import { clearStoredProfileAvatarUrl } from "../../utils/auth/storedProfileAvatar";
 import { Link } from "react-router-dom";
 import GoogleLoginForm from "../../components/auth/GoogleLoginForm";
@@ -58,7 +58,7 @@ const XrayLoginPage: React.FC = () => {
       scheduleAutoLogout(response.token);
       navigate("/xray/", { replace: true });
     } catch (e: unknown) {
-      let detailedMessage = t.failedSignIn;
+      let detailedMessage: string;
       if (axios.isAxiosError(e)) {
         const data = e.response?.data;
         const msg = axiosResponseDataMessage(data);

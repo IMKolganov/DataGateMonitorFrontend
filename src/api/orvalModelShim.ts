@@ -78,7 +78,9 @@ export type { VpnServersDtoVpnServerWithStatusV2Dto as VpnServerWithStatusV2Dto 
 export type { VpnServerEventDtoVpnServerEventLogDto as VpnServerEventLogDto } from "./orval/model/vpnServerEventDtoVpnServerEventLogDto";
 export type { VpnServersResponsesVpnServerResponse as VpnServerResponse } from "./orval/model/vpnServersResponsesVpnServerResponse";
 export type { VpnServersResponsesVpnServersV2Response as VpnServersV2Response } from "./orval/model/vpnServersResponsesVpnServersV2Response";
+export type { VpnServersResponsesVpnServersV3Response as VpnServersV3Response } from "./orval/model/vpnServersResponsesVpnServersV3Response";
 export type { VpnServersResponsesVpnServerWithStatusesV2Response as VpnServerWithStatusesV2Response } from "./orval/model/vpnServersResponsesVpnServerWithStatusesV2Response";
+export type { VpnServersResponsesVpnServerWithStatusesV3Response as VpnServerWithStatusesV3Response } from "./orval/model/vpnServersResponsesVpnServerWithStatusesV3Response";
 export type { VpnServersResponsesVpnServerWithStatusResponse as VpnServerWithStatusResponse } from "./orval/model/vpnServersResponsesVpnServerWithStatusResponse";
 export type { VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest as AddOrUpdateOvpnFileConfigRequest } from "./orval/model/vpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest";
 export type { DataGateOpenVpnManagerInfoRootOpenVpnInfoResponse as RootOpenVpnInfoResponse } from "./orval/model/dataGateOpenVpnManagerInfoRootOpenVpnInfoResponse";
