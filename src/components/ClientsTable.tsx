@@ -60,6 +60,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
     const { vpnServerId } = useParams<{ vpnServerId?: string }>();
     const [actionBusyKey, setActionBusyKey] = useState<string | null>(null);
     const canXrayAdminActions = clientsStack === "xray" && isAdmin(getCurrentUser());
+    const canLinkToUserStats = isAdmin(getCurrentUser());
     const serverIdForActions =
         typeof vpnServerIdProp === "number" && Number.isFinite(vpnServerIdProp)
             ? vpnServerIdProp
@@ -150,9 +151,13 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                 const val = params.value as string | undefined;
                 if (!val) return null;
 
+                if (!canLinkToUserStats) {
+                    return <span>{val}</span>;
+                }
+
                 const url = vpnServerId
-                    ? `/servers/${vpnServerId}/statistics/${val}`
-                    : `/servers/statistics/${val}`;
+                    ? `/servers/${vpnServerId}/statistics/${encodeURIComponent(val)}`
+                    : `/servers/statistics/${encodeURIComponent(val)}`;
 
                 return (
                     <Link to={url} style={{ color: "#58a6ff", textDecoration: "none" }}>
