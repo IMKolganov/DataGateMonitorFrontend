@@ -16,7 +16,6 @@ import {
   FaUsers,
   FaWindows,
 } from "react-icons/fa";
-import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import "../css/Settings.css";
 
 type SettingsTab = {
@@ -45,14 +44,7 @@ export function Settings() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const tabs = isAdmin(getCurrentUser())
-    ? ALL_SETTINGS_TABS
-    : ALL_SETTINGS_TABS.filter(
-        (t) =>
-          t.path !== "admin-password" &&
-          t.path !== "android-crashes" &&
-          t.path !== "windows-crashes",
-      );
+  const tabs = ALL_SETTINGS_TABS;
 
   const pathRest = location.pathname.replace(/^\/settings\/?/, "") || "general";
   const currentTab = pathRest.startsWith("users") ? "users" : pathRest.split("/")[0];

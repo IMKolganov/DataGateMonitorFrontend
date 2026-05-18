@@ -42,6 +42,8 @@ import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse"
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import { formatDateWithOffset } from "../utils/utils";
 import { useProxyTrafficFlow } from "../hooks/useProxyTrafficFlow";
+import { ServerAccessDenied } from "../components/ServerAccessDenied";
+import { isHttpForbidden } from "../utils/httpError";
 
 type ConflogPayload = {
     application?: string | null;
@@ -248,16 +250,24 @@ export function GeneralServerDetails() {
     const loadingClients =
         (isLive ? connectedQuery.isFetching : historyQuery.isFetching) ?? false;
 
+    const clientsAccessDenied =
+        clientInsightsEnabled &&
+        ((isLive &&
+            (isHttpForbidden(connectedQuery.error) || isHttpForbidden(mapConnectedQuery.error))) ||
+            (!isLive && isHttpForbidden(historyQuery.error)));
+
     const xrayClientsQueryErrorMessage =
-        isLive && connectedQuery.isError
-            ? connectedQuery.error instanceof Error
-                ? connectedQuery.error.message
-                : String(connectedQuery.error ?? "Request failed")
-            : !isLive && historyQuery.isError
-              ? historyQuery.error instanceof Error
-                  ? historyQuery.error.message
-                  : String(historyQuery.error ?? "Request failed")
-              : null;
+        clientsAccessDenied
+            ? null
+            : isLive && connectedQuery.isError
+              ? connectedQuery.error instanceof Error
+                  ? connectedQuery.error.message
+                  : String(connectedQuery.error ?? "Request failed")
+              : !isLive && historyQuery.isError
+                ? historyQuery.error instanceof Error
+                    ? historyQuery.error.message
+                    : String(historyQuery.error ?? "Request failed")
+                : null;
 
     const activeClientsResponse =
         (isLive ? connectedQuery.data : historyQuery.data) as unknown as
@@ -475,7 +485,11 @@ export function GeneralServerDetails() {
                 quotaPlanLabels={quotaPlanLabels}
             />
 
-            {clientInsightsEnabled ? (
+            {clientsAccessDenied ? (
+                <ServerAccessDenied />
+            ) : null}
+
+            {clientInsightsEnabled && !clientsAccessDenied ? (
                 <>
                     <section className="server-details__panel" aria-labelledby="server-vpn-clients-heading">
                         <h3 id="server-vpn-clients-heading" className="settings-card__h3-with-icon">

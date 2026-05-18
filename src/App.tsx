@@ -20,7 +20,7 @@ import RegisterPage from "./components/auth/RegisterPage";
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./components/auth/ResetPasswordPage";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./utils/const.ts";
-import { getCurrentUser, isAdmin } from "./utils/auth/authSelectors.ts";
+import { RequireAdmin } from "./components/auth/RequireAdmin.tsx";
 import { withSuspense } from "./utils/withSuspense.tsx";
 
 // Lazy pages
@@ -157,7 +157,14 @@ function App() {
                       </Route>
                     </Route>
 
-                    <Route path="/settings" element={withSuspense(<Settings />)}>
+                    <Route
+                      path="/settings"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<Settings />)}
+                        </RequireAdmin>
+                      }
+                    >
                       <Route index element={<Navigate to="general" replace />} />
                       <Route path="general" element={withSuspense(<GeneralSettings />)} />
                       <Route path="applications" element={withSuspense(<ApplicationSettings />)} />
@@ -169,42 +176,29 @@ function App() {
                       <Route path="users" element={withSuspense(<UsersSettings />)} />
                       <Route path="users/:userId" element={withSuspense(<UserDetailPage />)} />
                       <Route path="email-broadcast" element={withSuspense(<EmailBroadcastSettings />)} />
-                      <Route
-                        path="android-crashes"
-                        element={
-                          isAdmin(getCurrentUser()) ? (
-                            withSuspense(<AndroidCrashReportsSettings />)
-                          ) : (
-                            <Navigate to="/settings/general" replace />
-                          )
-                        }
-                      />
-                      <Route
-                        path="windows-crashes"
-                        element={
-                          isAdmin(getCurrentUser()) ? (
-                            withSuspense(<WindowsCrashReportsSettings />)
-                          ) : (
-                            <Navigate to="/settings/general" replace />
-                          )
-                        }
-                      />
-                      <Route
-                        path="admin-password"
-                        element={
-                          isAdmin(getCurrentUser()) ? (
-                            withSuspense(<AdminPasswordRecoverySettings />)
-                          ) : (
-                            <Navigate to="/settings/general" replace />
-                          )
-                        }
-                      />
+                      <Route path="android-crashes" element={withSuspense(<AndroidCrashReportsSettings />)} />
+                      <Route path="windows-crashes" element={withSuspense(<WindowsCrashReportsSettings />)} />
+                      <Route path="admin-password" element={withSuspense(<AdminPasswordRecoverySettings />)} />
                     </Route>
 
-                    <Route path="/notifications" element={withSuspense(<NotificationsPage />)} />
+                    <Route
+                      path="/notifications"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<NotificationsPage />)}
+                        </RequireAdmin>
+                      }
+                    />
 
                     {/* legacy direct paths */}
-                    <Route path="/settings/applications" element={withSuspense(<ApplicationSettings />)} />
+                    <Route
+                      path="/settings/applications"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<ApplicationSettings />)}
+                        </RequireAdmin>
+                      }
+                    />
                     <Route path="/servers/add" element={withSuspense(<ServerForm />)} />
                     <Route path="/servers/edit/:serverId" element={withSuspense(<ServerForm />)} />
                     <Route path="/about" element={withSuspense(<About />)} />

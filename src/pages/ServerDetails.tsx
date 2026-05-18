@@ -52,7 +52,7 @@ const ALL_SERVER_TABS: Tab[] = [
         mobilePrefix: "⚙️",
     },
     { label: "Statistics", path: "statistics", Icon: FaChartLine, mobilePrefix: "📈" },
-    { label: "Events", path: "events", Icon: FaBolt, mobilePrefix: "⚡" },
+    { label: "Events", path: "events", adminOnly: true, Icon: FaBolt, mobilePrefix: "⚡" },
 ];
 
 export function ServerDetails() {
