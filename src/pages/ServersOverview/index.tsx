@@ -52,6 +52,8 @@ import type {
 import { OverviewGrouping } from "../../api/orvalModelShim";
 import VpnMap from "../../components/VpnMap";
 import { useProxyTrafficFlowMany, type ProxyTrafficFlowUpdate } from "../../hooks/useProxyTrafficFlow";
+import { canViewUserStatisticsScope } from "../../utils/auth/canViewUserStatisticsScope";
+import { UserStatisticsAccessDenied } from "./UserStatisticsAccessDenied";
 
 
 
@@ -168,6 +170,9 @@ export default function ServersOverview() {
     scopedServerQuery.isSuccess;
 
   const externalId = externalIdParam || undefined;
+  const userStatsAccessDenied =
+    Boolean(externalId) && !canViewUserStatisticsScope(externalId);
+  const statsExternalId = userStatsAccessDenied ? undefined : externalId;
 
   const lastErrorKey = useRef<string>("");
 
@@ -196,9 +201,9 @@ export default function ServersOverview() {
       To: to.toISOString(),
       Grouping: toApiGrouping(grouping),
       VpnServerId: vpnServerId,
-      ExternalId: externalId,
+      ExternalId: statsExternalId,
     }),
-    [from, to, grouping, vpnServerId, externalId]
+    [from, to, grouping, vpnServerId, statsExternalId]
   );
 
   const totalsParams: GetApiOpenVpnClientsOverviewSummaryParams = useMemo(
@@ -206,9 +211,9 @@ export default function ServersOverview() {
       From: from.toISOString(),
       To: to.toISOString(),
       VpnServerId: vpnServerId,
-      ExternalId: externalId,
+      ExternalId: statsExternalId,
     }),
-    [from, to, vpnServerId, externalId]
+    [from, to, vpnServerId, statsExternalId]
   );
 
   // NOTE: no onError inside options.query — not supported by the generated types
@@ -307,22 +312,22 @@ export default function ServersOverview() {
     () => ({
       From: from.toISOString(),
       To: to.toISOString(),
-      ExternalId: externalId,
+      ExternalId: statsExternalId,
       VpnServerId: vpnServerId,
     }),
-    [from, to, externalId, vpnServerId],
+    [from, to, statsExternalId, vpnServerId],
   );
 
   const usersLabelQuery = useGetApiUsersGetAll(
     { Page: 1, PageSize: 500 },
-    { query: { enabled: Boolean(externalId), staleTime: 60_000 } },
+    { query: { enabled: Boolean(statsExternalId), staleTime: 60_000 } },
   );
 
   const overviewLabelQuery = useGetApiOpenVpnClientsOverviewUsers<OverviewUsersResponse>(
     overviewLabelParams,
     {
       query: {
-        enabled: Boolean(externalId && overviewLabelParams.From && overviewLabelParams.To),
+        enabled: Boolean(statsExternalId && overviewLabelParams.From && overviewLabelParams.To),
         staleTime: 10_000,
       },
     },
@@ -334,17 +339,17 @@ export default function ServersOverview() {
   );
 
   const userDisplayName = useMemo(() => {
-    if (!externalId) return "";
+    if (!statsExternalId) return "";
     const payload = readPayload<GetAllUsersResponse>(
       usersLabelQuery.data as GetAllUsersResponse | { data?: GetAllUsersResponse } | undefined
     );
-    const fromDash = (payload?.users ?? []).find((u) => u.externalId === externalId)?.displayName?.trim();
+    const fromDash = (payload?.users ?? []).find((u) => u.externalId === statsExternalId)?.displayName?.trim();
     if (fromDash) return fromDash;
     const items = overviewLabelQuery.data?.overviewUserItems ?? [];
     const row =
-      items.find((i) => i.externalId === externalId) ?? (items.length > 0 ? items[0] : undefined);
+      items.find((i) => i.externalId === statsExternalId) ?? (items.length > 0 ? items[0] : undefined);
     return row?.displayName?.trim() ?? "";
-  }, [externalId, usersLabelQuery.data, overviewLabelQuery.data]);
+  }, [statsExternalId, usersLabelQuery.data, overviewLabelQuery.data]);
 
   const vpnServerDisplayName = useMemo(() => {
     if (vpnServerId == null) return "";
@@ -361,19 +366,24 @@ export default function ServersOverview() {
     vpnServerId != null ? vpnServerDisplayName || `VPN server #${vpnServerId}` : "";
 
   const title = useMemo(() => {
-    if (externalId && vpnServerId != null) {
+    if (userStatsAccessDenied) {
+      return vpnServerId != null
+        ? `Server statistics — ${titleServerPart}`
+        : "All servers overview";
+    }
+    if (statsExternalId && vpnServerId != null) {
       return `User statistics — ${titleUserPart} · ${titleServerPart}`;
     }
-    if (externalId) {
+    if (statsExternalId) {
       return `User statistics — ${titleUserPart} · all VPN servers`;
     }
     if (vpnServerId != null) {
       return `Server statistics — ${titleServerPart}`;
     }
     return "All servers overview";
-  }, [externalId, vpnServerId, titleUserPart, titleServerPart]);
+  }, [userStatsAccessDenied, statsExternalId, vpnServerId, titleUserPart, titleServerPart]);
 
-  const isGlobalServersPage = vpnServerId == null && !externalId;
+  const isGlobalServersPage = vpnServerId == null && !statsExternalId;
   const allServersWithStatusQuery = useGetApiV2OpenVpnServersGetAllWithStatus(
     {},
     {
@@ -505,9 +515,9 @@ export default function ServersOverview() {
       From: from.toISOString(),
       To: to.toISOString(),
       VpnServerId: vpnServerId ?? undefined,
-      ExternalId: externalId ?? undefined,
+      ExternalId: statsExternalId ?? undefined,
     }),
-    [from, to, vpnServerId, externalId]
+    [from, to, vpnServerId, statsExternalId]
   );
 
   const offlineOverviewUsersQuery = useGetApiOpenVpnClientsOverviewUsers<OverviewUsersResponse>(
@@ -711,16 +721,20 @@ export default function ServersOverview() {
         </h2>
       </div>
 
+      {userStatsAccessDenied ? (
+        <UserStatisticsAccessDenied vpnServerId={vpnServerId} />
+      ) : null}
+
       <StatisticsScopeBanner
-        externalId={externalId}
+        externalId={statsExternalId}
         vpnServerId={vpnServerId}
         userDisplayName={userDisplayName}
         vpnServerDisplayName={vpnServerDisplayName}
       />
 
-      {externalId ? (
+      {statsExternalId ? (
         <OverviewUserProfileCard
-          externalId={externalId}
+          externalId={statsExternalId}
           vpnServerId={vpnServerId}
           from={from}
           to={to}
@@ -735,7 +749,7 @@ export default function ServersOverview() {
         from={from}
         to={to}
         vpnServerId={vpnServerId ?? null}
-        externalId={externalId ?? null}
+        externalId={statsExternalId ?? null}
       />
 
       {isGlobalServersPage ? (
@@ -782,7 +796,7 @@ export default function ServersOverview() {
         </section>
       ) : null}
 
-      <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} externalId={externalId ?? null} />
+      <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} externalId={statsExternalId ?? null} />
     </div>
   );
 }
