@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   useGetApiNotificationsGetAll,
   useGetApiNotificationsUnreadCount,
@@ -43,7 +43,6 @@ export function useNotifications() {
   const user = getCurrentUser();
   const adminUserId = user?.id ?? 0;
 
-  const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = usePersistedPageSize(
     "notifications",
     DEFAULT_PAGE_SIZE,
@@ -68,6 +67,22 @@ export function useNotifications() {
     return selected;
   }, [severityEnabled]);
 
+  const [pageState, setPageState] = useState({
+    readFilter,
+    typeFilter,
+    severitiesForApi,
+    page: 0,
+  });
+  if (
+    pageState.readFilter !== readFilter ||
+    pageState.typeFilter !== typeFilter ||
+    pageState.severitiesForApi !== severitiesForApi
+  ) {
+    setPageState({ readFilter, typeFilter, severitiesForApi, page: 0 });
+  }
+  const page = pageState.page;
+  const setPage = (next: number) => setPageState((s) => ({ ...s, page: next }));
+
   const listParams = useMemo((): GetApiNotificationsGetAllParams => {
     const trimmedType = typeFilter.trim();
     const p: GetApiNotificationsGetAllParams = {
@@ -80,10 +95,6 @@ export function useNotifications() {
     if (severitiesForApi) p.Severities = severitiesForApi;
     return p;
   }, [page, pageSize, readFilter, typeFilter, severitiesForApi]);
-
-  useEffect(() => {
-    setPage(0);
-  }, [readFilter, typeFilter, severitiesForApi]);
 
   const listQuery = useGetApiNotificationsGetAll(listParams, {
     query: { placeholderData: (prev) => prev },

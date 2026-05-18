@@ -1,12 +1,11 @@
 // src/pages/servers/ServersOverview.tsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaChartLine } from "react-icons/fa";
 
 import { errorMessage } from "../../utils/errorMessage";
 import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
-import { OverviewUsersTable } from "../../components/OverviewUsersTable";
 import StatsCards from "./StatsCards";
 import OverviewChart from "./OverviewChart";
 import GeoMap from "./GeoMap";
@@ -29,9 +28,9 @@ import {
 } from "../../api/orval/vpn-server-clients/vpn-server-clients";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../../api/orval/vpn-servers/vpn-servers";
 import {
-  useGetApiV2OpenVpnServersGetAll,
-  useGetApiV2OpenVpnServersGetAllWithStatus,
-} from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
+  useGetApiV3OpenVpnServersGetAll,
+  useGetApiV3OpenVpnServersGetAllWithStatus,
+} from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
 import { useGetApiUsersGetAll } from "../../api/orval/user/user";
 import type {
   GetAllUsersResponse,
@@ -45,12 +44,16 @@ import type {
   VpnServerClientsResponsesConnectedClientsResponse,
   VpnServerV2Dto,
   VpnServersDtoVpnServerWithStatusV2Dto,
-  VpnServersV2Response,
+  VpnServersV3Response,
   GetApiOpenVpnClientsOverviewSeriesParams,
   GetApiOpenVpnClientsOverviewSummaryParams,
 } from "../../api/orvalModelShim";
 import { OverviewGrouping } from "../../api/orvalModelShim";
-import VpnMap from "../../components/VpnMap";
+
+const OverviewUsersTable = lazy(() =>
+  import("../../components/OverviewUsersTable").then((m) => ({ default: m.OverviewUsersTable })),
+);
+const VpnMap = lazy(() => import("../../components/VpnMap"));
 import { useProxyTrafficFlowMany, type ProxyTrafficFlowUpdate } from "../../hooks/useProxyTrafficFlow";
 import { canViewUserStatisticsScope } from "../../utils/auth/canViewUserStatisticsScope";
 import { UserStatisticsAccessDenied } from "./UserStatisticsAccessDenied";
@@ -333,7 +336,7 @@ export default function ServersOverview() {
     },
   );
 
-  const serversLabelQuery = useGetApiV2OpenVpnServersGetAll(
+  const serversLabelQuery = useGetApiV3OpenVpnServersGetAll(
     {},
     { query: { enabled: vpnServerId != null } },
   );
@@ -353,8 +356,8 @@ export default function ServersOverview() {
 
   const vpnServerDisplayName = useMemo(() => {
     if (vpnServerId == null) return "";
-    const payload = readPayload<VpnServersV2Response>(
-      serversLabelQuery.data as VpnServersV2Response | { data?: VpnServersV2Response } | undefined
+    const payload = readPayload<VpnServersV3Response>(
+      serversLabelQuery.data as VpnServersV3Response | { data?: VpnServersV3Response } | undefined
     );
     const list = payload?.vpnServers ?? [];
     const s = list.find((x) => x.id === vpnServerId);
@@ -384,7 +387,7 @@ export default function ServersOverview() {
   }, [userStatsAccessDenied, statsExternalId, vpnServerId, titleUserPart, titleServerPart]);
 
   const isGlobalServersPage = vpnServerId == null && !statsExternalId;
-  const allServersWithStatusQuery = useGetApiV2OpenVpnServersGetAllWithStatus(
+  const allServersWithStatusQuery = useGetApiV3OpenVpnServersGetAllWithStatus(
     {},
     {
       query: {
@@ -394,7 +397,7 @@ export default function ServersOverview() {
       },
     }
   );
-  const allServersListQuery = useGetApiV2OpenVpnServersGetAll(
+  const allServersListQuery = useGetApiV3OpenVpnServersGetAll(
     {},
     {
       query: {
@@ -431,8 +434,8 @@ export default function ServersOverview() {
   }, [allServersWithStatusQuery.data]);
 
   const allServersList = useMemo<VpnServerV2Dto[]>(() => {
-    const payload = readPayload<VpnServersV2Response>(
-      allServersListQuery.data as VpnServersV2Response | { data?: VpnServersV2Response } | undefined
+    const payload = readPayload<VpnServersV3Response>(
+      allServersListQuery.data as VpnServersV3Response | { data?: VpnServersV3Response } | undefined
     );
     return payload?.vpnServers ?? [];
   }, [allServersListQuery.data]);
@@ -745,12 +748,14 @@ export default function ServersOverview() {
       <StatsCards totals={totalsForCards} loading={loadingTotals} />
       <OverviewChart data={chartData} loading={loadingSeries} error={null} />
 
-      <OverviewUsersTable
-        from={from}
-        to={to}
-        vpnServerId={vpnServerId ?? null}
-        externalId={statsExternalId ?? null}
-      />
+      <Suspense fallback={<p style={{ margin: "12px 0" }}>Loading users table…</p>}>
+        <OverviewUsersTable
+          from={from}
+          to={to}
+          vpnServerId={vpnServerId ?? null}
+          externalId={statsExternalId ?? null}
+        />
+      </Suspense>
 
       {isGlobalServersPage ? (
         <section style={{ marginTop: 14 }}>
@@ -786,12 +791,14 @@ export default function ServersOverview() {
           </p>
           <h4 style={{ margin: "16px 0 8px" }}>All active connections map</h4>
           <div style={{ marginTop: 8, paddingTop: 6 }}>
-            <VpnMap
-              clients={offlinePlaybackMode ? offlinePlaybackData.clients : globalLiveClients}
-              trafficFlows={offlinePlaybackMode ? offlinePlaybackData.flows : globalFlowHub.flows}
-              serverMarkers={globalFlowServerMarkers}
-              animationMode={offlinePlaybackMode ? "offline" : "live"}
-            />
+            <Suspense fallback={<p>Loading traffic map…</p>}>
+              <VpnMap
+                clients={offlinePlaybackMode ? offlinePlaybackData.clients : globalLiveClients}
+                trafficFlows={offlinePlaybackMode ? offlinePlaybackData.flows : globalFlowHub.flows}
+                serverMarkers={globalFlowServerMarkers}
+                animationMode={offlinePlaybackMode ? "offline" : "live"}
+              />
+            </Suspense>
           </div>
         </section>
       ) : null}

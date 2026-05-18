@@ -138,9 +138,10 @@ const tileLayers = {
 
 const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
     const map = useMap();
+    const [lat, lng] = center;
     useEffect(() => {
-        map.setView(center, zoom);
-    }, [map, center[0], center[1], zoom]);
+        map.setView([lat, lng], zoom);
+    }, [map, lat, lng, zoom]);
     return null;
 };
 

@@ -2,8 +2,8 @@
 import { useMemo } from "react";
 
 import GeoPointsMap from "../../components/settings/GeoPointsMap.tsx";
-import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
-import type { VpnServerV2Dto, VpnServersV2Response } from "../../api/orvalModelShim";
+import { useGetApiV3OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
+import type { VpnServerV2Dto, VpnServersV3Response } from "../../api/orvalModelShim";
 
 type Props = {
   from: Date | string;
@@ -28,10 +28,10 @@ function withLatLng(s: VpnServerV2Dto): s is VpnServerV2Dto & {
 }
 
 export default function GeoMap({ from, to, vpnServerId = null, externalId = null }: Props) {
-  const { data: serversData } = useGetApiV2OpenVpnServersGetAll({});
+  const { data: serversData } = useGetApiV3OpenVpnServersGetAll({});
 
   const vpnServerMarkers = useMemo(() => {
-    const list = (serversData as VpnServersV2Response | undefined)?.vpnServers ?? [];
+    const list = (serversData as VpnServersV3Response | undefined)?.vpnServers ?? [];
     const withCoords = list.filter((s) => !s.isDeleted).filter(withLatLng);
 
     if (vpnServerId != null) {

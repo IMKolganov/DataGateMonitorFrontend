@@ -160,7 +160,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                     : `/servers/statistics/${encodeURIComponent(val)}`;
 
                 return (
-                    <Link to={url} style={{ color: "#58a6ff", textDecoration: "none" }}>
+                    <Link to={url} className="link-accent">
                         {val}
                     </Link>
                 );
@@ -223,7 +223,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                 },
             } satisfies GridColDef,
         ];
-    }, [canXrayAdminActions, actionBusyKey, postXrayAction, vpnServerId]);
+    }, [canLinkToUserStats, canXrayAdminActions, actionBusyKey, postXrayAction, vpnServerId]);
 
     const noRowsLabel = useMemo(() => {
         if (clientsStack !== "xray") return "No connected clients";

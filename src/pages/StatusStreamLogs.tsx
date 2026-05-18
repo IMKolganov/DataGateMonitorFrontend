@@ -307,10 +307,13 @@ export default function StatusStreamLogs() {
   }, []);
 
   useEffect(() => {
-    void fetchLogs();
-    const id = window.setInterval(() => {
-      void fetchLogs();
-    }, 5000);
+    const scheduleFetch = () => {
+      queueMicrotask(() => {
+        void fetchLogs();
+      });
+    };
+    scheduleFetch();
+    const id = window.setInterval(scheduleFetch, 5000);
     return () => window.clearInterval(id);
   }, [fetchLogs]);
 

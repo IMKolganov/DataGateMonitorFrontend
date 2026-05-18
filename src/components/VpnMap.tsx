@@ -330,9 +330,6 @@ const VpnMap: React.FC<VpnMapProps> = ({
   const [globeTrafficLayer, setGlobeTrafficLayer] = useState<GlobeTrafficLayer>(
       (Cookies.get("selectedGlobeTrafficLayer") as GlobeTrafficLayer) || "arcs"
   );
-  const segmentCacheRef = useRef<Map<string, TrafficSegment>>(new Map());
-  const arcCacheRef = useRef<Map<string, GlobeArcDatum>>(new Map());
-  const cableCacheRef = useRef<Map<string, GlobeCableDatum>>(new Map());
   const [viewportSize, setViewportSize] = useState(() => ({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -607,7 +604,6 @@ const VpnMap: React.FC<VpnMapProps> = ({
       return Math.max(acc, flow.clientToServerBytesDelta ?? 0, flow.serverToClientBytesDelta ?? 0);
     }, 0);
 
-    const nextIds = new Set<string>();
     const result: TrafficSegment[] = [];
 
     for (const flow of visibleTrafficFlows) {
@@ -622,7 +618,6 @@ const VpnMap: React.FC<VpnMapProps> = ({
         if (d.delta <= 0) continue;
 
         const id = `${flow.connectionId}:${d.key}`;
-        nextIds.add(id);
         const intensity = intensityFromDelta(d.delta, maxDelta);
         const weight = 1.2 + intensity * 6.8;
         const opacityBase = 0.25 + intensity * 0.75;
@@ -637,25 +632,6 @@ const VpnMap: React.FC<VpnMapProps> = ({
           d.key === "clientToServer"
             ? `C→S Δ: ${d.delta} B/s`
             : `S→C Δ: ${d.delta} B/s`;
-
-        const cached = segmentCacheRef.current.get(id);
-        if (cached) {
-          cached.connectionId = flow.connectionId;
-          cached.direction = d.key;
-          cached.delta = d.delta;
-          cached.color = color;
-          cached.weight = weight;
-          cached.opacity = opacity;
-          cached.intensity = intensity;
-          cached.isIdle = flow.isIdle;
-          cached.state = flow.state;
-          cached.from = flow.from;
-          cached.to = flow.to;
-          cached.mapPath = mapPath;
-          cached.label = label;
-          result.push(cached);
-          continue;
-        }
 
         const created: TrafficSegment = {
           id,
@@ -673,13 +649,8 @@ const VpnMap: React.FC<VpnMapProps> = ({
           mapPath,
           label,
         };
-        segmentCacheRef.current.set(id, created);
         result.push(created);
       }
-    }
-
-    for (const key of [...segmentCacheRef.current.keys()]) {
-      if (!nextIds.has(key)) segmentCacheRef.current.delete(key);
     }
 
     return result;
@@ -694,7 +665,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
       return acc;
     }, {});
 
-    // eslint-disable-next-line no-console
+     
     console.debug("[TrafficFlowDebug] summary", {
       incomingFlows: trafficFlows.length,
       matchedFlows: visibleTrafficFlows.length,
@@ -705,15 +676,15 @@ const VpnMap: React.FC<VpnMapProps> = ({
       serversOnMap: serverMarkers.length > 0 ? serverMarkers.length : (serverLocation ? 1 : 0),
     });
 
-    // eslint-disable-next-line no-console
+     
     console.debug("[TrafficFlowDebug] clients sample", clientDebugSample);
-    // eslint-disable-next-line no-console
+     
     console.debug("[TrafficFlowDebug] incoming flows sample", flowDebugSample);
     console.debug("[TrafficFlowDebug] client IP list", clientIpDebugList);
     console.debug("[TrafficFlowDebug] flow IP list", flowIpDebugList);
 
     if (unmatchedTrafficDebug.length > 0) {
-      // eslint-disable-next-line no-console
+       
       console.debug("[TrafficFlowDebug] unmatched sample", unmatchedTrafficDebug.slice(0, 10));
     }
   }, [
@@ -782,30 +753,14 @@ const VpnMap: React.FC<VpnMapProps> = ({
   }, [visibleClients, serverLocation, serverName, serverMarkers, renderBudget.maxPoints]);
 
   const globeArcsData = useMemo(() => {
-    const nextIds = new Set<string>();
     const result: GlobeArcDatum[] = [];
 
     for (const segment of visibleTrafficSegments) {
-      nextIds.add(segment.id);
       const [startLat, startLng] =
         segment.direction === "clientToServer" ? segment.from : segment.to;
       const [endLat, endLng] =
         segment.direction === "clientToServer" ? segment.to : segment.from;
       const label = `<strong>${segment.connectionId}</strong><br/>${segment.label}<br/>State: ${segment.state}${segment.isIdle ? " (idle)" : " (active)"}`;
-
-      const cached = arcCacheRef.current.get(segment.id);
-      if (cached) {
-        cached.startLat = startLat;
-        cached.startLng = startLng;
-        cached.endLat = endLat;
-        cached.endLng = endLng;
-        cached.color = segment.color;
-        cached.label = label;
-        cached.isIdle = segment.isIdle;
-        cached.intensity = segment.intensity;
-        result.push(cached);
-        continue;
-      }
 
       const created: GlobeArcDatum = {
         id: segment.id,
@@ -818,23 +773,16 @@ const VpnMap: React.FC<VpnMapProps> = ({
         isIdle: segment.isIdle,
         intensity: segment.intensity,
       };
-      arcCacheRef.current.set(segment.id, created);
       result.push(created);
-    }
-
-    for (const key of [...arcCacheRef.current.keys()]) {
-      if (!nextIds.has(key)) arcCacheRef.current.delete(key);
     }
 
     return result;
   }, [visibleTrafficSegments]);
 
   const globeCablePathsData = useMemo(() => {
-    const nextIds = new Set<string>();
     const result: GlobeCableDatum[] = [];
 
     for (const segment of visibleTrafficSegments) {
-      nextIds.add(segment.id);
       const start =
         segment.direction === "clientToServer"
           ? { lat: segment.from[0], lng: segment.from[1] }
@@ -860,18 +808,6 @@ const VpnMap: React.FC<VpnMapProps> = ({
         { ...end, alt: 0.001 },
       ];
 
-      const cached = cableCacheRef.current.get(segment.id);
-      if (cached) {
-        cached.color = segment.color;
-        cached.width = width;
-        cached.isIdle = segment.isIdle;
-        cached.intensity = segment.intensity;
-        cached.label = label;
-        cached.points = points;
-        result.push(cached);
-        continue;
-      }
-
       const created: GlobeCableDatum = {
         id: segment.id,
         color: segment.color,
@@ -881,12 +817,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
         label,
         points,
       };
-      cableCacheRef.current.set(segment.id, created);
       result.push(created);
-    }
-
-    for (const key of [...cableCacheRef.current.keys()]) {
-      if (!nextIds.has(key)) cableCacheRef.current.delete(key);
     }
 
     return result;
@@ -905,14 +836,14 @@ const VpnMap: React.FC<VpnMapProps> = ({
       pointLimit: renderBudget.maxPoints,
     };
   }, [
-    visibleTrafficFlows.length,
-    trafficFlows.length,
+    visibleTrafficFlows,
+    trafficFlows,
     renderBudget.maxFlows,
-    visibleTrafficSegments.length,
-    globePointsData.length,
-    visibleClients.length,
+    visibleTrafficSegments,
+    globePointsData,
+    visibleClients,
     serverLocation,
-    serverMarkers.length,
+    serverMarkers,
     renderBudget.maxPoints,
   ]);
 

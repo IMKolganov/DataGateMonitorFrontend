@@ -51,7 +51,7 @@ import {
   deleteApiQuotaPlanAllowedServersDeleteId,
   getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey,
 } from "../api/orval/quota-plan-allowed-server/quota-plan-allowed-server";
-import { getGetApiV2OpenVpnServersGetAllWithStatusQueryKey } from "../api/orval/vpn-servers-v2/vpn-servers-v2";
+import { getGetApiV3OpenVpnServersGetAllWithStatusQueryKey } from "../api/orval/vpn-servers-v3/vpn-servers-v3";
 import {
   getGetApiOpenVpnServersGetVpnServerIdQueryKey,
   getGetApiOpenVpnServersGetServerWithStatusVpnServerIdQueryKey,
@@ -427,7 +427,6 @@ const ServerForm: React.FC = () => {
   const [quotaPlans, setQuotaPlans] = React.useState<QuotaPlanDto[]>([]);
   const [selectedQuotaPlanIds, setSelectedQuotaPlanIds] = React.useState<number[]>([]);
   const [quotaPlansHydrated, setQuotaPlansHydrated] = React.useState(false);
-  const quotaInitForServerRef = React.useRef<number | null>(null);
 
   const { data: allowedByServerRaw, isFetched: allowedPlansFetched } =
     useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId(idNum, {
@@ -507,12 +506,15 @@ const ServerForm: React.FC = () => {
   });
 
   const [copyStatus, setCopyStatus] = React.useState<"Copy" | "Copied!">("Copy");
+  const [appliedAllowedPlansKey, setAppliedAllowedPlansKey] = React.useState("");
 
-  React.useEffect(() => {
-    quotaInitForServerRef.current = null;
+  const [quotaScopeId, setQuotaScopeId] = React.useState(idNum);
+  if (quotaScopeId !== idNum) {
+    setQuotaScopeId(idNum);
+    setAppliedAllowedPlansKey("");
     setQuotaPlansHydrated(!idNum);
     if (!idNum) setSelectedQuotaPlanIds([]);
-  }, [idNum]);
+  }
 
   React.useEffect(() => {
     getPlansMutation.mutate(
@@ -529,26 +531,25 @@ const ServerForm: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mutation result reference is unstable; `mutate` is stable (TanStack Query v5)
   }, [getPlansMutation.mutate]);
 
-  React.useEffect(() => {
-    if (!idNum) return;
+  const allowedPlansKey = React.useMemo(
+    () => (allowedByServerRaw ? JSON.stringify(allowedByServerRaw) : `empty:${allowedPlansFetched}`),
+    [allowedByServerRaw, allowedPlansFetched],
+  );
+  if (idNum && allowedPlansKey !== appliedAllowedPlansKey) {
+    setAppliedAllowedPlansKey(allowedPlansKey);
     if (allowedByServerRaw) {
-      if (quotaInitForServerRef.current === idNum) return;
       const items = getAllowedItemsByVpnServer(allowedByServerRaw);
       setSelectedQuotaPlanIds(
         items
           .map((i) => i.quotaPlanId)
-          .filter((x): x is number => typeof x === "number")
+          .filter((x): x is number => typeof x === "number"),
       );
-      quotaInitForServerRef.current = idNum;
       setQuotaPlansHydrated(true);
-      return;
-    }
-    if (allowedPlansFetched && quotaInitForServerRef.current !== idNum) {
+    } else if (allowedPlansFetched) {
       setSelectedQuotaPlanIds([]);
-      quotaInitForServerRef.current = idNum;
       setQuotaPlansHydrated(true);
     }
-  }, [idNum, allowedByServerRaw, allowedPlansFetched]);
+  }
 
   const visibleQuotaPlans = React.useMemo(() => {
     return quotaPlans
@@ -573,50 +574,51 @@ const ServerForm: React.FC = () => {
     error?: string;
   }>({ status: "idle" });
 
-  React.useEffect(() => {
-    if (!serverResp) return;
-
+  const [appliedServerResp, setAppliedServerResp] = React.useState<unknown>(null);
+  if (serverResp && serverResp !== appliedServerResp) {
+    setAppliedServerResp(serverResp);
     const dto = unwrapServerDto(serverResp);
-    if (!dto) return;
+    if (dto) {
+      setServerData((prev) => ({
+        ...prev,
+        ...dto,
+        id: dto.id ?? prev.id ?? (idNum || undefined),
+        serverType: dto.serverType ?? VpnServerType.OpenVpn,
+        serverName: dto.serverName ?? "",
+        apiUrl: dto.apiUrl ?? null,
+        latitude: dto.latitude ?? null,
+        longitude: dto.longitude ?? null,
+        isOnline: dto.isOnline ?? false,
+        isDisabled: dto.isDisabled ?? false,
+        isDefault: dto.isDefault ?? false,
+        isEnableWss: dto.isEnableWss ?? false,
+        lastUpdate: dto.lastUpdate ?? prev.lastUpdate,
+        createDate: dto.createDate ?? prev.createDate,
+      }));
 
-    setServerData((prev) => ({
-      ...prev,
-      ...dto,
-      id: dto.id ?? prev.id ?? (idNum || undefined),
-      serverType: dto.serverType ?? VpnServerType.OpenVpn,
-      serverName: dto.serverName ?? "",
-      apiUrl: dto.apiUrl ?? null,
-      latitude: dto.latitude ?? null,
-      longitude: dto.longitude ?? null,
-      isOnline: dto.isOnline ?? false,
-      isDisabled: dto.isDisabled ?? false,
-      isDefault: dto.isDefault ?? false,
-      isEnableWss: dto.isEnableWss ?? false,
-      lastUpdate: dto.lastUpdate ?? prev.lastUpdate,
-      createDate: dto.createDate ?? prev.createDate,
-    }));
+      const tagNames = dto.tags ?? [];
+      const ids =
+        tagNames.length > 0 && allTags.length > 0
+          ? allTags
+              .filter((t) => t.name != null && tagNames.includes(t.name))
+              .map((t) => t.id!)
+              .filter((tagId): tagId is number => typeof tagId === "number")
+          : [];
+      setSelectedTagIds(ids);
+    }
+  }
 
-    const tagNames = dto.tags ?? [];
-    const ids =
-      tagNames.length > 0 && allTags.length > 0
-        ? allTags
-            .filter((t) => t.name != null && tagNames.includes(t.name))
-            .map((t) => t.id!)
-            .filter((id): id is number => typeof id === "number")
-        : [];
-    setSelectedTagIds(ids);
-  }, [serverResp, idNum, allTags]);
-
-  React.useEffect(() => {
-    const raw = ovpnConfigData as OvpnFileConfigResponse | undefined;
-    if (!raw || typeof raw !== "object") return;
+  const [appliedOvpnConfigData, setAppliedOvpnConfigData] = React.useState<unknown>(null);
+  const rawOvpnConfig = ovpnConfigData as OvpnFileConfigResponse | undefined;
+  if (rawOvpnConfig && typeof rawOvpnConfig === "object" && rawOvpnConfig !== appliedOvpnConfigData) {
+    setAppliedOvpnConfigData(rawOvpnConfig);
     setOvpnConfig((prev) => ({
       ...prev,
-      vpnServerIp: raw.vpnServerIp ?? "",
-      vpnServerPort: Number(raw.vpnServerPort ?? 1194),
-      configTemplate: raw.configTemplate ?? "",
+      vpnServerIp: rawOvpnConfig.vpnServerIp ?? "",
+      vpnServerPort: Number(rawOvpnConfig.vpnServerPort ?? 1194),
+      configTemplate: rawOvpnConfig.configTemplate ?? "",
     }));
-  }, [ovpnConfigData]);
+  }
 
   const validateForm = () => {
     let ok = true;
@@ -784,7 +786,7 @@ const ServerForm: React.FC = () => {
       queryClient.invalidateQueries({
         queryKey: getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey(vpnServerId),
       });
-      queryClient.invalidateQueries({ queryKey: getGetApiV2OpenVpnServersGetAllWithStatusQueryKey(undefined) });
+      queryClient.invalidateQueries({ queryKey: getGetApiV3OpenVpnServersGetAllWithStatusQueryKey(undefined) });
       queryClient.invalidateQueries({ queryKey: getGetApiOpenVpnServersGetVpnServerIdQueryKey(vpnServerId) });
       queryClient.invalidateQueries({
         queryKey: getGetApiOpenVpnServersGetServerWithStatusVpnServerIdQueryKey(vpnServerId),
@@ -924,7 +926,7 @@ const ServerForm: React.FC = () => {
           invalidateQuotaCaches(newId);
         } else {
           queryClient.invalidateQueries({
-            queryKey: getGetApiV2OpenVpnServersGetAllWithStatusQueryKey(undefined),
+            queryKey: getGetApiV3OpenVpnServersGetAllWithStatusQueryKey(undefined),
           });
           toast.success("Server added successfully!");
         }
@@ -974,7 +976,7 @@ const ServerForm: React.FC = () => {
             <div className="form-group">
               <label htmlFor="ServerType">VPN stack</label>
               {idNum ? (
-                <p className="form-hint" style={{ marginTop: 4 }}>
+                <p className="form-hint form-hint--mt-4">
                   {vpnServerTypeLabel(serverData.serverType)} (type cannot be changed after create)
                 </p>
               ) : (
@@ -990,7 +992,7 @@ const ServerForm: React.FC = () => {
                 </select>
               )}
               {!idNum && (
-                <p className="form-hint" style={{ marginTop: 6 }}>
+                <p className="form-hint form-hint--mt-6">
                   Xray uses the DataGateXRayManager sidecar; default API URL for Docker Compose is{" "}
                   <code>http://xray:5010/</code>.
                 </p>
@@ -1177,7 +1179,7 @@ const ServerForm: React.FC = () => {
                   </span>
                 ) : (
                   allTags.map((tag) => (
-                    <div key={tag.id ?? tag.name ?? Math.random()} className="tags-checkbox-item tags-checkbox-row">
+                    <div key={tag.id ?? tag.name} className="tags-checkbox-item tags-checkbox-row">
                       <label className="checkbox-label tags-checkbox-item-inner">
                         <input
                           type="checkbox"

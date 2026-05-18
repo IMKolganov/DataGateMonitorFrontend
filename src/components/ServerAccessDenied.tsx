@@ -5,7 +5,7 @@ type Props = {
 
 export function ServerAccessDenied({
   title = "Access restricted",
-  message = "You do not have access to this VPN server. Contact an administrator if you need quota access.",
+  message = "You cannot use this feature on this VPN server with your current quota plan. You can still view server details elsewhere in the dashboard.",
 }: Props) {
   return (
     <div

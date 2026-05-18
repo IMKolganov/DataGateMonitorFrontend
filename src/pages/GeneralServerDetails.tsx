@@ -21,14 +21,12 @@ import type {
     VpnClientInfoDto,
     VpnServerWithStatusDto,
     VpnServerDto,
-    VpnServerWithStatusResponse,
     VpnServerResponse,
+    VpnServerWithStatusV2Dto,
+    VpnServerWithStatusesV3Response,
 } from "../api/orvalModelShim";
 
-import {
-    useGetApiOpenVpnServersGetServerWithStatusVpnServerId,
-    useGetApiOpenVpnServersGetVpnServerId,
-} from "../api/orval/vpn-servers/vpn-servers";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import { useGetApiOpenVpnConfigsGetVpnServerId } from "../api/orval/vpn-server-ovpn-file-config/vpn-server-ovpn-file-config";
 import { useGetApiOpenVpnServersConflogHistoryByServerVpnServerId } from "../api/orval/vpn-server-conflog/vpn-server-conflog";
 import { usePostApiQuotaPlansGetAll } from "../api/orval/quota-plan/quota-plan";
@@ -43,7 +41,10 @@ import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import { formatDateWithOffset } from "../utils/utils";
 import { useProxyTrafficFlow } from "../hooks/useProxyTrafficFlow";
 import { ServerAccessDenied } from "../components/ServerAccessDenied";
+import { QuotaPlanViewOnlyNotice } from "../components/servers/QuotaPlanViewOnlyNotice";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import { isHttpForbidden } from "../utils/httpError";
+import { useGetApiV3OpenVpnServersGetAllWithStatus } from "../api/orval/vpn-servers-v3/vpn-servers-v3";
 
 type ConflogPayload = {
     application?: string | null;
@@ -105,20 +106,78 @@ export function GeneralServerDetails() {
     const queryClient = useQueryClient();
 
     const [isLive, setIsLive] = useState(true);
-    const [liveRefreshSeconds, setLiveRefreshSeconds] = useState(5);
-    const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = usePersistedPageSize(
         `clients:${vpnServerId ?? "0"}`,
         10,
         "5,10,20,50,100",
     );
-    const [totalClients, setTotalClients] = useState(0);
     const [planNameById, setPlanNameById] = useState<Map<number, string>>(new Map());
 
     const numericServerId = useMemo(
         () => (vpnServerId ? Number(vpnServerId) : undefined),
         [vpnServerId]
     );
+
+    const canManage = isAdmin(getCurrentUser());
+    const v3ServersWithStatusQuery = useGetApiV3OpenVpnServersGetAllWithStatus(
+        { includeDeleted: canManage },
+        {
+            query: {
+                enabled: Number.isFinite(numericServerId),
+                staleTime: 60_000,
+            },
+        },
+    );
+
+    const v3ServerWithStatus = useMemo((): VpnServerWithStatusV2Dto | undefined => {
+        if (!Number.isFinite(numericServerId)) return undefined;
+        const payload = unwrapMaybeApiResponse<VpnServerWithStatusesV3Response>(
+            v3ServersWithStatusQuery.data as never,
+        );
+        const list =
+            payload?.vpnServerWithStatuses ??
+            payload?.openVpnServerWithStatuses ??
+            [];
+        return list.find((item) => item.vpnServerResponses?.vpnServer?.id === numericServerId);
+    }, [numericServerId, v3ServersWithStatusQuery.data]);
+
+    const quotaViewOnly =
+        !canManage &&
+        Number.isFinite(numericServerId) &&
+        v3ServerWithStatus?.vpnServerResponses?.vpnServer?.isAccessibleForUserQuotaPlan === false;
+
+    const [pageState, setPageState] = useState({ isLive, page: 0 });
+    if (pageState.isLive !== isLive) {
+        setPageState({ isLive, page: 0 });
+    }
+    const page = pageState.page;
+    const setPage = (next: number) => setPageState((s) => ({ ...s, page: next }));
+
+    const readStoredLiveRefreshSeconds = (serverId: number): number => {
+        const storageKey = `server-live-refresh-seconds:${serverId}`;
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return 5;
+        const parsed = Number.parseInt(raw, 10);
+        return [0, 1, 5, 10, 15].includes(parsed) ? parsed : 5;
+    };
+
+    const [liveRefreshState, setLiveRefreshState] = useState({
+        serverId: numericServerId,
+        seconds: 5,
+    });
+    if (
+        Number.isFinite(numericServerId) &&
+        (numericServerId ?? 0) > 0 &&
+        liveRefreshState.serverId !== numericServerId
+    ) {
+        setLiveRefreshState({
+            serverId: numericServerId,
+            seconds: readStoredLiveRefreshSeconds(numericServerId!),
+        });
+    }
+    const liveRefreshSeconds = liveRefreshState.seconds;
+    const setLiveRefreshSeconds = (seconds: number) =>
+        setLiveRefreshState((s) => ({ ...s, seconds }));
 
     const getPlansMutation = usePostApiQuotaPlansGetAll();
 
@@ -191,29 +250,22 @@ export function GeneralServerDetails() {
         [numericServerId, page, pageSize]
     );
 
-    const serverWithStatusQuery = useGetApiOpenVpnServersGetServerWithStatusVpnServerId(
-        numericServerId ?? 0,
-        {
-            query: {
-                enabled: Number.isFinite(numericServerId),
-                staleTime: 30000,
-                retry: 1,
-            },
-        }
-    );
-
     const serverBasicQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId ?? 0, {
         query: {
-            enabled: Number.isFinite(numericServerId) && !serverWithStatusQuery.data,
+            enabled:
+                canManage &&
+                Number.isFinite(numericServerId) &&
+                v3ServersWithStatusQuery.isSuccess &&
+                !v3ServerWithStatus,
             staleTime: 30000,
             retry: 1,
         },
     });
 
-    const serverKindReady = serverWithStatusQuery.isSuccess || serverBasicQuery.isSuccess;
+    const serverKindReady =
+        Boolean(v3ServerWithStatus) || serverBasicQuery.isSuccess;
     const scopedStackType =
-        (serverWithStatusQuery.data as unknown as VpnServerWithStatusResponse | undefined)
-            ?.vpnServerWithStatus?.vpnServerResponses?.vpnServer?.serverType ??
+        v3ServerWithStatus?.vpnServerResponses?.vpnServer?.serverType ??
         (serverBasicQuery.data as unknown as VpnServerResponse | undefined)?.vpnServer?.serverType;
     const openVpnQueriesEnabled =
         Number.isFinite(numericServerId) && serverKindReady && isOpenVpnStack(scopedStackType);
@@ -281,12 +333,10 @@ export function GeneralServerDetails() {
         ? mapLiveClientsResponse?.vpnClients ?? clients
         : clients;
 
-    useEffect(() => {
-        const newTotal = activeClientsResponse?.totalCount;
-        if (typeof newTotal === "number" && newTotal >= 0) {
-            setTotalClients(newTotal);
-        }
-    }, [activeClientsResponse?.totalCount]);
+    const totalClients =
+        typeof activeClientsResponse?.totalCount === "number" && activeClientsResponse.totalCount >= 0
+            ? activeClientsResponse.totalCount
+            : 0;
 
     const ovpnConfigQuery = useGetApiOpenVpnConfigsGetVpnServerId(numericServerId ?? 0, {
         query: {
@@ -308,15 +358,13 @@ export function GeneralServerDetails() {
     const latestConflogItems = (latestConflogQuery.data as { items?: { payload?: ConflogPayload }[] } | undefined)?.items ?? [];
     const latestConflogPayload: ConflogPayload | null = latestConflogItems[0]?.payload ?? null;
     const openVpnRuntimeVersion = useMemo(() => {
-        const statusVersionRaw =
-            (serverWithStatusQuery.data as unknown as VpnServerWithStatusResponse | undefined)
-                ?.vpnServerWithStatus?.vpnServerStatusLogResponse?.version;
+        const statusVersionRaw = v3ServerWithStatus?.vpnServerStatusLogResponse?.version;
         const statusVersion = typeof statusVersionRaw === "string" ? statusVersionRaw.trim() : "";
         if (statusVersion.length > 0) return statusVersion;
 
         const conflogVersion = latestConflogPayload?.version?.trim() ?? "";
         return conflogVersion.length > 0 ? conflogVersion : null;
-    }, [serverWithStatusQuery.data, latestConflogPayload?.version]);
+    }, [v3ServerWithStatus, latestConflogPayload?.version]);
 
     const proxyTrafficFlowSupported = useMemo(() => {
         if (!openVpnQueriesEnabled) return false;
@@ -335,13 +383,10 @@ export function GeneralServerDetails() {
         return null;
     }, [openVpnQueriesEnabled, openVpnRuntimeVersion, proxyTrafficFlowSupported]);
 
-    const loadingServer = serverWithStatusQuery.isFetching || serverBasicQuery.isFetching;
+    const loadingServer =
+        v3ServersWithStatusQuery.isFetching || serverBasicQuery.isFetching;
 
-    const serverWithStatusPayload = serverWithStatusQuery.data as unknown as
-        | VpnServerWithStatusResponse
-        | undefined;
-    const serverWithStatus: VpnServerWithStatusDto | undefined =
-        serverWithStatusPayload?.vpnServerWithStatus;
+    const serverWithStatus: VpnServerWithStatusDto | undefined = v3ServerWithStatus;
 
     const serverBasicPayload = serverBasicQuery.data as unknown as VpnServerResponse | undefined;
 
@@ -361,11 +406,8 @@ export function GeneralServerDetails() {
     const serverName = serverEntity?.serverName ?? null;
 
     const serverInfo = useMemo(() => {
-        const withStatus = serverWithStatusQuery.data as unknown as
-            | VpnServerWithStatusResponse
-            | undefined;
-        if (withStatus?.vpnServerWithStatus) {
-            return withStatus.vpnServerWithStatus;
+        if (v3ServerWithStatus) {
+            return v3ServerWithStatus;
         }
 
         const basic = serverBasicQuery.data as unknown as VpnServerResponse | undefined;
@@ -374,22 +416,7 @@ export function GeneralServerDetails() {
         }
 
         return null;
-    }, [serverWithStatusQuery.data, serverBasicQuery.data]);
-
-    useEffect(() => {
-        setPage(0);
-    }, [isLive]);
-
-    useEffect(() => {
-        if (!Number.isFinite(numericServerId) || (numericServerId ?? 0) <= 0) return;
-        const storageKey = `server-live-refresh-seconds:${numericServerId}`;
-        const raw = localStorage.getItem(storageKey);
-        if (!raw) return;
-        const parsed = Number.parseInt(raw, 10);
-        if ([0, 1, 5, 10, 15].includes(parsed)) {
-            setLiveRefreshSeconds(parsed);
-        }
-    }, [numericServerId]);
+    }, [v3ServerWithStatus, serverBasicQuery.data]);
 
     useEffect(() => {
         if (!Number.isFinite(numericServerId) || (numericServerId ?? 0) <= 0) return;
@@ -406,8 +433,8 @@ export function GeneralServerDetails() {
             latestConflogQuery.refetch();
         }
 
-        serverWithStatusQuery.refetch();
-        serverBasicQuery.refetch();
+        void v3ServersWithStatusQuery.refetch();
+        void serverBasicQuery.refetch();
 
         if (Number.isFinite(numericServerId)) {
             queryClient.invalidateQueries({
@@ -430,7 +457,7 @@ export function GeneralServerDetails() {
     };
 
     return (
-        <div style={{ width: "100%", minWidth: 0 }}>
+        <div className="server-details__root">
             <div className="header-bar">
                 <div className="left-buttons">
                     <button
@@ -450,8 +477,8 @@ export function GeneralServerDetails() {
                                 <span className="toggle-text">{isLive ? "Live" : "History"}</span>
                             </label>
                             {isLive ? (
-                                <label style={{ display: "inline-flex", alignItems: "center", gap: 8, marginLeft: 8 }}>
-                                    <span style={{ fontSize: 12, opacity: 0.85 }}>Auto refresh:</span>
+                                <label className="server-details__auto-refresh-label">
+                                    <span className="server-details__auto-refresh-label__text">Auto refresh:</span>
                                     <select
                                         className="btn secondary dropdown-select"
                                         value={liveRefreshSeconds}
@@ -485,6 +512,8 @@ export function GeneralServerDetails() {
                 quotaPlanLabels={quotaPlanLabels}
             />
 
+            {quotaViewOnly ? <QuotaPlanViewOnlyNotice /> : null}
+
             {clientsAccessDenied ? (
                 <ServerAccessDenied />
             ) : null}
@@ -498,18 +527,15 @@ export function GeneralServerDetails() {
                                 {xrayClientsEnabled ? "Clients (synced)" : "VPN Clients"} (
                                 {isLive ? "Connected" : "Historical"})
                                 {loadingClients && (
-                                    <span style={{ fontSize: 12, opacity: 0.7 }}> loading…</span>
+                                    <span className="server-details__loading-hint"> loading…</span>
                                 )}
                             </span>
                         </h3>
 
                         {xrayClientsEnabled ? (
-                            <p
-                                className="server-details__muted"
-                                style={{ fontSize: 13, opacity: 0.92, margin: "0 0 12px", lineHeight: 1.45 }}
-                            >
+                            <p className="server-details__muted server-details__intro">
                                 Sessions are synced from the node agent at{" "}
-                                <code style={{ wordBreak: "break-all" }}>{serverEntity?.apiUrl ?? "—"}</code>
+                                <code className="code-break">{serverEntity?.apiUrl ?? "—"}</code>
                                 {" "}
                                 by the dashboard background service (same polling interval setting as OpenVPN,{" "}
                                 <code>OpenVPN_Polling_Interval</code>). This page refetches the stored list about every
@@ -528,25 +554,15 @@ export function GeneralServerDetails() {
                         clients.length === 0 &&
                         !loadingClients &&
                         (Boolean(serverEntity?.xrayClientsPollError) || Boolean(xrayClientsQueryErrorMessage)) ? (
-                            <div
-                                role="alert"
-                                style={{
-                                    marginBottom: 12,
-                                    padding: "10px 12px",
-                                    borderRadius: 8,
-                                    background: "rgba(248, 81, 73, 0.12)",
-                                    border: "1px solid rgba(248, 81, 73, 0.35)",
-                                    fontSize: 13,
-                                }}
-                            >
+                            <div className="server-details__alert" role="alert">
                                 <strong>No sessions shown because polling failed.</strong>
                                 {serverEntity?.xrayClientsPollError ? (
-                                    <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>
+                                    <div className="server-details__alert-detail">
                                         {serverEntity.xrayClientsPollError}
                                     </div>
                                 ) : null}
                                 {xrayClientsQueryErrorMessage ? (
-                                    <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>
+                                    <div className="server-details__alert-detail">
                                         {xrayClientsQueryErrorMessage}
                                     </div>
                                 ) : null}
@@ -568,7 +584,7 @@ export function GeneralServerDetails() {
                             onXraySessionsChanged={() => {
                                 if (isLive) void connectedQuery.refetch();
                                 else void historyQuery.refetch();
-                                void serverWithStatusQuery.refetch();
+                                void v3ServersWithStatusQuery.refetch();
                                 void serverBasicQuery.refetch();
                             }}
                         />
@@ -580,10 +596,7 @@ export function GeneralServerDetails() {
                             <span>{xrayClientsEnabled ? "Client locations" : "VPN Client Locations"}</span>
                         </h3>
                         {openVpnQueriesEnabled && isLive ? (
-                            <p
-                                className="server-details__muted"
-                                style={{ fontSize: 12, opacity: 0.88, margin: "0 0 10px" }}
-                            >
+                            <p className="server-details__muted server-details__traffic-hint">
                                 Traffic stream:{" "}
                                 {proxyTrafficFlowSupported ? (
                                     <>
