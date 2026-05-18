@@ -36,6 +36,9 @@ import { axiosResponseDataMessage, errorMessage } from "../utils/errorMessage";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import { isOpenVpnStack, VpnServerType } from "../constants/vpnServerType";
 import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
+import { ServerAccessDenied } from "../components/ServerAccessDenied";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
+import { isHttpForbidden } from "../utils/httpError";
 
 /** Extract proto from config template (e.g. "proto tcp" or "proto udp") */
 function extractProtoFromTemplate(template: string): string | null {
@@ -98,6 +101,7 @@ const OvpnFileConfigForm: React.FC = () => {
   const queryClient = useQueryClient();
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const parsedVpnServerId = Number(vpnServerId) || 0;
+  const canManageExportConfig = isAdmin(getCurrentUser());
   const serverKindQuery = useGetApiOpenVpnServersGetVpnServerId(parsedVpnServerId, {
     query: {
       enabled: parsedVpnServerId > 0,
@@ -146,12 +150,14 @@ const OvpnFileConfigForm: React.FC = () => {
     parsedVpnServerId,
     {
       query: {
-        enabled: parsedVpnServerId > 0 && exportConfigPageEnabled,
+        enabled: parsedVpnServerId > 0 && exportConfigPageEnabled && canManageExportConfig,
         staleTime: 0,
         retry: 1,
       },
     },
   );
+
+  const configAccessDenied = isError && isHttpForbidden(error);
 
   // mutation for save
   const saveMutation = usePostApiOpenVpnConfigsAddUpdate();
@@ -308,7 +314,7 @@ const OvpnFileConfigForm: React.FC = () => {
 
   // toast on load error (once per state change)
   useEffect(() => {
-    if (isError) {
+    if (isError && !isHttpForbidden(error)) {
       toast.error(`Failed to load VPN server configuration: ${getErrorMessage(error)}`, {
         toastId: "ovpn-config-load-error",
       });
@@ -316,6 +322,16 @@ const OvpnFileConfigForm: React.FC = () => {
   }, [isError, error]);
 
   const loading = useMemo(() => isFetching || saveMutation.isPending, [isFetching, saveMutation.isPending]);
+
+  if (!canManageExportConfig) {
+    return (
+      <ServerAccessDenied message="Client export configuration is available to administrators only." />
+    );
+  }
+
+  if (configAccessDenied) {
+    return <ServerAccessDenied />;
+  }
 
   if (parsedVpnServerId > 0 && serverKindQuery.isSuccess && !exportConfigPageEnabled) {
     return (

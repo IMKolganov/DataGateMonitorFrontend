@@ -17,7 +17,9 @@ import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/
 import type { VpnServerResponse } from "../api/orvalModelShim";
 import { isOpenVpnStack } from "../constants/vpnServerType";
 import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
+import { ServerAccessDenied } from "../components/ServerAccessDenied";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import type { VpnServerEventLogDto } from "../api/orvalModelShim";
 
 // Resp is already unwrapped by ogmMutator (ApiResponse<T> -> T)
@@ -113,6 +115,7 @@ function normalize<TItem = Item>(raw: Resp): Normalized<TItem> {
 const Events: React.FC = () => {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const numericServerId = Number(vpnServerId || 0);
+  const canViewEvents = isAdmin(getCurrentUser());
 
   const serverQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId, {
     query: {
@@ -150,7 +153,7 @@ const Events: React.FC = () => {
     refetch,
   } = useGetApiOpenVpnEventsGetByServer<Resp>(params, {
     query: {
-      enabled: eventsApiEnabled,
+      enabled: eventsApiEnabled && canViewEvents,
       // v5 way to keep previous page data during refetch
       placeholderData: (prev) => prev as Resp,
       // optionally tune caching:
@@ -201,6 +204,17 @@ const Events: React.FC = () => {
       createDate: safeFormatDate(e?.createDate),
     }));
   }, [normalized.items]);
+
+  if (!canViewEvents) {
+    return (
+      <div style={{ padding: 16 }}>
+        <ServerAccessDenied
+          title="Access restricted"
+          message="Server event logs are available to administrators only."
+        />
+      </div>
+    );
+  }
 
   if (
     numericServerId > 0 &&
