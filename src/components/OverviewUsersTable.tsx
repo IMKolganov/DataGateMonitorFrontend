@@ -18,6 +18,7 @@ import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import { UserAvatar } from "./ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../utils/readOptionalAvatarUrl.ts";
 import { parseTelegramNumericId } from "../utils/telegramNumericId.ts";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors.ts";
 import { unwrapMaybeApiResponse } from "../pages/TelegramBotSettings/unwrapApiResponse";
 import type { ApiEnvelope } from "../pages/TelegramBotSettings/unwrapApiResponse";
 
@@ -43,6 +44,7 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
   externalId,
 }) => {
   const { vpnServerId: vpnServerIdFromRoute } = useParams<{ vpnServerId: string }>();
+  const canLinkToUserStats = isAdmin(getCurrentUser());
 
   const overviewStorageKey = useMemo(
     () =>
@@ -84,7 +86,7 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
 
   const usersQuery = useGetApiUsersGetAll(
     { Page: 1, PageSize: 500 },
-    { query: { staleTime: 60_000 } },
+    { query: { enabled: canLinkToUserStats, staleTime: 60_000 } },
   );
 
   // orval response: { OverviewUserDto: OverviewUserDto[] }
@@ -162,9 +164,13 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
         const routeServerId = vpnServerIdFromRoute ? Number(vpnServerIdFromRoute) : null;
         const serverIdForLink = rowServerId ?? routeServerId;
 
+        if (!canLinkToUserStats) {
+          return <span>{extId}</span>;
+        }
+
         const url = serverIdForLink
-          ? `/servers/${serverIdForLink}/statistics/${extId}`
-          : `/servers/statistics/${extId}`;
+          ? `/servers/${serverIdForLink}/statistics/${encodeURIComponent(extId)}`
+          : `/servers/statistics/${encodeURIComponent(extId)}`;
 
         return (
           <Link to={url} style={{ color: "#58a6ff", textDecoration: "none" }}>
