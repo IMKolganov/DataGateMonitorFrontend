@@ -34,7 +34,6 @@ import type {
   UpdateServerRequest,
   VpnServerDto,
   VpnServerType as OrvalVpnServerType,
-  OvpnFileConfigResponse,
   QuotaPlanDto,
   QuotaPlansResponse,
   QuotaPlanAllowedServerDto,
@@ -44,6 +43,10 @@ import type {
 import { VpnServersResponsesVpnServerPostSetupState } from "../api/orval/model/vpnServersResponsesVpnServerPostSetupState";
 import type { VpnServersResponsesVpnServerPostSetupStatusResponse } from "../api/orval/model/vpnServersResponsesVpnServerPostSetupStatusResponse";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
+import {
+  OPEN_VPN_EXPORT_TEMPLATE,
+  unwrapOvpnFileConfigPayload,
+} from "../utils/exportConfigTemplates";
 import { usePostApiQuotaPlansGetAll } from "../api/orval/quota-plan/quota-plan";
 import {
   useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId,
@@ -59,7 +62,6 @@ import {
 import type { ApiEnvelope } from "./TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 import { errorMessage } from "../utils/errorMessage";
-import axios from "axios";
 import { VpnServerType, vpnServerTypeLabel } from "../constants/vpnServerType";
 
 type GetByIdResult = Awaited<ReturnType<typeof getApiOpenVpnServersGetVpnServerId>>;
@@ -502,7 +504,7 @@ const ServerForm: React.FC = () => {
   const [ovpnConfig, setOvpnConfig] = React.useState({
     vpnServerIp: "",
     vpnServerPort: 1194,
-    configTemplate: "",
+    configTemplate: OPEN_VPN_EXPORT_TEMPLATE,
   });
 
   const [copyStatus, setCopyStatus] = React.useState<"Copy" | "Copied!">("Copy");
@@ -608,17 +610,20 @@ const ServerForm: React.FC = () => {
     }
   }
 
-  const [appliedOvpnConfigData, setAppliedOvpnConfigData] = React.useState<unknown>(null);
-  const rawOvpnConfig = ovpnConfigData as OvpnFileConfigResponse | undefined;
-  if (rawOvpnConfig && typeof rawOvpnConfig === "object" && rawOvpnConfig !== appliedOvpnConfigData) {
-    setAppliedOvpnConfigData(rawOvpnConfig);
-    setOvpnConfig((prev) => ({
-      ...prev,
-      vpnServerIp: rawOvpnConfig.vpnServerIp ?? "",
-      vpnServerPort: Number(rawOvpnConfig.vpnServerPort ?? 1194),
-      configTemplate: rawOvpnConfig.configTemplate ?? "",
-    }));
-  }
+  const loadedOvpnConfig = React.useMemo(
+    () => unwrapOvpnFileConfigPayload(ovpnConfigData),
+    [ovpnConfigData],
+  );
+
+  React.useEffect(() => {
+    if (!loadedOvpnConfig) return;
+    const templateFromApi = (loadedOvpnConfig.configTemplate ?? "").trim();
+    setOvpnConfig({
+      vpnServerIp: (loadedOvpnConfig.vpnServerIp ?? "").trim(),
+      vpnServerPort: Number(loadedOvpnConfig.vpnServerPort ?? 1194) || 1194,
+      configTemplate: templateFromApi || OPEN_VPN_EXPORT_TEMPLATE,
+    });
+  }, [loadedOvpnConfig]);
 
   const validateForm = () => {
     let ok = true;
@@ -937,18 +942,7 @@ const ServerForm: React.FC = () => {
       }
     } catch (err: unknown) {
       const base = idNum ? "Failed to update server." : "Failed to add server.";
-      let apiMsg = base;
-      if (axios.isAxiosError(err)) {
-        const d = err.response?.data;
-        if (d && typeof d === "object" && d !== null) {
-          const rec = d as Record<string, unknown>;
-          const m = rec["Message"] ?? rec["message"];
-          if (typeof m === "string") apiMsg = m;
-        } else if (err.message) apiMsg = err.message;
-      } else {
-        apiMsg = errorMessage(err) || base;
-      }
-      toast.error(apiMsg);
+      toast.error(errorMessage(err) || base);
     }
   };
 

@@ -22,6 +22,7 @@ import ResetPasswordPage from "./components/auth/ResetPasswordPage";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./utils/const.ts";
 import { scheduleAutoLogout } from "./utils/auth/tokenExpiryScheduler.ts";
 import { RequireAdmin } from "./components/auth/RequireAdmin.tsx";
+import { RequireAdminTotpSetup } from "./components/auth/RequireAdminTotpSetup.tsx";
 import { withSuspense } from "./utils/withSuspense.tsx";
 
 // Lazy pages
@@ -48,6 +49,7 @@ const UserQuotasPage = lazy(() => import("./pages/UsersSettings/UserQuotasPage")
 const UserDetailPage = lazy(() => import("./pages/UsersSettings/UserDetailPage"));
 const EmailBroadcastSettings = lazy(() => import("./pages/EmailBroadcastSettings"));
 const AdminPasswordRecoverySettings = lazy(() => import("./pages/AdminPasswordRecoverySettings"));
+const AdminSecuritySettings = lazy(() => import("./pages/AdminSecuritySettings"));
 const QuotaPlansSettings = lazy(() => import("./pages/QuotaPlansSettings/QuotaPlansSettings"));
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
 const ServersOverview = lazy(() => import("./pages/ServersOverview"));
@@ -132,6 +134,7 @@ function App() {
               path="/*"
               element={
                 <PrivateRoute>
+                  <RequireAdminTotpSetup>
                   {/* Route content below loads lazily in small chunks */}
                   <Routes>
                     <Route path="/" element={<Navigate to="/servers" replace />} />
@@ -145,6 +148,7 @@ function App() {
                         <Route index element={withSuspense(<GeneralTab />)} />
                         <Route path="certificates" element={withSuspense(<CertificatesTab />)} />
                         <Route path="ovpn-file-config" element={withSuspense(<OvpnFileConfigForm />)} />
+                        <Route path="export-template" element={withSuspense(<OvpnFileConfigForm />)} />
                         <Route path="console" element={withSuspense(<WebConsole />)} />
 
                         <Route path="statistics">
@@ -178,6 +182,7 @@ function App() {
                       <Route path="android-crashes" element={withSuspense(<AndroidCrashReportsSettings />)} />
                       <Route path="windows-crashes" element={withSuspense(<WindowsCrashReportsSettings />)} />
                       <Route path="admin-password" element={withSuspense(<AdminPasswordRecoverySettings />)} />
+                      <Route path="security" element={withSuspense(<AdminSecuritySettings />)} />
                     </Route>
 
                     <Route
@@ -205,6 +210,7 @@ function App() {
 
                     <Route path="*" element={withSuspense(<NotFound />)} />
                   </Routes>
+                  </RequireAdminTotpSetup>
                 </PrivateRoute>
               }
             />
