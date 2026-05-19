@@ -10,6 +10,7 @@ import type {
   VpnServersResponsesStatusStreamLogsResponse,
 } from "../api/orvalModelShim";
 import "../css/StatusStreamLogs.css";
+import { VpnServerType, vpnServerTypeLabel } from "../constants/vpnServerType";
 
 const STORAGE_KEY = "status-stream-logs:v2";
 const INITIAL_FETCH_LIMIT = 300;
@@ -54,6 +55,7 @@ type ParsedOperationalLogPayload = {
   serverId: number | null;
   serverName: string | null;
   apiUrl: string | null;
+  serverType: number | null;
   durationMs: number | null;
   details: string | null;
   metrics: OperationalMetrics | null;
@@ -64,6 +66,7 @@ type EventHighlight = "error" | "ok" | "progress" | "neutral";
 type SlowServerEntry = {
   serverId: number | null;
   serverName: string | null;
+  serverType: number;
   durationMs: number;
   timestampUtc: string | null;
 };
@@ -185,6 +188,7 @@ function parseOperationalPayload(payloadJson: string): ParsedOperationalLogPaylo
       serverId?: unknown;
       serverName?: unknown;
       apiUrl?: unknown;
+      serverType?: unknown;
       durationMs?: unknown;
       details?: unknown;
       metrics?: unknown;
@@ -205,6 +209,7 @@ function parseOperationalPayload(payloadJson: string): ParsedOperationalLogPaylo
       serverId: typeof parsed.serverId === "number" ? parsed.serverId : null,
       serverName: typeof parsed.serverName === "string" ? parsed.serverName : null,
       apiUrl: typeof parsed.apiUrl === "string" ? parsed.apiUrl : null,
+      serverType: typeof parsed.serverType === "number" ? parsed.serverType : null,
       durationMs: typeof parsed.durationMs === "number" ? parsed.durationMs : null,
       details: typeof parsed.details === "string" ? parsed.details : null,
       metrics: metricsRaw
@@ -264,6 +269,81 @@ function getHighlightLabel(highlight: EventHighlight): string {
   if (highlight === "ok") return "OK";
   if (highlight === "progress") return "IN PROGRESS";
   return "INFO";
+}
+
+function resolveServerType(serverType: number | null, serverName: string | null): number {
+  if (serverType === VpnServerType.Xray || serverType === VpnServerType.OpenVpn) return serverType;
+  if (serverName && /\bxray\b/i.test(serverName)) return VpnServerType.Xray;
+  return VpnServerType.OpenVpn;
+}
+
+function buildTopSlowServers(
+  candidates: SlowServerEntry[],
+  stack: typeof VpnServerType.OpenVpn | typeof VpnServerType.Xray,
+  limit = 5,
+): SlowServerAggregate[] {
+  const filtered = candidates.filter((c) => c.serverType === stack);
+  const grouped = new Map<
+    string,
+    {
+      serverId: number | null;
+      serverName: string | null;
+      samples: number;
+      totalDurationMs: number;
+      maxDurationMs: number;
+      lastDurationMs: number;
+    }
+  >();
+
+  for (const item of filtered) {
+    const key = `${item.serverId ?? "unknown"}|${item.serverName ?? "unknown"}`;
+    const existing = grouped.get(key);
+    if (!existing) {
+      grouped.set(key, {
+        serverId: item.serverId,
+        serverName: item.serverName,
+        samples: 1,
+        totalDurationMs: item.durationMs,
+        maxDurationMs: item.durationMs,
+        lastDurationMs: item.durationMs,
+      });
+      continue;
+    }
+
+    existing.samples += 1;
+    existing.totalDurationMs += item.durationMs;
+    existing.maxDurationMs = Math.max(existing.maxDurationMs, item.durationMs);
+    existing.lastDurationMs = item.durationMs;
+  }
+
+  return [...grouped.values()]
+    .map((x) => ({
+      serverId: x.serverId,
+      serverName: x.serverName,
+      maxDurationMs: x.maxDurationMs,
+      avgDurationMs: Math.round(x.totalDurationMs / x.samples),
+      samples: x.samples,
+      lastDurationMs: x.lastDurationMs,
+    }))
+    .sort((a, b) => b.maxDurationMs - a.maxDurationMs)
+    .slice(0, limit);
+}
+
+function renderSlowServerList(items: SlowServerAggregate[]) {
+  if (items.length === 0) {
+    return <p>Not enough successful polls yet.</p>;
+  }
+
+  return (
+    <ul>
+      {items.map((item) => (
+        <li key={`${item.serverId ?? "unknown"}:${item.serverName ?? "unknown"}`}>
+          {item.serverName ?? "Unknown"} #{item.serverId ?? "—"} - max {item.maxDurationMs} ms, avg{" "}
+          {item.avgDurationMs} ms, last {item.lastDurationMs} ms ({item.samples} samples)
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 export default function StatusStreamLogs() {
@@ -330,54 +410,22 @@ export default function StatusStreamLogs() {
           slowCandidates.push({
             serverId: operational.serverId,
             serverName: operational.serverName,
+            serverType: resolveServerType(operational.serverType, operational.serverName),
             durationMs: operational.durationMs,
             timestampUtc: log.timestampUtc ?? null,
           });
         }
       }
 
-      const grouped = new Map<
-        string,
-        { serverId: number | null; serverName: string | null; samples: number; totalDurationMs: number; maxDurationMs: number; lastDurationMs: number; }
-      >();
-      for (const item of slowCandidates) {
-        const key = `${item.serverId ?? "unknown"}|${item.serverName ?? "unknown"}`;
-        const existing = grouped.get(key);
-        if (!existing) {
-          grouped.set(key, {
-            serverId: item.serverId,
-            serverName: item.serverName,
-            samples: 1,
-            totalDurationMs: item.durationMs,
-            maxDurationMs: item.durationMs,
-            lastDurationMs: item.durationMs,
-          });
-          continue;
-        }
-
-        existing.samples += 1;
-        existing.totalDurationMs += item.durationMs;
-        existing.maxDurationMs = Math.max(existing.maxDurationMs, item.durationMs);
-        existing.lastDurationMs = item.durationMs;
-      }
-
-      const topSlowServers: SlowServerAggregate[] = [...grouped.values()]
-        .map((x) => ({
-          serverId: x.serverId,
-          serverName: x.serverName,
-          maxDurationMs: x.maxDurationMs,
-          avgDurationMs: Math.round(x.totalDurationMs / x.samples),
-          samples: x.samples,
-          lastDurationMs: x.lastDurationMs,
-        }))
-        .sort((a, b) => b.maxDurationMs - a.maxDurationMs)
-        .slice(0, 5);
+      const topSlowOpenVpn = buildTopSlowServers(slowCandidates, VpnServerType.OpenVpn);
+      const topSlowXray = buildTopSlowServers(slowCandidates, VpnServerType.Xray);
 
       return {
         total: logs.length,
         serviceEvents: logs.filter((x) => parseOperationalPayload(x.payloadJson ?? "") !== null).length,
         errorEvents,
-        topSlowServers,
+        topSlowOpenVpn,
+        topSlowXray,
         fromRedis: logs.filter((x) => x.source === "redis").length,
         fromMemory: logs.filter((x) => x.source === "memory").length,
       };
@@ -444,21 +492,19 @@ export default function StatusStreamLogs() {
           <strong>Redis source:</strong> {summary.fromRedis} | <strong>Memory source:</strong> {summary.fromMemory}
         </p>
         <div className="status-stream-logs-slow-servers">
-          <strong>Top slow servers (unique, success only):</strong>
-          {summary.topSlowServers.length === 0 ? (
-            <p>Not enough successful polls yet.</p>
-          ) : (
-            <ul>
-              {summary.topSlowServers.map((item) => (
-                <li
-                  key={`${item.serverId ?? "unknown"}:${item.serverName ?? "unknown"}`}
-                >
-                  {item.serverName ?? "Unknown"} #{item.serverId ?? "—"} - max {item.maxDurationMs} ms, avg{" "}
-                  {item.avgDurationMs} ms, last {item.lastDurationMs} ms ({item.samples} samples)
-                </li>
-              ))}
-            </ul>
-          )}
+          <strong>Poll duration (success only)</strong>
+          <p className="form-hint" style={{ margin: "6px 0 10px" }}>
+            Full background sync per server, not HTTP ping. {vpnServerTypeLabel(VpnServerType.OpenVpn)} runs status +
+            clients + conflog; {vpnServerTypeLabel(VpnServerType.Xray)} is one clients API call — lower ms is expected.
+          </p>
+          <p style={{ marginBottom: 4 }}>
+            <strong>{vpnServerTypeLabel(VpnServerType.OpenVpn)} (slowest):</strong>
+          </p>
+          {renderSlowServerList(summary.topSlowOpenVpn)}
+          <p style={{ margin: "12px 0 4px" }}>
+            <strong>{vpnServerTypeLabel(VpnServerType.Xray)} (slowest):</strong>
+          </p>
+          {renderSlowServerList(summary.topSlowXray)}
         </div>
         <p>
           <strong>Last sync:</strong> {lastSyncUtc ? new Date(lastSyncUtc).toLocaleString() : "N/A"}
@@ -502,6 +548,9 @@ export default function StatusStreamLogs() {
                         <p>
                           <strong>Server:</strong> #{operational.serverId}
                           {operational.serverName ? ` (${operational.serverName})` : ""}
+                          {operational.serverType !== null
+                            ? ` | ${vpnServerTypeLabel(operational.serverType)}`
+                            : ""}
                           {operational.apiUrl ? ` | ${operational.apiUrl}` : ""}
                         </p>
                       )}

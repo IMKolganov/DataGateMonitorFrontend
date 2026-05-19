@@ -22,6 +22,8 @@ type GlobeTrafficLayer = "arcs" | "submarine";
 const DEFAULT_MAP_CENTER: [number, number] = [45, 37];
 const BASE_MAX_RENDERED_FLOWS = 300;
 const BASE_MAX_RENDERED_POINTS = 1200;
+/** Max simultaneous dash animations (each hub tick adds pulses; old ones expire after animate time). */
+const MAX_TRAFFIC_PULSES = 96;
 type PerformanceMode = "auto" | "high" | "balanced" | "low";
 
 const createMarkerIcon = (color: MarkerColor, withShadow = true): L.Icon =>
@@ -72,6 +74,9 @@ type GlobeArcDatum = {
   endLat: number;
   endLng: number;
   color: string;
+  /** Stable tuple for three-globe (do not use inline arcColor fn — it restarts dash anim). */
+  dashColors: [string, string];
+  dashAnimateMs: number;
   label: string;
   isIdle: boolean;
   intensity: number;
@@ -81,11 +86,90 @@ type GlobeCableDatum = {
   id: string;
   color: string;
   width: number;
+  dashAnimateMs: number;
   isIdle: boolean;
   intensity: number;
   label: string;
   points: Array<{ lat: number; lng: number; alt: number }>;
 };
+
+type TimedGlobeArc = GlobeArcDatum & { expiresAt: number };
+type TimedGlobeCable = GlobeCableDatum & { expiresAt: number };
+
+function buildGlobeArcFromSegment(
+  segment: TrafficSegment,
+  arcId: string,
+  isIdle: boolean,
+  dashAnimateMs: number,
+): GlobeArcDatum {
+  const [startLat, startLng] =
+    segment.direction === "clientToServer" ? segment.from : segment.to;
+  const [endLat, endLng] =
+    segment.direction === "clientToServer" ? segment.to : segment.from;
+  const label = `<strong>${segment.connectionId}</strong><br/>${segment.label}<br/>State: ${segment.state}${
+    isIdle ? " (idle)" : " (active)"
+  }`;
+  return {
+    id: arcId,
+    startLat,
+    startLng,
+    endLat,
+    endLng,
+    color: segment.color,
+    dashColors: [segment.color, segment.color],
+    dashAnimateMs: isIdle ? 0 : dashAnimateMs,
+    label,
+    isIdle,
+    intensity: segment.intensity,
+  };
+}
+
+function buildGlobeCableFromSegment(
+  segment: TrafficSegment,
+  pathId: string,
+  isIdle: boolean,
+  dashAnimateMs: number,
+): GlobeCableDatum {
+  const start =
+    segment.direction === "clientToServer"
+      ? { lat: segment.from[0], lng: segment.from[1] }
+      : { lat: segment.to[0], lng: segment.to[1] };
+  const end =
+    segment.direction === "clientToServer"
+      ? { lat: segment.to[0], lng: segment.to[1] }
+      : { lat: segment.from[0], lng: segment.from[1] };
+
+  const midLat = (start.lat + end.lat) / 2;
+  const midLng = (start.lng + end.lng) / 2;
+  const bendSign = segment.direction === "clientToServer" ? 1 : -1;
+  const bendFactor = 4 + segment.intensity * 6;
+  const alt = 0.008 + segment.intensity * 0.03;
+  const width = 0.2 + segment.intensity * 1.35;
+  const label = `<strong>${segment.connectionId}</strong><br/>${segment.label}<br/>State: ${segment.state}${
+    isIdle ? " (idle)" : " (active)"
+  }`;
+  const points = [
+    { ...start, alt: 0.001 },
+    { lat: midLat + bendSign * bendFactor, lng: midLng - bendSign * (bendFactor * 0.6), alt },
+    {
+      lat: midLat + bendSign * (bendFactor * 0.35),
+      lng: midLng + bendSign * (bendFactor * 0.5),
+      alt: alt * 0.9,
+    },
+    { ...end, alt: 0.001 },
+  ];
+
+  return {
+    id: pathId,
+    color: segment.color,
+    width,
+    dashAnimateMs: isIdle ? 0 : dashAnimateMs,
+    isIdle,
+    intensity: segment.intensity,
+    label,
+    points,
+  };
+}
 
 function normalizeIpForMatch(raw: string | null | undefined): string {
   if (!raw) return "";
@@ -656,6 +740,83 @@ const VpnMap: React.FC<VpnMapProps> = ({
     return result;
   }, [visibleTrafficFlows]);
 
+  const [pulseArcs, setPulseArcs] = useState<TimedGlobeArc[]>([]);
+  const [pulseCables, setPulseCables] = useState<TimedGlobeCable[]>([]);
+  const pulseSeqRef = useRef(0);
+  const lastPulseAtRef = useRef<Map<string, number>>(new Map());
+  const idleArcCacheRef = useRef<Map<string, GlobeArcDatum>>(new Map());
+  const idleCableCacheRef = useRef<Map<string, GlobeCableDatum>>(new Map());
+  const lastFlowEmitRef = useRef<Map<string, string>>(new Map());
+  const globeArcsListRef = useRef<{ sig: string; list: GlobeArcDatum[] }>({ sig: "", list: [] });
+  const globeCablesListRef = useRef<{ sig: string; list: GlobeCableDatum[] }>({ sig: "", list: [] });
+
+  const pulseAnimateMs = animationMode === "offline" ? 2200 : 1500;
+  const minPulseGapMs = animationMode === "offline" ? 400 : 180;
+
+  const pruneExpiredPulses = (now: number) => {
+    setPulseArcs((prev) => {
+      const next = prev.filter((p) => p.expiresAt > now);
+      return next.length === prev.length ? prev : next;
+    });
+    setPulseCables((prev) => {
+      const next = prev.filter((p) => p.expiresAt > now);
+      return next.length === prev.length ? prev : next;
+    });
+  };
+
+  // Hub tick → new pulse with a fresh id. Existing pulse objects are never recreated (three-globe keeps animating).
+  useEffect(() => {
+    const now = Date.now();
+    pruneExpiredPulses(now);
+
+    const segmentById = new Map(visibleTrafficSegments.map((s) => [s.id, s]));
+    const nextArcs: TimedGlobeArc[] = [];
+    const nextCables: TimedGlobeCable[] = [];
+
+    for (const flow of visibleTrafficFlows) {
+      if (flow.state === "failed" || flow.state === "disconnected") continue;
+
+      const inDelta = Math.max(0, flow.clientToServerBytesDelta ?? 0);
+      const outDelta = Math.max(0, flow.serverToClientBytesDelta ?? 0);
+      const directions: Array<{ key: FlowDirection; delta: number }> = [
+        { key: "clientToServer", delta: inDelta },
+        { key: "serverToClient", delta: outDelta },
+      ];
+
+      const emitKey = `${flow.serverId ?? "na"}:${flow.connectionId}`;
+      const prevEmit = lastFlowEmitRef.current.get(emitKey);
+      if (prevEmit === flow.emittedAtUtc) continue;
+      lastFlowEmitRef.current.set(emitKey, flow.emittedAtUtc);
+
+      for (const d of directions) {
+        if (d.delta <= 0) continue;
+
+        const segmentId = `${flow.connectionId}:${d.key}`;
+        const segment = segmentById.get(segmentId);
+        if (!segment) continue;
+
+        const lastAt = lastPulseAtRef.current.get(segmentId) ?? 0;
+        if (now - lastAt < minPulseGapMs) continue;
+        lastPulseAtRef.current.set(segmentId, now);
+
+        const pulseId = `${segmentId}:p${pulseSeqRef.current++}`;
+        const expiresAt = now + pulseAnimateMs + 200;
+        nextArcs.push({ ...buildGlobeArcFromSegment(segment, pulseId, false, pulseAnimateMs), expiresAt });
+        nextCables.push({ ...buildGlobeCableFromSegment(segment, pulseId, false, pulseAnimateMs), expiresAt });
+      }
+    }
+
+    if (nextArcs.length === 0) return;
+
+    setPulseArcs((prev) => [...prev, ...nextArcs].slice(-MAX_TRAFFIC_PULSES));
+    setPulseCables((prev) => [...prev, ...nextCables].slice(-MAX_TRAFFIC_PULSES));
+  }, [trafficFlows, visibleTrafficFlows, visibleTrafficSegments, pulseAnimateMs, minPulseGapMs]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => pruneExpiredPulses(Date.now()), 400);
+    return () => window.clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     if (!trafficDebugEnabled) return;
     if (trafficFlows.length === 0 && visibleTrafficSegments.length === 0) return;
@@ -753,82 +914,77 @@ const VpnMap: React.FC<VpnMapProps> = ({
   }, [visibleClients, serverLocation, serverName, serverMarkers, renderBudget.maxPoints]);
 
   const globeArcsData = useMemo(() => {
-    const result: GlobeArcDatum[] = [];
+    const now = Date.now();
+    const idleCache = idleArcCacheRef.current;
+    const usedIdle = new Set<string>();
+    const idleArcs: GlobeArcDatum[] = [];
 
     for (const segment of visibleTrafficSegments) {
-      const [startLat, startLng] =
-        segment.direction === "clientToServer" ? segment.from : segment.to;
-      const [endLat, endLng] =
-        segment.direction === "clientToServer" ? segment.to : segment.from;
-      const label = `<strong>${segment.connectionId}</strong><br/>${segment.label}<br/>State: ${segment.state}${segment.isIdle ? " (idle)" : " (active)"}`;
-
-      const created: GlobeArcDatum = {
-        id: segment.id,
-        startLat,
-        startLng,
-        endLat,
-        endLng,
-        color: segment.color,
-        label,
-        isIdle: segment.isIdle,
-        intensity: segment.intensity,
-      };
-      result.push(created);
+      if (!segment.isIdle) continue;
+      usedIdle.add(segment.id);
+      const cached = idleCache.get(segment.id);
+      if (cached) {
+        idleArcs.push(cached);
+        continue;
+      }
+      const created = buildGlobeArcFromSegment(segment, segment.id, true, 0);
+      idleCache.set(segment.id, created);
+      idleArcs.push(created);
+    }
+    for (const key of [...idleCache.keys()]) {
+      if (!usedIdle.has(key)) idleCache.delete(key);
     }
 
-    return result;
-  }, [visibleTrafficSegments]);
+    const activePulses = pulseArcs.filter((pulse) => pulse.expiresAt > now);
+    const built = [...idleArcs, ...activePulses];
+    const sig = built.map((a) => a.id).join("\n");
+    if (sig === globeArcsListRef.current.sig) {
+      return globeArcsListRef.current.list;
+    }
+    globeArcsListRef.current = { sig, list: built };
+    return built;
+  }, [visibleTrafficSegments, pulseArcs]);
 
   const globeCablePathsData = useMemo(() => {
-    const result: GlobeCableDatum[] = [];
+    const now = Date.now();
+    const idleCache = idleCableCacheRef.current;
+    const usedIdle = new Set<string>();
+    const idleCables: GlobeCableDatum[] = [];
 
     for (const segment of visibleTrafficSegments) {
-      const start =
-        segment.direction === "clientToServer"
-          ? { lat: segment.from[0], lng: segment.from[1] }
-          : { lat: segment.to[0], lng: segment.to[1] };
-      const end =
-        segment.direction === "clientToServer"
-          ? { lat: segment.to[0], lng: segment.to[1] }
-          : { lat: segment.from[0], lng: segment.from[1] };
-
-      const midLat = (start.lat + end.lat) / 2;
-      const midLng = (start.lng + end.lng) / 2;
-      const bendSign = segment.direction === "clientToServer" ? 1 : -1;
-      const bendFactor = 4 + segment.intensity * 6;
-      const alt = 0.008 + segment.intensity * 0.03;
-      const width = 0.2 + segment.intensity * 1.35;
-      const label = `<strong>${segment.connectionId}</strong><br/>${segment.label}<br/>State: ${
-        segment.state
-      }${segment.isIdle ? " (idle)" : " (active)"}`;
-      const points = [
-        { ...start, alt: 0.001 },
-        { lat: midLat + bendSign * bendFactor, lng: midLng - bendSign * (bendFactor * 0.6), alt },
-        { lat: midLat + bendSign * (bendFactor * 0.35), lng: midLng + bendSign * (bendFactor * 0.5), alt: alt * 0.9 },
-        { ...end, alt: 0.001 },
-      ];
-
-      const created: GlobeCableDatum = {
-        id: segment.id,
-        color: segment.color,
-        width,
-        isIdle: segment.isIdle,
-        intensity: segment.intensity,
-        label,
-        points,
-      };
-      result.push(created);
+      if (!segment.isIdle) continue;
+      usedIdle.add(segment.id);
+      const cached = idleCache.get(segment.id);
+      if (cached) {
+        idleCables.push(cached);
+        continue;
+      }
+      const created = buildGlobeCableFromSegment(segment, segment.id, true, 0);
+      idleCache.set(segment.id, created);
+      idleCables.push(created);
+    }
+    for (const key of [...idleCache.keys()]) {
+      if (!usedIdle.has(key)) idleCache.delete(key);
     }
 
-    return result;
-  }, [visibleTrafficSegments]);
+    const activePulses = pulseCables.filter((pulse) => pulse.expiresAt > now);
+    const built = [...idleCables, ...activePulses];
+    const sig = built.map((a) => a.id).join("\n");
+    if (sig === globeCablesListRef.current.sig) {
+      return globeCablesListRef.current.list;
+    }
+    globeCablesListRef.current = { sig, list: built };
+    return built;
+  }, [visibleTrafficSegments, pulseCables]);
 
   const renderedStats = useMemo(() => {
+    const now = Date.now();
     return {
       renderedFlows: visibleTrafficFlows.length,
       totalFlows: trafficFlows.length,
       flowLimit: renderBudget.maxFlows,
       renderedSegments: visibleTrafficSegments.length,
+      activePulses: pulseArcs.filter((p) => p.expiresAt > now).length,
       renderedPoints: globePointsData.length,
       totalPoints:
         visibleClients.length + (serverMarkers.length > 0 ? serverMarkers.length : (serverLocation ? 1 : 0)),
@@ -840,6 +996,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
     trafficFlows,
     renderBudget.maxFlows,
     visibleTrafficSegments,
+    pulseArcs,
     globePointsData,
     visibleClients,
     serverLocation,
@@ -941,7 +1098,8 @@ const VpnMap: React.FC<VpnMapProps> = ({
           ) : null}
           <span className="vpn-map-stats">
             Flows: {renderedStats.renderedFlows}/{renderedStats.totalFlows} (limit {renderedStats.flowLimit}) | Segments:{" "}
-            {renderedStats.renderedSegments} | Servers: {renderedStats.totalServers} | Points:{" "}
+            {renderedStats.renderedSegments} | Pulses: {renderedStats.activePulses} | Servers:{" "}
+            {renderedStats.totalServers} | Points:{" "}
             {renderedStats.renderedPoints}/{renderedStats.totalPoints} (limit {renderedStats.pointLimit})
           </span>
           <span className="vpn-map-stats">C→S: orange | S→C: cyan | thicker/brighter = more traffic</span>
@@ -1018,16 +1176,12 @@ const VpnMap: React.FC<VpnMapProps> = ({
                     arcStartLng="startLng"
                     arcEndLat="endLat"
                     arcEndLng="endLng"
-                    arcColor={(d: unknown) => [(d as { color: string }).color, (d as { color: string }).color]}
+                    arcColor="dashColors"
                     arcLabel="label"
                     arcCurveResolution={24}
                     arcDashLength={globeDash.arcLength}
                     arcDashGap={globeDash.arcGap}
-                    arcDashAnimateTime={(d: unknown) => {
-                      const arc = d as { isIdle: boolean };
-                      if (arc.isIdle) return 0;
-                      return globeDash.arcAnimateMs;
-                    }}
+                    arcDashAnimateTime="dashAnimateMs"
                     arcsTransitionDuration={0}
                     pathsData={globeTrafficLayer === "submarine" ? globeCablePathsData : []}
                     pathPoints="points"
@@ -1039,11 +1193,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
                     pathLabel="label"
                     pathDashLength={globeDash.pathLength}
                     pathDashGap={globeDash.pathGap}
-                    pathDashAnimateTime={(d: unknown) => {
-                      const cable = d as { isIdle: boolean };
-                      if (cable.isIdle) return 0;
-                      return globeDash.pathAnimateMs;
-                    }}
+                    pathDashAnimateTime="dashAnimateMs"
                     pathTransitionDuration={0}
                 />
               </Suspense>

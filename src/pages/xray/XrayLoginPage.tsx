@@ -1,12 +1,16 @@
 import React, { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { FaTelegramPlane } from "react-icons/fa";
 import axios from "axios";
 import { postApiAuthLogin } from "../../api/orval/auth/auth";
-import type { LoginRequest, LoginResponse } from "../../api/orvalModelShim";
-import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY } from "../../utils/const";
-import { scheduleAutoLogout } from "../../utils/auth/tokenExpiryScheduler";
-import { clearStoredProfileAvatarUrl } from "../../utils/auth/storedProfileAvatar";
+import type { LoginRequest } from "../../api/orvalModelShim";
+import { ACCESS_TOKEN_KEY } from "../../utils/const";
+import TotpChallengeForm from "../../components/auth/TotpChallengeForm";
+import {
+  applyLoginFlow,
+  type TotpChallengeState,
+} from "../../utils/auth/handleLoginResponse";
+import type { LoginResponseWithTotp } from "../../utils/auth/totpApi";
 import { Link } from "react-router-dom";
 import GoogleLoginForm from "../../components/auth/GoogleLoginForm";
 import { axiosResponseDataMessage, axiosResponseDetail, errorMessage } from "../../utils/errorMessage";
@@ -15,11 +19,11 @@ import { appVersion } from "../../version";
 import "../../css/XrayPortal.css";
 
 const XrayLoginPage: React.FC = () => {
-  const navigate = useNavigate();
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [totpChallenge, setTotpChallenge] = useState<TotpChallengeState | null>(null);
   const [lang, setLang] = useState(getXrayLanguage);
   const t = XRAY_TRANSLATIONS[lang].login;
 
@@ -41,22 +45,12 @@ const XrayLoginPage: React.FC = () => {
         password,
       };
 
-      const response = (await postApiAuthLogin(payload)) as LoginResponse;
-      if (!response?.token) {
-        throw new Error("Token was not returned.");
-      }
+      const response = (await postApiAuthLogin(payload)) as LoginResponseWithTotp;
 
-      clearStoredProfileAvatarUrl();
-      localStorage.setItem(ACCESS_TOKEN_KEY, response.token);
-      if (response.refreshToken) {
-        localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
-      }
-      if (response.refreshExpiration) {
-        localStorage.setItem(REFRESH_TOKEN_EXPIRATION, response.refreshExpiration);
-      }
-
-      scheduleAutoLogout(response.token);
-      navigate("/xray/", { replace: true });
+      applyLoginFlow(response, {
+        redirectPath: "/xray/",
+        onTotpChallenge: setTotpChallenge,
+      });
     } catch (e: unknown) {
       let detailedMessage: string;
       if (axios.isAxiosError(e)) {
@@ -113,6 +107,15 @@ const XrayLoginPage: React.FC = () => {
           <h2 className="xray-title">{t.accessTitle}</h2>
           <p className="xray-subtitle">{t.subtitle}</p>
 
+          {totpChallenge ? (
+            <TotpChallengeForm
+              loginChallengeId={totpChallenge.loginChallengeId}
+              displayName={totpChallenge.displayName}
+              redirectPath="/xray/"
+              onBack={() => setTotpChallenge(null)}
+            />
+          ) : (
+          <>
           <form onSubmit={onSubmit} className="xray-auth-form">
             <label className="xray-label" htmlFor="xray-login">
               {t.usernameLabel}
@@ -162,6 +165,8 @@ const XrayLoginPage: React.FC = () => {
               {t.createAccountPrompt} <Link to="/xray/register">{t.createAccount}</Link>
             </p>
           </div>
+          </>
+          )}
         </div>
 
         <div className="xray-login-footer-links xray-card">
