@@ -10,6 +10,7 @@ import {
 import { orvalPayload } from "../api/orvalPayload";
 import type { TotpSetupResponse, TotpStatusResponse } from "../api/orvalModelShim";
 import { PasswordInput } from "../components/auth/PasswordInput";
+import { TotpSetupQrCode } from "../components/auth/TotpSetupQrCode";
 import { errorMessage } from "../utils/errorMessage";
 import "../css/Settings.css";
 
@@ -77,7 +78,10 @@ export default function AdminSecuritySettings() {
     setInfo("");
     setLoading(true);
     try {
-      await postApiAuthTotpDisable({ code: disableCode.trim(), password: disablePassword });
+      await postApiAuthTotpDisable({
+        code: disableCode.trim(),
+        password: disablePassword.trim() || undefined,
+      });
       setDisableCode("");
       setDisablePassword("");
       await refreshStatus();
@@ -158,13 +162,15 @@ export default function AdminSecuritySettings() {
               </div>
               <div className="form-row">
                 <label htmlFor="totp-disable-password">Account password</label>
+                <p className="settings-item-description" style={{ marginBottom: 8 }}>
+                  Required only if you sign in with a password. Google sign-in can leave this empty.
+                </p>
                 <PasswordInput
                   id="totp-disable-password"
                   autoComplete="current-password"
                   className="input"
                   value={disablePassword}
                   onChange={(e) => setDisablePassword(e.target.value)}
-                  required
                 />
               </div>
               <div className="settings-item" style={{ marginTop: 12 }}>
@@ -191,8 +197,23 @@ export default function AdminSecuritySettings() {
                 <span>Scan or enter the secret</span>
               </h3>
               <p className="settings-item-description" style={{ marginBottom: 12 }}>
-                Add a new account in your authenticator app, then open the link below or enter the secret manually.
+                Scan the QR code with your authenticator app, or enter the secret manually below.
               </p>
+              {typeof setup.otpAuthUri === "string" && setup.otpAuthUri.length > 0 ? (
+                <div
+                  className="totp-setup-qr"
+                  style={{
+                    marginBottom: 16,
+                    padding: 16,
+                    display: "inline-block",
+                    background: "#fff",
+                    borderRadius: 8,
+                    lineHeight: 0,
+                  }}
+                >
+                  <TotpSetupQrCode value={setup.otpAuthUri} size={200} />
+                </div>
+              ) : null}
               <p style={{ marginBottom: 12 }}>
                 <a href={setup.otpAuthUri ?? undefined} className="register-link">
                   Open in authenticator app
