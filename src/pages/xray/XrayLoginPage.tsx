@@ -3,14 +3,14 @@ import { Navigate } from "react-router-dom";
 import { FaTelegramPlane } from "react-icons/fa";
 import axios from "axios";
 import { postApiAuthLogin } from "../../api/orval/auth/auth";
-import type { LoginRequest } from "../../api/orvalModelShim";
+import { orvalPayload } from "../../api/orvalPayload";
+import type { LoginRequest, LoginResponse } from "../../api/orvalModelShim";
 import { ACCESS_TOKEN_KEY } from "../../utils/const";
 import TotpChallengeForm from "../../components/auth/TotpChallengeForm";
 import {
   applyLoginFlow,
   type TotpChallengeState,
 } from "../../utils/auth/handleLoginResponse";
-import type { LoginResponseWithTotp } from "../../utils/auth/totpApi";
 import { Link } from "react-router-dom";
 import GoogleLoginForm from "../../components/auth/GoogleLoginForm";
 import { axiosResponseDataMessage, axiosResponseDetail, errorMessage } from "../../utils/errorMessage";
@@ -45,7 +45,7 @@ const XrayLoginPage: React.FC = () => {
         password,
       };
 
-      const response = (await postApiAuthLogin(payload)) as LoginResponseWithTotp;
+      const response = orvalPayload<LoginResponse>(await postApiAuthLogin(payload));
 
       applyLoginFlow(response, {
         redirectPath: "/xray/",

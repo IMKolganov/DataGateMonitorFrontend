@@ -1,20 +1,20 @@
+import type { LoginResponse } from "../../api/orvalModelShim";
 import { clearStoredProfileAvatarUrl } from "./storedProfileAvatar";
 import { storeAuthTokens } from "./authTokens";
-import type { LoginResponseWithTotp } from "./totpApi";
 
 export const ADMIN_TOTP_SETUP_PATH = "/settings/security";
 
 export type LoginFlowResult =
-  | { kind: "tokens"; payload: LoginResponseWithTotp }
+  | { kind: "tokens"; payload: LoginResponse }
   | { kind: "totp"; loginChallengeId: string; displayName?: string | null }
-  | { kind: "setup_required"; payload: LoginResponseWithTotp };
+  | { kind: "setup_required"; payload: LoginResponse };
 
 export type TotpChallengeState = {
   loginChallengeId: string;
   displayName?: string | null;
 };
 
-export function resolveLoginFlow(payload: LoginResponseWithTotp | null | undefined): LoginFlowResult {
+export function resolveLoginFlow(payload: LoginResponse | null | undefined): LoginFlowResult {
   if (!payload) {
     throw new Error("Empty login response.");
   }
@@ -48,7 +48,7 @@ export type ApplyLoginFlowOptions = {
 
 /** Stores tokens and redirects, or delegates to TOTP challenge UI. */
 export function applyLoginFlow(
-  payload: LoginResponseWithTotp,
+  payload: LoginResponse,
   options: ApplyLoginFlowOptions,
 ): void {
   const flow = resolveLoginFlow(payload);

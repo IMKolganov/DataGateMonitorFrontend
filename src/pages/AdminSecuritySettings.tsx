@@ -1,22 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaCopy, FaShieldAlt, FaTrash } from "react-icons/fa";
-import { PasswordInput } from "../components/auth/PasswordInput";
 import {
-  beginTotpSetup,
-  confirmTotpSetup,
-  disableTotp,
-  getTotpStatus,
-  type TotpSetupInfo,
-  type TotpStatus,
-} from "../utils/auth/totpApi";
+  getApiAuthTotpStatus,
+  postApiAuthTotpConfirm,
+  postApiAuthTotpDisable,
+  postApiAuthTotpSetup,
+} from "../api/orval/auth/auth";
+import { orvalPayload } from "../api/orvalPayload";
+import type { TotpSetupResponse, TotpStatusResponse } from "../api/orvalModelShim";
+import { PasswordInput } from "../components/auth/PasswordInput";
 import { errorMessage } from "../utils/errorMessage";
 import "../css/Settings.css";
 
 export default function AdminSecuritySettings() {
   const navigate = useNavigate();
-  const [status, setStatus] = useState<TotpStatus | null>(null);
-  const [setup, setSetup] = useState<TotpSetupInfo | null>(null);
+  const [status, setStatus] = useState<TotpStatusResponse | null>(null);
+  const [setup, setSetup] = useState<TotpSetupResponse | null>(null);
   const [confirmCode, setConfirmCode] = useState("");
   const [disableCode, setDisableCode] = useState("");
   const [disablePassword, setDisablePassword] = useState("");
@@ -25,7 +25,7 @@ export default function AdminSecuritySettings() {
   const [loading, setLoading] = useState(false);
 
   const refreshStatus = useCallback(async () => {
-    const next = await getTotpStatus();
+    const next = orvalPayload<TotpStatusResponse>(await getApiAuthTotpStatus());
     setStatus(next);
     return next;
   }, []);
@@ -39,7 +39,7 @@ export default function AdminSecuritySettings() {
     setInfo("");
     setLoading(true);
     try {
-      const nextSetup = await beginTotpSetup();
+      const nextSetup = orvalPayload<TotpSetupResponse>(await postApiAuthTotpSetup());
       setSetup(nextSetup);
       setConfirmCode("");
     } catch (e: unknown) {
@@ -56,7 +56,7 @@ export default function AdminSecuritySettings() {
     setLoading(true);
     const wasRequired = status?.requiresTotpSetup ?? false;
     try {
-      await confirmTotpSetup(confirmCode.trim());
+      await postApiAuthTotpConfirm({ code: confirmCode.trim() });
       setSetup(null);
       setConfirmCode("");
       await refreshStatus();
@@ -77,7 +77,7 @@ export default function AdminSecuritySettings() {
     setInfo("");
     setLoading(true);
     try {
-      await disableTotp(disableCode.trim(), disablePassword);
+      await postApiAuthTotpDisable({ code: disableCode.trim(), password: disablePassword });
       setDisableCode("");
       setDisablePassword("");
       await refreshStatus();
@@ -120,7 +120,7 @@ export default function AdminSecuritySettings() {
 
       <p className="settings-item-description" style={{ marginBottom: 24, maxWidth: 960 }}>
         Administrators must use an authenticator app (Google Authenticator, Authy, 1Password, etc.) for a
-        time-based one-time password (TOTP) when signing in to the web panel.
+        time-based one-time password (TOTP) when signing in to the panel.
       </p>
 
       {status.requiresTotpSetup ? (
@@ -194,7 +194,7 @@ export default function AdminSecuritySettings() {
                 Add a new account in your authenticator app, then open the link below or enter the secret manually.
               </p>
               <p style={{ marginBottom: 12 }}>
-                <a href={setup.otpAuthUri} className="register-link">
+                <a href={setup.otpAuthUri ?? undefined} className="register-link">
                   Open in authenticator app
                 </a>
               </p>
