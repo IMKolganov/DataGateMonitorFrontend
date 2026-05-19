@@ -20,6 +20,7 @@ import RegisterPage from "./components/auth/RegisterPage";
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./components/auth/ResetPasswordPage";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./utils/const.ts";
+import { startAdminIdleSession } from "./utils/auth/adminIdleSession.ts";
 import { scheduleAutoLogout } from "./utils/auth/tokenExpiryScheduler.ts";
 import { RequireAdmin } from "./components/auth/RequireAdmin.tsx";
 import { RequireAdminTotpSetup } from "./components/auth/RequireAdminTotpSetup.tsx";
@@ -100,6 +101,7 @@ function App() {
     const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
     if (!access || !refresh) return;
     scheduleAutoLogout(access);
+    return startAdminIdleSession();
   }, []);
 
   return (

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { postApiAuthLogin } from "../../api/orval/auth/auth";
-import type { LoginRequest } from "../../api/orvalModelShim";
+import { orvalPayload } from "../../api/orvalPayload";
+import type { LoginRequest, LoginResponse } from "../../api/orvalModelShim";
 import { FaDoorOpen } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
 import TotpChallengeForm from "./TotpChallengeForm";
 import { applyLoginFlow, type TotpChallengeState } from "../../utils/auth/handleLoginResponse";
-import type { LoginResponseWithTotp } from "../../utils/auth/totpApi";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
@@ -37,9 +37,7 @@ const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({ redirectPath = "/
         password,
       };
 
-      const loginPayload = (await postApiAuthLogin(
-          loginReq,
-      )) as LoginResponseWithTotp;
+      const loginPayload = orvalPayload<LoginResponse>(await postApiAuthLogin(loginReq));
 
       applyLoginFlow(loginPayload, {
         redirectPath,

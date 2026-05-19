@@ -18,4 +18,8 @@ export interface AuthResponsesLoginResponse {
   refreshToken?: string | null;
   /** @nullable */
   refreshExpiration?: string | null;
+  requiresTotp?: boolean;
+  /** @nullable */
+  loginChallengeId?: string | null;
+  requiresTotpSetup?: boolean;
 }

@@ -32,6 +32,9 @@ import type {
   ApiAuthResponsesRegisterUserResponse,
   ApiAuthResponsesTelegramRequestLoginCodeResponse,
   ApiAuthResponsesTokenResponse,
+  ApiAuthResponsesTotpSetupResponse,
+  ApiAuthResponsesTotpStatusResponse,
+  ApiModelsAuthAuthSessionPolicyResponse,
   ApiServicesApiAuthEmailConfirmationModelsConfirmEmailResponse,
   ApiSystemString,
   AuthRequestsAdminForgotPasswordRequest,
@@ -44,6 +47,9 @@ import type {
   AuthRequestsTelegramCodeLoginRequest,
   AuthRequestsTelegramRequestLoginCodeRequest,
   AuthRequestsTokenRequest,
+  AuthRequestsTotpConfirmRequest,
+  AuthRequestsTotpDisableRequest,
+  AuthRequestsTotpVerifyLoginRequest,
   MicrosoftAspNetCoreMvcProblemDetails,
   ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest,
   ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest
@@ -56,7 +62,148 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export const postApiAuthToken = (
+export const getApiAuthSessionPolicy = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiModelsAuthAuthSessionPolicyResponse>(
+      {url: `/api/auth/session-policy`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiAuthSessionPolicyQueryKey = () => {
+    return [
+    `/api/auth/session-policy`
+    ] as const;
+    }
+
+
+export const getGetApiAuthSessionPolicyQueryOptions = <TData = Awaited<ReturnType<typeof getApiAuthSessionPolicy>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthSessionPolicy>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAuthSessionPolicyQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAuthSessionPolicy>>> = ({ signal }) => getApiAuthSessionPolicy(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAuthSessionPolicy>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAuthSessionPolicyQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAuthSessionPolicy>>>
+export type GetApiAuthSessionPolicyQueryError = unknown
+
+
+export function useGetApiAuthSessionPolicy<TData = Awaited<ReturnType<typeof getApiAuthSessionPolicy>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthSessionPolicy>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuthSessionPolicy>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuthSessionPolicy>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuthSessionPolicy<TData = Awaited<ReturnType<typeof getApiAuthSessionPolicy>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthSessionPolicy>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuthSessionPolicy>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuthSessionPolicy>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuthSessionPolicy<TData = Awaited<ReturnType<typeof getApiAuthSessionPolicy>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthSessionPolicy>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAuthSessionPolicy<TData = Awaited<ReturnType<typeof getApiAuthSessionPolicy>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthSessionPolicy>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAuthSessionPolicyQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export const postApiAuthActivity = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<void>(
+      {url: `/api/auth/activity`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthActivityMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthActivity>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthActivity>>, TError,void, TContext> => {
+
+const mutationKey = ['postApiAuthActivity'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthActivity>>, void> = () => {
+
+
+          return  postApiAuthActivity(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthActivityMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthActivity>>>
+
+    export type PostApiAuthActivityMutationError = unknown
+
+    export const usePostApiAuthActivity = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthActivity>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthActivity>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostApiAuthActivityMutationOptions(options), queryClient);
+    }
+    export const postApiAuthToken = (
     authRequestsTokenRequest?: AuthRequestsTokenRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -823,6 +970,318 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostApiAuthLogoutMutationOptions(options), queryClient);
+    }
+    export const postApiAuthTotpVerifyLogin = (
+    authRequestsTotpVerifyLoginRequest?: AuthRequestsTotpVerifyLoginRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesLoginResponse>(
+      {url: `/api/auth/totp/verify-login`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsTotpVerifyLoginRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthTotpVerifyLoginMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTotpVerifyLogin>>, TError,{data?: AuthRequestsTotpVerifyLoginRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTotpVerifyLogin>>, TError,{data?: AuthRequestsTotpVerifyLoginRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthTotpVerifyLogin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthTotpVerifyLogin>>, {data?: AuthRequestsTotpVerifyLoginRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthTotpVerifyLogin(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthTotpVerifyLoginMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthTotpVerifyLogin>>>
+    export type PostApiAuthTotpVerifyLoginMutationBody = AuthRequestsTotpVerifyLoginRequest | undefined
+    export type PostApiAuthTotpVerifyLoginMutationError = unknown
+
+    export const usePostApiAuthTotpVerifyLogin = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTotpVerifyLogin>>, TError,{data?: AuthRequestsTotpVerifyLoginRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthTotpVerifyLogin>>,
+        TError,
+        {data?: AuthRequestsTotpVerifyLoginRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthTotpVerifyLoginMutationOptions(options), queryClient);
+    }
+    export const getApiAuthTotpStatus = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesTotpStatusResponse>(
+      {url: `/api/auth/totp/status`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiAuthTotpStatusQueryKey = () => {
+    return [
+    `/api/auth/totp/status`
+    ] as const;
+    }
+
+
+export const getGetApiAuthTotpStatusQueryOptions = <TData = Awaited<ReturnType<typeof getApiAuthTotpStatus>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTotpStatus>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAuthTotpStatusQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAuthTotpStatus>>> = ({ signal }) => getApiAuthTotpStatus(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTotpStatus>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAuthTotpStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAuthTotpStatus>>>
+export type GetApiAuthTotpStatusQueryError = unknown
+
+
+export function useGetApiAuthTotpStatus<TData = Awaited<ReturnType<typeof getApiAuthTotpStatus>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTotpStatus>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuthTotpStatus>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuthTotpStatus>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuthTotpStatus<TData = Awaited<ReturnType<typeof getApiAuthTotpStatus>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTotpStatus>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuthTotpStatus>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuthTotpStatus>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuthTotpStatus<TData = Awaited<ReturnType<typeof getApiAuthTotpStatus>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTotpStatus>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAuthTotpStatus<TData = Awaited<ReturnType<typeof getApiAuthTotpStatus>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTotpStatus>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAuthTotpStatusQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export const postApiAuthTotpSetup = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesTotpSetupResponse>(
+      {url: `/api/auth/totp/setup`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthTotpSetupMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTotpSetup>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTotpSetup>>, TError,void, TContext> => {
+
+const mutationKey = ['postApiAuthTotpSetup'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthTotpSetup>>, void> = () => {
+
+
+          return  postApiAuthTotpSetup(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthTotpSetupMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthTotpSetup>>>
+
+    export type PostApiAuthTotpSetupMutationError = unknown
+
+    export const usePostApiAuthTotpSetup = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTotpSetup>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthTotpSetup>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostApiAuthTotpSetupMutationOptions(options), queryClient);
+    }
+    export const postApiAuthTotpConfirm = (
+    authRequestsTotpConfirmRequest?: AuthRequestsTotpConfirmRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/auth/totp/confirm`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsTotpConfirmRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthTotpConfirmMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTotpConfirm>>, TError,{data?: AuthRequestsTotpConfirmRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTotpConfirm>>, TError,{data?: AuthRequestsTotpConfirmRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthTotpConfirm'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthTotpConfirm>>, {data?: AuthRequestsTotpConfirmRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthTotpConfirm(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthTotpConfirmMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthTotpConfirm>>>
+    export type PostApiAuthTotpConfirmMutationBody = AuthRequestsTotpConfirmRequest | undefined
+    export type PostApiAuthTotpConfirmMutationError = unknown
+
+    export const usePostApiAuthTotpConfirm = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTotpConfirm>>, TError,{data?: AuthRequestsTotpConfirmRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthTotpConfirm>>,
+        TError,
+        {data?: AuthRequestsTotpConfirmRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthTotpConfirmMutationOptions(options), queryClient);
+    }
+    export const postApiAuthTotpDisable = (
+    authRequestsTotpDisableRequest?: AuthRequestsTotpDisableRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/auth/totp/disable`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsTotpDisableRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthTotpDisableMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTotpDisable>>, TError,{data?: AuthRequestsTotpDisableRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTotpDisable>>, TError,{data?: AuthRequestsTotpDisableRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthTotpDisable'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthTotpDisable>>, {data?: AuthRequestsTotpDisableRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthTotpDisable(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthTotpDisableMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthTotpDisable>>>
+    export type PostApiAuthTotpDisableMutationBody = AuthRequestsTotpDisableRequest | undefined
+    export type PostApiAuthTotpDisableMutationError = unknown
+
+    export const usePostApiAuthTotpDisable = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTotpDisable>>, TError,{data?: AuthRequestsTotpDisableRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthTotpDisable>>,
+        TError,
+        {data?: AuthRequestsTotpDisableRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthTotpDisableMutationOptions(options), queryClient);
     }
     export const postApiAuthRefresh = (
     authRequestsRefreshRequest?: AuthRequestsRefreshRequest,
