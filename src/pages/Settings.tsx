@@ -10,6 +10,7 @@ import {
   FaDatabase,
   FaEnvelope,
   FaKey,
+  FaShieldAlt,
   FaLaptopCode,
   FaSlidersH,
   FaTelegram,
@@ -38,6 +39,7 @@ const ALL_SETTINGS_TABS: SettingsTab[] = [
   { label: "Android crashes", path: "android-crashes", Icon: FaBug, mobilePrefix: "🐞" },
   { label: "Windows crashes", path: "windows-crashes", Icon: FaWindows, mobilePrefix: "🪟" },
   { label: "Admin password", path: "admin-password", Icon: FaKey, mobilePrefix: "🔑" },
+  { label: "Security (2FA)", path: "security", Icon: FaShieldAlt, mobilePrefix: "🛡️" },
 ];
 
 export function Settings() {
