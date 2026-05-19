@@ -6,14 +6,14 @@
  */
 
 export interface AuthResponsesGoogleLoginResponse {
+  isNewUser?: boolean;
+  /** @nullable */
+  avatarUrl?: string | null;
   userId?: number;
   /** @nullable */
   displayName?: string | null;
   /** @nullable */
   email?: string | null;
-  isNewUser?: boolean;
-  /** @nullable */
-  avatarUrl?: string | null;
   /** @nullable */
   token?: string | null;
   expiration?: string;
@@ -21,4 +21,8 @@ export interface AuthResponsesGoogleLoginResponse {
   refreshToken?: string | null;
   /** @nullable */
   refreshExpiration?: string | null;
+  requiresTotp?: boolean;
+  /** @nullable */
+  loginChallengeId?: string | null;
+  requiresTotpSetup?: boolean;
 }

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { FaShieldAlt } from "react-icons/fa";
-import { verifyTotpLogin } from "../../utils/auth/totpApi";
+import { postApiAuthTotpVerifyLogin } from "../../api/orval/auth/auth";
+import { orvalPayload } from "../../api/orvalPayload";
+import type { LoginResponse } from "../../api/orvalModelShim";
 import { storeAuthTokens } from "../../utils/auth/authTokens";
 import { clearStoredProfileAvatarUrl } from "../../utils/auth/storedProfileAvatar";
 import { errorMessage } from "../../utils/errorMessage";
@@ -31,7 +33,12 @@ const TotpChallengeForm: React.FC<Props> = ({
     setError("");
     setLoading(true);
     try {
-      const result = await verifyTotpLogin(loginChallengeId, code.trim());
+      const result = orvalPayload<LoginResponse>(
+        await postApiAuthTotpVerifyLogin({
+          loginChallengeId,
+          code: code.trim(),
+        }),
+      );
       onBeforeStoreTokens?.();
       if (!onBeforeStoreTokens) {
         clearStoredProfileAvatarUrl();

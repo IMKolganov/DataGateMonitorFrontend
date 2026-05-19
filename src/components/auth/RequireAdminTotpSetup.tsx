@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { ADMIN_TOTP_SETUP_PATH } from "../../utils/auth/handleLoginResponse";
-import { getTotpStatus } from "../../utils/auth/totpApi";
+import { getApiAuthTotpStatus } from "../../api/orval/auth/auth";
+import { orvalPayload } from "../../api/orvalPayload";
+import type { TotpStatusResponse } from "../../api/orvalModelShim";
 
 type Props = {
   children: ReactNode;
@@ -33,9 +35,9 @@ export function RequireAdminTotpSetup({ children }: Props) {
       }
 
       try {
-        const status = await getTotpStatus();
+        const status = orvalPayload<TotpStatusResponse>(await getApiAuthTotpStatus());
         if (cancelled) return;
-        setAllowed(!(status.isAdmin && status.requiresTotpSetup));
+        setAllowed(!(status?.isAdmin && status?.requiresTotpSetup));
       } catch {
         if (!cancelled) setAllowed(true);
       }

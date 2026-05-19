@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { usePostApiAuthGoogleLogin } from "../../api/orval/auth/auth";
-import type { GoogleLoginRequest } from "../../api/orvalModelShim";
+import { orvalPayload } from "../../api/orvalPayload";
+import type { GoogleLoginRequest, LoginResponse } from "../../api/orvalModelShim";
 import { getRuntimeEnv } from "../../utils/runtimeEnv";
 import axios from "axios";
 import { errorMessage } from "../../utils/errorMessage";
@@ -10,7 +11,6 @@ import {
   applyLoginFlow,
   type TotpChallengeState,
 } from "../../utils/auth/handleLoginResponse";
-import type { LoginResponseWithTotp } from "../../utils/auth/totpApi";
 
 type GoogleCredentialResponse = { credential?: string };
 
@@ -55,9 +55,11 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" })
                     idToken,
                 };
 
-                const response = (await googleLogin({
+                const response = orvalPayload<LoginResponse>(
+                  await googleLogin({
                     data: body,
-                })) as LoginResponseWithTotp;
+                  }),
+                );
 
                 applyLoginFlow(response, {
                     redirectPath,
