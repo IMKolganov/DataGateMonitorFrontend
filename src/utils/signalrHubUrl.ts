@@ -25,3 +25,13 @@ export function getStatusStreamHubUrl(): string {
   }
   return `${getApiBaseUrl()}/hubs/status-stream`;
 }
+
+export function getProxyTrafficFlowHubUrl(): string {
+  const explicit = import.meta.env.VITE_SIGNALR_ORIGIN?.trim();
+  if (explicit !== undefined && explicit.length > 0) {
+    return `${explicit.replace(/\/$/, "")}/api/hubs/proxy-traffic-flow`;
+  }
+
+  // Frontend must always connect through main backend.
+  return `${getApiBaseUrl()}/hubs/proxy-traffic-flow`;
+}

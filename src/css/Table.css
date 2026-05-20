@@ -1,8 +1,8 @@
-/* Global wrapper for DataGrid: prevents horizontal overflow past layout, scroll inside */
+/* Global wrapper for DataGrid: keep layout clipped, scrolling happens in DataGrid virtual scroller. */
 .data-grid-wrap {
   width: 100%;
   max-width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
   min-width: 0;
 }
@@ -13,7 +13,7 @@
   background-color: var(--bg-content);
   border-radius: 8px;
   margin-top: 15px;
-  overflow-x: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
 }
 

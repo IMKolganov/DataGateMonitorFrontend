@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { postApiAuthLogin } from "../../api/orval/auth/auth";
+import { orvalPayload } from "../../api/orvalPayload";
 import type { LoginRequest, LoginResponse } from "../../api/orvalModelShim";
 import { FaDoorOpen } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
-import { scheduleAutoLogout } from "../../utils/auth/authSession";
-import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY } from "../../utils/const.ts";
+import TotpChallengeForm from "./TotpChallengeForm";
+import { applyLoginFlow, type TotpChallengeState } from "../../utils/auth/handleLoginResponse";
 import axios from "axios";
-import { clearStoredProfileAvatarUrl } from "../../utils/auth/storedProfileAvatar";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
 interface PasswordLoginFormProps {
@@ -19,6 +19,7 @@ const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({ redirectPath = "/
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [totpChallenge, setTotpChallenge] = useState<TotpChallengeState | null>(null);
 
   const canSubmit =
       login.trim().length > 0 &&
@@ -36,28 +37,12 @@ const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({ redirectPath = "/
         password,
       };
 
-      const loginPayload = (await postApiAuthLogin(
-          loginReq,
-      )) as LoginResponse;
+      const loginPayload = orvalPayload<LoginResponse>(await postApiAuthLogin(loginReq));
 
-      const token = loginPayload?.token;
-      const refreshToken = loginPayload?.refreshToken;
-      const refreshExpiration = loginPayload?.refreshExpiration;
-
-      if (!token) {
-        throw new Error("No token returned by API.");
-      }
-
-      clearStoredProfileAvatarUrl();
-      localStorage.setItem(ACCESS_TOKEN_KEY, token);
-      if (refreshToken) {
-        localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-      }
-      if (refreshExpiration) {
-        localStorage.setItem(REFRESH_TOKEN_EXPIRATION, refreshExpiration);
-      }
-      scheduleAutoLogout(token);
-      window.location.href = redirectPath;
+      applyLoginFlow(loginPayload, {
+        redirectPath,
+        onTotpChallenge: setTotpChallenge,
+      });
     } catch (err: unknown) {
       let detailedMessage = "We could not log you in.";
 
@@ -97,6 +82,17 @@ const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({ redirectPath = "/
       setLoading(false);
     }
   };
+
+  if (totpChallenge) {
+    return (
+      <TotpChallengeForm
+        loginChallengeId={totpChallenge.loginChallengeId}
+        displayName={totpChallenge.displayName}
+        redirectPath={redirectPath}
+        onBack={() => setTotpChallenge(null)}
+      />
+    );
+  }
 
   return (
       <>

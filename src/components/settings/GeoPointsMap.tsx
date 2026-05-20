@@ -32,6 +32,7 @@ type GeoPointsMapProps = {
     /** VPN server location markers (from server list / API), not client geo points. */
     vpnServerMarkers?: VpnServerMapMarker[];
 };
+const DEFAULT_GEO_CENTER: [number, number] = [45, 37];
 
 const MARKER_BASE =
     "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x";
@@ -137,9 +138,10 @@ const tileLayers = {
 
 const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
     const map = useMap();
+    const [lat, lng] = center;
     useEffect(() => {
-        map.setView(center, zoom);
-    }, [map, center, zoom]);
+        map.setView([lat, lng], zoom);
+    }, [map, lat, lng, zoom]);
     return null;
 };
 
@@ -231,7 +233,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                                                               vpnServerId,
                                                               externalId,
                                                               onlyWithCoordinates = true,
-                                                              center = [45, 37],
+                                                              center = DEFAULT_GEO_CENTER,
                                                               zoom = 4,
                                                               vpnServerMarkers = [],
                                                           }) => {

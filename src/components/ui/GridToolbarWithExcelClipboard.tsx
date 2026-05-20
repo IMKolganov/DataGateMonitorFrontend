@@ -6,18 +6,17 @@ import {
   useGridApiContext,
   type GridToolbarProps,
 } from "@mui/x-data-grid";
-import * as XLSX from "xlsx";
-
 function GridToolbarWithExcelClipboard(props: GridToolbarProps) {
   const apiRef = useGridApiContext();
 
-  const handleExportExcel = useCallback(() => {
+  const handleExportExcel = useCallback(async () => {
     if (!apiRef.current) return;
     const csv = apiRef.current.getDataAsCsv({
       delimiter: ",",
       includeHeaders: true,
     });
     if (!csv) return;
+    const XLSX = await import("xlsx");
     const wb = XLSX.read(csv, { type: "string", FS: "," });
     const fileName = `export-${new Date().toISOString().slice(0, 10)}.xlsx`;
     XLSX.writeFile(wb, fileName);

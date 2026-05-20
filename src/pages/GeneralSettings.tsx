@@ -1,5 +1,5 @@
 // src/pages/GeneralSettings.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { FaSave, FaSlidersH } from "react-icons/fa";
 import "../css/Settings.css";
 
@@ -117,9 +117,19 @@ export function GeneralSettings() {
     isFetchingRequireEmailConfirmation ||
     isFetchingEmailConfirmationCodeTtlMinutes;
 
-  // When responses arrive, hydrate local UI state
-  useEffect(() => {
-    // safely extract value from either shape
+  const settingsSnapshotKey = useMemo(() => {
+    return JSON.stringify({
+      interval: pickSettingValue(intervalResp),
+      unit: pickSettingValue(unitResp),
+      requireEmailConfirmation: pickSettingValue(requireEmailConfirmationResp),
+      ttl: pickSettingValue(emailConfirmationCodeTtlMinutesResp),
+    });
+  }, [intervalResp, unitResp, requireEmailConfirmationResp, emailConfirmationCodeTtlMinutesResp]);
+
+  const [appliedSettingsKey, setAppliedSettingsKey] = useState("");
+  if (settingsSnapshotKey !== appliedSettingsKey && !initialLoading) {
+    setAppliedSettingsKey(settingsSnapshotKey);
+
     const intervalRaw = pickSettingValue(intervalResp);
     const val = Number(intervalRaw);
     if (!Number.isNaN(val)) setIntervalValue(val);
@@ -141,7 +151,7 @@ export function GeneralSettings() {
     if (!Number.isNaN(ttlRaw)) {
       setEmailConfirmationCodeTtlMinutes(ttlRaw);
     }
-  }, [intervalResp, unitResp, requireEmailConfirmationResp, emailConfirmationCodeTtlMinutesResp]);
+  }
 
 
   // Orval mutation for setting values
@@ -233,7 +243,7 @@ export function GeneralSettings() {
           <FaSlidersH className="icon" aria-hidden />
           <span>OpenVPN Polling Interval</span>
         </h2>
-        <div style={{ borderTop: "1px solid #d1d5da" }}></div>
+        <div className="settings-divider" />
 
         <div className="settings-item">
           <input
@@ -272,9 +282,9 @@ export function GeneralSettings() {
           <FaSlidersH className="icon" aria-hidden />
           <span>Authentication</span>
         </h2>
-        <div style={{ borderTop: "1px solid #d1d5da" }}></div>
+        <div className="settings-divider" />
 
-        <label className="settings-item" style={{ gap: 10 }}>
+        <label className="settings-item settings-item--gap-10">
           <input
             type="checkbox"
             checked={requireEmailConfirmation}
@@ -288,8 +298,8 @@ export function GeneralSettings() {
           Google sign-in is not affected.
         </p>
 
-        <div className="settings-item" style={{ marginTop: 12 }}>
-          <label htmlFor="email-confirmation-code-ttl" style={{ minWidth: 320 }}>
+        <div className="settings-item settings-item--mt-12">
+          <label htmlFor="email-confirmation-code-ttl" className="settings-item-label--320">
             Email confirmation code lifetime (minutes)
           </label>
           <input

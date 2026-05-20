@@ -25,10 +25,13 @@ import { errorMessage } from "../utils/errorMessage";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import type { VpnServerResponse } from "../api/orvalModelShim";
 import { isOpenVpnStack } from "../constants/vpnServerType";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
+import { ServerAccessDenied } from "../components/ServerAccessDenied";
 
 export function WebConsole() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const navigate = useNavigate();
+  const canUseConsole = isAdmin(getCurrentUser());
   const numericServerId = Number(vpnServerId || 0);
   const serverQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId, {
     query: {
@@ -84,6 +87,7 @@ export function WebConsole() {
 
   useEffect(() => {
     if (!vpnServerId) return;
+    if (!canUseConsole) return;
     if (numericServerId > 0 && serverQuery.isPending) return;
     if (consoleNotSupported) return;
 
@@ -154,7 +158,7 @@ export function WebConsole() {
       connectionRef.current?.stop();
       connectionRef.current = null;
     };
-  }, [vpnServerId, hubSessionKey, numericServerId, serverQuery.isPending, consoleNotSupported]);
+  }, [vpnServerId, hubSessionKey, numericServerId, serverQuery.isPending, consoleNotSupported, canUseConsole]);
 
   useEffect(() => {
     if (messages.length === 0) return;
@@ -296,6 +300,12 @@ export function WebConsole() {
     historyIndexRef.current = -1;
     await clearHistoryDB(vpnServerId);
   };
+
+  if (!canUseConsole) {
+    return (
+      <ServerAccessDenied message="OpenVPN management console is available to administrators only." />
+    );
+  }
 
   if (consoleNotSupported) {
     return null;

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Outlet, useLocation, useMatch } from "react-router-dom";
 import ServerList from "../components/servers/ServerList.tsx";
 import { useMediaQuery } from "react-responsive";
@@ -22,15 +22,17 @@ function ServersWithDetails() {
   /** `/servers/statistics/:externalId` — user statistics across all VPN servers (must not sit under the server list on mobile). */
   const isGlobalStatisticsRoute = /^\/servers\/statistics\//.test(location.pathname);
 
-  useEffect(() => {
+  const [layoutIsMobile, setLayoutIsMobile] = useState(isMobile);
+  if (layoutIsMobile !== isMobile) {
+    setLayoutIsMobile(isMobile);
     if (isMobile) setCollapsed(false);
-  }, [isMobile]);
+  }
 
-  useEffect(() => {
-    // When the user switches tabs, keep controls visible and reset direction tracking.
+  const selectMobileHomeTab = (tab: MobileServersHomeTab) => {
+    setMobileHomeTab(tab);
     setHideMobileSwitcher(false);
     lastMobileScrollTop.current = 0;
-  }, [mobileHomeTab]);
+  };
 
   const onMobilePaneScroll: React.UIEventHandler<HTMLDivElement> = (e) => {
     const y = e.currentTarget.scrollTop;
@@ -87,7 +89,7 @@ function ServersWithDetails() {
             role="tab"
             aria-selected={mobileHomeTab === "list"}
             className={`servers-mobile-home-switcher__btn btn ${mobileHomeTab === "list" ? "primary" : "secondary"}`}
-            onClick={() => setMobileHomeTab("list")}
+            onClick={() => selectMobileHomeTab("list")}
           >
             Servers
           </button>
@@ -96,7 +98,7 @@ function ServersWithDetails() {
             role="tab"
             aria-selected={mobileHomeTab === "overview"}
             className={`servers-mobile-home-switcher__btn btn ${mobileHomeTab === "overview" ? "primary" : "secondary"}`}
-            onClick={() => setMobileHomeTab("overview")}
+            onClick={() => selectMobileHomeTab("overview")}
           >
             Overview
           </button>
