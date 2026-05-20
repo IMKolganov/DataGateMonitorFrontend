@@ -6,13 +6,13 @@ import {
   useDeleteApiQuotaPlanAllowedServersDeleteId,
 } from "../../api/orval/quota-plan-allowed-server/quota-plan-allowed-server";
 import {
-  useGetApiV2OpenVpnServersGetAll,
-  getGetApiV2OpenVpnServersGetAllQueryKey,
-  getGetApiV2OpenVpnServersGetAllWithStatusQueryKey,
-} from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
+  useGetApiV3OpenVpnServersGetAll,
+  getGetApiV3OpenVpnServersGetAllQueryKey,
+  getGetApiV3OpenVpnServersGetAllWithStatusQueryKey,
+} from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
 import type {
   QuotaPlanAllowedServerDto,
-  VpnServersV2Response,
+  VpnServersV3Response,
   GetQuotaPlanAllowedServersByQuotaPlanIdResponse,
 } from "../../api/orvalModelShim";
 import { useQueryClient } from "@tanstack/react-query";
@@ -40,9 +40,9 @@ export function QuotaPlanAllowedServersModal({
   const allowed: QuotaPlanAllowedServerDto[] =
     (allowedData as GetQuotaPlanAllowedServersByQuotaPlanIdResponse | undefined)?.items ?? [];
 
-  const { data: serversData } = useGetApiV2OpenVpnServersGetAll({});
+  const { data: serversData } = useGetApiV3OpenVpnServersGetAll({});
   const servers =
-    (serversData as VpnServersV2Response | undefined)?.vpnServers ?? [];
+    (serversData as VpnServersV3Response | undefined)?.vpnServers ?? [];
 
   const createMutation = usePostApiQuotaPlanAllowedServersCreate();
   const deleteMutation = useDeleteApiQuotaPlanAllowedServersDeleteId();
@@ -60,9 +60,9 @@ export function QuotaPlanAllowedServersModal({
         planId
       ),
     });
-    queryClient.invalidateQueries({ queryKey: getGetApiV2OpenVpnServersGetAllQueryKey(undefined) });
+    queryClient.invalidateQueries({ queryKey: getGetApiV3OpenVpnServersGetAllQueryKey(undefined) });
     queryClient.invalidateQueries({
-      queryKey: getGetApiV2OpenVpnServersGetAllWithStatusQueryKey(undefined),
+      queryKey: getGetApiV3OpenVpnServersGetAllWithStatusQueryKey(undefined),
     });
   };
 

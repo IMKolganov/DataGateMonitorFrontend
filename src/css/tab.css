@@ -44,7 +44,8 @@
 
 .tab-content {
   padding: 1rem;
-  overflow-x: auto;
+  /* Prevent phantom horizontal scrollbar on details/settings wrappers. */
+  overflow-x: hidden;
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;

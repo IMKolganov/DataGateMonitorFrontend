@@ -9,6 +9,7 @@ import {
 import { clearStoredProfileAvatarUrl } from "../utils/auth/storedProfileAvatar.ts";
 import { notifyAccessTokenRefreshed } from "../utils/auth/accessTokenEvents.ts";
 import { authErrFields, authLog } from "../utils/auth/authLog.ts";
+import { scheduleAutoLogout } from "../utils/auth/tokenExpiryScheduler.ts";
 import type { RefreshRequest, RefreshResponse } from "./orvalModelShim";
 
 let refreshPromise: Promise<string> | null = null;
@@ -92,9 +93,7 @@ export const apiRequest = async <T>(
         authLog("apiRequest: refresh OK, retrying request", { url, method });
 
         // Reschedule JWT expiry timer (avoids stale timer if login ever stays in SPA without full reload)
-        void import("../utils/auth/authSession").then(({ scheduleAutoLogout }) => {
-          scheduleAutoLogout(newToken);
-        });
+        scheduleAutoLogout(newToken);
 
         const retryResponse = await axios({
           method,

@@ -99,9 +99,6 @@ export function UserDetailPage() {
 
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<UserQuotaPlanDto | null>(null);
-  const [pendingRoleId, setPendingRoleId] = useState<number | "">("");
-
-  const [telegramMessagesPage, setTelegramMessagesPage] = useState(0);
   const [telegramMessagesPageSize, setTelegramMessagesPageSize] = usePersistedPageSize(
     `user-detail-telegram:${userId ?? "0"}`,
     10,
@@ -166,15 +163,27 @@ export function UserDetailPage() {
     },
   });
 
-  useEffect(() => {
-    const rid = currentRoleAssignment?.roleId;
-    if (rid != null && typeof rid === "number") setPendingRoleId(rid);
-    else setPendingRoleId("");
-  }, [currentRoleAssignment?.roleId]);
+  const roleIdFromServer = currentRoleAssignment?.roleId;
+  const [roleSync, setRoleSync] = useState<{ roleId: number | undefined; pendingRoleId: number | "" }>({
+    roleId: roleIdFromServer,
+    pendingRoleId: "",
+  });
+  if (roleSync.roleId !== roleIdFromServer) {
+    const nextPending: number | "" =
+      roleIdFromServer != null && typeof roleIdFromServer === "number" ? roleIdFromServer : "";
+    setRoleSync({ roleId: roleIdFromServer, pendingRoleId: nextPending });
+  }
+  const pendingRoleId = roleSync.pendingRoleId;
+  const setPendingRoleId = (value: number | "") =>
+    setRoleSync((s) => ({ ...s, pendingRoleId: value }));
 
-  useEffect(() => {
-    setTelegramMessagesPage(0);
-  }, [userId]);
+  const [telegramPageState, setTelegramPageState] = useState({ userId, page: 0 });
+  if (telegramPageState.userId !== userId) {
+    setTelegramPageState({ userId, page: 0 });
+  }
+  const telegramMessagesPage = telegramPageState.page;
+  const setTelegramMessagesPage = (page: number) =>
+    setTelegramPageState((s) => ({ ...s, page }));
 
   const isTelegramUser =
     user != null &&
@@ -415,7 +424,7 @@ export function UserDetailPage() {
         <span>User details</span>
       </h2>
 
-      <section className="settings-card" style={{ marginBottom: 24 }}>
+      <section className="settings-card settings-card--mb">
         <h3 className="settings-card__h3-with-icon">
           <FaUser className="icon" aria-hidden />
           <span>Profile</span>
@@ -488,7 +497,7 @@ export function UserDetailPage() {
       </section>
 
       {user.id != null && (
-        <section className="settings-card" style={{ marginBottom: 24 }}>
+        <section className="settings-card settings-card--mb">
           <h3 className="settings-card__h3-with-icon">
             <FaChartBar className="icon" aria-hidden />
             <span>Traffic quota</span>
@@ -505,7 +514,7 @@ export function UserDetailPage() {
 
       <UserVpnConnectionsSection externalId={user.externalId} />
 
-      <section className="settings-card" style={{ marginBottom: 24 }}>
+      <section className="settings-card settings-card--mb">
         <h3 className="settings-card__h3-with-icon">
           <FaCog className="icon" aria-hidden />
           <span>Admin actions</span>
@@ -521,7 +530,7 @@ export function UserDetailPage() {
         >
           <FaKey className="icon" /> Send password reset code
         </button>
-        <div style={{ marginTop: 12 }}>
+        <div className="mt-12">
           <button
             className="btn primary"
             onClick={handleConfirmEmailManually}
@@ -533,7 +542,7 @@ export function UserDetailPage() {
       </section>
 
       {canManageRoles && (
-        <section className="settings-card" style={{ marginBottom: 24 }}>
+        <section className="settings-card settings-card--mb">
           <h3 className="settings-card__h3-with-icon">
             <FaShieldAlt className="icon" aria-hidden />
             <span>Access role</span>
@@ -543,25 +552,24 @@ export function UserDetailPage() {
             reflect legacy data.
           </p>
           {rolesCatalogLoading || userRoleLoading ? (
-            <p style={{ color: "#8b949e" }}>Loading role…</p>
+            <p className="text-muted">Loading role…</p>
           ) : roleCatalog.length === 0 ? (
             <p className="error-message">No roles returned from the API. Check permissions or backend configuration.</p>
           ) : (
-            <div className="settings-item" style={{ alignItems: "flex-start", gap: 12 }}>
-              <label htmlFor="user-role-select" style={{ minWidth: 120 }}>
+            <div className="settings-item settings-item--col-top">
+              <label htmlFor="user-role-select" className="settings-item-label--wide">
                 Role
               </label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+              <div className="flex-wrap-gap-12">
                 <select
                   id="user-role-select"
-                  className="input"
+                  className="input select-min-220"
                   value={pendingRoleId === "" ? "" : String(pendingRoleId)}
                   onChange={(e) => {
                     const v = e.target.value;
                     setPendingRoleId(v === "" ? "" : Number(v));
                   }}
                   disabled={setRoleMutation.isPending}
-                  style={{ minWidth: 220 }}
                 >
                   <option value="">— Select role —</option>
                   {roleCatalog.map((r) => (
@@ -581,7 +589,7 @@ export function UserDetailPage() {
                 </button>
               </div>
               {currentRoleAssignment?.roleName != null && (
-                <p style={{ color: "#8b949e", fontSize: 13, marginTop: 8, marginBottom: 0 }}>
+                <p className="text-muted-sm">
                   Current (from server): {currentRoleAssignment.roleName}
                 </p>
               )}
@@ -591,7 +599,7 @@ export function UserDetailPage() {
       )}
 
       {isTelegramUser && (
-        <section className="settings-card" style={{ marginBottom: 24 }}>
+        <section className="settings-card settings-card--mb">
           <h3 className="settings-card__h3-with-icon">
             <FaPaperPlane className="icon" aria-hidden />
             <span>Telegram bot messages</span>
@@ -601,7 +609,7 @@ export function UserDetailPage() {
           </p>
           {telegramIdValid ? (
             <>
-              <div className="header-bar" style={{ marginBottom: 8 }}>
+              <div className="header-bar header-bar--mb-8">
                 <div className="left-buttons">
                   <button
                     type="button"
@@ -614,12 +622,12 @@ export function UserDetailPage() {
                 </div>
               </div>
               {telegramMessagesErrorMessage && (
-                <p className="error-message" style={{ marginBottom: 8 }}>❌ {telegramMessagesErrorMessage}</p>
+                <p className="error-message error-message--mb-8">❌ {telegramMessagesErrorMessage}</p>
               )}
               {!telegramMessagesLoading && telegramMessagesTotalCount === 0 ? (
-                <p style={{ color: "#8b949e" }}>No messages.</p>
+                <p className="text-muted">No messages.</p>
               ) : (
-              <div className="data-grid-wrap" style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}>
+              <div className="data-grid-wrap data-grid-wrap--inset">
                 <CustomThemeProvider>
                   <StyledDataGrid
                     rows={telegramMessages.map((msg, idx) => ({
@@ -655,14 +663,14 @@ export function UserDetailPage() {
               )}
             </>
           ) : (
-            <p style={{ color: "#8b949e" }}>
+            <p className="text-muted">
               Telegram ID not available; cannot load messages.
             </p>
           )}
         </section>
       )}
 
-      <section className="settings-card" style={{ marginBottom: 24 }}>
+      <section className="settings-card settings-card--mb">
         <h3 className="settings-card__h3-with-icon">
           <FaClipboardList className="icon" aria-hidden />
           <span>User quota plan assignments</span>
@@ -670,7 +678,7 @@ export function UserDetailPage() {
         <p className="settings-item-description">
           Assign quota plans to this user. Effective from/to define the period when the plan applies.
         </p>
-        <div className="header-bar" style={{ marginBottom: 12 }}>
+        <div className="header-bar header-bar--mb-12">
           <div className="left-buttons">
             <button
               type="button"
@@ -690,9 +698,9 @@ export function UserDetailPage() {
           </div>
         </div>
         {userAssignments.length === 0 ? (
-          <p style={{ color: "#8b949e" }}>No assignments. Click «Assign plan» to add one.</p>
+          <p className="text-muted">No assignments. Click «Assign plan» to add one.</p>
         ) : (
-          <div className="table-container" style={{ padding: 10 }}>
+          <div className="table-container table-container--pad">
             <table className="user-quota-assignments-table">
               <thead>
                 <tr>
@@ -700,7 +708,7 @@ export function UserDetailPage() {
                   <th>Effective from</th>
                   <th>Effective to</th>
                   <th>Note</th>
-                  <th style={{ width: 100 }}>Actions</th>
+                  <th className="th-actions">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -770,7 +778,7 @@ export function UserDetailPage() {
           All quota plans defined in the system. Assign them above. Server-side restrictions may apply.
         </p>
         {quotaPlans.length === 0 ? (
-          <p style={{ color: "#8b949e" }}>No quota plans.</p>
+          <p className="text-muted">No quota plans.</p>
         ) : (
           <ul className="quota-plan-list">
             {quotaPlans.map((p) => (

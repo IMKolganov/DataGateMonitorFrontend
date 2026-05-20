@@ -12,6 +12,7 @@ import type { VpnServerResponse } from "../api/orvalModelShim";
 // Import generated hook
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import { isOpenVpnStack, VpnServerType } from "../constants/vpnServerType";
+import { AdminServerPageGate } from "../components/AdminServerPageGate";
 
 // Helper to unwrap ApiResponse<T>
 function unwrap<T>(resp: unknown): T | undefined {
@@ -45,34 +46,30 @@ const Certificates: React.FC = () => {
     numericId && apiPayload?.vpnServer?.serverType === VpnServerType.Xray,
   );
 
-  if (numericId && serverQuery.isSuccess && !isOpenVpnStack(apiPayload?.vpnServer?.serverType) && !isXray) {
-    return (
-      <div className="certificates-page">
-        <p>This server type does not support issued client files from the dashboard.</p>
-      </div>
-    );
-  }
-
-  if (numericId && serverQuery.isPending) {
-    return (
-      <div className="certificates-page">
-        <p>Loading server…</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="certificates-page">
-      <h2 className="certificates-page__title settings-page__h2-with-icon">
-        <FaKey className="icon" aria-hidden />
-        <span>
-          {isXray ? "VLESS client links" : "VPN Certificates & OVPN Files"} for Server{" "}
-          {serverQuery.isLoading ? "…" : serverName || vpnServerId}
-        </span>
-      </h2>
+    <AdminServerPageGate featureLabel="Certificate management">
+      {numericId && serverQuery.isSuccess && !isOpenVpnStack(apiPayload?.vpnServer?.serverType) && !isXray ? (
+        <div className="certificates-page">
+          <p>This server type does not support issued client files from the dashboard.</p>
+        </div>
+      ) : numericId && serverQuery.isPending ? (
+        <div className="certificates-page">
+          <p>Loading server…</p>
+        </div>
+      ) : (
+        <div className="certificates-page">
+          <h2 className="certificates-page__title settings-page__h2-with-icon">
+            <FaKey className="icon" aria-hidden />
+            <span>
+              {isXray ? "VLESS client links" : "VPN Certificates & OVPN Files"} for Server{" "}
+              {serverQuery.isLoading ? "…" : serverName || vpnServerId}
+            </span>
+          </h2>
 
-      <CertificatesData vpnServerId={vpnServerId || ""} stack={isXray ? "xray" : "openvpn"} />
-    </div>
+          <CertificatesData vpnServerId={vpnServerId || ""} stack={isXray ? "xray" : "openvpn"} />
+        </div>
+      )}
+    </AdminServerPageGate>
   );
 };
 

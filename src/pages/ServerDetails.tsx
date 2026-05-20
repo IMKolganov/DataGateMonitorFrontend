@@ -52,7 +52,7 @@ const ALL_SERVER_TABS: Tab[] = [
         mobilePrefix: "⚙️",
     },
     { label: "Statistics", path: "statistics", Icon: FaChartLine, mobilePrefix: "📈" },
-    { label: "Events", path: "events", Icon: FaBolt, mobilePrefix: "⚡" },
+    { label: "Events", path: "events", adminOnly: true, Icon: FaBolt, mobilePrefix: "⚡" },
 ];
 
 export function ServerDetails() {
@@ -93,7 +93,7 @@ export function ServerDetails() {
                     return { ...t, label: "Client links (VLESS)" };
                 }
                 if (t.path === "ovpn-file-config") {
-                    return { ...t, label: "Client export template" };
+                    return { ...t, label: "Client export template", path: "export-template" };
                 }
                 return t;
             });
@@ -113,9 +113,11 @@ export function ServerDetails() {
     }, [isXrayServer, currentPath, navigate, vpnServerId]);
 
     const safeCurrentPath = useMemo(() => {
-        const exists = tabs.some((t) => t.path === currentPath);
-        return exists ? currentPath : "";
-    }, [currentPath, tabs]);
+        const normalized =
+            isXrayServer && currentPath === "ovpn-file-config" ? "export-template" : currentPath;
+        const exists = tabs.some((t) => t.path === normalized);
+        return exists ? normalized : "";
+    }, [currentPath, tabs, isXrayServer]);
 
     return (
         <div>

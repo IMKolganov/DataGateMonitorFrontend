@@ -13,7 +13,10 @@ export function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
     const user = getCurrentUser();
     const { theme, toggleTheme } = useTheme();
-    const { data: unreadCount = 0 } = useNotificationsUnreadCount();
+    const canViewNotifications = isAdmin(user);
+    const { data: unreadCount = 0 } = useNotificationsUnreadCount({
+        enabled: canViewNotifications,
+    });
 
     return (
         <header className={`header${menuOpen ? " header--nav-open" : ""}`}>
@@ -72,7 +75,7 @@ export function Header() {
                         </li>
                     )}
 
-                    {user && (
+                    {user && canViewNotifications && (
                         <li className="header-notifications">
                             <Link to="/notifications" onClick={() => setMenuOpen(false)} className="header-notifications-link" title="Notifications">
                                 <FaBell className="icon" />

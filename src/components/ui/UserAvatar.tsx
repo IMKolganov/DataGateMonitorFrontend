@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import axios from "axios";
 import { avatarBackgroundStyle, initialsFromLabel } from "../../utils/avatarVisual";
 import { getApiBaseUrlResolved } from "../../api/apirequest";
@@ -33,6 +33,9 @@ export function UserAvatar({
   const [tgBlobUrl, setTgBlobUrl] = useState<string | null>(null);
   const [tgFetchFailed, setTgFetchFailed] = useState(false);
   const blobRef = useRef<string | null>(null);
+  const [imageSourceKey, setImageSourceKey] = useState(
+    () => `${src ?? ""}|${telegramPhotoTelegramId ?? ""}`,
+  );
 
   const label = (name ?? "").trim() || "User";
   const initials = initialsFromLabel(label);
@@ -45,26 +48,30 @@ export function UserAvatar({
       ? src
       : undefined;
 
-  useEffect(() => {
+  const nextImageSourceKey = `${src ?? ""}|${telegramPhotoTelegramId ?? ""}`;
+  if (nextImageSourceKey !== imageSourceKey) {
+    setImageSourceKey(nextImageSourceKey);
     setImgFailed(false);
     setTgFetchFailed(false);
+  }
 
-    if (publicHttpSrc) {
+  useEffect(() => {
+    const clearTelegramBlob = () => {
       if (blobRef.current) {
         URL.revokeObjectURL(blobRef.current);
         blobRef.current = null;
       }
-      setTgBlobUrl(null);
+      queueMicrotask(() => setTgBlobUrl(null));
+    };
+
+    if (publicHttpSrc) {
+      clearTelegramBlob();
       return;
     }
 
     const tid = telegramPhotoTelegramId;
     if (tid == null || !Number.isFinite(tid) || tid <= 0) {
-      if (blobRef.current) {
-        URL.revokeObjectURL(blobRef.current);
-        blobRef.current = null;
-      }
-      setTgBlobUrl(null);
+      clearTelegramBlob();
       return;
     }
 
@@ -85,7 +92,17 @@ export function UserAvatar({
           headers: { Authorization: `Bearer ${token}` },
         });
         if (cancelled) return;
-        const mime = resp.headers["content-type"]?.split(";")[0]?.trim();
+        const contentTypeRaw =
+          typeof resp.headers.get === "function"
+            ? resp.headers.get("content-type")
+            : resp.headers["content-type"];
+        const contentType =
+          typeof contentTypeRaw === "string"
+            ? contentTypeRaw
+            : Array.isArray(contentTypeRaw) && typeof contentTypeRaw[0] === "string"
+              ? contentTypeRaw[0]
+              : undefined;
+        const mime = contentType?.split(";")[0]?.trim();
         const blob =
           mime && mime !== "application/octet-stream"
             ? new Blob([resp.data], { type: mime })
@@ -118,7 +135,13 @@ export function UserAvatar({
       role="img"
       aria-label={label}
       className={`user-avatar ${className ?? ""}`.trim()}
-      style={{ width: dim, height: dim, fontSize: `${fontSize}px`, ...avatarBackgroundStyle(seed) }}
+      style={
+        {
+          "--avatar-size": dim,
+          "--avatar-font-size": `${fontSize}px`,
+          ...avatarBackgroundStyle(seed),
+        } as CSSProperties
+      }
       title={label}
     >
       {showImg ? (

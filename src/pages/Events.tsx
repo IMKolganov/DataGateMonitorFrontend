@@ -1,5 +1,5 @@
 // src/pages/Events.tsx
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import StyledDataGrid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
@@ -17,7 +17,9 @@ import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/
 import type { VpnServerResponse } from "../api/orvalModelShim";
 import { isOpenVpnStack } from "../constants/vpnServerType";
 import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
+import { ServerAccessDenied } from "../components/ServerAccessDenied";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import type { VpnServerEventLogDto } from "../api/orvalModelShim";
 
 // Resp is already unwrapped by ogmMutator (ApiResponse<T> -> T)
@@ -113,6 +115,7 @@ function normalize<TItem = Item>(raw: Resp): Normalized<TItem> {
 const Events: React.FC = () => {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const numericServerId = Number(vpnServerId || 0);
+  const canViewEvents = isAdmin(getCurrentUser());
 
   const serverQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId, {
     query: {
@@ -150,7 +153,7 @@ const Events: React.FC = () => {
     refetch,
   } = useGetApiOpenVpnEventsGetByServer<Resp>(params, {
     query: {
-      enabled: eventsApiEnabled,
+      enabled: eventsApiEnabled && canViewEvents,
       // v5 way to keep previous page data during refetch
       placeholderData: (prev) => prev as Resp,
       // optionally tune caching:
@@ -161,19 +164,18 @@ const Events: React.FC = () => {
 
   const normalized = useMemo(() => (resp ? normalize<Item>(resp) : { items: [], totalCount: 0 } as Normalized<Item>), [resp]);
 
-  // If backend returns corrected page or pageSize, sync them back to the grid
-  React.useEffect(() => {
-    if (!resp) return;
+  const [paginationSyncKey, setPaginationSyncKey] = useState<unknown>(null);
+  if (resp && resp !== paginationSyncKey) {
+    setPaginationSyncKey(resp);
     const n = normalize<Item>(resp);
     if (typeof n.page === "number" && n.page >= 1) {
       const zero = n.page - 1;
       if (zero !== page) setPage(zero);
     }
-    if (typeof n.pageSize === "number" && n.pageSize > 0) {
-      if (n.pageSize !== pageSize) setPageSize(n.pageSize);
+    if (typeof n.pageSize === "number" && n.pageSize > 0 && n.pageSize !== pageSize) {
+      setPageSize(n.pageSize);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resp]);
+  }
 
   const rows = useMemo(() => {
     return normalized.items.map((e: Item, idx: number) => ({
@@ -202,6 +204,17 @@ const Events: React.FC = () => {
     }));
   }, [normalized.items]);
 
+  if (!canViewEvents) {
+    return (
+      <div className="page-pad">
+        <ServerAccessDenied
+          title="Access restricted"
+          message="Server event logs are available to administrators only."
+        />
+      </div>
+    );
+  }
+
   if (
     numericServerId > 0 &&
     serverQuery.isSuccess &&
@@ -209,7 +222,7 @@ const Events: React.FC = () => {
   ) {
     return (
       <OpenVpnServerFeaturePlaceholder vpnServerId={String(vpnServerId)} featureLabel="Events">
-        <p style={{ marginTop: 8 }}>
+        <p className="form-hint--mt-8">
           OpenVPN management event logs are not produced for Xray (VLESS) nodes.
         </p>
       </OpenVpnServerFeaturePlaceholder>
@@ -218,7 +231,7 @@ const Events: React.FC = () => {
 
   if (numericServerId > 0 && serverQuery.isPending) {
     return (
-      <div className="server-details__panel" style={{ padding: 16 }}>
+      <div className="server-details__panel panel-pad">
         <p>Loading server…</p>
       </div>
     );
@@ -263,14 +276,7 @@ const Events: React.FC = () => {
             <span>Server Events</span>
           </h2>
 
-          <div
-            className="data-grid-wrap"
-            style={{
-              backgroundColor: "var(--bg-body)",
-              padding: "10px",
-              borderRadius: "8px",
-            }}
-          >
+          <div className="data-grid-wrap data-grid-wrap--inset">
             <StyledDataGrid
               rows={rows}
               columns={columns}
@@ -312,7 +318,7 @@ const Events: React.FC = () => {
                   href="https://community.openvpn.net/openvpn/wiki/ClientConnectDisconnect#clientconnect"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: "#58a6ff" }}
+                  className="link-accent--inline"
                 >
                   ClientConnect/ClientDisconnect documentation
                 </a>
@@ -325,7 +331,7 @@ const Events: React.FC = () => {
                   href="https://community.openvpn.net/openvpn/wiki/ClientConnectDisconnect#clientdisconnect"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: "#58a6ff" }}
+                  className="link-accent--inline"
                 >
                   ClientConnect/ClientDisconnect documentation
                 </a>
@@ -338,7 +344,7 @@ const Events: React.FC = () => {
                   href="https://github.com/OpenVPN/openvpn/blob/master/doc/man-sections/script-options.rst#learn-address"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: "#58a6ff" }}
+                  className="link-accent--inline"
                 >
                   learn-address option documentation
                 </a>
@@ -351,7 +357,7 @@ const Events: React.FC = () => {
                   href="https://openvpn.net/community-resources/reference-manual-for-openvpn-2-6/#tls-verify"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: "#58a6ff" }}
+                  className="link-accent--inline"
                 >
                   tls-verify option in reference manual
                 </a>
@@ -364,7 +370,7 @@ const Events: React.FC = () => {
                   href="https://engineering.freeagent.com/2017/05/22/external-authentication-scripts-in-openvpn-the-right-way/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: "#58a6ff" }}
+                  className="link-accent--inline"
                 >
                   External authentication scripts article
                 </a>

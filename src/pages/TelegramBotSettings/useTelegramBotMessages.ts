@@ -1,5 +1,5 @@
 // src/pages/TelegramBotSettings/useTelegramBotMessages.ts
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
 
 import {
@@ -22,7 +22,6 @@ export function useTelegramBotMessages() {
         10,
         "5,10,20,50,100",
     );
-    const [totalCount, setTotalCount] = useState(0);
     const [manualRefreshing, setManualRefreshing] = useState(false);
 
     const params = useMemo<GetApiTgbotIncomingMessageLogsGetAllParams>(
@@ -46,14 +45,11 @@ export function useTelegramBotMessages() {
         return items as MessageDto[];
     }, [qMessages.data]);
 
-    useEffect(() => {
+    const totalCount = useMemo(() => {
         const raw = qMessages.data as GetAllMessagesResponse | undefined;
         const envelope = raw?.messages;
-
-        if (envelope) {
-            const total = envelope.totalCount ?? envelope.items?.length ?? 0;
-            setTotalCount(total);
-        }
+        if (!envelope) return 0;
+        return envelope.totalCount ?? envelope.items?.length ?? 0;
     }, [qMessages.data]);
 
     const handleRefresh = async () => {

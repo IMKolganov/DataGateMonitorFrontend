@@ -1,5 +1,5 @@
 // src/pages/ApplicationSettings.tsx
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { FaLaptopCode, FaPlus, FaSync, FaTerminal } from "react-icons/fa";
 import "../css/ApplicationSettings.css";
 import "../css/Settings.css";
@@ -38,10 +38,10 @@ function extractApps(raw: unknown): ApplicationDto[] {
 }
 
 export function ApplicationSettings() {
-  const [apps, setApps] = useState<ApplicationDto[]>([]);
+  const [appsOverlay, setAppsOverlay] = useState<ApplicationDto[] | null>(null);
+  const [registerError, setRegisterError] = useState<string | null>(null);
   const [newAppName, setNewAppName] = useState("");
   const [refreshing, setRefreshing] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const {
     data: appsResp,
@@ -58,14 +58,16 @@ export function ApplicationSettings() {
 
   const registerMutation = usePostApiApplicationsRegister();
 
-  useEffect(() => {
-    if (appsError) {
-      setErrorMessage((appsError as Error).message || "Failed to load applications");
-    } else {
-      setErrorMessage(null);
-    }
-    setApps(extractApps(appsResp));
-  }, [appsResp, appsError, isLoading, isFetching]);
+  const appsFromServer = useMemo(() => extractApps(appsResp), [appsResp]);
+  const [appsSource, setAppsSource] = useState(appsResp);
+  if (appsResp !== appsSource) {
+    setAppsSource(appsResp);
+    setAppsOverlay(null);
+  }
+  const apps = appsOverlay ?? appsFromServer;
+  const errorMessage =
+    registerError ??
+    (appsError ? (appsError as Error).message || "Failed to load applications" : null);
 
   const loading = isLoading;
   const spinner = refreshing || isFetching || registerMutation.isPending;
@@ -74,7 +76,7 @@ export function ApplicationSettings() {
     const name = newAppName.trim();
     if (!name) return;
 
-    setErrorMessage(null);
+    setRegisterError(null);
     try {
       const body: RegisterApplicationRequest = { name };
       const res = await registerMutation.mutateAsync({ data: body });
@@ -92,7 +94,7 @@ export function ApplicationSettings() {
         throw new Error("Invalid response from server");
       }
 
-      setApps((prev) => [...prev, created as ApplicationDto]);
+      setAppsOverlay([...appsFromServer, created as ApplicationDto]);
       setNewAppName("");
       await refetch();
     } catch (e: unknown) {
@@ -107,14 +109,14 @@ export function ApplicationSettings() {
       } else {
         msg = formatError(e) || msg;
       }
-      setErrorMessage(msg);
+      setRegisterError(msg);
     }
   };
 
   const handleRefresh = async () => {
     if (refreshing) return;
     setRefreshing(true);
-    setErrorMessage(null);
+    setRegisterError(null);
     try {
       await refetch();
     } finally {
@@ -128,7 +130,7 @@ export function ApplicationSettings() {
         <FaLaptopCode className="icon" aria-hidden />
         <span>Application Settings</span>
       </h2>
-      <div style={{ borderTop: "1px solid #d1d5da" }}></div>
+      <div className="settings-divider" />
 
       <p className="app-settings-description">
         Manage applications that require API access. Each registered application receives a unique{" "}

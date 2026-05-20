@@ -1,6 +1,6 @@
 // src/components/ServiceControls.tsx
 import { FaPlay } from "react-icons/fa";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { ServiceStatusDto } from "../api/orvalModelShim";
 import type { ServiceStatus } from "../api/orvalModelShim";
 import { humanizeSignalRStatusStreamError } from "../utils/signalrFriendlyError";
@@ -8,6 +8,7 @@ import { humanizeSignalRStatusStreamError } from "../utils/signalrFriendlyError"
 type Props = {
   serviceData: Record<number, ServiceStatusDto>;
   onRunNow: () => void;
+  onOpenDetails?: () => void;
   /** From useSignalRService — helps tell connection errors from “no snapshot yet”. */
   hubConnectionState?: string;
   hubLastError?: string | null;
@@ -65,6 +66,7 @@ function getNextRunSeconds(entries: ServiceStatusDto[]): number | null {
 export default function ServiceControls({
   serviceData,
   onRunNow,
+  onOpenDetails,
   hubConnectionState,
   hubLastError,
 }: Props) {
@@ -160,11 +162,16 @@ export default function ServiceControls({
   return (
       <div className="service-status-container">
         <h2>Service Control</h2>
-        <div style={{ borderTop: "1px solid #d1d5da" }} />
+        <div className="settings-divider" />
 
         <p>
           <strong>Service Status:</strong>{" "}
-          <span style={{ color: statusColor }}>{statusDescription}</span>
+          <span
+            className="status-color-dynamic"
+            style={{ "--status-color": statusColor } as CSSProperties}
+          >
+            {statusDescription}
+          </span>
         </p>
 
         <p>
@@ -180,11 +187,16 @@ export default function ServiceControls({
           <strong>Total Sessions:</strong> {totals.sessions.toLocaleString()}
         </p>
 
-        <button className="btn primary" onClick={onRunNow} disabled={anyRunning}>
-          <FaPlay className="icon" /> Sync All Now
-        </button>
+        <div className="flex-wrap-gap-8">
+          <button className="btn primary" onClick={onRunNow} disabled={anyRunning}>
+            <FaPlay className="icon" /> Sync All Now
+          </button>
+          <button className="btn secondary" onClick={onOpenDetails}>
+            Details
+          </button>
+        </div>
 
-        <p className="description" style={{ marginTop: 12 }}>
+        <p className="description mt-12">
           This service periodically queries the OpenVPN server to collect data about connected clients
           and stores this information in the database. Use the button below to manually trigger the service
           and update the data immediately.

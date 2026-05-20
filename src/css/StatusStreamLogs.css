@@ -1,0 +1,143 @@
+.status-stream-logs-page {
+  padding: 16px;
+}
+
+.status-stream-logs-toolbar {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.status-stream-logs-summary {
+  margin-bottom: 12px;
+}
+
+.status-stream-logs-slow-servers {
+  margin: 8px 0;
+}
+
+.status-stream-logs-slow-servers ul {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+
+.status-stream-logs-slow-servers li {
+  margin: 2px 0;
+}
+
+.status-stream-logs-error {
+  color: #f85149;
+}
+
+.status-stream-logs-error-strong {
+  color: #f85149;
+  font-weight: 700;
+}
+
+.status-stream-logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-stream-log-item {
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #0d1117;
+}
+
+.status-stream-log-item summary {
+  cursor: pointer;
+  color: #c9d1d9;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.status-stream-log-item pre {
+  margin: 10px 0 0;
+  max-height: 360px;
+  overflow: auto;
+  padding: 10px;
+  border-radius: 6px;
+  background: #161b22;
+  color: #e6edf3;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.status-stream-log-item--error {
+  border-color: #f85149;
+  box-shadow: 0 0 0 1px rgba(248, 81, 73, 0.35);
+}
+
+.status-stream-log-item--ok {
+  border-color: #2ea043;
+}
+
+.status-stream-log-item--progress {
+  border-color: #1f6feb;
+}
+
+.status-stream-log-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.status-stream-log-badge--error {
+  background: rgba(248, 81, 73, 0.2);
+  color: #ffa198;
+}
+
+.status-stream-log-badge--ok {
+  background: rgba(46, 160, 67, 0.2);
+  color: #7ee787;
+}
+
+.status-stream-log-badge--progress {
+  background: rgba(31, 111, 235, 0.2);
+  color: #79c0ff;
+}
+
+.status-stream-log-badge--neutral {
+  background: rgba(139, 148, 158, 0.2);
+  color: #c9d1d9;
+}
+
+.status-stream-log-readable {
+  margin-top: 10px;
+}
+
+.status-stream-log-readable p {
+  margin: 6px 0;
+}
+
+.status-stream-log-table-wrap {
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+.status-stream-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.status-stream-log-table th,
+.status-stream-log-table td {
+  border: 1px solid #30363d;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.status-stream-log-table th {
+  background: #161b22;
+}

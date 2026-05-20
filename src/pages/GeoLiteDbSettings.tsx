@@ -1,5 +1,5 @@
 // src/components/GeoLiteDbSettings.tsx
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import "../css/Settings.css";
 import { FaDatabase, FaSave } from "react-icons/fa";
@@ -42,17 +42,35 @@ export function GeoLiteDbSettings() {
 
   const mSetSetting = usePostApiSettingsSet();
 
-  useEffect(() => {
-    const allSettled =
-      qDbPath.isFetched &&
-      qDownloadUrl.isFetched &&
-      qAccountId.isFetched &&
-      qLicenseKey.isFetched &&
-      qAutoUpdateDays.isFetched;
+  const settingsReady =
+    qDbPath.isFetched &&
+    qDownloadUrl.isFetched &&
+    qAccountId.isFetched &&
+    qLicenseKey.isFetched &&
+    qAutoUpdateDays.isFetched;
 
-    if (!allSettled) return;
+  const settingsSnapshotKey = useMemo(() => {
+    if (!settingsReady) return "";
+    return JSON.stringify({
+      dbPath: qDbPath.data,
+      downloadUrl: qDownloadUrl.data,
+      accountId: qAccountId.data,
+      licenseKey: qLicenseKey.data,
+      autoUpdateDays: qAutoUpdateDays.data,
+    });
+  }, [
+    settingsReady,
+    qDbPath.data,
+    qDownloadUrl.data,
+    qAccountId.data,
+    qLicenseKey.data,
+    qAutoUpdateDays.data,
+  ]);
 
-    // With ogmMutator unwrapping, .data is the inner model already
+  const [appliedSettingsKey, setAppliedSettingsKey] = useState("");
+  if (settingsSnapshotKey && settingsSnapshotKey !== appliedSettingsKey) {
+    setAppliedSettingsKey(settingsSnapshotKey);
+
     const safeValue = (resp: SettingResponse | undefined): string =>
       String(resp?.value ?? "");
 
@@ -67,20 +85,8 @@ export function GeoLiteDbSettings() {
     setGeoIpAccountId(safeValue(qAccountId.data));
     setGeoIpLicenseKey(safeValue(qLicenseKey.data));
     setGeoIpAutoUpdateIntervalDays(safeInt(qAutoUpdateDays.data));
-
     setInitialLoading(false);
-  }, [
-    qDbPath.isFetched,
-    qDownloadUrl.isFetched,
-    qAccountId.isFetched,
-    qLicenseKey.isFetched,
-    qAutoUpdateDays.isFetched,
-    qDbPath.data,
-    qDownloadUrl.data,
-    qAccountId.data,
-    qLicenseKey.data,
-    qAutoUpdateDays.data,
-  ]);
+  }
 
   // Save handler
   const handleSave = async (
@@ -147,10 +153,10 @@ export function GeoLiteDbSettings() {
         <FaDatabase className="icon" aria-hidden />
         <span>
           GeoLite2 Settings{" "}
-          {versionText ? <small style={{ opacity: 0.6 }}>— DB {versionText}</small> : null}
+          {versionText ? <small className="opacity-muted">— DB {versionText}</small> : null}
         </span>
       </h2>
-      <div style={{ borderTop: "1px solid #d1d5da" }}></div>
+      <div className="settings-divider" />
 
       {anyLoading ? (
         <div className="loading-container">
@@ -270,7 +276,7 @@ export function GeoLiteDbSettings() {
           </div>
 
           <h2>GeoLite2 Downloader</h2>
-          <div style={{ borderTop: "1px solid #d1d5da" }}></div>
+          <div className="settings-divider" />
           <GeoLiteDbDownloader />
 
           <div className="db-info">
@@ -281,7 +287,7 @@ export function GeoLiteDbSettings() {
                 href="https://www.maxmind.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "#58a6ff" }}
+                className="link-accent--inline"
               >
                 MaxMind
               </a>.
@@ -296,7 +302,7 @@ export function GeoLiteDbSettings() {
                 href="https://dev.maxmind.com/geoip/geolite2-free-geolocation-data"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "#58a6ff" }}
+                className="link-accent--inline"
               >
                 MaxMind’s GeoLite2 DB page
               </a>{" "}

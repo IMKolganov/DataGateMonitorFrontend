@@ -17,6 +17,8 @@ import type {
 } from "../../api/orvalModelShim";
 import axios from "axios";
 import { errorMessage as baseErrorMessage } from "../../utils/errorMessage";
+import { isHttpForbidden } from "../../utils/httpError";
+import { ServerAccessDenied } from "../ServerAccessDenied";
 import { pickArray } from "../../utils/pickPayloadArray.ts";
 import "../../css/Settings.css";
 import "../../css/ServerDetails.css";
@@ -81,13 +83,19 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId, stack = "openvpn" }) =
     }
   }, [isValidId]);
 
+  const certsAccessDenied = isValidId && certsQuery.isError && isHttpForbidden(certsQuery.error);
+
   useEffect(() => {
-    if (certsQuery.isError) {
+    if (certsQuery.isError && !isHttpForbidden(certsQuery.error)) {
       toast.error(`Failed to load certificates: ${getErrorMessage(certsQuery.error)}`, {
         toastId: "certs-load-error",
       });
     }
   }, [certsQuery.isError, certsQuery.error]);
+
+  if (certsAccessDenied) {
+    return <ServerAccessDenied />;
+  }
 
   const refetchCerts = async () =>
     toast.promise(certsQuery.refetch(), {
