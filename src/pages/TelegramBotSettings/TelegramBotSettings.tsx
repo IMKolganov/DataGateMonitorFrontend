@@ -33,7 +33,7 @@ export function TelegramBotSettings() {
               <FaTelegram className="icon" aria-hidden />
               <span>Telegram Bot Settings</span>
             </h2>
-            <div style={{ borderTop: "1px solid #d1d5da" }}></div>
+            <div className="settings-divider" />
 
             <p className="app-settings-description">
                 View the list of users who interacted with your Telegram bot and inspect their messages.

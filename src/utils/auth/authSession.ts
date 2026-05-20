@@ -1,8 +1,7 @@
 import { logout, refreshSessionTokens, shouldLogoutOnRefreshError } from "../../api/apirequest";
 import { authErrFields, authLog } from "./authLog";
 import { getTokenExpiration } from "./jwt";
-
-let logoutTimer: number | null = null;
+import { registerTokenExpiryHandler, scheduleAutoLogout } from "./tokenExpiryScheduler";
 
 async function refreshOrLogout(): Promise<void> {
     try {
@@ -26,32 +25,6 @@ async function refreshOrLogout(): Promise<void> {
     }
 }
 
-/**
- * Schedules logout at JWT expiry. Before logging out, tries refresh — otherwise idle tabs
- * lose the session even when the refresh token is still valid (HTTP-only refresh never ran).
- */
-export function scheduleAutoLogout(token: string) {
-    try {
-        const { expiresInMs } = getTokenExpiration(token);
+registerTokenExpiryHandler(refreshOrLogout);
 
-        if (logoutTimer) {
-            clearTimeout(logoutTimer);
-            logoutTimer = null;
-        }
-
-        authLog("scheduleAutoLogout", { expiresInMs });
-
-        if (expiresInMs <= 0) {
-            void refreshOrLogout();
-            return;
-        }
-
-        logoutTimer = window.setTimeout(() => {
-            logoutTimer = null;
-            void refreshOrLogout();
-        }, expiresInMs);
-    } catch (err) {
-        authLog("scheduleAutoLogout: JWT decode failed, attempting refresh", authErrFields(err));
-        void refreshOrLogout();
-    }
-}
+export { scheduleAutoLogout };

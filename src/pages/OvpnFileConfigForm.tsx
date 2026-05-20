@@ -1,6 +1,6 @@
 // src/pages/OvpnFileConfigForm.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "../css/ServerForm.css";
 import "../css/OvpnFileConfigForm.css";
 import "../css/Settings.css";
@@ -36,6 +36,14 @@ import { axiosResponseDataMessage, errorMessage } from "../utils/errorMessage";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import { isOpenVpnStack, VpnServerType } from "../constants/vpnServerType";
 import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
+import { ServerAccessDenied } from "../components/ServerAccessDenied";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
+import { isHttpForbidden } from "../utils/httpError";
+import {
+  OPEN_VPN_EXPORT_TEMPLATE,
+  XRAY_EXPORT_TEMPLATE,
+  unwrapOvpnFileConfigPayload,
+} from "../utils/exportConfigTemplates";
 
 /** Extract proto from config template (e.g. "proto tcp" or "proto udp") */
 function extractProtoFromTemplate(template: string): string | null {
@@ -43,33 +51,39 @@ function extractProtoFromTemplate(template: string): string | null {
   return m ? m[1].toLowerCase() : null;
 }
 
-const SAMPLE_TEMPLATE = `setenv FRIENDLY_NAME "{{friendly_name}}"
-client
-dev tun
-proto tcp
-remote {{server_ip}} {{server_port}}
-resolv-retry infinite
-nobind
-remote-cert-tls server
-tls-version-min 1.2
-cipher AES-256-CBC
-auth SHA256
-auth-nocache
-verb 3
-<ca>
-{{ca_cert}}
-</ca>
-<cert>
-{{client_cert}}
-</cert>
-<key>
-{{client_key}}
-</key>
-<tls-crypt>
-{{tls_auth_key}}
-</tls-crypt>`;
+function normalizeProto(value: unknown): "tcp" | "udp" | null {
+  if (typeof value !== "string") return null;
+  const v = value.trim().toLowerCase();
+  return v === "tcp" || v === "udp" ? v : null;
+}
+
+function applyProtoToTemplate(template: string, proto: "tcp" | "udp"): string {
+  if (!template.trim()) return template;
+  if (/^\s*proto\s+\S+/im.test(template)) {
+    return template.replace(/^\s*proto\s+\S+/im, `proto ${proto}`);
+  }
+  return `proto ${proto}\n${template}`;
+}
 
 const DEFAULT_CONFLOG_PAGE_SIZE = 10;
+const DEFAULT_XRAY_PUBLIC_PORT = 443;
+
+function hostFromApiUrl(apiUrl: string | null | undefined): string {
+  const raw = (apiUrl ?? "").trim();
+  if (!raw) return "";
+  try {
+    return new URL(raw.includes("://") ? raw : `https://${raw}`).hostname;
+  } catch {
+    return "";
+  }
+}
+
+function isConfigNotFoundError(err: unknown): boolean {
+  if (!axios.isAxiosError(err)) return false;
+  if (err.response?.status === 404) return true;
+  const msg = axiosResponseDataMessage(err.response?.data) ?? err.message;
+  return /not found/i.test(msg);
+}
 
 interface ConflogRow {
   id?: number;
@@ -81,9 +95,11 @@ interface ConflogRow {
 
 const OvpnFileConfigForm: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
   const parsedVpnServerId = Number(vpnServerId) || 0;
+  const canManageExportConfig = isAdmin(getCurrentUser());
   const serverKindQuery = useGetApiOpenVpnServersGetVpnServerId(parsedVpnServerId, {
     query: {
       enabled: parsedVpnServerId > 0,
@@ -91,14 +107,15 @@ const OvpnFileConfigForm: React.FC = () => {
       retry: 1,
     },
   });
-  const serverType = (serverKindQuery.data as VpnServerResponse | undefined)?.vpnServer?.serverType;
+  const vpnServer = (serverKindQuery.data as VpnServerResponse | undefined)?.vpnServer;
+  const serverType = vpnServer?.serverType;
+  const apiUrlHost = hostFromApiUrl(vpnServer?.apiUrl);
   const openVpnPageEnabled =
     parsedVpnServerId > 0 && serverKindQuery.isSuccess && isOpenVpnStack(serverType);
   const isXrayStack = parsedVpnServerId > 0 && serverType === VpnServerType.Xray;
   const exportConfigPageEnabled = openVpnPageEnabled || isXrayStack;
   const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
-  const [conflogPage, setConflogPage] = useState(1);
   const [conflogPageSize, setConflogPageSize] = usePersistedPageSize(
     parsedVpnServerId > 0 ? `ovpn-conflog:${parsedVpnServerId}` : "ovpn-conflog:0",
     DEFAULT_CONFLOG_PAGE_SIZE,
@@ -120,6 +137,7 @@ const OvpnFileConfigForm: React.FC = () => {
   });
 
   const [copyStatus, setCopyStatus] = useState<"Copy" | "Copied!">("Copy");
+  const [autoDetectServerSettings, setAutoDetectServerSettings] = useState(true);
 
   // load config via orval hook (auto-unwrapped response)
   const {
@@ -131,24 +149,31 @@ const OvpnFileConfigForm: React.FC = () => {
     parsedVpnServerId,
     {
       query: {
-        enabled: parsedVpnServerId > 0 && exportConfigPageEnabled,
+        enabled: parsedVpnServerId > 0 && exportConfigPageEnabled && canManageExportConfig,
         staleTime: 0,
         retry: 1,
       },
     },
   );
 
+  const configAccessDenied = isError && isHttpForbidden(error);
+  const configNotFound = isError && !configAccessDenied && isConfigNotFoundError(error);
+
   // mutation for save
   const saveMutation = usePostApiOpenVpnConfigsAddUpdate();
+
+  const [conflogPageState, setConflogPageState] = useState({ serverId: parsedVpnServerId, page: 1 });
+  if (conflogPageState.serverId !== parsedVpnServerId) {
+    setConflogPageState({ serverId: parsedVpnServerId, page: 1 });
+  }
+  const conflogPage = conflogPageState.page;
+  const setConflogPage = (page: number) =>
+    setConflogPageState((s) => ({ ...s, page }));
 
   const conflogHistoryParams = useMemo(
     () => ({ page: conflogPage, pageSize: conflogPageSize }),
     [conflogPage, conflogPageSize]
   );
-
-  useEffect(() => {
-    setConflogPage(1);
-  }, [parsedVpnServerId]);
   const { data: conflogHistoryResp, isFetching: isConflogLoading } =
     useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
       parsedVpnServerId,
@@ -216,7 +241,8 @@ const OvpnFileConfigForm: React.FC = () => {
   );
   const templatePort = ovpnFileConfig.VpnServerPort != null ? String(ovpnFileConfig.VpnServerPort) : null;
   const serverPort = latestConfig?.port != null ? String(latestConfig.port).trim() : null;
-  const serverProto = latestConfig?.proto != null ? String(latestConfig.proto).trim().toLowerCase() : null;
+  const serverProto = normalizeProto(latestConfig?.proto);
+  const detectedPort = latestConfig?.port != null ? Number(latestConfig.port) : null;
   const configMismatch = useMemo(() => {
     const mismatches: string[] = [];
     if (serverPort != null && templatePort != null && serverPort !== templatePort) {
@@ -276,29 +302,80 @@ const OvpnFileConfigForm: React.FC = () => {
     return errorMessage(err);
   };
 
-  // when data arrives, map to local PascalCase state
+  const loadedConfig = useMemo(() => unwrapOvpnFileConfigPayload(data), [data]);
+  const exampleTemplate = isXrayStack ? XRAY_EXPORT_TEMPLATE : OPEN_VPN_EXPORT_TEMPLATE;
+
   useEffect(() => {
-    if (!data) return;
-    setServerConfig((prev) => ({
-      ...prev,
-      Id: data.id ?? 0,
-      VpnServerId: data.vpnServerId ?? parsedVpnServerId,
-      VpnServerIp: data.vpnServerIp ?? "",
-      VpnServerPort: Number(data.vpnServerPort ?? 1194),
-      ConfigTemplate: data.configTemplate ?? "",
-    }));
-  }, [data, parsedVpnServerId]);
+    if (!isXrayStack || !parsedVpnServerId) return;
+    if (!location.pathname.includes("/ovpn-file-config")) return;
+    navigate(`/servers/${parsedVpnServerId}/export-template`, { replace: true });
+  }, [isXrayStack, parsedVpnServerId, location.pathname, navigate]);
+
+  useEffect(() => {
+    if (!exportConfigPageEnabled) return;
+
+    if (loadedConfig) {
+      const port =
+        loadedConfig.vpnServerPort && loadedConfig.vpnServerPort > 0
+          ? loadedConfig.vpnServerPort
+          : isXrayStack
+            ? DEFAULT_XRAY_PUBLIC_PORT
+            : 1194;
+      const templateFromApi = (loadedConfig.configTemplate ?? "").trim();
+      setServerConfig({
+        Id: loadedConfig.id ?? 0,
+        VpnServerId: loadedConfig.vpnServerId ?? parsedVpnServerId,
+        VpnServerIp: (loadedConfig.vpnServerIp ?? "").trim(),
+        VpnServerPort: port,
+        ConfigTemplate: templateFromApi || (isXrayStack ? XRAY_EXPORT_TEMPLATE : ""),
+      });
+      setAutoDetectServerSettings(!isXrayStack);
+      return;
+    }
+
+    if (isFetching || !configNotFound) return;
+
+    setServerConfig({
+      Id: 0,
+      VpnServerId: parsedVpnServerId,
+      VpnServerIp: apiUrlHost,
+      VpnServerPort: isXrayStack ? DEFAULT_XRAY_PUBLIC_PORT : 1194,
+      ConfigTemplate: isXrayStack ? XRAY_EXPORT_TEMPLATE : OPEN_VPN_EXPORT_TEMPLATE,
+    });
+    setAutoDetectServerSettings(!isXrayStack);
+  }, [
+    loadedConfig,
+    exportConfigPageEnabled,
+    isFetching,
+    configNotFound,
+    isXrayStack,
+    parsedVpnServerId,
+    apiUrlHost,
+  ]);
 
   // toast on load error (once per state change)
   useEffect(() => {
-    if (isError) {
+    if (isError && !isHttpForbidden(error) && !configNotFound) {
       toast.error(`Failed to load VPN server configuration: ${getErrorMessage(error)}`, {
         toastId: "ovpn-config-load-error",
       });
     }
-  }, [isError, error]);
+  }, [isError, error, configNotFound]);
 
-  const loading = useMemo(() => isFetching || saveMutation.isPending, [isFetching, saveMutation.isPending]);
+  const loading = useMemo(
+    () => (isFetching && !configNotFound) || saveMutation.isPending,
+    [isFetching, configNotFound, saveMutation.isPending],
+  );
+
+  if (!canManageExportConfig) {
+    return (
+      <ServerAccessDenied message="Client export configuration is available to administrators only." />
+    );
+  }
+
+  if (configAccessDenied) {
+    return <ServerAccessDenied />;
+  }
 
   if (parsedVpnServerId > 0 && serverKindQuery.isSuccess && !exportConfigPageEnabled) {
     return (
@@ -333,15 +410,22 @@ const OvpnFileConfigForm: React.FC = () => {
     const newErrors = { VpnServerIp: "", VpnServerPort: "" };
 
     if (!ovpnFileConfig.VpnServerIp.trim()) {
-      newErrors.VpnServerIp = "VPN Server IP is required.";
+      newErrors.VpnServerIp = isXrayStack
+        ? "Public endpoint IP or hostname is required."
+        : "VPN Server IP is required.";
       isValid = false;
     }
-    if (
-      !ovpnFileConfig.VpnServerPort ||
-      ovpnFileConfig.VpnServerPort < 1 ||
-      ovpnFileConfig.VpnServerPort > 65535
-    ) {
-      newErrors.VpnServerPort = "VPN Server Port must be between 1 and 65535.";
+    const effectivePort =
+      !isXrayStack &&
+      autoDetectServerSettings &&
+      typeof detectedPort === "number" &&
+      Number.isFinite(detectedPort)
+        ? detectedPort
+        : ovpnFileConfig.VpnServerPort;
+    if (!effectivePort || effectivePort < 1 || effectivePort > 65535) {
+      newErrors.VpnServerPort = isXrayStack
+        ? "Public endpoint port must be between 1 and 65535."
+        : "VPN Server Port must be between 1 and 65535.";
       isValid = false;
     }
 
@@ -360,15 +444,31 @@ const OvpnFileConfigForm: React.FC = () => {
     }
   };
 
+  const applyExampleTemplate = () => {
+    setServerConfig((prev) => ({ ...prev, ConfigTemplate: exampleTemplate }));
+    toast.info("Example template inserted into the editor. Save to persist.");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
+    const useOpenVpnAutoDetect = openVpnPageEnabled && autoDetectServerSettings;
+    const effectivePort =
+      useOpenVpnAutoDetect && typeof detectedPort === "number" && Number.isFinite(detectedPort)
+        ? detectedPort
+        : ovpnFileConfig.VpnServerPort;
+    const effectiveTemplate =
+      useOpenVpnAutoDetect && serverProto
+        ? applyProtoToTemplate(ovpnFileConfig.ConfigTemplate, serverProto)
+        : ovpnFileConfig.ConfigTemplate;
+
     const payload: AddOrUpdateOvpnFileConfigRequest = {
       vpnServerId: ovpnFileConfig.VpnServerId || parsedVpnServerId,
       vpnServerIp: ovpnFileConfig.VpnServerIp.trim(),
-      vpnServerPort: ovpnFileConfig.VpnServerPort,
-      configTemplate: ovpnFileConfig.ConfigTemplate,
+      vpnServerPort: effectivePort,
+      configTemplate: effectiveTemplate,
+      autoDetectServerSettings: useOpenVpnAutoDetect,
     };
 
     try {
@@ -420,7 +520,6 @@ const OvpnFileConfigForm: React.FC = () => {
                 borderRadius: 8,
                 border: "1px solid var(--border-default, #30363d)",
                 background: "rgba(56, 139, 253, 0.08)",
-                maxWidth: 900,
                 lineHeight: 1.5,
                 fontSize: 14,
               }}
@@ -438,7 +537,6 @@ const OvpnFileConfigForm: React.FC = () => {
                 padding: "12px 14px",
                 borderRadius: 8,
                 border: "1px solid var(--border-default, #30363d)",
-                maxWidth: 900,
                 lineHeight: 1.5,
                 fontSize: 14,
               }}
@@ -462,7 +560,14 @@ const OvpnFileConfigForm: React.FC = () => {
               </div>
               <div className="right-buttons">
                 <button type="button" className="btn secondary" onClick={handleSubmit}>
-                  {FaPlus({ className: "icon" })} {vpnServerId ? "Update Config" : "Add Config"}
+                  {FaPlus({ className: "icon" })}{" "}
+                  {vpnServerId
+                    ? isXrayStack
+                      ? "Save template"
+                      : "Update Config"
+                    : isXrayStack
+                      ? "Save template"
+                      : "Add Config"}
                 </button>
               </div>
             </div>
@@ -473,7 +578,9 @@ const OvpnFileConfigForm: React.FC = () => {
 
           <form className="server-form" onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="VpnServerIp">VPN Server IP *</label>
+              <label htmlFor="VpnServerIp">
+                {isXrayStack ? "Public endpoint IP or hostname *" : "VPN Server IP *"}
+              </label>
               <input
                 type="text"
                 id="VpnServerIp"
@@ -481,13 +588,27 @@ const OvpnFileConfigForm: React.FC = () => {
                 value={ovpnFileConfig.VpnServerIp}
                 onChange={handleChange}
                 className={errors.VpnServerIp ? "input-error" : ""}
-                placeholder="Enter VPN Server IP"
+                placeholder={
+                  isXrayStack
+                    ? apiUrlHost
+                      ? `e.g. ${apiUrlHost}`
+                      : "IP or hostname clients use to connect"
+                    : "Enter VPN Server IP"
+                }
               />
+              {isXrayStack && apiUrlHost && !ovpnFileConfig.VpnServerIp.trim() ? (
+                <p className="form-hint" style={{ marginTop: 6 }}>
+                  Tip: server API URL host is <code>{apiUrlHost}</code> — use the public address clients reach, not
+                  necessarily the manager URL.
+                </p>
+              ) : null}
               {errors.VpnServerIp && <p className="error-message">{errors.VpnServerIp}</p>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="VpnServerPort">VPN Server Port *</label>
+              <label htmlFor="VpnServerPort">
+                {isXrayStack ? "Public endpoint port *" : "VPN Server Port *"}
+              </label>
               <input
                 type="number"
                 id="VpnServerPort"
@@ -495,10 +616,31 @@ const OvpnFileConfigForm: React.FC = () => {
                 value={ovpnFileConfig.VpnServerPort}
                 onChange={handleChange}
                 className={errors.VpnServerPort ? "input-error" : ""}
-                placeholder="Enter VPN Server Port"
+                placeholder={isXrayStack ? String(DEFAULT_XRAY_PUBLIC_PORT) : "Enter VPN Server Port"}
               />
               {errors.VpnServerPort && <p className="error-message">{errors.VpnServerPort}</p>}
             </div>
+
+            {openVpnPageEnabled ? (
+              <div className="form-group checkbox-container">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={autoDetectServerSettings}
+                    onChange={(e) => setAutoDetectServerSettings(e.target.checked)}
+                  />
+                  <div className="checkbox-content">
+                    <span className="checkbox-title">
+                      Try auto-detect Port/Proto from latest server conflog
+                    </span>
+                    <span className="checkbox-description">
+                      When enabled, save uses detected values from server config ({detectedPort ?? "—"} /{" "}
+                      {serverProto ?? "—"}).
+                    </span>
+                  </div>
+                </label>
+              </div>
+            ) : null}
 
             <div className="form-group">
               <div className="config-template-container">
@@ -531,7 +673,11 @@ const OvpnFileConfigForm: React.FC = () => {
                         highlightPreRef.current.scrollLeft = textareaRef.current.scrollLeft;
                       }
                     }}
-                    placeholder="Enter config template"
+                    placeholder={
+                      isXrayStack
+                        ? "VLESS export template with {{vless_uri}}, {{uuid}}, …"
+                        : "Enter config template"
+                    }
                     className="ovpn-textarea-overlay"
                     ref={textareaRef}
                   />
@@ -540,13 +686,32 @@ const OvpnFileConfigForm: React.FC = () => {
             </div>
           </form>
 
+          <div className="export-template-example" style={{ marginTop: 24 }}>
+            <h4>Example template</h4>
+            <p className="form-hint" style={{ marginBottom: 10 }}>
+              {isXrayStack
+                ? "Reference layout for VLESS export. Use “Insert into editor” if your saved template is empty or lost."
+                : "Reference .ovpn layout for new servers. Post-create setup also seeds a default on the server."}
+            </p>
+            <div className="toolbar" style={{ marginBottom: 8, display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button type="button" className="copy-button" onClick={() => void handleCopy(exampleTemplate)}>
+                {FaCopy({})} Copy example
+              </button>
+              <button type="button" className="btn secondary" onClick={applyExampleTemplate}>
+                Insert into editor
+              </button>
+            </div>
+            <pre className="ovpn-template-sample">{highlightOvpnConfig(exampleTemplate)}</pre>
+          </div>
+
           <div className="form-hint-container">
             <h4>What are these settings?</h4>
             {isXrayStack ? (
               <>
                 <p>
-                  <strong>VPN Server IP / Port</strong> — public endpoint embedded in generated VLESS URIs and templates
-                  (e.g. <code>{"{{server_ip}}"}</code>, <code>{"{{server_port}}"}</code>).
+                  <strong>Public endpoint IP / port</strong> — values embedded in generated VLESS URIs and templates
+                  (e.g. <code>{"{{server_ip}}"}</code>, <code>{"{{server_port}}"}</code>). Default port is{" "}
+                  <code>{DEFAULT_XRAY_PUBLIC_PORT}</code> (not OpenVPN <code>1194</code>).
                 </p>
                 <h4>VLESS link template</h4>
                 <p>
@@ -574,7 +739,7 @@ const OvpnFileConfigForm: React.FC = () => {
                   include dynamic placeholders like <code>{"{{server_ip}}"}</code>, <code>{"{{client_cert}}"}</code>, etc.
                 </p>
                 <p>These placeholders will be replaced with actual values when generating client configs:</p>
-                <pre className="ovpn-template-sample">{highlightOvpnConfig(SAMPLE_TEMPLATE)}</pre>
+                <pre className="ovpn-template-sample">{highlightOvpnConfig(OPEN_VPN_EXPORT_TEMPLATE)}</pre>
                 <p>
                   ⚠️ Do not remove or change the placeholders unless you understand their purpose. Each one is automatically
                   replaced with correct values for the selected VPN server and user certificate.

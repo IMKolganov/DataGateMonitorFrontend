@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { FaTelegramPlane } from "react-icons/fa";
-import { useGetApiV2OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v2/vpn-servers-v2";
+import { useGetApiV3OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
 import {
   postApiXrayClientLinksAddWithToken,
   postApiXrayClientLinksDownloadFileByCn,
@@ -10,7 +10,7 @@ import type {
   AddFileRequest,
   DownloadFileResponse,
   VpnServerV2Dto,
-  VpnServersV2Response,
+  VpnServersV3Response,
 } from "../../api/orvalModelShim";
 import { ACCESS_TOKEN_KEY } from "../../utils/const";
 import { decodeToken } from "../../utils/auth/jwt";
@@ -23,8 +23,12 @@ import "../../css/XrayPortal.css";
 const EMAIL_CLAIM = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress";
 const DISPLAY_NAME_CLAIM = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name";
 
-function normalizeServers(payload: VpnServersV2Response | undefined): VpnServerV2Dto[] {
+function normalizeServers(payload: VpnServersV3Response | undefined): VpnServerV2Dto[] {
   return payload?.vpnServers?.filter(Boolean) ?? [];
+}
+
+function buildXrayCommonName(externalId: string): string {
+  return `xray-${externalId.slice(0, 64)}-${Date.now()}`;
 }
 
 function decodeBase64Utf8(value: string): string {
@@ -83,7 +87,7 @@ const XrayPortalPage: React.FC = () => {
     }
   }, [accessToken]);
 
-  const serversQuery = useGetApiV2OpenVpnServersGetAll(undefined, {
+  const serversQuery = useGetApiV3OpenVpnServersGetAll(undefined, {
     query: {
       refetchOnWindowFocus: false,
       enabled: Boolean(accessToken),
@@ -91,7 +95,7 @@ const XrayPortalPage: React.FC = () => {
   });
 
   const xrayServers = useMemo(() => {
-    const servers = normalizeServers(serversQuery.data as VpnServersV2Response);
+    const servers = normalizeServers(serversQuery.data as VpnServersV3Response);
     return servers.filter(
       (server) => server.serverType === VpnServerType.Xray && server.isAccessibleForUserQuotaPlan !== false,
     );
@@ -117,7 +121,7 @@ const XrayPortalPage: React.FC = () => {
 
     try {
       const shortExternalId = userInfo.externalId.slice(0, 64);
-      const generatedCommonName = `xray-${shortExternalId}-${Date.now()}`;
+      const generatedCommonName = buildXrayCommonName(shortExternalId);
       const payload: AddFileRequest = {
         vpnServerId: server.id,
         externalId: shortExternalId,
