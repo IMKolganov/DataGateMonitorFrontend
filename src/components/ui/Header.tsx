@@ -5,6 +5,7 @@ import "../../css/Header.css";
 import { FaBell, FaDoorClosed, FaSun, FaMoon } from "react-icons/fa";
 import { logout } from "../../api/apirequest.ts";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
+import { parseTelegramNumericId } from "../../utils/telegramNumericId.ts";
 import { useNotificationsUnreadCount } from "../../pages/Notifications/useNotifications";
 import { useTheme } from "../../contexts/useTheme";
 import { UserAvatar } from "./UserAvatar";
@@ -65,6 +66,7 @@ export function Header() {
                         <li className="user-info">
                             <UserAvatar
                                 src={user.avatarUrl}
+                                telegramPhotoTelegramId={parseTelegramNumericId(user.providerExternalId)}
                                 name={user.displayName || user.email || "User"}
                                 colorSeed={String(user.id)}
                                 size={36}
