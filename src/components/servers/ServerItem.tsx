@@ -17,6 +17,7 @@ import type {
 } from "../../api/orvalModelShim";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { vpnServerTypeLabel } from "../../constants/vpnServerType";
+import { VpnStackLogo } from "./VpnStackLogo";
 
 interface Props {
     /** v2 includes quota plan groups and accessibility; v1 kept for detail pages still on legacy GET. */
@@ -170,6 +171,10 @@ const ServerItem: React.FC<Props> = ({
                     )}
                 </div>
                 <div className={`server-status ${isOnline ? "status-online" : "status-offline"}`}>
+                    <VpnStackLogo
+                        serverType={vpnServer?.serverType as number | undefined}
+                        size={18}
+                    />
                     {isOnline ? "✅ Online" : "❌ Offline"}
                 </div>
             </div>

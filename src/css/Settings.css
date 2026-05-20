@@ -8,6 +8,114 @@
   min-width: 0;
 }
 
+/* Left sidebar + full-width content area (tables, grids, forms) */
+.settings-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.settings-sidebar {
+  display: none;
+}
+
+.settings-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.settings-content__mobile-picker {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  background-color: var(--bg-content);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.settings-content__body {
+  min-width: 0;
+  width: 100%;
+}
+
+.settings-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.settings-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.625rem;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  text-decoration: none;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.settings-sidebar__link > .icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  opacity: 0.88;
+}
+
+.settings-sidebar__link:hover {
+  color: var(--text-primary);
+  background: var(--bg-content-alt);
+}
+
+.settings-sidebar__link--active {
+  color: var(--text-primary);
+  font-weight: 600;
+  border-left-color: var(--link-color);
+  background: var(--bg-content-alt);
+}
+
+.settings-sidebar__link--active > .icon {
+  opacity: 1;
+}
+
+@media (min-width: 900px) {
+  .settings-shell {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .settings-sidebar {
+    display: block;
+    flex: 0 0 13.5rem;
+    width: 13.5rem;
+    padding-right: 1rem;
+    border-right: 1px solid var(--border-color);
+    position: sticky;
+    top: 0.5rem;
+    max-height: calc(100vh - 10rem);
+    overflow-y: auto;
+  }
+
+  .settings-content__mobile-picker {
+    display: none;
+  }
+
+  .settings .settings-content__body.tab-content {
+    padding: 0;
+  }
+}
+
 
 
 .settings-description {

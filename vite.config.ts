@@ -103,41 +103,52 @@ export default defineConfig(({ mode }) => {
 
     build: {
       reportCompressedSize: true,
-      chunkSizeWarningLimit: 1200,
+      // react-globe.gl + three (~1.7MB) is lazy-loaded from VpnMap only
+      chunkSizeWarningLimit: 1800,
       /** Suppress Rolldown’s PLUGIN_TIMINGS noise (vite:css / visualizer / tailwind are expected). */
       rolldownOptions: {
         checks: {
           pluginTimings: false,
+        },
+        output: {
+          codeSplitting: {
+            groups: [
+              {
+                name: "react",
+                test: /node_modules\/(react|react-dom|react-router-dom|react-router)\//,
+              },
+              {
+                name: "mui",
+                test: /node_modules\/(@mui|@emotion)\//,
+              },
+              {
+                name: "recharts",
+                test: /node_modules\/(recharts|d3-)/,
+              },
+              {
+                name: "react-globe",
+                test: /node_modules\/(three|react-globe\.gl)\//,
+              },
+              {
+                name: "leaflet",
+                test: /node_modules\/(leaflet|react-leaflet)\//,
+              },
+              {
+                name: "signalr",
+                test: /node_modules\/@microsoft\/signalr\//,
+              },
+              {
+                name: "xlsx",
+                test: /node_modules\/xlsx\//,
+              },
+            ],
+          },
         },
       },
       rollupOptions: {
         onwarn(warning, warn) {
           if (warning.message.includes("/*#__PURE__*/")) return;
           warn(warning);
-        },
-        output: {
-          manualChunks(id) {
-            if (
-              id.includes("node_modules/react/") ||
-              id.includes("node_modules/react-dom/") ||
-              id.includes("node_modules/react-router-dom/") ||
-              id.includes("node_modules/react-router/")
-            ) {
-              return "react";
-            }
-            if (id.includes("node_modules/@mui/material/") || id.includes("node_modules/@mui/x-data-grid/")) {
-              return "mui";
-            }
-            if (id.includes("node_modules/leaflet/") || id.includes("node_modules/react-leaflet/")) {
-              return "leaflet";
-            }
-            if (id.includes("node_modules/@microsoft/signalr/")) {
-              return "signalr";
-            }
-            if (id.includes("node_modules/react-toastify/") || id.includes("node_modules/js-cookie/")) {
-              return "misc";
-            }
-          },
         },
       },
     },

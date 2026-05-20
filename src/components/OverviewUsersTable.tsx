@@ -1,5 +1,5 @@
 // src/components/OverviewUsersTable.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { Link, useParams } from "react-router-dom";
 import { FaUsers } from "react-icons/fa";
@@ -18,6 +18,7 @@ import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import { UserAvatar } from "./ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../utils/readOptionalAvatarUrl.ts";
 import { parseTelegramNumericId } from "../utils/telegramNumericId.ts";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors.ts";
 import { unwrapMaybeApiResponse } from "../pages/TelegramBotSettings/unwrapApiResponse";
 import type { ApiEnvelope } from "../pages/TelegramBotSettings/unwrapApiResponse";
 
@@ -43,22 +44,26 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
   externalId,
 }) => {
   const { vpnServerId: vpnServerIdFromRoute } = useParams<{ vpnServerId: string }>();
+  const canLinkToUserStats = isAdmin(getCurrentUser());
 
   const overviewStorageKey = useMemo(
     () =>
       `overview-users:${vpnServerId != null ? String(vpnServerId) : vpnServerIdFromRoute ?? "all"}`,
     [vpnServerId, vpnServerIdFromRoute],
   );
-  const [overviewPage, setOverviewPage] = useState(0);
+  const [overviewPageState, setOverviewPageState] = useState({ key: overviewStorageKey, page: 0 });
+  if (overviewPageState.key !== overviewStorageKey) {
+    setOverviewPageState({ key: overviewStorageKey, page: 0 });
+  }
+  const overviewPage = overviewPageState.page;
+  const setOverviewPage = (page: number) =>
+    setOverviewPageState((s) => ({ ...s, page }));
+
   const [overviewPageSize, setOverviewPageSize] = usePersistedPageSize(
     overviewStorageKey,
     10,
     "5,10,20,50,100",
   );
-
-  useEffect(() => {
-    setOverviewPage(0);
-  }, [overviewStorageKey]);
 
   // IMPORTANT: orval params are PascalCase (From/To/VpnServerId/ExternalId)
   const queryParams = useMemo(() => {
@@ -74,14 +79,17 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
     useGetApiOpenVpnClientsOverviewUsers<OverviewUsersResponse>(queryParams, {
       query: {
         enabled: Boolean(queryParams.From && queryParams.To),
-        staleTime: 10_000,
+        staleTime: Number.POSITIVE_INFINITY,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        refetchOnMount: false,
         retry: 1,
       },
     });
 
   const usersQuery = useGetApiUsersGetAll(
     { Page: 1, PageSize: 500 },
-    { query: { staleTime: 60_000 } },
+    { query: { enabled: canLinkToUserStats, staleTime: 60_000 } },
   );
 
   // orval response: { OverviewUserDto: OverviewUserDto[] }
@@ -159,12 +167,16 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
         const routeServerId = vpnServerIdFromRoute ? Number(vpnServerIdFromRoute) : null;
         const serverIdForLink = rowServerId ?? routeServerId;
 
+        if (!canLinkToUserStats) {
+          return <span>{extId}</span>;
+        }
+
         const url = serverIdForLink
-          ? `/servers/${serverIdForLink}/statistics/${extId}`
-          : `/servers/statistics/${extId}`;
+          ? `/servers/${serverIdForLink}/statistics/${encodeURIComponent(extId)}`
+          : `/servers/statistics/${encodeURIComponent(extId)}`;
 
         return (
-          <Link to={url} style={{ color: "#58a6ff", textDecoration: "none" }}>
+          <Link to={url} className="link-accent">
             {extId}
           </Link>
         );
@@ -186,20 +198,13 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
   ];
 
   return (
-    <div style={{ width: "100%", minWidth: 0 }}>
+    <div className="full-width-min-0">
       <h3 className="settings-card__h3-with-icon">
         <FaUsers className="icon" aria-hidden />
         <span>Users in Selection</span>
       </h3>
       <CustomThemeProvider>
-        <div
-          className="data-grid-wrap"
-          style={{
-            backgroundColor: "var(--bg-body)",
-            padding: "10px",
-            borderRadius: "8px",
-          }}
-        >
+        <div className="data-grid-wrap data-grid-wrap--inset">
           <StyledDataGrid
             rows={rows}
             columns={columns}

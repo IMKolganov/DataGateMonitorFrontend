@@ -4,6 +4,7 @@ import { BsClock, BsCpu, BsHddNetwork, BsFillBookmarkStarFill, BsPerson, BsTag }
 import { RiBarChart2Line, RiHardDrive2Line } from "react-icons/ri";
 import { IoIosSpeedometer, IoMdPerson } from "react-icons/io";
 import type { VpnServerResponse, VpnServerWithStatusDto } from "../../api/orvalModelShim";
+import { VpnStackLogo } from "./VpnStackLogo";
 
 export type ConflogPayloadSummary = {
   application?: string | null;
@@ -93,7 +94,17 @@ const ServerDetailsInfo: React.FC<Props> = ({
           </strong>
         </div>
         <div className={`server-status ${server?.isOnline ? "status-online" : "status-offline"}`}>
-          {loading ? <Skeleton width={80} /> : server?.isOnline ? "Online" : "Offline"}
+          {loading ? (
+            <Skeleton width={80} />
+          ) : (
+            <>
+              <VpnStackLogo
+                serverType={server?.serverType as number | undefined}
+                size={18}
+              />
+              {server?.isOnline ? "✅ Online" : "❌ Offline"}
+            </>
+          )}
         </div>
       </div>
 

@@ -38,6 +38,19 @@
     border-radius: 6px;
     vertical-align: middle;
   }
+
+  .server-item-skeleton .skeleton--w220-h20 { width: 220px; height: 20px; }
+  .server-item-skeleton .skeleton--w70-h22 { width: 70px; height: 22px; }
+  .server-item-skeleton .skeleton--w14-h14 { width: 14px; height: 14px; }
+  .server-item-skeleton .skeleton--w140-h14 { width: 140px; height: 14px; }
+  .server-item-skeleton .skeleton--w180-h14 { width: 180px; height: 14px; }
+  .server-item-skeleton .skeleton--w100-h14 { width: 100px; height: 14px; }
+  .server-item-skeleton .skeleton--w60-h14 { width: 60px; height: 14px; }
+  .server-item-skeleton .skeleton--w80-h24 { width: 80px; height: 24px; border-radius: 6px; }
+  .server-item-skeleton .skeleton--w50-h24 { width: 50px; height: 24px; border-radius: 6px; }
+  .server-item-skeleton .skeleton--w70-h32 { width: 70px; height: 32px; border-radius: 6px; }
+  .server-item-skeleton .skeleton--w65-h32 { width: 65px; height: 32px; border-radius: 6px; }
+  .server-item-skeleton .skeleton--w75-h32 { width: 75px; height: 32px; border-radius: 6px; }
   .server-item-skeleton .skeleton::after {
     content: "";
     position: absolute;
@@ -236,8 +249,10 @@
   .server-status {
     flex-shrink: 0;
     white-space: nowrap;
-    display: inline-block;
-    padding: 3px 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
     margin: 0px 6px 0px 6px;
     font-size: 12px;
     font-weight: 600;
@@ -245,6 +260,25 @@
     background-color: rgba(46, 204, 113, 0.12);
     border-radius: 8px;
     transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .server-status__stack-logo {
+    flex-shrink: 0;
+    display: block;
+    object-fit: contain;
+  }
+
+  .server-status__stack-logo--openvpn {
+    margin-right: 2px;
+  }
+
+  .server-status__stack-logo--xray {
+    border-radius: 4px;
+    color: #22d3ee;
+  }
+
+  [data-theme="light"] .server-status__stack-logo--xray {
+    color: #0e7490;
   }
 
   .status-online {

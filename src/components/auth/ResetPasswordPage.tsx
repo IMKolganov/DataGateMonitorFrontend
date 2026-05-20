@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { postApiAuthResetPassword } from "../../api/orval/auth/auth";
 import type { AdminResetPasswordRequest } from "../../api/orvalModelShim";
@@ -14,15 +14,17 @@ const ResetPasswordPage: React.FC = () => {
   const codeFromUrl = searchParams.get("code") ?? "";
 
   const [code, setCode] = useState("");
+  const [appliedUrlCode, setAppliedUrlCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    if (codeFromUrl) setCode(codeFromUrl);
-  }, [codeFromUrl]);
+  if (codeFromUrl && codeFromUrl !== appliedUrlCode) {
+    setAppliedUrlCode(codeFromUrl);
+    setCode(codeFromUrl);
+  }
 
   const canSubmit =
     code.trim().length > 0 &&

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { getCurrentUser } from "../utils/auth/authSelectors";
 
 const PREFIX = "datagrid-pageSize";
@@ -55,24 +55,26 @@ export function usePersistedPageSize(
 ): [number, (n: number) => void] {
   const allowedOptions = optionsFromKey(allowedKey);
 
-  const [pageSize, setPageSizeState] = useState(() =>
-    getStoredPageSize(storageKey, defaultPageSize, allowedOptions),
-  );
+  const [state, setState] = useState(() => ({
+    storageKey,
+    pageSize: getStoredPageSize(storageKey, defaultPageSize, allowedOptions),
+  }));
 
-  useEffect(() => {
+  if (state.storageKey !== storageKey) {
     const opts = optionsFromKey(allowedKey);
-    setPageSizeState(getStoredPageSize(storageKey, defaultPageSize, opts));
-  }, [storageKey, defaultPageSize, allowedKey]);
+    const pageSize = getStoredPageSize(storageKey, defaultPageSize, opts);
+    setState({ storageKey, pageSize });
+  }
 
   const setPageSize = useCallback(
     (n: number) => {
       const opts = optionsFromKey(allowedKey);
       const next = opts.includes(n) ? n : defaultPageSize;
-      setPageSizeState(next);
+      setState({ storageKey, pageSize: next });
       setStoredPageSize(storageKey, next);
     },
     [storageKey, defaultPageSize, allowedKey],
   );
 
-  return [pageSize, setPageSize];
+  return [state.pageSize, setPageSize];
 }

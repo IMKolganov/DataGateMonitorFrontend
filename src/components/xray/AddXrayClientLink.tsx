@@ -112,7 +112,7 @@ const AddXrayClientLink: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
       <button
         className="btn secondary"
         type="button"
-        onClick={() => navigate(`/servers/${vpnServerId}/ovpn-file-config/`)}
+        onClick={() => navigate(`/servers/${vpnServerId}/export-template`)}
         disabled={isPending}
         title="VLESS client export template ({{vless_uri}}, etc.)"
       >
