@@ -5,6 +5,9 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  width: var(--avatar-size, 32px);
+  height: var(--avatar-size, 32px);
+  font-size: var(--avatar-font-size, 12px);
   border-radius: 50%;
   overflow: hidden;
   font-weight: 600;

@@ -1,15 +1,16 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { usePostApiAuthGoogleLogin } from "../../api/orval/auth/auth";
-import type {
-    GoogleLoginRequest,
-    GoogleLoginResponse,
-} from "../../api/orvalModelShim";
-import { scheduleAutoLogout } from "../../utils/auth/authSession";
+import { orvalPayload } from "../../api/orvalPayload";
+import type { GoogleLoginRequest, LoginResponse } from "../../api/orvalModelShim";
 import { getRuntimeEnv } from "../../utils/runtimeEnv";
-import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY } from "../../utils/const.ts";
 import axios from "axios";
 import { errorMessage } from "../../utils/errorMessage";
 import { setStoredProfileAvatarFromGoogleIdToken } from "../../utils/auth/storedProfileAvatar";
+import TotpChallengeForm from "./TotpChallengeForm";
+import {
+  applyLoginFlow,
+  type TotpChallengeState,
+} from "../../utils/auth/handleLoginResponse";
 
 type GoogleCredentialResponse = { credential?: string };
 
@@ -39,40 +40,33 @@ interface GoogleLoginFormProps {
 const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" }) => {
     const [error, setError] = useState<string>("");
     const [scriptReady, setScriptReady] = useState<boolean>(false);
+    const [totpChallenge, setTotpChallenge] = useState<TotpChallengeState | null>(null);
+    const [googleIdToken, setGoogleIdToken] = useState<string | null>(null);
 
     const { mutateAsync: googleLogin, isPending } = usePostApiAuthGoogleLogin();
 
     const handleGoogleCredential = useCallback(
         async (idToken: string) => {
             setError("");
+            setGoogleIdToken(idToken);
 
             try {
                 const body: GoogleLoginRequest = {
                     idToken,
                 };
 
-                const response = (await googleLogin({
+                const response = orvalPayload<LoginResponse>(
+                  await googleLogin({
                     data: body,
-                })) as GoogleLoginResponse;
+                  }),
+                );
 
-                const token = response.token;
-                const refreshToken = response.refreshToken;
-                const refreshExpiration = response.refreshExpiration;
-
-                if (!token) {
-                    throw new Error("No token returned by API.");
-                }
-
-                setStoredProfileAvatarFromGoogleIdToken(idToken);
-                localStorage.setItem(ACCESS_TOKEN_KEY, token);
-                if (refreshToken) {
-                    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-                }
-                if (refreshExpiration) {
-                    localStorage.setItem(REFRESH_TOKEN_EXPIRATION, refreshExpiration);
-                }
-                scheduleAutoLogout(token);
-                window.location.href = redirectPath;
+                applyLoginFlow(response, {
+                    redirectPath,
+                    clearAvatar: false,
+                    onTotpChallenge: setTotpChallenge,
+                    onBeforeStoreTokens: () => setStoredProfileAvatarFromGoogleIdToken(idToken),
+                });
             } catch (err: unknown) {
                 let detailedMessage =
                     "We could not log you in with Google. Please try again.";
@@ -188,9 +182,6 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" })
                     shape: "rectangular",
                 });
 
-                // Optional auto prompt; remove if not needed
-                // window.google.accounts.id.prompt();
-
                 setScriptReady(true);
             } catch (e: unknown) {
                 if (cancelled) {
@@ -213,6 +204,22 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" })
             cancelled = true;
         };
     }, [handleGoogleCredential]);
+
+    if (totpChallenge) {
+        return (
+            <TotpChallengeForm
+                loginChallengeId={totpChallenge.loginChallengeId}
+                displayName={totpChallenge.displayName}
+                redirectPath={redirectPath}
+                onBack={() => setTotpChallenge(null)}
+                onBeforeStoreTokens={
+                  googleIdToken
+                    ? () => setStoredProfileAvatarFromGoogleIdToken(googleIdToken)
+                    : undefined
+                }
+            />
+        );
+    }
 
     return (
         <>

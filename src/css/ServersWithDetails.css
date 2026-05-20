@@ -116,7 +116,6 @@
   background-color: var(--bg-content);
   border-right: 1px solid var(--border-color);
   transition: border-color 0.3s ease, background-color 0.3s ease;
-  scrollbar-gutter: stable;
 }
 
 .server-list-panel.collapsed {
@@ -153,7 +152,6 @@
   background-color: var(--bg-content);
   /* Body copy: softer than page default (--text-primary from html/body). */
   color: var(--text-secondary);
-  scrollbar-gutter: stable;
 }
 
 .server-details-panel h2,
