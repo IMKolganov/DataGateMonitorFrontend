@@ -53,13 +53,14 @@ const TelegramCodeLoginForm: React.FC<Props> = ({ redirectPath = "/" }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <p className="settings-item-description" style={{ marginBottom: 12 }}>
-        In the Telegram bot, send <strong>дай код</strong> or <strong>/login_code</strong>, then paste the code here.
+      <p className="login-info-text">
+        Open the DataGate VPN Telegram bot in a private chat, run <strong>/login_code</strong>, then paste the one-time code below. The code expires in a few minutes. Register in the bot with <strong>/register</strong> first if you have not already.
       </p>
       {error ? <p className="error-message">{error}</p> : null}
       <div className="login-item">
-        <h4>Telegram code</h4>
+        <h4>One-time code</h4>
         <input
+          id="telegram-login-code"
           type="text"
           inputMode="text"
           autoComplete="one-time-code"
@@ -69,11 +70,13 @@ const TelegramCodeLoginForm: React.FC<Props> = ({ redirectPath = "/" }) => {
           required
           placeholder="ABCD1234"
           maxLength={12}
+          disabled={loading}
         />
       </div>
       <div className="login-item">
         <button type="submit" className="btn primary btn-fullwidth" disabled={!canSubmit}>
-          <FaTelegramPlane className="icon" /> {loading ? "Signing in…" : "Sign in with Telegram code"}
+          <FaTelegramPlane className="icon" aria-hidden />
+          {loading ? "Signing in…" : "Sign in with Telegram code"}
         </button>
       </div>
     </form>
