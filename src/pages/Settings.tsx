@@ -89,40 +89,47 @@ export function Settings() {
         </div>
       </div>
 
-      {/* Desktop tabs */}
-      <div className="tabs desktop-tabs">
-        {tabs.map((tab) => {
-          const Icon = tab.Icon;
-          return (
-            <Link
-              key={tab.path}
-              to={`/settings/${tab.path}`}
-              className={
-                isTabActive(tab.path) ? "tab active-tab tab--with-icon" : "tab tab--with-icon"
-              }
-            >
-              <Icon className="icon" aria-hidden />
-              <span>{tab.label}</span>
-            </Link>
-          );
-        })}
-      </div>
+      <div className="settings-shell">
+        <aside className="settings-sidebar" aria-label="Settings sections">
+          <nav className="settings-sidebar__nav">
+            {tabs.map((tab) => {
+              const Icon = tab.Icon;
+              return (
+                <Link
+                  key={tab.path}
+                  to={`/settings/${tab.path}`}
+                  className={
+                    isTabActive(tab.path)
+                      ? "settings-sidebar__link settings-sidebar__link--active"
+                      : "settings-sidebar__link"
+                  }
+                >
+                  <Icon className="icon" aria-hidden />
+                  <span>{tab.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </aside>
 
-      {/* Mobile dropdown */}
-      <select
-        className="tabs-dropdown mobile-tabs"
-        value={selectTabValue}
-        onChange={handleSelectChange}
-      >
-        {tabs.map((tab) => (
-          <option key={tab.path} value={tab.path}>
-            {tab.mobilePrefix} {tab.label}
-          </option>
-        ))}
-      </select>
+        <div className="settings-content">
+          <select
+            className="settings-content__mobile-picker mobile-tabs"
+            value={selectTabValue}
+            onChange={handleSelectChange}
+            aria-label="Settings section"
+          >
+            {tabs.map((tab) => (
+              <option key={tab.path} value={tab.path}>
+                {tab.mobilePrefix} {tab.label}
+              </option>
+            ))}
+          </select>
 
-      <div className="tab-content">
-        <Outlet />
+          <div className="settings-content__body tab-content">
+            <Outlet />
+          </div>
+        </div>
       </div>
     </div>
   );
