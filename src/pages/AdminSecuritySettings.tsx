@@ -11,6 +11,7 @@ import { orvalPayload } from "../api/orvalPayload";
 import type { TotpSetupResponse, TotpStatusResponse } from "../api/orvalModelShim";
 import { PasswordInput } from "../components/auth/PasswordInput";
 import { TotpSetupQrCode } from "../components/auth/TotpSetupQrCode";
+import { AdminActiveSessions } from "../components/settings/AdminActiveSessions";
 import { errorMessage } from "../utils/errorMessage";
 import "../css/Settings.css";
 
@@ -269,6 +270,8 @@ export default function AdminSecuritySettings() {
           )}
         </>
       )}
+
+      <AdminActiveSessions />
     </>
   );
 }
