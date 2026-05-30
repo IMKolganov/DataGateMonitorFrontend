@@ -12,6 +12,8 @@ export type LoginFlowResult =
 export type TotpChallengeState = {
   loginChallengeId: string;
   displayName?: string | null;
+  /** Runs immediately before tokens are stored after a successful TOTP verify. */
+  onBeforeStoreTokens?: () => void;
 };
 
 export function resolveLoginFlow(payload: LoginResponse | null | undefined): LoginFlowResult {

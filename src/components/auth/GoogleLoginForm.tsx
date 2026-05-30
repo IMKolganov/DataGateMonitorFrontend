@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { usePostApiAuthGoogleLogin } from "../../api/orval/auth/auth";
 import { orvalPayload } from "../../api/orvalPayload";
 import type { GoogleLoginRequest, LoginResponse } from "../../api/orvalModelShim";
@@ -6,7 +6,6 @@ import { getRuntimeEnv } from "../../utils/runtimeEnv";
 import axios from "axios";
 import { errorMessage } from "../../utils/errorMessage";
 import { setStoredProfileAvatarFromGoogleIdToken } from "../../utils/auth/storedProfileAvatar";
-import TotpChallengeForm from "./TotpChallengeForm";
 import {
   applyLoginFlow,
   type TotpChallengeState,
@@ -35,20 +34,22 @@ const GOOGLE_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
 
 interface GoogleLoginFormProps {
   redirectPath?: string;
+  onTotpChallenge: (challenge: TotpChallengeState) => void;
 }
 
-const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" }) => {
+const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({
+  redirectPath = "/",
+  onTotpChallenge,
+}) => {
     const [error, setError] = useState<string>("");
     const [scriptReady, setScriptReady] = useState<boolean>(false);
-    const [totpChallenge, setTotpChallenge] = useState<TotpChallengeState | null>(null);
-    const [googleIdToken, setGoogleIdToken] = useState<string | null>(null);
+    const buttonContainerRef = useRef<HTMLDivElement>(null);
 
     const { mutateAsync: googleLogin, isPending } = usePostApiAuthGoogleLogin();
 
     const handleGoogleCredential = useCallback(
         async (idToken: string) => {
             setError("");
-            setGoogleIdToken(idToken);
 
             try {
                 const body: GoogleLoginRequest = {
@@ -64,7 +65,12 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" })
                 applyLoginFlow(response, {
                     redirectPath,
                     clearAvatar: false,
-                    onTotpChallenge: setTotpChallenge,
+                    onTotpChallenge: (challenge) => {
+                      onTotpChallenge({
+                        ...challenge,
+                        onBeforeStoreTokens: () => setStoredProfileAvatarFromGoogleIdToken(idToken),
+                      });
+                    },
                     onBeforeStoreTokens: () => setStoredProfileAvatarFromGoogleIdToken(idToken),
                 });
             } catch (err: unknown) {
@@ -90,7 +96,7 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" })
                 setError(detailedMessage);
             }
         },
-        [googleLogin, redirectPath],
+        [googleLogin, onTotpChallenge, redirectPath],
     );
 
     const loadGoogleScript = () =>
@@ -132,6 +138,23 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" })
             document.body.appendChild(script);
         });
 
+    const renderGoogleButton = useCallback(() => {
+        const buttonContainer = buttonContainerRef.current;
+        if (!buttonContainer || !window.google?.accounts?.id) {
+            return;
+        }
+
+        buttonContainer.replaceChildren();
+        window.google.accounts.id.renderButton(buttonContainer, {
+            type: "standard",
+            theme: "filled_black",
+            size: "large",
+            text: "signin_with",
+            shape: "rectangular",
+            width: 400,
+        });
+    }, []);
+
     useEffect(() => {
         let cancelled = false;
 
@@ -166,23 +189,7 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" })
                     },
                 });
 
-                const buttonContainer = document.getElementById(
-                    "google-signin-button",
-                );
-
-                if (!buttonContainer) {
-                    throw new Error("Google sign-in button container was not found.");
-                }
-
-                window.google.accounts.id.renderButton(buttonContainer, {
-                    type: "standard",
-                    theme: "filled_black",
-                    size: "large",
-                    text: "signin_with",
-                    shape: "rectangular",
-                    width: 400,
-                });
-
+                renderGoogleButton();
                 setScriptReady(true);
             } catch (e: unknown) {
                 if (cancelled) {
@@ -204,30 +211,14 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" })
         return () => {
             cancelled = true;
         };
-    }, [handleGoogleCredential]);
-
-    if (totpChallenge) {
-        return (
-            <TotpChallengeForm
-                loginChallengeId={totpChallenge.loginChallengeId}
-                displayName={totpChallenge.displayName}
-                redirectPath={redirectPath}
-                onBack={() => setTotpChallenge(null)}
-                onBeforeStoreTokens={
-                  googleIdToken
-                    ? () => setStoredProfileAvatarFromGoogleIdToken(googleIdToken)
-                    : undefined
-                }
-            />
-        );
-    }
+    }, [handleGoogleCredential, renderGoogleButton]);
 
     return (
         <>
             {error && <p className="error-message">{error}</p>}
 
             <div className="login-item">
-                <div id="google-signin-button" className="google-login-wrapper" />
+                <div ref={buttonContainerRef} className="google-login-wrapper" />
             </div>
 
             {(!scriptReady || isPending) && (

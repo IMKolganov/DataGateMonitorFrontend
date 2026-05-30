@@ -53,14 +53,17 @@ const TotpChallengeForm: React.FC<Props> = ({
   };
 
   return (
-    <div>
-      <p style={{ marginBottom: 12, lineHeight: 1.45 }}>
+    <div className="login-totp-screen" data-testid="totp-challenge-screen">
+      <div className="login-totp-icon" aria-hidden>
+        <FaShieldAlt />
+      </div>
+      <p className="login-totp-lead">
         {displayName ? (
           <>
-            Signed in as <strong>{displayName}</strong>. Enter the 6-digit code from your authenticator app.
+            Signed in as <strong>{displayName}</strong>. Enter the 6-digit code from your authenticator app to finish signing in.
           </>
         ) : (
-          <>Enter the 6-digit code from your authenticator app.</>
+          <>Enter the 6-digit code from your authenticator app to finish signing in.</>
         )}
       </p>
       {error ? <p className="error-message">{error}</p> : null}
@@ -71,21 +74,26 @@ const TotpChallengeForm: React.FC<Props> = ({
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"
-            className="input-login"
+            className="input-login login-totp-code-input"
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
             placeholder="000000"
+            autoFocus
             required
           />
         </div>
         <div className="login-item">
           <button type="submit" className="btn primary btn-fullwidth" disabled={!canSubmit}>
-            <FaShieldAlt className="icon" /> {loading ? "Verifying…" : "Verify"}
+            <FaShieldAlt className="icon" /> {loading ? "Verifying…" : "Verify and sign in"}
           </button>
         </div>
       </form>
       {onBack ? (
-        <button type="button" className="btn secondary btn-fullwidth" style={{ marginTop: 8 }} onClick={onBack}>
+        <button
+          type="button"
+          className="btn secondary btn-fullwidth login-totp-back"
+          onClick={onBack}
+        >
           Back to sign in
         </button>
       ) : null}
