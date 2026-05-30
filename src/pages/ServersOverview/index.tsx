@@ -223,7 +223,7 @@ export default function ServersOverview() {
   const seriesQuery = useGetApiOpenVpnClientsOverviewSeries(seriesParams, {
     query: {
       enabled: overviewChartsEnabled,
-      staleTime: 10_000,
+      staleTime: 60_000,
       retry: 1,
       placeholderData: keepPreviousData,
     },
@@ -232,16 +232,22 @@ export default function ServersOverview() {
   const totalsQuery = useGetApiOpenVpnClientsOverviewSummary(totalsParams, {
     query: {
       enabled: overviewChartsEnabled,
-      staleTime: 10_000,
+      staleTime: 60_000,
       retry: 1,
       placeholderData: keepPreviousData,
     },
   });
 
+  const overviewPrimaryReady =
+    !seriesQuery.isLoading &&
+    !totalsQuery.isLoading &&
+    (seriesQuery.isFetched || seriesQuery.isError) &&
+    (totalsQuery.isFetched || totalsQuery.isError);
+
   const usersSeriesQuery = useGetApiOpenVpnClientsOverviewUsersSeries(seriesParams, {
     query: {
-      enabled: overviewChartsEnabled,
-      staleTime: 10_000,
+      enabled: overviewChartsEnabled && overviewPrimaryReady,
+      staleTime: 60_000,
       retry: 1,
       placeholderData: keepPreviousData,
     },
