@@ -21,13 +21,6 @@ describe("GoogleLoginForm", () => {
     renderButton.mockReset();
     initialize.mockReset();
 
-    class ResizeObserverMock {
-      observe = vi.fn();
-      disconnect = vi.fn();
-      unobserve = vi.fn();
-    }
-    vi.stubGlobal("ResizeObserver", ResizeObserverMock);
-
     window.google = {
       accounts: {
         id: {
@@ -52,6 +45,17 @@ describe("GoogleLoginForm", () => {
     });
 
     expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
+  });
+
+  it("renders the Google button once on mount", async () => {
+    render(<GoogleLoginForm onTotpChallenge={vi.fn()} />);
+
+    await vi.waitFor(() => {
+      expect(renderButton).toHaveBeenCalled();
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(renderButton.mock.calls.length).toBe(1);
   });
 
   it("uses the container width for the Google button", async () => {

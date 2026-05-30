@@ -298,6 +298,7 @@ export function GeneralServerDetails() {
             staleTime: 10000,
             refetchInterval: isLive && liveRefreshSeconds > 0 ? liveRefreshSeconds * 1000 : false,
             retry: 1,
+            placeholderData: keepPreviousData,
         },
     });
 
@@ -346,7 +347,7 @@ export function GeneralServerDetails() {
         [mapConnectedQuery.data],
     );
     const mapClients: VpnClientInfoDto[] = isLive
-        ? mapLiveClientsResponse?.vpnClients ?? clients
+        ? mapLiveClientsResponse?.vpnClients ?? []
         : clients;
 
     const totalClients =
