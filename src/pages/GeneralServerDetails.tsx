@@ -34,7 +34,7 @@ import {
     useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId,
     getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey,
 } from "../api/orval/quota-plan-allowed-server/quota-plan-allowed-server";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import type { QuotaPlansResponse, QuotaPlanAllowedServerDto } from "../api/orvalModelShim";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
@@ -146,12 +146,21 @@ export function GeneralServerDetails() {
         Number.isFinite(numericServerId) &&
         v3ServerWithStatus?.vpnServerResponses?.vpnServer?.isAccessibleForUserQuotaPlan === false;
 
-    const [pageState, setPageState] = useState({ isLive, page: 0 });
-    if (pageState.isLive !== isLive) {
-        setPageState({ isLive, page: 0 });
+    const [pageState, setPageState] = useState({
+        isLive,
+        serverId: numericServerId,
+        page: 0,
+    });
+    if (pageState.isLive !== isLive || pageState.serverId !== numericServerId) {
+        setPageState({ isLive, serverId: numericServerId, page: 0 });
     }
     const page = pageState.page;
     const setPage = (next: number) => setPageState((s) => ({ ...s, page: next }));
+
+    const handleClientsPageSizeChange = (nextPageSize: number) => {
+        setPageSize(nextPageSize);
+        setPage(0);
+    };
 
     const readStoredLiveRefreshSeconds = (serverId: number): number => {
         const storageKey = `server-live-refresh-seconds:${serverId}`;
@@ -279,6 +288,7 @@ export function GeneralServerDetails() {
             staleTime: 10000,
             refetchInterval: isLive && liveRefreshSeconds > 0 ? liveRefreshSeconds * 1000 : false,
             retry: 1,
+            placeholderData: keepPreviousData,
         },
     });
 
@@ -296,6 +306,7 @@ export function GeneralServerDetails() {
             enabled: Number.isFinite(numericServerId) && !isLive && clientInsightsEnabled,
             staleTime: 10000,
             retry: 1,
+            placeholderData: keepPreviousData,
         },
     });
 
@@ -321,14 +332,19 @@ export function GeneralServerDetails() {
                     : String(historyQuery.error ?? "Request failed")
                 : null;
 
-    const activeClientsResponse =
-        (isLive ? connectedQuery.data : historyQuery.data) as unknown as
-            | ConnectedClientsResponse
-            | undefined;
+    const activeClientsResponse = useMemo(
+        () =>
+            unwrapMaybeApiResponse<ConnectedClientsResponse>(
+                (isLive ? connectedQuery.data : historyQuery.data) as never,
+            ),
+        [isLive, connectedQuery.data, historyQuery.data],
+    );
 
     const clients: VpnClientInfoDto[] = activeClientsResponse?.vpnClients ?? [];
-    const mapLiveClientsResponse =
-        mapConnectedQuery.data as unknown as ConnectedClientsResponse | undefined;
+    const mapLiveClientsResponse = useMemo(
+        () => unwrapMaybeApiResponse<ConnectedClientsResponse>(mapConnectedQuery.data as never),
+        [mapConnectedQuery.data],
+    );
     const mapClients: VpnClientInfoDto[] = isLive
         ? mapLiveClientsResponse?.vpnClients ?? clients
         : clients;
@@ -575,7 +591,7 @@ export function GeneralServerDetails() {
                             page={page}
                             pageSize={pageSize}
                             onPageChange={setPage}
-                            onPageSizeChange={setPageSize}
+                            onPageSizeChange={handleClientsPageSizeChange}
                             loading={loadingClients}
                             clientsStack={xrayClientsEnabled ? "xray" : "openvpn"}
                             vpnServerId={numericServerId}

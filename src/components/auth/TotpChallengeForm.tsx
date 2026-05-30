@@ -7,6 +7,10 @@ import { storeAuthTokens } from "../../utils/auth/authTokens";
 import { clearStoredProfileAvatarUrl } from "../../utils/auth/storedProfileAvatar";
 import { errorMessage } from "../../utils/errorMessage";
 
+function isLoginChallengeExpiredMessage(message: string): boolean {
+  return /challenge expired|too many invalid attempts|sign in again/i.test(message);
+}
+
 type Props = {
   loginChallengeId: string;
   displayName?: string | null;
@@ -24,6 +28,7 @@ const TotpChallengeForm: React.FC<Props> = ({
 }) => {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  const [challengeExpired, setChallengeExpired] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const canSubmit = code.trim().length >= 6 && !loading;
@@ -31,6 +36,7 @@ const TotpChallengeForm: React.FC<Props> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setChallengeExpired(false);
     setLoading(true);
     try {
       const result = orvalPayload<LoginResponse>(
@@ -46,7 +52,15 @@ const TotpChallengeForm: React.FC<Props> = ({
       storeAuthTokens(result);
       window.location.href = redirectPath;
     } catch (err: unknown) {
-      setError(errorMessage(err));
+      const message = errorMessage(err);
+      if (isLoginChallengeExpiredMessage(message)) {
+        setChallengeExpired(true);
+        setError(
+          "This verification step expired. Go back and sign in again — you are not logged in yet, so there is nothing to log out of.",
+        );
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -83,7 +97,11 @@ const TotpChallengeForm: React.FC<Props> = ({
           />
         </div>
         <div className="login-item">
-          <button type="submit" className="btn primary btn-fullwidth" disabled={!canSubmit}>
+          <button
+            type="submit"
+            className="btn primary btn-fullwidth"
+            disabled={!canSubmit || challengeExpired}
+          >
             <FaShieldAlt className="icon" /> {loading ? "Verifying…" : "Verify and sign in"}
           </button>
         </div>
@@ -91,10 +109,10 @@ const TotpChallengeForm: React.FC<Props> = ({
       {onBack ? (
         <button
           type="button"
-          className="btn secondary btn-fullwidth login-totp-back"
+          className={`btn ${challengeExpired ? "primary" : "secondary"} btn-fullwidth login-totp-back`}
           onClick={onBack}
         >
-          Back to sign in
+          {challengeExpired ? "Sign in again" : "Back to sign in"}
         </button>
       ) : null}
     </div>
