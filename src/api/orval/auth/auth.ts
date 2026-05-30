@@ -26,6 +26,8 @@ import type {
 import type {
   ApiAuthResponsesAdminForgotPasswordResponse,
   ApiAuthResponsesAdminResetPasswordResponse,
+  ApiAuthResponsesAuthSessionPolicyResponse,
+  ApiAuthResponsesGetUserSessionsResponse,
   ApiAuthResponsesGoogleLoginResponse,
   ApiAuthResponsesLoginResponse,
   ApiAuthResponsesRefreshResponse,
@@ -34,8 +36,8 @@ import type {
   ApiAuthResponsesTokenResponse,
   ApiAuthResponsesTotpSetupResponse,
   ApiAuthResponsesTotpStatusResponse,
-  ApiModelsAuthAuthSessionPolicyResponse,
   ApiServicesApiAuthEmailConfirmationModelsConfirmEmailResponse,
+  ApiSystemInt32,
   ApiSystemString,
   AuthRequestsAdminForgotPasswordRequest,
   AuthRequestsAdminResetPasswordRequest,
@@ -44,6 +46,7 @@ import type {
   AuthRequestsLoginRequest,
   AuthRequestsRefreshRequest,
   AuthRequestsRegisterUserRequest,
+  AuthRequestsRevokeUserSessionsRequest,
   AuthRequestsTelegramCodeLoginRequest,
   AuthRequestsTelegramRequestLoginCodeRequest,
   AuthRequestsTokenRequest,
@@ -68,7 +71,7 @@ export const getApiAuthSessionPolicy = (
 ) => {
 
 
-      return ogmMutator<ApiModelsAuthAuthSessionPolicyResponse>(
+      return ogmMutator<ApiAuthResponsesAuthSessionPolicyResponse>(
       {url: `/api/auth/session-policy`, method: 'GET', signal
     },
       options);
@@ -916,14 +919,271 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPostApiAuthResetPasswordMutationOptions(options), queryClient);
     }
-    export const postApiAuthLogout = (
+    export const getApiAuthSessions = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
 
+      return ogmMutator<ApiAuthResponsesGetUserSessionsResponse>(
+      {url: `/api/auth/sessions`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiAuthSessionsQueryKey = () => {
+    return [
+    `/api/auth/sessions`
+    ] as const;
+    }
+
+
+export const getGetApiAuthSessionsQueryOptions = <TData = Awaited<ReturnType<typeof getApiAuthSessions>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthSessions>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAuthSessionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAuthSessions>>> = ({ signal }) => getApiAuthSessions(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAuthSessions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAuthSessionsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAuthSessions>>>
+export type GetApiAuthSessionsQueryError = unknown
+
+
+export function useGetApiAuthSessions<TData = Awaited<ReturnType<typeof getApiAuthSessions>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthSessions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuthSessions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuthSessions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuthSessions<TData = Awaited<ReturnType<typeof getApiAuthSessions>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthSessions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuthSessions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuthSessions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuthSessions<TData = Awaited<ReturnType<typeof getApiAuthSessions>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthSessions>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAuthSessions<TData = Awaited<ReturnType<typeof getApiAuthSessions>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthSessions>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAuthSessionsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export const deleteApiAuthSessionsSessionId = (
+    sessionId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
       return ogmMutator<void>(
-      {url: `/api/auth/logout`, method: 'POST', signal
+      {url: `/api/auth/sessions/${sessionId}`, method: 'DELETE', signal
+    },
+      options);
+    }
+
+
+
+export const getDeleteApiAuthSessionsSessionIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiAuthSessionsSessionId>>, TError,{sessionId: number}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiAuthSessionsSessionId>>, TError,{sessionId: number}, TContext> => {
+
+const mutationKey = ['deleteApiAuthSessionsSessionId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiAuthSessionsSessionId>>, {sessionId: number}> = (props) => {
+          const {sessionId} = props ?? {};
+
+          return  deleteApiAuthSessionsSessionId(sessionId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiAuthSessionsSessionIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiAuthSessionsSessionId>>>
+
+    export type DeleteApiAuthSessionsSessionIdMutationError = unknown
+
+    export const useDeleteApiAuthSessionsSessionId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiAuthSessionsSessionId>>, TError,{sessionId: number}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiAuthSessionsSessionId>>,
+        TError,
+        {sessionId: number},
+        TContext
+      > => {
+      return useMutation(getDeleteApiAuthSessionsSessionIdMutationOptions(options), queryClient);
+    }
+    export const postApiAuthSessionsRevokeAll = (
+    authRequestsRevokeUserSessionsRequest?: AuthRequestsRevokeUserSessionsRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemInt32>(
+      {url: `/api/auth/sessions/revoke-all`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsRevokeUserSessionsRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthSessionsRevokeAllMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthSessionsRevokeAll>>, TError,{data?: AuthRequestsRevokeUserSessionsRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthSessionsRevokeAll>>, TError,{data?: AuthRequestsRevokeUserSessionsRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthSessionsRevokeAll'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthSessionsRevokeAll>>, {data?: AuthRequestsRevokeUserSessionsRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthSessionsRevokeAll(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthSessionsRevokeAllMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthSessionsRevokeAll>>>
+    export type PostApiAuthSessionsRevokeAllMutationBody = AuthRequestsRevokeUserSessionsRequest | undefined
+    export type PostApiAuthSessionsRevokeAllMutationError = unknown
+
+    export const usePostApiAuthSessionsRevokeAll = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthSessionsRevokeAll>>, TError,{data?: AuthRequestsRevokeUserSessionsRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthSessionsRevokeAll>>,
+        TError,
+        {data?: AuthRequestsRevokeUserSessionsRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthSessionsRevokeAllMutationOptions(options), queryClient);
+    }
+    export const postApiAuthSessionsRevokeOthers = (
+    authRequestsRevokeUserSessionsRequest?: AuthRequestsRevokeUserSessionsRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemInt32>(
+      {url: `/api/auth/sessions/revoke-others`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsRevokeUserSessionsRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthSessionsRevokeOthersMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthSessionsRevokeOthers>>, TError,{data?: AuthRequestsRevokeUserSessionsRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthSessionsRevokeOthers>>, TError,{data?: AuthRequestsRevokeUserSessionsRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthSessionsRevokeOthers'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthSessionsRevokeOthers>>, {data?: AuthRequestsRevokeUserSessionsRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthSessionsRevokeOthers(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthSessionsRevokeOthersMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthSessionsRevokeOthers>>>
+    export type PostApiAuthSessionsRevokeOthersMutationBody = AuthRequestsRevokeUserSessionsRequest | undefined
+    export type PostApiAuthSessionsRevokeOthersMutationError = unknown
+
+    export const usePostApiAuthSessionsRevokeOthers = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthSessionsRevokeOthers>>, TError,{data?: AuthRequestsRevokeUserSessionsRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthSessionsRevokeOthers>>,
+        TError,
+        {data?: AuthRequestsRevokeUserSessionsRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthSessionsRevokeOthersMutationOptions(options), queryClient);
+    }
+    export const postApiAuthLogout = (
+    authRequestsRefreshRequest?: AuthRequestsRefreshRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<void>(
+      {url: `/api/auth/logout`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsRefreshRequest, signal
     },
       options);
     }
@@ -931,8 +1191,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 export const getPostApiAuthLogoutMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogout>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogout>>, TError,void, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogout>>, TError,{data?: AuthRequestsRefreshRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogout>>, TError,{data?: AuthRequestsRefreshRequest}, TContext> => {
 
 const mutationKey = ['postApiAuthLogout'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -944,10 +1204,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthLogout>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthLogout>>, {data?: AuthRequestsRefreshRequest}> = (props) => {
+          const {data} = props ?? {};
 
-
-          return  postApiAuthLogout(requestOptions)
+          return  postApiAuthLogout(data,requestOptions)
         }
 
 
@@ -958,15 +1218,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostApiAuthLogoutMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthLogout>>>
-
+    export type PostApiAuthLogoutMutationBody = AuthRequestsRefreshRequest | undefined
     export type PostApiAuthLogoutMutationError = unknown
 
     export const usePostApiAuthLogout = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogout>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthLogout>>, TError,{data?: AuthRequestsRefreshRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiAuthLogout>>,
         TError,
-        void,
+        {data?: AuthRequestsRefreshRequest},
         TContext
       > => {
       return useMutation(getPostApiAuthLogoutMutationOptions(options), queryClient);
