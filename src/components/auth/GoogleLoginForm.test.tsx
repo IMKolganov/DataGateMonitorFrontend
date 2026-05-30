@@ -74,7 +74,8 @@ describe("GoogleLoginForm", () => {
       expect(renderButton).toHaveBeenCalled();
     });
 
-    const opts = renderButton.mock.calls.at(-1)?.[1] as { width?: number } | undefined;
+    const lastCall = renderButton.mock.calls[renderButton.mock.calls.length - 1];
+    const opts = lastCall?.[1] as { width?: number } | undefined;
     expect(opts?.width).toBe(320);
   });
 
