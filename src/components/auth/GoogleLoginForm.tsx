@@ -180,6 +180,7 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({ redirectPath = "/" })
                     size: "large",
                     text: "signin_with",
                     shape: "rectangular",
+                    width: 400,
                 });
 
                 setScriptReady(true);
