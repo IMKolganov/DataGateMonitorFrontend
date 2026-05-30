@@ -31,6 +31,12 @@ declare global {
 
 const GOOGLE_SCRIPT_ID = "google-identity-script";
 const GOOGLE_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
+const GOOGLE_BUTTON_MIN_WIDTH = 200;
+
+function resolveGoogleButtonWidth(container: HTMLElement): number {
+    const measured = Math.floor(container.getBoundingClientRect().width);
+    return Math.max(GOOGLE_BUTTON_MIN_WIDTH, measured);
+}
 
 interface GoogleLoginFormProps {
   redirectPath?: string;
@@ -151,7 +157,7 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({
             size: "large",
             text: "signin_with",
             shape: "rectangular",
-            width: 400,
+            width: resolveGoogleButtonWidth(buttonContainer),
         });
     }, []);
 
@@ -212,6 +218,22 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({
             cancelled = true;
         };
     }, [handleGoogleCredential, renderGoogleButton]);
+
+    useEffect(() => {
+        const buttonContainer = buttonContainerRef.current;
+        if (!buttonContainer || !scriptReady) {
+            return;
+        }
+
+        const observer = new ResizeObserver(() => {
+            renderGoogleButton();
+        });
+        observer.observe(buttonContainer);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [scriptReady, renderGoogleButton]);
 
     return (
         <>
