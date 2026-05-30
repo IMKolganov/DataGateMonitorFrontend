@@ -5,6 +5,6 @@
  * OpenAPI spec version: v1
  */
 
-export interface ModelsAuthAuthSessionPolicyResponse {
+export interface AuthResponsesAuthSessionPolicyResponse {
   adminIdleTimeoutMinutes?: number;
 }
