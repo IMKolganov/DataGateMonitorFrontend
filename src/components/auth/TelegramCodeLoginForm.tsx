@@ -3,19 +3,21 @@ import { FaTelegramPlane } from "react-icons/fa";
 import { postApiAuthTelegramCodeLogin } from "../../api/orval/auth/auth";
 import { orvalPayload } from "../../api/orvalPayload";
 import type { LoginResponse } from "../../api/orvalModelShim";
-import TotpChallengeForm from "./TotpChallengeForm";
 import { applyLoginFlow, type TotpChallengeState } from "../../utils/auth/handleLoginResponse";
 import { errorMessage } from "../../utils/errorMessage";
 
 type Props = {
   redirectPath?: string;
+  onTotpChallenge: (challenge: TotpChallengeState) => void;
 };
 
-const TelegramCodeLoginForm: React.FC<Props> = ({ redirectPath = "/" }) => {
+const TelegramCodeLoginForm: React.FC<Props> = ({
+  redirectPath = "/",
+  onTotpChallenge,
+}) => {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [totpChallenge, setTotpChallenge] = useState<TotpChallengeState | null>(null);
 
   const canSubmit = code.trim().length >= 6 && !loading;
 
@@ -31,7 +33,7 @@ const TelegramCodeLoginForm: React.FC<Props> = ({ redirectPath = "/" }) => {
 
       applyLoginFlow(payload, {
         redirectPath,
-        onTotpChallenge: setTotpChallenge,
+        onTotpChallenge,
       });
     } catch (err: unknown) {
       setError(errorMessage(err));
@@ -39,17 +41,6 @@ const TelegramCodeLoginForm: React.FC<Props> = ({ redirectPath = "/" }) => {
       setLoading(false);
     }
   };
-
-  if (totpChallenge) {
-    return (
-      <TotpChallengeForm
-        loginChallengeId={totpChallenge.loginChallengeId}
-        displayName={totpChallenge.displayName}
-        redirectPath={redirectPath}
-        onBack={() => setTotpChallenge(null)}
-      />
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit}>
