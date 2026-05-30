@@ -50,6 +50,8 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({
     const [error, setError] = useState<string>("");
     const [scriptReady, setScriptReady] = useState<boolean>(false);
     const buttonContainerRef = useRef<HTMLDivElement>(null);
+    const lastRenderedWidthRef = useRef<number | null>(null);
+    const isRenderingButtonRef = useRef(false);
 
     const { mutateAsync: googleLogin, isPending } = usePostApiAuthGoogleLogin();
 
@@ -146,19 +148,30 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({
 
     const renderGoogleButton = useCallback(() => {
         const buttonContainer = buttonContainerRef.current;
-        if (!buttonContainer || !window.google?.accounts?.id) {
+        if (!buttonContainer || !window.google?.accounts?.id || isRenderingButtonRef.current) {
             return;
         }
 
-        buttonContainer.replaceChildren();
-        window.google.accounts.id.renderButton(buttonContainer, {
-            type: "standard",
-            theme: "filled_black",
-            size: "large",
-            text: "signin_with",
-            shape: "rectangular",
-            width: resolveGoogleButtonWidth(buttonContainer),
-        });
+        const width = resolveGoogleButtonWidth(buttonContainer);
+        if (lastRenderedWidthRef.current === width && buttonContainer.childElementCount > 0) {
+            return;
+        }
+
+        isRenderingButtonRef.current = true;
+        try {
+            buttonContainer.replaceChildren();
+            window.google.accounts.id.renderButton(buttonContainer, {
+                type: "standard",
+                theme: "filled_black",
+                size: "large",
+                text: "signin_with",
+                shape: "rectangular",
+                width,
+            });
+            lastRenderedWidthRef.current = width;
+        } finally {
+            isRenderingButtonRef.current = false;
+        }
     }, []);
 
     useEffect(() => {
@@ -195,7 +208,6 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({
                     },
                 });
 
-                renderGoogleButton();
                 setScriptReady(true);
             } catch (e: unknown) {
                 if (cancelled) {
@@ -220,18 +232,24 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({
     }, [handleGoogleCredential, renderGoogleButton]);
 
     useEffect(() => {
-        const buttonContainer = buttonContainerRef.current;
-        if (!buttonContainer || !scriptReady) {
+        if (!scriptReady) {
             return;
         }
 
-        const observer = new ResizeObserver(() => {
-            renderGoogleButton();
-        });
-        observer.observe(buttonContainer);
+        let frame = 0;
+        const scheduleRender = () => {
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(() => {
+                renderGoogleButton();
+            });
+        };
+
+        scheduleRender();
+        window.addEventListener("resize", scheduleRender);
 
         return () => {
-            observer.disconnect();
+            cancelAnimationFrame(frame);
+            window.removeEventListener("resize", scheduleRender);
         };
     }, [scriptReady, renderGoogleButton]);
 
