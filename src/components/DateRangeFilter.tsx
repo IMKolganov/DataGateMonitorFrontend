@@ -23,10 +23,12 @@ type PresetId =
   | "30d"
   | "last2m"
   | "last3m"
+  | "last6m"
   | "thisMonth"
   | "lastMonth"
   | "ytd"
   | "1y"
+  | "2y"
   | "3y";
 
 const PRESETS: { id: PresetId; label: string }[] = [
@@ -35,10 +37,12 @@ const PRESETS: { id: PresetId; label: string }[] = [
   { id: "30d", label: "Last 30 days" },
   { id: "last2m", label: "Last 2 months" },
   { id: "last3m", label: "Last 3 months" },
+  { id: "last6m", label: "Last 6 months" },
   { id: "thisMonth", label: "This month" },
   { id: "lastMonth", label: "Last month" },
   { id: "ytd", label: "YTD" },
   { id: "1y", label: "Last year" },
+  { id: "2y", label: "Last 2 years" },
   { id: "3y", label: "Last 3 years" },
 ];
 
@@ -72,6 +76,10 @@ export default function DateRangeFilter({ from, to, grouping, onChange }: Props)
       onChange({ from: addMonths(startOfToday(), -3), to: endOfToday(), grouping: "auto" });
       return;
     }
+    if (p === "last6m") {
+      onChange({ from: addMonths(startOfToday(), -6), to: endOfToday(), grouping: "auto" });
+      return;
+    }
     if (p === "thisMonth") {
       const s = startOfMonth(now);
       const e = endOfMonth(now);
@@ -91,6 +99,10 @@ export default function DateRangeFilter({ from, to, grouping, onChange }: Props)
     }
     if (p === "1y") {
       onChange({ from: addYears(now, -1), to: now, grouping: "auto" });
+      return;
+    }
+    if (p === "2y") {
+      onChange({ from: addYears(now, -2), to: now, grouping: "auto" });
       return;
     }
     if (p === "3y") {
@@ -331,6 +343,9 @@ function detectActivePreset(from: Date, to: Date): PresetId | null {
   const from3m = addMonths(startOfToday(), -3);
   if (sameDay(from, from3m) && sameDay(to, endOfToday()))
     return "last3m";
+  const from6m = addMonths(startOfToday(), -6);
+  if (sameDay(from, from6m) && sameDay(to, endOfToday()))
+    return "last6m";
 
   // thisMonth
   if (sameDay(from, startOfMonth(now)) && sameDay(to, endOfMonth(now)))
@@ -351,6 +366,11 @@ function detectActivePreset(from: Date, to: Date): PresetId | null {
   const y1 = addYears(now, -1);
   if (from.toDateString() === y1.toDateString() && to.toDateString() === now.toDateString())
     return "1y";
+
+  // 2y
+  const y2 = addYears(now, -2);
+  if (from.toDateString() === y2.toDateString() && to.toDateString() === now.toDateString())
+    return "2y";
 
   // 3y
   const y3 = addYears(now, -3);
