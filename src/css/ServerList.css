@@ -322,6 +322,16 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   }
 
+  .server-self-connected-note {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--accent-color);
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
   .server-item-content {
     width: 100%;
   }
