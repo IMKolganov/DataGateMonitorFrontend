@@ -20,6 +20,7 @@ import { keepPreviousData, useQueries } from "@tanstack/react-query";
 // orval hooks & types
 import {
   getApiOpenVpnClientsGetAllConnected,
+  useGetApiOpenVpnClientsGetAllConnected,
   useGetApiOpenVpnClientsOverviewPoints,
   useGetApiOpenVpnClientsOverviewSeries,
   useGetApiOpenVpnClientsOverviewSummary,
@@ -56,6 +57,7 @@ const OverviewUsersTable = lazy(() =>
 const VpnMap = lazy(() => import("../../components/VpnMap"));
 import { useProxyTrafficFlowMany, type ProxyTrafficFlowUpdate } from "../../hooks/useProxyTrafficFlow";
 import { canViewUserStatisticsScope } from "../../utils/auth/canViewUserStatisticsScope";
+import { getCurrentUser } from "../../utils/auth/authSelectors";
 import { UserStatisticsAccessDenied } from "./UserStatisticsAccessDenied";
 
 
@@ -148,6 +150,9 @@ function makeSafeTotals(resp?: OverviewTotalsResponse): SafeTotals {
 }
 
 export default function ServersOverview() {
+  const currentUser = getCurrentUser();
+  const currentUserExternalId = (currentUser?.providerExternalId ?? "").trim();
+
   const { vpnServerId: vpnServerIdParam, externalId: externalIdParam } = useParams<{
     vpnServerId?: string;
     externalId?: string;
@@ -269,6 +274,33 @@ export default function ServersOverview() {
   const apiData = seriesQuery.data as OverviewSeriesResponse | undefined;
   const totalsResp = totalsQuery.data as OverviewTotalsResponse | undefined;
   const usersSeriesData = usersSeriesQuery.data as OverviewUsersSeriesResponse | undefined;
+  const connectedOnCurrentServerQuery = useGetApiOpenVpnClientsGetAllConnected(
+    {
+      VpnServerId: vpnServerId ?? 0,
+      Page: 1,
+      PageSize: 300,
+    },
+    {
+      query: {
+        enabled: Boolean(vpnServerId && currentUserExternalId),
+        staleTime: 12_000,
+        refetchInterval: 15_000,
+        retry: 1,
+      },
+    }
+  );
+
+  const isCurrentUserConnectedOnServer = useMemo(() => {
+    if (!vpnServerId || !currentUserExternalId) return false;
+    const payload = readPayload<VpnServerClientsResponsesConnectedClientsResponse>(
+      connectedOnCurrentServerQuery.data as
+        | VpnServerClientsResponsesConnectedClientsResponse
+        | { data?: VpnServerClientsResponsesConnectedClientsResponse }
+        | undefined
+    );
+    const clients = payload?.vpnClients ?? [];
+    return clients.some((client) => (client.externalId ?? "").trim() === currentUserExternalId);
+  }, [connectedOnCurrentServerQuery.data, currentUserExternalId, vpnServerId]);
 
   const loadingSeries = seriesQuery.isFetching || usersSeriesQuery.isFetching;
   const loadingTotals = totalsQuery.isFetching;
@@ -740,6 +772,20 @@ export default function ServersOverview() {
         userDisplayName={userDisplayName}
         vpnServerDisplayName={vpnServerDisplayName}
       />
+      {vpnServerId != null && isCurrentUserConnectedOnServer ? (
+        <div
+          style={{
+            margin: "8px 0 12px",
+            padding: "10px 12px",
+            borderRadius: 8,
+            border: "1px solid var(--accent-color)",
+            background: "color-mix(in srgb, var(--accent-color) 10%, transparent)",
+            fontSize: 14,
+          }}
+        >
+          You are currently connected to this server.
+        </div>
+      ) : null}
 
       {statsExternalId ? (
         <OverviewUserProfileCard
@@ -760,6 +806,7 @@ export default function ServersOverview() {
           to={to}
           vpnServerId={vpnServerId ?? null}
           externalId={statsExternalId ?? null}
+          currentUserExternalId={currentUserExternalId || null}
         />
       </Suspense>
 

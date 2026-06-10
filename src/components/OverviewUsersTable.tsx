@@ -35,6 +35,7 @@ export interface OverviewUsersTableProps {
   to: Date;
   vpnServerId?: number | null;
   externalId?: string | null;
+  currentUserExternalId?: string | null;
 }
 
 export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
@@ -42,9 +43,13 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
   to,
   vpnServerId,
   externalId,
+  currentUserExternalId,
 }) => {
   const { vpnServerId: vpnServerIdFromRoute } = useParams<{ vpnServerId: string }>();
-  const canLinkToUserStats = isAdmin(getCurrentUser());
+  const currentUser = getCurrentUser();
+  const canLinkToUserStats = isAdmin(currentUser);
+  const normalizedCurrentUserExternalId = (currentUserExternalId ?? "").trim();
+  const currentUserDisplayName = (currentUser?.displayName ?? currentUser?.email ?? "").trim();
 
   const overviewStorageKey = useMemo(
     () =>
@@ -115,18 +120,30 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
 
   const rows = useMemo(() => {
     return items.map((u, index) => {
+      const rowExternalId = (u.externalId ?? "").trim();
+      const isCurrentUserRow =
+        normalizedCurrentUserExternalId.length > 0 &&
+        rowExternalId === normalizedCurrentUserExternalId;
+      const displayName =
+        isCurrentUserRow && currentUserDisplayName
+          ? currentUserDisplayName
+          : (u.displayName ?? "");
+      const externalId = isCurrentUserRow
+        ? normalizedCurrentUserExternalId
+        : (u.externalId ?? "");
       const firstSeen = u.firstSeen ? formatDateWithOffset(new Date(u.firstSeen)) : "";
       const lastSeen  = u.lastSeen  ? formatDateWithOffset(new Date(u.lastSeen))  : "";
       return {
-        id: `${u.externalId ?? "unknown"}_${u.vpnServerId ?? "mixed"}_${index}`,
-        displayName: u.displayName ?? "",
-        displayNameForAvatar: u.displayName ?? u.externalId ?? "",
+        id: `${externalId || "unknown"}_${u.vpnServerId ?? "mixed"}_${index}`,
+        displayName,
+        displayNameForAvatar: displayName || externalId || "",
         avatarUrl:
           readOptionalAvatarUrl(u) ??
-          avatarByExternalId.get((u.externalId ?? "").trim()) ??
+          avatarByExternalId.get(externalId.trim()) ??
           undefined,
-        telegramPhotoTelegramId: parseTelegramNumericId(u.externalId ?? undefined),
-        externalId: u.externalId ?? "",
+        telegramPhotoTelegramId: parseTelegramNumericId(externalId || undefined),
+        externalId,
+        isCurrentUser: isCurrentUserRow,
         vpnServerId: u.vpnServerId ?? null,
         sessions: u.sessions,
         trafficIn: formatBytes(u.trafficInBytes),
@@ -136,7 +153,7 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
         lastSeen,
       };
     });
-  }, [items, avatarByExternalId]);
+  }, [items, avatarByExternalId, currentUserDisplayName, normalizedCurrentUserExternalId]);
 
   const columns: GridColDef[] = [
     {
@@ -168,7 +185,12 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
         const serverIdForLink = rowServerId ?? routeServerId;
 
         if (!canLinkToUserStats) {
-          return <span>{extId}</span>;
+          return (
+            <span>
+              {extId}
+              {params.row?.isCurrentUser ? " (you)" : ""}
+            </span>
+          );
         }
 
         const url = serverIdForLink
@@ -178,6 +200,7 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
         return (
           <Link to={url} className="link-accent">
             {extId}
+            {params.row?.isCurrentUser ? " (you)" : ""}
           </Link>
         );
       },

@@ -1,6 +1,6 @@
 // src/components/ServerList.tsx
 import React, { useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FaSyncAlt, FaPlus } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
@@ -15,12 +15,14 @@ import { buildServerSwitchPath } from "../../utils/buildServerSwitchPath";
 
 import { deleteApiOpenVpnServersDeleteVpnServerId } from "../../api/orval/vpn-servers/vpn-servers";
 import { getApiV3OpenVpnServersGetAllWithStatus } from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
+import { getApiOpenVpnClientsGetAllConnected } from "../../api/orval/vpn-server-clients/vpn-server-clients";
 
 import { ServiceStatus } from "../../api/orvalModelShim";
 import type {
   ServiceStatusDto,
   VpnServerWithStatusV2Dto,
   VpnServerWithStatusesV3Response,
+  VpnServerClientsResponsesConnectedClientsResponse,
 } from "../../api/orvalModelShim";
 
 type GetAllWithStatusData = Awaited<ReturnType<typeof getApiV3OpenVpnServersGetAllWithStatus>>;
@@ -83,6 +85,14 @@ const extractList = (resp: GetAllWithStatusData): OrvalServerItem[] => {
   return Array.isArray(list) ? list : [];
 };
 
+function readPayload<T>(value: T | { data?: T } | undefined): T | undefined {
+  if (!value) return undefined;
+  if (typeof value === "object" && "data" in value) {
+    return (value as { data?: T }).data;
+  }
+  return value as T;
+}
+
 const resolveServerId = (item: OrvalServerItem): number => {
   const id =
       item.vpnServerResponses?.vpnServer?.id ??
@@ -103,6 +113,7 @@ const ServerList: React.FC = () => {
 
   const user = getCurrentUser();
   const canAddServer = isAdmin(user);
+  const currentUserExternalId = (user?.providerExternalId ?? "").trim();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -175,6 +186,40 @@ const ServerList: React.FC = () => {
       };
     });
   }, [baseServers, serviceData]);
+
+  const connectedByServerQueries = useQueries({
+    queries: servers.map((server) => ({
+      queryKey: ["server-list-connected", server.id],
+      queryFn: () => getApiOpenVpnClientsGetAllConnected({ VpnServerId: server.id, Page: 1, PageSize: 300 }),
+      enabled: Boolean(currentUserExternalId),
+      staleTime: 12_000,
+      refetchInterval: 15_000,
+      retry: 1,
+    })),
+  });
+
+  const connectedByServerId = useMemo(() => {
+    const map = new Map<number, boolean>();
+    if (!currentUserExternalId) return map;
+
+    for (let i = 0; i < servers.length; i += 1) {
+      const server = servers[i];
+      const q = connectedByServerQueries[i];
+      const payload = readPayload<VpnServerClientsResponsesConnectedClientsResponse>(
+        q?.data as
+          | VpnServerClientsResponsesConnectedClientsResponse
+          | { data?: VpnServerClientsResponsesConnectedClientsResponse }
+          | undefined
+      );
+      const clients = payload?.vpnClients ?? [];
+      map.set(
+        server.id,
+        clients.some((c) => (c.externalId ?? "").trim() === currentUserExternalId),
+      );
+    }
+
+    return map;
+  }, [connectedByServerQueries, currentUserExternalId, servers]);
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this server?")) return;
@@ -321,6 +366,7 @@ const ServerList: React.FC = () => {
                             wsOnline={server.wsOnline}
                             wsCountConnectedClients={server.wsCountConnectedClients}
                             wsCountSessions={server.wsCountSessions}
+                            isCurrentUserConnected={connectedByServerId.get(server.id) === true}
                             onView={(id) => {
                               const target = buildServerSwitchPath(id, location.pathname, canAddServer);
                               if (isMobile) navigate(target);
