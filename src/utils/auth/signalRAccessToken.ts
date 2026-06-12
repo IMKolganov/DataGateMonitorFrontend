@@ -7,6 +7,7 @@ const REFRESH_BEFORE_EXPIRY_MS = 60_000;
 
 /**
  * Returns a valid access token for SignalR hubs, refreshing via refresh token when the JWT is expired or near expiry.
+ * Returns empty string when no token or refresh failed — never sends a known-expired JWT to negotiate.
  */
 export async function resolveHubAccessToken(): Promise<string> {
   const token = localStorage.getItem(ACCESS_TOKEN_KEY);
@@ -17,6 +18,6 @@ export async function resolveHubAccessToken(): Promise<string> {
     if (expiresInMs > REFRESH_BEFORE_EXPIRY_MS) return token;
     return await refreshSessionTokens();
   } catch {
-    return token;
+    return "";
   }
 }
