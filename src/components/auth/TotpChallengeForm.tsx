@@ -85,6 +85,8 @@ const TotpChallengeForm: React.FC<Props> = ({
         <div className="login-item">
           <h4>Authentication code</h4>
           <input
+            id="totp-challenge-code"
+            name="totpCode"
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"

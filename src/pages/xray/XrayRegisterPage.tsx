@@ -152,6 +152,7 @@ const XrayRegisterPage: React.FC = () => {
               {t.password}
             </label>
             <PasswordInput
+              id="xray-register-password"
               name="xray-register-password"
               autoComplete="new-password"
               value={password}
@@ -164,6 +165,7 @@ const XrayRegisterPage: React.FC = () => {
               {t.confirmPassword}
             </label>
             <PasswordInput
+              id="xray-register-confirm-password"
               name="xray-register-confirm-password"
               autoComplete="new-password"
               value={confirmPassword}

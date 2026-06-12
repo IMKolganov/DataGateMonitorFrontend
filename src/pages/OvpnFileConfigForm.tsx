@@ -625,6 +625,8 @@ const OvpnFileConfigForm: React.FC = () => {
               <div className="form-group checkbox-container">
                 <label className="checkbox-label">
                   <input
+                    id="ovpn-auto-detect-server-settings"
+                    name="ovpnAutoDetectServerSettings"
                     type="checkbox"
                     checked={autoDetectServerSettings}
                     onChange={(e) => setAutoDetectServerSettings(e.target.checked)}

@@ -277,6 +277,13 @@
     font-weight: bold;
     margin-left: 5px;
   }
+
+  .server-form .form-group-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    margin-left: 5px;
+  }
   
   .server-form input:not([type="checkbox"]),
   .server-form select,

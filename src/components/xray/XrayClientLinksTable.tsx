@@ -210,6 +210,8 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
       >
         <div className="filters" style={{ marginBottom: 12 }}>
           <input
+            id="xray-links-search-common-name"
+            name="xrayLinksSearchCommonName"
             type="text"
             placeholder="Search by Common Name"
             value={searchQuery}
@@ -217,6 +219,8 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
             className="input"
           />
           <input
+            id="xray-links-search-issued-to"
+            name="xrayLinksSearchIssuedTo"
             type="text"
             placeholder="Search by Issued To"
             value={issuedToFilter}

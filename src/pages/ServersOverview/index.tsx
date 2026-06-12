@@ -816,6 +816,8 @@ export default function ServersOverview() {
           <div style={{ margin: "0 0 8px", display: "flex", gap: 10, alignItems: "center" }}>
             <label style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13 }}>
               <input
+                id="overview-offline-playback-mode"
+                name="overviewOfflinePlaybackMode"
                 type="checkbox"
                 checked={offlinePlaybackMode}
                 onChange={(e) => setOfflinePlaybackMode(e.target.checked)}

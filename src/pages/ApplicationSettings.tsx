@@ -155,6 +155,8 @@ export function ApplicationSettings() {
         <>
           <div className="app-register">
             <input
+              id="application-register-name"
+              name="applicationName"
               type="text"
               placeholder="Application Name"
               value={newAppName}

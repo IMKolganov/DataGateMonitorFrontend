@@ -240,13 +240,16 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       >
         <div className="filters" style={{ marginBottom: 12 }}>
           <input
+            id="ovpn-files-search-common-name"
+            name="ovpnFilesSearchCommonName"
             type="text"
-            placeholder="Search by Common Name"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="input"
           />
           <input
+            id="ovpn-files-search-issued-to"
+            name="ovpnFilesSearchIssuedTo"
             type="text"
             placeholder="Search by Issued To"
             value={issuedToFilter}

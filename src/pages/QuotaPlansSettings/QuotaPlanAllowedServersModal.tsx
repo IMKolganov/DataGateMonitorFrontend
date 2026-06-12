@@ -143,6 +143,8 @@ export function QuotaPlanAllowedServersModal({
           <div className="header-bar" style={{ marginBottom: 12 }}>
             <div className="left-buttons">
               <select
+                id="quota-plan-add-server"
+                name="quotaPlanAddServer"
                 className="input"
                 style={{ maxWidth: 280 }}
                 defaultValue=""

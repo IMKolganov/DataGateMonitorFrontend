@@ -171,6 +171,8 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId, stack = "openvpn" }) =
           </h4>
           <div className="settings-item">
             <select
+              id="certificates-status-filter"
+              name="certificateStatusFilter"
               className="input"
               value={selectedStatus ?? ""}
               onChange={(e) =>
