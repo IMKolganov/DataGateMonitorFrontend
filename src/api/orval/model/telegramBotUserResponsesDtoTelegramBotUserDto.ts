@@ -16,6 +16,7 @@ export interface TelegramBotUserResponsesDtoTelegramBotUserDto {
   lastName?: string | null;
   isAdmin?: boolean;
   isBlocked?: boolean;
+  hasProfilePhoto?: boolean;
   createDate?: string;
   lastUpdate?: string;
 }
