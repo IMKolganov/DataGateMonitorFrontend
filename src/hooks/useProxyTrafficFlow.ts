@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import { ACCESS_TOKEN_REFRESHED_EVENT } from "../utils/auth/accessTokenEvents";
+import { resolveHubAccessToken } from "../utils/auth/signalRAccessToken";
 import { ACCESS_TOKEN_KEY } from "../utils/const";
 import { errorMessage } from "../utils/errorMessage";
 import { getProxyTrafficFlowHubUrl } from "../utils/signalrHubUrl";
@@ -222,7 +223,7 @@ export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) 
         const hubUrl = `${getProxyTrafficFlowHubUrl()}?serverId=${encodeURIComponent(String(serverId))}`;
         const conn = new HubConnectionBuilder()
           .withUrl(hubUrl, {
-            accessTokenFactory: () => localStorage.getItem(ACCESS_TOKEN_KEY) ?? "",
+            accessTokenFactory: () => resolveHubAccessToken(),
             transport: getSignalRPreferredTransport(),
           })
           .withAutomaticReconnect([0, 2000, 5000, 10000])
@@ -417,7 +418,7 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
             const hubUrl = `${getProxyTrafficFlowHubUrl()}?serverId=${encodeURIComponent(String(sid))}`;
             const conn = new HubConnectionBuilder()
               .withUrl(hubUrl, {
-                accessTokenFactory: () => localStorage.getItem(ACCESS_TOKEN_KEY) ?? "",
+                accessTokenFactory: () => resolveHubAccessToken(),
                 transport: getSignalRPreferredTransport(),
               })
               .withAutomaticReconnect([0, 2000, 5000, 10000])
