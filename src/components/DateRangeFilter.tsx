@@ -152,8 +152,10 @@ export default function DateRangeFilter({ from, to, grouping, onChange }: Props)
           alignItems: "center",
         }}
       >
-        <Labeled field="From">
+        <Labeled field="From" fieldId="date-range-from">
           <input
+            id="date-range-from"
+            name="dateRangeFrom"
             type="date"
             value={toDateInputValue(from)}
             onChange={(e) => {
@@ -165,8 +167,10 @@ export default function DateRangeFilter({ from, to, grouping, onChange }: Props)
           />
         </Labeled>
 
-        <Labeled field="To">
+        <Labeled field="To" fieldId="date-range-to">
           <input
+            id="date-range-to"
+            name="dateRangeTo"
             type="date"
             value={toDateInputValue(to)}
             onChange={(e) => {
@@ -178,8 +182,10 @@ export default function DateRangeFilter({ from, to, grouping, onChange }: Props)
           />
         </Labeled>
 
-        <Labeled field="Grouping">
+        <Labeled field="Grouping" fieldId="date-range-grouping">
           <select
+            id="date-range-grouping"
+            name="dateRangeGrouping"
             value={grouping}
             onChange={(e) => onChange({ from, to, grouping: e.target.value as Grouping })}
             style={selectStyle}
@@ -220,9 +226,17 @@ export default function DateRangeFilter({ from, to, grouping, onChange }: Props)
 
 /* ---------- small UI ---------- */
 
-function Labeled({ field, children }: { field: string; children: React.ReactNode }) {
+function Labeled({
+  field,
+  fieldId,
+  children,
+}: {
+  field: string;
+  fieldId: string;
+  children: React.ReactNode;
+}) {
   return (
-    <label style={{ display: "grid", gap: 6 }}>
+    <label htmlFor={fieldId} style={{ display: "grid", gap: 6 }}>
       <span style={{ fontSize: 12, opacity: 0.8 }}>{field}</span>
       {children}
     </label>

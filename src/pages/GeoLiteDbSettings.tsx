@@ -169,6 +169,8 @@ export function GeoLiteDbSettings() {
             <h4>GeoIP Database Path:</h4>
             <div className="settings-item">
               <input
+                id="geoip-db-path"
+                name="geoIpDbPath"
                 type="text"
                 value={geoIpDbPath}
                 onChange={(e) => setGeoIpDbPath(e.target.value)}
@@ -186,6 +188,8 @@ export function GeoLiteDbSettings() {
             <h4>GeoIP Download URL:</h4>
             <div className="settings-item">
               <input
+                id="geoip-download-url"
+                name="geoIpDownloadUrl"
                 type="text"
                 value={geoIpDownloadUrl}
                 onChange={(e) => setGeoIpDownloadUrl(e.target.value)}
@@ -205,6 +209,8 @@ export function GeoLiteDbSettings() {
             <h4>GeoIP Account ID:</h4>
             <div className="settings-item">
               <input
+                id="geoip-account-id"
+                name="geoIpAccountId"
                 type="text"
                 value={geoIpAccountId}
                 onChange={(e) => setGeoIpAccountId(e.target.value)}
@@ -224,6 +230,8 @@ export function GeoLiteDbSettings() {
             <h4>GeoIP License Key:</h4>
             <div className="settings-item">
               <input
+                id="geoip-license-key"
+                name="geoIpLicenseKey"
                 type="text"
                 value={geoIpLicenseKey}
                 onChange={(e) => setGeoIpLicenseKey(e.target.value)}
@@ -243,6 +251,8 @@ export function GeoLiteDbSettings() {
             <h4>Auto-update interval (days):</h4>
             <div className="settings-item">
               <input
+                id="geoip-auto-update-interval-days"
+                name="geoIpAutoUpdateIntervalDays"
                 type="number"
                 min={0}
                 step={1}

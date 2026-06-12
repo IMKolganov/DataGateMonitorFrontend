@@ -489,7 +489,13 @@ export function GeneralServerDetails() {
                     {clientInsightsEnabled ? (
                         <>
                             <label className="square-toggle">
-                                <input type="checkbox" checked={isLive} onChange={() => setIsLive(!isLive)} />
+                                <input
+                                  id="server-details-live-toggle"
+                                  name="serverDetailsLiveToggle"
+                                  type="checkbox"
+                                  checked={isLive}
+                                  onChange={() => setIsLive(!isLive)}
+                                />
                                 <span className="toggle-slider"></span>
                                 <span className="toggle-text">{isLive ? "Live" : "History"}</span>
                             </label>
@@ -497,6 +503,8 @@ export function GeneralServerDetails() {
                                 <label className="server-details__auto-refresh-label">
                                     <span className="server-details__auto-refresh-label__text">Auto refresh:</span>
                                     <select
+                                        id="server-details-live-refresh-seconds"
+                                        name="serverDetailsLiveRefreshSeconds"
                                         className="btn secondary dropdown-select"
                                         value={liveRefreshSeconds}
                                         onChange={(e) => {

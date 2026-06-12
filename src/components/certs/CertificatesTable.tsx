@@ -156,6 +156,8 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
       >
         <div className="filters">
           <input
+            id="certificates-search-common-name"
+            name="certificateSearchCommonName"
             type="text"
             placeholder="Search by Common Name"
             value={searchQuery}
@@ -163,6 +165,8 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
             className="input"
           />
           <select
+            id="certificates-search-status"
+            name="certificateSearchStatus"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="input"
@@ -174,6 +178,8 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
             <option value="3">❓ Unknown</option>
           </select>
           <input
+            id="certificates-search-serial"
+            name="certificateSearchSerial"
             type="text"
             placeholder="Search by Serial Number"
             value={serialNumberQuery}

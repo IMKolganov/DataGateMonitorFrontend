@@ -368,6 +368,8 @@ export function WebConsole() {
           <div className="console-input">
             <span className="console-prompt">$</span>
             <input
+              id="web-console-command"
+              name="webConsoleCommand"
               ref={inputRef}
               type="text"
               value={command}

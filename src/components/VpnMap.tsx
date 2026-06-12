@@ -1030,6 +1030,8 @@ const VpnMap: React.FC<VpnMapProps> = ({
         <div className="vpn-map-toolbar">
           <strong>View:</strong>
           <select
+              id="vpn-map-view-mode"
+              name="vpnMapViewMode"
               className="btn secondary dropdown-select"
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value as MapViewMode)}
@@ -1044,6 +1046,8 @@ const VpnMap: React.FC<VpnMapProps> = ({
               <>
                 <strong>Map Style:</strong>
                 <select
+                    id="vpn-map-layer"
+                    name="vpnMapLayer"
                     className="btn secondary dropdown-select"
                     value={selectedLayer}
                     onChange={(e) => setSelectedLayer(e.target.value as keyof typeof tileLayers)}
@@ -1058,6 +1062,8 @@ const VpnMap: React.FC<VpnMapProps> = ({
           ) : null}
           <strong>Point color:</strong>
           <select
+              id="vpn-map-point-color"
+              name="vpnMapPointColor"
               className="btn secondary dropdown-select"
               value={pointColor}
               onChange={(e) => setPointColor(e.target.value as MarkerColor)}
@@ -1070,6 +1076,8 @@ const VpnMap: React.FC<VpnMapProps> = ({
           </select>
           <strong>Performance:</strong>
           <select
+              id="vpn-map-performance"
+              name="vpnMapPerformance"
               className="btn secondary dropdown-select"
               value={performanceMode}
               onChange={(e) => setPerformanceMode(e.target.value as PerformanceMode)}
@@ -1084,6 +1092,8 @@ const VpnMap: React.FC<VpnMapProps> = ({
             <>
               <strong>Traffic layer:</strong>
               <select
+                  id="vpn-map-globe-traffic-layer"
+                  name="vpnMapGlobeTrafficLayer"
                   className="btn secondary dropdown-select"
                   value={globeTrafficLayer}
                   onChange={(e) => setGlobeTrafficLayer(e.target.value as GlobeTrafficLayer)}

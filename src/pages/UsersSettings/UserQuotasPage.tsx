@@ -158,6 +158,8 @@ export default function UserQuotasPage() {
         <label className="user-quota-list__label">
           Per page
           <select
+            id="user-quotas-page-size"
+            name="userQuotasPageSize"
             className="btn secondary dropdown-select"
             value={pageSize}
             onChange={(e) => {
