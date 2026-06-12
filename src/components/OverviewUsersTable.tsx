@@ -18,6 +18,8 @@ import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import { UserAvatar } from "./ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../utils/readOptionalAvatarUrl.ts";
 import { parseTelegramNumericId } from "../utils/telegramNumericId.ts";
+import { telegramPhotoTelegramIdIfCached } from "../api/telegramProfilePhotoIndex.ts";
+import { useTelegramProfilePhotoIndex } from "../hooks/useTelegramProfilePhotoIndex.ts";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors.ts";
 import { unwrapMaybeApiResponse } from "../pages/TelegramBotSettings/unwrapApiResponse";
 import type { ApiEnvelope } from "../pages/TelegramBotSettings/unwrapApiResponse";
@@ -97,6 +99,8 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
     { query: { enabled: canLinkToUserStats, staleTime: 60_000 } },
   );
 
+  const { index: telegramPhotoIndex } = useTelegramProfilePhotoIndex(true);
+
   // orval response: { OverviewUserDto: OverviewUserDto[] }
   const items: OverviewUserDto[] = useMemo(
     () => data?.overviewUserItems ?? [],
@@ -141,7 +145,10 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
           readOptionalAvatarUrl(u) ??
           avatarByExternalId.get(externalId.trim()) ??
           undefined,
-        telegramPhotoTelegramId: parseTelegramNumericId(externalId || undefined),
+        telegramPhotoTelegramId: telegramPhotoTelegramIdIfCached(
+          parseTelegramNumericId(externalId || undefined),
+          telegramPhotoIndex,
+        ),
         externalId,
         isCurrentUser: isCurrentUserRow,
         vpnServerId: u.vpnServerId ?? null,
@@ -153,7 +160,7 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
         lastSeen,
       };
     });
-  }, [items, avatarByExternalId, currentUserDisplayName, normalizedCurrentUserExternalId]);
+  }, [items, avatarByExternalId, currentUserDisplayName, normalizedCurrentUserExternalId, telegramPhotoIndex]);
 
   const columns: GridColDef[] = [
     {

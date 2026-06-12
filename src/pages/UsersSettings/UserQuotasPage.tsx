@@ -11,6 +11,8 @@ import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuot
 import { UserAvatar } from "../../components/ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
 import { telegramPhotoIdForProvider } from "../../utils/telegramNumericId.ts";
+import { telegramPhotoTelegramIdIfCached } from "../../api/telegramProfilePhotoIndex.ts";
+import { useTelegramProfilePhotoIndex } from "../../hooks/useTelegramProfilePhotoIndex.ts";
 import { useUsers } from "./useUsers";
 import "../../css/Settings.css";
 
@@ -29,17 +31,24 @@ function trafficUsedFromSummary(resp: unknown): number {
   return (t.trafficInBytes ?? 0) + (t.trafficOutBytes ?? 0);
 }
 
-function QuotaRow({ u }: { u: UserDto }) {
+function QuotaRow({
+  u,
+  telegramPhotoIndex,
+}: {
+  u: UserDto;
+  telegramPhotoIndex: Set<number> | undefined;
+}) {
   const id = u.id;
   if (id == null || !Number.isFinite(id)) return null;
   const title = u.displayName?.trim() || `User #${id}`;
+  const telegramId = telegramPhotoIdForProvider(u.provider, u.externalId);
   return (
     <section className="settings-card user-quota-list__row" style={{ marginBottom: 14 }}>
       <div className="user-quota-list__row-head">
         <div className="user-quota-list__row-head-main">
           <UserAvatar
             src={readOptionalAvatarUrl(u as object)}
-            telegramPhotoTelegramId={telegramPhotoIdForProvider(u.provider, u.externalId)}
+            telegramPhotoTelegramId={telegramPhotoTelegramIdIfCached(telegramId, telegramPhotoIndex)}
             name={title}
             colorSeed={`${id}|${u.email ?? ""}`}
             size={40}
@@ -67,6 +76,8 @@ export default function UserQuotasPage() {
     errorMessage,
     handleRefresh,
   } = useUsers({ mode: "list" });
+
+  const { index: telegramPhotoIndex } = useTelegramProfilePhotoIndex(true);
 
   const monthBounds = useMemo(() => calendarMonthBounds(), []);
 
@@ -204,7 +215,9 @@ export default function UserQuotasPage() {
       {anyLoading && users.length === 0 ? (
         <p style={{ color: "var(--text-muted)" }}>Loading…</p>
       ) : (
-        usersSortedByMonthTraffic.map((u, idx) => <QuotaRow key={u.id ?? `row-${idx}`} u={u} />)
+        usersSortedByMonthTraffic.map((u, idx) => (
+          <QuotaRow key={u.id ?? `row-${idx}`} u={u} telegramPhotoIndex={telegramPhotoIndex} />
+        ))
       )}
 
       {users.length === 0 && !anyLoading && (
