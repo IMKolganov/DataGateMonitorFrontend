@@ -8,7 +8,8 @@ import {
 import { postApiOpenVpnServersRunNow } from "../api/orval/vpn-servers/vpn-servers";
 import type { ServiceStatusDto } from "../api/orvalModelShim";
 import { ServiceStatus as ServiceStatusEnum } from "../api/orvalModelShim";
-import {ACCESS_TOKEN_KEY} from "../utils/const.ts";
+import { resolveHubAccessToken } from "../utils/auth/signalRAccessToken.ts";
+import { ACCESS_TOKEN_KEY } from "../utils/const.ts";
 import { errorMessage } from "../utils/errorMessage.ts";
 import { getStatusStreamHubUrl } from "../utils/signalrHubUrl.ts";
 import { getSignalRPreferredTransport } from "../utils/signalrTransport.ts";
@@ -120,11 +121,11 @@ export default function useSignalRService() {
 
                 const conn = new HubConnectionBuilder()
                     .withUrl(hubUrl, {
-                        accessTokenFactory: () => localStorage.getItem(ACCESS_TOKEN_KEY) ?? "",
+                        accessTokenFactory: () => resolveHubAccessToken(),
                         transport: primaryTransport,
                     })
                     .withAutomaticReconnect([0, 2000, 5000, 10000])
-                    .configureLogging(import.meta.env.DEV ? LogLevel.None : LogLevel.Information)
+                    .configureLogging(LogLevel.None)
                     .build();
 
                 connRef.current = conn;

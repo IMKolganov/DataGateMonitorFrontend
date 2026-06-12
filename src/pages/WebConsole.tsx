@@ -16,7 +16,8 @@ import {
   saveCommandHistory,
   loadCommandHistory,
 } from "../utils/consoleStorage";
-import { getSignalRUrl, getAccessTokenOrLogout } from "../utils/signalr-url";
+import { getSignalRUrl } from "../utils/signalr-url";
+import { resolveHubAccessToken } from "../utils/auth/signalRAccessToken";
 import { getSignalRPreferredTransport } from "../utils/signalrTransport.ts";
 import { ACCESS_TOKEN_REFRESHED_EVENT } from "../utils/auth/accessTokenEvents.ts";
 import { highlightOvpMgmtLine } from "../utils/ovpMgmtHighlight";
@@ -102,9 +103,15 @@ export function WebConsole() {
         const connection = new HubConnectionBuilder()
           .withUrl(url, {
             transport: getSignalRPreferredTransport(),
-            accessTokenFactory: () => getAccessTokenOrLogout(),
+            accessTokenFactory: async () => {
+              const token = await resolveHubAccessToken();
+              if (!token) {
+                throw new Error("User is not authenticated");
+              }
+              return token;
+            },
           })
-          .configureLogging(LogLevel.Information)
+          .configureLogging(LogLevel.None)
           .withAutomaticReconnect()
           .build();
 
