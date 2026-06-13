@@ -9,18 +9,32 @@ import {
   usePostApiNotificationsMarkReadAll,
   usePostApiNotificationsNotifyAdmins,
 } from "../../api/orval/notification/notification";
-import type { NotificationRequest, NotificationItemDto } from "../../api/orval/model";
+import type {
+  NotificationRequest,
+  NotificationItemDto,
+  GetNotificationsResponse,
+  UnreadCountResponse,
+  GetApiNotificationsGetAllParams,
+  NotificationSeverity,
+} from "../../api/orvalModelShim";
 import { getCurrentUser } from "../../utils/auth/authSelectors";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { serializeNotificationsGetAllParams } from "../../utils/notificationsQuerySerialize";
 
 const DEFAULT_PAGE_SIZE = 10;
 
-export function useNotificationsList(params?: { Page?: number; PageSize?: number }) {
+export type NotificationReadFilter = "all" | "unread" | "read";
+
+export function useNotificationsList(params?: GetApiNotificationsGetAllParams) {
   return useGetApiNotificationsGetAll(params);
 }
 
-export function useNotificationsUnreadCount() {
-  const query = useGetApiNotificationsUnreadCount();
-  const count = query.data?.count ?? 0;
+export function useNotificationsUnreadCount(options?: { enabled?: boolean }) {
+  const query = useGetApiNotificationsUnreadCount({
+    query: { enabled: options?.enabled ?? true },
+  });
+  const payload = query.data as unknown as UnreadCountResponse | undefined;
+  const count = payload?.count ?? 0;
   return { ...query, data: count };
 }
 
@@ -29,16 +43,62 @@ export function useNotifications() {
   const user = getCurrentUser();
   const adminUserId = user?.id ?? 0;
 
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-
-  const listParams = useMemo(
-    () => ({ Page: page + 1, PageSize: pageSize }),
-    [page, pageSize]
+  const [pageSize, setPageSize] = usePersistedPageSize(
+    "notifications",
+    DEFAULT_PAGE_SIZE,
+    "5,10,20,50,100",
   );
+
+  const [readFilter, setReadFilter] = useState<NotificationReadFilter>("all");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [severityEnabled, setSeverityEnabled] = useState<[boolean, boolean, boolean, boolean]>([
+    true,
+    true,
+    true,
+    true,
+  ]);
+
+  const severitiesForApi = useMemo((): NotificationSeverity[] | undefined => {
+    const selected: NotificationSeverity[] = [];
+    for (let i = 0; i < 4; i++) {
+      if (severityEnabled[i]) selected.push(i as NotificationSeverity);
+    }
+    if (selected.length === 0 || selected.length === 4) return undefined;
+    return selected;
+  }, [severityEnabled]);
+
+  const [pageState, setPageState] = useState({
+    readFilter,
+    typeFilter,
+    severitiesForApi,
+    page: 0,
+  });
+  if (
+    pageState.readFilter !== readFilter ||
+    pageState.typeFilter !== typeFilter ||
+    pageState.severitiesForApi !== severitiesForApi
+  ) {
+    setPageState({ readFilter, typeFilter, severitiesForApi, page: 0 });
+  }
+  const page = pageState.page;
+  const setPage = (next: number) => setPageState((s) => ({ ...s, page: next }));
+
+  const listParams = useMemo((): GetApiNotificationsGetAllParams => {
+    const trimmedType = typeFilter.trim();
+    const p: GetApiNotificationsGetAllParams = {
+      Page: page + 1,
+      PageSize: pageSize,
+    };
+    if (readFilter === "unread") p.IsRead = false;
+    else if (readFilter === "read") p.IsRead = true;
+    if (trimmedType) p.Type = trimmedType.slice(0, 256);
+    if (severitiesForApi) p.Severities = severitiesForApi;
+    return p;
+  }, [page, pageSize, readFilter, typeFilter, severitiesForApi]);
 
   const listQuery = useGetApiNotificationsGetAll(listParams, {
     query: { placeholderData: (prev) => prev },
+    request: { paramsSerializer: serializeNotificationsGetAllParams },
   });
 
   const countQuery = useGetApiNotificationsUnreadCount();
@@ -49,11 +109,13 @@ export function useNotifications() {
   const mMarkReadAll = usePostApiNotificationsMarkReadAll();
   const mNotifyAdmins = usePostApiNotificationsNotifyAdmins();
 
-  const paged = listQuery.data?.notifications;
+  const listPayload = listQuery.data as unknown as GetNotificationsResponse | undefined;
+  const paged = listPayload?.notifications;
   const notifications: NotificationItemDto[] = paged?.items ?? [];
   const totalCount = paged?.totalCount ?? 0;
   const totalPages = paged?.totalPages ?? 0;
-  const unreadCount = countQuery.data?.count ?? 0;
+  const unreadPayload = countQuery.data as unknown as UnreadCountResponse | undefined;
+  const unreadCount = unreadPayload?.count ?? 0;
 
   const refresh = useCallback(async () => {
     if (refreshing) return;
@@ -65,8 +127,6 @@ export function useNotifications() {
         }),
         queryClient.invalidateQueries({ queryKey: getGetApiNotificationsUnreadCountQueryKey() }),
       ]);
-    } catch (e) {
-      throw e;
     } finally {
       setRefreshing(false);
     }
@@ -76,64 +136,51 @@ export function useNotifications() {
     async (notificationId: number) => {
       if (!adminUserId) return;
       if (!notificationId) return;
-      try {
-        await mRead.mutateAsync({
-          notificationId,
-          params: { adminUserId },
-        });
-        await refresh();
-      } catch (e) {
-        throw e;
-      }
+      await mRead.mutateAsync({
+        notificationId,
+        params: { adminUserId },
+      });
+      await refresh();
     },
     [adminUserId, mRead, refresh]
   );
 
   const markReadAll = useCallback(async () => {
-    try {
-      await mMarkReadAll.mutateAsync();
-      await refresh();
-    } catch (e) {
-      throw e;
-    }
+    await mMarkReadAll.mutateAsync();
+    await refresh();
   }, [mMarkReadAll, refresh]);
 
-  const onPaginationModelChange = useCallback((model: { page: number; pageSize: number }) => {
-    setPage(model.page ?? 0);
-    setPageSize(Math.max(1, model.pageSize ?? DEFAULT_PAGE_SIZE));
-  }, []);
+  const onPaginationModelChange = useCallback(
+    (model: { page: number; pageSize: number }) => {
+      setPage(model.page ?? 0);
+      setPageSize(model.pageSize ?? DEFAULT_PAGE_SIZE);
+    },
+    [setPageSize],
+  );
 
   const markDelivered = useCallback(
     async (notificationId: number) => {
       if (!adminUserId) return;
       if (!notificationId) return;
-      try {
-        await mDelivered.mutateAsync({
-          notificationId,
-          params: { adminUserId, channel: "web" },
-        });
-        await refresh();
-      } catch (e) {
-        throw e;
-      }
+      await mDelivered.mutateAsync({
+        notificationId,
+        params: { adminUserId, channel: "web" },
+      });
+      await refresh();
     },
     [adminUserId, mDelivered, refresh]
   );
 
   const sendTestNotification = useCallback(
     async (request?: Partial<NotificationRequest>) => {
-      try {
-        await mNotifyAdmins.mutateAsync({
-          data: {
-            title: request?.title ?? "Test notification",
-            message: request?.message ?? "Sent from dashboard",
-            severity: request?.severity,
-          } as NotificationRequest,
-        });
-        await refresh();
-      } catch (e) {
-        throw e;
-      }
+      await mNotifyAdmins.mutateAsync({
+        data: {
+          title: request?.title ?? "Test notification",
+          message: request?.message ?? "Sent from dashboard",
+          severity: request?.severity,
+        } as NotificationRequest,
+      });
+      await refresh();
     },
     [mNotifyAdmins, refresh]
   );
@@ -165,6 +212,14 @@ export function useNotifications() {
         : "Failed to load notifications"
       : null;
 
+  const toggleSeverity = useCallback((index: 0 | 1 | 2 | 3) => {
+    setSeverityEnabled((prev) => {
+      const next = [...prev] as [boolean, boolean, boolean, boolean];
+      next[index] = !next[index];
+      return next;
+    });
+  }, []);
+
   return {
     notifications,
     unreadCount,
@@ -173,6 +228,12 @@ export function useNotifications() {
     page,
     pageSize,
     onPaginationModelChange,
+    readFilter,
+    setReadFilter,
+    typeFilter,
+    setTypeFilter,
+    severityEnabled,
+    toggleSeverity,
     anyLoading,
     refreshing,
     errorMessage,

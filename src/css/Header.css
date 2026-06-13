@@ -13,6 +13,17 @@
   color: var(--text-primary);
 }
 
+/*
+ * Mobile nav is `position: absolute` under the header. <main> comes after <header> in the DOM,
+ * so in-flow siblings with z-index (e.g. `.servers-mobile-home-switcher` sticky z-index: 6) paint
+ * on top of the dropdown unless the header creates a higher stacking context while the menu is open.
+ */
+@media (max-width: 850px) {
+  .header.header--nav-open {
+    z-index: 1100;
+  }
+}
+
 .logo {
   display: flex;
   align-items: center;
@@ -65,6 +76,22 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+
+.nav-links li.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-links li.user-info .user-name {
+  font-size: 0.65em;
+  font-weight: 600;
+  color: var(--text-secondary);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .header-notifications-badge {

@@ -14,12 +14,16 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
 }) => {
   const [visible, setVisible] = useState(false);
 
+  const resolvedId =
+    inputProps.id ?? (typeof inputProps.name === "string" ? inputProps.name : undefined);
+
   return (
     <div className="password-input-wrap">
       <input
         type={visible ? "text" : "password"}
         className={className}
         {...inputProps}
+        id={resolvedId}
       />
       <button
         type="button"

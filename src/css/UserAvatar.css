@@ -1,0 +1,34 @@
+.user-avatar {
+  /* inline-flex + default baseline alignment shifts photo vs initials in table rows */
+  display: inline-flex;
+  vertical-align: middle;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--avatar-size, 32px);
+  height: var(--avatar-size, 32px);
+  font-size: var(--avatar-font-size, 12px);
+  border-radius: 50%;
+  overflow: hidden;
+  font-weight: 600;
+  line-height: 0;
+  letter-spacing: 0.02em;
+  user-select: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.user-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.user-avatar__initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  line-height: 1;
+}

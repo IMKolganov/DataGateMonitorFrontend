@@ -7,12 +7,19 @@ import Cookies from "js-cookie";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { toast } from "react-toastify";
+import "../../css/GeoPointsMap.css";
 
-import { getApiOpenVpnClientsOverviewPoints } from "../../api/orval/open-vpn-server-clients/open-vpn-server-clients.ts";
+import { getApiOpenVpnClientsOverviewPoints } from "../../api/orval/vpn-server-clients/vpn-server-clients.ts";
 import type {
     GeoPointAggDto,
     GetApiOpenVpnClientsOverviewPointsParams,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
+
+export type VpnServerMapMarker = {
+    id?: number;
+    name: string;
+    position: [number, number];
+};
 
 type GeoPointsMapProps = {
     from: Date | string;
@@ -22,13 +29,25 @@ type GeoPointsMapProps = {
     onlyWithCoordinates?: boolean;
     center?: [number, number];
     zoom?: number;
-    serverLocation?: [number, number] | null;
+    /** VPN server location markers (from server list / API), not client geo points. */
+    vpnServerMarkers?: VpnServerMapMarker[];
 };
+const DEFAULT_GEO_CENTER: [number, number] = [45, 37];
 
 const MARKER_BASE =
     "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x";
 
-const pointColorKeys = ["grey", "blue", "green", "orange", "red", "violet", "yellow", "black"] as const;
+const pointColorKeys = [
+    "grey",
+    "blue",
+    "green",
+    "orange",
+    "red",
+    "yellow",
+    "gold",
+    "violet",
+    "black",
+] as const;
 type PointColorKey = (typeof pointColorKeys)[number];
 
 const createPointIcon = (color: PointColorKey): L.Icon =>
@@ -39,7 +58,13 @@ const createPointIcon = (color: PointColorKey): L.Icon =>
         popupAnchor: [1, -34],
     });
 
-const serverIcon = createPointIcon("blue");
+/** VPN server locations — violet pin (not used for client traffic tiers). */
+const serverIcon = L.icon({
+    iconUrl: `${MARKER_BASE}-violet.png`,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+});
 
 const ICONS: Record<string, L.Icon> = Object.fromEntries(
     pointColorKeys.map((c) => [c, createPointIcon(c)])
@@ -113,9 +138,10 @@ const tileLayers = {
 
 const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
     const map = useMap();
+    const [lat, lng] = center;
     useEffect(() => {
-        map.setView(center, zoom);
-    }, [map, center, zoom]);
+        map.setView([lat, lng], zoom);
+    }, [map, lat, lng, zoom]);
     return null;
 };
 
@@ -138,8 +164,8 @@ function colorKeyForTraffic(totalBytes: number): PointColorKey {
     if (totalBytes <= FIFTY_MB) return "green";
     if (totalBytes <= ONE_GB) return "orange";
     if (totalBytes <= TEN_GB) return "red";
-    if (totalBytes <= HUNDRED_GB) return "violet";
-    if (totalBytes <= FIVE_HUNDRED_GB) return "yellow";
+    if (totalBytes <= HUNDRED_GB) return "yellow";
+    if (totalBytes <= FIVE_HUNDRED_GB) return "gold";
     return "black";
 }
 
@@ -207,10 +233,11 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                                                               vpnServerId,
                                                               externalId,
                                                               onlyWithCoordinates = true,
-                                                              center = [45, 37],
+                                                              center = DEFAULT_GEO_CENTER,
                                                               zoom = 4,
-                                                              serverLocation = null,
+                                                              vpnServerMarkers = [],
                                                           }) => {
+    const wrapperRef = useRef<HTMLDivElement | null>(null);
     const [selectedLayer, setSelectedLayer] = useState<keyof typeof tileLayers>(
         (Cookies.get("selectedMapLayer") as keyof typeof tileLayers) || "Carto Dark"
     );
@@ -222,7 +249,33 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
     );
     const [points, setPoints] = useState<GeoPointAggDto[]>([]);
     const [hideZeroTraffic, setHideZeroTraffic] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
     const abortRef = useRef<AbortController | null>(null);
+
+    useEffect(() => {
+        const onFullscreenChange = () => {
+            const next = document.fullscreenElement === wrapperRef.current;
+            setIsFullscreen(next);
+        };
+        document.addEventListener("fullscreenchange", onFullscreenChange);
+        return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = async () => {
+        try {
+            if (document.fullscreenElement === wrapperRef.current) {
+                await document.exitFullscreen();
+                return;
+            }
+            await wrapperRef.current?.requestFullscreen();
+        } catch (e: unknown) {
+            const msg =
+                typeof e === "object" && e && "message" in e
+                    ? String((e as { message?: unknown }).message)
+                    : "Fullscreen is not available in this browser context.";
+            toast.error(msg);
+        }
+    };
 
     useEffect(() => {
         Cookies.set("selectedMapLayer", selectedLayer, { expires: 365 });
@@ -233,18 +286,6 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
     useEffect(() => {
         Cookies.set("geoPointColor", pointColor, { expires: 365 });
     }, [pointColor]);
-
-    const depsKey = useMemo(
-        () =>
-            JSON.stringify({
-                from: toIso(from),
-                to: toIso(to),
-                vpnServerId,
-                externalId,
-                onlyWithCoordinates,
-            }),
-        [from, to, vpnServerId, externalId, onlyWithCoordinates]
-    );
 
     useEffect(() => {
         abortRef.current?.abort();
@@ -259,7 +300,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
             OnlyWithCoordinates: onlyWithCoordinates,
         };
 
-        getApiOpenVpnClientsOverviewPoints(params, undefined, controller.signal)
+        getApiOpenVpnClientsOverviewPoints(params, { signal: controller.signal })
             .then((resp) => {
                 const next = pickPoints(resp);
                 setPoints(next);
@@ -281,7 +322,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
             });
 
         return () => controller.abort();
-    }, [depsKey]);
+    }, [from, to, vpnServerId, externalId, onlyWithCoordinates]);
 
     const filteredPoints = useMemo(() => {
         return points.filter((p) => {
@@ -299,29 +340,30 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
 
     const bounds = useMemo(() => {
         const latlngs: [number, number][] = [];
-        if (serverLocation) latlngs.push(serverLocation);
+        vpnServerMarkers.forEach((m) => latlngs.push(m.position));
         filteredPoints.forEach((p) => {
             if (p.latitude != null && p.longitude != null) {
                 latlngs.push([p.latitude, p.longitude]);
             }
         });
         return latlngs.length ? L.latLngBounds(latlngs) : null;
-    }, [filteredPoints, serverLocation]);
+    }, [filteredPoints, vpnServerMarkers]);
+
+    const rootClassName = isFullscreen
+        ? "geo-points-map geo-points-map--fullscreen"
+        : "geo-points-map";
 
     return (
-        <div style={{ height: "650px", width: "100%", marginTop: 20 }}>
-            <div
-                style={{
-                    marginBottom: 10,
-                    display: "flex",
-                    gap: 10,
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                }}
-            >
-                <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        <div
+            ref={wrapperRef}
+            className={rootClassName}
+        >
+            <div className="geo-points-map__toolbar">
+                <div className="geo-points-map__controls">
                     <strong>Map Style:</strong>
                     <select
+                        id="geo-points-map-layer"
+                        name="geoPointsMapLayer"
                         className="btn secondary dropdown-select"
                         value={selectedLayer}
                         onChange={(e) =>
@@ -336,6 +378,8 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                     </select>
                     <strong>Point style:</strong>
                     <select
+                        id="geo-points-map-point-style"
+                        name="geoPointsMapPointStyle"
                         className="btn secondary dropdown-select"
                         value={pointStyle}
                         onChange={(e) => setPointStyle(e.target.value as "by_traffic" | "single")}
@@ -345,6 +389,8 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                     </select>
                     {pointStyle === "single" && (
                         <select
+                            id="geo-points-map-point-color"
+                            name="geoPointsMapPointColor"
                             className="btn secondary dropdown-select"
                             value={pointColor}
                             onChange={(e) => setPointColor(e.target.value as PointColorKey)}
@@ -367,22 +413,32 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                 </button>
             </div>
 
-            <MapContainer style={{ height: 600, width: "100%" }} center={center} zoom={zoom}>
+            <MapContainer
+                className="geo-points-map__container"
+                center={center}
+                zoom={zoom}
+            >
+                <InvalidateMapSize trigger={isFullscreen} />
+                <FullscreenControl isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
                 <ChangeView center={center} zoom={zoom} />
                 <TileLayer
                     url={tileLayers[selectedLayer].url}
                     attribution={tileLayers[selectedLayer].attribution}
                 />
 
-                {serverLocation && (
-                    <Marker position={serverLocation} icon={serverIcon}>
+                {vpnServerMarkers.map((m, idx) => (
+                    <Marker
+                        key={m.id != null ? `vpn-server-${m.id}` : `vpn-server-${idx}`}
+                        position={m.position}
+                        icon={serverIcon}
+                    >
                         <Popup>
-                            <strong>VPN Server</strong>
+                            <strong>{m.name}</strong>
                             <br />
-                            🌎 {serverLocation[0]}, {serverLocation[1]}
+                            🌎 {m.position[0]}, {m.position[1]}
                         </Popup>
                     </Marker>
-                )}
+                ))}
 
                 {filteredPoints.map((p, i) => {
                     const total = (p.totalBytesIn ?? 0) + (p.totalBytesOut ?? 0);
@@ -395,7 +451,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                             icon={icon}
                         >
                             <Popup>
-                                <div style={{ minWidth: 220 }}>
+                                <div className="geo-points-map__popup-content">
                                     <strong>{p.country ?? "Unknown country"}</strong>
                                     <br />
                                     {p.region ?? "Unknown region"}
@@ -418,23 +474,25 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                 {bounds && <FitBounds bounds={bounds} />}
             </MapContainer>
 
-            <div
-                style={{
-                    marginTop: 8,
-                    fontSize: 12,
-                    opacity: 0.85,
-                    display: "flex",
-                    gap: 12,
-                    flexWrap: "wrap",
-                }}
-            >
+            <div className="geo-points-map__legend">
+                {vpnServerMarkers.length > 0 && (
+                    <>
+                        <LegendItem
+                            colorUrl={serverIcon.options.iconUrl as string}
+                            label="VPN server (location)"
+                        />
+                        <span className="geo-points-map__legend-separator" aria-hidden="true">
+                            |
+                        </span>
+                    </>
+                )}
                 <LegendItem colorUrl={ICONS.grey.options.iconUrl as string} label="0 B" />
                 <LegendItem colorUrl={ICONS.blue.options.iconUrl as string} label="≤ 1 MB" />
                 <LegendItem colorUrl={ICONS.green.options.iconUrl as string} label="≤ 50 MB" />
                 <LegendItem colorUrl={ICONS.orange.options.iconUrl as string} label="≤ 1 GB" />
                 <LegendItem colorUrl={ICONS.red.options.iconUrl as string} label="≤ 10 GB" />
-                <LegendItem colorUrl={ICONS.violet.options.iconUrl as string} label="≤ 100 GB" />
-                <LegendItem colorUrl={ICONS.yellow.options.iconUrl as string} label="≤ 500 GB" />
+                <LegendItem colorUrl={ICONS.yellow.options.iconUrl as string} label="≤ 100 GB" />
+                <LegendItem colorUrl={ICONS.gold.options.iconUrl as string} label="≤ 500 GB" />
                 <LegendItem colorUrl={ICONS.black.options.iconUrl as string} label="≤ 1 TB" />
                 <LegendItem colorUrl={ICONS.black.options.iconUrl as string} label="> 1 TB" />
             </div>
@@ -445,8 +503,75 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
 const FitBounds: React.FC<{ bounds: L.LatLngBounds }> = ({ bounds }) => {
     const map = useMap();
     useEffect(() => {
-        map.fitBounds(bounds, { padding: [40, 40] });
+        let alive = true;
+        const id = window.setTimeout(() => {
+            if (!alive) return;
+            try {
+                const el = map.getContainer();
+                if (!el?.isConnected) return;
+                map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+            } catch {
+                /* map unmounting mid-zoom — avoids Leaflet _leaflet_pos on torn panes */
+            }
+        }, 0);
+        return () => {
+            alive = false;
+            clearTimeout(id);
+        };
     }, [map, bounds]);
+    return null;
+};
+
+const InvalidateMapSize: React.FC<{ trigger: boolean }> = ({ trigger }) => {
+    const map = useMap();
+    useEffect(() => {
+        const id = window.setTimeout(() => {
+            try {
+                map.invalidateSize();
+            } catch {
+                /* map may be unmounted while toggling fullscreen */
+            }
+        }, 50);
+        return () => clearTimeout(id);
+    }, [map, trigger]);
+    return null;
+};
+
+const FullscreenControl: React.FC<{
+    isFullscreen: boolean;
+    onToggle: () => void;
+}> = ({ isFullscreen, onToggle }) => {
+    const map = useMap();
+
+    useEffect(() => {
+        const control = new L.Control({ position: "topleft" });
+
+        control.onAdd = () => {
+            const container = L.DomUtil.create("div", "leaflet-bar");
+            const button = L.DomUtil.create("a", "", container);
+
+            button.href = "#";
+            button.setAttribute("role", "button");
+            button.setAttribute("aria-label", isFullscreen ? "Exit fullscreen" : "Enter fullscreen");
+            button.title = isFullscreen ? "Exit fullscreen" : "Fullscreen";
+            button.innerHTML = "⤢";
+
+            L.DomEvent.disableClickPropagation(container);
+            L.DomEvent.disableScrollPropagation(container);
+            L.DomEvent.on(button, "click", (e: Event) => {
+                L.DomEvent.preventDefault(e);
+                onToggle();
+            });
+
+            return container;
+        };
+
+        control.addTo(map);
+        return () => {
+            control.remove();
+        };
+    }, [map, onToggle, isFullscreen]);
+
     return null;
 };
 
@@ -454,7 +579,7 @@ const LegendItem: React.FC<{ colorUrl: string; label: string }> = ({
                                                                        colorUrl,
                                                                        label,
                                                                    }) => (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+    <span className="geo-points-map__legend-item">
     <img src={colorUrl} width={14} height={22} alt="" />
         {label}
   </span>

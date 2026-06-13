@@ -5,17 +5,22 @@ import "../../css/Header.css";
 import { FaBell, FaDoorClosed, FaSun, FaMoon } from "react-icons/fa";
 import { logout } from "../../api/apirequest.ts";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
+import { parseTelegramNumericId } from "../../utils/telegramNumericId.ts";
 import { useNotificationsUnreadCount } from "../../pages/Notifications/useNotifications";
-import { useTheme } from "../../contexts/ThemeContext";
+import { useTheme } from "../../contexts/useTheme";
+import { UserAvatar } from "./UserAvatar";
 
 export function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
     const user = getCurrentUser();
     const { theme, toggleTheme } = useTheme();
-    const { data: unreadCount = 0 } = useNotificationsUnreadCount();
+    const canViewNotifications = isAdmin(user);
+    const { data: unreadCount = 0 } = useNotificationsUnreadCount({
+        enabled: canViewNotifications,
+    });
 
     return (
-        <header className="header">
+        <header className={`header${menuOpen ? " header--nav-open" : ""}`}>
             <Link to="/" className="logo" onClick={() => setMenuOpen(false)}>
                 <div className="logo">
                     <img src="/favicon.png" alt="Logo" className="logo-icon" />
@@ -59,13 +64,20 @@ export function Header() {
 
                     {user && (
                         <li className="user-info">
+                            <UserAvatar
+                                src={user.avatarUrl}
+                                telegramPhotoTelegramId={parseTelegramNumericId(user.providerExternalId)}
+                                name={user.displayName || user.email || "User"}
+                                colorSeed={String(user.id)}
+                                size={36}
+                            />
                             <span className="user-name">
                                 {user.displayName || user.email || "User"}
                             </span>
                         </li>
                     )}
 
-                    {user && (
+                    {user && canViewNotifications && (
                         <li className="header-notifications">
                             <Link to="/notifications" onClick={() => setMenuOpen(false)} className="header-notifications-link" title="Notifications">
                                 <FaBell className="icon" />

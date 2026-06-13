@@ -1,7 +1,7 @@
 // src/pages/TelegramBotSettings/TelegramBotMessagesSection.tsx
-import { FaSync } from "react-icons/fa";
+import { FaInbox, FaSync } from "react-icons/fa";
 import TelegramBotMessagesTable from "./TelegramBotMessagesTable";
-import type { MessageDto } from "../../api/orval/model";
+import type { MessageDto } from "../../api/orvalModelShim";
 
 import "../../css/Settings.css";
 import "../../css/TelegramBotUsers.css";
@@ -31,7 +31,10 @@ export function TelegramBotMessagesSection({
                                            }: Props) {
     return (
         <section style={{ marginTop: "24px" }}>
-            <h3>Incoming Messages</h3>
+            <h3 className="settings-card__h3-with-icon">
+              <FaInbox className="icon" aria-hidden />
+              <span>Incoming Messages</span>
+            </h3>
             <p className="app-settings-description">
                 View all messages sent by users to your Telegram bot.
             </p>

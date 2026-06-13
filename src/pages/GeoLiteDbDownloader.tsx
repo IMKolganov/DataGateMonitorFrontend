@@ -1,12 +1,15 @@
 // GeoLiteDbDownloader.tsx
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, type CSSProperties } from "react";
 import { FaDatabase } from "react-icons/fa";
 import * as signalR from "@microsoft/signalr";
 import { toast } from "react-toastify";
-import type { GetVersionDatabaseResponse } from "../api/orval/model";
+import type { GetVersionDatabaseResponse } from "../api/orvalModelShim";
+import { getApiBaseUrl } from "../config/apiBase";
+import { errorMessage } from "../utils/errorMessage";
+import { getSignalRPreferredTransport } from "../utils/signalrTransport.ts";
+import { resolveHubAccessToken } from "../utils/auth/signalRAccessToken.ts";
+import "../css/GeoLiteDbDownloader.css";
 
-
-// ⬇️ adjust the import path if your orval file lives elsewhere
 import {
   useGetApiGeoLiteGetVerionDb,
   usePostApiGeoLiteUpdateDb,
@@ -19,22 +22,36 @@ type StepProgressPayload = {
   progress: number; // 0..100
 };
 
-// If you already have a helper that builds the connection, keep using it.
-// Otherwise, provide a simple builder like below.
-// IMPORTANT: update the hub URL to match your backend.
+type UpdateProgressState = {
+  running: boolean;
+  stepNo: number | null;
+  totalSteps: number | null;
+  title: string | null;
+  progress: number | null;
+};
+
+const idleProgressState: UpdateProgressState = {
+  running: false,
+  stepNo: null,
+  totalSteps: null,
+  title: null,
+  progress: null,
+};
+
+/** Same prefix as REST (`/api/...`) and Vite proxy — not `/hubs/...` at site root. */
 function buildGeoLiteHubConnection(): signalR.HubConnection {
-  const baseUrl =
-    (import.meta as any).env?.VITE_API_BASE_URL ??
-    (window as any).__API_BASE_URL__ ??
-    "";
+  const hubUrl = `${getApiBaseUrl()}/hubs/geolite`;
   return new signalR.HubConnectionBuilder()
-    .withUrl(`${baseUrl}/hubs/geolite`)
+    .withUrl(hubUrl, {
+      accessTokenFactory: () => resolveHubAccessToken(),
+      transport: getSignalRPreferredTransport(),
+    })
     .withAutomaticReconnect()
+    .configureLogging(signalR.LogLevel.None)
     .build();
 }
 
 export function GeoLiteDbDownloader() {
-  // Version loader (auto-unwrapped by ogmMutator in your setup)
   const {
     data: versionData,
     isLoading: isFetching,
@@ -43,33 +60,21 @@ export function GeoLiteDbDownloader() {
 
   const version = useMemo(
     () => versionData?.databaseVersion ?? "Unknown",
-    [versionData]
+    [versionData],
   );
 
-  // Update mutation
   const {
     mutateAsync: updateDbAsync,
     isPending: isUpdatingRequest,
   } = usePostApiGeoLiteUpdateDb({
     mutation: {
-      onError: (err: any) => {
-        const msg =
-          err?.response?.data?.error || err?.message || "Unknown error";
-        toast.error(msg);
+      onError: (err: unknown) => {
+        toast.error(errorMessage(err));
       },
     },
   });
 
-  // Local transient UI state (kept in refs to avoid re-renders during streaming)
-  const updateRunningRef = useRef(false);
-  const currentStepTitleRef = useRef<string | null>(null);
-  const currentStepNumberRef = useRef<number | null>(null);
-  const totalStepsRef = useRef<number | null>(null);
-  const stepProgressRef = useRef<number | null>(null);
-
-  // Simple force update hook
-  const [, setTick] = useState(0);
-  const forceRerender = () => setTick((x) => x + 1);
+  const [updateProgress, setUpdateProgress] = useState<UpdateProgressState>(idleProgressState);
 
   const connectionRef = useRef<signalR.HubConnection | null>(null);
 
@@ -78,33 +83,26 @@ export function GeoLiteDbDownloader() {
 
     const connect = async () => {
       try {
-        // Create connection only once
         if (!connectionRef.current) {
           connectionRef.current = buildGeoLiteHubConnection();
         }
         const connection = connectionRef.current;
 
-        // Ensure handlers are registered once
         connection?.off("GeoLiteStepProgress");
         connection?.off("GeoLiteUpdateFinished");
 
         connection?.on("GeoLiteStepProgress", (data: StepProgressPayload) => {
-          // Update refs first (cheaper), then force a batched re-render
-          currentStepNumberRef.current = data.step;
-          totalStepsRef.current = data.totalSteps;
-          currentStepTitleRef.current = data.title;
-          stepProgressRef.current = data.progress;
-          updateRunningRef.current = true;
-          forceRerender();
+          setUpdateProgress({
+            running: true,
+            stepNo: data.step,
+            totalSteps: data.totalSteps,
+            title: data.title,
+            progress: data.progress,
+          });
         });
 
         connection?.on("GeoLiteUpdateFinished", async () => {
-          updateRunningRef.current = false;
-          currentStepTitleRef.current = null;
-          currentStepNumberRef.current = null;
-          totalStepsRef.current = null;
-          stepProgressRef.current = null;
-          forceRerender();
+          setUpdateProgress(idleProgressState);
 
           try {
             await refetchVersion();
@@ -119,12 +117,11 @@ export function GeoLiteDbDownloader() {
         }
 
         connection.onclose(() => {
-          // Reset running state when the socket closes
-          updateRunningRef.current = false;
-          forceRerender();
+          setUpdateProgress(idleProgressState);
         });
-      } catch (err) {
+      } catch (e) {
         if (!isMounted) return;
+        console.error("[GeoLite] SignalR connect failed:", e);
       }
     };
 
@@ -132,7 +129,6 @@ export function GeoLiteDbDownloader() {
 
     return () => {
       isMounted = false;
-      // Clean up handlers and stop connection
       const c = connectionRef.current;
       if (c) {
         c.off("GeoLiteStepProgress");
@@ -145,88 +141,61 @@ export function GeoLiteDbDownloader() {
   const handleUpdateGeoLite = async () => {
     try {
       await updateDbAsync();
-      // Do not reset UI here; we wait for hub events to drive the UI.
     } catch {
       // Error is handled in mutation onError
     }
   };
 
-  const updateInProgress = updateRunningRef.current || isUpdatingRequest;
+  const updateInProgress = updateProgress.running || isUpdatingRequest;
+  const { stepNo, totalSteps, title, progress } = updateProgress;
 
-  // Render
+  const progressStyle =
+    progress !== null
+      ? ({ "--progress-pct": `${progress}%` } as CSSProperties)
+      : undefined;
+
   if (isFetching) {
     return (
-      <div
-        className="geo-db-downloader"
-        style={{ padding: "2rem", textAlign: "center" }}
-      >
-        <span
-          className="spinner"
-          style={{ width: 24, height: 24, display: "inline-block" }}
-        />
-        <p style={{ marginTop: "0.5rem", color: "#8b949e" }}>
-          Loading status...
-        </p>
+      <div className="geo-db-downloader geo-db-downloader--loading">
+        <span className="spinner spinner--md" />
+        <p className="loading-panel__hint">Loading status...</p>
       </div>
     );
   }
 
-  const stepNo = currentStepNumberRef.current;
-  const total = totalStepsRef.current;
-  const title = currentStepTitleRef.current;
-  const progress = stepProgressRef.current;
-
   return (
-    <div className="geo-db-downloader" style={{ paddingTop: "1rem" }}>
-      <h3 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.75rem" }}>
-        GeoLite2 Downloader
-      </h3>
+    <div className="geo-db-downloader">
+      <h3 className="geo-db-downloader__title">GeoLite2 Downloader</h3>
 
-      <p style={{ fontSize: "0.95rem", color: "var(--text-secondary)" }}>
-        <span style={{ color: "#8b949e" }}>Current DB Version:</span>{" "}
-        <strong style={{ color: "#58a6ff" }}>{version}</strong>
+      <p className="geo-db-downloader__version-line">
+        <span className="geo-db-downloader__version-label">Current DB Version:</span>{" "}
+        <strong className="geo-db-downloader__version-value">{version}</strong>
       </p>
 
       {stepNo !== null && title && (
-        <div className="step-status" style={{ marginTop: "1rem", marginBottom: "1rem" }}>
-          <div style={{ fontSize: "0.9rem", marginBottom: "0.5rem", color: "var(--text-secondary)" }}>
+        <div className="geo-db-downloader__step-status">
+          <div className="geo-db-downloader__step-caption">
             <strong>
-              Step {stepNo}/{total}:
+              Step {stepNo}/{totalSteps}:
             </strong>{" "}
             {title}
           </div>
           {progress !== null && (
-            <div
-              style={{
-                width: "100%",
-                height: "8px",
-                backgroundColor: "var(--bg-content-alt)",
-                borderRadius: "4px",
-                overflow: "hidden",
-                boxShadow: "inset 0 1px 2px rgba(0,0,0,0.1)",
-              }}
-            >
-              <div
-                style={{
-                  width: `${progress}%`,
-                  height: "100%",
-                  backgroundColor: "#58a6ff",
-                  transition: "width 0.3s ease-in-out",
-                  marginBottom: "2px",
-                }}
-              />
+            <div className="progress-bar">
+              <div className="progress-bar__fill" style={progressStyle} />
             </div>
           )}
         </div>
       )}
 
-      <button className="btn primary" onClick={handleUpdateGeoLite} disabled={updateInProgress}>
-        {updateInProgress ? (
-          <span className="spinner" style={{ marginRight: 8 }} />
-        ) : (
-          <FaDatabase className="icon" style={{ marginRight: 8 }} />
-        )}
-        {updateInProgress ? "Updating..." : "Update GeoLite2 Database"}
+      <button
+        type="button"
+        className="btn primary geo-db-downloader__update-btn"
+        onClick={() => void handleUpdateGeoLite()}
+        disabled={updateInProgress}
+      >
+        <FaDatabase className="icon-gap-end" />
+        {updateInProgress ? "Updating..." : "Update GeoLite Database"}
       </button>
     </div>
   );

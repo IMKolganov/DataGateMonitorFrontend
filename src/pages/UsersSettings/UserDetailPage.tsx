@@ -1,10 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaKey, FaPlus, FaEdit, FaTrash, FaSync } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaKey,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSync,
+  FaShieldAlt,
+  FaUser,
+  FaCog,
+  FaPaperPlane,
+  FaClipboardList,
+  FaListUl,
+  FaChartBar,
+  FaIdCard,
+  FaSave,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
   useGetApiUsersGetByIdId,
   getGetApiUsersGetAllQueryKey,
+  useGetApiUsersEmailConfirmationStatusId,
+  usePostApiUsersConfirmEmailId,
 } from "../../api/orval/user/user";
 import { usePostApiAuthForgotPassword } from "../../api/orval/auth/auth";
 import { usePostApiQuotaPlansGetAll } from "../../api/orval/quota-plan/quota-plan";
@@ -15,26 +33,44 @@ import {
   usePutApiUserQuotaPlansUpdate,
   useDeleteApiUserQuotaPlansDeleteId,
 } from "../../api/orval/user-quota-plan/user-quota-plan";
+import {
+  useGetApiUserRolesGetAllRoles,
+  useGetApiUserRolesByUserUserId,
+  usePutApiUserRolesSet,
+  getGetApiUserRolesByUserUserIdQueryKey,
+} from "../../api/orval/user-roles/user-roles";
 import { useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId } from "../../api/orval/telegram-bot-incoming-message-log/telegram-bot-incoming-message-log";
 import type {
   QuotaPlanDto,
   QuotaPlansResponse,
   UserQuotaPlanDto,
   CreateOrUpdateUserQuotaPlanRequest,
-} from "../../api/orval/model";
-import type { UsersResponse } from "../../api/orval/model";
-import type { GetUserQuotaPlansByUserIdResponse } from "../../api/orval/model";
-import type { GetByTelegramIdMessagesResponseApiResponse } from "../../api/orval/model";
-import type { MessageDto } from "../../api/orval/model";
+  RoleDto,
+  RolesResponse,
+  UserRoleAssignmentResponse,
+  UserResponsesGetUserEmailConfirmationStatusResponse,
+} from "../../api/orvalModelShim";
+import type { UsersResponse } from "../../api/orvalModelShim";
+import type { GetUserQuotaPlansByUserIdResponse } from "../../api/orvalModelShim";
+import type { GetByTelegramIdMessagesResponseApiResponse } from "../../api/orvalModelShim";
+import type { MessageDto } from "../../api/orvalModelShim";
 import { useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { isCanceledError } from "../../utils/queryCanceled";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
+import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
+import { UserVpnConnectionsSection } from "./UserVpnConnectionsSection";
+import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
 import StyledDataGrid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
-import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
+import type { GridColDef } from "@mui/x-data-grid";
 import "../../css/Settings.css";
 import "../../css/Table.css";
+import { UserAvatar } from "../../components/ui/UserAvatar.tsx";
+import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
+import { telegramPhotoIdForProvider } from "../../utils/telegramNumericId.ts";
 
 function formatBytes(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
@@ -63,13 +99,91 @@ export function UserDetailPage() {
 
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<UserQuotaPlanDto | null>(null);
-
-  const [telegramMessagesPagination, setTelegramMessagesPagination] =
-    useState<GridPaginationModel>({ page: 0, pageSize: 10 });
+  const [telegramMessagesPageSize, setTelegramMessagesPageSize] = usePersistedPageSize(
+    `user-detail-telegram:${userId ?? "0"}`,
+    10,
+    "5,10,20,50,100",
+  );
 
   const createAssignmentMutation = usePostApiUserQuotaPlansCreate();
   const updateAssignmentMutation = usePutApiUserQuotaPlansUpdate();
   const deleteAssignmentMutation = useDeleteApiUserQuotaPlansDeleteId();
+
+  const canManageRoles = isAdmin(getCurrentUser());
+  const userIdValid = Number.isFinite(id) && id > 0;
+
+  const { data: allRolesRaw, isLoading: rolesCatalogLoading } = useGetApiUserRolesGetAllRoles({
+    query: {
+      enabled: canManageRoles,
+      staleTime: 60_000,
+    },
+  });
+
+  const roleCatalog = useMemo(() => {
+    if (!allRolesRaw) return [] as (RoleDto & { id: number })[];
+    const r = unwrapMaybeApiResponse<RolesResponse>(
+      allRolesRaw as RolesResponse | ApiEnvelope<RolesResponse> | undefined,
+    );
+    return (r?.roles ?? []).filter(
+      (x): x is RoleDto & { id: number } => typeof x.id === "number" && x.id > 0,
+    );
+  }, [allRolesRaw]);
+
+  const { data: userRoleRaw, isLoading: userRoleLoading } = useGetApiUserRolesByUserUserId(
+    userIdValid ? id : 0,
+    {
+      query: {
+        enabled: canManageRoles && userIdValid,
+      },
+    },
+  );
+
+  const currentRoleAssignment = useMemo(() => {
+    if (!userRoleRaw) return undefined;
+    const u = unwrapMaybeApiResponse<UserRoleAssignmentResponse>(
+      userRoleRaw as UserRoleAssignmentResponse | ApiEnvelope<UserRoleAssignmentResponse> | undefined,
+    );
+    return u?.assignment ?? (userRoleRaw as UserRoleAssignmentResponse).assignment;
+  }, [userRoleRaw]);
+
+  const setRoleMutation = usePutApiUserRolesSet({
+    mutation: {
+      onSuccess: () => {
+        toast.success("Role updated");
+        void queryClient.invalidateQueries({
+          queryKey: getGetApiUserRolesByUserUserIdQueryKey(id),
+        });
+      },
+      onError: (e: unknown) => {
+        const err = e as { response?: { data?: { message?: string } }; message?: string };
+        toast.error(
+          err?.response?.data?.message ?? (err as Error)?.message ?? "Failed to update role",
+        );
+      },
+    },
+  });
+
+  const roleIdFromServer = currentRoleAssignment?.roleId;
+  const [roleSync, setRoleSync] = useState<{ roleId: number | undefined; pendingRoleId: number | "" }>({
+    roleId: roleIdFromServer,
+    pendingRoleId: "",
+  });
+  if (roleSync.roleId !== roleIdFromServer) {
+    const nextPending: number | "" =
+      roleIdFromServer != null && typeof roleIdFromServer === "number" ? roleIdFromServer : "";
+    setRoleSync({ roleId: roleIdFromServer, pendingRoleId: nextPending });
+  }
+  const pendingRoleId = roleSync.pendingRoleId;
+  const setPendingRoleId = (value: number | "") =>
+    setRoleSync((s) => ({ ...s, pendingRoleId: value }));
+
+  const [telegramPageState, setTelegramPageState] = useState({ userId, page: 0 });
+  if (telegramPageState.userId !== userId) {
+    setTelegramPageState({ userId, page: 0 });
+  }
+  const telegramMessagesPage = telegramPageState.page;
+  const setTelegramMessagesPage = (page: number) =>
+    setTelegramPageState((s) => ({ ...s, page }));
 
   const isTelegramUser =
     user != null &&
@@ -87,8 +201,8 @@ export function UserDetailPage() {
   } = useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId(
     telegramIdValid ? telegramId : 0,
     {
-      page: telegramMessagesPagination.page + 1,
-      pageSize: telegramMessagesPagination.pageSize,
+      page: telegramMessagesPage + 1,
+      pageSize: telegramMessagesPageSize,
     },
     {
       query: {
@@ -108,6 +222,40 @@ export function UserDetailPage() {
       : telegramMessagesError
         ? "Failed to load messages"
         : null;
+
+  const {
+    data: emailStatusRaw,
+    isLoading: emailStatusLoading,
+    refetch: refetchEmailStatus,
+  } = useGetApiUsersEmailConfirmationStatusId(userIdValid ? id : 0, {
+    query: {
+      enabled: userIdValid && Boolean(user?.email),
+    },
+  });
+
+  const emailStatusPayload = unwrapMaybeApiResponse<UserResponsesGetUserEmailConfirmationStatusResponse>(
+    emailStatusRaw as
+      | UserResponsesGetUserEmailConfirmationStatusResponse
+      | ApiEnvelope<UserResponsesGetUserEmailConfirmationStatusResponse>
+      | undefined,
+  );
+  const isEmailConfirmed = emailStatusPayload?.isEmailConfirmed;
+
+  const confirmEmailMutation = usePostApiUsersConfirmEmailId({
+    mutation: {
+      onSuccess: async () => {
+        toast.success("Email confirmed");
+        await queryClient.invalidateQueries({ queryKey: getGetApiUsersGetAllQueryKey() });
+        await refetchEmailStatus();
+      },
+      onError: (e: unknown) => {
+        const err = e as { response?: { data?: { message?: string } }; message?: string };
+        toast.error(
+          err?.response?.data?.message ?? (err as Error)?.message ?? "Failed to confirm email",
+        );
+      },
+    },
+  });
 
   const invalidateUserQuota = () =>
     queryClient.invalidateQueries({
@@ -174,12 +322,15 @@ export function UserDetailPage() {
       { data: { includeInactive: true } },
       {
         onSuccess: (raw) => {
-          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(raw as any);
+          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(
+            raw as QuotaPlansResponse | ApiEnvelope<QuotaPlansResponse> | undefined,
+          );
           setQuotaPlans(payload?.quotaPlans ?? []);
         },
       }
     );
-  }, [id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mutation result reference is unstable; `mutate` is stable (TanStack Query v5)
+  }, [id, getAllQuotaMutation.mutate]);
 
   const handleSendResetCode = () => {
     if (!user) return;
@@ -205,6 +356,24 @@ export function UserDetailPage() {
         },
       }
     );
+  };
+
+  const roleDirty =
+    (typeof pendingRoleId === "number" ? pendingRoleId : null) !==
+    (currentRoleAssignment?.roleId ?? null);
+
+  const handleSaveRole = () => {
+    if (!userIdValid) return;
+    if (pendingRoleId === "" || typeof pendingRoleId !== "number") {
+      toast.error("Select a role");
+      return;
+    }
+    setRoleMutation.mutate({ data: { userId: id, roleId: pendingRoleId } });
+  };
+
+  const handleConfirmEmailManually = () => {
+    if (!userIdValid || !user?.email) return;
+    confirmEmailMutation.mutate({ id });
   };
 
   if (!Number.isFinite(id)) {
@@ -250,10 +419,29 @@ export function UserDetailPage() {
         </div>
       </div>
 
-      <h2>User details</h2>
+      <h2 className="settings-page__h2-with-icon">
+        <FaIdCard className="icon" aria-hidden />
+        <span>User details</span>
+      </h2>
 
-      <section className="settings-card" style={{ marginBottom: 24 }}>
-        <h3>Profile</h3>
+      <section className="settings-card settings-card--mb">
+        <h3 className="settings-card__h3-with-icon">
+          <FaUser className="icon" aria-hidden />
+          <span>Profile</span>
+        </h3>
+        <div className="user-detail-profile-banner">
+          <UserAvatar
+            src={readOptionalAvatarUrl(user as object)}
+            telegramPhotoTelegramId={telegramPhotoIdForProvider(user.provider, user.externalId)}
+            name={user.displayName ?? user.email ?? `User #${user.id ?? ""}`}
+            colorSeed={`${user.id ?? ""}|${user.email ?? ""}`}
+            size={56}
+          />
+          <div className="user-detail-profile-banner__text">
+            <p className="user-detail-profile-banner__name">{user.displayName?.trim() || "—"}</p>
+            <p className="user-detail-profile-banner__sub">{user.email?.trim() || "No email"}</p>
+          </div>
+        </div>
         <dl className="user-detail-dl">
           <dt>ID</dt>
           <dd>{user.id ?? "—"}</dd>
@@ -261,6 +449,18 @@ export function UserDetailPage() {
           <dd>{user.displayName ?? "—"}</dd>
           <dt>Email</dt>
           <dd>{user.email ?? "—"}</dd>
+          <dt>Email confirmed</dt>
+          <dd>
+            {!user.email
+              ? "No email"
+              : emailStatusLoading
+                ? "Loading..."
+                : isEmailConfirmed === true
+                  ? "Yes"
+                  : isEmailConfirmed === false
+                    ? "No"
+                    : "—"}
+          </dd>
           <dt>Sign-in method</dt>
           <dd>
             {user.provider
@@ -296,8 +496,29 @@ export function UserDetailPage() {
         </dl>
       </section>
 
-      <section className="settings-card" style={{ marginBottom: 24 }}>
-        <h3>Admin actions</h3>
+      {user.id != null && (
+        <section className="settings-card settings-card--mb">
+          <h3 className="settings-card__h3-with-icon">
+            <FaChartBar className="icon" aria-hidden />
+            <span>Traffic quota</span>
+          </h3>
+          <UserTrafficQuotaProgress
+            userId={user.id}
+            externalId={user.externalId}
+            quotaPlans={quotaPlans}
+            userQuotaAssignments={userAssignments}
+            suppressInlineTitle
+          />
+        </section>
+      )}
+
+      <UserVpnConnectionsSection externalId={user.externalId} />
+
+      <section className="settings-card settings-card--mb">
+        <h3 className="settings-card__h3-with-icon">
+          <FaCog className="icon" aria-hidden />
+          <span>Admin actions</span>
+        </h3>
         <p className="settings-item-description">
           Request a one-time password reset code for this user. The code will be
           written to the server console (if the account exists and supports password login).
@@ -309,17 +530,86 @@ export function UserDetailPage() {
         >
           <FaKey className="icon" /> Send password reset code
         </button>
+        <div className="mt-12">
+          <button
+            className="btn primary"
+            onClick={handleConfirmEmailManually}
+            disabled={confirmEmailMutation.isPending || !user.email || isEmailConfirmed === true}
+          >
+            <FaSave className="icon" /> Confirm email manually
+          </button>
+        </div>
       </section>
 
+      {canManageRoles && (
+        <section className="settings-card settings-card--mb">
+          <h3 className="settings-card__h3-with-icon">
+            <FaShieldAlt className="icon" aria-hidden />
+            <span>Access role</span>
+          </h3>
+          <p className="settings-item-description">
+            Role used for authorization on the server. The &quot;Admin&quot; field in the profile above may still
+            reflect legacy data.
+          </p>
+          {rolesCatalogLoading || userRoleLoading ? (
+            <p className="text-muted">Loading role…</p>
+          ) : roleCatalog.length === 0 ? (
+            <p className="error-message">No roles returned from the API. Check permissions or backend configuration.</p>
+          ) : (
+            <div className="settings-item settings-item--col-top">
+              <label htmlFor="user-role-select" className="settings-item-label--wide">
+                Role
+              </label>
+              <div className="flex-wrap-gap-12">
+                <select
+                  id="user-role-select"
+                  className="input select-min-220"
+                  value={pendingRoleId === "" ? "" : String(pendingRoleId)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setPendingRoleId(v === "" ? "" : Number(v));
+                  }}
+                  disabled={setRoleMutation.isPending}
+                >
+                  <option value="">— Select role —</option>
+                  {roleCatalog.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name?.trim() || r.normalizedName || `Role #${r.id}`}
+                      {r.isSystem ? " (system)" : ""}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={handleSaveRole}
+                  disabled={!roleDirty || setRoleMutation.isPending}
+                >
+                  <FaSave className="icon" aria-hidden /> Save role
+                </button>
+              </div>
+              {currentRoleAssignment?.roleName != null && (
+                <p className="text-muted-sm">
+                  Current (from server): {currentRoleAssignment.roleName}
+                </p>
+              )}
+            </div>
+          )}
+        </section>
+      )}
+
       {isTelegramUser && (
-        <section className="settings-card" style={{ marginBottom: 24 }}>
-          <h3>Telegram bot messages</h3>
+        <section className="settings-card settings-card--mb">
+          <h3 className="settings-card__h3-with-icon">
+            <FaPaperPlane className="icon" aria-hidden />
+            <span>Telegram bot messages</span>
+          </h3>
           <p className="settings-item-description">
             Incoming messages from this user in the Telegram bot.
           </p>
           {telegramIdValid ? (
             <>
-              <div className="header-bar" style={{ marginBottom: 8 }}>
+              <div className="header-bar header-bar--mb-8">
                 <div className="left-buttons">
                   <button
                     type="button"
@@ -332,12 +622,12 @@ export function UserDetailPage() {
                 </div>
               </div>
               {telegramMessagesErrorMessage && (
-                <p className="error-message" style={{ marginBottom: 8 }}>❌ {telegramMessagesErrorMessage}</p>
+                <p className="error-message error-message--mb-8">❌ {telegramMessagesErrorMessage}</p>
               )}
               {!telegramMessagesLoading && telegramMessagesTotalCount === 0 ? (
-                <p style={{ color: "#8b949e" }}>No messages.</p>
+                <p className="text-muted">No messages.</p>
               ) : (
-              <div className="data-grid-wrap" style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}>
+              <div className="data-grid-wrap data-grid-wrap--inset">
                 <CustomThemeProvider>
                   <StyledDataGrid
                     rows={telegramMessages.map((msg, idx) => ({
@@ -353,19 +643,19 @@ export function UserDetailPage() {
                       { field: "text", headerName: "Text", flex: 2, minWidth: 120 },
                       { field: "file", headerName: "File", flex: 1, minWidth: 100 },
                     ] as GridColDef[]}
-                    pageSizeOptions={[5, 10, 20, 50]}
+                    pageSizeOptions={[5, 10, 20, 50, 100]}
                     paginationMode="server"
                     rowCount={telegramMessagesTotalCount}
-                    paginationModel={telegramMessagesPagination}
+                    paginationModel={{
+                      page: telegramMessagesPage,
+                      pageSize: telegramMessagesPageSize,
+                    }}
                     onPaginationModelChange={(model) => {
-                      setTelegramMessagesPagination((prev) =>
-                        prev.page !== model.page || prev.pageSize !== model.pageSize ? model : prev
-                      );
+                      setTelegramMessagesPage(model.page);
+                      setTelegramMessagesPageSize(model.pageSize);
                     }}
                     loading={telegramMessagesLoading || telegramMessagesFetching}
                     slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-                    disableColumnFilter
-                    disableColumnMenu
                     localeText={{ noRowsLabel: "📭 No messages" }}
                   />
                 </CustomThemeProvider>
@@ -373,43 +663,44 @@ export function UserDetailPage() {
               )}
             </>
           ) : (
-            <p style={{ color: "#8b949e" }}>
+            <p className="text-muted">
               Telegram ID not available; cannot load messages.
             </p>
           )}
         </section>
       )}
 
-      <section className="settings-card" style={{ marginBottom: 24 }}>
-        <h3>User quota plan assignments</h3>
+      <section className="settings-card settings-card--mb">
+        <h3 className="settings-card__h3-with-icon">
+          <FaClipboardList className="icon" aria-hidden />
+          <span>User quota plan assignments</span>
+        </h3>
         <p className="settings-item-description">
           Assign quota plans to this user. Effective from/to define the period when the plan applies.
         </p>
-        {userAssignments.length === 0 && (
-          <div className="header-bar" style={{ marginBottom: 12 }}>
-            <div className="left-buttons">
-              <button
-                type="button"
-                className="btn primary"
-                onClick={() => {
-                  setEditingAssignment(null);
-                  setAssignmentModalOpen(true);
-                }}
-                disabled={
-                  quotaPlans.length === 0 ||
-                  createAssignmentMutation.isPending ||
-                  updateAssignmentMutation.isPending
-                }
-              >
-                <FaPlus className="icon" /> Assign plan
-              </button>
-            </div>
+        <div className="header-bar header-bar--mb-12">
+          <div className="left-buttons">
+            <button
+              type="button"
+              className="btn primary"
+              onClick={() => {
+                setEditingAssignment(null);
+                setAssignmentModalOpen(true);
+              }}
+              disabled={
+                quotaPlans.length === 0 ||
+                createAssignmentMutation.isPending ||
+                updateAssignmentMutation.isPending
+              }
+            >
+              <FaPlus className="icon" /> Assign plan
+            </button>
           </div>
-        )}
+        </div>
         {userAssignments.length === 0 ? (
-          <p style={{ color: "#8b949e" }}>No assignments. Click «Assign plan» to add one.</p>
+          <p className="text-muted">No assignments. Click «Assign plan» to add one.</p>
         ) : (
-          <div className="table-container" style={{ padding: 10 }}>
+          <div className="table-container table-container--pad">
             <table className="user-quota-assignments-table">
               <thead>
                 <tr>
@@ -417,7 +708,7 @@ export function UserDetailPage() {
                   <th>Effective from</th>
                   <th>Effective to</th>
                   <th>Note</th>
-                  <th style={{ width: 100 }}>Actions</th>
+                  <th className="th-actions">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -479,12 +770,15 @@ export function UserDetailPage() {
       </section>
 
       <section className="settings-card">
-        <h3>Available quota plans</h3>
+        <h3 className="settings-card__h3-with-icon">
+          <FaListUl className="icon" aria-hidden />
+          <span>Available quota plans</span>
+        </h3>
         <p className="settings-item-description">
           All quota plans defined in the system. Assign them above. Server-side restrictions may apply.
         </p>
         {quotaPlans.length === 0 ? (
-          <p style={{ color: "#8b949e" }}>No quota plans.</p>
+          <p className="text-muted">No quota plans.</p>
         ) : (
           <ul className="quota-plan-list">
             {quotaPlans.map((p) => (

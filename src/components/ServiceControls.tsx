@@ -1,17 +1,23 @@
 // src/components/ServiceControls.tsx
 import { FaPlay } from "react-icons/fa";
-import { useEffect, useMemo, useState } from "react";
-import type { ServiceStatusDto } from "../api/orval/model";
-import type { ServiceStatus } from "../api/orval/model";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import type { ServiceStatusDto } from "../api/orvalModelShim";
+import type { ServiceStatus } from "../api/orvalModelShim";
+import { humanizeSignalRStatusStreamError } from "../utils/signalrFriendlyError";
 
 type Props = {
   serviceData: Record<number, ServiceStatusDto>;
   onRunNow: () => void;
+  onOpenDetails?: () => void;
+  /** From useSignalRService — helps tell connection errors from “no snapshot yet”. */
+  hubConnectionState?: string;
+  hubLastError?: string | null;
 };
 
-type UiStatus = "Idle" | "Running" | "Error";
+type UiStatus = "Idle" | "Running" | "Error" | "Pending";
 
 function normalizeStatus(s?: ServiceStatus | string | number | null): UiStatus {
+  if (s === undefined || s === null) return "Pending";
   if (s === 1 || s === "Running" || s === "running") return "Running";
   if (s === 2 || s === "Error" || s === "error") return "Error";
   return "Idle";
@@ -32,17 +38,22 @@ function toMs(v: unknown): number | null {
   return null;
 }
 
+/** SignalR may add fields not present on the OpenAPI DTO. */
+type ServiceStatusDtoLive = ServiceStatusDto & {
+  nextRunInSeconds?: number;
+};
+
 function getNextRunSeconds(entries: ServiceStatusDto[]): number | null {
   // 1) Prefer nextRunInSeconds if backend ever sends it (common with SignalR push)
   const secondsCandidates = entries
-      .map((e) => (e as any)?.nextRunInSeconds)
-      .filter((x: unknown) => typeof x === "number" && Number.isFinite(x) && x >= 0) as number[];
+      .map((e) => (e as ServiceStatusDtoLive).nextRunInSeconds)
+      .filter((x: unknown): x is number => typeof x === "number" && Number.isFinite(x) && x >= 0);
 
   if (secondsCandidates.length > 0) return Math.min(...secondsCandidates);
 
   // 2) Fallback to nextRunTime (ISO string)
   const msCandidates = entries
-      .map((e) => toMs((e as any)?.nextRunTime))
+      .map((e) => toMs(e.nextRunTime))
       .filter((x): x is number => typeof x === "number");
 
   if (msCandidates.length === 0) return null;
@@ -52,7 +63,13 @@ function getNextRunSeconds(entries: ServiceStatusDto[]): number | null {
   return diffSec;
 }
 
-export default function ServiceControls({ serviceData, onRunNow }: Props) {
+export default function ServiceControls({
+  serviceData,
+  onRunNow,
+  onOpenDetails,
+  hubConnectionState,
+  hubLastError,
+}: Props) {
   const entries = useMemo(() => Object.values(serviceData ?? {}), [serviceData]);
 
   const totals = useMemo(() => {
@@ -68,12 +85,17 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
   }, [entries]);
 
   const anyRunning = useMemo(
-      () => entries.some((e) => normalizeStatus((e as any)?.status) === "Running"),
+      () => entries.some((e) => normalizeStatus(e.status) === "Running"),
       [entries]
   );
 
   const anyError = useMemo(
-      () => entries.some((e) => normalizeStatus((e as any)?.status) === "Error"),
+      () => entries.some((e) => normalizeStatus(e.status) === "Error"),
+      [entries]
+  );
+
+  const anyPending = useMemo(
+      () => entries.some((e) => normalizeStatus(e.status) === "Pending"),
       [entries]
   );
 
@@ -86,7 +108,10 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
         return;
       }
 
-      const sec = getNextRunSeconds(entries);
+      const live = entries.filter(
+          (e) => e.status !== undefined && e.status !== null,
+      );
+      const sec = getNextRunSeconds(live);
       setTimeLeft(sec);
     };
 
@@ -95,26 +120,58 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
     return () => window.clearInterval(id);
   }, [entries, anyRunning]);
 
+  const hubErrorDisplay = useMemo(
+      () => humanizeSignalRStatusStreamError(hubLastError ?? null),
+      [hubLastError],
+  );
+
   const statusDescription = useMemo(() => {
+    if (hubConnectionState === "error" && hubLastError) {
+      return `Live status unavailable: ${hubErrorDisplay}`;
+    }
+    if (hubConnectionState === "no-token") {
+      return "Not authenticated; live status unavailable.";
+    }
+    if (hubConnectionState === "reconnecting") {
+      return "Reconnecting…";
+    }
+    if (hubConnectionState === "closed") {
+      return "Live updates disconnected. Refresh the page or check the network.";
+    }
     if (anyRunning) return "The service is currently running.";
     if (anyError) return "There is an error with the service.";
+    if (anyPending) {
+      if (hubConnectionState === "connected") {
+        return "Connected, but no live data yet (background service may be empty).";
+      }
+      return "Waiting for live status from the background service…";
+    }
     return "The service is idle.";
-  }, [anyRunning, anyError]);
+  }, [anyRunning, anyError, anyPending, hubConnectionState, hubLastError, hubErrorDisplay]);
 
   const statusColor = useMemo(() => {
+    if (hubConnectionState === "error" || hubConnectionState === "no-token" || hubConnectionState === "closed") {
+      return "#f85149";
+    }
     if (anyRunning) return "#1E90FF";
     if (anyError) return "red";
+    if (anyPending) return "#8b949e";
     return "green";
-  }, [anyRunning, anyError]);
+  }, [anyRunning, anyError, anyPending, hubConnectionState]);
 
   return (
       <div className="service-status-container">
         <h2>Service Control</h2>
-        <div style={{ borderTop: "1px solid #d1d5da" }} />
+        <div className="settings-divider" />
 
         <p>
           <strong>Service Status:</strong>{" "}
-          <span style={{ color: statusColor }}>{statusDescription}</span>
+          <span
+            className="status-color-dynamic"
+            style={{ "--status-color": statusColor } as CSSProperties}
+          >
+            {statusDescription}
+          </span>
         </p>
 
         <p>
@@ -130,11 +187,16 @@ export default function ServiceControls({ serviceData, onRunNow }: Props) {
           <strong>Total Sessions:</strong> {totals.sessions.toLocaleString()}
         </p>
 
-        <button className="btn primary" onClick={onRunNow} disabled={anyRunning}>
-          <FaPlay className="icon" /> Sync All Now
-        </button>
+        <div className="flex-wrap-gap-8">
+          <button className="btn primary" onClick={onRunNow} disabled={anyRunning}>
+            <FaPlay className="icon" /> Sync All Now
+          </button>
+          <button className="btn secondary" onClick={onOpenDetails}>
+            Details
+          </button>
+        </div>
 
-        <p className="description" style={{ marginTop: 12 }}>
+        <p className="description mt-12">
           This service periodically queries the OpenVPN server to collect data about connected clients
           and stores this information in the database. Use the button below to manually trigger the service
           and update the data immediately.

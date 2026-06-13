@@ -1,26 +1,31 @@
-// src/components/CertificatesData.tsx
+// src/components/certs/CertificatesData.tsx
 import React, { useEffect, useMemo, useState } from "react";
+import { FaCertificate, FaFilter, FaPlus } from "react-icons/fa";
 import CertificatesTable from "./CertificatesTable.tsx";
-import OvpnFilesTable from "../ovpn-files/OvpnFilesTable.tsx";
-import AddOvpnFile from "../ovpn-files/AddOvpnFile.tsx";
 import AddCertificate from "./AddCertificate.tsx";
+import OpenVpnIssuedFilesSection from "./OpenVpnIssuedFilesSection.tsx";
+import XrayClientLinksSection from "./XrayClientLinksSection.tsx";
 import { toast } from "react-toastify";
 
 import {
-  useGetApiOpenVpnFilesGetAllVpnServerId,
-} from "../../api/orval/open-vpn-files/open-vpn-files.ts";
-
-import {
   useGetApiOpenVpnCertsVpnServerIdGetAll,
-} from "../../api/orval/open-vpn-server-certs/open-vpn-server-certs.ts";
+} from "../../api/orval/vpn-server-certs/vpn-server-certs.ts";
 
 import type {
   GetAllCertificatesResponse,
-  OvpnFilesResponse,
-} from "../../api/orval/model";
+  MonitorServerCertificate,
+} from "../../api/orvalModelShim";
+import axios from "axios";
+import { errorMessage as baseErrorMessage } from "../../utils/errorMessage";
+import { isHttpForbidden } from "../../utils/httpError";
+import { ServerAccessDenied } from "../ServerAccessDenied";
+import { pickArray } from "../../utils/pickPayloadArray.ts";
+import "../../css/Settings.css";
+import "../../css/ServerDetails.css";
 
 interface Props {
   vpnServerId: string;
+  stack?: "openvpn" | "xray";
 }
 
 enum CertificateStatus {
@@ -37,67 +42,27 @@ const statusLabels: Record<CertificateStatus, string> = {
   [CertificateStatus.Unknown]: "Unknown",
 };
 
-// Safe error extractor
 function getErrorMessage(err: unknown): string {
-  const anyErr = err as any;
-  if (anyErr?.response?.data) {
-    const data = anyErr.response.data;
+  if (axios.isAxiosError(err) && err.response?.data !== undefined) {
+    const data = err.response.data;
     if (typeof data === "string") return data;
-    if (typeof data?.message === "string") return data.message;
-    if (typeof data?.title === "string") return data.title;
-    if (Array.isArray(data?.errors)) return data.errors.join(", ");
-  }
-  if (typeof anyErr?.message === "string") return anyErr.message;
-  try {
-    return JSON.stringify(anyErr);
-  } catch {
-    return "Unknown error";
-  }
-}
-
-// Normalize different shapes safely
-function pickArray(payload: any): any[] {
-  if (!payload) return [];
-  if (Array.isArray(payload)) return payload;
-
-  if (payload?.data && !Array.isArray(payload.data)) {
-    const nested = pickArray(payload.data);
-    if (nested.length) return nested;
-  }
-
-  if (Array.isArray(payload.data)) return payload.data;
-  if (Array.isArray(payload.items)) return payload.items;
-  if (Array.isArray(payload.ovpnFiles)) return payload.ovpnFiles;
-  if (Array.isArray(payload.issuedOvpnFile)) return payload.issuedOvpnFile;
-  if (Array.isArray(payload.issuedOvpnFiles)) return payload.issuedOvpnFiles;
-
-  if (Array.isArray(payload.serverCertificates)) return payload.serverCertificates;
-  if (Array.isArray(payload.certificates)) return payload.certificates;
-  if (Array.isArray(payload.monitorServerCertificates)) return payload.monitorServerCertificates;
-
-  if (typeof payload === "object") {
-    for (const k of Object.keys(payload)) {
-      const v = (payload as any)[k];
-      if (Array.isArray(v)) return v;
+    if (typeof data === "object" && data !== null) {
+      const r = data as Record<string, unknown>;
+      const msg = r["message"] ?? r["title"];
+      if (typeof msg === "string") return msg;
+      const errors = r["errors"];
+      if (Array.isArray(errors)) return errors.map(String).join(", ");
     }
   }
-
-  return [];
+  return baseErrorMessage(err);
 }
 
-const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
+const CertificatesData: React.FC<Props> = ({ vpnServerId, stack = "openvpn" }) => {
   const numericId = useMemo(() => Number(vpnServerId), [vpnServerId]);
   const isValidId = Number.isFinite(numericId) && numericId > 0;
+  const isXrayStack = stack === "xray";
 
   const [selectedStatus, setSelectedStatus] = useState<CertificateStatus | null>(null);
-
-  // Queries
-  const filesQuery = useGetApiOpenVpnFilesGetAllVpnServerId(
-    isValidId ? numericId : (undefined as unknown as number),
-    {
-      query: { enabled: isValidId, staleTime: 10_000, retry: 1 },
-    },
-  );
 
   const certsQuery = useGetApiOpenVpnCertsVpnServerIdGetAll(
     isValidId ? numericId : (undefined as unknown as number),
@@ -106,73 +71,47 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
     },
   );
 
-  const ovpnFiles = pickArray(filesQuery.data as OvpnFilesResponse);
-  const allCertificates = pickArray(certsQuery.data as GetAllCertificatesResponse);
-  const certificates =
+  const allCertificates = pickArray(certsQuery.data as GetAllCertificatesResponse) as MonitorServerCertificate[];
+  const certificates: MonitorServerCertificate[] =
     selectedStatus === null
       ? allCertificates
-      : allCertificates.filter((c: any) => c?.status === selectedStatus);
+      : allCertificates.filter((c) => c?.status === selectedStatus);
 
-  // Toasts for invalid server id
   useEffect(() => {
     if (!isValidId) {
       toast.warn("VPN Server ID is missing or invalid", { toastId: "vpn-id-warn" });
     }
   }, [isValidId]);
 
-  // Toasts for query errors
-  useEffect(() => {
-    if (filesQuery.isError) {
-      toast.error(`Failed to load OVPN files: ${getErrorMessage(filesQuery.error)}`, {
-        toastId: "files-load-error",
-      });
-    }
-  }, [filesQuery.isError, filesQuery.error]);
+  const certsAccessDenied = isValidId && certsQuery.isError && isHttpForbidden(certsQuery.error);
 
   useEffect(() => {
-    if (certsQuery.isError) {
+    if (certsQuery.isError && !isHttpForbidden(certsQuery.error)) {
       toast.error(`Failed to load certificates: ${getErrorMessage(certsQuery.error)}`, {
         toastId: "certs-load-error",
       });
     }
   }, [certsQuery.isError, certsQuery.error]);
 
-  // Helpers
-  const refetchFiles = async () =>
-    toast.promise(filesQuery.refetch(), {
-      pending: "Refreshing OVPN files…",
-      success: "OVPN files are up to date",
-      error: {
-        render({ data }) {
-          const err = (data as any)?.error ?? data;
-          return `Failed to refresh OVPN files: ${getErrorMessage(err)}`;
-        },
-      },
-    });
-
-  const silentRefetchFiles = async () => {
-    try {
-      await filesQuery.refetch();
-    } catch (e) {
-      toast.error(`Failed to refresh OVPN files: ${getErrorMessage(e)}`, {
-        toastId: "files-refetch-error",
-      });
-    }
-  };
+  if (certsAccessDenied) {
+    return <ServerAccessDenied />;
+  }
 
   const refetchCerts = async () =>
     toast.promise(certsQuery.refetch(), {
       pending: "Refreshing certificates…",
       success: "Certificates are up to date",
       error: {
-        render({ data }) {
-          const err = (data as any)?.error ?? data;
+        render({ data }: { data?: unknown }) {
+          const err =
+            data && typeof data === "object" && data !== null && "error" in data
+              ? (data as { error: unknown }).error
+              : data;
           return `Failed to refresh certificates: ${getErrorMessage(err)}`;
         },
       },
     });
 
-  // Silent refetch for certificates to avoid duplicate toasts after revoke
   const silentRefetchCerts = async () => {
     try {
       await certsQuery.refetch();
@@ -184,78 +123,83 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId }) => {
   };
 
   return (
-    <>
-      <h3>Issued OVPN Files</h3>
-      <h5>Make New OVPN File for Client</h5>
-      <p className="certificate-description">
-        Enter the <strong>Common Name (CN)</strong> and an <strong>External ID</strong> to generate a new OVPN file.
-      </p>
+    <div className="certificates-page__content">
+      {isXrayStack ? (
+        <XrayClientLinksSection vpnServerId={vpnServerId} />
+      ) : (
+        <OpenVpnIssuedFilesSection vpnServerId={vpnServerId} />
+      )}
 
-      <AddOvpnFile
-        vpnServerId={vpnServerId}
-        onSuccess={async () => {
-          toast.success("OVPN file created");
-          await refetchFiles();
-        }}
-      />
+      <section
+        className="certificates-page__section server-details__panel"
+        aria-labelledby="certificates-list-heading"
+      >
+        <h3 id="certificates-list-heading" className="settings-card__h3-with-icon">
+          <FaCertificate className="icon" aria-hidden />
+          <span>{isXrayStack ? "Xray user certificates" : "Certificates"}</span>
+        </h3>
 
-      <OvpnFilesTable
-        ovpnFiles={ovpnFiles}
-        vpnServerId={vpnServerId}
-        loading={filesQuery.isFetching}
-        onRevoke={async () => {
-          toast.success("OVPN file revoked", { toastId: "ovpn-revoked" });
-          await silentRefetchFiles();
-        }}
-      />
+        {isXrayStack ? (
+          <p className="certificate-description certificates-page__add-block-desc" style={{ marginBottom: 12 }}>
+            Optional: manage standalone certs on the node. Issuing a <strong>client link</strong> above also creates a
+            user certificate via DataGateXRayManager.
+          </p>
+        ) : null}
 
-      <h3>Certificates</h3>
-      <h5>Filter by Certificate Status</h5>
-      <div className="settings-item">
-        <select
-          className="input"
-          value={selectedStatus ?? ""}
-          onChange={(e) =>
-            setSelectedStatus(
-              e.target.value === ""
-                ? null
-                : (Number(e.target.value) as CertificateStatus),
-            )
-          }
-        >
-          <option value="">All</option>
-          {Object.entries(statusLabels).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
+        <div className="certificates-page__add-block">
+          <h4 className="certificates-page__subtitle certificates-page__add-block-title">
+            <FaPlus className="icon" aria-hidden />
+            Add New Certificate
+          </h4>
+          <p className="certificate-description certificates-page__add-block-desc">
+            Enter the <strong>Common Name (CN)</strong> for the new certificate and click &quot;Add Certificate&quot;.
+          </p>
 
-      <h5>Add New Certificate</h5>
-      <p className="certificate-description">
-        Enter the <strong>Common Name (CN)</strong> for the new certificate and click "Add Certificate".
-      </p>
+          <AddCertificate
+            vpnServerId={vpnServerId}
+            onSuccess={async () => {
+              toast.success("Certificate added");
+              await refetchCerts();
+            }}
+          />
+        </div>
 
-      <AddCertificate
-        vpnServerId={vpnServerId}
-        onSuccess={async () => {
-          toast.success("Certificate added");
-          await refetchCerts();
-        }}
-      />
+        <div className="certificates-page__list-toolbar" aria-label="Certificate list filters">
+          <h4 className="certificates-page__subtitle">
+            <FaFilter className="icon" aria-hidden />
+            Filter by Certificate Status
+          </h4>
+          <div className="settings-item">
+            <select
+              id="certificates-status-filter"
+              name="certificateStatusFilter"
+              className="input"
+              value={selectedStatus ?? ""}
+              onChange={(e) =>
+                setSelectedStatus(e.target.value === "" ? null : (Number(e.target.value) as CertificateStatus))
+              }
+            >
+              <option value="">All</option>
+              {Object.entries(statusLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-      <CertificatesTable
-        certificates={certificates}
-        vpnServerId={vpnServerId}
-        loading={certsQuery.isFetching}
-        onRevoke={async () => {
-          // single success toast on revoke + silent refetch (no duplicate toasts)
-          toast.success("Certificate revoked", { toastId: "cert-revoked" });
-          await silentRefetchCerts();
-        }}
-      />
-    </>
+        <CertificatesTable
+          certificates={certificates}
+          vpnServerId={vpnServerId}
+          loading={certsQuery.isFetching}
+          onRevoke={async () => {
+            toast.success("Certificate revoked", { toastId: "cert-revoked" });
+            await silentRefetchCerts();
+          }}
+        />
+      </section>
+    </div>
   );
 };
 

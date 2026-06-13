@@ -1,25 +1,39 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-body, html {
+html,
+body,
+#root {
+  height: 100%;
   margin: 0;
   padding: 0;
+}
+
+body {
   font-family: "Arial", sans-serif;
   background-color: var(--bg-body);
   color: var(--text-primary);
+  overflow: hidden;
 }
 
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
 }
 
+/* Fills space between header and footer; inner routes scroll or flex as needed.
+   No scrollbar-gutter: stable — it reserves a permanent strip for the scrollbar and reads as extra right padding. */
 .main-content {
-  justify-content: center;
-  align-items: center;
-  padding: 2px;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .content-wrapper {
@@ -30,4 +44,10 @@ body, html {
   margin: 0 auto;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
   border: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    width: 95%;
+  }
 }

@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
-import type { UserDto } from "../../api/orval/model";
+import type { UserDto } from "../../api/orvalModelShim";
 import "../../css/Table.css";
+import { UserAvatar } from "../ui/UserAvatar.tsx";
+import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
+import { telegramPhotoIdForProvider } from "../../utils/telegramNumericId.ts";
 
 interface UsersTableProps {
   users: UserDto[];
@@ -28,6 +31,9 @@ const UsersTable: React.FC<UsersTableProps> = ({
         return {
           id,
           displayName: u.displayName ?? "-",
+          displayNameForAvatar: u.displayName ?? u.email ?? "-",
+          avatarUrl: readOptionalAvatarUrl(u),
+          telegramPhotoTelegramId: telegramPhotoIdForProvider(u.provider, u.externalId),
           email: u.email ?? "-",
           provider: u.provider ?? "-",
           externalId: u.externalId ?? "-",
@@ -42,6 +48,22 @@ const UsersTable: React.FC<UsersTableProps> = ({
   );
 
   const columns: GridColDef[] = [
+    {
+      field: "avatar",
+      headerName: "",
+      width: 56,
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: (params) => (
+        <UserAvatar
+          src={params.row.avatarUrl as string | undefined}
+          telegramPhotoTelegramId={params.row.telegramPhotoTelegramId as number | undefined}
+          name={params.row.displayNameForAvatar as string}
+          colorSeed={`${params.row.id}|${params.row.email}`}
+          size={28}
+        />
+      ),
+    },
     { field: "id", headerName: "ID", width: 70 },
     { field: "displayName", headerName: "Display Name", flex: 1 },
     { field: "email", headerName: "Email", flex: 1 },
@@ -87,8 +109,6 @@ const UsersTable: React.FC<UsersTableProps> = ({
           paginationModel={paginationModel}
           onPaginationModelChange={onPaginationModelChange}
           pageSizeOptions={[5, 10, 20, 50, 100]}
-          disableColumnFilter
-          disableColumnMenu
           localeText={{ noRowsLabel: "📭 No users found" }}
           loading={loading}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}

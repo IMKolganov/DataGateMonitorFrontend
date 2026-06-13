@@ -1,43 +1,72 @@
-// api/orval/mutator.ts
+// api/orval/mutator.ts — adapter for Orval 8 + custom axios apiRequest (ApiResponse wrapper)
+import type { AxiosRequestConfig } from "axios";
 import { apiRequest, type ApiResponse } from "./apirequest";
 
-type LowerHttpMethod = "get" | "post" | "put" | "delete" | "patch";
-type AnyHttpMethod = LowerHttpMethod | Uppercase<LowerHttpMethod>;
+type LowerHttpMethod = "get" | "head" | "post" | "put" | "delete" | "patch";
 
-// Unwrap ApiResponse<T> -> T (supports optional data)
-type UnwrapApiResponse<T> =
-    T extends ApiResponse<infer D> ? D :
-        T extends { data?: infer D } ? D :
-            T;
+function flattenHeaders(
+  h: HeadersInit | Record<string, string> | undefined | null,
+): Record<string, string> | undefined {
+  if (h == null) return undefined;
+  if (typeof Headers !== "undefined" && h instanceof Headers) {
+    const o: Record<string, string> = {};
+    h.forEach((v, k) => {
+      o[k] = v;
+    });
+    return o;
+  }
+  if (Array.isArray(h)) {
+    const o: Record<string, string> = {};
+    for (const [k, v] of h) o[k] = v;
+    return o;
+  }
+  return h as Record<string, string>;
+}
 
-type MutatorConfig = {
-  url: string;
-  method?: AnyHttpMethod;
-  data?: any;
-  headers?: Record<string, string>;
-  params?: Record<string, any>;
-  signal?: AbortSignal;
-  body?: string;
-};
-
-/** Supports both (config) and (url, options) for orval v8 compatibility. */
-export const ogmMutator = async <TApiResponse>(
-  configOrUrl: MutatorConfig | string,
-  options?: Omit<MutatorConfig, "url">
-): Promise<UnwrapApiResponse<TApiResponse>> => {
-  const config: MutatorConfig =
+/**
+ * Orval 8 passes RequestInit-style options (body, headers, signal, …).
+ * We unwrap the backend `ApiResponse<T>` envelope and return the inner payload.
+ * Return type is asserted to T so generated clients match runtime (unwrapped data).
+ */
+export async function ogmMutator<T = unknown>(
+  configOrUrl: Record<string, unknown> | string,
+  options?: Record<string, unknown>,
+): Promise<T> {
+  const merged: Record<string, unknown> =
     typeof configOrUrl === "string"
-      ? { url: configOrUrl, ...options } as MutatorConfig
-      : configOrUrl;
+      ? { url: configOrUrl, ...(options ?? {}) }
+      : { ...configOrUrl, ...(options ?? {}) };
 
-  const method = (config.method as string).toLowerCase() as LowerHttpMethod;
+  const url = merged.url as string;
+  const methodLower = String(merged.method ?? "get").toLowerCase();
+  const method = methodLower as LowerHttpMethod;
 
-  const res = await apiRequest<any>(method, config.url, {
-    data: config.data ?? config.body,
-    headers: config.headers,
-    params: config.params,
-    signal: config.signal,
-  });
+  const rawBody = merged.data ?? merged.body;
+  const headers = flattenHeaders(merged.headers as HeadersInit | undefined);
+  const params = merged.params as Record<string, unknown> | undefined;
+  const signal = merged.signal as AbortSignal | undefined;
+  const paramsSerializer = merged.paramsSerializer as AxiosRequestConfig["paramsSerializer"] | undefined;
 
-  return (res?.data ?? res) as UnwrapApiResponse<TApiResponse>;
-};
+  const axiosConfig: AxiosRequestConfig = {
+    params,
+    signal,
+    ...(paramsSerializer !== undefined ? { paramsSerializer } : {}),
+  };
+
+  if (headers && Object.keys(headers).length > 0) {
+    axiosConfig.headers = headers;
+  }
+
+  if (rawBody !== undefined && rawBody !== null && methodLower !== "get" && methodLower !== "head") {
+    axiosConfig.data = rawBody;
+  }
+
+  const res = await apiRequest<unknown>(method, url, axiosConfig);
+
+  const inner =
+    res && typeof res === "object" && "data" in res && "success" in (res as object)
+      ? (res as ApiResponse<unknown>).data
+      : (res as unknown);
+
+  return inner as T;
+}

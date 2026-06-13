@@ -6,11 +6,14 @@ import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type {
   MonitorServerCertificate as Certificate,
   RevokeCertificateRequest,
-} from "../../api/orval/model";
-import { postApiOpenVpnCertsRevoke } from "../../api/orval/open-vpn-server-certs/open-vpn-server-certs.ts";
+} from "../../api/orvalModelShim";
+import { postApiOpenVpnCertsRevoke } from "../../api/orval/vpn-server-certs/vpn-server-certs.ts";
 import "../../css/Table.css";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import axios from "axios";
+import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
 type CertificatesTableProps = {
   certificates: Certificate[];
@@ -51,6 +54,12 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
   const [selectedStatus, setSelectedStatus] = useState("");
   const [serialNumberQuery, setSerialNumberQuery] = useState("");
   const [revokingCN, setRevokingCN] = useState<string | null>(null);
+  const [certsGridPage, setCertsGridPage] = useState(0);
+  const [certsPageSize, setCertsPageSize] = usePersistedPageSize(
+    `certs:${vpnServerId}`,
+    10,
+    "5,10,20,100",
+  );
 
   const handleRevoke = useCallback(
     async (commonName: string) => {
@@ -61,10 +70,12 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
         await revokeCertificate(vpnServerId, commonName);
         // success toast is handled by parent
         await onRevoke();
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const data = axios.isAxiosError(error) ? error.response?.data : undefined;
         const msg =
-          error?.response?.data?.Message ||
-          error?.message ||
+          axiosResponseDataMessage(data) ??
+          (axios.isAxiosError(error) ? error.message : undefined) ??
+          errorMessage(error) ??
           "Failed to revoke certificate.";
         toast.error(msg);
       } finally {
@@ -145,6 +156,8 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
       >
         <div className="filters">
           <input
+            id="certificates-search-common-name"
+            name="certificateSearchCommonName"
             type="text"
             placeholder="Search by Common Name"
             value={searchQuery}
@@ -152,6 +165,8 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
             className="input"
           />
           <select
+            id="certificates-search-status"
+            name="certificateSearchStatus"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="input"
@@ -163,6 +178,8 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
             <option value="3">❓ Unknown</option>
           </select>
           <input
+            id="certificates-search-serial"
+            name="certificateSearchSerial"
             type="text"
             placeholder="Search by Serial Number"
             value={serialNumberQuery}
@@ -174,11 +191,12 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 100]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
+          paginationMode="client"
+          paginationModel={{ page: certsGridPage, pageSize: certsPageSize }}
+          onPaginationModelChange={(m) => {
+            setCertsGridPage(m.page);
+            setCertsPageSize(m.pageSize);
           }}
-          disableColumnFilter
-          disableColumnMenu
           localeText={{
             noRowsLabel: loading ? "🔄 Loading certificates..." : "📭 No certificates found",
           }}

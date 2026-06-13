@@ -6,9 +6,24 @@ import {
   REFRESH_TOKEN_EXPIRATION,
   REFRESH_TOKEN_KEY,
 } from "../utils/const.ts";
-import type { RefreshRequest, RefreshResponse } from "./orval/model";
+import { clearStoredProfileAvatarUrl } from "../utils/auth/storedProfileAvatar.ts";
+import { notifyAccessTokenRefreshed } from "../utils/auth/accessTokenEvents.ts";
+import { authErrFields, authLog } from "../utils/auth/authLog.ts";
+import { scheduleAutoLogout } from "../utils/auth/tokenExpiryScheduler.ts";
+import type { RefreshRequest, RefreshResponse } from "./orvalModelShim";
 
 let refreshPromise: Promise<string> | null = null;
+declare const __VITE_API_DEV_ORIGIN__: string;
+
+/** Only these refresh failures should end the browser session (logout). */
+export function shouldLogoutOnRefreshError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const e = err as { name?: string; message?: string; response?: { status?: number } };
+  if (e.message === "No refresh token") return true;
+  if (e.name === "RefreshAuthFailure") return true;
+  const st = e.response?.status;
+  return st === 401 || st === 403;
+}
 
 export interface Config {
   defaultRefreshInterval: number;
@@ -29,7 +44,7 @@ let configPromise: Promise<Config> | null = null;
 const isAuthEndpoint = (u: string) => /\/api\/auth(\/|$)/i.test(u);
 
 export const apiRequest = async <T>(
-    method: "get" | "post" | "put" | "delete" | "patch",
+    method: "get" | "head" | "post" | "put" | "delete" | "patch",
     url: string,
     config: AxiosRequestConfig = {},
     skipAuth: boolean = false,
@@ -40,6 +55,7 @@ export const apiRequest = async <T>(
 
   // If token is required but missing -> soft logout (no reload loop)
   if (!token && !skipAuth && !isAuthEndpoint(url)) {
+    authLog("apiRequest: no access token, redirecting to login", { url, method });
     softLogout();
     throw new Error("User is not authenticated");
   }
@@ -59,8 +75,8 @@ export const apiRequest = async <T>(
     });
 
     return response.data as ApiResponse<T>;
-  } catch (error: any) {
-    const status = error?.response?.status;
+  } catch (error: unknown) {
+    const status = axios.isAxiosError(error) ? error.response?.status : undefined;
     const pathname = window.location.pathname;
 
     const shouldTryRefresh =
@@ -70,8 +86,14 @@ export const apiRequest = async <T>(
         pathname !== "/login";
 
     if (shouldTryRefresh) {
+      authLog("apiRequest: 401, attempting token refresh", { url, method, pathname });
       try {
         const newToken = await getOrCreateRefresh();
+
+        authLog("apiRequest: refresh OK, retrying request", { url, method });
+
+        // Reschedule JWT expiry timer (avoids stale timer if login ever stays in SPA without full reload)
+        scheduleAutoLogout(newToken);
 
         const retryResponse = await axios({
           method,
@@ -84,8 +106,17 @@ export const apiRequest = async <T>(
         });
 
         return retryResponse.data as ApiResponse<T>;
-      } catch {
-        logout();
+      } catch (refreshErr) {
+        authLog("apiRequest: refresh failed after 401", {
+          ...authErrFields(refreshErr),
+          willLogout: shouldLogoutOnRefreshError(refreshErr),
+          url,
+          method,
+        });
+        if (shouldLogoutOnRefreshError(refreshErr)) {
+          logout();
+        }
+        throw error;
       }
     }
 
@@ -104,8 +135,9 @@ export const fetchConfig = async (): Promise<Config> => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const host = window.location.host;
 
-    // Prefer config value if present, otherwise fall back to origin
-    API_BASE_URL = cfg.apiBaseUrl ?? origin;
+    // Prefer config value if present; in dev, allow direct backend origin injected from Vite config.
+    const devApiBase = typeof __VITE_API_DEV_ORIGIN__ === "string" ? __VITE_API_DEV_ORIGIN__.trim() : "";
+    API_BASE_URL = cfg.apiBaseUrl ?? (devApiBase || origin);
     WS_BASE_URL = `${protocol}//${host}`;
 
     return {
@@ -123,10 +155,18 @@ export const ensureApiBaseUrl = async () => {
   }
 };
 
+/** Absolute API origin (trailing slash stripped) for authenticated fetches outside `apiRequest` (e.g. blob URLs for `<img>`). */
+export const getApiBaseUrlResolved = async (): Promise<string> => {
+  await ensureApiBaseUrl();
+  if (!API_BASE_URL) throw new Error("API base URL is not configured");
+  return API_BASE_URL.replace(/\/+$/, "");
+};
+
 export const logout = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_EXPIRATION);
+  clearStoredProfileAvatarUrl();
 
   if (window.location.pathname !== "/login") {
     window.location.assign("/login");
@@ -137,6 +177,7 @@ const softLogout = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_EXPIRATION);
+  clearStoredProfileAvatarUrl();
 
   if (window.location.pathname !== "/login") {
     window.location.assign("/login");
@@ -163,6 +204,7 @@ const refreshAccessToken = async (): Promise<string> => {
 
   const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
   if (!refreshToken) {
+    authLog("refreshAccessToken: abort — no refresh token in storage");
     throw new Error("No refresh token");
   }
 
@@ -172,34 +214,47 @@ const refreshAccessToken = async (): Promise<string> => {
     // deviceId: localStorage.getItem("deviceId") ?? null,
   };
 
-  // IMPORTANT: raw axios call (do not call apiRequest / ogmMutator here)
-  const resp = await axios.post<ApiResponse<RefreshResponse>>(
-      `${API_BASE_URL}/api/auth/refresh`,
-      body,
-      { headers: { "Content-Type": "application/json" } },
-  );
+  try {
+    // IMPORTANT: raw axios call (do not call apiRequest / ogmMutator here)
+    const resp = await axios.post<ApiResponse<RefreshResponse>>(
+        `${API_BASE_URL}/api/auth/refresh`,
+        body,
+        { headers: { "Content-Type": "application/json" } },
+    );
 
-  const payload = resp.data;
-  const data = payload?.data;
+    const payload = resp.data;
+    const data = payload?.data;
 
-  const newAccess = data?.token;
-  if (!payload?.success || !newAccess) {
-    throw new Error(payload?.errorMessage ?? "Refresh failed");
+    const newAccess = data?.token;
+    if (!payload?.success || !newAccess) {
+      authLog("refreshAccessToken: API returned failure envelope", {
+        success: payload?.success,
+        errorMessage: payload?.errorMessage ?? null,
+      });
+      const e = new Error(payload?.errorMessage ?? "Refresh failed");
+      e.name = "RefreshAuthFailure";
+      throw e;
+    }
+
+    localStorage.setItem(ACCESS_TOKEN_KEY, newAccess);
+
+    const newRefresh = data?.refreshToken;
+    if (newRefresh) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, newRefresh);
+    }
+
+    const newRefreshExp = data?.refreshExpiration;
+    if (newRefreshExp) {
+      localStorage.setItem(REFRESH_TOKEN_EXPIRATION, newRefreshExp);
+    }
+
+    notifyAccessTokenRefreshed();
+    authLog("refreshAccessToken: success, new access token stored");
+    return newAccess;
+  } catch (err) {
+    authLog("refreshAccessToken: error", authErrFields(err));
+    throw err;
   }
-
-  localStorage.setItem(ACCESS_TOKEN_KEY, newAccess);
-
-  const newRefresh = data?.refreshToken;
-  if (newRefresh) {
-    localStorage.setItem(REFRESH_TOKEN_KEY, newRefresh);
-  }
-
-  const newRefreshExp = data?.refreshExpiration;
-  if (newRefreshExp) {
-    localStorage.setItem(REFRESH_TOKEN_EXPIRATION, newRefreshExp);
-  }
-
-  return newAccess;
 };
 
 // Ensures only one refresh in parallel
@@ -211,3 +266,6 @@ const getOrCreateRefresh = (): Promise<string> => {
   }
   return refreshPromise;
 };
+
+/** Single-flight refresh (same promise if multiple callers during 401). Safe when access JWT expired but refresh token still valid. */
+export const refreshSessionTokens = (): Promise<string> => getOrCreateRefresh();

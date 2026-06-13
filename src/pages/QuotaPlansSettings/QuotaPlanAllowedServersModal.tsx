@@ -1,16 +1,20 @@
-import { FaTrash } from "react-icons/fa";
+import { FaServer, FaTrash } from "react-icons/fa";
 import {
   useGetApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanId,
   getGetApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdQueryKey,
   usePostApiQuotaPlanAllowedServersCreate,
   useDeleteApiQuotaPlanAllowedServersDeleteId,
 } from "../../api/orval/quota-plan-allowed-server/quota-plan-allowed-server";
-import { useGetApiOpenVpnServersGetAll } from "../../api/orval/open-vpn-servers/open-vpn-servers";
+import {
+  useGetApiV3OpenVpnServersGetAll,
+  getGetApiV3OpenVpnServersGetAllQueryKey,
+  getGetApiV3OpenVpnServersGetAllWithStatusQueryKey,
+} from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
 import type {
   QuotaPlanAllowedServerDto,
-  OpenVpnServersResponse,
+  VpnServersV3Response,
   GetQuotaPlanAllowedServersByQuotaPlanIdResponse,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import "../../css/Settings.css";
@@ -36,9 +40,9 @@ export function QuotaPlanAllowedServersModal({
   const allowed: QuotaPlanAllowedServerDto[] =
     (allowedData as GetQuotaPlanAllowedServersByQuotaPlanIdResponse | undefined)?.items ?? [];
 
-  const { data: serversData } = useGetApiOpenVpnServersGetAll();
+  const { data: serversData } = useGetApiV3OpenVpnServersGetAll({});
   const servers =
-    (serversData as OpenVpnServersResponse | undefined)?.openVpnServers ?? [];
+    (serversData as VpnServersV3Response | undefined)?.vpnServers ?? [];
 
   const createMutation = usePostApiQuotaPlanAllowedServersCreate();
   const deleteMutation = useDeleteApiQuotaPlanAllowedServersDeleteId();
@@ -50,12 +54,17 @@ export function QuotaPlanAllowedServersModal({
     (s) => s.id != null && !allowedVpnServerIds.has(s.id)
   );
 
-  const invalidate = () =>
+  const invalidate = () => {
     queryClient.invalidateQueries({
       queryKey: getGetApiQuotaPlanAllowedServersGetByQuotaPlanIdQuotaPlanIdQueryKey(
         planId
       ),
     });
+    queryClient.invalidateQueries({ queryKey: getGetApiV3OpenVpnServersGetAllQueryKey(undefined) });
+    queryClient.invalidateQueries({
+      queryKey: getGetApiV3OpenVpnServersGetAllWithStatusQueryKey(undefined),
+    });
+  };
 
   const handleAdd = (vpnServerId: number) => {
     createMutation.mutate(
@@ -111,7 +120,12 @@ export function QuotaPlanAllowedServersModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
-          <h3>Allowed servers: {planName}</h3>
+          <h3 className="settings-card__h3-with-icon">
+            <FaServer className="icon" aria-hidden />
+            <span>
+              Allowed servers: {planName}
+            </span>
+          </h3>
           <button
             type="button"
             className="modal-close"
@@ -129,6 +143,8 @@ export function QuotaPlanAllowedServersModal({
           <div className="header-bar" style={{ marginBottom: 12 }}>
             <div className="left-buttons">
               <select
+                id="quota-plan-add-server"
+                name="quotaPlanAddServer"
                 className="input"
                 style={{ maxWidth: 280 }}
                 defaultValue=""

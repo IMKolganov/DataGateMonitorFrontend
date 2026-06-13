@@ -8,21 +8,24 @@ import type {
   DownloadFileRequest,
   DownloadFileResponse,
   DownloadFileResponseApiResponse,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
 import { usePostApiOpenVpnFilesRevokeFile, usePostApiOpenVpnFilesDownloadFile } from "../../api/orval/open-vpn-files/open-vpn-files.ts";
 import { FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import "../../css/Table.css";
 
 const safeFormatDate = (input?: string | null): string => {
   if (!input) return "";
   const date = new Date(input);
   return isNaN(date.getTime()) ? "Invalid date" : formatDateWithOffset(date);
 };
-import "../../css/Table.css";
 
-// Accept both wrapped and plain items
-type OvpnRowInput = { issuedOvpnFile?: IssuedOvpnFileDto } | Record<string, any> | IssuedOvpnFileDto;
+export type OvpnRowInput =
+  | { issuedOvpnFile?: IssuedOvpnFileDto }
+  | Record<string, unknown>
+  | IssuedOvpnFileDto;
 
 interface Props {
   ovpnFiles: OvpnRowInput[];
@@ -31,15 +34,12 @@ interface Props {
   loading: boolean;
 }
 
-// Super-tolerant unwrap: tries multiple common wrapper keys
 function unwrapOvpnItem(x: OvpnRowInput): IssuedOvpnFileDto | null {
   if (!x) return null;
-  // already a DTO-like object
   if ((x as IssuedOvpnFileDto).commonName != null || (x as IssuedOvpnFileDto).id != null) {
     return x as IssuedOvpnFileDto;
   }
-  const any = x as any;
-  // common wrapper keys we might see from various backends/mappers
+  const rec = x as Record<string, unknown>;
   const candidates = [
     "issuedOvpnFile",
     "issuedOvpnFileDto",
@@ -50,23 +50,33 @@ function unwrapOvpnItem(x: OvpnRowInput): IssuedOvpnFileDto | null {
     "data",
   ];
   for (const k of candidates) {
-    const v = any?.[k];
-    if (v && (v.commonName != null || v.id != null)) return v as IssuedOvpnFileDto;
+    const v = rec[k];
+    if (v && typeof v === "object" && v !== null) {
+      const o = v as IssuedOvpnFileDto;
+      if (o.commonName != null || o.id != null) return o;
+    }
   }
-  // sometimes nested deeper
-  if (any?.payload?.issuedOvpnFile) return any.payload.issuedOvpnFile as IssuedOvpnFileDto;
+  const payload = rec["payload"];
+  if (payload && typeof payload === "object" && payload !== null) {
+    const nested = (payload as Record<string, unknown>)["issuedOvpnFile"];
+    if (nested && typeof nested === "object") return nested as IssuedOvpnFileDto;
+  }
   return null;
 }
 
 const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loading }) => {
-  // Mutations (unwrapped by ogmMutator in this project)
   const { mutateAsync: revokeMutate, isPending: revokePending } = usePostApiOpenVpnFilesRevokeFile();
   const { mutateAsync: downloadMutate, isPending: downloadPending } = usePostApiOpenVpnFilesDownloadFile();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [issuedToFilter, setIssuedToFilter] = useState("");
+  const [ovpnFilesGridPage, setOvpnFilesGridPage] = useState(0);
+  const [ovpnFilesPageSize, setOvpnFilesPageSize] = usePersistedPageSize(
+    `ovpn-files:${vpnServerId}`,
+    10,
+    "5,10,20,100",
+  );
 
-  // Normalize input list to IssuedOvpnFileDto[]
   const items: IssuedOvpnFileDto[] = useMemo(() => {
     const arr = Array.isArray(ovpnFiles) ? ovpnFiles : [];
     return arr
@@ -74,32 +84,28 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       .filter((x): x is IssuedOvpnFileDto => !!x && (x.id != null || x.commonName != null));
   }, [ovpnFiles]);
 
-    const handleRevoke = useCallback(
-        async (ovpnFileId: number, commonName: string) => {
-            if (!window.confirm(`Are you sure you want to revoke OVPN file ${commonName}?`)) return;
-            try {
-                const data: RevokeFileRequest = {
-                    vpnServerId: Number(vpnServerId),
-                    ovpnFileId: ovpnFileId,
-                    commonName,
-                };
+  const handleRevoke = useCallback(
+    async (ovpnFileId: number, commonName: string) => {
+      if (!window.confirm(`Are you sure you want to revoke OVPN file ${commonName}?`)) return;
+      try {
+        const data: RevokeFileRequest = {
+          vpnServerId: Number(vpnServerId),
+          ovpnFileId: ovpnFileId,
+          commonName,
+        };
 
-                await revokeMutate({ data });
-                await onRevoke();
+        await revokeMutate({ data });
+        await onRevoke();
+      } catch (err: unknown) {
+        const e = err as { response?: { data?: { message?: string } }; message?: string };
 
-            } catch (err: unknown) {
-                const e = err as { response?: { data?: { message?: string } }; message?: string };
+        const msg = e.response?.data?.message || e.message || "Error revoking OVPN file.";
 
-                const msg =
-                    e.response?.data?.message ||
-                    e.message ||
-                    "Error revoking OVPN file.";
-
-                toast.error(msg);
-            }
-        },
-        [vpnServerId, revokeMutate, onRevoke]
-    );
+        toast.error(msg);
+      }
+    },
+    [vpnServerId, revokeMutate, onRevoke],
+  );
 
   const handleDownload = useCallback(
     async (issuedOvpnFileId: number) => {
@@ -109,16 +115,14 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           issuedOvpnFileId,
         };
 
-        // May be wrapped (DownloadFileResponseApiResponse) or unwrapped (DownloadFileResponse)
         const apiResult = (await downloadMutate({ data: payload })) as
           | DownloadFileResponseApiResponse
           | DownloadFileResponse;
 
         const resp: DownloadFileResponse | undefined =
-          (apiResult as DownloadFileResponseApiResponse)?.data ??
-          (apiResult as DownloadFileResponse);
+          (apiResult as DownloadFileResponseApiResponse)?.data ?? (apiResult as DownloadFileResponse);
 
-        const b64 = resp?.content ?? null; // base64 profile content per schema
+        const b64 = resp?.content ?? null;
         if (!b64) throw new Error("No file content received.");
 
         const raw = atob(b64);
@@ -138,17 +142,14 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
 
         toast.success("File downloaded.");
       } catch (err: unknown) {
-          const e = err as { response?: { data?: { message?: string } }; message?: string };
+        const e = err as { response?: { data?: { message?: string } }; message?: string };
 
-          const msg =
-              e.response?.data?.message ||
-              e.message ||
-              "Error downloading file.";
+        const msg = e.response?.data?.message || e.message || "Error downloading file.";
 
-          toast.error(msg);
+        toast.error(msg);
       }
     },
-    [downloadMutate, vpnServerId]
+    [downloadMutate, vpnServerId],
   );
 
   const filtered = useMemo(() => {
@@ -161,10 +162,10 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
   }, [items, searchQuery, issuedToFilter]);
 
   const rows = filtered.map((issuedOvpnFile, index) => {
-    // Ensure stable, string id for DataGrid
-    const id = issuedOvpnFile.id != null
-      ? String(issuedOvpnFile.id)
-      : `${issuedOvpnFile.commonName ?? "cn"}-${index}`;
+    const id =
+      issuedOvpnFile.id != null
+        ? String(issuedOvpnFile.id)
+        : `${issuedOvpnFile.commonName ?? "cn"}-${index}`;
 
     return {
       id,
@@ -239,13 +240,16 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       >
         <div className="filters" style={{ marginBottom: 12 }}>
           <input
+            id="ovpn-files-search-common-name"
+            name="ovpnFilesSearchCommonName"
             type="text"
-            placeholder="Search by Common Name"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="input"
           />
           <input
+            id="ovpn-files-search-issued-to"
+            name="ovpnFilesSearchIssuedTo"
             type="text"
             placeholder="Search by Issued To"
             value={issuedToFilter}
@@ -259,11 +263,12 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 100]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
+          paginationMode="client"
+          paginationModel={{ page: ovpnFilesGridPage, pageSize: ovpnFilesPageSize }}
+          onPaginationModelChange={(m) => {
+            setOvpnFilesGridPage(m.page);
+            setOvpnFilesPageSize(m.pageSize);
           }}
-          disableColumnFilter
-          disableColumnMenu
           localeText={{
             noRowsLabel: loading ? "🔄 Loading OVPN files..." : "📭 No OVPN files found",
           }}

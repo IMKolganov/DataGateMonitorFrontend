@@ -6,9 +6,11 @@ import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import { toast } from "react-toastify";
 
-import type { ApplicationDto, RevokeApplicationRequest } from "../../api/orval/model";
+import type { ApplicationDto, RevokeApplicationRequest } from "../../api/orvalModelShim";
 import { usePostApiApplicationsRevoke } from "../../api/orval/applications/applications.ts";
 import "../../css/Table.css";
+import { errorMessage } from "../../utils/errorMessage";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 
 interface ApplicationTableProps {
   applications: ApplicationDto[];
@@ -17,6 +19,12 @@ interface ApplicationTableProps {
 
 const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refreshApps }) => {
   const [copied, setCopied] = useState<string | null>(null);
+  const [appsGridPage, setAppsGridPage] = useState(0);
+  const [appsPageSize, setAppsPageSize] = usePersistedPageSize(
+    "applications-settings",
+    10,
+    "5,10,20,50,100",
+  );
 
   const revokeMutation = usePostApiApplicationsRevoke({
     mutation: {
@@ -24,13 +32,8 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
         toast.success("Application revoked");
         refreshApps();
       },
-      onError: (e: any) => {
-        toast.error(
-          e?.response?.data?.error ||
-            e?.response?.data?.message ||
-            e?.message ||
-            "Failed to revoke application."
-        );
+      onError: (e: unknown) => {
+        toast.error(errorMessage(e) || "Failed to revoke application.");
       },
     },
   });
@@ -133,10 +136,13 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50, 100]}
-          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+          paginationMode="client"
+          paginationModel={{ page: appsGridPage, pageSize: appsPageSize }}
+          onPaginationModelChange={(m) => {
+            setAppsGridPage(m.page);
+            setAppsPageSize(m.pageSize);
+          }}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-          disableColumnFilter
-          disableColumnMenu
           localeText={{ noRowsLabel: "📭 No applications registered" }}
         />
       </div>

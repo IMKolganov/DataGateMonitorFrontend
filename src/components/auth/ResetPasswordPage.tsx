@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { postApiAuthResetPassword } from "../../api/orval/auth/auth";
-import type { AdminResetPasswordRequest } from "../../api/orval/model";
+import type { AdminResetPasswordRequest } from "../../api/orvalModelShim";
 import { FaKey } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
 import "../../css/Login.css";
+import axios from "axios";
+import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
 const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -12,15 +14,17 @@ const ResetPasswordPage: React.FC = () => {
   const codeFromUrl = searchParams.get("code") ?? "";
 
   const [code, setCode] = useState("");
+  const [appliedUrlCode, setAppliedUrlCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    if (codeFromUrl) setCode(codeFromUrl);
-  }, [codeFromUrl]);
+  if (codeFromUrl && codeFromUrl !== appliedUrlCode) {
+    setAppliedUrlCode(codeFromUrl);
+    setCode(codeFromUrl);
+  }
 
   const canSubmit =
     code.trim().length > 0 &&
@@ -46,13 +50,13 @@ const ResetPasswordPage: React.FC = () => {
       await postApiAuthResetPassword(req);
       setSuccess(true);
       setTimeout(() => navigate("/login", { replace: true }), 2500);
-    } catch (err: any) {
-      const msg =
-        err.response?.data?.message ??
-        err.response?.data?.errorMessage ??
-        err.message ??
-        "Password reset failed.";
-      setError(msg);
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err)
+        ? axiosResponseDataMessage(err.response?.data) ??
+          err.message ??
+          "Password reset failed."
+        : errorMessage(err);
+      setError(msg || "Password reset failed.");
     } finally {
       setLoading(false);
     }
@@ -90,7 +94,7 @@ const ResetPasswordPage: React.FC = () => {
           {error && <p className="error-message">{error}</p>}
           <form onSubmit={handleSubmit}>
             <div className="login-item">
-              <h4>Code from server console</h4>
+              <h4>One-time reset code</h4>
               <input
                 type="text"
                 name="code"

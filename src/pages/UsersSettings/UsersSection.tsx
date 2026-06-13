@@ -1,6 +1,6 @@
 import { FaSync } from "react-icons/fa";
 import UsersTable from "../../components/settings/UsersTable.tsx";
-import type { UserDto } from "../../api/orval/model";
+import type { UserDto } from "../../api/orvalModelShim";
 import type { GridPaginationModel } from "@mui/x-data-grid";
 import "../../css/Settings.css";
 import "../../css/TelegramBotUsers.css";
