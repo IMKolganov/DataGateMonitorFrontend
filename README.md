@@ -1,270 +1,57 @@
-# OpenVpnGateMonitor Frontend (React + Vite + TypeScript)
+# DataGate Monitor — Frontend
 
-A simple checklist to get the app running on Windows (works on macOS/Linux too). Keep it short, reproducible, and friendly to clean installs.
+React + Vite dashboard for [DataGate Monitor](https://dash.datagateapp.com/).
 
----
+Part of the [DataGateMonitor](https://github.com/IMKolganov/DataGateMonitor) monorepo (`frontend/` submodule). Standalone repo: [DataGateMonitorFrontend](https://github.com/IMKolganov/DataGateMonitorFrontend).
 
-## Requirements
-- **Node.js**: **20 LTS** (18+ works, 20 recommended)
-- **npm**: 9+
-- **Git** (optional, for cloning)
-- **VS Code** (optional)
+## Links
 
-> Verify your versions
-```powershell
-node -v
-npm -v
-```
+- [DataGate app](https://datagateapp.com/) · [Download](https://datagateapp.com/download)
+- [Dashboard (prod)](https://dash.datagateapp.com/) · [Telegram @datagateapp](https://t.me/datagateapp)
 
-### Recommended: nvm for Windows
-Install: https://github.com/coreybutler/nvm-windows
+## Prerequisites
 
-Switch versions:
-```powershell
-nvm install 20.16.0
-nvm use 20.16.0
-node -v
-```
+- Node.js **≥24.14.0** (see `package.json` `engines`)
+- npm
 
----
+## Local development
 
-## First run (clean machine)
-```powershell
-# From the project root
-npm install
-npm run dev
-```
-If the browser doesn’t open automatically, navigate to:
-- http://localhost:5173/
-
----
-
-## Scripts
-Defined in `package.json`:
-```json
-{
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
-  }
-}
-```
-Usage:
-```powershell
-npm run dev      # start dev server
-npm run build    # type-check + production build to /dist
-npm run preview  # serve /dist locally (after build)
-```
-
----
-
-## Why “'vite' is not recognized” happens
-You’ll see this when **node_modules** is missing or broken. `vite` is a local devDependency and is resolved from `node_modules/.bin` by npm scripts.
-
-**Fix:**
-```powershell
-# Clean & reinstall
-rd /s /q node_modules & del package-lock.json
-npm install
+```bash
+cd frontend
+npm ci
 npm run dev
 ```
 
-Quick check:
-```powershell
-npx vite -v       # should print vite version
-```
+| Mode | URL |
+|------|-----|
+| Vite dev server | http://localhost:5173 |
+| Docker (monorepo compose) | http://localhost:5582 |
 
-> If this prints a version, your install is fine; re-run `npm run dev`.
+Set `VITE_APP_NAME=DataGate Monitor` (or your display name) in `.env` / compose env as needed.
 
----
+API base URL is configured for the dev proxy or nginx in Docker — see monorepo `docker-compose-local.yml` and `BACKEND_INTERNAL_URL`.
 
-## Environment variables
-Vite exposes only variables prefixed with `VITE_`.
+## Build
 
-Create **.env.local** (ignored by Git) in the project root:
-```dotenv
-# Example
-VITE_API_BASE_URL=http://localhost:5024
-VITE_APP_NAME=OpenVpnGateMonitor
-```
-Access in code:
-```ts
-const baseUrl = import.meta.env.VITE_API_BASE_URL;
-```
-
-**Common .env files**
-- `.env` – shared defaults
-- `.env.local` – local overrides (not committed)
-- `.env.development` / `.env.production` – per-mode
-
-More: https://vitejs.dev/guide/env-and-mode.html
-
----
-
-## Port & host
-Default: **5173**.
-Change with `--port` or in `vite.config.ts`.
-```powershell
-npm run dev -- --port 5180
-```
-
-If you need LAN access:
-```powershell
-npm run dev -- --host
-```
-
----
-
-## Optional: Backend API proxy (dev)
-If the backend runs on another port and you want to avoid CORS during development, add a proxy in `vite.config.ts`:
-```ts
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5024', // backend
-        changeOrigin: true
-      }
-    }
-  }
-});
-```
-Now requests to `/api/...` in dev will be forwarded to the backend.
-
-Docs: https://vitejs.dev/config/server-options.html#server-proxy
-
----
-
-## VS Code: launch with debugger (optional)
-Create `.vscode/launch.json`:
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Vite dev server",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**"]
-    }
-  ]
-}
-```
-Start debugging with **F5**.
-
----
-
-## Common issues & fixes
-
-### 1) `'vite' is not recognized as an internal or external command`
-- Run `npm install` (creates `node_modules` with `vite` inside)
-- If still broken: clean reinstall
-```powershell
-rd /s /q node_modules & del package-lock.json
-npm install
-```
-
-### 2) Node version too old
-- Ensure Node ≥ 18 (prefer 20): `node -v`
-- Switch with nvm (Windows):
-```powershell
-nvm install 20.16.0
-nvm use 20.16.0
-```
-
-### 3) Corporate/Custom registry
-If you use a private registry, set it explicitly before install:
-```powershell
-npm config set registry https://registry.npmjs.org/
-# or your corporate registry
-# npm config set registry https://pkg.whitebox.ru/npm/WhiteboxNpm
-npm install
-```
-Check active registry:
-```powershell
-npm config get registry
-```
-
-### 4) Port already in use
-```powershell
-npm run dev -- --port 5180
-```
-
-### 5) SSL / HTTPS in dev
-Use `--host` and a dev proxy or self-signed certs (advanced). Most setups don’t need HTTPS in local dev.
-
----
-
-## Build artifacts
-- Production bundle: `/dist`
-- Serve locally to test production build:
-```powershell
+```bash
 npm run build
-npm run preview
-```
-Preview default: http://localhost:4173/
-
----
-
-## Folder structure (typical)
-```
-project/
-├─ src/
-│  ├─ assets/
-│  ├─ components/
-│  ├─ pages/
-│  ├─ hooks/
-│  ├─ styles/
-│  ├─ main.tsx
-│  └─ App.tsx
-├─ public/
-├─ index.html
-├─ vite.config.ts
-├─ tsconfig.json
-├─ package.json
-└─ README.md
+npm run preview   # optional: preview production build
 ```
 
----
+## Docker (monorepo)
 
-## FAQ
-**Q:** Can I start with `npx vite`?
+From the monorepo root:
 
-**A:** Yes, but prefer `npm run dev` so you use the project’s pinned `vite` version.
-
-**Q:** Does this require global installs?
-
-**A:** No. Everything is local to the project (devDependencies).
-
----
-
-## Useful links
-- Vite docs: https://vitejs.dev/
-- React docs: https://react.dev/
-- TypeScript docs: https://www.typescriptlang.org/
-
----
-
-## TL;DR
-```powershell
-npm config set registry https://registry.npmjs.org/
-nvm use 20.16.0   # or install it
-npm install
-npm run dev
-```
-If it fails, clean & retry:
-```powershell
-rd /s /q node_modules & del package-lock.json
-npm install
-npm run dev
+```bash
+docker compose -f docker-compose-local.yml --env-file .env.dev.x64 up -d --build frontend
 ```
 
+Image: `imkolganov/datagate-monitor-frontend`.
+
+## License
+
+MIT
+
+## Author
+
+**Ivan Kolganov** — [LinkedIn](https://www.linkedin.com/in/imkolganov/?locale=en) · [Telegram](https://t.me/KolganovIvan) · [Buy Me a Coffee](https://buymeacoffee.com/imkolganov)
