@@ -32,6 +32,7 @@ interface Props {
 
     wsCountConnectedClients?: number | null;
     wsCountSessions?: number | null;
+    isCurrentUserConnected?: boolean;
 
     onView: (id: number) => void;
     onEdit: (id: number) => void;
@@ -98,6 +99,7 @@ const ServerItem: React.FC<Props> = ({
                                          nextRunTime,
                                          wsOnline,
                                          wsCountConnectedClients,
+                                         isCurrentUserConnected,
                                          onView,
                                          onEdit,
                                          onDelete,
@@ -178,6 +180,11 @@ const ServerItem: React.FC<Props> = ({
                     {isOnline ? "✅ Online" : "❌ Offline"}
                 </div>
             </div>
+            {isCurrentUserConnected ? (
+                <div className="server-self-connected-note">
+                    You are currently connected to this server.
+                </div>
+            ) : null}
 
             <div className="server-details">
                 <div className="detail-row">

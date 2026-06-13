@@ -78,8 +78,9 @@ const AddXrayClientLink: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
   return (
     <div className="add-certificate">
       <input
+        id="xray-add-common-name"
+        name="xrayCommonName"
         type="text"
-        placeholder="Enter Common Name"
         value={newCommonName}
         onChange={(e) => {
           setNewCommonName(e.target.value);
@@ -91,6 +92,8 @@ const AddXrayClientLink: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
         disabled={isPending}
       />
       <input
+        id="xray-add-external-id"
+        name="xrayExternalId"
         type="text"
         placeholder="Enter External ID"
         value={newExternalId}

@@ -156,6 +156,8 @@ export function ServerDetails() {
             </div>
 
             <select
+                id="server-details-tabs"
+                name="serverDetailsTabs"
                 className="tabs-dropdown mobile-tabs"
                 value={safeCurrentPath}
                 onChange={(e) => navigate(`/servers/${vpnServerId}/${e.target.value}`)}

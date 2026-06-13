@@ -60,6 +60,8 @@ const AddCertificate: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
   return (
     <div className="add-certificate">
       <input
+        id="cert-add-common-name"
+        name="certCommonName"
         type="text"
         placeholder="Enter Common Name"
         value={newCertCommonName}

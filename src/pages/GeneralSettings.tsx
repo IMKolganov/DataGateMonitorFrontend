@@ -247,6 +247,8 @@ export function GeneralSettings() {
 
         <div className="settings-item">
           <input
+            id="openvpn-polling-interval-value"
+            name="openvpnPollingIntervalValue"
             type="number"
             min={0}
             value={intervalValue}
@@ -255,6 +257,8 @@ export function GeneralSettings() {
           />
 
           <select
+            id="openvpn-polling-interval-unit"
+            name="openvpnPollingIntervalUnit"
             value={intervalType}
             onChange={(e) => setIntervalType(e.target.value as Unit)}
             className="btn secondary"
@@ -286,6 +290,8 @@ export function GeneralSettings() {
 
         <label className="settings-item settings-item--gap-10">
           <input
+            id="require-email-confirmation"
+            name="requireEmailConfirmation"
             type="checkbox"
             checked={requireEmailConfirmation}
             onChange={(e) => setRequireEmailConfirmation(e.target.checked)}

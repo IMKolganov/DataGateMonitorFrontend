@@ -113,6 +113,7 @@ const XrayLoginPage: React.FC = () => {
               displayName={totpChallenge.displayName}
               redirectPath="/xray/"
               onBack={() => setTotpChallenge(null)}
+              onBeforeStoreTokens={totpChallenge.onBeforeStoreTokens}
             />
           ) : (
           <>
@@ -156,7 +157,7 @@ const XrayLoginPage: React.FC = () => {
 
           <div className="social-login">
             <div className="social-login-item">
-              <GoogleLoginForm redirectPath="/xray/" />
+              <GoogleLoginForm redirectPath="/xray/" onTotpChallenge={setTotpChallenge} />
             </div>
           </div>
 

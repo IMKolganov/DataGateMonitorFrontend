@@ -94,6 +94,7 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
           fullName,
           displayNameForAvatar: fullName !== "-" ? fullName : u.username ?? String(telegramId),
           avatarUrl: readOptionalAvatarUrl(u),
+          hasProfilePhoto: Boolean(u.hasProfilePhoto),
           createDate: u.createDate ? new Date(u.createDate).toLocaleString() : "-",
           lastUpdate: u.lastUpdate ? new Date(u.lastUpdate).toLocaleString() : "-",
           isAdmin: Boolean(u.isAdmin),
@@ -114,7 +115,9 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
         <UserAvatar
           src={params.row.avatarUrl as string | undefined}
           telegramPhotoTelegramId={
-            typeof params.row.telegramId === "number" && params.row.telegramId > 0
+            params.row.hasProfilePhoto &&
+            typeof params.row.telegramId === "number" &&
+            params.row.telegramId > 0
               ? params.row.telegramId
               : undefined
           }
