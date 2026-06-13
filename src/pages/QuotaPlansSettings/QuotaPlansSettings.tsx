@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo } from "react";
-import { FaPlus, FaSync, FaEdit, FaTrash, FaStar, FaServer } from "react-icons/fa";
+import { useCallback, useEffect, useState, useMemo } from "react";
+import { FaPlus, FaSync, FaEdit, FaTrash, FaStar, FaServer, FaClipboardList } from "react-icons/fa";
 import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
@@ -16,10 +16,12 @@ import type {
   QuotaPlanDto,
   CreateOrUpdateQuotaPlanRequest,
   QuotaPlansResponse,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
+import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { QuotaPlanFormModal } from "./QuotaPlanFormModal";
 import { QuotaPlanAllowedServersModal } from "./QuotaPlanAllowedServersModal";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import "../../css/Settings.css";
 import "../../css/Table.css";
 
@@ -36,19 +38,28 @@ export function QuotaPlansSettings() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<QuotaPlanDto | null>(null);
   const [allowedServersPlan, setAllowedServersPlan] = useState<QuotaPlanDto | null>(null);
+  const [quotaPlansGridPage, setQuotaPlansGridPage] = useState(0);
+  const [quotaPlansPageSize, setQuotaPlansPageSize] = usePersistedPageSize(
+    "quota-plans",
+    10,
+    "5,10,20,50,100",
+  );
 
   const getAllMutation = usePostApiQuotaPlansGetAll();
+  const loadPlansMutate = getAllMutation.mutate;
   const createMutation = usePostApiQuotaPlansCreate();
   const updateMutation = usePutApiQuotaPlansUpdate();
   const deleteMutation = useDeleteApiQuotaPlansDeleteId();
   const setDefaultMutation = usePostApiQuotaPlansSetDefaultId();
 
-  const loadPlans = () => {
-    getAllMutation.mutate(
+  const loadPlans = useCallback(() => {
+    loadPlansMutate(
       { data: { includeInactive: true } },
       {
         onSuccess: (raw) => {
-          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(raw as any);
+          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(
+            raw as QuotaPlansResponse | ApiEnvelope<QuotaPlansResponse> | undefined,
+          );
           setPlans(payload?.quotaPlans ?? []);
         },
         onError: (e: unknown) => {
@@ -62,11 +73,11 @@ export function QuotaPlansSettings() {
         },
       }
     );
-  };
+  }, [loadPlansMutate]);
 
   useEffect(() => {
     loadPlans();
-  }, []);
+  }, [loadPlans]);
 
   const isBusy =
     getAllMutation.isPending ||
@@ -256,7 +267,10 @@ export function QuotaPlansSettings() {
 
   return (
     <div>
-      <h2>Quota plans</h2>
+      <h2 className="settings-page__h2-with-icon">
+        <FaClipboardList className="icon" aria-hidden />
+        <span>Quota plans</span>
+      </h2>
       <div style={{ borderTop: "1px solid var(--border-color)", marginTop: 8 }} />
 
       <p className="settings-item-description" style={{ marginBottom: 16 }}>
@@ -302,11 +316,14 @@ export function QuotaPlansSettings() {
             <StyledDataGrid
               rows={rows}
               columns={columns}
-              pageSizeOptions={[5, 10, 20, 50]}
-              initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+              pageSizeOptions={[5, 10, 20, 50, 100]}
+              paginationMode="client"
+              paginationModel={{ page: quotaPlansGridPage, pageSize: quotaPlansPageSize }}
+              onPaginationModelChange={(m) => {
+                setQuotaPlansGridPage(m.page);
+                setQuotaPlansPageSize(m.pageSize);
+              }}
               slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-              disableColumnFilter
-              disableColumnMenu
               localeText={{ noRowsLabel: "No quota plans. Click «Add plan» to create one." }}
             />
           </div>

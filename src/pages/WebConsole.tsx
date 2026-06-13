@@ -1,12 +1,11 @@
 // src/pages/WebConsole.tsx
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useLayoutEffect, useState, useRef, useCallback } from "react";
 import "../css/Console.css";
-import { FaArrowRight, FaTrash, FaInfoCircle, FaList } from "react-icons/fa";
-import { useParams } from "react-router-dom";
+import { FaArrowRight, FaTrash, FaInfoCircle, FaList, FaTerminal } from "react-icons/fa";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   HubConnectionBuilder,
   HubConnection,
-  HttpTransportType,
   LogLevel,
   HubConnectionState,
 } from "@microsoft/signalr";
@@ -17,12 +16,44 @@ import {
   saveCommandHistory,
   loadCommandHistory,
 } from "../utils/consoleStorage";
-import { getSignalRUrl, getAccessTokenOrLogout } from "../utils/signalr-url";
+import { getSignalRUrl } from "../utils/signalr-url";
+import { resolveHubAccessToken } from "../utils/auth/signalRAccessToken";
+import { getSignalRPreferredTransport } from "../utils/signalrTransport.ts";
+import { ACCESS_TOKEN_REFRESHED_EVENT } from "../utils/auth/accessTokenEvents.ts";
 import { highlightOvpMgmtLine } from "../utils/ovpMgmtHighlight";
 import { OVP_MGMT_COMMANDS } from "../utils/ovpMgmtCommands";
+import { errorMessage } from "../utils/errorMessage";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
+import type { VpnServerResponse } from "../api/orvalModelShim";
+import { isOpenVpnStack } from "../constants/vpnServerType";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
+import { ServerAccessDenied } from "../components/ServerAccessDenied";
 
 export function WebConsole() {
   const { vpnServerId } = useParams<{ vpnServerId?: string }>();
+  const navigate = useNavigate();
+  const canUseConsole = isAdmin(getCurrentUser());
+  const numericServerId = Number(vpnServerId || 0);
+  const serverQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId, {
+    query: {
+      enabled: numericServerId > 0,
+      staleTime: 10_000,
+      retry: 1,
+    },
+  });
+  const serverPayload = serverQuery.data as VpnServerResponse | undefined;
+  const serverType = serverPayload?.vpnServer?.serverType;
+  /** Management console exists only for OpenVPN; any other known stack leaves this route immediately. */
+  const consoleNotSupported =
+    numericServerId > 0 &&
+    serverType !== undefined &&
+    serverType !== null &&
+    !isOpenVpnStack(serverType);
+
+  useLayoutEffect(() => {
+    if (!vpnServerId || !consoleNotSupported) return;
+    navigate(`/servers/${vpnServerId}`, { replace: true });
+  }, [vpnServerId, consoleNotSupported, navigate]);
   const [messages, setMessages] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const [showCmdList, setShowCmdList] = useState(false);
@@ -32,8 +63,16 @@ export function WebConsole() {
   const cmdListRef = useRef<HTMLDivElement>(null);
   const inputWrapperRef = useRef<HTMLDivElement>(null);
   const connectionRef = useRef<HubConnection | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  /** Scroll this element only — never use scrollIntoView on inner nodes (it scrolls the whole page). */
+  const consoleOutputRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [hubSessionKey, setHubSessionKey] = useState(0);
+
+  useEffect(() => {
+    const bump = () => setHubSessionKey((k) => k + 1);
+    window.addEventListener(ACCESS_TOKEN_REFRESHED_EVENT, bump);
+    return () => window.removeEventListener(ACCESS_TOKEN_REFRESHED_EVENT, bump);
+  }, []);
 
   useEffect(() => {
     if (!vpnServerId) return;
@@ -49,21 +88,30 @@ export function WebConsole() {
 
   useEffect(() => {
     if (!vpnServerId) return;
-
-    // Avoid rebuilding an active connection
-    if (connectionRef.current && connectionRef.current.state !== HubConnectionState.Disconnected) {
-      return;
-    }
+    if (!canUseConsole) return;
+    if (numericServerId > 0 && serverQuery.isPending) return;
+    if (consoleNotSupported) return;
 
     const setupSignalR = async () => {
       try {
+        if (connectionRef.current) {
+          await connectionRef.current.stop().catch(() => {});
+          connectionRef.current = null;
+        }
+
         const url = getSignalRUrl(vpnServerId);
         const connection = new HubConnectionBuilder()
           .withUrl(url, {
-            transport: HttpTransportType.WebSockets,
-            accessTokenFactory: () => getAccessTokenOrLogout(),
+            transport: getSignalRPreferredTransport(),
+            accessTokenFactory: async () => {
+              const token = await resolveHubAccessToken();
+              if (!token) {
+                throw new Error("User is not authenticated");
+              }
+              return token;
+            },
           })
-          .configureLogging(LogLevel.Information)
+          .configureLogging(LogLevel.None)
           .withAutomaticReconnect()
           .build();
 
@@ -106,8 +154,8 @@ export function WebConsole() {
 
         await connection.start();
         setMessages((prev) => [...prev, "✅ Console ready. Connection to OpenVPN server established."]);
-      } catch (err: any) {
-        setMessages((prev) => [...prev, `❌ Failed to connect to OpenVPN server: ${err.message}`]);
+      } catch (err: unknown) {
+        setMessages((prev) => [...prev, `❌ Failed to connect to OpenVPN server: ${errorMessage(err)}`]);
       }
     };
 
@@ -117,11 +165,13 @@ export function WebConsole() {
       connectionRef.current?.stop();
       connectionRef.current = null;
     };
-  }, [vpnServerId]);
+  }, [vpnServerId, hubSessionKey, numericServerId, serverQuery.isPending, consoleNotSupported, canUseConsole]);
 
   useEffect(() => {
     if (messages.length === 0) return;
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = consoleOutputRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
   }, [messages]);
 
   const addToCommandHistory = useCallback(
@@ -161,8 +211,8 @@ export function WebConsole() {
 
     try {
       await connection.send("SendCommand", cmdToSend);
-    } catch (error: any) {
-      setMessages((prev) => [...prev, `❌ Failed to send command to OpenVPN: ${error.message}`]);
+    } catch (error: unknown) {
+      setMessages((prev) => [...prev, `❌ Failed to send command to OpenVPN: ${errorMessage(error)}`]);
     }
   };
 
@@ -258,9 +308,30 @@ export function WebConsole() {
     await clearHistoryDB(vpnServerId);
   };
 
+  if (!canUseConsole) {
+    return (
+      <ServerAccessDenied message="OpenVPN management console is available to administrators only." />
+    );
+  }
+
+  if (consoleNotSupported) {
+    return null;
+  }
+
+  if (numericServerId > 0 && serverQuery.isPending) {
+    return (
+      <div className="server-details__panel" style={{ padding: 16 }}>
+        <p>Loading server…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="web-console-page">
-      <h2 className="console-page-title">Web Console</h2>
+      <h2 className="console-page-title console-page-title--with-icon">
+        <FaTerminal className="icon" aria-hidden />
+        <span>Web Console</span>
+      </h2>
       <div className="header-bar">
         <div className="left-buttons">
           <button className="btn danger" onClick={clearConsole}>
@@ -270,7 +341,7 @@ export function WebConsole() {
       </div>
 
       <div className="console-container">
-        <div className="console-output">
+        <div ref={consoleOutputRef} className="console-output">
           {messages.map((msg, index) => {
             const isCommand = msg.startsWith("> ");
             const isSuccess = msg.startsWith("✅");
@@ -292,12 +363,13 @@ export function WebConsole() {
               </div>
             );
           })}
-          <div ref={messagesEndRef} />
         </div>
         <div ref={inputWrapperRef} className="console-input-wrapper">
           <div className="console-input">
             <span className="console-prompt">$</span>
             <input
+              id="web-console-command"
+              name="webConsoleCommand"
               ref={inputRef}
               type="text"
               value={command}
@@ -351,8 +423,9 @@ export function WebConsole() {
       </div>
 
       <div className="console-info">
-        <h3>
-          <FaInfoCircle className="icon" /> Important Information
+        <h3 className="console-info__title">
+          <FaInfoCircle className="icon" aria-hidden />
+          <span>Important Information</span>
         </h3>
         <p>
           This web console provides access to the <strong>OpenVPN Management Interface</strong>. Be careful when

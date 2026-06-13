@@ -1,4 +1,5 @@
 // src/pages/TelegramBotSettings/TelegramBotSettings.tsx
+import { FaTelegram } from "react-icons/fa";
 import { useTelegramBotUsers } from "./useTelegramBotUsers";
 import { TelegramBotUsersSection } from "./TelegramBotUsersSection";
 import { TelegramBotInfoBlock } from "./TelegramBotInfoBlock";
@@ -28,8 +29,11 @@ export function TelegramBotSettings() {
 
     return (
         <div>
-            <h2>Telegram Bot Settings</h2>
-            <div style={{ borderTop: "1px solid #d1d5da" }}></div>
+            <h2 className="settings-page__h2-with-icon">
+              <FaTelegram className="icon" aria-hidden />
+              <span>Telegram Bot Settings</span>
+            </h2>
+            <div className="settings-divider" />
 
             <p className="app-settings-description">
                 View the list of users who interacted with your Telegram bot and inspect their messages.

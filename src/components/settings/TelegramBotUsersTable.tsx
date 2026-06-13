@@ -3,7 +3,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import { FaBan, FaUserShield } from "react-icons/fa";
-import type { TelegramBotUserDto, TelegramUserActionRequest } from "../../api/orval/model";
+import type { TelegramBotUserDto, TelegramUserActionRequest } from "../../api/orvalModelShim";
 import {
   usePostApiTgbotUsersBlock,
   usePostApiTgbotUsersUnblock,
@@ -11,6 +11,9 @@ import {
   usePostApiTgbotUsersUnsetAdmin,
 } from "../../api/orval/telegram-bot-user/telegram-bot-user.ts";
 import "../../css/Table.css";
+import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { UserAvatar } from "../ui/UserAvatar.tsx";
+import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
 
 interface TelegramBotUsersTableProps {
   users: TelegramBotUserDto[];
@@ -24,6 +27,12 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
   loading,
 }) => {
   const [mutationLoading, setMutationLoading] = useState(false);
+  const [tgUsersGridPage, setTgUsersGridPage] = useState(0);
+  const [tgUsersPageSize, setTgUsersPageSize] = usePersistedPageSize(
+    "telegram-bot-users",
+    10,
+    "5,10,20,50,100",
+  );
 
   const mBlock = usePostApiTgbotUsersBlock();
   const mUnblock = usePostApiTgbotUsersUnblock();
@@ -46,7 +55,11 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
     if (!telegramId) return;
     setMutationLoading(true);
     try {
-      isBlocked ? await unblockUser(telegramId) : await blockUser(telegramId);
+      if (isBlocked) {
+        await unblockUser(telegramId);
+      } else {
+        await blockUser(telegramId);
+      }
       await refreshUsers();
     } finally {
       setMutationLoading(false);
@@ -57,7 +70,11 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
     if (!telegramId) return;
     setMutationLoading(true);
     try {
-      isAdmin ? await unsetAdmin(telegramId) : await setAdmin(telegramId);
+      if (isAdmin) {
+        await unsetAdmin(telegramId);
+      } else {
+        await setAdmin(telegramId);
+      }
       await refreshUsers();
     } finally {
       setMutationLoading(false);
@@ -69,11 +86,15 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
       (users ?? []).map((u, idx) => {
         const id = u.id ?? u.telegramId ?? idx + 1;
         const telegramId = u.telegramId ?? 0;
+        const fullName = `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || "-";
         return {
           id,
           telegramId,
           username: u.username ?? "-",
-          fullName: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || "-",
+          fullName,
+          displayNameForAvatar: fullName !== "-" ? fullName : u.username ?? String(telegramId),
+          avatarUrl: readOptionalAvatarUrl(u),
+          hasProfilePhoto: Boolean(u.hasProfilePhoto),
           createDate: u.createDate ? new Date(u.createDate).toLocaleString() : "-",
           lastUpdate: u.lastUpdate ? new Date(u.lastUpdate).toLocaleString() : "-",
           isAdmin: Boolean(u.isAdmin),
@@ -84,6 +105,28 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
   );
 
   const columns: GridColDef[] = [
+    {
+      field: "avatar",
+      headerName: "",
+      width: 56,
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: (params) => (
+        <UserAvatar
+          src={params.row.avatarUrl as string | undefined}
+          telegramPhotoTelegramId={
+            params.row.hasProfilePhoto &&
+            typeof params.row.telegramId === "number" &&
+            params.row.telegramId > 0
+              ? params.row.telegramId
+              : undefined
+          }
+          name={params.row.displayNameForAvatar as string}
+          colorSeed={String(params.row.telegramId)}
+          size={28}
+        />
+      ),
+    },
     { field: "id", headerName: "ID", width: 70 },
     { field: "telegramId", headerName: "Telegram ID", flex: 1 },
     { field: "username", headerName: "Username", flex: 1 },
@@ -141,9 +184,12 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50, 100]}
-          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-          disableColumnFilter
-          disableColumnMenu
+          paginationMode="client"
+          paginationModel={{ page: tgUsersGridPage, pageSize: tgUsersPageSize }}
+          onPaginationModelChange={(m) => {
+            setTgUsersGridPage(m.page);
+            setTgUsersPageSize(m.pageSize);
+          }}
           localeText={{ noRowsLabel: "📭 No users found" }}
           loading={isGridLoading}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}

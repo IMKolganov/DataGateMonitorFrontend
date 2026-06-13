@@ -1,16 +1,39 @@
 // tabs.tsx
-// tabs.tsx
-import React, { useState } from "react";
-import type { ReactNode } from 'react';
+import React, { isValidElement, useState } from "react";
+import type { Key, ReactElement, ReactNode } from "react";
 
-export function Tabs({ defaultValue, children, className }: { defaultValue: string; children: ReactNode[]; className?: string }) {
+type TabChildProps = { value?: string; activeTab?: string; setActiveTab?: (v: string) => void };
+
+function cloneTabChild(
+  child: ReactNode,
+  extra: TabChildProps & { key?: Key },
+): ReactNode {
+  if (!isValidElement(child)) return child;
+  return React.cloneElement(child as ReactElement<TabChildProps>, extra);
+}
+
+export function Tabs({
+  defaultValue,
+  children,
+  className,
+}: {
+  defaultValue: string;
+  children: ReactNode[];
+  className?: string;
+}) {
   const [activeTab, setActiveTab] = useState(defaultValue);
   return (
 <div className={`${className} p-4 rounded-lg border`} style={{ backgroundColor: 'var(--bg-content-alt)', borderColor: 'var(--border-color)' }}>
       <div className="flex space-x-4 border-b mb-4" style={{ borderColor: 'var(--border-color)' }}>
-        {children.map(child => React.cloneElement(child as any, { activeTab, setActiveTab, key: (child as any).props.value }))}
+        {children.map((child) =>
+          cloneTabChild(child, {
+            activeTab,
+            setActiveTab,
+            key: isValidElement(child) ? (child.props as { value?: string }).value : undefined,
+          }),
+        )}
       </div>
-      {children.map(child => React.cloneElement(child as any, { activeTab }))}
+      {children.map((child) => cloneTabChild(child, { activeTab }))}
     </div>
   );
 }

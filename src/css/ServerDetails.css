@@ -126,6 +126,139 @@
   padding-left: 8px;
 }
 
+/* General tab — layout must not inherit global rules from ServerList.css (scoped to .server-item). */
+.server-info .server-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.server-info .server-meta {
+  min-width: 0;
+}
+
+.server-info .server-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.server-info .server-status {
+  flex-shrink: 0;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.server-info .server-status.status-online {
+  color: #2ecc71;
+  background-color: rgba(46, 204, 113, 0.12);
+}
+
+.server-info .server-status.status-offline {
+  color: #ff6b5a;
+  background-color: rgba(255, 107, 90, 0.12);
+}
+
+.server-info .server-status__stack-logo {
+  flex-shrink: 0;
+  display: block;
+  object-fit: contain;
+}
+
+.server-info .server-status__stack-logo--openvpn {
+  margin-right: 2px;
+}
+
+.server-info .server-status__stack-logo--xray {
+  border-radius: 4px;
+  color: #22d3ee;
+}
+
+[data-theme="light"] .server-status__stack-logo--xray {
+  color: #0e7490;
+}
+
+/* Multi-column grid like the original General tab: items fill row-by-row (5 cols on wide viewports). */
+.server-info .server-details {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  column-gap: 1rem;
+  row-gap: 0.65rem;
+  margin-top: 0.5rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 1200px) {
+  .server-info .server-details {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .server-info .server-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .server-info .server-details {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Icon + label/value stay on one line inside each cell. */
+.server-info .detail-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 2px 0;
+  font-size: 14px;
+  min-width: 0;
+}
+
+.server-info .detail-row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.4em;
+  row-gap: 0.15em;
+}
+
+.server-info .detail-row .detail-icon {
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  font-size: 16px;
+  color: var(--text-muted);
+  margin-top: 0.12em;
+}
+
+.server-info .detail-label {
+  color: var(--text-muted);
+}
+
+.server-info .detail-row-main > span:not(.detail-label) {
+  color: var(--text-secondary);
+}
+
 .detail-row-tags-heading {
   display: flex;
   align-items: center;
@@ -139,4 +272,64 @@
 
 .server-tags-block .server-tags-list {
   margin-left: 0;
+}
+
+/* Title + DataGrid / map: breathing room after server info card */
+.server-details__panel {
+  margin-top: 2rem;
+}
+
+.server-details__panel > h3.settings-card__h3-with-icon {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.server-details__root {
+  width: 100%;
+  min-width: 0;
+}
+
+.server-details__auto-refresh-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+.server-details__auto-refresh-label__text {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.server-details__loading-hint {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.server-details__intro {
+  font-size: 13px;
+  opacity: 0.92;
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
+
+.server-details__traffic-hint {
+  font-size: 12px;
+  opacity: 0.88;
+  margin: 0 0 10px;
+}
+
+.server-details__alert {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(248, 81, 73, 0.12);
+  border: 1px solid rgba(248, 81, 73, 0.35);
+  font-size: 13px;
+}
+
+.server-details__alert-detail {
+  margin-top: 6px;
+  white-space: pre-wrap;
 }

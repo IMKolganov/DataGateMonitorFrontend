@@ -9,18 +9,30 @@ import {
 } from "react-icons/fa";
 import { BsClock, BsFillBookmarkStarFill, BsTag, BsLink45Deg, BsHddNetwork } from "react-icons/bs";
 import { IoMdPerson } from "react-icons/io";
-import type { ServiceStatus, OpenVpnServerWithStatusDto } from "../../api/orval/model";
+import type {
+    ServiceStatus,
+    VpnServerV2Dto,
+    VpnServerWithStatusDto,
+    VpnServerWithStatusV2Dto,
+} from "../../api/orvalModelShim";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
+import { vpnServerTypeLabel } from "../../constants/vpnServerType";
+import { VpnStackLogo } from "./VpnStackLogo";
 
 interface Props {
-    server: OpenVpnServerWithStatusDto;
+    /** v2 includes quota plan groups and accessibility; v1 kept for detail pages still on legacy GET. */
+    server: VpnServerWithStatusDto | VpnServerWithStatusV2Dto;
     vpnServerId: number;
-    serviceStatus: ServiceStatus;
+    /** null until the status-stream hub sends service status for this server. */
+    serviceStatus: ServiceStatus | null;
     errorMessage: string | null;
     nextRunTime: string;
+    /** null = use REST isOnline; true/false = live override from hub when backend sends IsOnline. */
+    wsOnline: boolean | null;
 
     wsCountConnectedClients?: number | null;
     wsCountSessions?: number | null;
+    isCurrentUserConnected?: boolean;
 
     onView: (id: number) => void;
     onEdit: (id: number) => void;
@@ -42,7 +54,14 @@ const formatUtcDate = (utc: string | null | undefined) => {
     }
 };
 
-const getStatusLabel = (status: ServiceStatus) => {
+const getStatusLabel = (status: ServiceStatus | null) => {
+    if (status === null) {
+        return (
+            <span className="status-indicator idle" title="Waiting for live status from the background service">
+                <BsClock className="status-icon" /> Service status: …
+            </span>
+        );
+    }
     const s = Number(status);
     if (s === 1) {
         return (
@@ -78,7 +97,9 @@ const ServerItem: React.FC<Props> = ({
                                          serviceStatus,
                                          errorMessage,
                                          nextRunTime,
+                                         wsOnline,
                                          wsCountConnectedClients,
+                                         isCurrentUserConnected,
                                          onView,
                                          onEdit,
                                          onDelete,
@@ -86,23 +107,30 @@ const ServerItem: React.FC<Props> = ({
     const user = getCurrentUser();
     const canManage = isAdmin(user);
 
-    const openVpnServer = server.openVpnServerResponses?.openVpnServer ?? null;
+    const vpnServer = server.vpnServerResponses?.vpnServer ?? null;
 
     const resolvedId =
-        openVpnServer?.id ??
-        server.openVpnServerStatusLogResponse?.vpnServerId ??
+        vpnServer?.id ??
+        server.vpnServerStatusLogResponse?.vpnServerId ??
         vpnServerId;
 
-    const name = openVpnServer?.serverName ?? "";
-    const isOnline = !!openVpnServer?.isOnline;
-    const isDefault = !!openVpnServer?.isDefault;
+    const name = vpnServer?.serverName ?? "";
+    const stackLabel = vpnServerTypeLabel(vpnServer?.serverType as number | undefined);
+    const isOnlineFromApi = !!vpnServer?.isOnline;
+    const isOnline = wsOnline === null ? isOnlineFromApi : wsOnline;
+    const isDefault = !!vpnServer?.isDefault;
+    const isDisabled = Boolean(vpnServer?.isDisabled);
 
     const connectedClients =
         wsCountConnectedClients ?? server.countConnectedClients ?? 0;
 
-    const apiUrl = openVpnServer?.apiUrl ?? null;
-    const statusLog = server.openVpnServerStatusLogResponse;
+    const apiUrl = vpnServer?.apiUrl ?? null;
+    const statusLog = server.vpnServerStatusLogResponse;
     const serverIp = statusLog?.serverRemoteIp ?? statusLog?.serverLocalIp ?? null;
+
+    const v2Server = vpnServer as VpnServerV2Dto | null;
+    const quotaPlanGroups = v2Server?.quotaPlanGroups?.filter((g) => g?.name) ?? [];
+    const accessibleByQuotaPlan = v2Server?.isAccessibleForUserQuotaPlan;
 
     return (
         <div className="server-item-content">
@@ -110,52 +138,103 @@ const ServerItem: React.FC<Props> = ({
                 <div className="server-info">
                     <strong className="server-name">
                         ({vpnServerId !== 0 ? vpnServerId : resolvedId}) {name}
+                        <span
+                            style={{
+                                marginLeft: 8,
+                                fontSize: 11,
+                                fontWeight: 600,
+                                color: "var(--text-secondary)",
+                            }}
+                        >
+                            {stackLabel}
+                        </span>
+                        {isDisabled && (
+                            <span
+                                className="server-disabled-pill"
+                                title="Background polling is off for this server; card stays clickable."
+                            >
+                                Polling off
+                            </span>
+                        )}
                     </strong>
+                    {quotaPlanGroups.length > 0 && (
+                        <div
+                            className="server-quota-plans"
+                            style={{ marginTop: 4, fontSize: 11, color: "var(--text-secondary)" }}
+                        >
+                            Quota plans:{" "}
+                            {quotaPlanGroups.map((g) => g?.name).filter(Boolean).join(", ")}
+                        </div>
+                    )}
+                    {accessibleByQuotaPlan === false && !canManage && (
+                        <div style={{ marginTop: 4, fontSize: 11, color: "#f85149" }}>
+                            Not included in your quota plan (view only).
+                        </div>
+                    )}
                 </div>
                 <div className={`server-status ${isOnline ? "status-online" : "status-offline"}`}>
+                    <VpnStackLogo
+                        serverType={vpnServer?.serverType as number | undefined}
+                        size={18}
+                    />
                     {isOnline ? "✅ Online" : "❌ Offline"}
                 </div>
             </div>
+            {isCurrentUserConnected ? (
+                <div className="server-self-connected-note">
+                    You are currently connected to this server.
+                </div>
+            ) : null}
 
             <div className="server-details">
                 <div className="detail-row">
-                    <IoMdPerson className="detail-icon" />
-                    <span className="detail-label">Count Connected Clients:</span>
-                    <span>{connectedClients}</span>
+                    <IoMdPerson className="detail-icon" aria-hidden />
+                    <div className="detail-row-main">
+                        <span className="detail-label">Count Connected Clients:</span>
+                        <span className="detail-value">{connectedClients}</span>
+                    </div>
                 </div>
 
                 {apiUrl && (
                     <div className="detail-row">
-                        <BsLink45Deg className="detail-icon" />
-                        <span className="detail-label">API:</span>
-                        <a href={apiUrl} target="_blank" rel="noreferrer" className="detail-link" onClick={(e) => e.stopPropagation()}>
-                            {apiUrl}
-                        </a>
+                        <BsLink45Deg className="detail-icon" aria-hidden />
+                        <div className="detail-row-main">
+                            <span className="detail-label">API:</span>
+                            <a href={apiUrl} target="_blank" rel="noreferrer" className="detail-link" onClick={(e) => e.stopPropagation()}>
+                                {apiUrl}
+                            </a>
+                        </div>
                     </div>
                 )}
 
                 {serverIp && (
                     <div className="detail-row">
-                        <BsHddNetwork className="detail-icon" />
-                        <span className="detail-label">IP:</span>
-                        <span>{serverIp}</span>
+                        <BsHddNetwork className="detail-icon" aria-hidden />
+                        <div className="detail-row-main">
+                            <span className="detail-label">IP:</span>
+                            <span className="detail-value">{serverIp}</span>
+                        </div>
                     </div>
                 )}
 
                 {isDefault && (
                     <div className="detail-row">
-                        <BsFillBookmarkStarFill className="detail-icon" />
-                        <span className="detail-label">Default server</span>
+                        <BsFillBookmarkStarFill className="detail-icon" aria-hidden />
+                        <div className="detail-row-main">
+                            <span className="detail-label">Default server</span>
+                        </div>
                     </div>
                 )}
             </div>
 
             <div className="server-service">
-                <div className="detail-row">{getStatusLabel(serviceStatus)}</div>
+                <div className="detail-row detail-row--status">{getStatusLabel(serviceStatus)}</div>
                 <div className="detail-row">
-                    <BsClock className="detail-icon" />
-                    <span className="detail-label">Next Run Time:</span>
-                    <span>{formatUtcDate(nextRunTime)}</span>
+                    <BsClock className="detail-icon" aria-hidden />
+                    <div className="detail-row-main">
+                        <span className="detail-label">Next Run Time:</span>
+                        <span className="detail-value">{formatUtcDate(nextRunTime)}</span>
+                    </div>
                 </div>
                 {errorMessage && (
                     <div className="error-message">
@@ -164,14 +243,14 @@ const ServerItem: React.FC<Props> = ({
                 )}
             </div>
 
-            {Array.isArray(openVpnServer?.tags) && openVpnServer.tags.length > 0 && (
+            {Array.isArray(vpnServer?.tags) && vpnServer.tags.length > 0 && (
                 <div className="server-tags-block">
                     <div className="detail-row-tags-heading">
                         <BsTag className="detail-icon" />
                         <span className="detail-label">Tags:</span>
                     </div>
                     <span className="server-tags-list">
-                        {openVpnServer.tags.map((tag) => (
+                        {vpnServer.tags.map((tag) => (
                             <span key={tag} className="server-tag-pill">
                                 {tag}
                             </span>

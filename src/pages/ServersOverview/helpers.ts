@@ -1,9 +1,10 @@
 import type { Grouping } from "../../components/DateRangeFilter";
-import type { ChartPoint } from "./types";
+import type { ChartPoint, UsersSeriesChartPoint, MergedChartPoint } from "./types";
 import type {
   OverviewSeriesResponse,
   OverviewSeriesRowDto,
-} from "../../api/orval/model";
+} from "../../api/orvalModelShim";
+import type { OverviewUsersSeriesRowDto } from "../../api/orvalModelShim";
 
 /* ---- time helpers ---- */
 export function startOfToday() { const n = new Date(); n.setHours(0,0,0,0); return n; }
@@ -17,6 +18,20 @@ export function formatBytes(v: number): string {
   let i = 0; let n = v;
   while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
   return `${n.toFixed(n < 10 ? 2 : 1)} ${units[i]}`;
+}
+
+export type NormalizedGrouping = "hours" | "days" | "months" | "years";
+
+export function normalizeGrouping(g: string | null | undefined): NormalizedGrouping {
+  switch (g) {
+    case "hours":
+    case "days":
+    case "months":
+    case "years":
+      return g;
+    default:
+      return "days";
+  }
 }
 
 export function formatLabel(d: Date, mode: Exclude<Grouping,"auto">): string {
@@ -50,6 +65,33 @@ export function toChartPoints(
         mb: Math.round(totalBytes / (1024 * 1024)),
       };
     });
+}
+
+export function toUsersSeriesChartPoints(
+  rows: OverviewUsersSeriesRowDto[],
+  mode: Exclude<Grouping, "auto">
+): UsersSeriesChartPoint[] {
+  return (rows ?? [])
+    .filter((r): r is OverviewUsersSeriesRowDto & { ts: string } => typeof r.ts === "string" && r.ts.length > 0)
+    .map((r) => {
+      const date = new Date(r.ts);
+      return {
+        label: formatLabel(date, mode),
+        activeSessions: r.activeSessions ?? 0,
+        activeUsers: r.activeUsers ?? 0,
+      };
+    });
+}
+
+/** Merge main chart points with users series by index (same From/To/Grouping → same order). Adds activeUsers. */
+export function mergeChartWithUsersSeries(
+  base: ChartPoint[],
+  usersSeries: UsersSeriesChartPoint[]
+): MergedChartPoint[] {
+  return base.map((p, i) => ({
+    ...p,
+    activeUsers: usersSeries[i]?.activeUsers ?? 0,
+  }));
 }
 
 export function buildFallbackOverviewResponse(opts: {

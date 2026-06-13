@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { ThemeProvider as MuiThemeProvider, createTheme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import type {} from "@mui/x-data-grid/themeAugmentation";
-import { useTheme } from "../../contexts/ThemeContext";
+import { useTheme } from "../../contexts/useTheme";
 
 const darkPalette = {
   mode: "dark" as const,
@@ -18,6 +18,9 @@ const darkPalette = {
     bg: "#0d1117",
     headerBg: "#161b22",
     pinnedBg: "#161b22",
+    scrollbarTrack: "#161b22",
+    scrollbarThumb: "#30363d",
+    scrollbarThumbHover: "#484f58",
   },
 };
 
@@ -35,12 +38,27 @@ const lightPalette = {
     bg: "#f6f8fa",
     headerBg: "#ffffff",
     pinnedBg: "#eaeef2",
+    scrollbarTrack: "#eaeef2",
+    scrollbarThumb: "#d0d7de",
+    scrollbarThumbHover: "#8b949e",
   },
 };
 
+/**
+ * Build theme with `palette.mode` set from the start so MUI derives `action`, `divider`, etc.
+ * for that mode. Merging `mode: "dark"` onto the default **light** `createTheme()` leaves
+ * light `action.disabled` on SvgIcon (e.g. DataGrid boolean “no” crosses) — nearly invisible
+ * on dark row backgrounds.
+ */
 function getAppTheme(mode: "light" | "dark") {
+  const data = mode === "dark" ? darkPalette : lightPalette;
   return createTheme({
-    palette: mode === "dark" ? darkPalette : lightPalette,
+    palette: {
+      mode: data.mode,
+      background: data.background,
+      text: data.text,
+      DataGrid: data.DataGrid,
+    },
   });
 }
 

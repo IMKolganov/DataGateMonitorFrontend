@@ -1,0 +1,47 @@
+.vpn-map-root {
+  min-height: 650px;
+  width: 100%;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.vpn-map-toolbar {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.map-container-full-size {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+}
+
+.vpn-globe-root {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.vpn-globe-loading {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.vpn-map-stats {
+  font-size: 12px;
+  opacity: 0.86;
+  margin-left: 2px;
+}

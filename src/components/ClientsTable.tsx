@@ -1,14 +1,29 @@
 // src/components/ClientsTable.tsx
-import React from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
 import StyledDataGrid from "./ui/TableStyle.tsx";
 import CustomThemeProvider from "./ui/ThemeProvider.tsx";
 import { Link, useParams } from "react-router-dom";
-import type { VpnClientInfoDto } from "../api/orval/model";
+import type { VpnClientInfoDto } from "../api/orvalModelShim";
 import "../css/Table.css";
+import { UserAvatar } from "./ui/UserAvatar.tsx";
+import { readOptionalAvatarUrl } from "../utils/readOptionalAvatarUrl.ts";
+import { parseTelegramNumericId } from "../utils/telegramNumericId.ts";
+import { apiRequest } from "../api/apirequest";
+import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
+import { toast } from "react-toastify";
+import { FaBolt, FaBan } from "react-icons/fa";
 
 type ClientDto = VpnClientInfoDto;
+
+/** Backend may add `userId` before OpenAPI/orval is updated. */
+function pickClientUserId(client: object): string {
+    const v = (client as Record<string, unknown>)["userId"];
+    if (typeof v === "number" && Number.isFinite(v)) return String(v);
+    if (typeof v === "string" && /^\d+$/.test(v.trim())) return v.trim();
+    return "";
+}
 
 interface ClientsTableProps {
     clients: ClientDto[];
@@ -18,6 +33,14 @@ interface ClientsTableProps {
     onPageChange: (page: number) => void;
     onPageSizeChange: (size: number) => void;
     loading: boolean;
+    /** When set, empty grid / errors are explained for Xray polling instead of OpenVPN wording. */
+    clientsStack?: "openvpn" | "xray";
+    vpnServerId?: number;
+    /** Last processor / node poll error persisted on the server row (optional). */
+    xrayPollError?: string | null;
+    /** React Query / HTTP failure while loading the clients list. */
+    xrayQueryErrorMessage?: string | null;
+    onXraySessionsChanged?: () => void;
 }
 
 const ClientsTable: React.FC<ClientsTableProps> = ({
@@ -28,25 +51,96 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                                                        onPageChange,
                                                        onPageSizeChange,
                                                        loading,
+                                                       clientsStack = "openvpn",
+                                                       vpnServerId: vpnServerIdProp,
+                                                       xrayPollError,
+                                                       xrayQueryErrorMessage,
+                                                       onXraySessionsChanged,
                                                    }) => {
     const { vpnServerId } = useParams<{ vpnServerId?: string }>();
+    const [actionBusyKey, setActionBusyKey] = useState<string | null>(null);
+    const canXrayAdminActions = clientsStack === "xray" && isAdmin(getCurrentUser());
+    const canLinkToUserStats = isAdmin(getCurrentUser());
+    const serverIdForActions =
+        typeof vpnServerIdProp === "number" && Number.isFinite(vpnServerIdProp)
+            ? vpnServerIdProp
+            : vpnServerId
+              ? Number(vpnServerId)
+              : undefined;
 
-    const rows = clients.map((client, index) => ({
-        id: client.id ?? page * pageSize + index + 1,
-        commonName: client.commonName ?? "",
-        externalId: client.externalId ?? "",
-        displayName: client.displayName ?? "",
-        remoteIp: client.remoteIp ?? "",
-        localIp: client.localIp ?? "",
-        bytesReceived: formatBytes(client.bytesReceived ?? 0),
-        bytesSent: formatBytes(client.bytesSent ?? 0),
-        connectedSince: client.connectedSince
-            ? formatDateWithOffset(new Date(client.connectedSince))
-            : "",
-        country: [client.country, client.region, client.city].filter(Boolean).join(", "),
-    }));
+    const postXrayAction = useCallback(
+        async (path: "kick-user" | "disable-user", commonName: string) => {
+            if (!serverIdForActions || serverIdForActions <= 0) return;
+            const key = `${path}:${commonName}`;
+            setActionBusyKey(key);
+            try {
+                const resp = await apiRequest<{ ok?: boolean }>(
+                    "post",
+                    `/api/vpn-servers/${serverIdForActions}/xray/${path}`,
+                    { data: { commonName } }
+                );
+                if (!resp.success) {
+                    toast.error(resp.errorMessage ?? "Request failed");
+                    return;
+                }
+                toast.success(path === "kick-user" ? "Session dropped; client can reconnect." : "Client revoked on node.");
+                onXraySessionsChanged?.();
+            } catch (e) {
+                toast.error(e instanceof Error ? e.message : "Request failed");
+            } finally {
+                setActionBusyKey(null);
+            }
+        },
+        [serverIdForActions, onXraySessionsChanged]
+    );
 
-    const columns: GridColDef[] = [
+    const rows = clients.map((client, index) => {
+        const rowId = client.id ?? page * pageSize + index + 1;
+        const externalId = client.externalId ?? "";
+        const displayName = client.displayName ?? "";
+        const commonName = client.commonName ?? "";
+        const userId = pickClientUserId(client as object);
+        return {
+            id: rowId,
+            commonName,
+            externalId,
+            displayName,
+            displayNameForAvatar: displayName || commonName || externalId || "Client",
+            avatarUrl: readOptionalAvatarUrl(client as object),
+            telegramPhotoTelegramId: parseTelegramNumericId(externalId || undefined),
+            avatarColorSeed: [userId && `u:${userId}`, externalId, displayName, commonName, String(rowId)]
+                .filter(Boolean)
+                .join("|"),
+            remoteIp: client.remoteIp ?? "",
+            localIp: client.localIp ?? "",
+            bytesReceived: formatBytes(client.bytesReceived ?? 0),
+            bytesSent: formatBytes(client.bytesSent ?? 0),
+            connectedSince: client.connectedSince
+                ? formatDateWithOffset(new Date(client.connectedSince))
+                : "",
+            country: [client.country, client.region, client.city].filter(Boolean).join(", "),
+            _cn: commonName,
+        };
+    });
+
+    const columns: GridColDef[] = useMemo(() => {
+        const base: GridColDef[] = [
+        {
+            field: "avatar",
+            headerName: "",
+            width: 56,
+            sortable: false,
+            disableColumnMenu: true,
+            renderCell: (params) => (
+                <UserAvatar
+                    src={params.row.avatarUrl as string | undefined}
+                    telegramPhotoTelegramId={params.row.telegramPhotoTelegramId as number | undefined}
+                    name={params.row.displayNameForAvatar as string}
+                    colorSeed={params.row.avatarColorSeed as string}
+                    size={28}
+                />
+            ),
+        },
         { field: "id", headerName: "ID", width: 70 },
         { field: "commonName", headerName: "Common Name", flex: 0.7 },
         {
@@ -57,12 +151,16 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                 const val = params.value as string | undefined;
                 if (!val) return null;
 
+                if (!canLinkToUserStats) {
+                    return <span>{val}</span>;
+                }
+
                 const url = vpnServerId
-                    ? `/servers/${vpnServerId}/statistics/${val}`
-                    : `/servers/statistics/${val}`;
+                    ? `/servers/${vpnServerId}/statistics/${encodeURIComponent(val)}`
+                    : `/servers/statistics/${encodeURIComponent(val)}`;
 
                 return (
-                    <Link to={url} style={{ color: "#58a6ff", textDecoration: "none" }}>
+                    <Link to={url} className="link-accent">
                         {val}
                     </Link>
                 );
@@ -75,7 +173,66 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
         { field: "bytesSent", headerName: "Bytes Sent", flex: 0.4 },
         { field: "connectedSince", headerName: "Connected Since", flex: 0.5 },
         { field: "country", headerName: "Country", flex: 1 },
-    ];
+        ];
+        if (!canXrayAdminActions) return base;
+        return [
+            ...base,
+            {
+                field: "xrayActions",
+                headerName: "Actions",
+                sortable: false,
+                filterable: false,
+                width: 260,
+                renderCell: (params) => {
+                    const cn = (params.row as { _cn?: string })._cn ?? "";
+                    if (!cn) return null;
+                    const busyKick = actionBusyKey === `kick-user:${cn}`;
+                    const busyDisable = actionBusyKey === `disable-user:${cn}`;
+                    return (
+                        <div className="action-container">
+                            <button
+                                type="button"
+                                className="btn secondary"
+                                disabled={busyKick || busyDisable}
+                                title="Drop active sessions; client stays issued and can reconnect."
+                                onClick={() => void postXrayAction("kick-user", cn)}
+                            >
+                                <FaBolt className="icon" aria-hidden />
+                                {busyKick ? "…" : "Drop session"}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn danger"
+                                disabled={busyKick || busyDisable}
+                                title="Revoke client on this node (same as revoking an issued link)."
+                                onClick={() => {
+                                    if (
+                                        !window.confirm(
+                                            `Revoke Xray client "${cn}" on this server? Their profile will stop working; issue a new link if needed.`
+                                        )
+                                    )
+                                        return;
+                                    void postXrayAction("disable-user", cn);
+                                }}
+                            >
+                                <FaBan className="icon" aria-hidden />
+                                {busyDisable ? "…" : "Revoke"}
+                            </button>
+                        </div>
+                    );
+                },
+            } satisfies GridColDef,
+        ];
+    }, [canLinkToUserStats, canXrayAdminActions, actionBusyKey, postXrayAction, vpnServerId]);
+
+    const noRowsLabel = useMemo(() => {
+        if (clientsStack !== "xray") return "No connected clients";
+        const parts: string[] = [];
+        if (xrayQueryErrorMessage) parts.push(xrayQueryErrorMessage);
+        if (xrayPollError) parts.push(xrayPollError);
+        if (parts.length) return `Could not load sessions (${parts.join(" — ")})`;
+        return "No connected clients";
+    }, [clientsStack, xrayPollError, xrayQueryErrorMessage]);
 
     return (
         <CustomThemeProvider>
@@ -90,6 +247,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                 <StyledDataGrid
                     rows={rows}
                     columns={columns}
+                    autoHeight
                     pageSizeOptions={[5, 10, 20, 50, 100]}
                     paginationMode="server"
                     rowCount={totalClients}
@@ -100,10 +258,8 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                     }}
                     loading={loading}
                     slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-                    disableColumnFilter
-                    disableColumnMenu
                     localeText={{
-                        noRowsLabel: "No connected clients",
+                        noRowsLabel,
                     }}
                 />
             </div>

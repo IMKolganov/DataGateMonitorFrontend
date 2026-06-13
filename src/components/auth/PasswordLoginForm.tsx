@@ -1,13 +1,23 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { postApiAuthLogin } from "../../api/orval/auth/auth";
-import type { LoginRequest, LoginResponse } from "../../api/orval/model";
+import { orvalPayload } from "../../api/orvalPayload";
+import type { LoginRequest, LoginResponse } from "../../api/orvalModelShim";
 import { FaDoorOpen } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
-import { scheduleAutoLogout } from "../../utils/auth/authSession";
-import {ACCESS_TOKEN_KEY, REFRESH_TOKEN_EXPIRATION, REFRESH_TOKEN_KEY} from "../../utils/const.ts";
+import { applyLoginFlow, type TotpChallengeState } from "../../utils/auth/handleLoginResponse";
+import axios from "axios";
+import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
-const PasswordLoginForm: React.FC = () => {
+interface PasswordLoginFormProps {
+  redirectPath?: string;
+  onTotpChallenge: (challenge: TotpChallengeState) => void;
+}
+
+const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({
+  redirectPath = "/",
+  onTotpChallenge,
+}) => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,59 +39,44 @@ const PasswordLoginForm: React.FC = () => {
         password,
       };
 
-      const loginPayload = (await postApiAuthLogin(
-          loginReq,
-      )) as LoginResponse;
+      const loginPayload = orvalPayload<LoginResponse>(await postApiAuthLogin(loginReq));
 
-      const token = loginPayload?.token;
-      const refreshToken = loginPayload?.refreshToken;
-      const refreshExpiration = loginPayload?.refreshExpiration;
-
-      if (!token) {
-        throw new Error("No token returned by API.");
-      }
-
-      localStorage.setItem(ACCESS_TOKEN_KEY, token);
-      if (refreshToken) {
-        localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-      }
-      if (refreshExpiration) {
-        localStorage.setItem(REFRESH_TOKEN_EXPIRATION, refreshExpiration);
-      }
-      scheduleAutoLogout(token);
-      window.location.href = "/";
-    } catch (err: any) {
+      applyLoginFlow(loginPayload, {
+        redirectPath,
+        onTotpChallenge,
+      });
+    } catch (err: unknown) {
       let detailedMessage = "We could not log you in.";
 
-      if (err.response) {
-        const status = err.response.status;
-        const data = err.response.data;
+      if (axios.isAxiosError(err)) {
+        if (err.response) {
+          const status = err.response.status;
+          const data = err.response.data;
+          const m = axiosResponseDataMessage(data);
 
-        if (status === 401) {
-          // Invalid credentials / blocked user
+          if (status === 401) {
+            detailedMessage = m || "Invalid login or password. Please try again.";
+          } else if (status >= 400 && status < 500) {
+            detailedMessage = m || "The request could not be processed. Please check your input.";
+          } else {
+            detailedMessage =
+              m || "We could not log you in due to a server error. Please try again later.";
+          }
+        } else if (err.request) {
           detailedMessage =
-              data?.message || "Invalid login or password. Please try again.";
-        } else if (status >= 400 && status < 500) {
-          detailedMessage =
-              data?.message ||
-              "The request could not be processed. Please check your input.";
-        } else {
-          detailedMessage =
-              data?.message ||
-              "We could not log you in due to a server error. Please try again later.";
-        }
-      } else if (err.request) {
-        detailedMessage =
             "We could not connect to the server. Please make sure it is running.";
-      } else if (err.message) {
-        detailedMessage = `Error: ${err.message}`;
-      }
+        } else if (err.message) {
+          detailedMessage = `Error: ${err.message}`;
+        }
 
-      if (err.config?.url && !err.response) {
-        const fullUrl = err.config.baseURL
+        if (err.config?.url && !err.response) {
+          const fullUrl = err.config.baseURL
             ? `${err.config.baseURL}${err.config.url}`
             : err.config.url;
-        detailedMessage += `<br/>You can also try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${fullUrl}</a> in your browser.`;
+          detailedMessage += `<br/>You can also try opening <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${fullUrl}</a> in your browser.`;
+        }
+      } else {
+        detailedMessage = `Error: ${errorMessage(err)}`;
       }
 
       setError(detailedMessage);

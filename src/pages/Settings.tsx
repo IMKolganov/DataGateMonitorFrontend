@@ -1,21 +1,70 @@
-import { useNavigate, NavLink, Outlet, useLocation } from "react-router-dom";
-import { FaArrowLeft } from "react-icons/fa";
+import { useMemo } from "react";
+import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
+import type { IconType } from "react-icons";
+import {
+  FaArrowLeft,
+  FaBell,
+  FaBug,
+  FaClipboardList,
+  FaCog,
+  FaDatabase,
+  FaEnvelope,
+  FaKey,
+  FaShieldAlt,
+  FaLaptopCode,
+  FaSlidersH,
+  FaTelegram,
+  FaUsers,
+  FaWindows,
+} from "react-icons/fa";
 import "../css/Settings.css";
+
+type SettingsTab = {
+  label: string;
+  path: string;
+  Icon: IconType;
+  /** Shown in the mobile dropdown (emoji; SVG does not render inside native options). */
+  mobilePrefix: string;
+};
+
+const ALL_SETTINGS_TABS: SettingsTab[] = [
+  { label: "General", path: "general", Icon: FaSlidersH, mobilePrefix: "⚙️" },
+  { label: "API Clients", path: "applications", Icon: FaLaptopCode, mobilePrefix: "🔌" },
+  { label: "Quotas", path: "quotas", Icon: FaClipboardList, mobilePrefix: "📋" },
+  { label: "GeoLite DB", path: "geolitedb", Icon: FaDatabase, mobilePrefix: "🌐" },
+  { label: "VPN notifications", path: "vpn-notifications", Icon: FaBell, mobilePrefix: "🔔" },
+  { label: "Telegram Bot", path: "telegrambot", Icon: FaTelegram, mobilePrefix: "✈️" },
+  { label: "Users", path: "users", Icon: FaUsers, mobilePrefix: "👥" },
+  { label: "Email broadcast", path: "email-broadcast", Icon: FaEnvelope, mobilePrefix: "✉️" },
+  { label: "Android crashes", path: "android-crashes", Icon: FaBug, mobilePrefix: "🐞" },
+  { label: "Windows crashes", path: "windows-crashes", Icon: FaWindows, mobilePrefix: "🪟" },
+  { label: "Admin password", path: "admin-password", Icon: FaKey, mobilePrefix: "🔑" },
+  { label: "Security (2FA)", path: "security", Icon: FaShieldAlt, mobilePrefix: "🛡️" },
+];
 
 export function Settings() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const tabs = [
-    { label: "General", path: "general" },
-    { label: "API Clients", path: "applications" },
-    { label: "Quotas", path: "quotas" },
-    { label: "GeoLite DB", path: "geolitedb" },
-    { label: "Telegram Bot", path: "telegrambot" },
-    { label: "Users", path: "users" },
-  ];
+  const tabs = ALL_SETTINGS_TABS;
 
-  const currentTab = location.pathname.split("/settings/")[1] || "general";
+  const pathRest = location.pathname.replace(/^\/settings\/?/, "") || "general";
+  const currentTab = pathRest.startsWith("users") ? "users" : pathRest.split("/")[0];
+  const tabPaths = useMemo(() => new Set(tabs.map((t) => t.path)), [tabs]);
+  const selectTabValue = tabPaths.has(currentTab) ? currentTab : "general";
+
+  const isTabActive = (path: string) => {
+    if (path === "users") {
+      return (
+        location.pathname === "/settings/users" ||
+        location.pathname.startsWith("/settings/users/")
+      );
+    }
+    return (
+      location.pathname === `/settings/${path}` ||
+      location.pathname.startsWith(`/settings/${path}/`)
+    );
+  };
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     navigate(`/settings/${e.target.value}`);
@@ -23,7 +72,10 @@ export function Settings() {
 
   return (
     <div className="content-wrapper wide-table settings">
-      <h2>Settings</h2>
+      <h2 className="settings-page__h2-with-icon">
+        <FaCog className="icon" aria-hidden />
+        <span>Settings</span>
+      </h2>
 
       <div className="header-container">
         <p className="settings-description">Configure system settings here.</p>
@@ -31,40 +83,55 @@ export function Settings() {
         <div className="header-bar">
           <div className="left-buttons">
             <button className="btn secondary" onClick={() => navigate("/")}>
-              {FaArrowLeft({ className: "icon" })} Back
+              <FaArrowLeft className="icon" aria-hidden /> Back
             </button>
           </div>
         </div>
       </div>
 
-      {/* Desktop tabs */}
-      <div className="tabs desktop-tabs">
-        {tabs.map((tab) => (
-          <NavLink
-            key={tab.path}
-            to={`/settings/${tab.path}`}
-            className={({ isActive }) => (isActive ? "tab active-tab" : "tab")}
+      <div className="settings-shell">
+        <aside className="settings-sidebar" aria-label="Settings sections">
+          <nav className="settings-sidebar__nav">
+            {tabs.map((tab) => {
+              const Icon = tab.Icon;
+              return (
+                <Link
+                  key={tab.path}
+                  to={`/settings/${tab.path}`}
+                  className={
+                    isTabActive(tab.path)
+                      ? "settings-sidebar__link settings-sidebar__link--active"
+                      : "settings-sidebar__link"
+                  }
+                >
+                  <Icon className="icon" aria-hidden />
+                  <span>{tab.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </aside>
+
+        <div className="settings-content">
+          <select
+            id="settings-mobile-tab"
+            name="settingsMobileTab"
+            className="settings-content__mobile-picker mobile-tabs"
+            value={selectTabValue}
+            onChange={handleSelectChange}
+            aria-label="Settings section"
           >
-            {tab.label}
-          </NavLink>
-        ))}
-      </div>
+            {tabs.map((tab) => (
+              <option key={tab.path} value={tab.path}>
+                {tab.mobilePrefix} {tab.label}
+              </option>
+            ))}
+          </select>
 
-      {/* Mobile dropdown */}
-      <select
-        className="tabs-dropdown mobile-tabs"
-        value={currentTab}
-        onChange={handleSelectChange}
-      >
-        {tabs.map((tab) => (
-          <option key={tab.path} value={tab.path}>
-            {tab.label}
-          </option>
-        ))}
-      </select>
-
-      <div className="tab-content">
-        <Outlet />
+          <div className="settings-content__body tab-content">
+            <Outlet />
+          </div>
+        </div>
       </div>
     </div>
   );
