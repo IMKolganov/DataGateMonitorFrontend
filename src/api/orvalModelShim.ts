@@ -33,7 +33,10 @@ export type { AuthRequestsLoginRequest as LoginRequest } from "./orval/model/aut
 export type { AuthResponsesLoginResponse as LoginResponse } from "./orval/model/authResponsesLoginResponse";
 export type { AuthResponsesTotpStatusResponse as TotpStatusResponse } from "./orval/model/authResponsesTotpStatusResponse";
 export type { AuthResponsesTotpSetupResponse as TotpSetupResponse } from "./orval/model/authResponsesTotpSetupResponse";
-export type { ModelsAuthAuthSessionPolicyResponse as AuthSessionPolicyResponse } from "./orval/model/modelsAuthAuthSessionPolicyResponse";
+export type { AuthResponsesAuthSessionPolicyResponse as AuthSessionPolicyResponse } from "./orval/model/authResponsesAuthSessionPolicyResponse";
+export type { AuthResponsesGetUserSessionsResponse as GetUserSessionsResponse } from "./orval/model/authResponsesGetUserSessionsResponse";
+export type { AuthResponsesUserSessionDto as UserSessionDto } from "./orval/model/authResponsesUserSessionDto";
+export type { AuthRequestsRevokeUserSessionsRequest as RevokeUserSessionsRequest } from "./orval/model/authRequestsRevokeUserSessionsRequest";
 export type { AuthRequestsTotpVerifyLoginRequest as TotpVerifyLoginRequest } from "./orval/model/authRequestsTotpVerifyLoginRequest";
 export type { AuthRequestsTotpConfirmRequest as TotpConfirmRequest } from "./orval/model/authRequestsTotpConfirmRequest";
 export type { AuthRequestsTotpDisableRequest as TotpDisableRequest } from "./orval/model/authRequestsTotpDisableRequest";

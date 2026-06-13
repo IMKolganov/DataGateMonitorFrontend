@@ -80,6 +80,8 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
   return (
     <div className="add-certificate">
       <input
+        id="ovpn-add-common-name"
+        name="ovpnCommonName"
         type="text"
         placeholder="Enter Common Name"
         value={newCommonName}
@@ -93,6 +95,8 @@ const AddOvpnFile: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
         disabled={isPending}
       />
       <input
+        id="ovpn-add-external-id"
+        name="ovpnExternalId"
         type="text"
         placeholder="Enter External ID"
         value={newExternalId}

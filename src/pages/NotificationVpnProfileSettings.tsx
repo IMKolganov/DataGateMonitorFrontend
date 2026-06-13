@@ -312,6 +312,8 @@ export default function NotificationVpnProfileSettings() {
           return (
             <label className="checkbox-label" style={{ margin: 0, alignItems: "center", gap: 8 }}>
               <input
+                id={`notification-kind-${key}`}
+                name={`notificationKind${key}`}
                 type="checkbox"
                 checked={Boolean(params.value)}
                 disabled={busy || putMutation.isPending || !payload?.globallyEnabled}
@@ -362,6 +364,8 @@ export default function NotificationVpnProfileSettings() {
         <h4>All admin notifications (this page)</h4>
         <label className="checkbox-label" style={{ gap: 10 }}>
           <input
+            id="notification-vpn-profile-global"
+            name="notificationVpnProfileGlobal"
             type="checkbox"
             checked={globalOn}
             disabled={globalBusy || putMutation.isPending}

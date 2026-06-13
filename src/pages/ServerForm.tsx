@@ -968,9 +968,13 @@ const ServerForm: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="ServerType">VPN stack</label>
               {idNum ? (
-                <p className="form-hint form-hint--mt-4">
+                <span className="form-group-label">VPN stack</span>
+              ) : (
+                <label htmlFor="ServerType">VPN stack</label>
+              )}
+              {idNum ? (
+                <p className="form-hint form-hint--mt-4" id="ServerType">
                   {vpnServerTypeLabel(serverData.serverType)} (type cannot be changed after create)
                 </p>
               ) : (
@@ -1140,6 +1144,8 @@ const ServerForm: React.FC = () => {
               </p>
               <div className="tags-create-row">
                 <input
+                  id="server-new-tag-name"
+                  name="serverNewTagName"
                   type="text"
                   value={newTagName}
                   onChange={(e) => setNewTagName(e.target.value)}
@@ -1176,6 +1182,8 @@ const ServerForm: React.FC = () => {
                     <div key={tag.id ?? tag.name} className="tags-checkbox-item tags-checkbox-row">
                       <label className="checkbox-label tags-checkbox-item-inner">
                         <input
+                          id={`server-tag-${tag.id ?? tag.name}`}
+                          name={`serverTag${tag.id ?? tag.name}`}
                           type="checkbox"
                           checked={selectedTagIds.includes(tag.id!)}
                           onChange={() => {
@@ -1230,6 +1238,8 @@ const ServerForm: React.FC = () => {
                       <div key={pid} className="tags-checkbox-item tags-checkbox-row">
                         <label className="checkbox-label tags-checkbox-item-inner">
                           <input
+                            id={`server-quota-plan-${pid}`}
+                            name={`serverQuotaPlan${pid}`}
                             type="checkbox"
                             checked={selectedQuotaPlanIds.includes(pid)}
                             onChange={() => {

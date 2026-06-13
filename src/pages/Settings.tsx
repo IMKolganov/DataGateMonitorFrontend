@@ -114,6 +114,8 @@ export function Settings() {
 
         <div className="settings-content">
           <select
+            id="settings-mobile-tab"
+            name="settingsMobileTab"
             className="settings-content__mobile-picker mobile-tabs"
             value={selectTabValue}
             onChange={handleSelectChange}

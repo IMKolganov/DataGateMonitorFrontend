@@ -362,6 +362,8 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                 <div className="geo-points-map__controls">
                     <strong>Map Style:</strong>
                     <select
+                        id="geo-points-map-layer"
+                        name="geoPointsMapLayer"
                         className="btn secondary dropdown-select"
                         value={selectedLayer}
                         onChange={(e) =>
@@ -376,6 +378,8 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                     </select>
                     <strong>Point style:</strong>
                     <select
+                        id="geo-points-map-point-style"
+                        name="geoPointsMapPointStyle"
                         className="btn secondary dropdown-select"
                         value={pointStyle}
                         onChange={(e) => setPointStyle(e.target.value as "by_traffic" | "single")}
@@ -385,6 +389,8 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                     </select>
                     {pointStyle === "single" && (
                         <select
+                            id="geo-points-map-point-color"
+                            name="geoPointsMapPointColor"
                             className="btn secondary dropdown-select"
                             value={pointColor}
                             onChange={(e) => setPointColor(e.target.value as PointColorKey)}

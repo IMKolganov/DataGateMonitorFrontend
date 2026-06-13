@@ -71,6 +71,8 @@ export function NotificationsSection({
         <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ color: "var(--text-secondary, #8b949e)", fontSize: 14 }}>Read</span>
           <select
+            id="notifications-read-filter"
+            name="notificationsReadFilter"
             className="input"
             value={readFilter}
             onChange={(e) => onReadFilterChange(e.target.value as NotificationReadFilter)}
@@ -86,6 +88,8 @@ export function NotificationsSection({
             Type
           </span>
           <input
+            id="notifications-type-filter"
+            name="notificationsTypeFilter"
             type="text"
             className="input"
             value={typeFilter}
@@ -104,6 +108,8 @@ export function NotificationsSection({
               style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 14, cursor: "pointer" }}
             >
               <input
+                id={`notifications-severity-${i}`}
+                name={`notificationsSeverity${i}`}
                 type="checkbox"
                 checked={severityEnabled[i]}
                 onChange={() => onToggleSeverity(i as 0 | 1 | 2 | 3)}

@@ -5,21 +5,23 @@ import { orvalPayload } from "../../api/orvalPayload";
 import type { LoginRequest, LoginResponse } from "../../api/orvalModelShim";
 import { FaDoorOpen } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
-import TotpChallengeForm from "./TotpChallengeForm";
 import { applyLoginFlow, type TotpChallengeState } from "../../utils/auth/handleLoginResponse";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 
 interface PasswordLoginFormProps {
   redirectPath?: string;
+  onTotpChallenge: (challenge: TotpChallengeState) => void;
 }
 
-const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({ redirectPath = "/" }) => {
+const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({
+  redirectPath = "/",
+  onTotpChallenge,
+}) => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [totpChallenge, setTotpChallenge] = useState<TotpChallengeState | null>(null);
 
   const canSubmit =
       login.trim().length > 0 &&
@@ -41,7 +43,7 @@ const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({ redirectPath = "/
 
       applyLoginFlow(loginPayload, {
         redirectPath,
-        onTotpChallenge: setTotpChallenge,
+        onTotpChallenge,
       });
     } catch (err: unknown) {
       let detailedMessage = "We could not log you in.";
@@ -82,17 +84,6 @@ const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({ redirectPath = "/
       setLoading(false);
     }
   };
-
-  if (totpChallenge) {
-    return (
-      <TotpChallengeForm
-        loginChallengeId={totpChallenge.loginChallengeId}
-        displayName={totpChallenge.displayName}
-        redirectPath={redirectPath}
-        onBack={() => setTotpChallenge(null)}
-      />
-    );
-  }
 
   return (
       <>
