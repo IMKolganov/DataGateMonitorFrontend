@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { FaGlobe, FaSave, FaStethoscope, FaSync } from "react-icons/fa";
+import { FaGlobe, FaSave, FaSync } from "react-icons/fa";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import {
-  getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics,
   getGetApiOpenVpnServersPiHoleConfigVpnServerIdQueryKey,
   postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime,
   putApiOpenVpnServersPiHoleConfig,
   useGetApiOpenVpnServersPiHoleConfigVpnServerId,
+  useGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics,
 } from "../api/orval/vpn-server-pi-hole-config/vpn-server-pi-hole-config";
 import {
   getApiVpnDnsQueriesSearch,
@@ -23,6 +23,7 @@ import type {
   VpnServerPiHoleConfigResponse,
   VpnServerResponse,
 } from "../api/orvalModelShim";
+import { PiHoleStatusPanel } from "../components/pihole/PiHoleStatusPanel";
 import { isOpenVpnStack } from "../constants/vpnServerType";
 import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 import { ServerAccessDenied } from "../components/ServerAccessDenied";
@@ -65,9 +66,7 @@ export function PiHoleServerTab() {
   const [domainFilter, setDomainFilter] = useState("");
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = usePersistedPageSize("server-pihole-queries", 25, "10,25,50,100");
-  const [diagnostics, setDiagnostics] = useState<PiHoleDiagnosticsResponse | null>(null);
   const [saving, setSaving] = useState(false);
-  const [probing, setProbing] = useState(false);
 
   const serverQuery = useGetApiOpenVpnServersGetVpnServerId(id, {
     query: { enabled: Number.isFinite(id) && id > 0, retry: 1 },
@@ -80,6 +79,22 @@ export function PiHoleServerTab() {
   const configQuery = useGetApiOpenVpnServersPiHoleConfigVpnServerId(id, {
     query: { enabled: admin && piHoleEnabled && id > 0 },
   });
+
+  const diagnosticsQuery = useGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics(id, {
+    query: {
+      enabled: admin && piHoleEnabled && id > 0,
+      refetchInterval: 30_000,
+      staleTime: 10_000,
+    },
+  });
+
+  const diagnostics = diagnosticsQuery.data as PiHoleDiagnosticsResponse | undefined;
+  const diagnosticsError =
+    diagnosticsQuery.error instanceof Error
+      ? diagnosticsQuery.error.message
+      : diagnosticsQuery.isError
+        ? "Failed to load Pi-hole diagnostics"
+        : null;
 
   useEffect(() => {
     const cfg = (configQuery.data as VpnServerPiHoleConfigResponse | undefined)?.config;
@@ -166,24 +181,11 @@ export function PiHoleServerTab() {
 
       toast.success("Pi-hole settings saved and applied to the VPN server.");
       await queryClient.invalidateQueries({ queryKey: getGetApiOpenVpnServersPiHoleConfigVpnServerIdQueryKey(id) });
+      await diagnosticsQuery.refetch();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to save Pi-hole settings");
     } finally {
       setSaving(false);
-    }
-  };
-
-  const onProbe = async () => {
-    setProbing(true);
-    try {
-      const result = await getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics(id) as PiHoleDiagnosticsResponse;
-      setDiagnostics(result);
-      if (result.error) toast.warn(result.error);
-      else toast.success(`Pi-hole OK — sample queries: ${result.sampleQueryCount ?? 0}`);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Diagnostics failed");
-    } finally {
-      setProbing(false);
     }
   };
 
@@ -192,8 +194,16 @@ export function PiHoleServerTab() {
       <h2><FaGlobe /> Pi-hole DNS logging</h2>
       <p className="muted">
         Settings are stored in the dashboard and applied to the OpenVPN microservice via the backend.
-        Pi-hole v6 API uses <code>POST /api/auth</code> and <code>GET /api/queries?from&amp;until&amp;length</code>.
+        Status refreshes every 30 seconds.
       </p>
+
+      <PiHoleStatusPanel
+        diagnostics={diagnostics}
+        loading={diagnosticsQuery.isLoading}
+        error={diagnosticsError}
+        refreshing={diagnosticsQuery.isFetching}
+        onRefresh={() => void diagnosticsQuery.refetch()}
+      />
 
       <section className="settings-section">
         <h3>Connection</h3>
@@ -261,17 +271,7 @@ export function PiHoleServerTab() {
           <button type="button" className="btn btn-primary" onClick={() => void onSave()} disabled={saving}>
             <FaSave /> {saving ? "Saving…" : "Save & apply"}
           </button>
-          <button type="button" className="btn btn-secondary" onClick={() => void onProbe()} disabled={probing}>
-            <FaStethoscope /> {probing ? "Testing…" : "Test Pi-hole"}
-          </button>
         </div>
-
-        {diagnostics && (
-          <p className="muted">
-            Last test: auth={String(diagnostics.authenticated)}, samples={diagnostics.sampleQueryCount}
-            {diagnostics.error ? `, error=${diagnostics.error}` : ""}
-          </p>
-        )}
       </section>
 
       <section className="settings-section">

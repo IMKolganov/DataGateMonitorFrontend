@@ -207,8 +207,22 @@ function App() {
                         </RequireAdmin>
                       }
                     />
-                    <Route path="/servers/add" element={withSuspense(<ServerForm />)} />
-                    <Route path="/servers/edit/:serverId" element={withSuspense(<ServerForm />)} />
+                    <Route
+                      path="/servers/add"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<ServerForm />)}
+                        </RequireAdmin>
+                      }
+                    />
+                    <Route
+                      path="/servers/edit/:serverId"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<ServerForm />)}
+                        </RequireAdmin>
+                      }
+                    />
                     <Route path="/about" element={withSuspense(<About />)} />
                     <Route path="/contact" element={withSuspense(<Contact />)} />
 

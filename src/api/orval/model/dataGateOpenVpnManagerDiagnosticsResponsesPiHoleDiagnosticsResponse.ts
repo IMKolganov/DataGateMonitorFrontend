@@ -10,8 +10,36 @@ export interface DataGateOpenVpnManagerDiagnosticsResponsesPiHoleDiagnosticsResp
   enabled?: boolean;
   /** @nullable */
   baseUrl?: string | null;
+  hasAppPassword?: boolean;
+  pollIntervalSeconds?: number;
+  batchSize?: number;
+  lookbackSeconds?: number;
+  /** @nullable */
+  clientSubnetPrefix?: string | null;
   authenticated?: boolean;
   /** @nullable */
   error?: string | null;
   sampleQueryCount?: number;
+  collectorRunning?: boolean;
+  /** @nullable */
+  runtimeConfigAppliedAtUtc?: string | null;
+  /** @nullable */
+  lastPollAtUtc?: string | null;
+  /** @nullable */
+  lastSuccessfulPollAtUtc?: string | null;
+  /** @nullable */
+  lastPollError?: string | null;
+  lastPollQueriesFetched?: number;
+  lastPollQueriesAfterFilter?: number;
+  lastPollQueriesEnriched?: number;
+  lastPollQueriesForwarded?: number;
+  /** @nullable */
+  lastCursorUntilUtc?: string | null;
+  storedQueryCount?: number;
+  /** @nullable */
+  lastStoredQueryAtUtc?: string | null;
+  /** @nullable */
+  health?: string | null;
+  /** @nullable */
+  healthMessage?: string | null;
 }

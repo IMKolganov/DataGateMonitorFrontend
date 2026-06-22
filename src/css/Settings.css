@@ -649,3 +649,90 @@ h2.settings-page__h2-with-icon > .icon {
 .traffic-quota-progress--compact .traffic-quota-progress__bar {
   height: 10px;
 }
+
+.pihole-status__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.pihole-status__health {
+  display: inline-block;
+  width: fit-content;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pihole-status__health--ok {
+  background: rgba(46, 125, 50, 0.15);
+  color: #2e7d32;
+}
+
+.pihole-status__health--warning {
+  background: rgba(237, 108, 2, 0.15);
+  color: #ed6c02;
+}
+
+.pihole-status__health--error {
+  background: rgba(211, 47, 47, 0.15);
+  color: #d32f2f;
+}
+
+.pihole-status__health--disabled {
+  background: rgba(120, 120, 120, 0.15);
+  color: var(--text-muted);
+}
+
+.pihole-status__message {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.pihole-status__alerts {
+  margin-bottom: 0.75rem;
+}
+
+.pihole-status__alert {
+  margin: 0 0 0.35rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.92rem;
+}
+
+.pihole-status__alert--error {
+  background: rgba(211, 47, 47, 0.08);
+  border: 1px solid rgba(211, 47, 47, 0.25);
+}
+
+.pihole-status__error {
+  color: #d32f2f;
+}
+
+.pihole-status__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.65rem 1rem;
+  margin: 0;
+}
+
+.pihole-status__grid > div {
+  min-width: 0;
+}
+
+.pihole-status__grid dt {
+  margin: 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.pihole-status__grid dd {
+  margin: 0.15rem 0 0;
+  word-break: break-word;
+}

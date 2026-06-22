@@ -58,7 +58,7 @@ const OverviewUsersTable = lazy(() =>
 const VpnMap = lazy(() => import("../../components/VpnMap"));
 import { useProxyTrafficFlowMany, type ProxyTrafficFlowUpdate } from "../../hooks/useProxyTrafficFlow";
 import { canViewUserStatisticsScope } from "../../utils/auth/canViewUserStatisticsScope";
-import { getCurrentUser } from "../../utils/auth/authSelectors";
+import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { UserStatisticsAccessDenied } from "./UserStatisticsAccessDenied";
 import { UserDnsQueriesSection } from "../../components/pihole/UserDnsQueriesSection";
 import { serverPiHoleEnabled, shouldShowUserDnsQueries } from "../../utils/pihole/serverPiHoleEnabled";
@@ -188,7 +188,13 @@ export default function ServersOverview() {
   const statsExternalId = userStatsAccessDenied ? undefined : externalId;
 
   const scopedServerPiHole = serverPiHoleEnabled(scopedServer);
-  const showUserDnsQueries = shouldShowUserDnsQueries(statsExternalId, vpnServerId ?? null, scopedServerPiHole);
+  const viewerIsAdmin = isAdmin(currentUser);
+  const showUserDnsQueries = shouldShowUserDnsQueries(
+    statsExternalId,
+    vpnServerId ?? null,
+    scopedServerPiHole,
+    viewerIsAdmin,
+  );
 
   const lastErrorKey = useRef<string>("");
 

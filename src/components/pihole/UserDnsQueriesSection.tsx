@@ -11,6 +11,7 @@ import {
   getGetApiVpnDnsQueriesSearchQueryKey,
 } from "../../api/orval/vpn-dns-query/vpn-dns-query";
 import type { VpnDnsQueryLogDto, VpnDnsQueryPageResponse } from "../../api/orvalModelShim";
+import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { formatDateWithOffset } from "../../utils/utils";
 import { addDays, endOfToday, startOfToday } from "../../pages/ServersOverview/helpers";
 import "../../css/Table.css";
@@ -28,6 +29,7 @@ export function UserDnsQueriesSection({
   title = "Pi-hole DNS history",
   compact = false,
 }: UserDnsQueriesSectionProps) {
+  const admin = isAdmin(getCurrentUser());
   const ext = typeof externalId === "string" ? externalId.trim() : "";
   const hasIdentity = ext.length > 0;
   const [from, setFrom] = useState(() => addDays(startOfToday(), -6));
@@ -59,7 +61,7 @@ export function UserDnsQueriesSection({
 
   const query = useQuery({
     queryKey: getGetApiVpnDnsQueriesSearchQueryKey(searchParams),
-    enabled: hasIdentity,
+    enabled: admin && hasIdentity,
     placeholderData: keepPreviousData,
     queryFn: () => getApiVpnDnsQueriesSearch(searchParams),
   });
@@ -81,6 +83,10 @@ export function UserDnsQueriesSection({
     ],
     [],
   );
+
+  if (!admin) {
+    return null;
+  }
 
   if (!hasIdentity) {
     return (

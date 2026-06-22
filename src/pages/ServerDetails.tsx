@@ -27,6 +27,13 @@ function isXrayBlockedSubpath(relative: string): boolean {
     return keys.some((k) => relative === k || relative.startsWith(`${k}/`));
 }
 
+/** Admin-only server subpaths (non-admins are redirected to statistics). */
+function isNonAdminBlockedSubpath(relative: string): boolean {
+    if (!relative) return false;
+    const keys = ["", "certificates", "console", "ovpn-file-config", "export-template", "events", "pi-hole"];
+    return keys.some((k) => (k === "" ? relative === "" : relative === k || relative.startsWith(`${k}/`)));
+}
+
 type Tab = {
     label: string;
     path: string;
@@ -119,6 +126,12 @@ export function ServerDetails() {
         if (!isXrayBlockedSubpath(currentPath)) return;
         navigate(`/servers/${vpnServerId}`, { replace: true });
     }, [isXrayServer, currentPath, navigate, vpnServerId]);
+
+    useEffect(() => {
+        if (canSeeAdminTabs || !vpnServerId) return;
+        if (!isNonAdminBlockedSubpath(currentPath)) return;
+        navigate(`/servers/${vpnServerId}/statistics`, { replace: true });
+    }, [canSeeAdminTabs, currentPath, navigate, vpnServerId]);
 
     const safeCurrentPath = useMemo(() => {
         const normalized =

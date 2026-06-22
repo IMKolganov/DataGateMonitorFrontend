@@ -13236,6 +13236,25 @@
             "type": "string",
             "nullable": true
           },
+          "hasAppPassword": {
+            "type": "boolean"
+          },
+          "pollIntervalSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "batchSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lookbackSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "clientSubnetPrefix": {
+            "type": "string",
+            "nullable": true
+          },
           "authenticated": {
             "type": "boolean"
           },
@@ -13246,6 +13265,66 @@
           "sampleQueryCount": {
             "type": "integer",
             "format": "int32"
+          },
+          "collectorRunning": {
+            "type": "boolean"
+          },
+          "runtimeConfigAppliedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastPollAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastSuccessfulPollAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastPollError": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastPollQueriesFetched": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastPollQueriesAfterFilter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastPollQueriesEnriched": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastPollQueriesForwarded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastCursorUntilUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "storedQueryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastStoredQueryAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "health": {
+            "type": "string",
+            "nullable": true
+          },
+          "healthMessage": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
