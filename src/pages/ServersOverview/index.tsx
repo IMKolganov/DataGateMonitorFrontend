@@ -44,6 +44,7 @@ import type {
   VpnClientInfoDto,
   VpnServerClientsResponsesConnectedClientsResponse,
   VpnServerV2Dto,
+  VpnServerResponse,
   VpnServersDtoVpnServerWithStatusV2Dto,
   VpnServersV3Response,
   GetApiOpenVpnClientsOverviewSeriesParams,
@@ -59,6 +60,8 @@ import { useProxyTrafficFlowMany, type ProxyTrafficFlowUpdate } from "../../hook
 import { canViewUserStatisticsScope } from "../../utils/auth/canViewUserStatisticsScope";
 import { getCurrentUser } from "../../utils/auth/authSelectors";
 import { UserStatisticsAccessDenied } from "./UserStatisticsAccessDenied";
+import { UserDnsQueriesSection } from "../../components/pihole/UserDnsQueriesSection";
+import { serverPiHoleEnabled, shouldShowUserDnsQueries } from "../../utils/pihole/serverPiHoleEnabled";
 
 
 
@@ -177,10 +180,15 @@ export default function ServersOverview() {
     scopedServerQuery.isError ||
     scopedServerQuery.isSuccess;
 
+  const scopedServer = (scopedServerQuery.data as VpnServerResponse | undefined)?.vpnServer;
+
   const externalId = externalIdParam || undefined;
   const userStatsAccessDenied =
     Boolean(externalId) && !canViewUserStatisticsScope(externalId);
   const statsExternalId = userStatsAccessDenied ? undefined : externalId;
+
+  const scopedServerPiHole = serverPiHoleEnabled(scopedServer);
+  const showUserDnsQueries = shouldShowUserDnsQueries(statsExternalId, vpnServerId ?? null, scopedServerPiHole);
 
   const lastErrorKey = useRef<string>("");
 
@@ -793,6 +801,14 @@ export default function ServersOverview() {
           vpnServerId={vpnServerId}
           from={from}
           to={to}
+        />
+      ) : null}
+
+      {showUserDnsQueries ? (
+        <UserDnsQueriesSection
+          externalId={statsExternalId}
+          vpnServerId={vpnServerId ?? 0}
+          compact
         />
       ) : null}
 

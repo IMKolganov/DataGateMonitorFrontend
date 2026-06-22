@@ -20,12 +20,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  ApiDataBaseServicesQueryVpnServerClientTableOverviewUsersResponse,
   ApiSystemString,
   ApiVpnServerClientsResponsesConnectedClientsResponse,
   ApiVpnServerClientsResponsesOverviewPointsResponse,
   ApiVpnServerClientsResponsesOverviewSeriesResponse,
   ApiVpnServerClientsResponsesOverviewTotalsResponse,
+  ApiVpnServerClientsResponsesOverviewUsersResponse,
   ApiVpnServerClientsResponsesOverviewUsersSeriesResponse,
   GetApiOpenVpnClientsGetAllConnectedParams,
   GetApiOpenVpnClientsGetAllHistoryParams,
@@ -926,7 +926,7 @@ export const getApiOpenVpnClientsOverviewUsers = (
 ) => {
 
 
-      return ogmMutator<ApiDataBaseServicesQueryVpnServerClientTableOverviewUsersResponse>(
+      return ogmMutator<ApiVpnServerClientsResponsesOverviewUsersResponse>(
       {url: `/api/open-vpn-clients/overview/users`, method: 'GET',
         params, signal
     },
@@ -1013,7 +1013,7 @@ export const getApiV2VpnSessionsOverviewUsers = (
 ) => {
 
 
-      return ogmMutator<ApiDataBaseServicesQueryVpnServerClientTableOverviewUsersResponse>(
+      return ogmMutator<ApiVpnServerClientsResponsesOverviewUsersResponse>(
       {url: `/api/v2/vpn-sessions/overview/users`, method: 'GET',
         params, signal
     },

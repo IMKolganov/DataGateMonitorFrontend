@@ -30,9 +30,9 @@ import type {
   ApiSystemInt32,
   ApiSystemString,
   GetApiNotificationsGetAllParams,
+  NotificationsRequestsNotifyAdminsRequest,
   PostApiNotificationsNotificationIdDeliveredParams,
-  PostApiNotificationsNotificationIdReadParams,
-  ServicesOthersModelsNotificationRequest
+  PostApiNotificationsNotificationIdReadParams
 } from '../model';
 
 import { ogmMutator } from '../../mutator';
@@ -43,7 +43,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export const postApiNotificationsNotifyAdmins = (
-    servicesOthersModelsNotificationRequest?: ServicesOthersModelsNotificationRequest,
+    notificationsRequestsNotifyAdminsRequest?: NotificationsRequestsNotifyAdminsRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
@@ -51,7 +51,7 @@ export const postApiNotificationsNotifyAdmins = (
       return ogmMutator<ApiSystemInt32>(
       {url: `/api/notifications/notify-admins`, method: 'POST',
       headers: {'Content-Type': 'application/json-patch+json', },
-      data: servicesOthersModelsNotificationRequest, signal
+      data: notificationsRequestsNotifyAdminsRequest, signal
     },
       options);
     }
@@ -59,8 +59,8 @@ export const postApiNotificationsNotifyAdmins = (
 
 
 export const getPostApiNotificationsNotifyAdminsMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, TError,{data?: ServicesOthersModelsNotificationRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, TError,{data?: ServicesOthersModelsNotificationRequest}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, TError,{data?: NotificationsRequestsNotifyAdminsRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, TError,{data?: NotificationsRequestsNotifyAdminsRequest}, TContext> => {
 
 const mutationKey = ['postApiNotificationsNotifyAdmins'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -72,7 +72,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, {data?: ServicesOthersModelsNotificationRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, {data?: NotificationsRequestsNotifyAdminsRequest}> = (props) => {
           const {data} = props ?? {};
 
           return  postApiNotificationsNotifyAdmins(data,requestOptions)
@@ -86,15 +86,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostApiNotificationsNotifyAdminsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>>
-    export type PostApiNotificationsNotifyAdminsMutationBody = ServicesOthersModelsNotificationRequest | undefined
+    export type PostApiNotificationsNotifyAdminsMutationBody = NotificationsRequestsNotifyAdminsRequest | undefined
     export type PostApiNotificationsNotifyAdminsMutationError = unknown
 
     export const usePostApiNotificationsNotifyAdmins = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, TError,{data?: ServicesOthersModelsNotificationRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, TError,{data?: NotificationsRequestsNotifyAdminsRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>,
         TError,
-        {data?: ServicesOthersModelsNotificationRequest},
+        {data?: NotificationsRequestsNotifyAdminsRequest},
         TContext
       > => {
       return useMutation(getPostApiNotificationsNotifyAdminsMutationOptions(options), queryClient);

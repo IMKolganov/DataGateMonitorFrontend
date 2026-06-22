@@ -62,6 +62,7 @@ import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
 import { UserVpnConnectionsSection } from "./UserVpnConnectionsSection";
+import { UserDnsQueriesSection } from "../../components/pihole/UserDnsQueriesSection";
 import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
 import StyledDataGrid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
@@ -513,6 +514,8 @@ export function UserDetailPage() {
       )}
 
       <UserVpnConnectionsSection externalId={user.externalId} />
+
+      <UserDnsQueriesSection externalId={user.externalId} vpnServerId={0} />
 
       <section className="settings-card settings-card--mb">
         <h3 className="settings-card__h3-with-icon">

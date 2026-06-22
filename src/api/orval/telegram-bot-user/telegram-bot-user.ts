@@ -29,6 +29,7 @@ import type {
   ApiTelegramBotUserRequestsUserRequest,
   ApiTelegramBotUserResponsesGetAdminsResponse,
   ApiTelegramBotUserResponsesGetAllTelegramUsersResponse,
+  ApiTelegramBotUserResponsesTelegramBotUserProfilePhotoIndexResponse,
   ApiTelegramBotUserResponsesTelegramBotUserProfilePhotoMetaResponse,
   ApiTelegramBotUserResponsesUpsertTelegramBotUserProfilePhotoResponse,
   TelegramBotUserRequestsTelegramUserActionRequest,
@@ -375,6 +376,92 @@ export function useGetApiTgbotUsersGetAll<TData = Awaited<ReturnType<typeof getA
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiTgbotUsersGetAllQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export const getApiTgbotUsersProfilePhotoIndex = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiTelegramBotUserResponsesTelegramBotUserProfilePhotoIndexResponse>(
+      {url: `/api/tgbot-users/profile-photo-index`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiTgbotUsersProfilePhotoIndexQueryKey = () => {
+    return [
+    `/api/tgbot-users/profile-photo-index`
+    ] as const;
+    }
+
+
+export const getGetApiTgbotUsersProfilePhotoIndexQueryOptions = <TData = Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiTgbotUsersProfilePhotoIndexQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>> = ({ signal }) => getApiTgbotUsersProfilePhotoIndex(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiTgbotUsersProfilePhotoIndexQueryResult = NonNullable<Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>>
+export type GetApiTgbotUsersProfilePhotoIndexQueryError = unknown
+
+
+export function useGetApiTgbotUsersProfilePhotoIndex<TData = Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>,
+          TError,
+          Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiTgbotUsersProfilePhotoIndex<TData = Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>,
+          TError,
+          Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiTgbotUsersProfilePhotoIndex<TData = Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiTgbotUsersProfilePhotoIndex<TData = Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotUsersProfilePhotoIndex>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiTgbotUsersProfilePhotoIndexQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

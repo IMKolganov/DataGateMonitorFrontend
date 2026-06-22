@@ -26,7 +26,7 @@ import type {
 import type {
   GetApiV1WindowsCrashIngestRecentParams,
   MicrosoftAspNetCoreMvcProblemDetails,
-  ServicesApiWindowsCrashIngestRecentWindowsCrashReportDto
+  WindowsCrashIngestDtoRecentWindowsCrashReportDto
 } from '../model';
 
 import { ogmMutator } from '../../mutator';
@@ -97,7 +97,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return ogmMutator<ServicesApiWindowsCrashIngestRecentWindowsCrashReportDto[]>(
+      return ogmMutator<WindowsCrashIngestDtoRecentWindowsCrashReportDto[]>(
       {url: `/api/v1/windows/crash-ingest/recent`, method: 'GET',
         params, signal
     },

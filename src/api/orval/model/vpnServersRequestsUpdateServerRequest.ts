@@ -24,6 +24,7 @@ export interface VpnServersRequestsUpdateServerRequest {
   /** @nullable */
   longitude?: number | null;
   isEnableWss?: boolean;
+  isPiHoleEnabled?: boolean;
   /** @nullable */
   quotaPlanIds?: number[] | null;
   /** @nullable */

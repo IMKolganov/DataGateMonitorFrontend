@@ -94,6 +94,14 @@ export type { VpnServersResponsesVpnServerWithStatusResponse as VpnServerWithSta
 export type { VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest as AddOrUpdateOvpnFileConfigRequest } from "./orval/model/vpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest";
 export type { DataGateOpenVpnManagerInfoRootOpenVpnInfoResponse as RootOpenVpnInfoResponse } from "./orval/model/dataGateOpenVpnManagerInfoRootOpenVpnInfoResponse";
 
+export type { VpnDnsQueryDtoVpnDnsQueryLogDto as VpnDnsQueryLogDto } from "./orval/model/vpnDnsQueryDtoVpnDnsQueryLogDto";
+export type { VpnDnsQueryResponsesVpnDnsQueryPageResponse as VpnDnsQueryPageResponse } from "./orval/model/vpnDnsQueryResponsesVpnDnsQueryPageResponse";
+export type { VpnServerPiHoleResponsesVpnServerPiHoleConfigResponse as VpnServerPiHoleConfigResponse } from "./orval/model/vpnServerPiHoleResponsesVpnServerPiHoleConfigResponse";
+export type { VpnServerPiHoleDtoVpnServerPiHoleConfigDto as VpnServerPiHoleConfigDto } from "./orval/model/vpnServerPiHoleDtoVpnServerPiHoleConfigDto";
+export type { VpnServerPiHoleRequestsUpsertVpnServerPiHoleConfigRequest as UpsertVpnServerPiHoleConfigRequest } from "./orval/model/vpnServerPiHoleRequestsUpsertVpnServerPiHoleConfigRequest";
+export type { DataGateOpenVpnManagerDiagnosticsResponsesPiHoleDiagnosticsResponse as PiHoleDiagnosticsResponse } from "./orval/model/dataGateOpenVpnManagerDiagnosticsResponsesPiHoleDiagnosticsResponse";
+export type { GetApiVpnDnsQueriesSearchParams as SearchVpnDnsQueriesParams } from "./orval/model/getApiVpnDnsQueriesSearchParams";
+
 export type { EmailBroadcastResponsesDtoSentEmailLogDto as SentEmailLogDto } from "./orval/model/emailBroadcastResponsesDtoSentEmailLogDto";
 export type { EmailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto as EmailBroadcastTemplateSummaryDto } from "./orval/model/emailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto";
 export type { EmailBroadcastResponsesDtoEmailBroadcastTemplateDto as EmailBroadcastTemplateDto } from "./orval/model/emailBroadcastResponsesDtoEmailBroadcastTemplateDto";

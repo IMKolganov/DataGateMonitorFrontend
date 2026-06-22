@@ -28,8 +28,10 @@ import type {
   ApiUserResponsesConfirmUserEmailResponse,
   ApiUserResponsesGetAllUsersResponse,
   ApiUserResponsesGetUserEmailConfirmationStatusResponse,
+  ApiUserResponsesMergeTelegramGoogleUsersResponse,
   ApiUserResponsesUsersResponse,
   GetApiUsersGetAllParams,
+  UserRequestsMergeTelegramGoogleUsersRequest,
   UserRequestsRegisterUserFromTgBotRequest
 } from '../model';
 
@@ -496,6 +498,63 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostApiUsersConfirmEmailIdMutationOptions(options), queryClient);
+    }
+    export const postApiUsersMergeTelegramGoogle = (
+    userRequestsMergeTelegramGoogleUsersRequest?: UserRequestsMergeTelegramGoogleUsersRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiUserResponsesMergeTelegramGoogleUsersResponse>(
+      {url: `/api/users/merge-telegram-google`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: userRequestsMergeTelegramGoogleUsersRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiUsersMergeTelegramGoogleMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsersMergeTelegramGoogle>>, TError,{data?: UserRequestsMergeTelegramGoogleUsersRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiUsersMergeTelegramGoogle>>, TError,{data?: UserRequestsMergeTelegramGoogleUsersRequest}, TContext> => {
+
+const mutationKey = ['postApiUsersMergeTelegramGoogle'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiUsersMergeTelegramGoogle>>, {data?: UserRequestsMergeTelegramGoogleUsersRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiUsersMergeTelegramGoogle(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiUsersMergeTelegramGoogleMutationResult = NonNullable<Awaited<ReturnType<typeof postApiUsersMergeTelegramGoogle>>>
+    export type PostApiUsersMergeTelegramGoogleMutationBody = UserRequestsMergeTelegramGoogleUsersRequest | undefined
+    export type PostApiUsersMergeTelegramGoogleMutationError = unknown
+
+    export const usePostApiUsersMergeTelegramGoogle = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsersMergeTelegramGoogle>>, TError,{data?: UserRequestsMergeTelegramGoogleUsersRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiUsersMergeTelegramGoogle>>,
+        TError,
+        {data?: UserRequestsMergeTelegramGoogleUsersRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiUsersMergeTelegramGoogleMutationOptions(options), queryClient);
     }
     export const getApiUsersHealthcheck = (
 

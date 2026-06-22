@@ -24,8 +24,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  ApiSystemObject,
   ApiSystemString,
+  ApiXrayNodeResponsesXrayNodeUserActionResponse,
   XrayNodeRequestsXrayNodeUserActionRequest
 } from '../model';
 
@@ -43,7 +43,7 @@ export const postApiVpnServersVpnServerIdXrayKickUser = (
 ) => {
 
 
-      return ogmMutator<ApiSystemObject>(
+      return ogmMutator<ApiXrayNodeResponsesXrayNodeUserActionResponse>(
       {url: `/api/vpn-servers/${vpnServerId}/xray/kick-user`, method: 'POST',
       headers: {'Content-Type': 'application/json-patch+json', },
       data: xrayNodeRequestsXrayNodeUserActionRequest, signal
@@ -101,7 +101,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return ogmMutator<ApiSystemObject>(
+      return ogmMutator<ApiXrayNodeResponsesXrayNodeUserActionResponse>(
       {url: `/api/vpn-servers/${vpnServerId}/xray/disable-user`, method: 'POST',
       headers: {'Content-Type': 'application/json-patch+json', },
       data: xrayNodeRequestsXrayNodeUserActionRequest, signal

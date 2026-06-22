@@ -26,7 +26,7 @@ import type {
 import type {
   GetApiV1MobileCrashIngestRecentParams,
   MicrosoftAspNetCoreMvcProblemDetails,
-  ServicesApiMobileCrashIngestRecentCrashReportDto
+  MobileCrashIngestDtoRecentCrashReportDto
 } from '../model';
 
 import { ogmMutator } from '../../mutator';
@@ -97,7 +97,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return ogmMutator<ServicesApiMobileCrashIngestRecentCrashReportDto[]>(
+      return ogmMutator<MobileCrashIngestDtoRecentCrashReportDto[]>(
       {url: `/api/v1/mobile/crash-ingest/recent`, method: 'GET',
         params, signal
     },

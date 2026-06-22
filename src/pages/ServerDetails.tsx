@@ -7,6 +7,7 @@ import {
   FaBolt,
   FaChartLine,
   FaCogs,
+  FaFilter,
   FaKey,
   FaServer,
   FaTerminal,
@@ -17,11 +18,12 @@ import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import type { VpnServerResponse } from "../api/orvalModelShim";
 import { VpnServerType } from "../constants/vpnServerType";
+import { serverPiHoleEnabled } from "../utils/pihole/serverPiHoleEnabled";
 
 /** Subpaths under `/servers/:id/...` that do not apply to Xray (OpenVPN-only UI). */
 function isXrayBlockedSubpath(relative: string): boolean {
     if (!relative) return false;
-    const keys = ["console", "events"];
+    const keys = ["console", "events", "pi-hole"];
     return keys.some((k) => relative === k || relative.startsWith(`${k}/`));
 }
 
@@ -86,7 +88,7 @@ export function ServerDetails() {
     const tabs = useMemo(() => {
         let base = canSeeAdminTabs ? ALL_SERVER_TABS : ALL_SERVER_TABS.filter((t) => !t.adminOnly);
         if (isXrayServer) {
-            const xrayHidden = new Set(["console", "events"]);
+            const xrayHidden = new Set(["console", "events", "pi-hole"]);
             base = base.filter((t) => !xrayHidden.has(t.path));
             base = base.map((t) => {
                 if (t.path === "certificates") {
@@ -101,8 +103,14 @@ export function ServerDetails() {
                 base = [{ label: "Overview", path: "", adminOnly: false, Icon: FaServer, mobilePrefix: "🖥️" }];
             }
         }
+        if (serverPiHoleEnabled(payload?.vpnServer)) {
+            base = [
+                ...base,
+                { label: "Pi-hole", path: "pi-hole", adminOnly: true, Icon: FaFilter, mobilePrefix: "🌐" },
+            ];
+        }
         return base;
-    }, [canSeeAdminTabs, isXrayServer]);
+    }, [canSeeAdminTabs, isXrayServer, payload?.vpnServer]);
 
     const vpnServerName = payload?.vpnServer?.serverName ?? "(unknown)";
 

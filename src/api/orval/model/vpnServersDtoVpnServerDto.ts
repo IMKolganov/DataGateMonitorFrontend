@@ -20,6 +20,7 @@ export interface VpnServersDtoVpnServerDto {
   /** @nullable */
   longitude?: number | null;
   isEnableWss?: boolean;
+  isPiHoleEnabled?: boolean;
   createDate?: string;
   lastUpdate?: string;
   isDeleted?: boolean;

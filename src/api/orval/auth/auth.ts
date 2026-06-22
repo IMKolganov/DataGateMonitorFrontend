@@ -27,6 +27,7 @@ import type {
   ApiAuthResponsesAdminForgotPasswordResponse,
   ApiAuthResponsesAdminResetPasswordResponse,
   ApiAuthResponsesAuthSessionPolicyResponse,
+  ApiAuthResponsesConfirmEmailResponse,
   ApiAuthResponsesGetUserSessionsResponse,
   ApiAuthResponsesGoogleLoginResponse,
   ApiAuthResponsesLoginResponse,
@@ -36,16 +37,17 @@ import type {
   ApiAuthResponsesTokenResponse,
   ApiAuthResponsesTotpSetupResponse,
   ApiAuthResponsesTotpStatusResponse,
-  ApiServicesApiAuthEmailConfirmationModelsConfirmEmailResponse,
   ApiSystemInt32,
   ApiSystemString,
   AuthRequestsAdminForgotPasswordRequest,
   AuthRequestsAdminResetPasswordRequest,
+  AuthRequestsConfirmEmailRequest,
   AuthRequestsGoogleCodeLoginRequest,
   AuthRequestsGoogleLoginRequest,
   AuthRequestsLoginRequest,
   AuthRequestsRefreshRequest,
   AuthRequestsRegisterUserRequest,
+  AuthRequestsRequestEmailConfirmationRequest,
   AuthRequestsRevokeUserSessionsRequest,
   AuthRequestsTelegramCodeLoginRequest,
   AuthRequestsTelegramRequestLoginCodeRequest,
@@ -53,9 +55,7 @@ import type {
   AuthRequestsTotpConfirmRequest,
   AuthRequestsTotpDisableRequest,
   AuthRequestsTotpVerifyLoginRequest,
-  MicrosoftAspNetCoreMvcProblemDetails,
-  ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest,
-  ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest
+  MicrosoftAspNetCoreMvcProblemDetails
 } from '../model';
 
 import { ogmMutator } from '../../mutator';
@@ -407,7 +407,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getPostApiAuthRegisterMutationOptions(options), queryClient);
     }
     export const postApiAuthEmailRequestConfirmation = (
-    servicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest?: ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest,
+    authRequestsRequestEmailConfirmationRequest?: AuthRequestsRequestEmailConfirmationRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
@@ -415,7 +415,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return ogmMutator<ApiSystemString>(
       {url: `/api/auth/email/request-confirmation`, method: 'POST',
       headers: {'Content-Type': 'application/json-patch+json', },
-      data: servicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest, signal
+      data: authRequestsRequestEmailConfirmationRequest, signal
     },
       options);
     }
@@ -423,8 +423,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 export const getPostApiAuthEmailRequestConfirmationMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>, TError,{data?: ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>, TError,{data?: ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>, TError,{data?: AuthRequestsRequestEmailConfirmationRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>, TError,{data?: AuthRequestsRequestEmailConfirmationRequest}, TContext> => {
 
 const mutationKey = ['postApiAuthEmailRequestConfirmation'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -436,7 +436,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>, {data?: ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>, {data?: AuthRequestsRequestEmailConfirmationRequest}> = (props) => {
           const {data} = props ?? {};
 
           return  postApiAuthEmailRequestConfirmation(data,requestOptions)
@@ -450,29 +450,29 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostApiAuthEmailRequestConfirmationMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>>
-    export type PostApiAuthEmailRequestConfirmationMutationBody = ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest | undefined
+    export type PostApiAuthEmailRequestConfirmationMutationBody = AuthRequestsRequestEmailConfirmationRequest | undefined
     export type PostApiAuthEmailRequestConfirmationMutationError = unknown
 
     export const usePostApiAuthEmailRequestConfirmation = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>, TError,{data?: ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>, TError,{data?: AuthRequestsRequestEmailConfirmationRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiAuthEmailRequestConfirmation>>,
         TError,
-        {data?: ServicesApiAuthEmailConfirmationModelsRequestEmailConfirmationRequest},
+        {data?: AuthRequestsRequestEmailConfirmationRequest},
         TContext
       > => {
       return useMutation(getPostApiAuthEmailRequestConfirmationMutationOptions(options), queryClient);
     }
     export const postApiAuthEmailConfirm = (
-    servicesApiAuthEmailConfirmationModelsConfirmEmailRequest?: ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest,
+    authRequestsConfirmEmailRequest?: AuthRequestsConfirmEmailRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
 
-      return ogmMutator<ApiServicesApiAuthEmailConfirmationModelsConfirmEmailResponse>(
+      return ogmMutator<ApiAuthResponsesConfirmEmailResponse>(
       {url: `/api/auth/email/confirm`, method: 'POST',
       headers: {'Content-Type': 'application/json-patch+json', },
-      data: servicesApiAuthEmailConfirmationModelsConfirmEmailRequest, signal
+      data: authRequestsConfirmEmailRequest, signal
     },
       options);
     }
@@ -480,8 +480,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 export const getPostApiAuthEmailConfirmMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthEmailConfirm>>, TError,{data?: ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthEmailConfirm>>, TError,{data?: ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthEmailConfirm>>, TError,{data?: AuthRequestsConfirmEmailRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthEmailConfirm>>, TError,{data?: AuthRequestsConfirmEmailRequest}, TContext> => {
 
 const mutationKey = ['postApiAuthEmailConfirm'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -493,7 +493,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthEmailConfirm>>, {data?: ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthEmailConfirm>>, {data?: AuthRequestsConfirmEmailRequest}> = (props) => {
           const {data} = props ?? {};
 
           return  postApiAuthEmailConfirm(data,requestOptions)
@@ -507,15 +507,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostApiAuthEmailConfirmMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthEmailConfirm>>>
-    export type PostApiAuthEmailConfirmMutationBody = ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest | undefined
+    export type PostApiAuthEmailConfirmMutationBody = AuthRequestsConfirmEmailRequest | undefined
     export type PostApiAuthEmailConfirmMutationError = unknown
 
     export const usePostApiAuthEmailConfirm = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthEmailConfirm>>, TError,{data?: ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthEmailConfirm>>, TError,{data?: AuthRequestsConfirmEmailRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiAuthEmailConfirm>>,
         TError,
-        {data?: ServicesApiAuthEmailConfirmationModelsConfirmEmailRequest},
+        {data?: AuthRequestsConfirmEmailRequest},
         TContext
       > => {
       return useMutation(getPostApiAuthEmailConfirmMutationOptions(options), queryClient);
