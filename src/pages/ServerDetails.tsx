@@ -19,20 +19,7 @@ import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import type { VpnServerResponse } from "../api/orvalModelShim";
 import { VpnServerType } from "../constants/vpnServerType";
 import { serverPiHoleEnabled } from "../utils/pihole/serverPiHoleEnabled";
-
-/** Subpaths under `/servers/:id/...` that do not apply to Xray (OpenVPN-only UI). */
-function isXrayBlockedSubpath(relative: string): boolean {
-    if (!relative) return false;
-    const keys = ["console", "events", "pi-hole"];
-    return keys.some((k) => relative === k || relative.startsWith(`${k}/`));
-}
-
-/** Admin-only server subpaths (non-admins are redirected to statistics). */
-function isNonAdminBlockedSubpath(relative: string): boolean {
-    if (!relative) return false;
-    const keys = ["", "certificates", "console", "ovpn-file-config", "export-template", "events", "pi-hole"];
-    return keys.some((k) => (k === "" ? relative === "" : relative === k || relative.startsWith(`${k}/`)));
-}
+import { isNonAdminBlockedSubpath, isXrayBlockedSubpath } from "../utils/pihole/serverDetailsPaths";
 
 type Tab = {
     label: string;
