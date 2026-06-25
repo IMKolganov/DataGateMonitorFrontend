@@ -18,7 +18,6 @@ import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import type { VpnServerResponse } from "../api/orvalModelShim";
 import { VpnServerType } from "../constants/vpnServerType";
-import { serverPiHoleEnabled } from "../utils/pihole/serverPiHoleEnabled";
 import { isNonAdminBlockedSubpath, isXrayBlockedSubpath } from "../utils/pihole/serverDetailsPaths";
 
 type Tab = {
@@ -97,14 +96,14 @@ export function ServerDetails() {
                 base = [{ label: "Overview", path: "", adminOnly: false, Icon: FaServer, mobilePrefix: "🖥️" }];
             }
         }
-        if (serverPiHoleEnabled(payload?.vpnServer)) {
+        if (!isXrayServer && canSeeAdminTabs) {
             base = [
                 ...base,
                 { label: "Pi-hole", path: "pi-hole", adminOnly: true, Icon: FaFilter, mobilePrefix: "🌐" },
             ];
         }
         return base;
-    }, [canSeeAdminTabs, isXrayServer, payload?.vpnServer]);
+    }, [canSeeAdminTabs, isXrayServer]);
 
     const vpnServerName = payload?.vpnServer?.serverName ?? "(unknown)";
 

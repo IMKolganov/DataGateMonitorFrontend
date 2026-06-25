@@ -1071,7 +1071,7 @@ const ServerForm: React.FC = () => {
                 <div className="checkbox-content">
                   <span className="checkbox-title">Enable Pi-hole integration</span>
                   <span className="checkbox-description">
-                    Show Pi-hole tab and collect VPN DNS queries for this OpenVPN server.
+                    Start DNS query collection on this server (configure connection on the Pi-hole tab first).
                   </span>
                 </div>
               </label>

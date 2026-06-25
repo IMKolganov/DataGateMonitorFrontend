@@ -1,6 +1,6 @@
 /* Toast container */
 .Toastify__toast-container {
-    font-family: "Segoe UI", sans-serif;
+    font-family: var(--font-sans);
     overflow-x: hidden;
   }
 

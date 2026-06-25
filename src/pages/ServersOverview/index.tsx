@@ -61,6 +61,7 @@ import { canViewUserStatisticsScope } from "../../utils/auth/canViewUserStatisti
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { UserStatisticsAccessDenied } from "./UserStatisticsAccessDenied";
 import { UserDnsQueriesSection } from "../../components/pihole/UserDnsQueriesSection";
+import { TopVisitedDomainsSection } from "../../components/pihole/TopVisitedDomainsSection";
 import { serverPiHoleEnabled, shouldShowUserDnsQueries } from "../../utils/pihole/serverPiHoleEnabled";
 
 
@@ -810,14 +811,6 @@ export default function ServersOverview() {
         />
       ) : null}
 
-      {showUserDnsQueries ? (
-        <UserDnsQueriesSection
-          externalId={statsExternalId}
-          vpnServerId={vpnServerId ?? 0}
-          compact
-        />
-      ) : null}
-
       <DateRangeFilter from={from} to={to} grouping={grouping} onChange={onFilterChange} />
       <StatsCards totals={totalsForCards} loading={loadingTotals} />
       <OverviewChart data={chartData} loading={loadingSeries} error={null} />
@@ -881,6 +874,18 @@ export default function ServersOverview() {
       ) : null}
 
       <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} externalId={statsExternalId ?? null} />
+
+      {showUserDnsQueries ? (
+        <UserDnsQueriesSection
+          externalId={statsExternalId}
+          vpnServerId={vpnServerId ?? 0}
+          title="Pi-hole DNS history"
+        />
+      ) : null}
+
+      {isGlobalServersPage && viewerIsAdmin ? (
+        <TopVisitedDomainsSection from={from} to={to} />
+      ) : null}
     </div>
   );
 }

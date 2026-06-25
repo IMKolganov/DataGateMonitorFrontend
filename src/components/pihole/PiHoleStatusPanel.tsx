@@ -1,124 +1,194 @@
-import type { PiHoleDiagnosticsResponse } from "../../api/orvalModelShim";
-import { formatDateWithOffset } from "../../utils/utils";
+import { useMemo } from "react";
+import {
+  BsArrowRepeat,
+  BsCheck2Circle,
+  BsCloudUpload,
+  BsDatabase,
+  BsGlobe,
+  BsToggleOn,
+} from "react-icons/bs";
+import { FaSync } from "react-icons/fa";
+import type { PiHoleDiagnosticsResponse, VpnServerPiHoleConfigDto } from "../../api/orvalModelShim";
+import {
+  buildPiHolePipelineSteps,
+  firstPiHolePipelineIssue,
+  formatPiHoleStepValue,
+  piHolePipelineOverallLabel,
+  type PiHolePipelineStep,
+  type PiHolePipelineStepStatus,
+} from "../../utils/pihole/buildPiHolePipelineSteps";
+import "../../css/ServerDetails.css";
+import "../../css/Settings.css";
 
 type PiHoleStatusPanelProps = {
-  diagnostics: PiHoleDiagnosticsResponse | null | undefined;
+  dashboardConfig?: VpnServerPiHoleConfigDto | null;
+  serverPiHoleEnabled: boolean;
+  serverApiUrl?: string | null;
+  diagnostics?: PiHoleDiagnosticsResponse | null;
   loading?: boolean;
   error?: string | null;
   onRefresh?: () => void;
   refreshing?: boolean;
 };
 
-function fmtUtc(value?: string | null): string {
-  if (!value) return "—";
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? "—" : formatDateWithOffset(d);
-}
+const STEP_ICONS: Record<string, typeof BsDatabase> = {
+  "dashboard-config": BsDatabase,
+  "integration-flag": BsToggleOn,
+  "runtime-push": BsCloudUpload,
+  "pihole-api": BsGlobe,
+  collector: BsArrowRepeat,
+  storage: BsDatabase,
+};
 
-function healthClass(health?: string | null): string {
-  switch ((health ?? "").toLowerCase()) {
-    case "ok":
-      return "pihole-status__health pihole-status__health--ok";
-    case "warning":
-      return "pihole-status__health pihole-status__health--warning";
+function valueStatusClass(status: PiHolePipelineStepStatus): string {
+  switch (status) {
     case "error":
-      return "pihole-status__health pihole-status__health--error";
-    case "disabled":
-      return "pihole-status__health pihole-status__health--disabled";
+      return "pihole-step-value pihole-step-value--error";
+    case "warning":
+      return "pihole-step-value pihole-step-value--warning";
+    case "pending":
+      return "pihole-step-value pihole-step-value--pending";
     default:
-      return "pihole-status__health";
+      return "pihole-step-value";
   }
 }
 
+function PipelineDetailRow({ step }: { step: PiHolePipelineStep }) {
+  const Icon = STEP_ICONS[step.id] ?? BsCheck2Circle;
+  const value = formatPiHoleStepValue(step);
+
+  return (
+    <div className="detail-row">
+      <Icon className="detail-icon" aria-hidden />
+      <div className="detail-row-main">
+        <span className="detail-label">
+          {step.step}. {step.title}:
+        </span>
+        <span className={valueStatusClass(step.status)}>{value}</span>
+      </div>
+    </div>
+  );
+}
+
+function PipelineSkeletonRow() {
+  return (
+    <div className="detail-row">
+      <span className="detail-icon skeleton" style={{ width: 16, height: 16 }} aria-hidden />
+      <div className="detail-row-main">
+        <span className="skeleton" style={{ width: "72%", height: 14 }} aria-label="loading" />
+      </div>
+    </div>
+  );
+}
+
 export function PiHoleStatusPanel({
+  dashboardConfig,
+  serverPiHoleEnabled,
+  serverApiUrl,
   diagnostics,
   loading,
   error,
   onRefresh,
   refreshing,
 }: PiHoleStatusPanelProps) {
+  const steps = useMemo(
+    () =>
+      buildPiHolePipelineSteps({
+        dashboardConfig,
+        serverPiHoleEnabled,
+        serverApiUrl,
+        diagnostics,
+        diagnosticsFetchError: error,
+        diagnosticsLoading: loading,
+      }),
+    [dashboardConfig, serverPiHoleEnabled, serverApiUrl, diagnostics, error, loading],
+  );
+
+  const blocker = useMemo(() => firstPiHolePipelineIssue(steps), [steps]);
+  const overall = useMemo(() => piHolePipelineOverallLabel(steps), [steps]);
+  const showTroubleshooting = steps.some((s) => s.status === "error" || s.status === "warning" || s.fix);
+
   if (loading && !diagnostics) {
     return (
-      <section className="settings-section pihole-status">
-        <h3>Pi-hole status</h3>
-        <p className="muted">Loading diagnostics…</p>
-      </section>
-    );
-  }
-
-  if (error && !diagnostics) {
-    return (
-      <section className="settings-section pihole-status">
-        <div className="settings-section__header">
-          <h3>Pi-hole status</h3>
-          {onRefresh && (
-            <button type="button" className="btn btn-secondary btn-sm" onClick={onRefresh} disabled={refreshing}>
-              Retry
-            </button>
-          )}
+      <section className="settings-card settings-card--mb">
+        <div className="server-info is-loading">
+          <div className="server-header">
+            <div className="server-meta">
+              <strong className="server-name">Pi-hole integration</strong>
+            </div>
+          </div>
+          <div className="server-details">
+            {Array.from({ length: 6 }, (_, i) => (
+              <PipelineSkeletonRow key={i} />
+            ))}
+          </div>
         </div>
-        <p className="pihole-status__error">{error}</p>
       </section>
     );
   }
-
-  if (!diagnostics) return null;
-
-  const d = diagnostics;
-  const probeError = d.error?.trim();
-  const pollError = d.lastPollError?.trim();
 
   return (
-    <section className="settings-section pihole-status">
-      <div className="settings-section__header">
-        <h3>Pi-hole status</h3>
-        {onRefresh && (
-          <button type="button" className="btn btn-secondary btn-sm" onClick={onRefresh} disabled={refreshing}>
-            {refreshing ? "Refreshing…" : "Refresh status"}
-          </button>
-        )}
-      </div>
-
-      <div className="pihole-status__summary">
-        <span className={healthClass(d.health)}>{d.health ?? "Unknown"}</span>
-        {d.healthMessage && <p className="pihole-status__message">{d.healthMessage}</p>}
-      </div>
-
-      {(probeError || pollError) && (
-        <div className="pihole-status__alerts">
-          {probeError && (
-            <p className="pihole-status__alert pihole-status__alert--error">
-              <strong>Probe error:</strong> {probeError}
-            </p>
-          )}
-          {pollError && (
-            <p className="pihole-status__alert pihole-status__alert--error">
-              <strong>Last poll error:</strong> {pollError}
-            </p>
-          )}
+    <section className="settings-card settings-card--mb">
+      {onRefresh && (
+        <div className="header-bar">
+          <div className="left-buttons">
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={onRefresh}
+              disabled={refreshing || loading}
+            >
+              <FaSync className={`icon ${refreshing || loading ? "icon-spin" : ""}`} />
+              Refresh
+            </button>
+          </div>
         </div>
       )}
 
-      <dl className="pihole-status__grid">
-        <div><dt>Checked at</dt><dd>{fmtUtc(d.checkedAtUtc)}</dd></div>
-        <div><dt>Base URL</dt><dd><code>{d.baseUrl || "—"}</code></dd></div>
-        <div><dt>Authenticated</dt><dd>{d.authenticated ? "Yes" : "No"}</dd></div>
-        <div><dt>App password</dt><dd>{d.hasAppPassword ? "Set" : "Not set"}</dd></div>
-        <div><dt>Collector</dt><dd>{d.collectorRunning ? "Running" : "Stopped"}</dd></div>
-        <div><dt>Runtime applied</dt><dd>{fmtUtc(d.runtimeConfigAppliedAtUtc)}</dd></div>
-        <div><dt>Last poll</dt><dd>{fmtUtc(d.lastPollAtUtc)}</dd></div>
-        <div><dt>Last successful poll</dt><dd>{fmtUtc(d.lastSuccessfulPollAtUtc)}</dd></div>
-        <div><dt>Poll interval</dt><dd>{d.pollIntervalSeconds ?? "—"}s</dd></div>
-        <div><dt>Batch / lookback</dt><dd>{d.batchSize ?? "—"} / {d.lookbackSeconds ?? "—"}s</dd></div>
-        <div><dt>Subnet prefix</dt><dd><code>{d.clientSubnetPrefix || "(all)"}</code></dd></div>
-        <div><dt>Probe samples</dt><dd>{d.sampleQueryCount ?? 0}</dd></div>
-        <div><dt>Last poll fetched</dt><dd>{d.lastPollQueriesFetched ?? 0}</dd></div>
-        <div><dt>After filter / enriched</dt><dd>{d.lastPollQueriesAfterFilter ?? 0} / {d.lastPollQueriesEnriched ?? 0}</dd></div>
-        <div><dt>Last poll forwarded</dt><dd>{d.lastPollQueriesForwarded ?? 0}</dd></div>
-        <div><dt>Cursor until</dt><dd>{fmtUtc(d.lastCursorUntilUtc)}</dd></div>
-        <div><dt>Stored in DB</dt><dd>{d.storedQueryCount ?? 0}</dd></div>
-        <div><dt>Last stored query</dt><dd>{fmtUtc(d.lastStoredQueryAtUtc)}</dd></div>
-      </dl>
+      <div className="server-info">
+        <div className="server-header">
+          <div className="server-meta">
+            <strong className="server-name">Pi-hole integration</strong>
+          </div>
+          <div className={`server-status ${overall.healthy ? "status-online" : "status-offline"}`}>
+            {overall.healthy ? "✅ " : "⚠️ "}
+            {overall.text}
+          </div>
+        </div>
+
+        {blocker && (blocker.status === "error" || blocker.status === "pending") && (
+          <div className="server-details__alert" role="alert">
+            <strong>
+              Step {blocker.step}: {blocker.title}
+            </strong>
+            {blocker.error && <span> — {blocker.error}</span>}
+            {!blocker.error && blocker.fix && <span> — {blocker.fix}</span>}
+          </div>
+        )}
+
+        <div className="server-details">
+          {steps.map((step) => (
+            <PipelineDetailRow key={step.id} step={step} />
+          ))}
+        </div>
+
+        {showTroubleshooting && (
+          <details className="pihole-pipeline-details">
+            <summary>Troubleshooting</summary>
+            <ol className="pihole-pipeline-details__list">
+              {steps.map((step) => (
+                <li key={step.id}>
+                  <strong>
+                    {step.step}. {step.title}
+                  </strong>
+                  <span className="pihole-pipeline-details__flow">{step.flow}</span>
+                  {step.fix && <p className="pihole-pipeline-details__fix">{step.fix}</p>}
+                </li>
+              ))}
+            </ol>
+          </details>
+        )}
+      </div>
     </section>
   );
 }

@@ -14,6 +14,8 @@ import type { VpnDnsQueryLogDto, VpnDnsQueryPageResponse } from "../../api/orval
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { formatDateWithOffset } from "../../utils/utils";
 import { addDays, endOfToday, startOfToday } from "../../pages/ServersOverview/helpers";
+import "../../css/ServerForm.css";
+import "../../css/Settings.css";
 import "../../css/Table.css";
 
 export type UserDnsQueriesSectionProps = {
@@ -27,7 +29,7 @@ export function UserDnsQueriesSection({
   externalId,
   vpnServerId,
   title = "Pi-hole DNS history",
-  compact = false,
+  compact: _compact = false,
 }: UserDnsQueriesSectionProps) {
   const admin = isAdmin(getCurrentUser());
   const ext = typeof externalId === "string" ? externalId.trim() : "";
@@ -90,9 +92,11 @@ export function UserDnsQueriesSection({
 
   if (!hasIdentity) {
     return (
-      <section className="settings-section">
-        <h3><FaGlobe /> {title}</h3>
-        <p className="muted">No VPN identity (externalId) for this user.</p>
+      <section className="settings-card settings-card--mb">
+        <h3 className="settings-card__h3-with-icon">
+          <FaGlobe className="icon" aria-hidden /> {title}
+        </h3>
+        <p className="server-details__intro">No VPN identity (externalId) for this user.</p>
       </section>
     );
   }
@@ -101,19 +105,25 @@ export function UserDnsQueriesSection({
   const total = (query.data as VpnDnsQueryPageResponse | undefined)?.totalCount ?? 0;
 
   return (
-    <section className={`settings-section${compact ? " settings-section--compact" : ""}`}>
-      <div className="settings-section__header">
-        <h3><FaGlobe /> {title}</h3>
-        <button type="button" className="btn btn-secondary btn-sm" onClick={() => void query.refetch()} disabled={query.isFetching}>
-          <FaSync /> Refresh
-        </button>
+    <section className="settings-card settings-card--mb">
+      <h3 className="settings-card__h3-with-icon">
+        <FaGlobe className="icon" aria-hidden /> {title}
+      </h3>
+      <div className="header-bar">
+        <div className="left-buttons">
+          <button type="button" className="btn secondary" onClick={() => void query.refetch()} disabled={query.isFetching}>
+            <FaSync className={`icon ${query.isFetching ? "icon-spin" : ""}`} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       <DateRangeFilter from={from} to={to} grouping={grouping} onChange={onFilterChange} />
-      <div className="form-row" style={{ marginTop: 8, marginBottom: 8 }}>
-        <label>
-          Domain contains
+      <div className="server-form">
+        <div className="form-group">
+          <label htmlFor="user-dns-domain-filter">Domain contains</label>
           <input
+            id="user-dns-domain-filter"
             type="text"
             value={domainFilter}
             onChange={(e) => {
@@ -122,26 +132,36 @@ export function UserDnsQueriesSection({
             }}
             placeholder="e.g. netflix"
           />
-        </label>
+        </div>
       </div>
 
       <CustomThemeProvider>
-        <StyledDataGrid
-          rows={rows}
-          columns={columns}
-          getRowId={(r) => r.id ?? 0}
-          loading={query.isLoading || query.isFetching}
-          rowCount={total}
-          paginationMode="server"
-          paginationModel={{ page, pageSize }}
-          onPaginationModelChange={(m) => {
-            setPage(m.page);
-            setPageSize(m.pageSize);
+        <div
+          className="data-grid-wrap"
+          style={{
+            backgroundColor: "var(--bg-body)",
+            padding: "10px",
+            borderRadius: "8px",
           }}
-          pageSizeOptions={[10, 25, 50, 100]}
-          autoHeight
-          disableRowSelectionOnClick
-        />
+        >
+          <StyledDataGrid
+            rows={rows}
+            columns={columns}
+            getRowId={(r) => r.id ?? 0}
+            loading={query.isLoading || query.isFetching}
+            rowCount={total}
+            paginationMode="server"
+            paginationModel={{ page, pageSize }}
+            onPaginationModelChange={(m) => {
+              setPage(m.page);
+              setPageSize(m.pageSize);
+            }}
+            pageSizeOptions={[10, 25, 50, 100]}
+            disableRowSelectionOnClick
+            slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
+            localeText={{ noRowsLabel: "📭 No DNS queries logged" }}
+          />
+        </div>
       </CustomThemeProvider>
     </section>
   );

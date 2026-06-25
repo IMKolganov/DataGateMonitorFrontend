@@ -17,7 +17,7 @@ const overlayStyle: React.CSSProperties = {
   backgroundColor: "rgba(0, 0, 0, 0.35)",
   backdropFilter: "blur(2px)",
   color: "#fff",
-  fontFamily: "Inter, sans-serif",
+  fontFamily: "inherit",
   letterSpacing: "0.5px",
 };
 

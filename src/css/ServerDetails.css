@@ -274,17 +274,6 @@
   margin-left: 0;
 }
 
-/* Title + DataGrid / map: breathing room after server info card */
-.server-details__panel {
-  margin-top: 2rem;
-}
-
-.server-details__panel > h3.settings-card__h3-with-icon {
-  margin: 0 0 12px 0;
-  font-size: 16px;
-  color: var(--text-primary);
-}
-
 .server-details__root {
   width: 100%;
   min-width: 0;
@@ -332,4 +321,54 @@
 .server-details__alert-detail {
   margin-top: 6px;
   white-space: pre-wrap;
+}
+
+.pihole-step-value {
+  color: var(--text-secondary);
+}
+
+.pihole-step-value--warning {
+  color: #b45309;
+}
+
+.pihole-step-value--error {
+  color: #dc2626;
+}
+
+.pihole-step-value--pending {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.pihole-pipeline-details {
+  margin-top: 0.75rem;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.pihole-pipeline-details summary {
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-secondary);
+}
+
+.pihole-pipeline-details__list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.pihole-pipeline-details__list li {
+  margin-bottom: 0.5rem;
+}
+
+.pihole-pipeline-details__flow {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.pihole-pipeline-details__fix {
+  margin: 4px 0 0;
+  font-size: 12px;
 }
