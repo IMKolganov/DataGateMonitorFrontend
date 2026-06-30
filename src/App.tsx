@@ -50,6 +50,7 @@ const UsersSettings = lazy(() => import("./pages/UsersSettings/UsersSettings"));
 const UserQuotasPage = lazy(() => import("./pages/UsersSettings/UserQuotasPage"));
 const UserDetailPage = lazy(() => import("./pages/UsersSettings/UserDetailPage"));
 const CertExpirySettings = lazy(() => import("./pages/CertExpirySettings"));
+const CertExpiryRunDetailPage = lazy(() => import("./pages/CertExpiryRunDetailPage"));
 const EmailBroadcastSettings = lazy(() => import("./pages/EmailBroadcastSettings"));
 const AdminPasswordRecoverySettings = lazy(() => import("./pages/AdminPasswordRecoverySettings"));
 const AdminSecuritySettings = lazy(() => import("./pages/AdminSecuritySettings"));
@@ -180,6 +181,7 @@ function App() {
                       <Route path="geolitedb" element={withSuspense(<GeoLiteDbSettings />)} />
                       <Route path="vpn-notifications" element={withSuspense(<NotificationVpnProfileSettings />)} />
                       <Route path="cert-expiry" element={withSuspense(<CertExpirySettings />)} />
+                      <Route path="cert-expiry/runs/:runId" element={withSuspense(<CertExpiryRunDetailPage />)} />
                       <Route path="telegrambot" element={withSuspense(<TelegramBotSettings />)} />
                       <Route path="users/quotas" element={withSuspense(<UserQuotasPage />)} />
                       <Route path="users" element={withSuspense(<UsersSettings />)} />

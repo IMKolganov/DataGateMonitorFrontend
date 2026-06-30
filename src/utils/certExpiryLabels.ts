@@ -36,6 +36,12 @@ export function certExpiryProfileOutcomeLabel(
   }
 }
 
+export function certExpiryProfileHasIssue(
+  outcome: EnumsCertExpiryProfileOutcome | number | undefined,
+): boolean {
+  return outcome != null && outcome !== EnumsCertExpiryProfileOutcome.NUMBER_0;
+}
+
 export function certExpiryRunHasIssues(
   run: Partial<Pick<CertExpiryCheckRunResponse, "status" | "summary" | "errorMessage">>,
 ): boolean {

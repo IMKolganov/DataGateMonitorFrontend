@@ -2,11 +2,11 @@ import { useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaEye, FaPlay, FaSync } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import {
-  getApiCertExpiryRunsRunId,
   getGetApiCertExpiryRunsQueryKey,
   useGetApiCertExpiryRuns,
   usePostApiCertExpiryCheck,
@@ -16,16 +16,13 @@ import type {
   CertExpiryRunSummaryDto,
   GetCertExpiryRunsResponse,
 } from "../../api/orvalModelShim";
-import type { CertExpiryDtoCertExpiryProfileResultDto } from "../../api/orval/model/certExpiryDtoCertExpiryProfileResultDto";
-import type { CertExpiryDtoCertExpiryServerResultDto } from "../../api/orval/model/certExpiryDtoCertExpiryServerResultDto";
-import { EnumsCertExpiryServerFetchStatus } from "../../api/orval/model/enumsCertExpiryServerFetchStatus";
 import { formatDateWithOffset } from "../../utils/utils.ts";
 import { errorMessage } from "../../utils/errorMessage.ts";
 import {
-  certExpiryProfileOutcomeLabel,
   certExpiryRunHasIssues,
   certExpiryRunStatusLabel,
 } from "../../utils/certExpiryLabels.ts";
+import { certExpiryRunDetailPath } from "../../utils/certExpiryRoutes.ts";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize.ts";
 import "../../css/Settings.css";
 import "../../css/Table.css";
@@ -54,10 +51,12 @@ export function CertExpiryCheckPanel({
   historyLimit = 20,
 }: Props) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [sendNotifications, setSendNotifications] = useState(false);
   const [lastResult, setLastResult] = useState<CertExpiryCheckRunResponse | null>(null);
-  const [detailRun, setDetailRun] = useState<CertExpiryCheckRunResponse | null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
+
+  const returnTo = location.pathname + location.search;
 
   const historyParams = useMemo(
     () => ({ limit: historyLimit, vpnServerId: vpnServerId ?? undefined }),
@@ -99,15 +98,8 @@ export function CertExpiryCheckPanel({
     });
   };
 
-  const openRunDetails = async (runId: string) => {
-    setDetailLoading(true);
-    try {
-      setDetailRun(unwrapCertExpiryRun(await getApiCertExpiryRunsRunId(runId)));
-    } catch (err) {
-      toast.error(errorMessage(err));
-    } finally {
-      setDetailLoading(false);
-    }
+  const openRunDetails = (runId: string) => {
+    navigate(certExpiryRunDetailPath(runId), { state: { returnTo } });
   };
 
   const historyRows = useMemo(() => {
@@ -154,7 +146,7 @@ export function CertExpiryCheckPanel({
           type="button"
           className="btn secondary"
           style={{ padding: "2px 8px", minHeight: 28 }}
-          onClick={() => void openRunDetails(String(params.row.runId))}
+          onClick={() => openRunDetails(String(params.row.runId))}
         >
           <FaEye className="icon" aria-hidden />
         </button>
@@ -162,7 +154,7 @@ export function CertExpiryCheckPanel({
     },
   ];
 
-  const resultBanner = lastResult ? (
+  const resultBanner = lastResult?.runId ? (
     <div className={certExpiryRunHasIssues(lastResult) ? "message-error" : "message-success"} style={{ marginTop: 12 }}>
       <strong>{certExpiryRunStatusLabel(lastResult.status)}</strong>
       {" — "}
@@ -177,9 +169,14 @@ export function CertExpiryCheckPanel({
           {lastResult.summary.serverFailures}
         </>
       ) : null}{" "}
-      <button type="button" className="btn secondary" style={{ marginLeft: 8 }} onClick={() => setDetailRun(lastResult)}>
+      <Link
+        to={certExpiryRunDetailPath(lastResult.runId)}
+        state={{ returnTo }}
+        className="btn secondary"
+        style={{ marginLeft: 8 }}
+      >
         View details
-      </button>
+      </Link>
     </div>
   ) : null;
 
@@ -236,120 +233,12 @@ export function CertExpiryCheckPanel({
                 onPaginationModelChange={(m: { page: number; pageSize: number }) => setPageSize(m.pageSize)}
                 disableRowSelectionOnClick
                 slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-                localeText={{ noRowsLabel: "No manual checks logged yet." }}
+                localeText={{ noRowsLabel: "No checks logged yet." }}
               />
             </div>
           </CustomThemeProvider>
         </>
       )}
-
-      {(detailRun || detailLoading) && (
-        <CertExpiryRunDetailModal run={detailRun} loading={detailLoading} onClose={() => setDetailRun(null)} />
-      )}
-    </div>
-  );
-}
-
-function CertExpiryRunDetailModal({
-  run,
-  loading,
-  onClose,
-}: {
-  run: CertExpiryCheckRunResponse | null;
-  loading: boolean;
-  onClose: () => void;
-}) {
-  const profileColumns: GridColDef[] = [
-    { field: "issuedOvpnFileId", headerName: "Profile ID", width: 100 },
-    { field: "commonName", headerName: "Common name", flex: 0.35, minWidth: 160 },
-    {
-      field: "outcome",
-      headerName: "Outcome",
-      width: 130,
-      valueFormatter: (value) => certExpiryProfileOutcomeLabel(value),
-    },
-    {
-      field: "expiryUtc",
-      headerName: "Expiry",
-      width: 170,
-      valueFormatter: (value) => (value ? formatDateWithOffset(new Date(String(value))) : "—"),
-    },
-    { field: "daysLeft", headerName: "Days left", width: 90 },
-    { field: "serialNumber", headerName: "Serial", flex: 0.2, minWidth: 120 },
-  ];
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" style={{ maxWidth: 960, width: "100%" }} onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>Certificate expiry check — {run?.scopeLabel ?? "…"}</h3>
-          <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
-            ×
-          </button>
-        </div>
-        <div style={{ padding: "0 20px 16px" }}>
-          {loading || !run ? (
-            <p>Loading run details…</p>
-          ) : (
-            <>
-              <p className="settings-item-description">
-                Started {run.startedAtUtc ? formatDateWithOffset(new Date(run.startedAtUtc)) : "—"}
-                {run.finishedAtUtc ? ` · finished ${formatDateWithOffset(new Date(run.finishedAtUtc))}` : ""}
-                {run.durationMs != null ? ` · ${run.durationMs} ms` : ""}
-                {" · "}
-                {certExpiryRunStatusLabel(run.status)}
-                {run.errorMessage ? ` — ${run.errorMessage}` : ""}
-              </p>
-              <p className="settings-item-description">
-                Warning window: {run.warningDays} day(s)
-                {run.sendNotifications ? " · notifications sent" : " · report only"}
-                {run.isScheduled ? " · scheduled run" : " · manual run"}
-              </p>
-
-              {(run.servers ?? []).map((server: CertExpiryDtoCertExpiryServerResultDto) => (
-                <div key={server.vpnServerId} style={{ marginBottom: 20 }}>
-                  <h4 style={{ marginBottom: 8 }}>
-                    {server.serverName} (#{server.vpnServerId})
-                    {" — "}
-                    {server.fetchStatus === EnumsCertExpiryServerFetchStatus.NUMBER_0 ? "OK" : "Failed"}
-                    {server.durationMs != null ? ` · ${server.durationMs} ms` : ""}
-                    {server.fetchError ? `: ${server.fetchError}` : ""}
-                  </h4>
-                  {(server.profiles?.length ?? 0) > 0 ? (
-                    <CustomThemeProvider>
-                      <div
-                        className="data-grid-wrap"
-                        style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}
-                      >
-                        <Grid
-                          gridId={`cert-expiry-run-${run.runId}-server-${server.vpnServerId}`}
-                          rows={(server.profiles ?? []).map((p: CertExpiryDtoCertExpiryProfileResultDto, idx: number) => ({
-                            ...p,
-                            id: `${p.issuedOvpnFileId}-${idx}`,
-                          }))}
-                          columns={profileColumns}
-                          pageSizeOptions={[5, 10, 20, 50]}
-                          disableRowSelectionOnClick
-                          autoHeight
-                          hideFooter={(server.profiles?.length ?? 0) <= 10}
-                          localeText={{ noRowsLabel: "No profiles checked on this server." }}
-                        />
-                      </div>
-                    </CustomThemeProvider>
-                  ) : (
-                    <p className="settings-item-description">No profiles evaluated on this server.</p>
-                  )}
-                </div>
-              ))}
-            </>
-          )}
-        </div>
-        <div className="modal-actions" style={{ padding: "0 20px 20px" }}>
-          <button type="button" className="btn secondary" onClick={onClose}>
-            Close
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
