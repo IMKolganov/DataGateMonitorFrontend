@@ -1,12 +1,10 @@
 import { useCallback, useState } from "react";
-import { getCurrentUser } from "../utils/auth/authSelectors";
+import { getUserScopedStorageKey } from "../utils/datagridUserStorage";
 
 const PREFIX = "datagrid-pageSize";
 
 function getScopedStorageKey(storageKey: string): string {
-  const user = getCurrentUser();
-  const userPart = user?.id && Number.isFinite(user.id) ? String(user.id) : "anon";
-  return `${PREFIX}:${userPart}:${storageKey}`;
+  return getUserScopedStorageKey(PREFIX, storageKey);
 }
 
 export function getStoredPageSize(

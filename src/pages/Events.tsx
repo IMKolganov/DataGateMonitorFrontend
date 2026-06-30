@@ -1,7 +1,7 @@
 // src/pages/Events.tsx
 import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import StyledDataGrid from "../components/ui/TableStyle.tsx";
+import Grid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaBolt, FaInfoCircle, FaSync } from "react-icons/fa";
@@ -277,7 +277,8 @@ const Events: React.FC = () => {
           </h2>
 
           <div className="data-grid-wrap data-grid-wrap--inset">
-            <StyledDataGrid
+            <Grid
+              gridId="server-events"
               rows={rows}
               columns={columns}
               pageSizeOptions={[5, 10, 20, 50, 100]}

@@ -30,9 +30,10 @@ import { withSuspense } from "./utils/withSuspense.tsx";
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
 const ServersWithDetails = lazy(() => import("./pages/ServersWithDetails"));
+const ServerDetails = lazy(() => import("./pages/ServerDetails"));
 const ServerForm = lazy(() => import("./pages/ServerForm"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const ServerDetails = lazy(() => import("./pages/ServerDetails"));
+const PiHoleServerTab = lazy(() => import("./pages/PiHoleServerTab"));
 const Settings = lazy(() => import("./pages/Settings"));
 const ApplicationSettings = lazy(() => import("./pages/ApplicationSettings"));
 const GeneralTab = lazy(() => import("./pages/GeneralServerDetails"));
@@ -159,6 +160,7 @@ function App() {
                         </Route>
 
                         <Route path="events" element={withSuspense(<Events />)} />
+                        <Route path="pi-hole" element={withSuspense(<PiHoleServerTab />)} />
                       </Route>
                     </Route>
 
@@ -205,8 +207,22 @@ function App() {
                         </RequireAdmin>
                       }
                     />
-                    <Route path="/servers/add" element={withSuspense(<ServerForm />)} />
-                    <Route path="/servers/edit/:serverId" element={withSuspense(<ServerForm />)} />
+                    <Route
+                      path="/servers/add"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<ServerForm />)}
+                        </RequireAdmin>
+                      }
+                    />
+                    <Route
+                      path="/servers/edit/:serverId"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<ServerForm />)}
+                        </RequireAdmin>
+                      }
+                    />
                     <Route path="/about" element={withSuspense(<About />)} />
                     <Route path="/contact" element={withSuspense(<Contact />)} />
 

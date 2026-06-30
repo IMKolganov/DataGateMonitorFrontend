@@ -9,7 +9,7 @@ body,
 }
 
 body {
-  font-family: "Arial", sans-serif;
+  font-family: var(--font-sans);
   background-color: var(--bg-body);
   color: var(--text-primary);
   overflow: hidden;

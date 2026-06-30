@@ -21,6 +21,10 @@ function ServersWithDetails() {
   const isViewingDetails = /^\/servers\/\d+/.test(location.pathname);
   /** `/servers/statistics/:externalId` — user statistics across all VPN servers (must not sit under the server list on mobile). */
   const isGlobalStatisticsRoute = /^\/servers\/statistics\//.test(location.pathname);
+  /** Service Control → Details (Status Stream Logs). */
+  const isStatusStreamLogsRoute = location.pathname === "/servers/status-stream-logs";
+  const isMobileFullScreenOutlet =
+    isViewingDetails || isGlobalStatisticsRoute || isStatusStreamLogsRoute;
 
   const [layoutIsMobile, setLayoutIsMobile] = useState(isMobile);
   if (layoutIsMobile !== isMobile) {
@@ -56,19 +60,10 @@ function ServersWithDetails() {
     }
   };
 
-  if (isMobile && isViewingDetails) {
+  if (isMobile && isMobileFullScreenOutlet) {
+    const extraClass = isGlobalStatisticsRoute ? " servers-with-details-mobile-global-stats" : "";
     return (
-      <div className="server-details-panel-mobile">
-        <Suspense fallback={<div className="center">Loading…</div>}>
-          <Outlet />
-        </Suspense>
-      </div>
-    );
-  }
-
-  if (isMobile && isGlobalStatisticsRoute) {
-    return (
-      <div className="server-details-panel-mobile servers-with-details-mobile-global-stats">
+      <div className={`server-details-panel-mobile${extraClass}`}>
         <Suspense fallback={<div className="center">Loading…</div>}>
           <Outlet />
         </Suspense>

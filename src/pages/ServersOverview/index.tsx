@@ -44,6 +44,7 @@ import type {
   VpnClientInfoDto,
   VpnServerClientsResponsesConnectedClientsResponse,
   VpnServerV2Dto,
+  VpnServerResponse,
   VpnServersDtoVpnServerWithStatusV2Dto,
   VpnServersV3Response,
   GetApiOpenVpnClientsOverviewSeriesParams,
@@ -57,8 +58,11 @@ const OverviewUsersTable = lazy(() =>
 const VpnMap = lazy(() => import("../../components/VpnMap"));
 import { useProxyTrafficFlowMany, type ProxyTrafficFlowUpdate } from "../../hooks/useProxyTrafficFlow";
 import { canViewUserStatisticsScope } from "../../utils/auth/canViewUserStatisticsScope";
-import { getCurrentUser } from "../../utils/auth/authSelectors";
+import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { UserStatisticsAccessDenied } from "./UserStatisticsAccessDenied";
+import { UserDnsQueriesSection } from "../../components/pihole/UserDnsQueriesSection";
+import { TopVisitedDomainsSection } from "../../components/pihole/TopVisitedDomainsSection";
+import { serverPiHoleEnabled, shouldShowUserDnsQueries } from "../../utils/pihole/serverPiHoleEnabled";
 
 
 
@@ -67,6 +71,7 @@ const UI_TO_API_GROUPING: Record<
   (typeof OverviewGrouping)[keyof typeof OverviewGrouping]
 > = {
   auto:   OverviewGrouping.NUMBER_0,
+  tenminutes: OverviewGrouping.NUMBER_5,
   hours:  OverviewGrouping.NUMBER_1,
   days:   OverviewGrouping.NUMBER_2,
   months: OverviewGrouping.NUMBER_3,
@@ -177,10 +182,21 @@ export default function ServersOverview() {
     scopedServerQuery.isError ||
     scopedServerQuery.isSuccess;
 
+  const scopedServer = (scopedServerQuery.data as VpnServerResponse | undefined)?.vpnServer;
+
   const externalId = externalIdParam || undefined;
   const userStatsAccessDenied =
     Boolean(externalId) && !canViewUserStatisticsScope(externalId);
   const statsExternalId = userStatsAccessDenied ? undefined : externalId;
+
+  const scopedServerPiHole = serverPiHoleEnabled(scopedServer);
+  const viewerIsAdmin = isAdmin(currentUser);
+  const showUserDnsQueries = shouldShowUserDnsQueries(
+    statsExternalId,
+    vpnServerId ?? null,
+    scopedServerPiHole,
+    viewerIsAdmin,
+  );
 
   const lastErrorKey = useRef<string>("");
 
@@ -859,6 +875,18 @@ export default function ServersOverview() {
       ) : null}
 
       <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} externalId={statsExternalId ?? null} />
+
+      {showUserDnsQueries ? (
+        <UserDnsQueriesSection
+          externalId={statsExternalId}
+          vpnServerId={vpnServerId ?? 0}
+          title="Pi-hole DNS history"
+        />
+      ) : null}
+
+      {isGlobalServersPage && viewerIsAdmin ? (
+        <TopVisitedDomainsSection from={from} to={to} />
+      ) : null}
     </div>
   );
 }

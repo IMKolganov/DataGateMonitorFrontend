@@ -1,7 +1,7 @@
 // src/components/CertificatesTable.tsx
 import React, { useState, useCallback } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
-import StyledDataGrid from "../ui/TableStyle.tsx";
+import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type {
   MonitorServerCertificate as Certificate,
@@ -187,7 +187,8 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
             className="input"
           />
         </div>
-        <StyledDataGrid
+        <Grid
+          gridId="certificates"
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 100]}

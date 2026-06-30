@@ -20,10 +20,11 @@ export function formatBytes(v: number): string {
   return `${n.toFixed(n < 10 ? 2 : 1)} ${units[i]}`;
 }
 
-export type NormalizedGrouping = "hours" | "days" | "months" | "years";
+export type NormalizedGrouping = "tenminutes" | "hours" | "days" | "months" | "years";
 
 export function normalizeGrouping(g: string | null | undefined): NormalizedGrouping {
   switch (g) {
+    case "tenminutes":
     case "hours":
     case "days":
     case "months":
@@ -35,6 +36,8 @@ export function normalizeGrouping(g: string | null | undefined): NormalizedGroup
 }
 
 export function formatLabel(d: Date, mode: Exclude<Grouping,"auto">): string {
+  if (mode === "tenminutes")
+    return d.toLocaleString(undefined, { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" });
   if (mode === "hours")
     return d.toLocaleTimeString(undefined, { hour: "2-digit", day: "2-digit", month: "short" });
   if (mode === "days")
@@ -106,7 +109,8 @@ export function buildFallbackOverviewResponse(opts: {
 
   const mode: Exclude<Grouping,"auto"> =
     grouping === "auto"
-      ? (span <= 2 * dayMs ? "hours"
+      ? (span <= 24 * 3600 * 1000 ? "tenminutes"
+         : span <= 2 * dayMs ? "hours"
          : span <= 180 * dayMs ? "days"
          : span <= 36 * 30 * dayMs ? "months"
          : "years")
@@ -118,7 +122,26 @@ export function buildFallbackOverviewResponse(opts: {
 
   const overviewSeriesRows: OverviewSeriesRowDto[] = [];
 
-  if (mode === "hours") {
+  if (mode === "tenminutes") {
+    const cur = new Date(start);
+    cur.setSeconds(0, 0);
+    cur.setMinutes(cur.getMinutes() - (cur.getMinutes() % 10));
+    let i = 0;
+    while (cur <= end) {
+      const active = wave(i, Math.max(4, totals.clients + 8));
+      const mb = Math.round((baseMb / 1800) * (1 + 0.15 * Math.cos(i / 2)) + active * 0.5);
+      const total = mb * 1024 * 1024;
+      overviewSeriesRows.push({
+        ts: cur.toISOString(),
+        activeClients: active,
+        trafficInBytes: Math.floor(total * 0.6),
+        trafficOutBytes: Math.ceil(total * 0.4),
+        trafficTotalBytes: total,
+      });
+      cur.setMinutes(cur.getMinutes() + 10);
+      i++;
+    }
+  } else if (mode === "hours") {
     const cur = new Date(start); cur.setMinutes(0,0,0); let i=0;
     while (cur <= end) {
       const active = wave(i, Math.max(4, totals.clients + 8));

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { FaEnvelope, FaPaperPlane, FaPlus, FaSync, FaSave, FaFileImport } from "react-icons/fa";
 import { toast } from "react-toastify";
 import type { GridColDef } from "@mui/x-data-grid";
-import StyledDataGrid from "../components/ui/TableStyle.tsx";
+import Grid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import {
   getApiAdminEmailBroadcastTemplatesId,
@@ -619,7 +619,8 @@ export default function EmailBroadcastSettings() {
             marginBottom: 32,
           }}
         >
-          <StyledDataGrid
+          <Grid
+            gridId="email-broadcast-templates"
             rows={templateGridRows}
             columns={templateColumns}
             loading={templatesLoading}
@@ -734,7 +735,8 @@ export default function EmailBroadcastSettings() {
             borderRadius: 8,
           }}
         >
-          <StyledDataGrid
+          <Grid
+            gridId="email-broadcast-sent-log"
             rows={gridRows}
             columns={columns}
             rowCount={rowCount}

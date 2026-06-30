@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaTrash, FaCopy } from "react-icons/fa";
-import StyledDataGrid from "../ui/TableStyle.tsx";
+import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import { toast } from "react-toastify";
 
@@ -132,7 +132,8 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
           borderRadius: 8,
         }}
       >
-        <StyledDataGrid
+        <Grid
+          gridId="applications"
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50, 100]}

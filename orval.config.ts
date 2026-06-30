@@ -1,9 +1,13 @@
 /**
- * Orval fetches OpenAPI from a running backend (Swashbuckle).
+ * Orval fetches OpenAPI from a running backend (Swashbuckle) or the committed snapshot.
  * Override with env: `OPENAPI_URL=https://host:port/swagger/v1/swagger.json`
  */
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 const openApiUrl =
-  process.env.OPENAPI_URL ?? "http://127.0.0.1:5581/swagger/v1/swagger.json";
+  process.env.OPENAPI_URL ??
+  path.join(path.dirname(fileURLToPath(import.meta.url)), "openapi/swagger.json");
 
 export default {
   ogm: {
