@@ -112,6 +112,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                 .filter(Boolean)
                 .join("|"),
             remoteIp: client.remoteIp ?? "",
+            proxyRealIp: client.proxyRealIp?.trim() || "—",
             localIp: client.localIp ?? "",
             bytesReceived: formatBytes(client.bytesReceived ?? 0),
             bytesSent: formatBytes(client.bytesSent ?? 0),
@@ -168,6 +169,13 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
         },
         { field: "displayName", headerName: "Display Name", flex: 0.6 },
         { field: "remoteIp", headerName: "Remote Address", flex: 0.6 },
+        {
+            field: "proxyRealIp",
+            headerName: "Real Client IP",
+            flex: 0.6,
+            description:
+                "Public client endpoint resolved via WSS proxy lookup (OpenVPN management shows loopback in Remote Address).",
+        },
         { field: "localIp", headerName: "Local Address", flex: 0.5 },
         { field: "bytesReceived", headerName: "Bytes Received", flex: 0.4 },
         { field: "bytesSent", headerName: "Bytes Sent", flex: 0.4 },
