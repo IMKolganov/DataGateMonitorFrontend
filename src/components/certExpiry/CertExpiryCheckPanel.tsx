@@ -27,8 +27,8 @@ import {
   certExpiryRunStatusLabel,
 } from "../../utils/certExpiryLabels.ts";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize.ts";
-import "../css/Settings.css";
-import "../css/Table.css";
+import "../../css/Settings.css";
+import "../../css/Table.css";
 
 /** ogmMutator unwraps ApiResponse.data at runtime; Orval types still use the Api* wrapper. */
 function unwrapCertExpiryRun(raw: unknown): CertExpiryCheckRunResponse {
