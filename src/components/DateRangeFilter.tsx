@@ -2,7 +2,7 @@
 import React, { useMemo } from "react";
 import { FaCheck, FaUndo } from "react-icons/fa";
 
-export type Grouping = "auto" | "hours" | "days" | "months" | "years";
+export type Grouping = "auto" | "tenminutes" | "hours" | "days" | "months" | "years";
 
 export type DateRangeChange = {
   from: Date;
@@ -191,6 +191,7 @@ export default function DateRangeFilter({ from, to, grouping, onChange }: Props)
             style={selectStyle}
           >
             <option value="auto">Auto</option>
+            <option value="tenminutes">10 minutes</option>
             <option value="hours">Hours</option>
             <option value="days">Days</option>
             <option value="months">Months</option>

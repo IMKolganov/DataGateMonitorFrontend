@@ -6472,6 +6472,76 @@
         }
       }
     },
+    "/api/vpn-dns-queries/top-domains": {
+      "get": {
+        "tags": [
+          "VpnDnsQuery"
+        ],
+        "parameters": [
+          {
+            "name": "VpnServerId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "FromUtc",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "ToUtc",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "Limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnDnsQuery.Responses.VpnDnsTopDomainsResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnDnsQuery.Responses.VpnDnsTopDomainsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnDnsQuery.Responses.VpnDnsTopDomainsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/vpn-dns-queries/healthcheck": {
       "get": {
         "tags": [
@@ -12091,6 +12161,22 @@
         },
         "additionalProperties": false
       },
+      "Api.VpnDnsQuery.Responses.VpnDnsTopDomainsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/VpnDnsQuery.Responses.VpnDnsTopDomainsResponse"
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.VpnProfileNotificationPreferences.GetVpnProfileNotificationPreferencesResponse": {
         "type": "object",
         "properties": {
@@ -13808,7 +13894,8 @@
           1,
           2,
           3,
-          4
+          4,
+          5
         ],
         "type": "integer",
         "format": "int32"
@@ -15858,6 +15945,24 @@
         },
         "additionalProperties": false
       },
+      "VpnDnsQuery.Dto.VpnDnsTopDomainDto": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "nullable": true
+          },
+          "uniqueUsersCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "queryCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "VpnDnsQuery.Responses.VpnDnsQueryPageResponse": {
         "type": "object",
         "properties": {
@@ -15877,6 +15982,19 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/VpnDnsQuery.Dto.VpnDnsQueryLogDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VpnDnsQuery.Responses.VpnDnsTopDomainsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VpnDnsQuery.Dto.VpnDnsTopDomainDto"
             },
             "nullable": true
           }

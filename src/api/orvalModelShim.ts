@@ -43,12 +43,12 @@ export type { AuthRequestsTotpDisableRequest as TotpDisableRequest } from "./orv
 export type { TelegramBotIncomingMessageLogDtoMessageDto as MessageDto } from "./orval/model/telegramBotIncomingMessageLogDtoMessageDto";
 export type { VpnServerCertsResponsesDtoMonitorServerCertificate as MonitorServerCertificate } from "./orval/model/vpnServerCertsResponsesDtoMonitorServerCertificate";
 export type { NotificationsResponsesNotificationItemDto as NotificationItemDto } from "./orval/model/notificationsResponsesNotificationItemDto";
-export type { ServicesOthersModelsNotificationRequest as NotificationRequest } from "./orval/model/servicesOthersModelsNotificationRequest";
+export type { NotificationsRequestsNotifyAdminsRequest as NotificationRequest } from "./orval/model/notificationsRequestsNotifyAdminsRequest";
 export type { VpnServerClientsResponsesOverviewSeriesResponse as OverviewSeriesResponse } from "./orval/model/vpnServerClientsResponsesOverviewSeriesResponse";
 export type { VpnServerClientsDtoOverviewSeriesRowDto as OverviewSeriesRowDto } from "./orval/model/vpnServerClientsDtoOverviewSeriesRowDto";
 export type { VpnServerClientsResponsesOverviewTotalsResponse as OverviewTotalsResponse } from "./orval/model/vpnServerClientsResponsesOverviewTotalsResponse";
 export type { VpnServerClientsDtoOverviewUserDto as OverviewUserDto } from "./orval/model/vpnServerClientsDtoOverviewUserDto";
-export type { DataBaseServicesQueryVpnServerClientTableOverviewUsersResponse as OverviewUsersResponse } from "./orval/model/dataBaseServicesQueryVpnServerClientTableOverviewUsersResponse";
+export type { VpnServerClientsResponsesOverviewUsersResponse as OverviewUsersResponse } from "./orval/model/vpnServerClientsResponsesOverviewUsersResponse";
 export type { VpnServerClientsResponsesOverviewUsersSeriesResponse as OverviewUsersSeriesResponse } from "./orval/model/vpnServerClientsResponsesOverviewUsersSeriesResponse";
 export type { ApiVpnServerClientsResponsesOverviewUsersSeriesResponse as OverviewUsersSeriesResponseApiResponse } from "./orval/model/apiVpnServerClientsResponsesOverviewUsersSeriesResponse";
 export type { VpnServerClientsDtoOverviewUsersSeriesRowDto as OverviewUsersSeriesRowDto } from "./orval/model/vpnServerClientsDtoOverviewUsersSeriesRowDto";
@@ -95,12 +95,15 @@ export type { VpnServerOvpnFileConfigRequestsAddOrUpdateOvpnFileConfigRequest as
 export type { DataGateOpenVpnManagerInfoRootOpenVpnInfoResponse as RootOpenVpnInfoResponse } from "./orval/model/dataGateOpenVpnManagerInfoRootOpenVpnInfoResponse";
 
 export type { VpnDnsQueryDtoVpnDnsQueryLogDto as VpnDnsQueryLogDto } from "./orval/model/vpnDnsQueryDtoVpnDnsQueryLogDto";
+export type { VpnDnsQueryDtoVpnDnsTopDomainDto as VpnDnsTopDomainDto } from "./orval/model/vpnDnsQueryDtoVpnDnsTopDomainDto";
 export type { VpnDnsQueryResponsesVpnDnsQueryPageResponse as VpnDnsQueryPageResponse } from "./orval/model/vpnDnsQueryResponsesVpnDnsQueryPageResponse";
+export type { VpnDnsQueryResponsesVpnDnsTopDomainsResponse as VpnDnsTopDomainsResponse } from "./orval/model/vpnDnsQueryResponsesVpnDnsTopDomainsResponse";
 export type { VpnServerPiHoleResponsesVpnServerPiHoleConfigResponse as VpnServerPiHoleConfigResponse } from "./orval/model/vpnServerPiHoleResponsesVpnServerPiHoleConfigResponse";
 export type { VpnServerPiHoleDtoVpnServerPiHoleConfigDto as VpnServerPiHoleConfigDto } from "./orval/model/vpnServerPiHoleDtoVpnServerPiHoleConfigDto";
 export type { VpnServerPiHoleRequestsUpsertVpnServerPiHoleConfigRequest as UpsertVpnServerPiHoleConfigRequest } from "./orval/model/vpnServerPiHoleRequestsUpsertVpnServerPiHoleConfigRequest";
 export type { DataGateOpenVpnManagerDiagnosticsResponsesPiHoleDiagnosticsResponse as PiHoleDiagnosticsResponse } from "./orval/model/dataGateOpenVpnManagerDiagnosticsResponsesPiHoleDiagnosticsResponse";
 export type { GetApiVpnDnsQueriesSearchParams as SearchVpnDnsQueriesParams } from "./orval/model/getApiVpnDnsQueriesSearchParams";
+export type { GetApiVpnDnsQueriesTopDomainsParams as TopVpnDnsDomainsParams } from "./orval/model/getApiVpnDnsQueriesTopDomainsParams";
 
 export type { EmailBroadcastResponsesDtoSentEmailLogDto as SentEmailLogDto } from "./orval/model/emailBroadcastResponsesDtoSentEmailLogDto";
 export type { EmailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto as EmailBroadcastTemplateSummaryDto } from "./orval/model/emailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto";

@@ -71,6 +71,7 @@ const UI_TO_API_GROUPING: Record<
   (typeof OverviewGrouping)[keyof typeof OverviewGrouping]
 > = {
   auto:   OverviewGrouping.NUMBER_0,
+  tenminutes: OverviewGrouping.NUMBER_5,
   hours:  OverviewGrouping.NUMBER_1,
   days:   OverviewGrouping.NUMBER_2,
   months: OverviewGrouping.NUMBER_3,

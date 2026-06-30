@@ -1,14 +1,11 @@
 import { useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaGlobe, FaSync } from "react-icons/fa";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData } from "@tanstack/react-query";
 import StyledDataGrid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
-import {
-  getApiVpnDnsQueriesTopDomains,
-  getVpnDnsTopDomainsQueryKey,
-  type VpnDnsTopDomainDto,
-} from "../../api/manual/vpnDnsTopDomains";
+import { useGetApiVpnDnsQueriesTopDomains } from "../../api/orval/vpn-dns-query/vpn-dns-query";
+import type { VpnDnsTopDomainDto, VpnDnsTopDomainsResponse } from "../../api/orvalModelShim";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import "../../css/Settings.css";
 import "../../css/Table.css";
@@ -32,17 +29,17 @@ export function TopVisitedDomainsSection({ from, to }: TopVisitedDomainsSectionP
     [from, to],
   );
 
-  const query = useQuery({
-    queryKey: getVpnDnsTopDomainsQueryKey(params),
-    enabled: admin,
-    placeholderData: keepPreviousData,
-    queryFn: ({ signal }) => getApiVpnDnsQueriesTopDomains(params, signal),
+  const query = useGetApiVpnDnsQueriesTopDomains(params, {
+    query: {
+      enabled: admin,
+      placeholderData: keepPreviousData,
+    },
   });
 
   const rows = useMemo<TopDomainRow[]>(() => {
-    const items = query.data?.items ?? [];
+    const items = (query.data as VpnDnsTopDomainsResponse | undefined)?.items ?? [];
     return items.map((row, index) => ({ ...row, id: index + 1 }));
-  }, [query.data?.items]);
+  }, [query.data]);
 
   const columns = useMemo<GridColDef<TopDomainRow>[]>(
     () => [
