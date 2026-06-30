@@ -109,6 +109,12 @@ export type { EmailBroadcastResponsesDtoSentEmailLogDto as SentEmailLogDto } fro
 export type { EmailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto as EmailBroadcastTemplateSummaryDto } from "./orval/model/emailBroadcastResponsesDtoEmailBroadcastTemplateSummaryDto";
 export type { EmailBroadcastResponsesDtoEmailBroadcastTemplateDto as EmailBroadcastTemplateDto } from "./orval/model/emailBroadcastResponsesDtoEmailBroadcastTemplateDto";
 
+export type { CertExpiryResponsesCertExpiryCheckRunResponse as CertExpiryCheckRunResponse } from "./orval/model/certExpiryResponsesCertExpiryCheckRunResponse";
+export type { CertExpiryResponsesCertExpiryRunSummaryDto as CertExpiryRunSummaryDto } from "./orval/model/certExpiryResponsesCertExpiryRunSummaryDto";
+export type { CertExpiryResponsesGetCertExpiryRunsResponse as GetCertExpiryRunsResponse } from "./orval/model/certExpiryResponsesGetCertExpiryRunsResponse";
+export type { CertExpiryDtoCertExpiryServerResultDto as CertExpiryServerResultDto } from "./orval/model/certExpiryDtoCertExpiryServerResultDto";
+export type { CertExpiryDtoCertExpiryProfileResultDto as CertExpiryProfileResultDto } from "./orval/model/certExpiryDtoCertExpiryProfileResultDto";
+
 export { EnumsServiceStatus as ServiceStatus } from "./orval/model/enumsServiceStatus";
 export { EnumsOverviewGrouping as OverviewGrouping } from "./orval/model/enumsOverviewGrouping";
 export { EnumsQuotaOverlimitAction as QuotaOverlimitAction } from "./orval/model/enumsQuotaOverlimitAction";
