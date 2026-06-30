@@ -42,7 +42,7 @@ import {
 } from "../utils/pihole/buildServerUpdateRequest";
 import { errorMessage } from "../utils/errorMessage";
 import { isHttpForbidden } from "../utils/httpError";
-import StyledDataGrid from "../components/ui/TableStyle.tsx";
+import Grid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import { formatDateWithOffset } from "../utils/utils";
@@ -424,7 +424,8 @@ export function PiHoleServerTab() {
                 borderRadius: "8px",
               }}
             >
-              <StyledDataGrid
+              <Grid
+                gridId="server-pihole-queries"
                 rows={(dnsQuery.data as VpnDnsQueryPageResponse | undefined)?.items ?? []}
                 columns={columns}
                 getRowId={(r) => r.id ?? 0}

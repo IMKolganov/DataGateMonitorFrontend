@@ -26,7 +26,7 @@ import type {
   RootOpenVpnInfoResponse,
 } from "../api/orvalModelShim";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
-import StyledDataGrid from "../components/ui/TableStyle.tsx";
+import Grid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import "../css/Table.css";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
@@ -824,7 +824,8 @@ const OvpnFileConfigForm: React.FC = () => {
                   className="data-grid-wrap"
                   style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}
                 >
-                  <StyledDataGrid
+                  <Grid
+                    gridId="ovpn-config-conflog"
                     rows={conflogRows}
                     columns={conflogColumns}
                     pageSizeOptions={[5, 10, 20, 50, 100]}

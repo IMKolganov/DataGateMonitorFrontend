@@ -64,7 +64,7 @@ import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
 import { UserVpnConnectionsSection } from "./UserVpnConnectionsSection";
 import { UserDnsQueriesSection } from "../../components/pihole/UserDnsQueriesSection";
 import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
-import StyledDataGrid from "../../components/ui/TableStyle.tsx";
+import Grid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
 import type { GridColDef } from "@mui/x-data-grid";
 import "../../css/Settings.css";
@@ -632,7 +632,8 @@ export function UserDetailPage() {
               ) : (
               <div className="data-grid-wrap data-grid-wrap--inset">
                 <CustomThemeProvider>
-                  <StyledDataGrid
+                  <Grid
+                    gridId="user-telegram-messages"
                     rows={telegramMessages.map((msg, idx) => ({
                       id: msg.id ?? `msg-${idx}`,
                       date: msg.receivedAt ?? msg.createDate

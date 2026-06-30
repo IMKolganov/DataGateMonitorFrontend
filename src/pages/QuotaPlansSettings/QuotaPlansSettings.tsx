@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { FaPlus, FaSync, FaEdit, FaTrash, FaStar, FaServer, FaClipboardList } from "react-icons/fa";
 import type { GridColDef } from "@mui/x-data-grid";
-import StyledDataGrid from "../../components/ui/TableStyle.tsx";
+import Grid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
 import { toast } from "react-toastify";
 
@@ -313,7 +313,8 @@ export function QuotaPlansSettings() {
               borderRadius: 8,
             }}
           >
-            <StyledDataGrid
+            <Grid
+              gridId="quota-plans"
               rows={rows}
               columns={columns}
               pageSizeOptions={[5, 10, 20, 50, 100]}

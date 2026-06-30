@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from "react";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
-import StyledDataGrid from "../ui/TableStyle.tsx";
+import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type { NotificationItemDto } from "../../api/orvalModelShim";
 import { FaCheck, FaExpandAlt } from "react-icons/fa";
@@ -177,7 +177,8 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
           borderRadius: "8px",
         }}
       >
-        <StyledDataGrid
+        <Grid
+          gridId="notifications"
           rows={rows}
           columns={columns}
           rowCount={totalCount}

@@ -3,7 +3,7 @@ import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaBug, FaSync, FaWindows } from "react-icons/fa";
-import StyledDataGrid from "../components/ui/TableStyle.tsx";
+import Grid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import { getApiBaseUrlResolved } from "../api/apirequest";
 import { ACCESS_TOKEN_KEY } from "../utils/const";
@@ -223,7 +223,8 @@ export default function WindowsCrashReportsSettings() {
           className="data-grid-wrap"
           style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}
         >
-          <StyledDataGrid
+          <Grid
+            gridId="windows-crash-reports"
             rows={filteredRows}
             columns={columns}
             getRowId={(r) => (r as RecentWindowsCrashReportDto).id}

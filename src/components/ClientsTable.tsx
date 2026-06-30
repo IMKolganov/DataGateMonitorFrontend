@@ -2,7 +2,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
-import StyledDataGrid from "./ui/TableStyle.tsx";
+import Grid from "./ui/TableStyle.tsx";
 import CustomThemeProvider from "./ui/ThemeProvider.tsx";
 import { Link, useParams } from "react-router-dom";
 import type { VpnClientInfoDto } from "../api/orvalModelShim";
@@ -252,7 +252,8 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                     borderRadius: "8px",
                 }}
             >
-                <StyledDataGrid
+                <Grid
+                    gridId="vpn-clients"
                     rows={rows}
                     columns={columns}
                     autoHeight

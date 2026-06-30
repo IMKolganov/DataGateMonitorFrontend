@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaGlobe, FaSync } from "react-icons/fa";
 import { keepPreviousData } from "@tanstack/react-query";
-import StyledDataGrid from "../ui/TableStyle.tsx";
+import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import { useGetApiVpnDnsQueriesTopDomains } from "../../api/orval/vpn-dns-query/vpn-dns-query";
 import type { VpnDnsTopDomainDto, VpnDnsTopDomainsResponse } from "../../api/orvalModelShim";
@@ -95,7 +95,8 @@ export function TopVisitedDomainsSection({ from, to }: TopVisitedDomainsSectionP
             borderRadius: "8px",
           }}
         >
-          <StyledDataGrid
+          <Grid
+            gridId="top-visited-domains"
             rows={rows}
             columns={columns}
             loading={query.isLoading || query.isFetching}

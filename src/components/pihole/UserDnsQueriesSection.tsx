@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaGlobe, FaSync } from "react-icons/fa";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import StyledDataGrid from "../ui/TableStyle.tsx";
+import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import DateRangeFilter, { type DateRangeChange, type Grouping } from "../DateRangeFilter";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
@@ -144,7 +144,8 @@ export function UserDnsQueriesSection({
             borderRadius: "8px",
           }}
         >
-          <StyledDataGrid
+          <Grid
+            gridId="user-dns-queries"
             rows={rows}
             columns={columns}
             getRowId={(r) => r.id ?? 0}

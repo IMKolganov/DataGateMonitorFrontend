@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
-import StyledDataGrid from "../ui/TableStyle.tsx";
+import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import { FaBan, FaUserShield } from "react-icons/fa";
 import type { TelegramBotUserDto, TelegramUserActionRequest } from "../../api/orvalModelShim";
@@ -180,7 +180,8 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
           borderRadius: "8px",
         }}
       >
-        <StyledDataGrid
+        <Grid
+          gridId="telegram-bot-users"
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50, 100]}

@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { FaBell } from "react-icons/fa";
 import "../css/Settings.css";
 import "../css/Table.css";
-import StyledDataGrid from "../components/ui/TableStyle.tsx";
+import Grid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import type {
   EnumsApplicationNotificationKind,
@@ -408,7 +408,8 @@ export default function NotificationVpnProfileSettings() {
             marginTop: 16,
           }}
         >
-          <StyledDataGrid
+          <Grid
+            gridId="notification-vpn-profiles"
             getRowId={(r) => r.kind}
             rows={gridRows}
             columns={columns}

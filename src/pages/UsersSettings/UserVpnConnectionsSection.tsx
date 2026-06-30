@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { FaGlobe, FaTable } from "react-icons/fa";
 import DateRangeFilter, { type DateRangeChange, type Grouping } from "../../components/DateRangeFilter";
-import StyledDataGrid from "../../components/ui/TableStyle.tsx";
+import Grid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
 import type { GridColDef } from "@mui/x-data-grid";
 import { keepPreviousData } from "@tanstack/react-query";
@@ -164,7 +164,8 @@ export function UserVpnConnectionsSection({ externalId }: UserVpnConnectionsSect
         style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}
       >
         <CustomThemeProvider>
-          <StyledDataGrid
+          <Grid
+            gridId="user-vpn-connections-series"
             rows={gridRows}
             columns={
               [
