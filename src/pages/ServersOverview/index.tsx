@@ -61,6 +61,8 @@ import { canViewUserStatisticsScope } from "../../utils/auth/canViewUserStatisti
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { UserStatisticsAccessDenied } from "./UserStatisticsAccessDenied";
 import { UserDnsQueriesSection } from "../../components/pihole/UserDnsQueriesSection";
+import { UserOpenVpnEventsSection } from "../../components/openvpn/UserOpenVpnEventsSection";
+import { UserClientAppVersionsSection } from "../../components/openvpn/UserClientAppVersionsSection";
 import { TopVisitedDomainsSection } from "../../components/pihole/TopVisitedDomainsSection";
 import { serverPiHoleEnabled, shouldShowUserDnsQueries } from "../../utils/pihole/serverPiHoleEnabled";
 
@@ -197,6 +199,14 @@ export default function ServersOverview() {
     scopedServerPiHole,
     viewerIsAdmin,
   );
+  const showUserOpenVpnEvents =
+    Boolean(statsExternalId && vpnServerId != null && vpnServerId > 0 && viewerIsAdmin);
+
+  const [userProfileCn, setUserProfileCn] = useState<string | null>(null);
+
+  useEffect(() => {
+    setUserProfileCn(null);
+  }, [statsExternalId, vpnServerId]);
 
   const lastErrorKey = useRef<string>("");
 
@@ -874,13 +884,34 @@ export default function ServersOverview() {
         </section>
       ) : null}
 
-      <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} externalId={statsExternalId ?? null} />
+      <div className="servers-overview-geo-map">
+        <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} externalId={statsExternalId ?? null} />
+      </div>
+
+      {showUserOpenVpnEvents ? (
+        <>
+          <UserClientAppVersionsSection
+            externalId={statsExternalId}
+            vpnServerId={vpnServerId!}
+            selectedCn={userProfileCn}
+          />
+          <UserOpenVpnEventsSection
+            externalId={statsExternalId}
+            vpnServerId={vpnServerId!}
+            selectedCn={userProfileCn}
+            onSelectedCnChange={setUserProfileCn}
+          />
+        </>
+      ) : null}
 
       {showUserDnsQueries ? (
         <UserDnsQueriesSection
           externalId={statsExternalId}
           vpnServerId={vpnServerId ?? 0}
           title="Pi-hole DNS history"
+          selectedCn={showUserOpenVpnEvents ? userProfileCn : undefined}
+          onSelectedCnChange={showUserOpenVpnEvents ? setUserProfileCn : undefined}
+          hideProfilePicker={showUserOpenVpnEvents}
         />
       ) : null}
 

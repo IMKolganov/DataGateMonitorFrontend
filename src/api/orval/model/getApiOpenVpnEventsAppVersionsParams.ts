@@ -5,22 +5,12 @@
  * OpenAPI spec version: v1
  */
 
-export type GetApiOpenVpnEventsGetByServerParams = {
+export type GetApiOpenVpnEventsAppVersionsParams = {
 /**
  * @minimum 1
  * @maximum 2147483647
  */
 VpnServerId: number;
-/**
- * @minimum 1
- * @maximum 2147483647
- */
-Page?: number;
-/**
- * @minimum 1
- * @maximum 2147483647
- */
-PageSize?: number;
 CommonName?: string;
 ExternalId?: string;
 };

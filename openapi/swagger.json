@@ -8635,6 +8635,20 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "CommonName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -8654,6 +8668,62 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Api.VpnServerEvent.Responses.VpnServerEventResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/open-vpn-events/app-versions": {
+      "get": {
+        "tags": [
+          "VpnServerEvent"
+        ],
+        "parameters": [
+          {
+            "name": "VpnServerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "CommonName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.Collections.Generic.IReadOnlyList_VpnServerEvent.Dto.VpnClientAppVersionSummaryItemDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.Collections.Generic.IReadOnlyList_VpnServerEvent.Dto.VpnClientAppVersionSummaryItemDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.Collections.Generic.IReadOnlyList_VpnServerEvent.Dto.VpnClientAppVersionSummaryItemDto"
                 }
               }
             }
@@ -11983,6 +12053,26 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/VpnDnsQuery.Dto.VpnDnsProfileSummaryItemDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.System.Collections.Generic.IReadOnlyList_VpnServerEvent.Dto.VpnClientAppVersionSummaryItemDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VpnServerEvent.Dto.VpnClientAppVersionSummaryItemDto"
             },
             "nullable": true
           }
@@ -17231,6 +17321,24 @@
           "lastError": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VpnServerEvent.Dto.VpnClientAppVersionSummaryItemDto": {
+        "type": "object",
+        "properties": {
+          "ivGuiVer": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastConnectedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "connectionCount": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

@@ -85,6 +85,7 @@ export type { VpnServersDtoVpnServerV2Dto as VpnServerV2Dto } from "./orval/mode
 export type { VpnServersDtoVpnServerWithStatusDto as VpnServerWithStatusDto } from "./orval/model/vpnServersDtoVpnServerWithStatusDto";
 export type { VpnServersDtoVpnServerWithStatusV2Dto as VpnServerWithStatusV2Dto } from "./orval/model/vpnServersDtoVpnServerWithStatusV2Dto";
 export type { VpnServerEventDtoVpnServerEventLogDto as VpnServerEventLogDto } from "./orval/model/vpnServerEventDtoVpnServerEventLogDto";
+export type { VpnServerEventDtoVpnClientAppVersionSummaryItemDto as VpnClientAppVersionSummaryItemDto } from "./orval/model/vpnServerEventDtoVpnClientAppVersionSummaryItemDto";
 export type { VpnServersResponsesVpnServerResponse as VpnServerResponse } from "./orval/model/vpnServersResponsesVpnServerResponse";
 export type { VpnServersResponsesVpnServersV2Response as VpnServersV2Response } from "./orval/model/vpnServersResponsesVpnServersV2Response";
 export type { VpnServersResponsesVpnServersV3Response as VpnServersV3Response } from "./orval/model/vpnServersResponsesVpnServersV3Response";
