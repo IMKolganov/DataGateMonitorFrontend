@@ -8,7 +8,8 @@ import type { EnumsCertExpiryProfileOutcome } from './enumsCertExpiryProfileOutc
 
 export interface CertExpiryDtoCertExpiryProfileResultDto {
   issuedOvpnFileId?: number;
-  commonName?: string;
+  /** @nullable */
+  commonName?: string | null;
   outcome?: EnumsCertExpiryProfileOutcome;
   /** @nullable */
   expiryUtc?: string | null;

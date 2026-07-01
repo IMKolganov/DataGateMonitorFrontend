@@ -98,7 +98,7 @@ export type { VpnDnsQueryDtoVpnDnsQueryLogDto as VpnDnsQueryLogDto } from "./orv
 export type { VpnDnsQueryDtoVpnDnsTopDomainDto as VpnDnsTopDomainDto } from "./orval/model/vpnDnsQueryDtoVpnDnsTopDomainDto";
 export type { VpnDnsQueryResponsesVpnDnsQueryPageResponse as VpnDnsQueryPageResponse } from "./orval/model/vpnDnsQueryResponsesVpnDnsQueryPageResponse";
 export type { VpnDnsQueryResponsesVpnDnsTopDomainsResponse as VpnDnsTopDomainsResponse } from "./orval/model/vpnDnsQueryResponsesVpnDnsTopDomainsResponse";
-export type { VpnDnsQueryResponsesVpnDnsProfileSummaryResponseItem as VpnDnsProfileSummaryItem } from "./orval/model/vpnDnsQueryResponsesVpnDnsProfileSummaryResponseItem";
+export type { VpnDnsQueryDtoVpnDnsProfileSummaryItemDto as VpnDnsProfileSummaryItem } from "./orval/model/vpnDnsQueryDtoVpnDnsProfileSummaryItemDto";
 export type { VpnServerPiHoleResponsesVpnServerPiHoleConfigResponse as VpnServerPiHoleConfigResponse } from "./orval/model/vpnServerPiHoleResponsesVpnServerPiHoleConfigResponse";
 export type { VpnServerPiHoleDtoVpnServerPiHoleConfigDto as VpnServerPiHoleConfigDto } from "./orval/model/vpnServerPiHoleDtoVpnServerPiHoleConfigDto";
 export type { VpnServerPiHoleRequestsUpsertVpnServerPiHoleConfigRequest as UpsertVpnServerPiHoleConfigRequest } from "./orval/model/vpnServerPiHoleRequestsUpsertVpnServerPiHoleConfigRequest";

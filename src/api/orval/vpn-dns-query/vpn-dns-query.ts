@@ -20,8 +20,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiSystemCollectionsGenericIReadOnlyListVpnDnsQueryDtoVpnDnsProfileSummaryItemDto,
   ApiSystemString,
-  ApiVpnDnsQueryResponsesVpnDnsProfileSummaryListResponse,
   ApiVpnDnsQueryResponsesVpnDnsQueryPageResponse,
   ApiVpnDnsQueryResponsesVpnDnsTopDomainsResponse,
   GetApiVpnDnsQueriesProfileSummaryParams,
@@ -144,7 +144,7 @@ export const getApiVpnDnsQueriesProfileSummary = (
 ) => {
 
 
-      return ogmMutator<ApiVpnDnsQueryResponsesVpnDnsProfileSummaryListResponse>(
+      return ogmMutator<ApiSystemCollectionsGenericIReadOnlyListVpnDnsQueryDtoVpnDnsProfileSummaryItemDto>(
       {url: `/api/vpn-dns-queries/profile-summary`, method: 'GET',
         params, signal
     },

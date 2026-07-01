@@ -5,7 +5,7 @@
  * OpenAPI spec version: v1
  */
 
-export interface VpnDnsQueryResponsesVpnDnsProfileSummaryResponseItem {
+export interface VpnDnsQueryDtoVpnDnsProfileSummaryItemDto {
   /** @nullable */
   commonName?: string | null;
   vpnServerId?: number;

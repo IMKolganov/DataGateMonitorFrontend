@@ -16,7 +16,8 @@ export interface CertExpiryResponsesCertExpiryRunSummaryDto {
   status?: EnumsCertExpiryRunStatus;
   /** @nullable */
   vpnServerId?: number | null;
-  scopeLabel?: string;
+  /** @nullable */
+  scopeLabel?: string | null;
   sendNotifications?: boolean;
   isScheduled?: boolean;
   serversChecked?: number;
