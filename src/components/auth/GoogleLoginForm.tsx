@@ -10,6 +10,8 @@ import {
   applyLoginFlow,
   type TotpChallengeState,
 } from "../../utils/auth/handleLoginResponse";
+import { acceptsThirdParty } from "../../utils/gdpr/cookieConsent";
+import { useCookieConsent } from "../../contexts/CookieConsentContext";
 
 type GoogleCredentialResponse = { credential?: string };
 
@@ -47,6 +49,8 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({
   redirectPath = "/",
   onTotpChallenge,
 }) => {
+    const { strings, openSettings, consent } = useCookieConsent();
+    const thirdPartyAllowed = acceptsThirdParty();
     const [error, setError] = useState<string>("");
     const [scriptReady, setScriptReady] = useState<boolean>(false);
     const buttonContainerRef = useRef<HTMLDivElement>(null);
@@ -179,6 +183,11 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({
 
         const initGoogle = async () => {
             setScriptReady(false);
+            setError("");
+
+            if (!thirdPartyAllowed) {
+                return;
+            }
 
             const { googleClientId } = getRuntimeEnv();
             if (!googleClientId) {
@@ -229,7 +238,7 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({
         return () => {
             cancelled = true;
         };
-    }, [handleGoogleCredential, renderGoogleButton]);
+    }, [handleGoogleCredential, renderGoogleButton, thirdPartyAllowed, consent?.decidedAt]);
 
     useEffect(() => {
         if (!scriptReady) {
@@ -257,11 +266,20 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({
         <>
             {error && <p className="error-message">{error}</p>}
 
-            <div className="login-item">
-                <div ref={buttonContainerRef} className="google-login-wrapper" />
-            </div>
+            {!thirdPartyAllowed ? (
+                <p className="google-consent-hint">
+                    {strings.googleSignInDisabled}{" "}
+                    <button type="button" onClick={openSettings}>
+                        {strings.cookieSettings}
+                    </button>
+                </p>
+            ) : (
+                <div className="login-item">
+                    <div ref={buttonContainerRef} className="google-login-wrapper" />
+                </div>
+            )}
 
-            {(!scriptReady || isPending) && (
+            {thirdPartyAllowed && (!scriptReady || isPending) && (
                 <div className="login-item">
                     <span>Loading...</span>
                 </div>

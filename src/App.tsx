@@ -25,6 +25,9 @@ import { scheduleAutoLogout } from "./utils/auth/tokenExpiryScheduler.ts";
 import { RequireAdmin } from "./components/auth/RequireAdmin.tsx";
 import { RequireAdminTotpSetup } from "./components/auth/RequireAdminTotpSetup.tsx";
 import { withSuspense } from "./utils/withSuspense.tsx";
+import { CookieConsentProvider } from "./contexts/CookieConsentContext.tsx";
+import CookieConsentBanner from "./components/gdpr/CookieConsentBanner.tsx";
+import CookieSettingsPanel from "./components/gdpr/CookieSettingsPanel.tsx";
 
 // Lazy pages
 const About = lazy(() => import("./pages/About"));
@@ -62,6 +65,7 @@ const StatusStreamLogs = lazy(() => import("./pages/StatusStreamLogs"));
 const XrayLoginPage = lazy(() => import("./pages/xray/XrayLoginPage.tsx"));
 const XrayPortalPage = lazy(() => import("./pages/xray/XrayPortalPage.tsx"));
 const XrayRegisterPage = lazy(() => import("./pages/xray/XrayRegisterPage.tsx"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.tsx"));
 
 const isAuthenticated = () => !!localStorage.getItem(ACCESS_TOKEN_KEY);
 
@@ -75,6 +79,7 @@ const XrayPrivateRoute = ({ children }: { children: ReactNode }): React.ReactEle
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const isAuthPage =
+    location.pathname === "/privacy" ||
     location.pathname === "/login" ||
     location.pathname === "/xray/login" ||
     location.pathname === "/xray/register" ||
@@ -110,8 +115,10 @@ function App() {
   return (
     <div className="app-container">
       <Router>
+        <CookieConsentProvider>
         <Layout>
           <Routes>
+            <Route path="/privacy" element={withSuspense(<PrivacyPolicy />)} />
             <Route path="/login" element={withSuspense(<LoginPage />)} />
             <Route path="/xray/login" element={withSuspense(<XrayLoginPage />)} />
             <Route path="/xray/register" element={withSuspense(<XrayRegisterPage />)} />
@@ -238,6 +245,9 @@ function App() {
             />
           </Routes>
         </Layout>
+        <CookieConsentBanner />
+        <CookieSettingsPanel />
+        </CookieConsentProvider>
       </Router>
 
       <ToastContainer
