@@ -1,6 +1,6 @@
 import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import Cookies from "js-cookie";
+import { getPreferenceCookie, setPreferenceCookie } from "../utils/gdpr/cookieConsent";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import type { VpnClientInfoDto } from "../api/orvalModelShim";
@@ -400,19 +400,19 @@ const VpnMap: React.FC<VpnMapProps> = ({
   const [globeHeight, setGlobeHeight] = useState(580);
 
   const [selectedLayer, setSelectedLayer] = useState<keyof typeof tileLayers>(
-      (Cookies.get("selectedMapLayer") as keyof typeof tileLayers) || "Carto Dark"
+      (getPreferenceCookie("selectedMapLayer") as keyof typeof tileLayers) || "Carto Dark"
   );
   const [pointColor, setPointColor] = useState<MarkerColor>(
-      (Cookies.get("selectedPointColor") as MarkerColor) || "red"
+      (getPreferenceCookie("selectedPointColor") as MarkerColor) || "red"
   );
   const [viewMode, setViewMode] = useState<MapViewMode>(
-      (Cookies.get("selectedMapViewMode") as MapViewMode) || "map"
+      (getPreferenceCookie("selectedMapViewMode") as MapViewMode) || "map"
   );
   const [performanceMode, setPerformanceMode] = useState<PerformanceMode>(
-      (Cookies.get("selectedMapPerformanceMode") as PerformanceMode) || "auto"
+      (getPreferenceCookie("selectedMapPerformanceMode") as PerformanceMode) || "auto"
   );
   const [globeTrafficLayer, setGlobeTrafficLayer] = useState<GlobeTrafficLayer>(
-      (Cookies.get("selectedGlobeTrafficLayer") as GlobeTrafficLayer) || "arcs"
+      (getPreferenceCookie("selectedGlobeTrafficLayer") as GlobeTrafficLayer) || "arcs"
   );
   const [viewportSize, setViewportSize] = useState(() => ({
     width: window.innerWidth,
@@ -431,19 +431,19 @@ const VpnMap: React.FC<VpnMapProps> = ({
   }, []);
 
   useEffect(() => {
-    Cookies.set("selectedMapLayer", selectedLayer, { expires: 365 });
+    setPreferenceCookie("selectedMapLayer", selectedLayer);
   }, [selectedLayer]);
   useEffect(() => {
-    Cookies.set("selectedPointColor", pointColor, { expires: 365 });
+    setPreferenceCookie("selectedPointColor", pointColor);
   }, [pointColor]);
   useEffect(() => {
-    Cookies.set("selectedMapViewMode", viewMode, { expires: 365 });
+    setPreferenceCookie("selectedMapViewMode", viewMode);
   }, [viewMode]);
   useEffect(() => {
-    Cookies.set("selectedMapPerformanceMode", performanceMode, { expires: 365 });
+    setPreferenceCookie("selectedMapPerformanceMode", performanceMode);
   }, [performanceMode]);
   useEffect(() => {
-    Cookies.set("selectedGlobeTrafficLayer", globeTrafficLayer, { expires: 365 });
+    setPreferenceCookie("selectedGlobeTrafficLayer", globeTrafficLayer);
   }, [globeTrafficLayer]);
 
   useEffect(() => {

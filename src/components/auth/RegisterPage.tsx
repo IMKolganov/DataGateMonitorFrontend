@@ -4,6 +4,8 @@ import { postApiAuthRegister } from "../../api/orval/auth/auth";
 import type { RegisterUserRequest } from "../../api/orvalModelShim";
 import { FaUserPlus } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
+import GdprFooterLinks from "../gdpr/GdprFooterLinks";
+import { useCookieConsent } from "../../contexts/CookieConsentContext";
 import "../../css/Login.css";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
@@ -14,11 +16,13 @@ interface RegisterPageProps {
 
 const RegisterPage: React.FC<RegisterPageProps> = ({ loginPath = "/login" }) => {
   const navigate = useNavigate();
+  const { strings } = useCookieConsent();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -27,6 +31,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ loginPath = "/login" }) => 
     password.trim().length > 0 &&
     confirmPassword.trim().length > 0 &&
     password === confirmPassword &&
+    privacyAccepted &&
     !loading;
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -35,6 +40,11 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ loginPath = "/login" }) => 
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+
+    if (!privacyAccepted) {
+      setError(strings.registerPrivacyRequired);
       return;
     }
 
@@ -172,6 +182,18 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ loginPath = "/login" }) => 
               />
             </div>
 
+            <label className="register-privacy-row">
+              <input
+                type="checkbox"
+                checked={privacyAccepted}
+                onChange={(event) => setPrivacyAccepted(event.target.checked)}
+              />
+              <span>
+                {strings.registerPrivacyLabel}{" "}
+                <Link to="/privacy">{strings.privacyPolicy}</Link>.
+              </span>
+            </label>
+
             <div className="login-item">
               <button
                 className="btn primary btn-fullwidth"
@@ -189,6 +211,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ loginPath = "/login" }) => 
           <p>
             Already have an account? <Link to={loginPath}>Sign in</Link>
           </p>
+          <GdprFooterLinks />
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import Cookies from "js-cookie";
+import { getPreferenceCookie, setPreferenceCookie } from "../../utils/gdpr/cookieConsent";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { toast } from "react-toastify";
@@ -239,13 +239,13 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                                                           }) => {
     const wrapperRef = useRef<HTMLDivElement | null>(null);
     const [selectedLayer, setSelectedLayer] = useState<keyof typeof tileLayers>(
-        (Cookies.get("selectedMapLayer") as keyof typeof tileLayers) || "Carto Dark"
+        (getPreferenceCookie("selectedMapLayer") as keyof typeof tileLayers) || "Carto Dark"
     );
     const [pointStyle, setPointStyle] = useState<"by_traffic" | "single">(
-        (Cookies.get("geoPointStyle") as "by_traffic" | "single") || "by_traffic"
+        (getPreferenceCookie("geoPointStyle") as "by_traffic" | "single") || "by_traffic"
     );
     const [pointColor, setPointColor] = useState<PointColorKey>(
-        (Cookies.get("geoPointColor") as PointColorKey) || "blue"
+        (getPreferenceCookie("geoPointColor") as PointColorKey) || "blue"
     );
     const [points, setPoints] = useState<GeoPointAggDto[]>([]);
     const [hideZeroTraffic, setHideZeroTraffic] = useState(false);
@@ -278,13 +278,13 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
     };
 
     useEffect(() => {
-        Cookies.set("selectedMapLayer", selectedLayer, { expires: 365 });
+        setPreferenceCookie("selectedMapLayer", selectedLayer);
     }, [selectedLayer]);
     useEffect(() => {
-        Cookies.set("geoPointStyle", pointStyle, { expires: 365 });
+        setPreferenceCookie("geoPointStyle", pointStyle);
     }, [pointStyle]);
     useEffect(() => {
-        Cookies.set("geoPointColor", pointColor, { expires: 365 });
+        setPreferenceCookie("geoPointColor", pointColor);
     }, [pointColor]);
 
     useEffect(() => {
