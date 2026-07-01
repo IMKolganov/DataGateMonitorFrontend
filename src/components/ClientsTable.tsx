@@ -2,7 +2,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
-import StyledDataGrid from "./ui/TableStyle.tsx";
+import Grid from "./ui/TableStyle.tsx";
 import CustomThemeProvider from "./ui/ThemeProvider.tsx";
 import { Link, useParams } from "react-router-dom";
 import type { VpnClientInfoDto } from "../api/orvalModelShim";
@@ -112,6 +112,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                 .filter(Boolean)
                 .join("|"),
             remoteIp: client.remoteIp ?? "",
+            proxyRealIp: client.proxyRealIp?.trim() || "—",
             localIp: client.localIp ?? "",
             bytesReceived: formatBytes(client.bytesReceived ?? 0),
             bytesSent: formatBytes(client.bytesSent ?? 0),
@@ -168,6 +169,13 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
         },
         { field: "displayName", headerName: "Display Name", flex: 0.6 },
         { field: "remoteIp", headerName: "Remote Address", flex: 0.6 },
+        {
+            field: "proxyRealIp",
+            headerName: "Real Client IP",
+            flex: 0.6,
+            description:
+                "Public client endpoint resolved via WSS proxy lookup (OpenVPN management shows loopback in Remote Address).",
+        },
         { field: "localIp", headerName: "Local Address", flex: 0.5 },
         { field: "bytesReceived", headerName: "Bytes Received", flex: 0.4 },
         { field: "bytesSent", headerName: "Bytes Sent", flex: 0.4 },
@@ -244,7 +252,8 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                     borderRadius: "8px",
                 }}
             >
-                <StyledDataGrid
+                <Grid
+                    gridId="vpn-clients"
                     rows={rows}
                     columns={columns}
                     autoHeight

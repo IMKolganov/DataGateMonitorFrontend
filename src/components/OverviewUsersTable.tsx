@@ -3,7 +3,7 @@ import React, { useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { Link, useParams } from "react-router-dom";
 import { FaUsers } from "react-icons/fa";
-import StyledDataGrid from "./ui/TableStyle.tsx";
+import Grid from "./ui/TableStyle.tsx";
 import CustomThemeProvider from "./ui/ThemeProvider.tsx";
 import { formatBytes, formatDateWithOffset } from "../utils/utils";
 import "../css/Table.css";
@@ -235,7 +235,8 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
       </h3>
       <CustomThemeProvider>
         <div className="data-grid-wrap data-grid-wrap--inset">
-          <StyledDataGrid
+          <Grid
+            gridId="overview-users"
             rows={rows}
             columns={columns}
             pageSizeOptions={[5, 10, 20, 50, 100]}

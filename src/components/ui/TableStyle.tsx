@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import type { DataGridProps } from "@mui/x-data-grid";
+import type { DataGridProps, GridCallbackDetails, GridColumnResizeParams } from "@mui/x-data-grid";
 import { styled } from "@mui/material/styles";
 import type {} from "@mui/x-data-grid/themeAugmentation";
 import GridToolbarWithExcelClipboard from "./GridToolbarWithExcelClipboard";
+import {
+  applyStoredColumnWidths,
+  getStoredColumnWidths,
+  setStoredColumnWidth,
+} from "../../utils/gridColumnWidths";
 
 const borderColorDark = "#30363d";
 const borderColorLight = "#d0d7de";
@@ -107,22 +112,60 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => {
   };
 });
 
+export type GridProps = DataGridProps & {
+  /** Stable id for persisting column widths per user. */
+  gridId: string;
+};
+
 /**
- * Data grid with toolbar (Columns button) and column menu enabled.
- * Use this as the default grid so users get horizontal scroll, column visibility, and column menu.
+ * Base data grid for the app: shared styling, toolbar, and per-user column width persistence.
+ * All table grids should use this component (not MUI DataGrid or StyledDataGrid directly).
  */
-const AppDataGrid = React.forwardRef<HTMLDivElement, DataGridProps>(function AppDataGrid(props, ref) {
-  const { autoHeight, ...rest } = props;
+const Grid = React.forwardRef<HTMLDivElement, GridProps>(function Grid(props, ref) {
+  const { autoHeight, gridId, columns, onColumnWidthChange, slots, ...rest } = props;
+
+  const [columnWidths, setColumnWidths] = useState(() => getStoredColumnWidths(gridId));
+
+  useEffect(() => {
+    setColumnWidths(getStoredColumnWidths(gridId));
+  }, [gridId]);
+
+  const mergedColumns = useMemo(
+    () => applyStoredColumnWidths(columns ?? [], columnWidths),
+    [columns, columnWidths],
+  );
+
+  const handleColumnWidthChange = useCallback(
+    (
+      params: GridColumnResizeParams,
+      event: Parameters<NonNullable<DataGridProps["onColumnWidthChange"]>>[1],
+      details: GridCallbackDetails,
+    ) => {
+      const field = params.colDef.field;
+      const width = params.width;
+      if (field && Number.isFinite(width) && width > 0) {
+        setColumnWidths((prev) => {
+          const next = { ...prev, [field]: width };
+          setStoredColumnWidth(gridId, field, width);
+          return next;
+        });
+      }
+      onColumnWidthChange?.(params, event, details);
+    },
+    [gridId, onColumnWidthChange],
+  );
+
   return (
     <StyledDataGrid
       ref={ref}
       autoHeight={autoHeight ?? true}
       showToolbar
-      slots={{ toolbar: GridToolbarWithExcelClipboard }}
+      slots={{ toolbar: GridToolbarWithExcelClipboard, ...slots }}
+      columns={mergedColumns}
+      onColumnWidthChange={handleColumnWidthChange}
       {...rest}
     />
   );
 });
 
-export default AppDataGrid;
-export { StyledDataGrid };
+export default Grid;

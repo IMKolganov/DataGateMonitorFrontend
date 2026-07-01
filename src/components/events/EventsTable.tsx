@@ -1,6 +1,6 @@
 import React from "react";
 import type { GridColDef } from "@mui/x-data-grid";
-import StyledDataGrid from "../ui/TableStyle.tsx";
+import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import { formatDateWithOffset } from "../../utils/utils.ts";
 import "../../css/Table.css";
@@ -73,7 +73,8 @@ const EventsTable: React.FC<EventsTableProps> = ({
           borderRadius: "8px",
         }}
       >
-        <StyledDataGrid
+        <Grid
+          gridId="events-table"
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50, 100]}

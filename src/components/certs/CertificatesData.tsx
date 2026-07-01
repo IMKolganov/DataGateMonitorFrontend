@@ -5,6 +5,7 @@ import CertificatesTable from "./CertificatesTable.tsx";
 import AddCertificate from "./AddCertificate.tsx";
 import OpenVpnIssuedFilesSection from "./OpenVpnIssuedFilesSection.tsx";
 import XrayClientLinksSection from "./XrayClientLinksSection.tsx";
+import CertExpiryCheckPanel from "../certExpiry/CertExpiryCheckPanel.tsx";
 import { toast } from "react-toastify";
 
 import {
@@ -127,7 +128,16 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId, stack = "openvpn" }) =
       {isXrayStack ? (
         <XrayClientLinksSection vpnServerId={vpnServerId} />
       ) : (
-        <OpenVpnIssuedFilesSection vpnServerId={vpnServerId} />
+        <>
+          <section className="certificates-page__section server-details__panel" aria-labelledby="cert-expiry-check-heading">
+            <h3 id="cert-expiry-check-heading" className="settings-card__h3-with-icon">
+              <FaCertificate className="icon" aria-hidden />
+              <span>Certificate expiry check</span>
+            </h3>
+            <CertExpiryCheckPanel vpnServerId={numericId} showHistory={false} />
+          </section>
+          <OpenVpnIssuedFilesSection vpnServerId={vpnServerId} />
+        </>
       )}
 
       <section

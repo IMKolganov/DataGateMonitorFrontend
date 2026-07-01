@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
-import StyledDataGrid from "../ui/TableStyle.tsx";
+import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type { UserDto } from "../../api/orvalModelShim";
 import "../../css/Table.css";
@@ -101,7 +101,8 @@ const UsersTable: React.FC<UsersTableProps> = ({
           borderRadius: "8px",
         }}
       >
-        <StyledDataGrid
+        <Grid
+          gridId="settings-users"
           rows={rows}
           columns={columns}
           rowCount={totalCount}

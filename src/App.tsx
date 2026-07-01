@@ -25,14 +25,18 @@ import { scheduleAutoLogout } from "./utils/auth/tokenExpiryScheduler.ts";
 import { RequireAdmin } from "./components/auth/RequireAdmin.tsx";
 import { RequireAdminTotpSetup } from "./components/auth/RequireAdminTotpSetup.tsx";
 import { withSuspense } from "./utils/withSuspense.tsx";
+import { CookieConsentProvider } from "./contexts/CookieConsentContext.tsx";
+import CookieConsentBanner from "./components/gdpr/CookieConsentBanner.tsx";
+import CookieSettingsPanel from "./components/gdpr/CookieSettingsPanel.tsx";
 
 // Lazy pages
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
 const ServersWithDetails = lazy(() => import("./pages/ServersWithDetails"));
+const ServerDetails = lazy(() => import("./pages/ServerDetails"));
 const ServerForm = lazy(() => import("./pages/ServerForm"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const ServerDetails = lazy(() => import("./pages/ServerDetails"));
+const PiHoleServerTab = lazy(() => import("./pages/PiHoleServerTab"));
 const Settings = lazy(() => import("./pages/Settings"));
 const ApplicationSettings = lazy(() => import("./pages/ApplicationSettings"));
 const GeneralTab = lazy(() => import("./pages/GeneralServerDetails"));
@@ -48,6 +52,8 @@ const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
 const UsersSettings = lazy(() => import("./pages/UsersSettings/UsersSettings"));
 const UserQuotasPage = lazy(() => import("./pages/UsersSettings/UserQuotasPage"));
 const UserDetailPage = lazy(() => import("./pages/UsersSettings/UserDetailPage"));
+const CertExpirySettings = lazy(() => import("./pages/CertExpirySettings"));
+const CertExpiryRunDetailPage = lazy(() => import("./pages/CertExpiryRunDetailPage"));
 const EmailBroadcastSettings = lazy(() => import("./pages/EmailBroadcastSettings"));
 const AdminPasswordRecoverySettings = lazy(() => import("./pages/AdminPasswordRecoverySettings"));
 const AdminSecuritySettings = lazy(() => import("./pages/AdminSecuritySettings"));
@@ -59,6 +65,7 @@ const StatusStreamLogs = lazy(() => import("./pages/StatusStreamLogs"));
 const XrayLoginPage = lazy(() => import("./pages/xray/XrayLoginPage.tsx"));
 const XrayPortalPage = lazy(() => import("./pages/xray/XrayPortalPage.tsx"));
 const XrayRegisterPage = lazy(() => import("./pages/xray/XrayRegisterPage.tsx"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.tsx"));
 
 const isAuthenticated = () => !!localStorage.getItem(ACCESS_TOKEN_KEY);
 
@@ -72,6 +79,7 @@ const XrayPrivateRoute = ({ children }: { children: ReactNode }): React.ReactEle
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const isAuthPage =
+    location.pathname === "/privacy" ||
     location.pathname === "/login" ||
     location.pathname === "/xray/login" ||
     location.pathname === "/xray/register" ||
@@ -107,8 +115,10 @@ function App() {
   return (
     <div className="app-container">
       <Router>
+        <CookieConsentProvider>
         <Layout>
           <Routes>
+            <Route path="/privacy" element={withSuspense(<PrivacyPolicy />)} />
             <Route path="/login" element={withSuspense(<LoginPage />)} />
             <Route path="/xray/login" element={withSuspense(<XrayLoginPage />)} />
             <Route path="/xray/register" element={withSuspense(<XrayRegisterPage />)} />
@@ -159,6 +169,7 @@ function App() {
                         </Route>
 
                         <Route path="events" element={withSuspense(<Events />)} />
+                        <Route path="pi-hole" element={withSuspense(<PiHoleServerTab />)} />
                       </Route>
                     </Route>
 
@@ -176,6 +187,8 @@ function App() {
                       <Route path="quotas" element={withSuspense(<QuotaPlansSettings />)} />
                       <Route path="geolitedb" element={withSuspense(<GeoLiteDbSettings />)} />
                       <Route path="vpn-notifications" element={withSuspense(<NotificationVpnProfileSettings />)} />
+                      <Route path="cert-expiry" element={withSuspense(<CertExpirySettings />)} />
+                      <Route path="cert-expiry/runs/:runId" element={withSuspense(<CertExpiryRunDetailPage />)} />
                       <Route path="telegrambot" element={withSuspense(<TelegramBotSettings />)} />
                       <Route path="users/quotas" element={withSuspense(<UserQuotasPage />)} />
                       <Route path="users" element={withSuspense(<UsersSettings />)} />
@@ -205,8 +218,22 @@ function App() {
                         </RequireAdmin>
                       }
                     />
-                    <Route path="/servers/add" element={withSuspense(<ServerForm />)} />
-                    <Route path="/servers/edit/:serverId" element={withSuspense(<ServerForm />)} />
+                    <Route
+                      path="/servers/add"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<ServerForm />)}
+                        </RequireAdmin>
+                      }
+                    />
+                    <Route
+                      path="/servers/edit/:serverId"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<ServerForm />)}
+                        </RequireAdmin>
+                      }
+                    />
                     <Route path="/about" element={withSuspense(<About />)} />
                     <Route path="/contact" element={withSuspense(<Contact />)} />
 
@@ -218,6 +245,9 @@ function App() {
             />
           </Routes>
         </Layout>
+        <CookieConsentBanner />
+        <CookieSettingsPanel />
+        </CookieConsentProvider>
       </Router>
 
       <ToastContainer

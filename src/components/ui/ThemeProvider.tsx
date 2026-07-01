@@ -3,6 +3,7 @@ import { ThemeProvider as MuiThemeProvider, createTheme } from "@mui/material/st
 import type { ReactNode } from "react";
 import type {} from "@mui/x-data-grid/themeAugmentation";
 import { useTheme } from "../../contexts/useTheme";
+import { fontSans } from "../../theme/fonts";
 
 const darkPalette = {
   mode: "dark" as const,
@@ -53,6 +54,10 @@ const lightPalette = {
 function getAppTheme(mode: "light" | "dark") {
   const data = mode === "dark" ? darkPalette : lightPalette;
   return createTheme({
+    typography: {
+      fontFamily: fontSans,
+      fontSize: 14,
+    },
     palette: {
       mode: data.mode,
       background: data.background,

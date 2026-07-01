@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
-import StyledDataGrid from "../ui/TableStyle.tsx";
+import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type {
   IssuedOvpnFileDto,
@@ -258,7 +258,8 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           />
         </div>
 
-        <StyledDataGrid
+        <Grid
+          gridId="ovpn-files"
           getRowId={(row) => row.id}
           rows={rows}
           columns={columns}

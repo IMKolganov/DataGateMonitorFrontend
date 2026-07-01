@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
-import StyledDataGrid from "../ui/TableStyle.tsx";
+import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type {
   IssuedOvpnFileDto,
@@ -229,7 +229,8 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
           />
         </div>
 
-        <StyledDataGrid
+        <Grid
+          gridId="xray-client-links"
           getRowId={(row) => row.id}
           rows={rows}
           columns={columns}

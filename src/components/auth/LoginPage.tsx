@@ -9,6 +9,7 @@ import { FaTelegramPlane, FaSun, FaMoon } from "react-icons/fa";
 import { appVersion } from "../../version.ts";
 import { useTheme } from "../../contexts/useTheme";
 import type { TotpChallengeState } from "../../utils/auth/handleLoginResponse";
+import GdprFooterLinks from "../gdpr/GdprFooterLinks";
 
 const LoginPage: React.FC = () => {
     const [showTelegramForm, setShowTelegramForm] = useState(false);
@@ -84,6 +85,7 @@ const LoginPage: React.FC = () => {
                         </p>
                     ) : null}
                     <p>© {new Date().getFullYear()} DataGate Monitor v.{appVersion}</p>
+                    <GdprFooterLinks />
                     <button
                         type="button"
                         className="login-theme-toggle"

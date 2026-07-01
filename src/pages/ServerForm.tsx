@@ -104,6 +104,7 @@ function unwrapServerDto(raw: GetByIdResult | undefined): VpnServerDto | null {
     latitude: (o["latitude"] as number | null | undefined) ?? null,
     longitude: (o["longitude"] as number | null | undefined) ?? null,
     isEnableWss: Boolean(o["isEnableWss"] ?? false),
+    isPiHoleEnabled: Boolean(o["isPiHoleEnabled"] ?? false),
     createDate: o["createDate"] as string | undefined,
     lastUpdate: o["lastUpdate"] as string | undefined,
     tags: Array.isArray(o["tags"]) ? o["tags"] : (o["tags"] as string[] | null | undefined) ?? null,
@@ -455,6 +456,7 @@ const ServerForm: React.FC = () => {
     latitude: null,
     longitude: null,
     isEnableWss: false,
+    isPiHoleEnabled: false,
     createDate: new Date().toISOString(),
     lastUpdate: new Date().toISOString(),
   });
@@ -594,6 +596,7 @@ const ServerForm: React.FC = () => {
         isDisabled: dto.isDisabled ?? false,
         isDefault: dto.isDefault ?? false,
         isEnableWss: dto.isEnableWss ?? false,
+        isPiHoleEnabled: dto.isPiHoleEnabled ?? false,
         lastUpdate: dto.lastUpdate ?? prev.lastUpdate,
         createDate: dto.createDate ?? prev.createDate,
       }));
@@ -781,6 +784,10 @@ const ServerForm: React.FC = () => {
       setServerData((p) => ({ ...p, isEnableWss: checked }));
       return;
     }
+    if (name === "isPiHoleEnabled") {
+      setServerData((p) => ({ ...p, isPiHoleEnabled: checked }));
+      return;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -812,6 +819,7 @@ const ServerForm: React.FC = () => {
           latitude: serverData.latitude ?? null,
           longitude: serverData.longitude ?? null,
           isEnableWss: serverData.isEnableWss ?? false,
+          isPiHoleEnabled: serverData.isPiHoleEnabled ?? false,
           tagIds: selectedTagIds,
           quotaPlanIds: selectedQuotaPlanIds,
         };
@@ -845,6 +853,7 @@ const ServerForm: React.FC = () => {
           latitude: serverData.latitude ?? null,
           longitude: serverData.longitude ?? null,
           isEnableWss: serverData.isEnableWss ?? false,
+          isPiHoleEnabled: serverData.isPiHoleEnabled ?? false,
           quotaPlanIds: selectedQuotaPlanIds,
           tagIds: selectedTagIds,
         };
@@ -1045,6 +1054,24 @@ const ServerForm: React.FC = () => {
                   <span className="checkbox-description">
                     When enabled, the dashboard background service must not poll this server (OpenVPN/Xray
                     metrics). Requires API support for <code>isDisabled</code>.
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            <div className="form-group checkbox-container">
+              <label className="checkbox-label">
+                <input
+                    type="checkbox"
+                    name="isPiHoleEnabled"
+                    checked={Boolean(serverData.isPiHoleEnabled)}
+                    onChange={handleCheckboxChange}
+                    disabled={isFetching || (serverData.serverType ?? VpnServerType.OpenVpn) !== VpnServerType.OpenVpn}
+                />
+                <div className="checkbox-content">
+                  <span className="checkbox-title">Enable Pi-hole integration</span>
+                  <span className="checkbox-description">
+                    Start DNS query collection on this server (configure connection on the Pi-hole tab first).
                   </span>
                 </div>
               </label>

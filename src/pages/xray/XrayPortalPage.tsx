@@ -18,6 +18,7 @@ import { providerExternalIdFromJwtClaims } from "../../utils/auth/providerExtern
 import { VpnServerType } from "../../constants/vpnServerType";
 import { getXrayLanguage, setXrayLanguage, XRAY_LANGUAGE_OPTIONS, XRAY_TRANSLATIONS } from "./i18n";
 import { appVersion } from "../../version";
+import GdprFooterLinks from "../../components/gdpr/GdprFooterLinks";
 import "../../css/XrayPortal.css";
 
 const EMAIL_CLAIM = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress";
@@ -284,6 +285,7 @@ const XrayPortalPage: React.FC = () => {
       </section>
 
       <p className="xray-note xray-login-version">© {new Date().getFullYear()} DataGate Monitor v.{appVersion}</p>
+      <GdprFooterLinks />
     </div>
   );
 };

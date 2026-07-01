@@ -316,7 +316,7 @@
   min-height: 160px;
   resize: vertical;
   line-height: 1.45;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-mono);
 }
 
 .quota-plan-modal .form-row .input:focus,
@@ -648,4 +648,39 @@ h2.settings-page__h2-with-icon > .icon {
 
 .traffic-quota-progress--compact .traffic-quota-progress__bar {
   height: 10px;
+}
+
+.settings-card--mb {
+  margin-bottom: 1.25rem;
+}
+
+.settings-card--mt {
+  margin-top: 1rem;
+}
+
+.settings-card--mt-lg {
+  margin-top: 1.5rem;
+}
+
+.servers-overview-geo-map {
+  margin-bottom: 2rem;
+}
+
+.servers-overview-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.settings-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.settings-card__header h3 {
+  margin: 0;
 }

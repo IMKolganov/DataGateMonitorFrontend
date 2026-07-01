@@ -8,18 +8,22 @@ import { PasswordInput } from "../../components/auth/PasswordInput";
 import { ACCESS_TOKEN_KEY } from "../../utils/const";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 import { getXrayLanguage, setXrayLanguage, XRAY_LANGUAGE_OPTIONS, XRAY_TRANSLATIONS } from "./i18n";
+import { getGdprStrings } from "../../utils/gdpr/i18n";
+import GdprFooterLinks from "../../components/gdpr/GdprFooterLinks";
 import "../../css/XrayPortal.css";
 
 const XrayRegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const [lang, setLang] = useState(getXrayLanguage);
   const t = XRAY_TRANSLATIONS[lang].register;
+  const gdpr = getGdprStrings(lang);
 
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -33,6 +37,7 @@ const XrayRegisterPage: React.FC = () => {
     password.trim().length > 0 &&
     confirmPassword.trim().length > 0 &&
     password === confirmPassword &&
+    privacyAccepted &&
     !loading;
 
   const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -41,6 +46,11 @@ const XrayRegisterPage: React.FC = () => {
 
     if (password !== confirmPassword) {
       setError(t.passwordsDoNotMatch);
+      return;
+    }
+
+    if (!privacyAccepted) {
+      setError(gdpr.registerPrivacyRequired);
       return;
     }
 
@@ -174,6 +184,18 @@ const XrayRegisterPage: React.FC = () => {
               required
             />
 
+            <label className="register-privacy-row">
+              <input
+                type="checkbox"
+                checked={privacyAccepted}
+                onChange={(event) => setPrivacyAccepted(event.target.checked)}
+              />
+              <span>
+                {gdpr.registerPrivacyLabel}{" "}
+                <Link to="/privacy">{gdpr.privacyPolicy}</Link>.
+              </span>
+            </label>
+
             <button className="btn primary btn-fullwidth" type="submit" disabled={!canSubmit}>
               <FaUserPlus className="icon" /> {loading ? t.creatingAccount : t.createAccount}
             </button>
@@ -185,6 +207,7 @@ const XrayRegisterPage: React.FC = () => {
             </p>
           </div>
         </div>
+        <GdprFooterLinks />
       </div>
     </div>
   );
