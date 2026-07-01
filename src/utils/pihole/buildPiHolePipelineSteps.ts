@@ -138,7 +138,7 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
         error = "Collector is disabled on the OpenVPN microservice.";
         summary = `Runtime on microservice: disabled, password ${d.hasAppPassword ? "set" : "not set"}.`;
         fix =
-          "Click Save & apply on this page. After docker recreate the in-memory runtime is lost — apply again.";
+          "Click Save & apply (saved to $DATA_DIR/pihole-runtime-config.json), or set PIHOLE_ENABLED=true and related PIHOLE_* env vars (env wins when set).";
       } else if (!d.hasAppPassword) {
         status = "error";
         statusText = "No password";
@@ -159,13 +159,14 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
         error = `Dashboard subnet (${cfg.clientSubnetPrefix}) differs from microservice (${d.clientSubnetPrefix || "(all)"}).`;
         fix = "Click Save & apply to sync subnet filter.";
       } else if (!d.runtimeConfigAppliedAtUtc) {
-        status = "warning";
-        statusText = "Unknown apply time";
-        summary = "Runtime is enabled but apply timestamp was not recorded.";
+        status = "ok";
+        statusText = "From env";
+        summary =
+          "Collector enabled from container env/appsettings. Set PIHOLE_* env vars to override dashboard config.";
       } else {
         status = "ok";
         statusText = "Applied";
-        summary = `Pushed to ${apiUrl}/api/pi-hole/config at ${fmtUtc(d.runtimeConfigAppliedAtUtc)}.`;
+        summary = `Dashboard config saved at ${fmtUtc(d.runtimeConfigAppliedAtUtc)} ($DATA_DIR/pihole-runtime-config.json). PIHOLE_* env vars override these values when set.`;
       }
     } else {
       status = "pending";

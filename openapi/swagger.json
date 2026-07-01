@@ -11019,6 +11019,136 @@
           }
         }
       }
+    },
+    "/api/cert-expiry/check": {
+      "post": {
+        "tags": [
+          "CertExpiry"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CertExpiry.Requests.RunCertExpiryCheckRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CertExpiry.Requests.RunCertExpiryCheckRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.CertExpiry.Responses.CertExpiryCheckRunResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.CertExpiry.Responses.CertExpiryCheckRunResponse"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.CertExpiry.Responses.CertExpiryCheckRunResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cert-expiry/runs": {
+      "get": {
+        "tags": [
+          "CertExpiry"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "vpnServerId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.CertExpiry.Responses.GetCertExpiryRunsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.CertExpiry.Responses.GetCertExpiryRunsResponse"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.CertExpiry.Responses.GetCertExpiryRunsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cert-expiry/runs/{runId}": {
+      "get": {
+        "tags": [
+          "CertExpiry"
+        ],
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.CertExpiry.Responses.CertExpiryCheckRunResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.CertExpiry.Responses.CertExpiryCheckRunResponse"
+                }
+              },
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.CertExpiry.Responses.CertExpiryCheckRunResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -14071,7 +14201,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": { }
+        "additionalProperties": {}
       },
       "Mobile.Dto.DeviceDto": {
         "required": [
@@ -14900,14 +15030,14 @@
             "nullable": true
           },
           "dailyQuotaBytes": {
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9.223372036854776e+18,
             "minimum": 0,
             "type": "integer",
             "format": "int64",
             "nullable": true
           },
           "monthlyQuotaBytes": {
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9.223372036854776e+18,
             "minimum": 0,
             "type": "integer",
             "format": "int64",
@@ -17911,6 +18041,323 @@
           }
         },
         "additionalProperties": false
+      },
+      "CertExpiry.Requests.RunCertExpiryCheckRequest": {
+        "type": "object",
+        "properties": {
+          "vpnServerId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sendNotifications": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CertExpiry.Dto.CertExpiryCheckSummaryDto": {
+        "type": "object",
+        "properties": {
+          "serversChecked": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "profilesChecked": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "healthy": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expiringSoon": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expired": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingOnNode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serverFailures": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CertExpiry.Dto.CertExpiryProfileResultDto": {
+        "type": "object",
+        "properties": {
+          "issuedOvpnFileId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "commonName": {
+            "type": "string"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/Enums.CertExpiryProfileOutcome"
+          },
+          "expiryUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "daysLeft": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "serialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "pathsMatch": {
+            "type": "boolean"
+          },
+          "notificationSent": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CertExpiry.Dto.CertExpiryServerResultDto": {
+        "type": "object",
+        "properties": {
+          "vpnServerId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serverName": {
+            "type": "string"
+          },
+          "fetchStatus": {
+            "$ref": "#/components/schemas/Enums.CertExpiryServerFetchStatus"
+          },
+          "fetchError": {
+            "type": "string",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "profiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CertExpiry.Dto.CertExpiryProfileResultDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CertExpiry.Responses.CertExpiryCheckRunResponse": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/Enums.CertExpiryRunStatus"
+          },
+          "vpnServerId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "warningDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sendNotifications": {
+            "type": "boolean"
+          },
+          "isScheduled": {
+            "type": "boolean"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/CertExpiry.Dto.CertExpiryCheckSummaryDto"
+          },
+          "servers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CertExpiry.Dto.CertExpiryServerResultDto"
+            },
+            "nullable": true
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CertExpiry.Responses.CertExpiryRunSummaryDto": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/Enums.CertExpiryRunStatus"
+          },
+          "vpnServerId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "sendNotifications": {
+            "type": "boolean"
+          },
+          "isScheduled": {
+            "type": "boolean"
+          },
+          "serversChecked": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "profilesChecked": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expired": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expiringSoon": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingOnNode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serverFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CertExpiry.Responses.GetCertExpiryRunsResponse": {
+        "type": "object",
+        "properties": {
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CertExpiry.Responses.CertExpiryRunSummaryDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Enums.CertExpiryRunStatus": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "Enums.CertExpiryServerFetchStatus": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "Enums.CertExpiryProfileOutcome": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "Api.CertExpiry.Responses.CertExpiryCheckRunResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/CertExpiry.Responses.CertExpiryCheckRunResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.CertExpiry.Responses.GetCertExpiryRunsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/CertExpiry.Responses.GetCertExpiryRunsResponse"
+          }
+        },
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
@@ -17924,7 +18371,7 @@
   },
   "security": [
     {
-      "Bearer": [ ]
+      "Bearer": []
     }
   ],
   "tags": [
@@ -18032,6 +18479,9 @@
     },
     {
       "name": "XrayClientLinks"
+    },
+    {
+      "name": "CertExpiry"
     }
   ]
 }
