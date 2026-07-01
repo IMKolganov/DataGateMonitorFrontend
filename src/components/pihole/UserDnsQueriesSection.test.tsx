@@ -12,8 +12,8 @@ vi.mock("../../hooks/usePersistedPageSize", () => ({
 }));
 
 vi.mock("../../api/orval/vpn-dns-query/vpn-dns-query", () => ({
-  getApiVpnDnsQueriesSearch: vi.fn(),
-  getGetApiVpnDnsQueriesSearchQueryKey: vi.fn(() => ["dns-queries"]),
+  useGetApiVpnDnsQueriesSearch: vi.fn(() => ({ data: undefined, isFetching: false, refetch: vi.fn() })),
+  useGetApiVpnDnsQueriesProfileSummary: vi.fn(() => ({ data: [], isFetching: false, refetch: vi.fn() })),
 }));
 
 vi.mock("../ui/TableStyle.tsx", () => ({ default: () => null }));

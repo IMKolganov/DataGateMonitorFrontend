@@ -21,8 +21,10 @@ import type {
 
 import type {
   ApiSystemString,
+  ApiVpnDnsQueryResponsesVpnDnsProfileSummaryListResponse,
   ApiVpnDnsQueryResponsesVpnDnsQueryPageResponse,
   ApiVpnDnsQueryResponsesVpnDnsTopDomainsResponse,
+  GetApiVpnDnsQueriesProfileSummaryParams,
   GetApiVpnDnsQueriesSearchParams,
   GetApiVpnDnsQueriesTopDomainsParams
 } from '../model';
@@ -125,6 +127,93 @@ export function useGetApiVpnDnsQueriesSearch<TData = Awaited<ReturnType<typeof g
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiVpnDnsQueriesSearchQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiVpnDnsQueriesProfileSummary = (
+    params?: GetApiVpnDnsQueriesProfileSummaryParams,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnDnsQueryResponsesVpnDnsProfileSummaryListResponse>(
+      {url: `/api/vpn-dns-queries/profile-summary`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiVpnDnsQueriesProfileSummaryQueryKey = (params?: GetApiVpnDnsQueriesProfileSummaryParams,) => {
+    return [
+    `/api/vpn-dns-queries/profile-summary`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiVpnDnsQueriesProfileSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>, TError = unknown>(params?: GetApiVpnDnsQueriesProfileSummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiVpnDnsQueriesProfileSummaryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>> = ({ signal }) => getApiVpnDnsQueriesProfileSummary(params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiVpnDnsQueriesProfileSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>>
+export type GetApiVpnDnsQueriesProfileSummaryQueryError = unknown
+
+
+export function useGetApiVpnDnsQueriesProfileSummary<TData = Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>, TError = unknown>(
+ params: undefined |  GetApiVpnDnsQueriesProfileSummaryParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>,
+          TError,
+          Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiVpnDnsQueriesProfileSummary<TData = Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>, TError = unknown>(
+ params?: GetApiVpnDnsQueriesProfileSummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>,
+          TError,
+          Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiVpnDnsQueriesProfileSummary<TData = Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>, TError = unknown>(
+ params?: GetApiVpnDnsQueriesProfileSummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiVpnDnsQueriesProfileSummary<TData = Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>, TError = unknown>(
+ params?: GetApiVpnDnsQueriesProfileSummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnDnsQueriesProfileSummary>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiVpnDnsQueriesProfileSummaryQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

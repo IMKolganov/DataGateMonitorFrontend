@@ -1,19 +1,16 @@
 import { useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaGlobe, FaSync } from "react-icons/fa";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { keepPreviousData } from "@tanstack/react-query";
 import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import DateRangeFilter, { type DateRangeChange, type Grouping } from "../DateRangeFilter";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
-import type { VpnDnsQueryLogDto, VpnDnsQueryPageResponse } from "../../api/orvalModelShim";
+import type { VpnDnsQueryLogDto, VpnDnsQueryPageResponse, VpnDnsProfileSummaryItem } from "../../api/orvalModelShim";
 import {
-  getUserDnsProfileSummary,
-  searchUserDnsQueries,
-  userDnsProfileSummaryQueryKey,
-  userDnsQueriesQueryKey,
-  type VpnDnsProfileSummaryItem,
-} from "../../api/pihole/userDnsQueriesApi";
+  useGetApiVpnDnsQueriesProfileSummary,
+  useGetApiVpnDnsQueriesSearch,
+} from "../../api/orval/vpn-dns-query/vpn-dns-query";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { formatDateWithOffset } from "../../utils/utils";
 import { addDays, endOfToday, startOfToday } from "../../pages/ServersOverview/helpers";
@@ -72,7 +69,7 @@ export function UserDnsQueriesSection({
       VpnServerId: vpnServerId ?? 0,
       ExternalId: selectedCn ? undefined : ext,
       CommonName: selectedCn ?? undefined,
-      MatchUserProfiles: !selectedCn,
+      matchUserProfiles: !selectedCn,
       DomainContains: domainFilter.trim() || undefined,
       FromUtc: from.toISOString(),
       ToUtc: to.toISOString(),
@@ -82,17 +79,12 @@ export function UserDnsQueriesSection({
     [vpnServerId, ext, selectedCn, domainFilter, from, to, page, pageSize],
   );
 
-  const summaryQuery = useQuery({
-    queryKey: userDnsProfileSummaryQueryKey(summaryParams),
-    enabled: admin && hasIdentity,
-    queryFn: () => getUserDnsProfileSummary(summaryParams),
+  const summaryQuery = useGetApiVpnDnsQueriesProfileSummary(summaryParams, {
+    query: { enabled: admin && hasIdentity },
   });
 
-  const query = useQuery({
-    queryKey: userDnsQueriesQueryKey(searchParams),
-    enabled: admin && hasIdentity,
-    placeholderData: keepPreviousData,
-    queryFn: () => searchUserDnsQueries(searchParams),
+  const query = useGetApiVpnDnsQueriesSearch(searchParams, {
+    query: { enabled: admin && hasIdentity, placeholderData: keepPreviousData },
   });
 
   const profileRows = (summaryQuery.data ?? []) as VpnDnsProfileSummaryItem[];

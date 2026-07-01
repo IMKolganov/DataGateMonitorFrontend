@@ -15,4 +15,5 @@ FromUtc?: string;
 ToUtc?: string;
 Page?: number;
 PageSize?: number;
+matchUserProfiles?: boolean;
 };

@@ -6446,6 +6446,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "matchUserProfiles",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -6465,6 +6472,68 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Api.VpnDnsQuery.Responses.VpnDnsQueryPageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/vpn-dns-queries/profile-summary": {
+      "get": {
+        "tags": [
+          "VpnDnsQuery"
+        ],
+        "parameters": [
+          {
+            "name": "externalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "vpnServerId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "fromUtc",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "toUtc",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnDnsQuery.Responses.VpnDnsProfileSummaryListResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnDnsQuery.Responses.VpnDnsProfileSummaryListResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnDnsQuery.Responses.VpnDnsProfileSummaryListResponse"
                 }
               }
             }
@@ -12291,6 +12360,26 @@
         },
         "additionalProperties": false
       },
+      "Api.VpnDnsQuery.Responses.VpnDnsProfileSummaryListResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VpnDnsQuery.Responses.VpnDnsProfileSummaryResponseItem"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.VpnDnsQuery.Responses.VpnDnsTopDomainsResponse": {
         "type": "object",
         "properties": {
@@ -16089,6 +16178,32 @@
           "queryCount": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "VpnDnsQuery.Responses.VpnDnsProfileSummaryResponseItem": {
+        "type": "object",
+        "properties": {
+          "commonName": {
+            "type": "string",
+            "nullable": true
+          },
+          "vpnServerId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isRevoked": {
+            "type": "boolean"
+          },
+          "queryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastQueriedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
