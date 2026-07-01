@@ -889,7 +889,7 @@ export default function ServersOverview() {
       </div>
 
       {showUserOpenVpnEvents ? (
-        <>
+        <div className="servers-overview-user-details">
           <UserClientAppVersionsSection
             externalId={statsExternalId}
             vpnServerId={vpnServerId!}
@@ -901,7 +901,7 @@ export default function ServersOverview() {
             selectedCn={userProfileCn}
             onSelectedCnChange={setUserProfileCn}
           />
-        </>
+        </div>
       ) : null}
 
       {showUserDnsQueries ? (

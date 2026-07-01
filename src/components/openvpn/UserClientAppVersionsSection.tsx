@@ -81,7 +81,7 @@ export function UserClientAppVersionsSection({
   }
 
   return (
-    <section className="settings-card settings-card--mb">
+    <section className="settings-card settings-card--mb settings-card--mt-lg">
       <div className="settings-card__header">
         <h3 className="settings-card__h3-with-icon" style={{ marginBottom: 0 }}>
           <FaMobileAlt className="icon" aria-hidden />

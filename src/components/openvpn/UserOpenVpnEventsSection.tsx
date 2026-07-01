@@ -147,7 +147,7 @@ export function UserOpenVpnEventsSection({
   }
 
   return (
-    <section className="settings-card settings-card--mb settings-card--mt-lg">
+    <section className="settings-card settings-card--mb">
       <div className="settings-card__header">
         <h3 className="settings-card__h3-with-icon" style={{ marginBottom: 0 }}>
           <FaBolt className="icon" aria-hidden />
