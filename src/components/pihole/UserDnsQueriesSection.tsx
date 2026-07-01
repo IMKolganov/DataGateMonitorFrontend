@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaGlobe, FaSync } from "react-icons/fa";
 import { keepPreviousData } from "@tanstack/react-query";
@@ -11,8 +11,10 @@ import {
   useGetApiVpnDnsQueriesProfileSummary,
   useGetApiVpnDnsQueriesSearch,
 } from "../../api/orval/vpn-dns-query/vpn-dns-query";
+import { unwrapMaybeApiResponse } from "../../pages/TelegramBotSettings/unwrapApiResponse";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { formatDateWithOffset } from "../../utils/utils";
+import { shortOpenVpnCn } from "../../utils/openVpn/shortOpenVpnCn";
 import { addDays, endOfToday, startOfToday } from "../../pages/ServersOverview/helpers";
 import "../../css/ServerForm.css";
 import "../../css/Settings.css";
@@ -23,18 +25,19 @@ export type UserDnsQueriesSectionProps = {
   vpnServerId?: number | null;
   title?: string;
   compact?: boolean;
+  selectedCn?: string | null;
+  onSelectedCnChange?: (cn: string | null) => void;
+  hideProfilePicker?: boolean;
 };
-
-function shortCn(cn: string): string {
-  if (cn.length <= 36) return cn;
-  return `${cn.slice(0, 18)}…${cn.slice(-14)}`;
-}
 
 export function UserDnsQueriesSection({
   externalId,
   vpnServerId,
   title = "Pi-hole DNS history",
   compact: _compact = false,
+  selectedCn: selectedCnProp,
+  onSelectedCnChange,
+  hideProfilePicker = false,
 }: UserDnsQueriesSectionProps) {
   const admin = isAdmin(getCurrentUser());
   const ext = typeof externalId === "string" ? externalId.trim() : "";
@@ -43,9 +46,15 @@ export function UserDnsQueriesSection({
   const [to, setTo] = useState(() => endOfToday());
   const [grouping, setGrouping] = useState<Grouping>("auto");
   const [domainFilter, setDomainFilter] = useState("");
-  const [selectedCn, setSelectedCn] = useState<string | null>(null);
+  const [internalCn, setInternalCn] = useState<string | null>(null);
+  const selectedCn = selectedCnProp !== undefined ? selectedCnProp : internalCn;
+  const setSelectedCn = onSelectedCnChange ?? setInternalCn;
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = usePersistedPageSize("user-dns-queries", 25, "10,25,50,100");
+
+  useEffect(() => {
+    setPage(0);
+  }, [selectedCn]);
 
   const onFilterChange = (c: DateRangeChange) => {
     setFrom(c.from);
@@ -87,7 +96,12 @@ export function UserDnsQueriesSection({
     query: { enabled: admin && hasIdentity, placeholderData: keepPreviousData },
   });
 
-  const profileRows = (summaryQuery.data ?? []) as VpnDnsProfileSummaryItem[];
+  const profileRows = useMemo(() => {
+    const raw = summaryQuery.data;
+    if (Array.isArray(raw)) return raw as VpnDnsProfileSummaryItem[];
+    const unwrapped = unwrapMaybeApiResponse<VpnDnsProfileSummaryItem[]>(raw as never);
+    return Array.isArray(unwrapped) ? unwrapped : [];
+  }, [summaryQuery.data]);
 
   const columns = useMemo<GridColDef<VpnDnsQueryLogDto>[]>(
     () => [
@@ -128,34 +142,32 @@ export function UserDnsQueriesSection({
   const profilesWithDns = profileRows.filter((p) => (p.queryCount ?? 0) > 0).length;
 
   return (
-    <section className="settings-card settings-card--mb">
-      <h3 className="settings-card__h3-with-icon">
-        <FaGlobe className="icon" aria-hidden /> {title}
-      </h3>
-      <div className="header-bar">
-        <div className="left-buttons">
-          <button
-            type="button"
-            className="btn secondary"
-            onClick={() => {
-              void summaryQuery.refetch();
-              void query.refetch();
-            }}
-            disabled={query.isFetching || summaryQuery.isFetching}
-          >
-            <FaSync className={`icon ${query.isFetching || summaryQuery.isFetching ? "icon-spin" : ""}`} />
-            Refresh
-          </button>
-        </div>
+    <section className="settings-card settings-card--mb settings-card--mt">
+      <div className="settings-card__header">
+        <h3 className="settings-card__h3-with-icon" style={{ marginBottom: 0 }}>
+          <FaGlobe className="icon" aria-hidden /> {title}
+        </h3>
+        <button
+          type="button"
+          className="btn secondary"
+          onClick={() => {
+            void summaryQuery.refetch();
+            void query.refetch();
+          }}
+          disabled={query.isFetching || summaryQuery.isFetching}
+        >
+          <FaSync className={`icon ${query.isFetching || summaryQuery.isFetching ? "icon-spin" : ""}`} />
+          Refresh
+        </button>
       </div>
 
-      <p className="server-details__intro" style={{ marginBottom: 12 }}>
+      <p className="server-details__intro" style={{ marginTop: 0, marginBottom: 12 }}>
         {totalProfiles === 0
           ? "No issued OpenVPN profiles for this user."
-          : `${profilesWithDns} of ${totalProfiles} profile(s) have DNS events in the selected period.`}
+          : `${profilesWithDns} of ${totalProfiles} profile(s) have Pi-hole DNS queries in the selected period.`}
       </p>
 
-      {profileRows.length > 0 && (
+      {profileRows.length > 0 && !hideProfilePicker && (
         <div className="server-form" style={{ marginBottom: 12 }}>
           <div className="form-group">
             <label>OpenVPN profile (CN)</label>
@@ -186,7 +198,7 @@ export function UserDnsQueriesSection({
                       setPage(0);
                     }}
                   >
-                    srv {profile.vpnServerId ?? "?"} · {shortCn(cn)} ({count})
+                    srv {profile.vpnServerId ?? "?"} · {shortOpenVpnCn(cn)} ({count})
                     {profile.isRevoked ? " · revoked" : ""}
                   </button>
                 );

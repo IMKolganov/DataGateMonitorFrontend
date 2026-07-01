@@ -20,10 +20,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiSystemCollectionsGenericIReadOnlyListVpnServerEventDtoVpnClientAppVersionSummaryItemDto,
   ApiSystemString,
   ApiVpnServerEventResponsesConnectionStatusResponse,
   ApiVpnServerEventResponsesConnectionStatusesResponse,
   ApiVpnServerEventResponsesVpnServerEventResponse,
+  GetApiOpenVpnEventsAppVersionsParams,
   GetApiOpenVpnEventsGetByServerParams
 } from '../model';
 
@@ -125,6 +127,93 @@ export function useGetApiOpenVpnEventsGetByServer<TData = Awaited<ReturnType<typ
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiOpenVpnEventsGetByServerQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiOpenVpnEventsAppVersions = (
+    params: GetApiOpenVpnEventsAppVersionsParams,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemCollectionsGenericIReadOnlyListVpnServerEventDtoVpnClientAppVersionSummaryItemDto>(
+      {url: `/api/open-vpn-events/app-versions`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiOpenVpnEventsAppVersionsQueryKey = (params?: GetApiOpenVpnEventsAppVersionsParams,) => {
+    return [
+    `/api/open-vpn-events/app-versions`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiOpenVpnEventsAppVersionsQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>, TError = unknown>(params: GetApiOpenVpnEventsAppVersionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnEventsAppVersionsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>> = ({ signal }) => getApiOpenVpnEventsAppVersions(params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOpenVpnEventsAppVersionsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>>
+export type GetApiOpenVpnEventsAppVersionsQueryError = unknown
+
+
+export function useGetApiOpenVpnEventsAppVersions<TData = Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>, TError = unknown>(
+ params: GetApiOpenVpnEventsAppVersionsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnEventsAppVersions<TData = Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>, TError = unknown>(
+ params: GetApiOpenVpnEventsAppVersionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnEventsAppVersions<TData = Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>, TError = unknown>(
+ params: GetApiOpenVpnEventsAppVersionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOpenVpnEventsAppVersions<TData = Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>, TError = unknown>(
+ params: GetApiOpenVpnEventsAppVersionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnEventsAppVersions>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOpenVpnEventsAppVersionsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
