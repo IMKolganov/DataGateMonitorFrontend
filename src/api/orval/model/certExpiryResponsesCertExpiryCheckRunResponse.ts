@@ -18,7 +18,8 @@ export interface CertExpiryResponsesCertExpiryCheckRunResponse {
   status?: EnumsCertExpiryRunStatus;
   /** @nullable */
   vpnServerId?: number | null;
-  scopeLabel?: string;
+  /** @nullable */
+  scopeLabel?: string | null;
   warningDays?: number;
   sendNotifications?: boolean;
   isScheduled?: boolean;

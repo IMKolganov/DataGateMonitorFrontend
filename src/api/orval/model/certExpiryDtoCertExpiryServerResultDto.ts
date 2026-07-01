@@ -9,7 +9,8 @@ import type { EnumsCertExpiryServerFetchStatus } from './enumsCertExpiryServerFe
 
 export interface CertExpiryDtoCertExpiryServerResultDto {
   vpnServerId?: number;
-  serverName?: string;
+  /** @nullable */
+  serverName?: string | null;
   fetchStatus?: EnumsCertExpiryServerFetchStatus;
   /** @nullable */
   fetchError?: string | null;

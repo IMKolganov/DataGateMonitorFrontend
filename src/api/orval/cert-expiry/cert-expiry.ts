@@ -26,6 +26,7 @@ import type {
 import type {
   ApiCertExpiryResponsesCertExpiryCheckRunResponse,
   ApiCertExpiryResponsesGetCertExpiryRunsResponse,
+  ApiSystemString,
   CertExpiryRequestsRunCertExpiryCheckRequest,
   GetApiCertExpiryRunsParams
 } from '../model';
@@ -60,7 +61,7 @@ export const postApiCertExpiryCheck = (
 
       return ogmMutator<ApiCertExpiryResponsesCertExpiryCheckRunResponse>(
       {url: `/api/cert-expiry/check`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json-patch+json', },
       data: certExpiryRequestsRunCertExpiryCheckRequest, signal
     },
       options);
@@ -271,6 +272,178 @@ export function useGetApiCertExpiryRunsRunId<TData = Awaited<ReturnType<typeof g
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiCertExpiryRunsRunIdQueryOptions(runId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiCertExpiryHealthcheck = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/cert-expiry/healthcheck`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiCertExpiryHealthcheckQueryKey = () => {
+    return [
+    `/api/cert-expiry/healthcheck`
+    ] as const;
+    }
+
+
+export const getGetApiCertExpiryHealthcheckQueryOptions = <TData = Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiCertExpiryHealthcheckQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>> = ({ signal }) => getApiCertExpiryHealthcheck(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiCertExpiryHealthcheckQueryResult = NonNullable<Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>>
+export type GetApiCertExpiryHealthcheckQueryError = unknown
+
+
+export function useGetApiCertExpiryHealthcheck<TData = Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>,
+          TError,
+          Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiCertExpiryHealthcheck<TData = Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>,
+          TError,
+          Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiCertExpiryHealthcheck<TData = Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiCertExpiryHealthcheck<TData = Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCertExpiryHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiCertExpiryHealthcheckQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiCertExpiryHealthcheckWithJwt = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/cert-expiry/healthcheck-with-jwt`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiCertExpiryHealthcheckWithJwtQueryKey = () => {
+    return [
+    `/api/cert-expiry/healthcheck-with-jwt`
+    ] as const;
+    }
+
+
+export const getGetApiCertExpiryHealthcheckWithJwtQueryOptions = <TData = Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiCertExpiryHealthcheckWithJwtQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>> = ({ signal }) => getApiCertExpiryHealthcheckWithJwt(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiCertExpiryHealthcheckWithJwtQueryResult = NonNullable<Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>>
+export type GetApiCertExpiryHealthcheckWithJwtQueryError = unknown
+
+
+export function useGetApiCertExpiryHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>,
+          TError,
+          Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiCertExpiryHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>,
+          TError,
+          Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiCertExpiryHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiCertExpiryHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiCertExpiryHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiCertExpiryHealthcheckWithJwtQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

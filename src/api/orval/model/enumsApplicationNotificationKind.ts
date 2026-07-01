@@ -40,4 +40,6 @@ export const EnumsApplicationNotificationKind = {
   NUMBER_28: 28,
   NUMBER_29: 29,
   NUMBER_30: 30,
+  NUMBER_31: 31,
+  NUMBER_32: 32,
 } as const;

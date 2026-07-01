@@ -26,12 +26,12 @@ import type {
 import type {
   ApiSystemBoolean,
   ApiSystemString,
-  ApiTelegramBotUserRequestsUserRequest,
   ApiTelegramBotUserResponsesGetAdminsResponse,
   ApiTelegramBotUserResponsesGetAllTelegramUsersResponse,
   ApiTelegramBotUserResponsesTelegramBotUserProfilePhotoIndexResponse,
   ApiTelegramBotUserResponsesTelegramBotUserProfilePhotoMetaResponse,
   ApiTelegramBotUserResponsesUpsertTelegramBotUserProfilePhotoResponse,
+  ApiTelegramBotUserResponsesUserResponse,
   TelegramBotUserRequestsTelegramUserActionRequest,
   TelegramBotUserRequestsUpsertTelegramBotUserProfilePhotoRequest
 } from '../model';
@@ -150,7 +150,7 @@ export const getApiTgbotUsersGetTelegramId = (
 ) => {
 
 
-      return ogmMutator<ApiTelegramBotUserRequestsUserRequest>(
+      return ogmMutator<ApiTelegramBotUserResponsesUserResponse>(
       {url: `/api/tgbot-users/get/${telegramId}`, method: 'GET', signal
     },
       options);

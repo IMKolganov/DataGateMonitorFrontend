@@ -25,8 +25,8 @@ import type {
 
 import type {
   ApiDataGateOpenVpnManagerDiagnosticsResponsesPiHoleDiagnosticsResponse,
-  ApiSystemObject,
   ApiSystemString,
+  ApiVpnServerPiHoleResponsesApplyVpnServerPiHoleRuntimeResponse,
   ApiVpnServerPiHoleResponsesVpnServerPiHoleConfigResponse,
   ApiVpnServerPiHoleResponsesVpnServerPiHoleRuntimeConfigResponse,
   VpnServerPiHoleRequestsUpsertVpnServerPiHoleConfigRequest
@@ -203,7 +203,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return ogmMutator<ApiSystemObject>(
+      return ogmMutator<ApiVpnServerPiHoleResponsesApplyVpnServerPiHoleRuntimeResponse>(
       {url: `/api/open-vpn-servers/pi-hole-config/${vpnServerId}/apply-runtime`, method: 'POST', signal
     },
       options);

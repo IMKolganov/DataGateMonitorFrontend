@@ -5,6 +5,4 @@
  * OpenAPI spec version: v1
  */
 
-export interface TelegramBotUserRequestsUserRequest {
-  telegramId: number;
-}
+export interface VpnServerPiHoleResponsesApplyVpnServerPiHoleRuntimeResponse { [key: string]: unknown }
