@@ -6,11 +6,14 @@ import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import DateRangeFilter, { type DateRangeChange, type Grouping } from "../DateRangeFilter";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
-import {
-  getApiVpnDnsQueriesSearch,
-  getGetApiVpnDnsQueriesSearchQueryKey,
-} from "../../api/orval/vpn-dns-query/vpn-dns-query";
 import type { VpnDnsQueryLogDto, VpnDnsQueryPageResponse } from "../../api/orvalModelShim";
+import {
+  getUserDnsProfileSummary,
+  searchUserDnsQueries,
+  userDnsProfileSummaryQueryKey,
+  userDnsQueriesQueryKey,
+  type VpnDnsProfileSummaryItem,
+} from "../../api/pihole/userDnsQueriesApi";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { formatDateWithOffset } from "../../utils/utils";
 import { addDays, endOfToday, startOfToday } from "../../pages/ServersOverview/helpers";
@@ -25,6 +28,11 @@ export type UserDnsQueriesSectionProps = {
   compact?: boolean;
 };
 
+function shortCn(cn: string): string {
+  if (cn.length <= 36) return cn;
+  return `${cn.slice(0, 18)}…${cn.slice(-14)}`;
+}
+
 export function UserDnsQueriesSection({
   externalId,
   vpnServerId,
@@ -38,6 +46,7 @@ export function UserDnsQueriesSection({
   const [to, setTo] = useState(() => endOfToday());
   const [grouping, setGrouping] = useState<Grouping>("auto");
   const [domainFilter, setDomainFilter] = useState("");
+  const [selectedCn, setSelectedCn] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = usePersistedPageSize("user-dns-queries", 25, "10,25,50,100");
 
@@ -48,25 +57,45 @@ export function UserDnsQueriesSection({
     setPage(0);
   };
 
+  const summaryParams = useMemo(
+    () => ({
+      externalId: ext,
+      vpnServerId: vpnServerId ?? 0,
+      fromUtc: from.toISOString(),
+      toUtc: to.toISOString(),
+    }),
+    [ext, vpnServerId, from, to],
+  );
+
   const searchParams = useMemo(
     () => ({
       VpnServerId: vpnServerId ?? 0,
-      ExternalId: ext,
+      ExternalId: selectedCn ? undefined : ext,
+      CommonName: selectedCn ?? undefined,
+      MatchUserProfiles: !selectedCn,
       DomainContains: domainFilter.trim() || undefined,
       FromUtc: from.toISOString(),
       ToUtc: to.toISOString(),
       Page: page + 1,
       PageSize: pageSize,
     }),
-    [vpnServerId, ext, domainFilter, from, to, page, pageSize],
+    [vpnServerId, ext, selectedCn, domainFilter, from, to, page, pageSize],
   );
 
+  const summaryQuery = useQuery({
+    queryKey: userDnsProfileSummaryQueryKey(summaryParams),
+    enabled: admin && hasIdentity,
+    queryFn: () => getUserDnsProfileSummary(summaryParams),
+  });
+
   const query = useQuery({
-    queryKey: getGetApiVpnDnsQueriesSearchQueryKey(searchParams),
+    queryKey: userDnsQueriesQueryKey(searchParams),
     enabled: admin && hasIdentity,
     placeholderData: keepPreviousData,
-    queryFn: () => getApiVpnDnsQueriesSearch(searchParams),
+    queryFn: () => searchUserDnsQueries(searchParams),
   });
+
+  const profileRows = (summaryQuery.data ?? []) as VpnDnsProfileSummaryItem[];
 
   const columns = useMemo<GridColDef<VpnDnsQueryLogDto>[]>(
     () => [
@@ -103,6 +132,8 @@ export function UserDnsQueriesSection({
 
   const rows = (query.data as VpnDnsQueryPageResponse | undefined)?.items ?? [];
   const total = (query.data as VpnDnsQueryPageResponse | undefined)?.totalCount ?? 0;
+  const totalProfiles = profileRows.length;
+  const profilesWithDns = profileRows.filter((p) => (p.queryCount ?? 0) > 0).length;
 
   return (
     <section className="settings-card settings-card--mb">
@@ -111,12 +142,67 @@ export function UserDnsQueriesSection({
       </h3>
       <div className="header-bar">
         <div className="left-buttons">
-          <button type="button" className="btn secondary" onClick={() => void query.refetch()} disabled={query.isFetching}>
-            <FaSync className={`icon ${query.isFetching ? "icon-spin" : ""}`} />
+          <button
+            type="button"
+            className="btn secondary"
+            onClick={() => {
+              void summaryQuery.refetch();
+              void query.refetch();
+            }}
+            disabled={query.isFetching || summaryQuery.isFetching}
+          >
+            <FaSync className={`icon ${query.isFetching || summaryQuery.isFetching ? "icon-spin" : ""}`} />
             Refresh
           </button>
         </div>
       </div>
+
+      <p className="server-details__intro" style={{ marginBottom: 12 }}>
+        {totalProfiles === 0
+          ? "No issued OpenVPN profiles for this user."
+          : `${profilesWithDns} of ${totalProfiles} profile(s) have DNS events in the selected period.`}
+      </p>
+
+      {profileRows.length > 0 && (
+        <div className="server-form" style={{ marginBottom: 12 }}>
+          <div className="form-group">
+            <label>OpenVPN profile (CN)</label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              <button
+                type="button"
+                className={`btn ${selectedCn ? "secondary" : "primary"}`}
+                onClick={() => {
+                  setSelectedCn(null);
+                  setPage(0);
+                }}
+              >
+                All profiles ({profileRows.reduce((sum, p) => sum + (p.queryCount ?? 0), 0)})
+              </button>
+              {profileRows.map((profile) => {
+                const cn = profile.commonName?.trim() ?? "";
+                if (!cn) return null;
+                const active = selectedCn === cn;
+                const count = profile.queryCount ?? 0;
+                return (
+                  <button
+                    key={`${profile.vpnServerId ?? 0}|${cn}`}
+                    type="button"
+                    className={`btn ${active ? "primary" : "secondary"}`}
+                    title={cn}
+                    onClick={() => {
+                      setSelectedCn(cn);
+                      setPage(0);
+                    }}
+                  >
+                    srv {profile.vpnServerId ?? "?"} · {shortCn(cn)} ({count})
+                    {profile.isRevoked ? " · revoked" : ""}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       <DateRangeFilter from={from} to={to} grouping={grouping} onChange={onFilterChange} />
       <div className="server-form">
@@ -160,7 +246,12 @@ export function UserDnsQueriesSection({
             pageSizeOptions={[10, 25, 50, 100]}
             disableRowSelectionOnClick
             slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-            localeText={{ noRowsLabel: "📭 No DNS queries logged" }}
+            localeText={{
+              noRowsLabel:
+                profileRows.length > 0 && profilesWithDns === 0
+                  ? "📭 No DNS via Pi-hole for these profiles (client may bypass VPN DNS)"
+                  : "📭 No DNS queries logged",
+            }}
           />
         </div>
       </CustomThemeProvider>

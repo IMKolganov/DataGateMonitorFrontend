@@ -97,6 +97,23 @@ describe("buildPiHolePipelineSteps", () => {
     expect(firstPiHolePipelineIssue(steps)).toBeUndefined();
   });
 
+  it("marks step 3 as From env when enabled without dashboard apply timestamp", () => {
+    const steps = buildPiHolePipelineSteps({
+      dashboardConfig: baseConfig,
+      serverPiHoleEnabled: true,
+      serverApiUrl: "https://s6.datagateapp.com/",
+      diagnostics: {
+        ...runningDiagnostics,
+        runtimeConfigAppliedAtUtc: undefined,
+      },
+    });
+
+    const runtime = steps.find((s) => s.id === "runtime-push");
+    expect(runtime?.status).toBe("ok");
+    expect(runtime?.statusText).toBe("From env");
+    expect(runtime?.summary).toMatch(/PIHOLE_\*/i);
+  });
+
   it("surfaces probe auth failure on step 4", () => {
     const steps = buildPiHolePipelineSteps({
       dashboardConfig: baseConfig,
