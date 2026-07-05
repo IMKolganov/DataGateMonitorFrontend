@@ -26,14 +26,18 @@ import type {
 import type {
   ApiSystemBoolean,
   ApiSystemString,
+  ApiUserResponsesAdminSetUserPasswordResponse,
   ApiUserResponsesCompleteTelegramAccountLinkResponse,
   ApiUserResponsesConfirmUserEmailResponse,
   ApiUserResponsesGetAllUsersResponse,
   ApiUserResponsesGetUserEmailConfirmationStatusResponse,
+  ApiUserResponsesGetUserPasswordHistoryResponse,
   ApiUserResponsesMergeTelegramGoogleUsersResponse,
+  ApiUserResponsesRestoreUserPasswordResponse,
   ApiUserResponsesUsersResponse,
   GetApiUsersGetAllParams,
   PostApiUsersAuditFreeTierAccessByTelegramTelegramIdParams,
+  UserRequestsAdminSetUserPasswordRequest,
   UserRequestsCompleteTelegramAccountLinkRequest,
   UserRequestsMergeTelegramGoogleUsersRequest,
   UserRequestsRegisterUserFromTgBotRequest
@@ -688,6 +692,206 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostApiUsersAuditFreeTierAccessByTelegramTelegramIdMutationOptions(options), queryClient);
+    }
+    export const getApiUsersIdPasswordHistory = (
+    id: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiUserResponsesGetUserPasswordHistoryResponse>(
+      {url: `/api/users/${id}/password-history`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiUsersIdPasswordHistoryQueryKey = (id: number,) => {
+    return [
+    `/api/users/${id}/password-history`
+    ] as const;
+    }
+
+
+export const getGetApiUsersIdPasswordHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiUsersIdPasswordHistoryQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>> = ({ signal }) => getApiUsersIdPasswordHistory(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiUsersIdPasswordHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>>
+export type GetApiUsersIdPasswordHistoryQueryError = unknown
+
+
+export function useGetApiUsersIdPasswordHistory<TData = Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>,
+          TError,
+          Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiUsersIdPasswordHistory<TData = Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>,
+          TError,
+          Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiUsersIdPasswordHistory<TData = Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiUsersIdPasswordHistory<TData = Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUsersIdPasswordHistory>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiUsersIdPasswordHistoryQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const postApiUsersIdSetPassword = (
+    id: number,
+    userRequestsAdminSetUserPasswordRequest?: UserRequestsAdminSetUserPasswordRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiUserResponsesAdminSetUserPasswordResponse>(
+      {url: `/api/users/${id}/set-password`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: userRequestsAdminSetUserPasswordRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiUsersIdSetPasswordMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsersIdSetPassword>>, TError,{id: number;data?: UserRequestsAdminSetUserPasswordRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiUsersIdSetPassword>>, TError,{id: number;data?: UserRequestsAdminSetUserPasswordRequest}, TContext> => {
+
+const mutationKey = ['postApiUsersIdSetPassword'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiUsersIdSetPassword>>, {id: number;data?: UserRequestsAdminSetUserPasswordRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiUsersIdSetPassword(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiUsersIdSetPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof postApiUsersIdSetPassword>>>
+    export type PostApiUsersIdSetPasswordMutationBody = UserRequestsAdminSetUserPasswordRequest | undefined
+    export type PostApiUsersIdSetPasswordMutationError = unknown
+
+    export const usePostApiUsersIdSetPassword = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsersIdSetPassword>>, TError,{id: number;data?: UserRequestsAdminSetUserPasswordRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiUsersIdSetPassword>>,
+        TError,
+        {id: number;data?: UserRequestsAdminSetUserPasswordRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiUsersIdSetPasswordMutationOptions(options), queryClient);
+    }
+    export const postApiUsersIdPasswordHistoryHistoryIdRestore = (
+    id: number,
+    historyId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiUserResponsesRestoreUserPasswordResponse>(
+      {url: `/api/users/${id}/password-history/${historyId}/restore`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiUsersIdPasswordHistoryHistoryIdRestoreMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsersIdPasswordHistoryHistoryIdRestore>>, TError,{id: number;historyId: number}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiUsersIdPasswordHistoryHistoryIdRestore>>, TError,{id: number;historyId: number}, TContext> => {
+
+const mutationKey = ['postApiUsersIdPasswordHistoryHistoryIdRestore'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiUsersIdPasswordHistoryHistoryIdRestore>>, {id: number;historyId: number}> = (props) => {
+          const {id,historyId} = props ?? {};
+
+          return  postApiUsersIdPasswordHistoryHistoryIdRestore(id,historyId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiUsersIdPasswordHistoryHistoryIdRestoreMutationResult = NonNullable<Awaited<ReturnType<typeof postApiUsersIdPasswordHistoryHistoryIdRestore>>>
+
+    export type PostApiUsersIdPasswordHistoryHistoryIdRestoreMutationError = unknown
+
+    export const usePostApiUsersIdPasswordHistoryHistoryIdRestore = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsersIdPasswordHistoryHistoryIdRestore>>, TError,{id: number;historyId: number}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiUsersIdPasswordHistoryHistoryIdRestore>>,
+        TError,
+        {id: number;historyId: number},
+        TContext
+      > => {
+      return useMutation(getPostApiUsersIdPasswordHistoryHistoryIdRestoreMutationOptions(options), queryClient);
     }
     export const getApiUsersHealthcheck = (
 

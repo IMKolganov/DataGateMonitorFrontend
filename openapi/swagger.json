@@ -6324,6 +6324,159 @@
         }
       }
     },
+    "/api/users/{id}/password-history": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.User.Responses.GetUserPasswordHistoryResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.User.Responses.GetUserPasswordHistoryResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.User.Responses.GetUserPasswordHistoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}/set-password": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/User.Requests.AdminSetUserPasswordRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User.Requests.AdminSetUserPasswordRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User.Requests.AdminSetUserPasswordRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/User.Requests.AdminSetUserPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.User.Responses.AdminSetUserPasswordResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.User.Responses.AdminSetUserPasswordResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.User.Responses.AdminSetUserPasswordResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}/password-history/{historyId}/restore": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "historyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.User.Responses.RestoreUserPasswordResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.User.Responses.RestoreUserPasswordResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.User.Responses.RestoreUserPasswordResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/users/healthcheck": {
       "get": {
         "tags": [
@@ -12862,6 +13015,22 @@
         },
         "additionalProperties": false
       },
+      "Api.User.Responses.AdminSetUserPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/User.Responses.AdminSetUserPasswordResponse"
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.User.Responses.CompleteTelegramAccountLinkResponse": {
         "type": "object",
         "properties": {
@@ -12926,6 +13095,22 @@
         },
         "additionalProperties": false
       },
+      "Api.User.Responses.GetUserPasswordHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/User.Responses.GetUserPasswordHistoryResponse"
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.User.Responses.MergeTelegramGoogleUsersResponse": {
         "type": "object",
         "properties": {
@@ -12938,6 +13123,22 @@
           },
           "data": {
             "$ref": "#/components/schemas/User.Responses.MergeTelegramGoogleUsersResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.User.Responses.RestoreUserPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/User.Responses.RestoreUserPasswordResponse"
           }
         },
         "additionalProperties": false
@@ -16647,6 +16848,74 @@
         },
         "additionalProperties": false
       },
+      "User.Dto.UserPasswordHistoryItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "passwordAlgo": {
+            "type": "string",
+            "nullable": true
+          },
+          "recordedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "setByActor": {
+            "$ref": "#/components/schemas/User.PasswordSetActorKind"
+          },
+          "setByUserId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "setByDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCurrent": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "User.PasswordSetActorKind": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "User.Requests.AdminSetUserPasswordRequest": {
+        "required": [
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "minLength": 8,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 256,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "User.Requests.CompleteTelegramAccountLinkRequest": {
         "required": [
           "code"
@@ -16725,6 +16994,19 @@
           },
           "isPremium": {
             "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "User.Responses.AdminSetUserPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
             "nullable": true
           }
         },
@@ -16837,6 +17119,19 @@
         "properties": {
           "isEmailConfirmed": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "User.Responses.GetUserPasswordHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User.Dto.UserPasswordHistoryItemDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -16967,6 +17262,19 @@
           "emailBroadcastTemplatesUpdated": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "User.Responses.RestoreUserPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

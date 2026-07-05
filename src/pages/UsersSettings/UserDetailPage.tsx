@@ -61,6 +61,7 @@ import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
+import { UserPasswordAdminSection } from "./UserPasswordAdminSection";
 import { UserVpnConnectionsSection } from "./UserVpnConnectionsSection";
 import { UserDnsQueriesSection } from "../../components/pihole/UserDnsQueriesSection";
 import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
@@ -547,6 +548,8 @@ export function UserDetailPage() {
           </button>
         </div>
       </section>
+
+      {canManageRoles && userIdValid && <UserPasswordAdminSection userId={id} />}
 
       {canManageRoles && (
         <section className="settings-card settings-card--mb">
