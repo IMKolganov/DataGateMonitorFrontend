@@ -65,6 +65,16 @@ const XrayRegisterPage: React.FC = () => {
       };
 
       await postApiAuthRegister(req);
+
+      const registeredEmail = email.trim();
+      if (registeredEmail) {
+        navigate(
+          `/xray/confirm-email?email=${encodeURIComponent(registeredEmail)}&registered=1`,
+          { replace: true },
+        );
+        return;
+      }
+
       navigate("/xray/login", { replace: true, state: { registered: true } });
     } catch (err: unknown) {
       let detailedMessage = t.registrationFailed;

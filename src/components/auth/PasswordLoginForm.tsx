@@ -11,16 +11,19 @@ import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage
 
 interface PasswordLoginFormProps {
   redirectPath?: string;
+  confirmEmailPath?: string;
   onTotpChallenge: (challenge: TotpChallengeState) => void;
 }
 
 const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({
   redirectPath = "/",
+  confirmEmailPath = "/confirm-email",
   onTotpChallenge,
 }) => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showConfirmEmailLink, setShowConfirmEmailLink] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const canSubmit =
@@ -31,6 +34,7 @@ const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setShowConfirmEmailLink(false);
     setLoading(true);
 
     try {
@@ -56,6 +60,9 @@ const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({
 
           if (status === 401) {
             detailedMessage = m || "Invalid login or password. Please try again.";
+            if (/email is not confirmed/i.test(detailedMessage)) {
+              setShowConfirmEmailLink(true);
+            }
           } else if (status >= 400 && status < 500) {
             detailedMessage = m || "The request could not be processed. Please check your input.";
           } else {
@@ -92,6 +99,12 @@ const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({
                 className="error-message"
                 dangerouslySetInnerHTML={{ __html: error }}
             ></p>
+        )}
+
+        {showConfirmEmailLink && (
+          <p className="login-info-text" style={{ marginBottom: 12 }}>
+            <Link to={confirmEmailPath}>Enter your email confirmation code</Link>
+          </p>
         )}
 
         <form onSubmit={handleLogin}>

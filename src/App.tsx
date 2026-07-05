@@ -19,6 +19,7 @@ import LoginPage from "./components/auth/LoginPage";
 import RegisterPage from "./components/auth/RegisterPage";
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./components/auth/ResetPasswordPage";
+import ConfirmEmailPage from "./components/auth/ConfirmEmailPage";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./utils/const.ts";
 import { startAdminIdleSession } from "./utils/auth/adminIdleSession.ts";
 import { scheduleAutoLogout } from "./utils/auth/tokenExpiryScheduler.ts";
@@ -86,6 +87,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     location.pathname === "/register" ||
     location.pathname === "/forgot-password" ||
     location.pathname === "/reset-password" ||
+    location.pathname === "/confirm-email" ||
+    location.pathname === "/xray/confirm-email" ||
     location.pathname === "/xray" ||
     location.pathname.startsWith("/xray/");
 
@@ -125,6 +128,13 @@ function App() {
             <Route path="/register" element={withSuspense(<RegisterPage />)} />
             <Route path="/forgot-password" element={withSuspense(<ForgotPasswordPage />)} />
             <Route path="/reset-password" element={withSuspense(<ResetPasswordPage />)} />
+            <Route path="/confirm-email" element={withSuspense(<ConfirmEmailPage />)} />
+            <Route
+              path="/xray/confirm-email"
+              element={withSuspense(
+                <ConfirmEmailPage loginPath="/xray/login" registerPath="/xray/register" />,
+              )}
+            />
             <Route
               path="/xray"
               element={
