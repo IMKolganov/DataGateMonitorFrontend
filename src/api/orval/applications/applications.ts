@@ -28,7 +28,8 @@ import type {
   ApiApplicationsResponsesRegisterApplicationResponse,
   ApiSystemString,
   ApplicationsRequestsRegisterApplicationRequest,
-  ApplicationsRequestsRevokeApplicationRequest
+  ApplicationsRequestsRevokeApplicationRequest,
+  GetApiApplicationsGetAllParams
 } from '../model';
 
 import { ogmMutator } from '../../mutator';
@@ -111,13 +112,14 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getPostApiApplicationsRegisterMutationOptions(options), queryClient);
     }
     export const getApiApplicationsGetAll = (
-
+    params?: GetApiApplicationsGetAllParams,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
 
       return ogmMutator<ApiApplicationsResponsesApplicationsResponse>(
-      {url: `/api/applications/get-all`, method: 'GET', signal
+      {url: `/api/applications/get-all`, method: 'GET',
+        params, signal
     },
       options);
     }
@@ -125,23 +127,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getGetApiApplicationsGetAllQueryKey = () => {
+export const getGetApiApplicationsGetAllQueryKey = (params?: GetApiApplicationsGetAllParams,) => {
     return [
-    `/api/applications/get-all`
+    `/api/applications/get-all`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetApiApplicationsGetAllQueryOptions = <TData = Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+export const getGetApiApplicationsGetAllQueryOptions = <TData = Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError = unknown>(params?: GetApiApplicationsGetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiApplicationsGetAllQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetApiApplicationsGetAllQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiApplicationsGetAll>>> = ({ signal }) => getApiApplicationsGetAll(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiApplicationsGetAll>>> = ({ signal }) => getApiApplicationsGetAll(params, requestOptions, signal);
 
 
 
@@ -155,7 +157,7 @@ export type GetApiApplicationsGetAllQueryError = unknown
 
 
 export function useGetApiApplicationsGetAll<TData = Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError, TData>> & Pick<
+ params: undefined |  GetApiApplicationsGetAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiApplicationsGetAll>>,
           TError,
@@ -165,7 +167,7 @@ export function useGetApiApplicationsGetAll<TData = Awaited<ReturnType<typeof ge
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiApplicationsGetAll<TData = Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError, TData>> & Pick<
+ params?: GetApiApplicationsGetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiApplicationsGetAll>>,
           TError,
@@ -175,16 +177,16 @@ export function useGetApiApplicationsGetAll<TData = Awaited<ReturnType<typeof ge
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetApiApplicationsGetAll<TData = Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ params?: GetApiApplicationsGetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetApiApplicationsGetAll<TData = Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ params?: GetApiApplicationsGetAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiApplicationsGetAll>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetApiApplicationsGetAllQueryOptions(options)
+  const queryOptions = getGetApiApplicationsGetAllQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

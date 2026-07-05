@@ -24,13 +24,17 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiSystemBoolean,
   ApiSystemString,
+  ApiUserResponsesCompleteTelegramAccountLinkResponse,
   ApiUserResponsesConfirmUserEmailResponse,
   ApiUserResponsesGetAllUsersResponse,
   ApiUserResponsesGetUserEmailConfirmationStatusResponse,
   ApiUserResponsesMergeTelegramGoogleUsersResponse,
   ApiUserResponsesUsersResponse,
   GetApiUsersGetAllParams,
+  PostApiUsersAuditFreeTierAccessByTelegramTelegramIdParams,
+  UserRequestsCompleteTelegramAccountLinkRequest,
   UserRequestsMergeTelegramGoogleUsersRequest,
   UserRequestsRegisterUserFromTgBotRequest
 } from '../model';
@@ -570,6 +574,120 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostApiUsersMergeTelegramGoogleMutationOptions(options), queryClient);
+    }
+    export const postApiUsersMergeTelegramGoogleByLinkCode = (
+    userRequestsCompleteTelegramAccountLinkRequest?: UserRequestsCompleteTelegramAccountLinkRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiUserResponsesCompleteTelegramAccountLinkResponse>(
+      {url: `/api/users/merge-telegram-google/by-link-code`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: userRequestsCompleteTelegramAccountLinkRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiUsersMergeTelegramGoogleByLinkCodeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsersMergeTelegramGoogleByLinkCode>>, TError,{data?: UserRequestsCompleteTelegramAccountLinkRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiUsersMergeTelegramGoogleByLinkCode>>, TError,{data?: UserRequestsCompleteTelegramAccountLinkRequest}, TContext> => {
+
+const mutationKey = ['postApiUsersMergeTelegramGoogleByLinkCode'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiUsersMergeTelegramGoogleByLinkCode>>, {data?: UserRequestsCompleteTelegramAccountLinkRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiUsersMergeTelegramGoogleByLinkCode(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiUsersMergeTelegramGoogleByLinkCodeMutationResult = NonNullable<Awaited<ReturnType<typeof postApiUsersMergeTelegramGoogleByLinkCode>>>
+    export type PostApiUsersMergeTelegramGoogleByLinkCodeMutationBody = UserRequestsCompleteTelegramAccountLinkRequest | undefined
+    export type PostApiUsersMergeTelegramGoogleByLinkCodeMutationError = unknown
+
+    export const usePostApiUsersMergeTelegramGoogleByLinkCode = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsersMergeTelegramGoogleByLinkCode>>, TError,{data?: UserRequestsCompleteTelegramAccountLinkRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiUsersMergeTelegramGoogleByLinkCode>>,
+        TError,
+        {data?: UserRequestsCompleteTelegramAccountLinkRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiUsersMergeTelegramGoogleByLinkCodeMutationOptions(options), queryClient);
+    }
+    export const postApiUsersAuditFreeTierAccessByTelegramTelegramId = (
+    telegramId: number,
+    params?: PostApiUsersAuditFreeTierAccessByTelegramTelegramIdParams,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemBoolean>(
+      {url: `/api/users/audit-free-tier-access/by-telegram/${telegramId}`, method: 'POST',
+        params, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiUsersAuditFreeTierAccessByTelegramTelegramIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsersAuditFreeTierAccessByTelegramTelegramId>>, TError,{telegramId: number;params?: PostApiUsersAuditFreeTierAccessByTelegramTelegramIdParams}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiUsersAuditFreeTierAccessByTelegramTelegramId>>, TError,{telegramId: number;params?: PostApiUsersAuditFreeTierAccessByTelegramTelegramIdParams}, TContext> => {
+
+const mutationKey = ['postApiUsersAuditFreeTierAccessByTelegramTelegramId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiUsersAuditFreeTierAccessByTelegramTelegramId>>, {telegramId: number;params?: PostApiUsersAuditFreeTierAccessByTelegramTelegramIdParams}> = (props) => {
+          const {telegramId,params} = props ?? {};
+
+          return  postApiUsersAuditFreeTierAccessByTelegramTelegramId(telegramId,params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiUsersAuditFreeTierAccessByTelegramTelegramIdMutationResult = NonNullable<Awaited<ReturnType<typeof postApiUsersAuditFreeTierAccessByTelegramTelegramId>>>
+
+    export type PostApiUsersAuditFreeTierAccessByTelegramTelegramIdMutationError = unknown
+
+    export const usePostApiUsersAuditFreeTierAccessByTelegramTelegramId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUsersAuditFreeTierAccessByTelegramTelegramId>>, TError,{telegramId: number;params?: PostApiUsersAuditFreeTierAccessByTelegramTelegramIdParams}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiUsersAuditFreeTierAccessByTelegramTelegramId>>,
+        TError,
+        {telegramId: number;params?: PostApiUsersAuditFreeTierAccessByTelegramTelegramIdParams},
+        TContext
+      > => {
+      return useMutation(getPostApiUsersAuditFreeTierAccessByTelegramTelegramIdMutationOptions(options), queryClient);
     }
     export const getApiUsersHealthcheck = (
 

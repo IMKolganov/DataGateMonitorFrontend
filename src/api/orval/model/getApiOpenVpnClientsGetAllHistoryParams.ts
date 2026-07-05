@@ -21,4 +21,7 @@ Page?: number;
  * @maximum 2147483647
  */
 PageSize?: number;
+CommonName?: string;
+ExternalId?: string;
+Search?: string;
 };

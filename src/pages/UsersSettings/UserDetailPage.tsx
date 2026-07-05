@@ -66,6 +66,9 @@ import { UserDnsQueriesSection } from "../../components/pihole/UserDnsQueriesSec
 import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
 import Grid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
+import { GridFilterBar } from "../../components/ui/GridFilterBar.tsx";
+import { gridFilterFields } from "../../config/gridFilters.ts";
+import { useGridFilters } from "../../hooks/useGridFilterStub.ts";
 import type { GridColDef } from "@mui/x-data-grid";
 import "../../css/Settings.css";
 import "../../css/Table.css";
@@ -105,6 +108,7 @@ export function UserDetailPage() {
     10,
     "5,10,20,50,100",
   );
+  const tgMessageFilters = useGridFilters("user-telegram-messages");
 
   const createAssignmentMutation = usePostApiUserQuotaPlansCreate();
   const updateAssignmentMutation = usePutApiUserQuotaPlansUpdate();
@@ -630,6 +634,17 @@ export function UserDetailPage() {
               {!telegramMessagesLoading && telegramMessagesTotalCount === 0 ? (
                 <p className="text-muted">No messages.</p>
               ) : (
+              <>
+              <GridFilterBar
+                gridId="user-telegram-messages"
+                fields={gridFilterFields("user-telegram-messages")}
+                values={tgMessageFilters.values}
+                onChange={tgMessageFilters.onChange}
+                onApply={tgMessageFilters.onApply}
+                onReset={tgMessageFilters.onReset}
+                pendingOrval
+                disabled={telegramMessagesLoading}
+              />
               <div className="data-grid-wrap data-grid-wrap--inset">
                 <CustomThemeProvider>
                   <Grid
@@ -664,6 +679,7 @@ export function UserDetailPage() {
                   />
                 </CustomThemeProvider>
               </div>
+              </>
               )}
             </>
           ) : (

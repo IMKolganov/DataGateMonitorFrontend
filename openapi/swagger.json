@@ -441,6 +441,29 @@
         "tags": [
           "Applications"
         ],
+        "parameters": [
+          {
+            "name": "Name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ClientId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IsRevoked",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -756,6 +779,128 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Api.Auth.Responses.RegisterUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/telegram/request-account-link-code": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.RequestTelegramAccountLinkCodeRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.RequestTelegramAccountLinkCodeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.RequestTelegramAccountLinkCodeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.RequestTelegramAccountLinkCodeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.RequestTelegramAccountLinkCodeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.RequestTelegramAccountLinkCodeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.RequestTelegramAccountLinkCodeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.RequestTelegramAccountLinkCodeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.RequestTelegramAccountLinkCodeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.RequestTelegramAccountLinkCodeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.RequestTelegramAccountLinkCodeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.RequestTelegramAccountLinkCodeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.RequestTelegramAccountLinkCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/free-tier-access/status": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.FreeTierAccessStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.FreeTierAccessStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.FreeTierAccessStatusResponse"
                 }
               }
             }
@@ -4687,6 +4832,28 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "TelegramId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "Username",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -5222,6 +5389,44 @@
         "tags": [
           "TelegramBotUser"
         ],
+        "parameters": [
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TelegramId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "Username",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IsAdmin",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "IsBlocked",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -5739,6 +5944,41 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Provider",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IsAdmin",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "IsBlocked",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -5970,6 +6210,113 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Api.User.Responses.MergeTelegramGoogleUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/merge-telegram-google/by-link-code": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/User.Requests.CompleteTelegramAccountLinkRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User.Requests.CompleteTelegramAccountLinkRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User.Requests.CompleteTelegramAccountLinkRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/User.Requests.CompleteTelegramAccountLinkRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.User.Responses.CompleteTelegramAccountLinkResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.User.Responses.CompleteTelegramAccountLinkResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.User.Responses.CompleteTelegramAccountLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/audit-free-tier-access/by-telegram/{telegramId}": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "telegramId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "channelSubscribed",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "context",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.Boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.Boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.Boolean"
                 }
               }
             }
@@ -7291,6 +7638,27 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "CommonName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -7352,6 +7720,27 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "CommonName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -7415,6 +7804,27 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "CommonName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -7476,6 +7886,27 @@
               "minimum": 1,
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "CommonName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -7953,6 +8384,13 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "DisplayName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -8013,6 +8451,13 @@
           },
           {
             "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DisplayName",
             "in": "query",
             "schema": {
               "type": "string"
@@ -8450,21 +8895,30 @@
             }
           },
           {
-            "name": "page",
+            "name": "Page",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
-              "format": "int32",
-              "default": 1
+              "format": "int32"
             }
           },
           {
-            "name": "pageSize",
+            "name": "PageSize",
             "in": "query",
             "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
               "type": "integer",
-              "format": "int32",
-              "default": 20
+              "format": "int32"
+            }
+          },
+          {
+            "name": "RequestUrl",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -8645,6 +9099,13 @@
           },
           {
             "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "EventType",
             "in": "query",
             "schema": {
               "type": "string"
@@ -11447,6 +11908,22 @@
         },
         "additionalProperties": false
       },
+      "Api.Auth.Responses.FreeTierAccessStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Auth.Responses.FreeTierAccessStatusResponse"
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.Auth.Responses.GetUserSessionsResponse": {
         "type": "object",
         "properties": {
@@ -11523,6 +12000,22 @@
           },
           "data": {
             "$ref": "#/components/schemas/Auth.Responses.RegisterUserResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Auth.Responses.RequestTelegramAccountLinkCodeResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Auth.Responses.RequestTelegramAccountLinkCodeResponse"
           }
         },
         "additionalProperties": false
@@ -12365,6 +12858,22 @@
           },
           "data": {
             "$ref": "#/components/schemas/TelegramBotUser.Responses.UserResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.User.Responses.CompleteTelegramAccountLinkResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/User.Responses.CompleteTelegramAccountLinkResponse"
           }
         },
         "additionalProperties": false
@@ -13332,6 +13841,18 @@
         },
         "additionalProperties": false
       },
+      "Auth.Requests.RequestTelegramAccountLinkCodeRequest": {
+        "type": "object",
+        "properties": {
+          "telegramId": {
+            "maximum": 9.223372036854776E+18,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
       "Auth.Requests.RevokeUserSessionsRequest": {
         "type": "object",
         "properties": {
@@ -13454,6 +13975,41 @@
             "type": "boolean"
           },
           "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Auth.Responses.FreeTierAccessStatusResponse": {
+        "type": "object",
+        "properties": {
+          "isApplicable": {
+            "type": "boolean"
+          },
+          "isCompliant": {
+            "type": "boolean"
+          },
+          "isMergedAccount": {
+            "type": "boolean"
+          },
+          "isChannelSubscribed": {
+            "type": "boolean"
+          },
+          "isGracePeriod": {
+            "type": "boolean"
+          },
+          "isLinkedToTelegram": {
+            "type": "boolean"
+          },
+          "canRequestAccountLinkCode": {
+            "type": "boolean"
+          },
+          "activePlanName": {
+            "type": "string",
+            "nullable": true
+          },
+          "requiredChannel": {
             "type": "string",
             "nullable": true
           }
@@ -13610,6 +14166,20 @@
           },
           "hasDashboardAccess": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Auth.Responses.RequestTelegramAccountLinkCodeResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresInSeconds": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -16077,6 +16647,26 @@
         },
         "additionalProperties": false
       },
+      "User.Requests.CompleteTelegramAccountLinkRequest": {
+        "required": [
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 32,
+            "minLength": 4,
+            "type": "string"
+          },
+          "telegramId": {
+            "maximum": 9.223372036854776E+18,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
       "User.Requests.MergeTelegramGoogleUsersRequest": {
         "required": [
           "googleUserId",
@@ -16136,6 +16726,22 @@
           "isPremium": {
             "type": "boolean",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "User.Responses.CompleteTelegramAccountLinkResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "merge": {
+            "$ref": "#/components/schemas/User.Responses.MergeTelegramGoogleUsersResponse"
           }
         },
         "additionalProperties": false

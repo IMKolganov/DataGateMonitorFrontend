@@ -16,4 +16,9 @@ Page?: number;
  * @maximum 500
  */
 PageSize?: number;
+Search?: string;
+ExternalId?: string;
+Provider?: string;
+IsAdmin?: boolean;
+IsBlocked?: boolean;
 };

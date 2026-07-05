@@ -13,6 +13,10 @@ export function UsersSettings() {
     refreshing,
     errorMessage,
     handleRefresh,
+    userFilterValues,
+    onUserFilterChange,
+    onUserFilterApply,
+    onUserFilterReset,
   } = useUsers({ mode: "datagrid" });
 
   return (
@@ -40,6 +44,10 @@ export function UsersSettings() {
         refreshing={refreshing}
         errorMessage={errorMessage}
         handleRefresh={handleRefresh}
+        userFilterValues={userFilterValues}
+        onUserFilterChange={onUserFilterChange}
+        onUserFilterApply={onUserFilterApply}
+        onUserFilterReset={onUserFilterReset}
       />
     </div>
   );

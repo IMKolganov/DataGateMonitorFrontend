@@ -16,6 +16,9 @@ import {
 import { useGetApiUsersGetAll } from "../api/orval/user/user";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import { UserAvatar } from "./ui/UserAvatar.tsx";
+import { GridFilterBar } from "./ui/GridFilterBar.tsx";
+import { gridFilterFields } from "../config/gridFilters.ts";
+import { useGridFilters } from "../hooks/useGridFilterStub.ts";
 import { readOptionalAvatarUrl } from "../utils/readOptionalAvatarUrl.ts";
 import { parseTelegramNumericId } from "../utils/telegramNumericId.ts";
 import { telegramPhotoTelegramIdIfCached } from "../api/telegramProfilePhotoIndex.ts";
@@ -71,16 +74,27 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
     10,
     "5,10,20,50,100",
   );
+  const overviewUserFilters = useGridFilters("overview-users");
 
-  // IMPORTANT: orval params are PascalCase (From/To/VpnServerId/ExternalId)
   const queryParams = useMemo(() => {
     return {
       From: from.toISOString(),
       To: to.toISOString(),
       VpnServerId: vpnServerId ?? undefined,
       ExternalId: externalId?.trim() || undefined,
+      ...overviewUserFilters.queryParams,
     };
-  }, [from, to, vpnServerId, externalId]);
+  }, [from, to, vpnServerId, externalId, overviewUserFilters.queryParams]);
+
+  const onOverviewFilterApply = () => {
+    overviewUserFilters.onApply();
+    setOverviewPage(0);
+  };
+
+  const onOverviewFilterReset = () => {
+    overviewUserFilters.onReset();
+    setOverviewPage(0);
+  };
 
   const { data, isFetching, isError, error } =
     useGetApiOpenVpnClientsOverviewUsers<OverviewUsersResponse>(queryParams, {
@@ -233,6 +247,14 @@ export const OverviewUsersTable: React.FC<OverviewUsersTableProps> = ({
         <FaUsers className="icon" aria-hidden />
         <span>Users in Selection</span>
       </h3>
+      <GridFilterBar
+        gridId="overview-users"
+        fields={gridFilterFields("overview-users")}
+        values={overviewUserFilters.values}
+        onChange={overviewUserFilters.onChange}
+        onApply={onOverviewFilterApply}
+        onReset={onOverviewFilterReset}
+      />
       <CustomThemeProvider>
         <div className="data-grid-wrap data-grid-wrap--inset">
           <Grid

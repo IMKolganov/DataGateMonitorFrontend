@@ -16,4 +16,7 @@ Page?: number;
  * @maximum 2147483647
  */
 PageSize?: number;
+TelegramId?: number;
+Username?: string;
+Search?: string;
 };
