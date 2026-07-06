@@ -1,4 +1,5 @@
 import React from "react";
+import { FaCheck, FaUndo } from "react-icons/fa";
 import "../../css/GridFilterBar.css";
 
 export type GridFilterField = {
@@ -49,51 +50,67 @@ export const GridFilterBar: React.FC<GridFilterBarProps> = ({
           Filters UI ready — connect to API after SharedModels publish and <code>npm run gen:api</code>.
         </p>
       )}
-      <div className="grid-filter-bar__fields">
-        {fields.map((field) => (
-          <label key={field.id} className="grid-filter-bar__field">
-            <span className="grid-filter-bar__label">{field.label}</span>
-            {field.type === "select" && field.options ? (
-              <select
-                className="grid-filter-bar__input"
-                value={values[field.id] ?? ""}
-                disabled={disabled}
-                onChange={(e) => onChange(field.id, e.target.value)}
-              >
-                <option value="">All</option>
-                {field.options.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                className="grid-filter-bar__input"
-                type={field.type === "number" ? "number" : "text"}
-                placeholder={field.placeholder ?? field.label}
-                value={values[field.id] ?? ""}
-                disabled={disabled}
-                onChange={(e) => onChange(field.id, e.target.value)}
-              />
-            )}
-          </label>
-        ))}
-      </div>
-      {(onApply || onReset) && (
-        <div className="grid-filter-bar__actions">
-          {onApply && (
-            <button type="button" className="grid-filter-bar__btn" disabled={disabled} onClick={onApply}>
-              Apply
-            </button>
-          )}
-          {onReset && (
-            <button type="button" className="grid-filter-bar__btn grid-filter-bar__btn--secondary" disabled={disabled} onClick={onReset}>
-              Reset
-            </button>
-          )}
+      <div className="grid-filter-bar__row">
+        <div className="grid-filter-bar__fields">
+          {fields.map((field) => (
+            <label key={field.id} className="grid-filter-bar__field">
+              <span className="grid-filter-bar__label">{field.label}</span>
+              {field.type === "select" && field.options ? (
+                <select
+                  className="input grid-filter-bar__input"
+                  value={values[field.id] ?? ""}
+                  disabled={disabled}
+                  onChange={(e) => onChange(field.id, e.target.value)}
+                >
+                  <option value="">All</option>
+                  {field.options.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  className="input grid-filter-bar__input"
+                  type={field.type === "number" ? "number" : "text"}
+                  placeholder={field.placeholder ?? field.label}
+                  value={values[field.id] ?? ""}
+                  disabled={disabled}
+                  onChange={(e) => onChange(field.id, e.target.value)}
+                />
+              )}
+            </label>
+          ))}
         </div>
-      )}
+        {(onApply || onReset) && (
+          <div className="grid-filter-bar__actions">
+            {onApply && (
+              <button
+                type="button"
+                className="btn primary"
+                disabled={disabled}
+                onClick={onApply}
+                title="Apply filters"
+              >
+                <FaCheck className="icon" aria-hidden />
+                Apply
+              </button>
+            )}
+            {onReset && (
+              <button
+                type="button"
+                className="btn secondary"
+                disabled={disabled}
+                onClick={onReset}
+                title="Reset filters"
+              >
+                <FaUndo className="icon" aria-hidden />
+                Reset
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
