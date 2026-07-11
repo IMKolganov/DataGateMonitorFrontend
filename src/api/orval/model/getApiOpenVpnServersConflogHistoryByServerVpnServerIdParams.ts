@@ -6,6 +6,15 @@
  */
 
 export type GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams = {
-page?: number;
-pageSize?: number;
+/**
+ * @minimum 1
+ * @maximum 2147483647
+ */
+Page?: number;
+/**
+ * @minimum 1
+ * @maximum 2147483647
+ */
+PageSize?: number;
+RequestUrl?: string;
 };

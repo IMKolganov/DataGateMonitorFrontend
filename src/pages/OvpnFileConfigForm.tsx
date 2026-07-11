@@ -28,6 +28,10 @@ import type {
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import Grid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
+import { GridFilterBar } from "../components/ui/GridFilterBar.tsx";
+import { gridFilterFields } from "../config/gridFilters.ts";
+import { useGridFilters } from "../hooks/useGridFilterStub.ts";
+import type { GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams } from "../api/orval/model/getApiOpenVpnServersConflogHistoryByServerVpnServerIdParams";
 import "../css/Table.css";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
@@ -121,6 +125,7 @@ const OvpnFileConfigForm: React.FC = () => {
     DEFAULT_CONFLOG_PAGE_SIZE,
     "5,10,20,50,100",
   );
+  const conflogFilters = useGridFilters("ovpn-config-conflog");
 
   // local UI state (kept in PascalCase to match form field names)
   const [ovpnFileConfig, setServerConfig] = useState({
@@ -170,10 +175,24 @@ const OvpnFileConfigForm: React.FC = () => {
   const setConflogPage = (page: number) =>
     setConflogPageState((s) => ({ ...s, page }));
 
-  const conflogHistoryParams = useMemo(
-    () => ({ page: conflogPage, pageSize: conflogPageSize }),
-    [conflogPage, conflogPageSize]
+  const conflogHistoryParams = useMemo<GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams>(
+    () => ({
+      Page: conflogPage,
+      PageSize: conflogPageSize,
+      ...conflogFilters.queryParams,
+    }),
+    [conflogPage, conflogPageSize, conflogFilters.queryParams],
   );
+  const onConflogFilterApply = () => {
+    conflogFilters.onApply();
+    setConflogPage(1);
+  };
+
+  const onConflogFilterReset = () => {
+    conflogFilters.onReset();
+    setConflogPage(1);
+  };
+
   const { data: conflogHistoryResp, isFetching: isConflogLoading } =
     useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
       parsedVpnServerId,
@@ -181,7 +200,10 @@ const OvpnFileConfigForm: React.FC = () => {
       { query: { enabled: parsedVpnServerId > 0 && openVpnPageEnabled } }
     );
 
-  const latestConflogParams = useMemo(() => ({ page: 1, pageSize: 1 }), []);
+  const latestConflogParams = useMemo<GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams>(
+    () => ({ Page: 1, PageSize: 1 }),
+    [],
+  );
   const { data: latestConflogResp } = useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
     parsedVpnServerId,
     latestConflogParams,
@@ -819,6 +841,14 @@ const OvpnFileConfigForm: React.FC = () => {
                   {fetchAndSaveConflogMutation.isPending ? "Fetching…" : "Fetch and save conflog"}
                 </button>
               </div>
+              <GridFilterBar
+                gridId="ovpn-config-conflog"
+                fields={gridFilterFields("ovpn-config-conflog")}
+                values={conflogFilters.values}
+                onChange={conflogFilters.onChange}
+                onApply={onConflogFilterApply}
+                onReset={onConflogFilterReset}
+              />
               <CustomThemeProvider>
                 <div
                   className="data-grid-wrap"

@@ -22,6 +22,9 @@ import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse
 import { QuotaPlanFormModal } from "./QuotaPlanFormModal";
 import { QuotaPlanAllowedServersModal } from "./QuotaPlanAllowedServersModal";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { GridFilterBar } from "../../components/ui/GridFilterBar.tsx";
+import { gridFilterFields } from "../../config/gridFilters.ts";
+import { useGridFilters } from "../../hooks/useGridFilterStub.ts";
 import "../../css/Settings.css";
 import "../../css/Table.css";
 
@@ -44,6 +47,7 @@ export function QuotaPlansSettings() {
     10,
     "5,10,20,50,100",
   );
+  const quotaPlanFilters = useGridFilters("quota-plans");
 
   const getAllMutation = usePostApiQuotaPlansGetAll();
   const loadPlansMutate = getAllMutation.mutate;
@@ -305,6 +309,16 @@ export function QuotaPlansSettings() {
         </div>
       ) : (
         <CustomThemeProvider>
+          <GridFilterBar
+            gridId="quota-plans"
+            fields={gridFilterFields("quota-plans")}
+            values={quotaPlanFilters.values}
+            onChange={quotaPlanFilters.onChange}
+            onApply={quotaPlanFilters.onApply}
+            onReset={quotaPlanFilters.onReset}
+            pendingOrval
+            disabled={getAllMutation.isPending}
+          />
           <div
             className="data-grid-wrap"
             style={{

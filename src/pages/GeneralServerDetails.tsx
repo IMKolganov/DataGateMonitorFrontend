@@ -6,6 +6,9 @@ import "../css/Settings.css";
 import { FaMapMarkerAlt, FaSync, FaUsers } from "react-icons/fa";
 import { isOpenVpnStack, VpnServerType } from "../constants/vpnServerType";
 import ClientsTable from "../components/ClientsTable";
+import { GridFilterBar } from "../components/ui/GridFilterBar.tsx";
+import { gridFilterFields } from "../config/gridFilters.ts";
+import { useGridFilters } from "../hooks/useGridFilterStub.ts";
 import VpnMap from "../components/VpnMap";
 import ServerDetailsInfoDefault from "../components/servers/ServerDetailsInfo.tsx";
 
@@ -112,6 +115,18 @@ export function GeneralServerDetails() {
         "5,10,20,50,100",
     );
     const [planNameById, setPlanNameById] = useState<Map<number, string>>(new Map());
+    const clientFilterGridId = isLive ? "server-connected-clients" : "server-history-clients";
+    const clientFilters = useGridFilters(clientFilterGridId);
+
+    const onClientFilterApply = () => {
+        clientFilters.onApply();
+        setPage(0);
+    };
+
+    const onClientFilterReset = () => {
+        clientFilters.onReset();
+        setPage(0);
+    };
 
     const numericServerId = useMemo(
         () => (vpnServerId ? Number(vpnServerId) : undefined),
@@ -237,8 +252,9 @@ export function GeneralServerDetails() {
             VpnServerId: numericServerId ?? 0,
             Page: page + 1,
             PageSize: pageSize,
+            ...clientFilters.queryParams,
         }),
-        [numericServerId, page, pageSize]
+        [numericServerId, page, pageSize, clientFilters.queryParams]
     );
 
     const mapConnectedParams: GetApiOpenVpnClientsGetAllConnectedParams = useMemo(
@@ -255,8 +271,9 @@ export function GeneralServerDetails() {
             VpnServerId: numericServerId ?? 0,
             Page: page + 1,
             PageSize: pageSize,
+            ...clientFilters.queryParams,
         }),
-        [numericServerId, page, pageSize]
+        [numericServerId, page, pageSize, clientFilters.queryParams]
     );
 
     const serverBasicQuery = useGetApiOpenVpnServersGetVpnServerId(numericServerId ?? 0, {
@@ -369,7 +386,7 @@ export function GeneralServerDetails() {
 
     const latestConflogQuery = useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
         numericServerId ?? 0,
-        { page: 1, pageSize: 1 },
+        { Page: 1, PageSize: 1 },
         { query: { enabled: Number.isFinite(numericServerId) && openVpnQueriesEnabled } }
     );
     const latestConflogItems = (latestConflogQuery.data as { items?: { payload?: ConflogPayload }[] } | undefined)?.items ?? [];
@@ -594,6 +611,16 @@ export function GeneralServerDetails() {
                             </div>
                         ) : null}
 
+                        <GridFilterBar
+                            gridId={clientFilterGridId}
+                            fields={gridFilterFields(clientFilterGridId)}
+                            values={clientFilters.values}
+                            onChange={clientFilters.onChange}
+                            onApply={onClientFilterApply}
+                            onReset={onClientFilterReset}
+                            disabled={loadingClients}
+                        />
+
                         <ClientsTable
                             clients={clients}
                             totalClients={totalClients}
@@ -606,7 +633,7 @@ export function GeneralServerDetails() {
                             vpnServerId={numericServerId}
                             xrayPollError={serverEntity?.xrayClientsPollError ?? null}
                             xrayQueryErrorMessage={xrayClientsQueryErrorMessage}
-                            onXraySessionsChanged={() => {
+                            onClientsChanged={() => {
                                 if (isLive) void connectedQuery.refetch();
                                 else void historyQuery.refetch();
                                 void v3ServersWithStatusQuery.refetch();

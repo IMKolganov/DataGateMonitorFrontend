@@ -15,6 +15,13 @@ export type { UserQuotaPlansRequestsCreateOrUpdateUserQuotaPlanRequest as Create
 export type { OpenVpnFilesRequestsDownloadFileRequest as DownloadFileRequest } from "./orval/model/openVpnFilesRequestsDownloadFileRequest";
 export type { OpenVpnFilesResponsesDownloadFileResponse as DownloadFileResponse } from "./orval/model/openVpnFilesResponsesDownloadFileResponse";
 export type { ApiOpenVpnFilesResponsesDownloadFileResponse as DownloadFileResponseApiResponse } from "./orval/model/apiOpenVpnFilesResponsesDownloadFileResponse";
+export type { FreeTierEnforcementDtoFreeTierEnforcementCandidateDto as FreeTierEnforcementCandidateDto } from "./orval/model/freeTierEnforcementDtoFreeTierEnforcementCandidateDto";
+export type { FreeTierEnforcementDtoFreeTierDisconnectLogEntryDto as FreeTierDisconnectLogEntryDto } from "./orval/model/freeTierEnforcementDtoFreeTierDisconnectLogEntryDto";
+export type { FreeTierEnforcementResponsesGetFreeTierEnforcementCandidatesResponse as GetFreeTierEnforcementCandidatesResponse } from "./orval/model/freeTierEnforcementResponsesGetFreeTierEnforcementCandidatesResponse";
+export type { FreeTierEnforcementResponsesGetFreeTierDisconnectLogResponse as GetFreeTierDisconnectLogResponse } from "./orval/model/freeTierEnforcementResponsesGetFreeTierDisconnectLogResponse";
+export type { PagedFreeTierEnforcementDtoFreeTierDisconnectLogEntryDto as PagedFreeTierDisconnectLogEntryDto } from "./orval/model/pagedFreeTierEnforcementDtoFreeTierDisconnectLogEntryDto";
+export type { VpnServerClientsRequestsKillOpenVpnClientRequest as KillOpenVpnClientRequest } from "./orval/model/vpnServerClientsRequestsKillOpenVpnClientRequest";
+export type { VpnServerClientsResponsesKillOpenVpnClientResponse as KillOpenVpnClientResponse } from "./orval/model/vpnServerClientsResponsesKillOpenVpnClientResponse";
 export type { VpnServerClientsDtoGeoPointAggDto as GeoPointAggDto } from "./orval/model/vpnServerClientsDtoGeoPointAggDto";
 export type { VpnServerCertsResponsesGetAllCertificatesResponse as GetAllCertificatesResponse } from "./orval/model/vpnServerCertsResponsesGetAllCertificatesResponse";
 export type { TelegramBotIncomingMessageLogResponsesGetAllMessagesResponse as GetAllMessagesResponse } from "./orval/model/telegramBotIncomingMessageLogResponsesGetAllMessagesResponse";
@@ -118,6 +125,7 @@ export type { CertExpiryDtoCertExpiryServerResultDto as CertExpiryServerResultDt
 export type { CertExpiryDtoCertExpiryProfileResultDto as CertExpiryProfileResultDto } from "./orval/model/certExpiryDtoCertExpiryProfileResultDto";
 
 export { EnumsServiceStatus as ServiceStatus } from "./orval/model/enumsServiceStatus";
+export { EnumsDisconnectReason as DisconnectReason } from "./orval/model/enumsDisconnectReason";
 export { EnumsOverviewGrouping as OverviewGrouping } from "./orval/model/enumsOverviewGrouping";
 export { EnumsQuotaOverlimitAction as QuotaOverlimitAction } from "./orval/model/enumsQuotaOverlimitAction";
 export { EnumsNotificationSeverity as NotificationSeverity } from "./orval/model/enumsNotificationSeverity";

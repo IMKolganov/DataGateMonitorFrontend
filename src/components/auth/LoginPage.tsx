@@ -79,10 +79,16 @@ const LoginPage: React.FC = () => {
 
                 <div className="register-container">
                     {!totpChallenge ? (
+                        <>
                         <p>
                             New to DataGate Monitor?{" "}
                             <Link to="/register" className="register-link">Create an account</Link>
                         </p>
+                        <p>
+                            Waiting for an email code?{" "}
+                            <Link to="/confirm-email" className="register-link">Confirm your email</Link>
+                        </p>
+                        </>
                     ) : null}
                     <p>© {new Date().getFullYear()} DataGate Monitor v.{appVersion}</p>
                     <GdprFooterLinks />

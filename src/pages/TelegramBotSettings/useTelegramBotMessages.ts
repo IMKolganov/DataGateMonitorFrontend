@@ -13,9 +13,9 @@ import type {
 } from "../../api/orvalModelShim";
 import { isCanceledError } from "../../utils/queryCanceled";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { useGridFilters } from "../../hooks/useGridFilterStub";
 
 export function useTelegramBotMessages() {
-    // MUI DataGrid — 0-based
     const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = usePersistedPageSize(
         "telegram-bot-incoming-messages",
@@ -23,13 +23,15 @@ export function useTelegramBotMessages() {
         "5,10,20,50,100",
     );
     const [manualRefreshing, setManualRefreshing] = useState(false);
+    const messageFilters = useGridFilters("settings-telegram-bot-messages");
 
     const params = useMemo<GetApiTgbotIncomingMessageLogsGetAllParams>(
         () => ({
-            Page: page + 1, // backend 1-based
+            Page: page + 1,
             PageSize: pageSize,
+            ...messageFilters.queryParams,
         }),
-        [page, pageSize],
+        [page, pageSize, messageFilters.queryParams],
     );
 
     const qMessages = useGetApiTgbotIncomingMessageLogsGetAll(params, {
@@ -82,6 +84,20 @@ export function useTelegramBotMessages() {
         [setPageSize],
     );
 
+    const resetPage = useCallback(() => {
+        setPage((prev) => (prev === 0 ? prev : 0));
+    }, []);
+
+    const onMessageFilterApply = useCallback(() => {
+        messageFilters.onApply();
+        resetPage();
+    }, [messageFilters.onApply, resetPage]);
+
+    const onMessageFilterReset = useCallback(() => {
+        messageFilters.onReset();
+        resetPage();
+    }, [messageFilters.onReset, resetPage]);
+
     return {
         messages,
         totalCount,
@@ -92,5 +108,9 @@ export function useTelegramBotMessages() {
         refreshing,
         errorMessage,
         handleRefresh,
+        messageFilterValues: messageFilters.values,
+        onMessageFilterChange: messageFilters.onChange,
+        onMessageFilterApply,
+        onMessageFilterReset,
     };
 }

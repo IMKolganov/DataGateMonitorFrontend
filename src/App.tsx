@@ -19,6 +19,7 @@ import LoginPage from "./components/auth/LoginPage";
 import RegisterPage from "./components/auth/RegisterPage";
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./components/auth/ResetPasswordPage";
+import ConfirmEmailPage from "./components/auth/ConfirmEmailPage";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./utils/const.ts";
 import { startAdminIdleSession } from "./utils/auth/adminIdleSession.ts";
 import { scheduleAutoLogout } from "./utils/auth/tokenExpiryScheduler.ts";
@@ -50,6 +51,7 @@ const AndroidCrashReportsSettings = lazy(() => import("./pages/AndroidCrashRepor
 const WindowsCrashReportsSettings = lazy(() => import("./pages/WindowsCrashReportsSettings"));
 const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
 const UsersSettings = lazy(() => import("./pages/UsersSettings/UsersSettings"));
+const FreeTierEnforcementSettings = lazy(() => import("./pages/FreeTierEnforcementSettings"));
 const UserQuotasPage = lazy(() => import("./pages/UsersSettings/UserQuotasPage"));
 const UserDetailPage = lazy(() => import("./pages/UsersSettings/UserDetailPage"));
 const CertExpirySettings = lazy(() => import("./pages/CertExpirySettings"));
@@ -86,6 +88,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     location.pathname === "/register" ||
     location.pathname === "/forgot-password" ||
     location.pathname === "/reset-password" ||
+    location.pathname === "/confirm-email" ||
+    location.pathname === "/xray/confirm-email" ||
     location.pathname === "/xray" ||
     location.pathname.startsWith("/xray/");
 
@@ -125,6 +129,13 @@ function App() {
             <Route path="/register" element={withSuspense(<RegisterPage />)} />
             <Route path="/forgot-password" element={withSuspense(<ForgotPasswordPage />)} />
             <Route path="/reset-password" element={withSuspense(<ResetPasswordPage />)} />
+            <Route path="/confirm-email" element={withSuspense(<ConfirmEmailPage />)} />
+            <Route
+              path="/xray/confirm-email"
+              element={withSuspense(
+                <ConfirmEmailPage loginPath="/xray/login" registerPath="/xray/register" />,
+              )}
+            />
             <Route
               path="/xray"
               element={
@@ -193,6 +204,10 @@ function App() {
                       <Route path="users/quotas" element={withSuspense(<UserQuotasPage />)} />
                       <Route path="users" element={withSuspense(<UsersSettings />)} />
                       <Route path="users/:userId" element={withSuspense(<UserDetailPage />)} />
+                      <Route
+                        path="free-tier-enforcement"
+                        element={withSuspense(<FreeTierEnforcementSettings />)}
+                      />
                       <Route path="email-broadcast" element={withSuspense(<EmailBroadcastSettings />)} />
                       <Route path="android-crashes" element={withSuspense(<AndroidCrashReportsSettings />)} />
                       <Route path="windows-crashes" element={withSuspense(<WindowsCrashReportsSettings />)} />

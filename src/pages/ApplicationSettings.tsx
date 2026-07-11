@@ -4,11 +4,15 @@ import { FaLaptopCode, FaPlus, FaSync, FaTerminal } from "react-icons/fa";
 import "../css/ApplicationSettings.css";
 import "../css/Settings.css";
 import ApplicationTable from "../components/settings/ApplicationTable.tsx";
+import { GridFilterBar } from "../components/ui/GridFilterBar.tsx";
+import { gridFilterFields } from "../config/gridFilters.ts";
+import { useGridFilters } from "../hooks/useGridFilterStub.ts";
 
 import {
   useGetApiApplicationsGetAll,
   usePostApiApplicationsRegister,
 } from "../api/orval/applications/applications";
+import type { GetApiApplicationsGetAllParams } from "../api/orval/model/getApiApplicationsGetAllParams";
 import type { RegisterApplicationRequest, ApplicationDto } from "../api/orvalModelShim";
 import axios from "axios";
 import { errorMessage as formatError } from "../utils/errorMessage";
@@ -42,6 +46,12 @@ export function ApplicationSettings() {
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [newAppName, setNewAppName] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const appFilters = useGridFilters("settings-applications");
+
+  const listParams = useMemo<GetApiApplicationsGetAllParams>(
+    () => ({ ...appFilters.queryParams }),
+    [appFilters.queryParams],
+  );
 
   const {
     data: appsResp,
@@ -49,7 +59,7 @@ export function ApplicationSettings() {
     isLoading,
     isFetching,
     refetch,
-  } = useGetApiApplicationsGetAll({
+  } = useGetApiApplicationsGetAll(listParams, {
     query: {
       staleTime: 0,
       gcTime: 5 * 60 * 1000,
@@ -178,6 +188,16 @@ export function ApplicationSettings() {
               <p className="error-message">❌ {errorMessage}</p>
             </div>
           )}
+
+          <GridFilterBar
+            gridId="settings-applications"
+            fields={gridFilterFields("settings-applications")}
+            values={appFilters.values}
+            onChange={appFilters.onChange}
+            onApply={appFilters.onApply}
+            onReset={appFilters.onReset}
+            disabled={isLoading || isFetching}
+          />
 
           <ApplicationTable applications={apps} refreshApps={handleRefresh} />
         </>

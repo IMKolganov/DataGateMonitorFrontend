@@ -14,6 +14,9 @@ import { apiRequest } from "../api/apirequest";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import { toast } from "react-toastify";
 import { FaBolt, FaBan } from "react-icons/fa";
+import { usePostApiOpenVpnClientsKill } from "../api/orval/vpn-server-clients/vpn-server-clients";
+import { unwrapKillResponse } from "../utils/unwrapKillResponse";
+import { errorMessage } from "../utils/errorMessage";
 
 type ClientDto = VpnClientInfoDto;
 
@@ -40,7 +43,8 @@ interface ClientsTableProps {
     xrayPollError?: string | null;
     /** React Query / HTTP failure while loading the clients list. */
     xrayQueryErrorMessage?: string | null;
-    onXraySessionsChanged?: () => void;
+    /** Called after a row action (Xray kick/revoke, OpenVPN kill) succeeds so the parent can refetch. */
+    onClientsChanged?: () => void;
 }
 
 const ClientsTable: React.FC<ClientsTableProps> = ({
@@ -55,11 +59,12 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                                                        vpnServerId: vpnServerIdProp,
                                                        xrayPollError,
                                                        xrayQueryErrorMessage,
-                                                       onXraySessionsChanged,
+                                                       onClientsChanged,
                                                    }) => {
     const { vpnServerId } = useParams<{ vpnServerId?: string }>();
     const [actionBusyKey, setActionBusyKey] = useState<string | null>(null);
     const canXrayAdminActions = clientsStack === "xray" && isAdmin(getCurrentUser());
+    const canOpenVpnAdminActions = clientsStack === "openvpn" && isAdmin(getCurrentUser());
     const canLinkToUserStats = isAdmin(getCurrentUser());
     const serverIdForActions =
         typeof vpnServerIdProp === "number" && Number.isFinite(vpnServerIdProp)
@@ -67,6 +72,36 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
             : vpnServerId
               ? Number(vpnServerId)
               : undefined;
+
+    const killMutation = usePostApiOpenVpnClientsKill();
+    const handleOpenVpnKill = useCallback(
+        async (commonName: string, revoke: boolean) => {
+            if (!serverIdForActions || serverIdForActions <= 0 || !commonName) return;
+            const key = `${revoke ? "kill-revoke" : "kill"}:${commonName}`;
+            setActionBusyKey(key);
+            try {
+                const resp = await killMutation.mutateAsync({
+                    data: {
+                        vpnServerId: serverIdForActions,
+                        commonName,
+                        revokeCertificate: revoke,
+                    },
+                });
+                const result = unwrapKillResponse(resp);
+                if (result && result.success === false) {
+                    toast.error(result.errorMessage ?? "Kill request failed.");
+                } else {
+                    toast.success(revoke ? "Client killed and certificate revoked." : "Client killed.");
+                    onClientsChanged?.();
+                }
+            } catch (e) {
+                toast.error(errorMessage(e));
+            } finally {
+                setActionBusyKey(null);
+            }
+        },
+        [serverIdForActions, killMutation, onClientsChanged]
+    );
 
     const postXrayAction = useCallback(
         async (path: "kick-user" | "disable-user", commonName: string) => {
@@ -84,14 +119,14 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                     return;
                 }
                 toast.success(path === "kick-user" ? "Session dropped; client can reconnect." : "Client revoked on node.");
-                onXraySessionsChanged?.();
+                onClientsChanged?.();
             } catch (e) {
                 toast.error(e instanceof Error ? e.message : "Request failed");
             } finally {
                 setActionBusyKey(null);
             }
         },
-        [serverIdForActions, onXraySessionsChanged]
+        [serverIdForActions, onClientsChanged]
     );
 
     const rows = clients.map((client, index) => {
@@ -182,56 +217,108 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
         { field: "connectedSince", headerName: "Connected Since", flex: 0.5 },
         { field: "country", headerName: "Country", flex: 1 },
         ];
-        if (!canXrayAdminActions) return base;
-        return [
-            ...base,
-            {
-                field: "xrayActions",
-                headerName: "Actions",
-                sortable: false,
-                filterable: false,
-                width: 260,
-                renderCell: (params) => {
-                    const cn = (params.row as { _cn?: string })._cn ?? "";
-                    if (!cn) return null;
-                    const busyKick = actionBusyKey === `kick-user:${cn}`;
-                    const busyDisable = actionBusyKey === `disable-user:${cn}`;
-                    return (
-                        <div className="action-container">
-                            <button
-                                type="button"
-                                className="btn secondary"
-                                disabled={busyKick || busyDisable}
-                                title="Drop active sessions; client stays issued and can reconnect."
-                                onClick={() => void postXrayAction("kick-user", cn)}
-                            >
-                                <FaBolt className="icon" aria-hidden />
-                                {busyKick ? "…" : "Drop session"}
-                            </button>
-                            <button
-                                type="button"
-                                className="btn danger"
-                                disabled={busyKick || busyDisable}
-                                title="Revoke client on this node (same as revoking an issued link)."
-                                onClick={() => {
-                                    if (
-                                        !window.confirm(
-                                            `Revoke Xray client "${cn}" on this server? Their profile will stop working; issue a new link if needed.`
+        if (canXrayAdminActions) {
+            return [
+                ...base,
+                {
+                    field: "xrayActions",
+                    headerName: "Actions",
+                    sortable: false,
+                    filterable: false,
+                    width: 260,
+                    renderCell: (params) => {
+                        const cn = (params.row as { _cn?: string })._cn ?? "";
+                        if (!cn) return null;
+                        const busyKick = actionBusyKey === `kick-user:${cn}`;
+                        const busyDisable = actionBusyKey === `disable-user:${cn}`;
+                        return (
+                            <div className="action-container">
+                                <button
+                                    type="button"
+                                    className="btn secondary"
+                                    disabled={busyKick || busyDisable}
+                                    title="Drop active sessions; client stays issued and can reconnect."
+                                    onClick={() => void postXrayAction("kick-user", cn)}
+                                >
+                                    <FaBolt className="icon" aria-hidden />
+                                    {busyKick ? "…" : "Drop session"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn danger"
+                                    disabled={busyKick || busyDisable}
+                                    title="Revoke client on this node (same as revoking an issued link)."
+                                    onClick={() => {
+                                        if (
+                                            !window.confirm(
+                                                `Revoke Xray client "${cn}" on this server? Their profile will stop working; issue a new link if needed.`
+                                            )
                                         )
-                                    )
-                                        return;
-                                    void postXrayAction("disable-user", cn);
-                                }}
-                            >
-                                <FaBan className="icon" aria-hidden />
-                                {busyDisable ? "…" : "Revoke"}
-                            </button>
-                        </div>
-                    );
-                },
-            } satisfies GridColDef,
-        ];
-    }, [canLinkToUserStats, canXrayAdminActions, actionBusyKey, postXrayAction, vpnServerId]);
+                                            return;
+                                        void postXrayAction("disable-user", cn);
+                                    }}
+                                >
+                                    <FaBan className="icon" aria-hidden />
+                                    {busyDisable ? "…" : "Revoke"}
+                                </button>
+                            </div>
+                        );
+                    },
+                } satisfies GridColDef,
+            ];
+        }
+        if (canOpenVpnAdminActions) {
+            return [
+                ...base,
+                {
+                    field: "openVpnActions",
+                    headerName: "Actions",
+                    sortable: false,
+                    filterable: false,
+                    width: 260,
+                    renderCell: (params) => {
+                        const cn = (params.row as { _cn?: string })._cn ?? "";
+                        if (!cn) return null;
+                        const busyKill = actionBusyKey === `kill:${cn}`;
+                        const busyKillRevoke = actionBusyKey === `kill-revoke:${cn}`;
+                        return (
+                            <div className="action-container">
+                                <button
+                                    type="button"
+                                    className="btn secondary"
+                                    disabled={busyKill || busyKillRevoke}
+                                    title="Disconnect the active OpenVPN session; the client can reconnect."
+                                    onClick={() => void handleOpenVpnKill(cn, false)}
+                                >
+                                    <FaBolt className="icon" aria-hidden />
+                                    {busyKill ? "…" : "Kill"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn danger"
+                                    disabled={busyKill || busyKillRevoke}
+                                    title="Disconnect and revoke the OVPN certificate; the client cannot reconnect with this profile."
+                                    onClick={() => {
+                                        if (
+                                            !window.confirm(
+                                                `Kill and revoke the OVPN certificate for "${cn}"? They will need a new profile to reconnect.`
+                                            )
+                                        )
+                                            return;
+                                        void handleOpenVpnKill(cn, true);
+                                    }}
+                                >
+                                    <FaBan className="icon" aria-hidden />
+                                    {busyKillRevoke ? "…" : "Kill + Revoke"}
+                                </button>
+                            </div>
+                        );
+                    },
+                } satisfies GridColDef,
+            ];
+        }
+        return base;
+    }, [canLinkToUserStats, canXrayAdminActions, canOpenVpnAdminActions, actionBusyKey, postXrayAction, handleOpenVpnKill, vpnServerId]);
 
     const noRowsLabel = useMemo(() => {
         if (clientsStack !== "xray") return "No connected clients";

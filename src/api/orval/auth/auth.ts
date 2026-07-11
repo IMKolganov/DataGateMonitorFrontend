@@ -28,19 +28,23 @@ import type {
   ApiAuthResponsesAdminResetPasswordResponse,
   ApiAuthResponsesAuthSessionPolicyResponse,
   ApiAuthResponsesConfirmEmailResponse,
+  ApiAuthResponsesFreeTierAccessStatusResponse,
   ApiAuthResponsesGetUserSessionsResponse,
   ApiAuthResponsesGoogleLoginResponse,
   ApiAuthResponsesLoginResponse,
   ApiAuthResponsesRefreshResponse,
   ApiAuthResponsesRegisterUserResponse,
+  ApiAuthResponsesRequestTelegramAccountLinkCodeResponse,
   ApiAuthResponsesTelegramRequestLoginCodeResponse,
   ApiAuthResponsesTokenResponse,
   ApiAuthResponsesTotpSetupResponse,
   ApiAuthResponsesTotpStatusResponse,
   ApiSystemInt32,
   ApiSystemString,
+  ApiUserResponsesCompleteTelegramAccountLinkResponse,
   AuthRequestsAdminForgotPasswordRequest,
   AuthRequestsAdminResetPasswordRequest,
+  AuthRequestsCompleteTelegramAccountLinkFromAppRequest,
   AuthRequestsConfirmEmailRequest,
   AuthRequestsGoogleCodeLoginRequest,
   AuthRequestsGoogleLoginRequest,
@@ -48,6 +52,8 @@ import type {
   AuthRequestsRefreshRequest,
   AuthRequestsRegisterUserRequest,
   AuthRequestsRequestEmailConfirmationRequest,
+  AuthRequestsRequestTelegramAccountLinkCodeForBotRequest,
+  AuthRequestsRequestTelegramAccountLinkCodeRequest,
   AuthRequestsRevokeUserSessionsRequest,
   AuthRequestsTelegramCodeLoginRequest,
   AuthRequestsTelegramRequestLoginCodeRequest,
@@ -421,7 +427,264 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPostApiAuthRegisterMutationOptions(options), queryClient);
     }
-    export const postApiAuthEmailRequestConfirmation = (
+    export const postApiAuthTelegramRequestAccountLinkCode = (
+    authRequestsRequestTelegramAccountLinkCodeRequest?: AuthRequestsRequestTelegramAccountLinkCodeRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesRequestTelegramAccountLinkCodeResponse>(
+      {url: `/api/auth/telegram/request-account-link-code`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsRequestTelegramAccountLinkCodeRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthTelegramRequestAccountLinkCodeMutationOptions = <TError = ApiAuthResponsesRequestTelegramAccountLinkCodeResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCode>>, TError,{data?: AuthRequestsRequestTelegramAccountLinkCodeRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCode>>, TError,{data?: AuthRequestsRequestTelegramAccountLinkCodeRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthTelegramRequestAccountLinkCode'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCode>>, {data?: AuthRequestsRequestTelegramAccountLinkCodeRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthTelegramRequestAccountLinkCode(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthTelegramRequestAccountLinkCodeMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCode>>>
+    export type PostApiAuthTelegramRequestAccountLinkCodeMutationBody = AuthRequestsRequestTelegramAccountLinkCodeRequest | undefined
+    export type PostApiAuthTelegramRequestAccountLinkCodeMutationError = ApiAuthResponsesRequestTelegramAccountLinkCodeResponse
+
+    export const usePostApiAuthTelegramRequestAccountLinkCode = <TError = ApiAuthResponsesRequestTelegramAccountLinkCodeResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCode>>, TError,{data?: AuthRequestsRequestTelegramAccountLinkCodeRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCode>>,
+        TError,
+        {data?: AuthRequestsRequestTelegramAccountLinkCodeRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthTelegramRequestAccountLinkCodeMutationOptions(options), queryClient);
+    }
+    export const postApiAuthTelegramRequestAccountLinkCodeForBot = (
+    authRequestsRequestTelegramAccountLinkCodeForBotRequest?: AuthRequestsRequestTelegramAccountLinkCodeForBotRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesRequestTelegramAccountLinkCodeResponse>(
+      {url: `/api/auth/telegram/request-account-link-code-for-bot`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsRequestTelegramAccountLinkCodeForBotRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthTelegramRequestAccountLinkCodeForBotMutationOptions = <TError = ApiAuthResponsesRequestTelegramAccountLinkCodeResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCodeForBot>>, TError,{data?: AuthRequestsRequestTelegramAccountLinkCodeForBotRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCodeForBot>>, TError,{data?: AuthRequestsRequestTelegramAccountLinkCodeForBotRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthTelegramRequestAccountLinkCodeForBot'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCodeForBot>>, {data?: AuthRequestsRequestTelegramAccountLinkCodeForBotRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthTelegramRequestAccountLinkCodeForBot(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthTelegramRequestAccountLinkCodeForBotMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCodeForBot>>>
+    export type PostApiAuthTelegramRequestAccountLinkCodeForBotMutationBody = AuthRequestsRequestTelegramAccountLinkCodeForBotRequest | undefined
+    export type PostApiAuthTelegramRequestAccountLinkCodeForBotMutationError = ApiAuthResponsesRequestTelegramAccountLinkCodeResponse
+
+    export const usePostApiAuthTelegramRequestAccountLinkCodeForBot = <TError = ApiAuthResponsesRequestTelegramAccountLinkCodeResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCodeForBot>>, TError,{data?: AuthRequestsRequestTelegramAccountLinkCodeForBotRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCodeForBot>>,
+        TError,
+        {data?: AuthRequestsRequestTelegramAccountLinkCodeForBotRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthTelegramRequestAccountLinkCodeForBotMutationOptions(options), queryClient);
+    }
+    export const postApiAuthTelegramCompleteAccountLink = (
+    authRequestsCompleteTelegramAccountLinkFromAppRequest?: AuthRequestsCompleteTelegramAccountLinkFromAppRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiUserResponsesCompleteTelegramAccountLinkResponse>(
+      {url: `/api/auth/telegram/complete-account-link`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsCompleteTelegramAccountLinkFromAppRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthTelegramCompleteAccountLinkMutationOptions = <TError = ApiUserResponsesCompleteTelegramAccountLinkResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramCompleteAccountLink>>, TError,{data?: AuthRequestsCompleteTelegramAccountLinkFromAppRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramCompleteAccountLink>>, TError,{data?: AuthRequestsCompleteTelegramAccountLinkFromAppRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthTelegramCompleteAccountLink'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthTelegramCompleteAccountLink>>, {data?: AuthRequestsCompleteTelegramAccountLinkFromAppRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthTelegramCompleteAccountLink(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthTelegramCompleteAccountLinkMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthTelegramCompleteAccountLink>>>
+    export type PostApiAuthTelegramCompleteAccountLinkMutationBody = AuthRequestsCompleteTelegramAccountLinkFromAppRequest | undefined
+    export type PostApiAuthTelegramCompleteAccountLinkMutationError = ApiUserResponsesCompleteTelegramAccountLinkResponse
+
+    export const usePostApiAuthTelegramCompleteAccountLink = <TError = ApiUserResponsesCompleteTelegramAccountLinkResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramCompleteAccountLink>>, TError,{data?: AuthRequestsCompleteTelegramAccountLinkFromAppRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthTelegramCompleteAccountLink>>,
+        TError,
+        {data?: AuthRequestsCompleteTelegramAccountLinkFromAppRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthTelegramCompleteAccountLinkMutationOptions(options), queryClient);
+    }
+    export const getApiAuthFreeTierAccessStatus = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesFreeTierAccessStatusResponse>(
+      {url: `/api/auth/free-tier-access/status`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiAuthFreeTierAccessStatusQueryKey = () => {
+    return [
+    `/api/auth/free-tier-access/status`
+    ] as const;
+    }
+
+
+export const getGetApiAuthFreeTierAccessStatusQueryOptions = <TData = Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAuthFreeTierAccessStatusQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>> = ({ signal }) => getApiAuthFreeTierAccessStatus(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAuthFreeTierAccessStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>>
+export type GetApiAuthFreeTierAccessStatusQueryError = unknown
+
+
+export function useGetApiAuthFreeTierAccessStatus<TData = Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuthFreeTierAccessStatus<TData = Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuthFreeTierAccessStatus<TData = Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAuthFreeTierAccessStatus<TData = Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthFreeTierAccessStatus>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAuthFreeTierAccessStatusQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const postApiAuthEmailRequestConfirmation = (
     authRequestsRequestEmailConfirmationRequest?: AuthRequestsRequestEmailConfirmationRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {

@@ -23,4 +23,5 @@ Page?: number;
 PageSize?: number;
 CommonName?: string;
 ExternalId?: string;
+EventType?: string;
 };
