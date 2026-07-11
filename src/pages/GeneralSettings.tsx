@@ -414,8 +414,8 @@ export function GeneralSettings() {
         <p className="settings-item-description">
           When enabled, users on Free/Default plans may receive VPN configs for a short grace
           period even if they are not subscribed to the required Telegram channel and have not
-          linked their dashboard account. Disconnect enforcement after the grace window is not
-          implemented yet.
+          linked their dashboard account. Disconnect enforcement respects the active grace window
+          and may disconnect them after it expires.
         </p>
 
         <div className="settings-item settings-item--mt-12">

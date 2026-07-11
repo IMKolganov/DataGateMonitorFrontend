@@ -633,7 +633,7 @@ export function GeneralServerDetails() {
                             vpnServerId={numericServerId}
                             xrayPollError={serverEntity?.xrayClientsPollError ?? null}
                             xrayQueryErrorMessage={xrayClientsQueryErrorMessage}
-                            onXraySessionsChanged={() => {
+                            onClientsChanged={() => {
                                 if (isLive) void connectedQuery.refetch();
                                 else void historyQuery.refetch();
                                 void v3ServersWithStatusQuery.refetch();
