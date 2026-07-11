@@ -1,5 +1,7 @@
 import { FaSync } from "react-icons/fa";
 import UsersTable from "../../components/settings/UsersTable.tsx";
+import { GridFilterBar } from "../../components/ui/GridFilterBar.tsx";
+import { gridFilterFields } from "../../config/gridFilters.ts";
 import type { UserDto } from "../../api/orvalModelShim";
 import type { GridPaginationModel } from "@mui/x-data-grid";
 import "../../css/Settings.css";
@@ -14,6 +16,10 @@ export function UsersSection({
   refreshing,
   errorMessage,
   handleRefresh,
+  userFilterValues,
+  onUserFilterChange,
+  onUserFilterApply,
+  onUserFilterReset,
 }: {
   users: UserDto[];
   totalCount: number;
@@ -23,6 +29,10 @@ export function UsersSection({
   refreshing: boolean;
   errorMessage: string | null;
   handleRefresh: () => void;
+  userFilterValues: Record<string, string>;
+  onUserFilterChange: (id: string, value: string) => void;
+  onUserFilterApply: () => void;
+  onUserFilterReset: () => void;
 }) {
   return (
     <div>
@@ -33,6 +43,16 @@ export function UsersSection({
           </button>
         </div>
       </div>
+
+      <GridFilterBar
+        gridId="settings-users"
+        fields={gridFilterFields("settings-users")}
+        values={userFilterValues}
+        onChange={onUserFilterChange}
+        onApply={onUserFilterApply}
+        onReset={onUserFilterReset}
+        disabled={anyLoading}
+      />
 
       {errorMessage && (
         <div>

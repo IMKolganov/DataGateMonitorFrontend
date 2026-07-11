@@ -10,4 +10,5 @@ From: string;
 To: string;
 VpnServerId?: number;
 ExternalId?: string;
+DisplayName?: string;
 };

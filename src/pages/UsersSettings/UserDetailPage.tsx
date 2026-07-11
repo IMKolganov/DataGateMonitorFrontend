@@ -61,11 +61,15 @@ import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
+import { UserPasswordAdminSection } from "./UserPasswordAdminSection";
 import { UserVpnConnectionsSection } from "./UserVpnConnectionsSection";
 import { UserDnsQueriesSection } from "../../components/pihole/UserDnsQueriesSection";
 import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
 import Grid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
+import { GridFilterBar } from "../../components/ui/GridFilterBar.tsx";
+import { gridFilterFields } from "../../config/gridFilters.ts";
+import { useGridFilters } from "../../hooks/useGridFilterStub.ts";
 import type { GridColDef } from "@mui/x-data-grid";
 import "../../css/Settings.css";
 import "../../css/Table.css";
@@ -105,6 +109,7 @@ export function UserDetailPage() {
     10,
     "5,10,20,50,100",
   );
+  const tgMessageFilters = useGridFilters("user-telegram-messages");
 
   const createAssignmentMutation = usePostApiUserQuotaPlansCreate();
   const updateAssignmentMutation = usePutApiUserQuotaPlansUpdate();
@@ -544,6 +549,8 @@ export function UserDetailPage() {
         </div>
       </section>
 
+      {canManageRoles && userIdValid && <UserPasswordAdminSection userId={id} />}
+
       {canManageRoles && (
         <section className="settings-card settings-card--mb">
           <h3 className="settings-card__h3-with-icon">
@@ -630,6 +637,17 @@ export function UserDetailPage() {
               {!telegramMessagesLoading && telegramMessagesTotalCount === 0 ? (
                 <p className="text-muted">No messages.</p>
               ) : (
+              <>
+              <GridFilterBar
+                gridId="user-telegram-messages"
+                fields={gridFilterFields("user-telegram-messages")}
+                values={tgMessageFilters.values}
+                onChange={tgMessageFilters.onChange}
+                onApply={tgMessageFilters.onApply}
+                onReset={tgMessageFilters.onReset}
+                pendingOrval
+                disabled={telegramMessagesLoading}
+              />
               <div className="data-grid-wrap data-grid-wrap--inset">
                 <CustomThemeProvider>
                   <Grid
@@ -664,6 +682,7 @@ export function UserDetailPage() {
                   />
                 </CustomThemeProvider>
               </div>
+              </>
               )}
             </>
           ) : (

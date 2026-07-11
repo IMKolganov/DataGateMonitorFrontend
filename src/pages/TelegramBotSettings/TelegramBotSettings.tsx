@@ -13,6 +13,10 @@ export function TelegramBotSettings() {
         refreshing: usersRefreshing,
         errorMessage: usersError,
         handleRefresh: refreshUsers,
+        tgUserFilterValues,
+        onTgUserFilterChange,
+        onTgUserFilterApply,
+        onTgUserFilterReset,
     } = useTelegramBotUsers();
 
     const {
@@ -25,6 +29,10 @@ export function TelegramBotSettings() {
         refreshing: messagesRefreshing,
         errorMessage: messagesError,
         handleRefresh: refreshMessages,
+        messageFilterValues,
+        onMessageFilterChange,
+        onMessageFilterApply,
+        onMessageFilterReset,
     } = useTelegramBotMessages();
 
     return (
@@ -45,6 +53,10 @@ export function TelegramBotSettings() {
                 refreshing={usersRefreshing}
                 errorMessage={usersError}
                 handleRefresh={refreshUsers}
+                tgUserFilterValues={tgUserFilterValues}
+                onTgUserFilterChange={onTgUserFilterChange}
+                onTgUserFilterApply={onTgUserFilterApply}
+                onTgUserFilterReset={onTgUserFilterReset}
             />
 
             <TelegramBotMessagesSection
@@ -57,6 +69,10 @@ export function TelegramBotSettings() {
                 refreshing={messagesRefreshing}
                 errorMessage={messagesError}
                 handleRefresh={refreshMessages}
+                messageFilterValues={messageFilterValues}
+                onMessageFilterChange={onMessageFilterChange}
+                onMessageFilterApply={onMessageFilterApply}
+                onMessageFilterReset={onMessageFilterReset}
             />
 
             <TelegramBotInfoBlock />

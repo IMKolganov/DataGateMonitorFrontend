@@ -24,6 +24,7 @@ const XrayLoginPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showConfirmEmailLink, setShowConfirmEmailLink] = useState(false);
   const [totpChallenge, setTotpChallenge] = useState<TotpChallengeState | null>(null);
   const [lang, setLang] = useState(getXrayLanguage);
   const t = XRAY_TRANSLATIONS[lang].login;
@@ -39,6 +40,7 @@ const XrayLoginPage: React.FC = () => {
     event.preventDefault();
     setLoading(true);
     setError("");
+    setShowConfirmEmailLink(false);
 
     try {
       const payload: LoginRequest = {
@@ -63,6 +65,7 @@ const XrayLoginPage: React.FC = () => {
         if (/email is not confirmed/i.test(detailedMessage) || (detail && /email is not confirmed/i.test(detail))) {
           detailedMessage = t.emailNotConfirmedHelp;
           mappedEmailConfirm = true;
+          setShowConfirmEmailLink(true);
         }
         if (!mappedEmailConfirm && detail && detail !== detailedMessage) {
           detailedMessage = `${detailedMessage} ${detail}`;
@@ -146,6 +149,11 @@ const XrayLoginPage: React.FC = () => {
             />
 
             {error && <p className="xray-error">{error}</p>}
+            {showConfirmEmailLink && (
+              <p className="xray-note">
+                <Link to="/xray/confirm-email">Enter your email confirmation code</Link>
+              </p>
+            )}
 
             <button className="btn primary btn-fullwidth" type="submit" disabled={!canSubmit}>
               {loading ? t.signingIn : t.signIn}

@@ -12,9 +12,13 @@ import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage
 
 interface RegisterPageProps {
   loginPath?: string;
+  confirmEmailPath?: string;
 }
 
-const RegisterPage: React.FC<RegisterPageProps> = ({ loginPath = "/login" }) => {
+const RegisterPage: React.FC<RegisterPageProps> = ({
+  loginPath = "/login",
+  confirmEmailPath = "/confirm-email",
+}) => {
   const navigate = useNavigate();
   const { strings } = useCookieConsent();
   const [displayName, setDisplayName] = useState("");
@@ -28,6 +32,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ loginPath = "/login" }) => 
 
   const canSubmit =
     login.trim().length > 0 &&
+    email.trim().length > 0 &&
     password.trim().length > 0 &&
     confirmPassword.trim().length > 0 &&
     password === confirmPassword &&
@@ -60,6 +65,15 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ loginPath = "/login" }) => 
       };
 
       await postApiAuthRegister(req);
+
+      const registeredEmail = email.trim();
+      if (registeredEmail) {
+        navigate(
+          `${confirmEmailPath}?email=${encodeURIComponent(registeredEmail)}&registered=1`,
+          { replace: true },
+        );
+        return;
+      }
 
       navigate(loginPath, { replace: true, state: { registered: true } });
     } catch (err: unknown) {
@@ -130,7 +144,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ loginPath = "/login" }) => 
             </div>
 
             <div className="login-item">
-              <h4>Email (optional)</h4>
+              <h4>Email</h4>
               <input
                 type="email"
                 name="email"
@@ -138,6 +152,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ loginPath = "/login" }) => 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="input-login"
+                required
                 placeholder=""
               />
             </div>

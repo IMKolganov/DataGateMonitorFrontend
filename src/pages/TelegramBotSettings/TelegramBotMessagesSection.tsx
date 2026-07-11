@@ -1,6 +1,8 @@
 // src/pages/TelegramBotSettings/TelegramBotMessagesSection.tsx
 import { FaInbox, FaSync } from "react-icons/fa";
 import TelegramBotMessagesTable from "./TelegramBotMessagesTable";
+import { GridFilterBar } from "../../components/ui/GridFilterBar.tsx";
+import { gridFilterFields } from "../../config/gridFilters.ts";
 import type { MessageDto } from "../../api/orvalModelShim";
 
 import "../../css/Settings.css";
@@ -16,6 +18,10 @@ interface Props {
     refreshing: boolean;
     errorMessage: string | null;
     handleRefresh: () => void;
+    messageFilterValues: Record<string, string>;
+    onMessageFilterChange: (id: string, value: string) => void;
+    onMessageFilterApply: () => void;
+    onMessageFilterReset: () => void;
 }
 
 export function TelegramBotMessagesSection({
@@ -28,6 +34,10 @@ export function TelegramBotMessagesSection({
                                                refreshing,
                                                errorMessage,
                                                handleRefresh,
+                                               messageFilterValues,
+                                               onMessageFilterChange,
+                                               onMessageFilterApply,
+                                               onMessageFilterReset,
                                            }: Props) {
     return (
         <section style={{ marginTop: "24px" }}>
@@ -52,6 +62,16 @@ export function TelegramBotMessagesSection({
                     <p className="error-message">❌ {errorMessage}</p>
                 </div>
             )}
+
+            <GridFilterBar
+                gridId="settings-telegram-bot-messages"
+                fields={gridFilterFields("settings-telegram-bot-messages")}
+                values={messageFilterValues}
+                onChange={onMessageFilterChange}
+                onApply={onMessageFilterApply}
+                onReset={onMessageFilterReset}
+                disabled={anyLoading}
+            />
 
             <TelegramBotMessagesTable
                 messages={messages}

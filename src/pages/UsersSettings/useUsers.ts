@@ -1,11 +1,13 @@
 import { useMemo, useState, useCallback } from "react";
 import { useGetApiUsersGetAll } from "../../api/orval/user/user";
+import type { GetApiUsersGetAllParams } from "../../api/orval/model/getApiUsersGetAllParams";
 import type { GetAllUsersResponse, UserDto } from "../../api/orvalModelShim";
 import type { GridPaginationModel } from "@mui/x-data-grid";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { isCanceledError } from "../../utils/queryCanceled";
 import { getStoredPageSize, setStoredPageSize } from "../../hooks/usePersistedPageSize";
+import { useGridFilters } from "../../hooks/useGridFilterStub";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -30,13 +32,15 @@ export function useUsers(options?: { mode?: UseUsersMode }) {
     pageSize: getStoredPageSize(storageKey, DEFAULT_PAGE_SIZE, [...pageSizeOptions]),
   }));
   const [manualRefreshing, setManualRefreshing] = useState(false);
+  const userFilters = useGridFilters("settings-users");
 
-  const params = useMemo(
+  const params = useMemo<GetApiUsersGetAllParams>(
     () => ({
       Page: paginationModel.page + 1,
       PageSize: paginationModel.pageSize,
+      ...userFilters.queryParams,
     }),
-    [paginationModel.page, paginationModel.pageSize]
+    [paginationModel.page, paginationModel.pageSize, userFilters.queryParams],
   );
 
   const qUsers = useGetApiUsersGetAll(params, {
@@ -61,6 +65,20 @@ export function useUsers(options?: { mode?: UseUsersMode }) {
       return model;
     });
   }, [storageKey]);
+
+  const resetPage = useCallback(() => {
+    setPaginationModel((prev) => (prev.page === 0 ? prev : { ...prev, page: 0 }));
+  }, []);
+
+  const onFilterApply = useCallback(() => {
+    userFilters.onApply();
+    resetPage();
+  }, [userFilters.onApply, resetPage]);
+
+  const onFilterReset = useCallback(() => {
+    userFilters.onReset();
+    resetPage();
+  }, [userFilters.onReset, resetPage]);
 
   const handleRefresh = async () => {
     if (qUsers.isFetching || manualRefreshing) return;
@@ -94,5 +112,9 @@ export function useUsers(options?: { mode?: UseUsersMode }) {
     refreshing,
     errorMessage,
     handleRefresh,
+    userFilterValues: userFilters.values,
+    onUserFilterChange: userFilters.onChange,
+    onUserFilterApply: onFilterApply,
+    onUserFilterReset: onFilterReset,
   };
 }

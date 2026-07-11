@@ -18,6 +18,9 @@ import type { VpnServerResponse } from "../api/orvalModelShim";
 import { isOpenVpnStack } from "../constants/vpnServerType";
 import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 import { ServerAccessDenied } from "../components/ServerAccessDenied";
+import { GridFilterBar } from "../components/ui/GridFilterBar.tsx";
+import { gridFilterFields } from "../config/gridFilters.ts";
+import { useGridFilters } from "../hooks/useGridFilterStub.ts";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import type { VpnServerEventLogDto } from "../api/orvalModelShim";
@@ -137,15 +140,26 @@ const Events: React.FC = () => {
     10,
     "5,10,20,50,100",
   );
+  const eventFilters = useGridFilters("server-events");
 
   const params = useMemo(() => {
     return {
-      // IMPORTANT: Orval params are PascalCase (as seen on other endpoints: From/To)
       VpnServerId: numericServerId,
-      Page: page + 1,       // API is 1-based
+      Page: page + 1,
       PageSize: pageSize,
+      ...eventFilters.queryParams,
     };
-  }, [numericServerId, page, pageSize]);
+  }, [numericServerId, page, pageSize, eventFilters.queryParams]);
+
+  const onEventFilterApply = () => {
+    eventFilters.onApply();
+    setPage(0);
+  };
+
+  const onEventFilterReset = () => {
+    eventFilters.onReset();
+    setPage(0);
+  };
 
   const {
     data: resp,
@@ -275,6 +289,16 @@ const Events: React.FC = () => {
             <FaBolt className="icon" aria-hidden />
             <span>Server Events</span>
           </h2>
+
+          <GridFilterBar
+            gridId="server-events"
+            fields={gridFilterFields("server-events")}
+            values={eventFilters.values}
+            onChange={eventFilters.onChange}
+            onApply={onEventFilterApply}
+            onReset={onEventFilterReset}
+            disabled={isFetching}
+          />
 
           <div className="data-grid-wrap data-grid-wrap--inset">
             <Grid

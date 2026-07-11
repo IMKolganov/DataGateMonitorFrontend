@@ -1,8 +1,9 @@
 // src/pages/TelegramBotSettings/useTelegramBotUsers.ts
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   useGetApiTgbotUsersGetAll
 } from "../../api/orval/telegram-bot-user/telegram-bot-user";
+import type { GetApiTgbotUsersGetAllParams } from "../../api/orval/model/getApiTgbotUsersGetAllParams";
 
 import type {
   GetAllTelegramUsersResponse,
@@ -11,9 +12,17 @@ import type {
 
 import type { ApiEnvelope } from "./unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "./unwrapApiResponse";
+import { useGridFilters } from "../../hooks/useGridFilterStub";
 
 export function useTelegramBotUsers() {
-  const qUsers = useGetApiTgbotUsersGetAll();
+  const tgUserFilters = useGridFilters("settings-telegram-bot-users");
+
+  const params = useMemo<GetApiTgbotUsersGetAllParams>(
+    () => ({ ...tgUserFilters.queryParams }),
+    [tgUserFilters.queryParams],
+  );
+
+  const qUsers = useGetApiTgbotUsersGetAll(params);
   const [manualRefreshing, setManualRefreshing] = useState(false);
 
   const users: TelegramBotUserDto[] = useMemo(() => {
@@ -43,11 +52,23 @@ export function useTelegramBotUsers() {
       ? "Failed to load Telegram bot users"
       : null;
 
+  const onTgUserFilterApply = useCallback(() => {
+    tgUserFilters.onApply();
+  }, [tgUserFilters.onApply]);
+
+  const onTgUserFilterReset = useCallback(() => {
+    tgUserFilters.onReset();
+  }, [tgUserFilters.onReset]);
+
   return {
     users,
     anyLoading,
     refreshing,
     errorMessage,
     handleRefresh,
+    tgUserFilterValues: tgUserFilters.values,
+    onTgUserFilterChange: tgUserFilters.onChange,
+    onTgUserFilterApply,
+    onTgUserFilterReset,
   };
 }

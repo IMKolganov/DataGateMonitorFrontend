@@ -5,16 +5,20 @@
  * OpenAPI spec version: v1
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
@@ -22,6 +26,7 @@ import type {
 import type {
   ApiSystemString,
   ApiVpnServerClientsResponsesConnectedClientsResponse,
+  ApiVpnServerClientsResponsesKillOpenVpnClientResponse,
   ApiVpnServerClientsResponsesOverviewPointsResponse,
   ApiVpnServerClientsResponsesOverviewSeriesResponse,
   ApiVpnServerClientsResponsesOverviewTotalsResponse,
@@ -40,7 +45,8 @@ import type {
   GetApiV2VpnSessionsOverviewSeriesParams,
   GetApiV2VpnSessionsOverviewSummaryParams,
   GetApiV2VpnSessionsOverviewUsersParams,
-  GetApiV2VpnSessionsOverviewUsersSeriesParams
+  GetApiV2VpnSessionsOverviewUsersSeriesParams,
+  VpnServerClientsRequestsKillOpenVpnClientRequest
 } from '../model';
 
 import { ogmMutator } from '../../mutator';
@@ -65,7 +71,121 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getApiOpenVpnClientsGetAllConnected = (
+export const postApiOpenVpnClientsKill = (
+    vpnServerClientsRequestsKillOpenVpnClientRequest?: VpnServerClientsRequestsKillOpenVpnClientRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServerClientsResponsesKillOpenVpnClientResponse>(
+      {url: `/api/open-vpn-clients/kill`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: vpnServerClientsRequestsKillOpenVpnClientRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiOpenVpnClientsKillMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnClientsKill>>, TError,{data?: VpnServerClientsRequestsKillOpenVpnClientRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnClientsKill>>, TError,{data?: VpnServerClientsRequestsKillOpenVpnClientRequest}, TContext> => {
+
+const mutationKey = ['postApiOpenVpnClientsKill'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnClientsKill>>, {data?: VpnServerClientsRequestsKillOpenVpnClientRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiOpenVpnClientsKill(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOpenVpnClientsKillMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnClientsKill>>>
+    export type PostApiOpenVpnClientsKillMutationBody = VpnServerClientsRequestsKillOpenVpnClientRequest | undefined
+    export type PostApiOpenVpnClientsKillMutationError = unknown
+
+    export const usePostApiOpenVpnClientsKill = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnClientsKill>>, TError,{data?: VpnServerClientsRequestsKillOpenVpnClientRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOpenVpnClientsKill>>,
+        TError,
+        {data?: VpnServerClientsRequestsKillOpenVpnClientRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiOpenVpnClientsKillMutationOptions(options), queryClient);
+    }
+    export const postApiV2VpnSessionsKill = (
+    vpnServerClientsRequestsKillOpenVpnClientRequest?: VpnServerClientsRequestsKillOpenVpnClientRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServerClientsResponsesKillOpenVpnClientResponse>(
+      {url: `/api/v2/vpn-sessions/kill`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: vpnServerClientsRequestsKillOpenVpnClientRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiV2VpnSessionsKillMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV2VpnSessionsKill>>, TError,{data?: VpnServerClientsRequestsKillOpenVpnClientRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV2VpnSessionsKill>>, TError,{data?: VpnServerClientsRequestsKillOpenVpnClientRequest}, TContext> => {
+
+const mutationKey = ['postApiV2VpnSessionsKill'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV2VpnSessionsKill>>, {data?: VpnServerClientsRequestsKillOpenVpnClientRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV2VpnSessionsKill(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV2VpnSessionsKillMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV2VpnSessionsKill>>>
+    export type PostApiV2VpnSessionsKillMutationBody = VpnServerClientsRequestsKillOpenVpnClientRequest | undefined
+    export type PostApiV2VpnSessionsKillMutationError = unknown
+
+    export const usePostApiV2VpnSessionsKill = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV2VpnSessionsKill>>, TError,{data?: VpnServerClientsRequestsKillOpenVpnClientRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV2VpnSessionsKill>>,
+        TError,
+        {data?: VpnServerClientsRequestsKillOpenVpnClientRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiV2VpnSessionsKillMutationOptions(options), queryClient);
+    }
+    export const getApiOpenVpnClientsGetAllConnected = (
     params: GetApiOpenVpnClientsGetAllConnectedParams,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {

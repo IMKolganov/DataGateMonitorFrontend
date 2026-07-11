@@ -14,6 +14,8 @@ const KEY_INTERVAL = "OpenVPN_Polling_Interval";
 const KEY_UNIT = "OpenVPN_Polling_Interval_Unit";
 const KEY_REQUIRE_EMAIL_CONFIRMATION = "Auth_Require_Email_Confirmation_On_Register";
 const KEY_EMAIL_CONFIRMATION_CODE_TTL_MINUTES = "Auth_Email_Confirmation_Code_Ttl_Minutes";
+const KEY_ALLOW_FREE_TIER_GRACE = "FreeTier_Allow_Grace_Without_Compliance";
+const KEY_FREE_TIER_GRACE_MINUTES = "FreeTier_Grace_Period_Minutes";
 
 // Allowed units (keep in sync with backend enum/validation)
 const ALLOWED_UNITS = ["seconds", "minutes"] as const;
@@ -24,6 +26,8 @@ export function GeneralSettings() {
   const [intervalValue, setIntervalValue] = useState<number>(0);
   const [requireEmailConfirmation, setRequireEmailConfirmation] = useState<boolean>(true);
   const [emailConfirmationCodeTtlMinutes, setEmailConfirmationCodeTtlMinutes] = useState<number>(30);
+  const [allowFreeTierGrace, setAllowFreeTierGrace] = useState<boolean>(false);
+  const [freeTierGraceMinutes, setFreeTierGraceMinutes] = useState<number>(5);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
@@ -42,6 +46,14 @@ export function GeneralSettings() {
   );
   const emailConfirmationCodeTtlMinutesParams = useMemo(
     () => ({ Key: KEY_EMAIL_CONFIRMATION_CODE_TTL_MINUTES }),
+    []
+  );
+  const allowFreeTierGraceParams = useMemo(
+    () => ({ Key: KEY_ALLOW_FREE_TIER_GRACE }),
+    []
+  );
+  const freeTierGraceMinutesParams = useMemo(
+    () => ({ Key: KEY_FREE_TIER_GRACE_MINUTES }),
     []
   );
 
@@ -105,17 +117,43 @@ export function GeneralSettings() {
       gcTime: 5 * 60 * 1000,
     },
   });
+  const {
+    data: allowFreeTierGraceResp,
+    isFetching: isFetchingAllowFreeTierGrace,
+    isLoading: isLoadingAllowFreeTierGrace,
+    error: loadAllowFreeTierGraceErr,
+  } = useGetApiSettingsGet(allowFreeTierGraceParams, {
+    query: {
+      staleTime: 0,
+      gcTime: 5 * 60 * 1000,
+    },
+  });
+  const {
+    data: freeTierGraceMinutesResp,
+    isFetching: isFetchingFreeTierGraceMinutes,
+    isLoading: isLoadingFreeTierGraceMinutes,
+    error: loadFreeTierGraceMinutesErr,
+  } = useGetApiSettingsGet(freeTierGraceMinutesParams, {
+    query: {
+      staleTime: 0,
+      gcTime: 5 * 60 * 1000,
+    },
+  });
 
   const initialLoading =
     isLoadingInterval ||
     isLoadingUnit ||
     isLoadingRequireEmailConfirmation ||
-    isLoadingEmailConfirmationCodeTtlMinutes;
+    isLoadingEmailConfirmationCodeTtlMinutes ||
+    isLoadingAllowFreeTierGrace ||
+    isLoadingFreeTierGraceMinutes;
   const loading =
     isFetchingInterval ||
     isFetchingUnit ||
     isFetchingRequireEmailConfirmation ||
-    isFetchingEmailConfirmationCodeTtlMinutes;
+    isFetchingEmailConfirmationCodeTtlMinutes ||
+    isFetchingAllowFreeTierGrace ||
+    isFetchingFreeTierGraceMinutes;
 
   const settingsSnapshotKey = useMemo(() => {
     return JSON.stringify({
@@ -123,8 +161,10 @@ export function GeneralSettings() {
       unit: pickSettingValue(unitResp),
       requireEmailConfirmation: pickSettingValue(requireEmailConfirmationResp),
       ttl: pickSettingValue(emailConfirmationCodeTtlMinutesResp),
+      allowFreeTierGrace: pickSettingValue(allowFreeTierGraceResp),
+      freeTierGraceMinutes: pickSettingValue(freeTierGraceMinutesResp),
     });
-  }, [intervalResp, unitResp, requireEmailConfirmationResp, emailConfirmationCodeTtlMinutesResp]);
+  }, [intervalResp, unitResp, requireEmailConfirmationResp, emailConfirmationCodeTtlMinutesResp, allowFreeTierGraceResp, freeTierGraceMinutesResp]);
 
   const [appliedSettingsKey, setAppliedSettingsKey] = useState("");
   if (settingsSnapshotKey !== appliedSettingsKey && !initialLoading) {
@@ -151,6 +191,19 @@ export function GeneralSettings() {
     if (!Number.isNaN(ttlRaw)) {
       setEmailConfirmationCodeTtlMinutes(ttlRaw);
     }
+
+    const allowFreeTierGraceRaw =
+      (pickSettingValue(allowFreeTierGraceResp) ?? "").toLowerCase();
+    if (allowFreeTierGraceRaw === "true") {
+      setAllowFreeTierGrace(true);
+    } else if (allowFreeTierGraceRaw === "false") {
+      setAllowFreeTierGrace(false);
+    }
+
+    const graceMinutesRaw = Number(pickSettingValue(freeTierGraceMinutesResp));
+    if (!Number.isNaN(graceMinutesRaw)) {
+      setFreeTierGraceMinutes(graceMinutesRaw);
+    }
   }
 
 
@@ -172,6 +225,10 @@ export function GeneralSettings() {
     }
     if (!Number.isFinite(emailConfirmationCodeTtlMinutes) || emailConfirmationCodeTtlMinutes < 1) {
       setErrorDetails("Email confirmation code lifetime must be at least 1 minute.");
+      return;
+    }
+    if (!Number.isFinite(freeTierGraceMinutes) || freeTierGraceMinutes < 1) {
+      setErrorDetails("Free tier grace period must be at least 1 minute.");
       return;
     }
 
@@ -200,12 +257,24 @@ export function GeneralSettings() {
         Value: String(emailConfirmationCodeTtlMinutes),
         Type: "int",
       };
+      const saveAllowFreeTierGraceParams = {
+        Key: KEY_ALLOW_FREE_TIER_GRACE,
+        Value: String(allowFreeTierGrace),
+        Type: "bool",
+      };
+      const saveFreeTierGraceMinutesParams = {
+        Key: KEY_FREE_TIER_GRACE_MINUTES,
+        Value: String(freeTierGraceMinutes),
+        Type: "int",
+      };
 
       await Promise.all([
         setSettingMutation.mutateAsync({ params: saveIntervalParams }),
         setSettingMutation.mutateAsync({ params: saveUnitParams }),
         setSettingMutation.mutateAsync({ params: saveRequireEmailConfirmationParams }),
         setSettingMutation.mutateAsync({ params: saveEmailConfirmationCodeTtlMinutesParams }),
+        setSettingMutation.mutateAsync({ params: saveAllowFreeTierGraceParams }),
+        setSettingMutation.mutateAsync({ params: saveFreeTierGraceMinutesParams }),
       ]);
 
       setSuccessMessage("Settings successfully updated.");
@@ -227,7 +296,9 @@ export function GeneralSettings() {
     loadIntervalErr ||
     loadUnitErr ||
     loadRequireEmailConfirmationErr ||
-    loadEmailConfirmationCodeTtlMinutesErr;
+    loadEmailConfirmationCodeTtlMinutesErr ||
+    loadAllowFreeTierGraceErr ||
+    loadFreeTierGraceMinutesErr;
 
   return (
     <div>
@@ -315,6 +386,49 @@ export function GeneralSettings() {
             max={1440}
             value={emailConfirmationCodeTtlMinutes}
             onChange={(e) => setEmailConfirmationCodeTtlMinutes(Number(e.target.value))}
+            className="input polling-interval-input"
+          />
+        </div>
+      </div>
+
+      <div className="settings-polling">
+        <h2 className="settings-page__h2-with-icon">
+          <FaSlidersH className="icon" aria-hidden />
+          <span>Free tier VPN access</span>
+        </h2>
+        <div className="settings-divider" />
+
+        <label className="settings-item settings-item--gap-10">
+          <input
+            id="allow-free-tier-grace"
+            name="allowFreeTierGrace"
+            type="checkbox"
+            checked={allowFreeTierGrace}
+            onChange={(e) => setAllowFreeTierGrace(e.target.checked)}
+          />
+          <span>
+            Allow temporary VPN access without channel subscription or merged account
+          </span>
+        </label>
+
+        <p className="settings-item-description">
+          When enabled, users on Free/Default plans may receive VPN configs for a short grace
+          period even if they are not subscribed to the required Telegram channel and have not
+          linked their dashboard account. Disconnect enforcement respects the active grace window
+          and may disconnect them after it expires.
+        </p>
+
+        <div className="settings-item settings-item--mt-12">
+          <label htmlFor="free-tier-grace-minutes" className="settings-item-label--320">
+            Grace period (minutes)
+          </label>
+          <input
+            id="free-tier-grace-minutes"
+            type="number"
+            min={1}
+            max={60}
+            value={freeTierGraceMinutes}
+            onChange={(e) => setFreeTierGraceMinutes(Number(e.target.value))}
             className="input polling-interval-input"
           />
         </div>
