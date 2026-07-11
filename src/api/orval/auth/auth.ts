@@ -41,8 +41,10 @@ import type {
   ApiAuthResponsesTotpStatusResponse,
   ApiSystemInt32,
   ApiSystemString,
+  ApiUserResponsesCompleteTelegramAccountLinkResponse,
   AuthRequestsAdminForgotPasswordRequest,
   AuthRequestsAdminResetPasswordRequest,
+  AuthRequestsCompleteTelegramAccountLinkFromAppRequest,
   AuthRequestsConfirmEmailRequest,
   AuthRequestsGoogleCodeLoginRequest,
   AuthRequestsGoogleLoginRequest,
@@ -50,6 +52,7 @@ import type {
   AuthRequestsRefreshRequest,
   AuthRequestsRegisterUserRequest,
   AuthRequestsRequestEmailConfirmationRequest,
+  AuthRequestsRequestTelegramAccountLinkCodeForBotRequest,
   AuthRequestsRequestTelegramAccountLinkCodeRequest,
   AuthRequestsRevokeUserSessionsRequest,
   AuthRequestsTelegramCodeLoginRequest,
@@ -480,6 +483,120 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostApiAuthTelegramRequestAccountLinkCodeMutationOptions(options), queryClient);
+    }
+    export const postApiAuthTelegramRequestAccountLinkCodeForBot = (
+    authRequestsRequestTelegramAccountLinkCodeForBotRequest?: AuthRequestsRequestTelegramAccountLinkCodeForBotRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesRequestTelegramAccountLinkCodeResponse>(
+      {url: `/api/auth/telegram/request-account-link-code-for-bot`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsRequestTelegramAccountLinkCodeForBotRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthTelegramRequestAccountLinkCodeForBotMutationOptions = <TError = ApiAuthResponsesRequestTelegramAccountLinkCodeResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCodeForBot>>, TError,{data?: AuthRequestsRequestTelegramAccountLinkCodeForBotRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCodeForBot>>, TError,{data?: AuthRequestsRequestTelegramAccountLinkCodeForBotRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthTelegramRequestAccountLinkCodeForBot'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCodeForBot>>, {data?: AuthRequestsRequestTelegramAccountLinkCodeForBotRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthTelegramRequestAccountLinkCodeForBot(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthTelegramRequestAccountLinkCodeForBotMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCodeForBot>>>
+    export type PostApiAuthTelegramRequestAccountLinkCodeForBotMutationBody = AuthRequestsRequestTelegramAccountLinkCodeForBotRequest | undefined
+    export type PostApiAuthTelegramRequestAccountLinkCodeForBotMutationError = ApiAuthResponsesRequestTelegramAccountLinkCodeResponse
+
+    export const usePostApiAuthTelegramRequestAccountLinkCodeForBot = <TError = ApiAuthResponsesRequestTelegramAccountLinkCodeResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCodeForBot>>, TError,{data?: AuthRequestsRequestTelegramAccountLinkCodeForBotRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthTelegramRequestAccountLinkCodeForBot>>,
+        TError,
+        {data?: AuthRequestsRequestTelegramAccountLinkCodeForBotRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthTelegramRequestAccountLinkCodeForBotMutationOptions(options), queryClient);
+    }
+    export const postApiAuthTelegramCompleteAccountLink = (
+    authRequestsCompleteTelegramAccountLinkFromAppRequest?: AuthRequestsCompleteTelegramAccountLinkFromAppRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiUserResponsesCompleteTelegramAccountLinkResponse>(
+      {url: `/api/auth/telegram/complete-account-link`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsCompleteTelegramAccountLinkFromAppRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthTelegramCompleteAccountLinkMutationOptions = <TError = ApiUserResponsesCompleteTelegramAccountLinkResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramCompleteAccountLink>>, TError,{data?: AuthRequestsCompleteTelegramAccountLinkFromAppRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramCompleteAccountLink>>, TError,{data?: AuthRequestsCompleteTelegramAccountLinkFromAppRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthTelegramCompleteAccountLink'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthTelegramCompleteAccountLink>>, {data?: AuthRequestsCompleteTelegramAccountLinkFromAppRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthTelegramCompleteAccountLink(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthTelegramCompleteAccountLinkMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthTelegramCompleteAccountLink>>>
+    export type PostApiAuthTelegramCompleteAccountLinkMutationBody = AuthRequestsCompleteTelegramAccountLinkFromAppRequest | undefined
+    export type PostApiAuthTelegramCompleteAccountLinkMutationError = ApiUserResponsesCompleteTelegramAccountLinkResponse
+
+    export const usePostApiAuthTelegramCompleteAccountLink = <TError = ApiUserResponsesCompleteTelegramAccountLinkResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTelegramCompleteAccountLink>>, TError,{data?: AuthRequestsCompleteTelegramAccountLinkFromAppRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthTelegramCompleteAccountLink>>,
+        TError,
+        {data?: AuthRequestsCompleteTelegramAccountLinkFromAppRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthTelegramCompleteAccountLinkMutationOptions(options), queryClient);
     }
     export const getApiAuthFreeTierAccessStatus = (
 

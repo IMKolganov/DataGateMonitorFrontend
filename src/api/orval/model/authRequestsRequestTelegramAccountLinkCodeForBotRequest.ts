@@ -5,11 +5,10 @@
  * OpenAPI spec version: v1
  */
 
-export interface AuthRequestsRequestTelegramAccountLinkCodeRequest {
+export interface AuthRequestsRequestTelegramAccountLinkCodeForBotRequest {
   /**
      * @minimum 1
      * @maximum 9223372036854776000
-     * @nullable
      */
-  telegramId?: number | null;
+  telegramId?: number;
 }
