@@ -245,8 +245,9 @@ export default function WindowsCrashReportsSettings() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header">
-              <h3>
-                <FaBug className="icon" aria-hidden /> Crash #{selectedCrash.id}
+              <h3 className="settings-card__h3-with-icon">
+                <FaBug className="icon" aria-hidden />
+                <span>Crash #{selectedCrash.id}</span>
               </h3>
               <button
                 type="button"

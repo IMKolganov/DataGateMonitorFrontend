@@ -170,14 +170,19 @@
 
 .settings-item {
   display: flex;
-  align-items: left;
-  justify-content: left;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
   gap: 10px;
   margin-top: 15px;
 }
 
-.input{
-  width: 70%;
+.settings-item > .input {
+  width: auto;
+  flex: 1 1 12rem;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .settings-polling {
@@ -186,6 +191,7 @@
 
 .settings-polling .polling-interval-input {
   width: 15ch;
+  flex: 0 0 auto;
 }
 
 .loading-container {

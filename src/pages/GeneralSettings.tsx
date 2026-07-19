@@ -332,7 +332,7 @@ export function GeneralSettings() {
             name="openvpnPollingIntervalUnit"
             value={intervalType}
             onChange={(e) => setIntervalType(e.target.value as Unit)}
-            className="btn secondary"
+            className="input dropdown-select"
           >
             <option value="seconds">Seconds</option>
             <option value="minutes">Minutes</option>
@@ -389,6 +389,16 @@ export function GeneralSettings() {
             className="input polling-interval-input"
           />
         </div>
+
+        <div className="settings-item settings-item--mt-12">
+          <button
+            className="btn primary"
+            onClick={handleSave}
+            disabled={loading || setSettingMutation.isPending}
+          >
+            <FaSave className="icon" aria-hidden /> Save
+          </button>
+        </div>
       </div>
 
       <div className="settings-polling">
@@ -431,6 +441,16 @@ export function GeneralSettings() {
             onChange={(e) => setFreeTierGraceMinutes(Number(e.target.value))}
             className="input polling-interval-input"
           />
+        </div>
+
+        <div className="settings-item settings-item--mt-12">
+          <button
+            className="btn primary"
+            onClick={handleSave}
+            disabled={loading || setSettingMutation.isPending}
+          >
+            <FaSave className="icon" aria-hidden /> Save
+          </button>
         </div>
       </div>
     </div>

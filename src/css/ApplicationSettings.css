@@ -64,18 +64,29 @@
   }
   
   .copy-btn {
-    background: none;
-    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
     cursor: pointer;
-    color: #00d4ff;
   }
-  
-  .copy-btn:hover {
-    color: #fff;
+
+  .copy-btn:hover:not(:disabled) {
+    background: var(--btn-secondary-hover);
+    color: var(--text-primary);
   }
-  
+
+  .copy-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .copied-text {
-    color: #00ff00;
+    color: var(--link-color);
     font-size: 12px;
   }
   

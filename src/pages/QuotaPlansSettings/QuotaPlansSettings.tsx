@@ -275,7 +275,7 @@ export function QuotaPlansSettings() {
         <FaClipboardList className="icon" aria-hidden />
         <span>Quota plans</span>
       </h2>
-      <div style={{ borderTop: "1px solid var(--border-color)", marginTop: 8 }} />
+      <div className="settings-divider" />
 
       <p className="settings-item-description" style={{ marginBottom: 16 }}>
         Manage quota plans: add, edit, delete, and set the default plan for new users.

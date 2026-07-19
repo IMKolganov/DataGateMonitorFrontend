@@ -310,7 +310,7 @@ export default function NotificationVpnProfileSettings() {
           const key = String(row.kind);
           const busy = savingRowKey === key;
           return (
-            <label className="checkbox-label" style={{ margin: 0, alignItems: "center", gap: 8 }}>
+            <label className="checkbox-label" style={{ margin: 0 }}>
               <input
                 id={`notification-kind-${key}`}
                 name={`notificationKind${key}`}
@@ -362,7 +362,7 @@ export default function NotificationVpnProfileSettings() {
 
       <div className="settings-group" style={{ marginBottom: 16 }}>
         <h4>All admin notifications (this page)</h4>
-        <label className="checkbox-label" style={{ gap: 10 }}>
+        <label className="checkbox-label">
           <input
             id="notification-vpn-profile-global"
             name="notificationVpnProfileGlobal"
@@ -396,7 +396,7 @@ export default function NotificationVpnProfileSettings() {
         </button>
       </div>
 
-      <div style={{ borderTop: "1px solid #d1d5da" }} />
+      <div className="settings-divider" />
 
       <CustomThemeProvider>
         <div

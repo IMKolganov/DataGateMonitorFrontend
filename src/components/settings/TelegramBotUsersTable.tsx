@@ -139,6 +139,7 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
       field: "Actions",
       headerName: "Actions",
       flex: 1,
+      minWidth: 240,
       renderCell: (params) => {
         const tid: number = params.row.telegramId || 0;
         const isBlocked: boolean = !!params.row.isBlocked;
@@ -156,7 +157,7 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
             </button>
 
             <button
-              className="btn danger"
+              className="btn secondary"
               disabled={disabled}
               onClick={() => handleToggleAdmin(tid, isAdmin)}
             >

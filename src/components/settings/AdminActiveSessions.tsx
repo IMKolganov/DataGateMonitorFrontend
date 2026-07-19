@@ -101,25 +101,15 @@ export function AdminActiveSessions() {
       {sessions.length === 0 ? (
         <p className="settings-item-description">No active sessions.</p>
       ) : (
-        <ul className="settings-item-description" style={{ listStyle: "none", padding: 0, margin: 0 }}>
+        <ul className="settings-item-description admin-session-list">
           {sessions.map((session) => (
-            <li
-              key={session.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 12,
-                padding: "10px 0",
-                borderBottom: "1px solid var(--border-color, #333)",
-              }}
-            >
-              <div>
+            <li key={session.id} className="admin-session-row">
+              <div className="admin-session-row__meta">
                 <strong>{formatSessionLabel(session)}</strong>
                 {session.isCurrent ? (
-                  <span style={{ marginLeft: 8, opacity: 0.85 }}>(this device)</span>
+                  <span className="admin-session-row__current">(this device)</span>
                 ) : null}
-                <div style={{ fontSize: "0.9em", opacity: 0.75, marginTop: 4 }}>
+                <div className="admin-session-row__since">
                   Since {new Date(session.createdAt).toLocaleString()}
                 </div>
               </div>

@@ -299,7 +299,7 @@ function CandidatesCard() {
       headerName: "Actions",
       sortable: false,
       filterable: false,
-      width: 220,
+      width: 280,
       renderCell: (params) => {
         const candidate = (params.row as { _candidate: FreeTierEnforcementCandidateDto })._candidate;
         if (!candidate.isConnected || !candidate.commonName) return null;
@@ -325,7 +325,7 @@ function CandidatesCard() {
               onClick={() => void handleKill(candidate, true)}
             >
               <FaBan className="icon" aria-hidden />
-              {busyRevoke ? "…" : "Kill + Revoke"}
+              {busyRevoke ? "…" : "Revoke"}
             </button>
           </div>
         );
