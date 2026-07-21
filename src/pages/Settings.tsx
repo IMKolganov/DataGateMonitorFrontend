@@ -18,6 +18,7 @@ import {
   FaUserSlash,
   FaUsers,
   FaWindows,
+  FaTv,
 } from "react-icons/fa";
 import "../css/Settings.css";
 
@@ -38,6 +39,7 @@ const ALL_SETTINGS_TABS: SettingsTab[] = [
   { label: "Cert expiry", path: "cert-expiry", Icon: FaCertificate, mobilePrefix: "📜" },
   { label: "Telegram Bot", path: "telegrambot", Icon: FaTelegram, mobilePrefix: "✈️" },
   { label: "Users", path: "users", Icon: FaUsers, mobilePrefix: "👥" },
+  { label: "TV device linking", path: "tv-login", Icon: FaTv, mobilePrefix: "📺" },
   { label: "Free Tier Enforcement", path: "free-tier-enforcement", Icon: FaUserSlash, mobilePrefix: "🚫" },
   { label: "Email broadcast", path: "email-broadcast", Icon: FaEnvelope, mobilePrefix: "✉️" },
   { label: "Android crashes", path: "android-crashes", Icon: FaBug, mobilePrefix: "🐞" },

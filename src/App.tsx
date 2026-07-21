@@ -52,6 +52,7 @@ const WindowsCrashReportsSettings = lazy(() => import("./pages/WindowsCrashRepor
 const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
 const UsersSettings = lazy(() => import("./pages/UsersSettings/UsersSettings"));
 const FreeTierEnforcementSettings = lazy(() => import("./pages/FreeTierEnforcementSettings"));
+const TvLoginSessionsSettings = lazy(() => import("./pages/TvLoginSessionsSettings"));
 const UserQuotasPage = lazy(() => import("./pages/UsersSettings/UserQuotasPage"));
 const UserDetailPage = lazy(() => import("./pages/UsersSettings/UserDetailPage"));
 const CertExpirySettings = lazy(() => import("./pages/CertExpirySettings"));
@@ -207,6 +208,10 @@ function App() {
                       <Route path="users/quotas" element={withSuspense(<UserQuotasPage />)} />
                       <Route path="users" element={withSuspense(<UsersSettings />)} />
                       <Route path="users/:userId" element={withSuspense(<UserDetailPage />)} />
+                      <Route
+                        path="tv-login"
+                        element={withSuspense(<TvLoginSessionsSettings />)}
+                      />
                       <Route
                         path="free-tier-enforcement"
                         element={withSuspense(<FreeTierEnforcementSettings />)}

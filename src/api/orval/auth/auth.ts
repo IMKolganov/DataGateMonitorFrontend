@@ -28,6 +28,7 @@ import type {
   ApiAuthResponsesAdminResetPasswordResponse,
   ApiAuthResponsesAuthSessionPolicyResponse,
   ApiAuthResponsesConfirmEmailResponse,
+  ApiAuthResponsesCreateTvLoginSessionResponse,
   ApiAuthResponsesFreeTierAccessStatusResponse,
   ApiAuthResponsesGetUserSessionsResponse,
   ApiAuthResponsesGoogleLoginResponse,
@@ -39,13 +40,19 @@ import type {
   ApiAuthResponsesTokenResponse,
   ApiAuthResponsesTotpSetupResponse,
   ApiAuthResponsesTotpStatusResponse,
+  ApiAuthResponsesTvLoginSessionActionResponse,
+  ApiAuthResponsesTvLoginSessionPollResponse,
+  ApiAuthResponsesTvLoginSessionPreviewResponse,
   ApiSystemInt32,
   ApiSystemString,
   ApiUserResponsesCompleteTelegramAccountLinkResponse,
   AuthRequestsAdminForgotPasswordRequest,
   AuthRequestsAdminResetPasswordRequest,
+  AuthRequestsApproveTvLoginSessionRequest,
   AuthRequestsCompleteTelegramAccountLinkFromAppRequest,
   AuthRequestsConfirmEmailRequest,
+  AuthRequestsCreateTvLoginSessionRequest,
+  AuthRequestsDenyTvLoginSessionRequest,
   AuthRequestsGoogleCodeLoginRequest,
   AuthRequestsGoogleLoginRequest,
   AuthRequestsLoginRequest,
@@ -684,7 +691,62 @@ export function useGetApiAuthFreeTierAccessStatus<TData = Awaited<ReturnType<typ
 
 
 
-export const postApiAuthEmailRequestConfirmation = (
+export const postApiAuthFreeTierAccessConnect = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesFreeTierAccessStatusResponse>(
+      {url: `/api/auth/free-tier-access/connect`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthFreeTierAccessConnectMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthFreeTierAccessConnect>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthFreeTierAccessConnect>>, TError,void, TContext> => {
+
+const mutationKey = ['postApiAuthFreeTierAccessConnect'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthFreeTierAccessConnect>>, void> = () => {
+
+
+          return  postApiAuthFreeTierAccessConnect(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthFreeTierAccessConnectMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthFreeTierAccessConnect>>>
+
+    export type PostApiAuthFreeTierAccessConnectMutationError = unknown
+
+    export const usePostApiAuthFreeTierAccessConnect = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthFreeTierAccessConnect>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthFreeTierAccessConnect>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostApiAuthFreeTierAccessConnectMutationOptions(options), queryClient);
+    }
+    export const postApiAuthEmailRequestConfirmation = (
     authRequestsRequestEmailConfirmationRequest?: AuthRequestsRequestEmailConfirmationRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -1025,6 +1087,349 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostApiAuthTelegramCodeLoginMutationOptions(options), queryClient);
+    }
+    export const postApiAuthTvSession = (
+    authRequestsCreateTvLoginSessionRequest?: AuthRequestsCreateTvLoginSessionRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesCreateTvLoginSessionResponse>(
+      {url: `/api/auth/tv/session`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsCreateTvLoginSessionRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthTvSessionMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTvSession>>, TError,{data?: AuthRequestsCreateTvLoginSessionRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTvSession>>, TError,{data?: AuthRequestsCreateTvLoginSessionRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthTvSession'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthTvSession>>, {data?: AuthRequestsCreateTvLoginSessionRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthTvSession(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthTvSessionMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthTvSession>>>
+    export type PostApiAuthTvSessionMutationBody = AuthRequestsCreateTvLoginSessionRequest | undefined
+    export type PostApiAuthTvSessionMutationError = unknown
+
+    export const usePostApiAuthTvSession = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTvSession>>, TError,{data?: AuthRequestsCreateTvLoginSessionRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthTvSession>>,
+        TError,
+        {data?: AuthRequestsCreateTvLoginSessionRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthTvSessionMutationOptions(options), queryClient);
+    }
+    export const getApiAuthTvSessionSessionId = (
+    sessionId: string,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesTvLoginSessionPollResponse>(
+      {url: `/api/auth/tv/session/${sessionId}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiAuthTvSessionSessionIdQueryKey = (sessionId: string,) => {
+    return [
+    `/api/auth/tv/session/${sessionId}`
+    ] as const;
+    }
+
+
+export const getGetApiAuthTvSessionSessionIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>, TError = unknown>(sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAuthTvSessionSessionIdQueryKey(sessionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>> = ({ signal }) => getApiAuthTvSessionSessionId(sessionId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: sessionId !== null && sessionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAuthTvSessionSessionIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>>
+export type GetApiAuthTvSessionSessionIdQueryError = unknown
+
+
+export function useGetApiAuthTvSessionSessionId<TData = Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>, TError = unknown>(
+ sessionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuthTvSessionSessionId<TData = Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>, TError = unknown>(
+ sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuthTvSessionSessionId<TData = Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>, TError = unknown>(
+ sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAuthTvSessionSessionId<TData = Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>, TError = unknown>(
+ sessionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTvSessionSessionId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAuthTvSessionSessionIdQueryOptions(sessionId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiAuthTvSessionByCodeUserCode = (
+    userCode: string,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesTvLoginSessionPreviewResponse>(
+      {url: `/api/auth/tv/session/by-code/${userCode}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiAuthTvSessionByCodeUserCodeQueryKey = (userCode: string,) => {
+    return [
+    `/api/auth/tv/session/by-code/${userCode}`
+    ] as const;
+    }
+
+
+export const getGetApiAuthTvSessionByCodeUserCodeQueryOptions = <TData = Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>, TError = MicrosoftAspNetCoreMvcProblemDetails>(userCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAuthTvSessionByCodeUserCodeQueryKey(userCode);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>> = ({ signal }) => getApiAuthTvSessionByCodeUserCode(userCode, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: userCode !== null && userCode !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAuthTvSessionByCodeUserCodeQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>>
+export type GetApiAuthTvSessionByCodeUserCodeQueryError = MicrosoftAspNetCoreMvcProblemDetails
+
+
+export function useGetApiAuthTvSessionByCodeUserCode<TData = Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>, TError = MicrosoftAspNetCoreMvcProblemDetails>(
+ userCode: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuthTvSessionByCodeUserCode<TData = Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>, TError = MicrosoftAspNetCoreMvcProblemDetails>(
+ userCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAuthTvSessionByCodeUserCode<TData = Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>, TError = MicrosoftAspNetCoreMvcProblemDetails>(
+ userCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAuthTvSessionByCodeUserCode<TData = Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>, TError = MicrosoftAspNetCoreMvcProblemDetails>(
+ userCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAuthTvSessionByCodeUserCode>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAuthTvSessionByCodeUserCodeQueryOptions(userCode,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const postApiAuthTvSessionApprove = (
+    authRequestsApproveTvLoginSessionRequest?: AuthRequestsApproveTvLoginSessionRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesTvLoginSessionActionResponse>(
+      {url: `/api/auth/tv/session/approve`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsApproveTvLoginSessionRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthTvSessionApproveMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTvSessionApprove>>, TError,{data?: AuthRequestsApproveTvLoginSessionRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTvSessionApprove>>, TError,{data?: AuthRequestsApproveTvLoginSessionRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthTvSessionApprove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthTvSessionApprove>>, {data?: AuthRequestsApproveTvLoginSessionRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthTvSessionApprove(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthTvSessionApproveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthTvSessionApprove>>>
+    export type PostApiAuthTvSessionApproveMutationBody = AuthRequestsApproveTvLoginSessionRequest | undefined
+    export type PostApiAuthTvSessionApproveMutationError = unknown
+
+    export const usePostApiAuthTvSessionApprove = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTvSessionApprove>>, TError,{data?: AuthRequestsApproveTvLoginSessionRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthTvSessionApprove>>,
+        TError,
+        {data?: AuthRequestsApproveTvLoginSessionRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthTvSessionApproveMutationOptions(options), queryClient);
+    }
+    export const postApiAuthTvSessionDeny = (
+    authRequestsDenyTvLoginSessionRequest?: AuthRequestsDenyTvLoginSessionRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAuthResponsesTvLoginSessionActionResponse>(
+      {url: `/api/auth/tv/session/deny`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: authRequestsDenyTvLoginSessionRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiAuthTvSessionDenyMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTvSessionDeny>>, TError,{data?: AuthRequestsDenyTvLoginSessionRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTvSessionDeny>>, TError,{data?: AuthRequestsDenyTvLoginSessionRequest}, TContext> => {
+
+const mutationKey = ['postApiAuthTvSessionDeny'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiAuthTvSessionDeny>>, {data?: AuthRequestsDenyTvLoginSessionRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiAuthTvSessionDeny(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiAuthTvSessionDenyMutationResult = NonNullable<Awaited<ReturnType<typeof postApiAuthTvSessionDeny>>>
+    export type PostApiAuthTvSessionDenyMutationBody = AuthRequestsDenyTvLoginSessionRequest | undefined
+    export type PostApiAuthTvSessionDenyMutationError = unknown
+
+    export const usePostApiAuthTvSessionDeny = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiAuthTvSessionDeny>>, TError,{data?: AuthRequestsDenyTvLoginSessionRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiAuthTvSessionDeny>>,
+        TError,
+        {data?: AuthRequestsDenyTvLoginSessionRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiAuthTvSessionDenyMutationOptions(options), queryClient);
     }
     export const postApiAuthLogin = (
     authRequestsLoginRequest?: AuthRequestsLoginRequest,

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   FaArrowLeft,
   FaKey,
@@ -24,6 +24,7 @@ import {
   useGetApiUsersEmailConfirmationStatusId,
   usePostApiUsersConfirmEmailId,
 } from "../../api/orval/user/user";
+import { useGetApiAdminTvLoginSessionsByUserUserIdSummary } from "../../api/orval/tv-login-sessions-admin/tv-login-sessions-admin";
 import { usePostApiAuthForgotPassword } from "../../api/orval/auth/auth";
 import { usePostApiQuotaPlansGetAll } from "../../api/orval/quota-plan/quota-plan";
 import {
@@ -49,6 +50,7 @@ import type {
   RolesResponse,
   UserRoleAssignmentResponse,
   UserResponsesGetUserEmailConfirmationStatusResponse,
+  UserTvLoginSummaryResponse,
 } from "../../api/orvalModelShim";
 import type { UsersResponse } from "../../api/orvalModelShim";
 import type { GetUserQuotaPlansByUserIdResponse } from "../../api/orvalModelShim";
@@ -93,6 +95,14 @@ export function UserDetailPage() {
 
   const { data: userData, isLoading, error } = useGetApiUsersGetByIdId(id);
   const user = (userData as UsersResponse | undefined)?.user ?? null;
+
+  const tvSummaryQuery = useGetApiAdminTvLoginSessionsByUserUserIdSummary<UserTvLoginSummaryResponse>(
+    id,
+    {
+      query: { enabled: Number.isFinite(id) && id > 0 },
+    },
+  );
+  const tvSummary = unwrapMaybeApiResponse(tvSummaryQuery.data);
 
   const [quotaPlans, setQuotaPlans] = useState<QuotaPlanDto[]>([]);
   const getAllQuotaMutation = usePostApiQuotaPlansGetAll();
@@ -487,6 +497,36 @@ export function UserDetailPage() {
           <dd>{user.isBlocked ? "Yes" : "No"}</dd>
           <dt>Dashboard access</dt>
           <dd>{user.hasDashboardAccess ? "Yes" : "No"}</dd>
+          <dt>TV device linking</dt>
+          <dd>
+            {tvSummaryQuery.isLoading
+              ? "Loading..."
+              : tvSummary?.hasUsedTvLogin
+                ? `Yes${
+                    tvSummary.approvedOrConsumedCount != null
+                      ? ` (${tvSummary.approvedOrConsumedCount})`
+                      : ""
+                  }`
+                : "No"}
+            {user.id != null && (
+              <>
+                {" · "}
+                <Link to={`/settings/tv-login?userId=${user.id}`}>View sessions</Link>
+              </>
+            )}
+          </dd>
+          {tvSummary?.hasUsedTvLogin ? (
+            <>
+              <dt>Last TV device</dt>
+              <dd>
+                {[tvSummary.lastDeviceName, tvSummary.lastClient].filter(Boolean).join(" / ") ||
+                  "—"}
+                {tvSummary.lastUsedAt
+                  ? ` · ${new Date(tvSummary.lastUsedAt).toLocaleString()}`
+                  : ""}
+              </dd>
+            </>
+          ) : null}
           <dt>Created</dt>
           <dd>
             {user.createDate
