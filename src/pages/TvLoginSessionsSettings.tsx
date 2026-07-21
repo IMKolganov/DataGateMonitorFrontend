@@ -11,6 +11,7 @@ import type {
 } from "../api/orvalModelShim";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 import { formatDateWithOffset } from "../utils/utils";
+import { errorMessage } from "../utils/errorMessage";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import "../css/Settings.css";
 import "../css/Table.css";
@@ -92,9 +93,7 @@ export default function TvLoginSessionsSettings() {
       renderCell: (params) => {
         const uid = params.row.approvedUserId as number | null;
         if (uid == null) return params.value;
-        return (
-          <Link to={`/settings/users/${uid}`}>{String(params.value)}</Link>
-        );
+        return <Link to={`/settings/users/${uid}`}>{String(params.value)}</Link>;
       },
     },
     { field: "createDate", headerName: "Created", width: 170 },
@@ -121,51 +120,62 @@ export default function TvLoginSessionsSettings() {
         linked the device.
       </p>
 
-      <section className="settings-card settings-card--mb">
-        <div className="settings-item">
-          <label>
-            User ID{" "}
-            <input
-              className="input"
-              value={userIdFilter}
-              onChange={(e) => setUserIdFilter(e.target.value)}
-              onBlur={applyUserFilter}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") applyUserFilter();
-              }}
-              placeholder="All users"
-              inputMode="numeric"
-            />
-          </label>
-          <label>
-            Status{" "}
-            <select
-              className="input"
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
-                setPaginationModel((m) => ({ ...m, page: 0 }));
-              }}
+      <div className="settings-polling">
+        <div className="header-bar">
+          <h3 className="settings-card__h3-with-icon">
+            <FaTv className="icon" aria-hidden />
+            <span>Sessions{totalCount > 0 ? ` (${totalCount})` : ""}</span>
+          </h3>
+          <div className="left-buttons">
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={() => void listQuery.refetch()}
+              disabled={listQuery.isFetching}
             >
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s || "all"} value={s}>
-                  {s || "All"}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="button"
-            className="btn secondary"
-            onClick={() => void listQuery.refetch()}
-            disabled={listQuery.isFetching}
-          >
-            <FaSync className="icon" aria-hidden /> Refresh
-          </button>
+              <FaSync className={`icon ${listQuery.isFetching ? "icon-spin" : ""}`} aria-hidden />{" "}
+              Refresh
+            </button>
+          </div>
         </div>
-      </section>
+        <div className="settings-divider" />
 
-      <section className="settings-card">
+        <div className="settings-item">
+          <label htmlFor="tv-login-user-id">User ID</label>
+          <input
+            id="tv-login-user-id"
+            className="input"
+            value={userIdFilter}
+            onChange={(e) => setUserIdFilter(e.target.value)}
+            onBlur={applyUserFilter}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") applyUserFilter();
+            }}
+            placeholder="All users"
+            inputMode="numeric"
+          />
+          <label htmlFor="tv-login-status">Status</label>
+          <select
+            id="tv-login-status"
+            className="input"
+            value={status}
+            onChange={(e) => {
+              setStatus(e.target.value);
+              setPaginationModel((m) => ({ ...m, page: 0 }));
+            }}
+          >
+            {STATUS_OPTIONS.map((s) => (
+              <option key={s || "all"} value={s}>
+                {s || "All"}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {listQuery.error ? (
+          <p className="error-message">{errorMessage(listQuery.error)}</p>
+        ) : null}
+
         <CustomThemeProvider>
           <div
             className="data-grid-wrap"
@@ -186,10 +196,11 @@ export default function TvLoginSessionsSettings() {
               pageSizeOptions={[10, 25, 50, 100]}
               disableRowSelectionOnClick
               localeText={{ noRowsLabel: "No TV login sessions" }}
+              slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
             />
           </div>
         </CustomThemeProvider>
-      </section>
+      </div>
     </div>
   );
 }

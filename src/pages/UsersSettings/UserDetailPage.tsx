@@ -502,31 +502,27 @@ export function UserDetailPage() {
             {tvSummaryQuery.isLoading
               ? "Loading..."
               : tvSummary?.hasUsedTvLogin
-                ? `Yes${
+                ? [
+                    "Yes",
                     tvSummary.approvedOrConsumedCount != null
-                      ? ` (${tvSummary.approvedOrConsumedCount})`
-                      : ""
-                  }`
+                      ? `(${tvSummary.approvedOrConsumedCount})`
+                      : null,
+                    [tvSummary.lastDeviceName, tvSummary.lastClient].filter(Boolean).join(" / ") ||
+                      null,
+                    tvSummary.lastUsedAt
+                      ? new Date(tvSummary.lastUsedAt).toLocaleString()
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")
                 : "No"}
-            {user.id != null && (
+            {user.id != null ? (
               <>
                 {" · "}
-                <Link to={`/settings/tv-login?userId=${user.id}`}>View sessions</Link>
+                <Link to={`/settings/tv-login?userId=${user.id}`}>Sessions</Link>
               </>
-            )}
+            ) : null}
           </dd>
-          {tvSummary?.hasUsedTvLogin ? (
-            <>
-              <dt>Last TV device</dt>
-              <dd>
-                {[tvSummary.lastDeviceName, tvSummary.lastClient].filter(Boolean).join(" / ") ||
-                  "—"}
-                {tvSummary.lastUsedAt
-                  ? ` · ${new Date(tvSummary.lastUsedAt).toLocaleString()}`
-                  : ""}
-              </dd>
-            </>
-          ) : null}
           <dt>Created</dt>
           <dd>
             {user.createDate
