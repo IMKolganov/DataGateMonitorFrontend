@@ -2,6 +2,7 @@
 
 .settings-divider {
   border-top: 1px solid var(--border-color);
+  margin: 12px 0;
 }
 
 .settings-divider:empty {
@@ -276,6 +277,7 @@ select.input:focus {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin: 0 0 8px;
 }
 
 .settings-page__h2-with-icon--flush {
