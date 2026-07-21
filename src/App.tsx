@@ -68,6 +68,7 @@ const XrayLoginPage = lazy(() => import("./pages/xray/XrayLoginPage.tsx"));
 const XrayPortalPage = lazy(() => import("./pages/xray/XrayPortalPage.tsx"));
 const XrayRegisterPage = lazy(() => import("./pages/xray/XrayRegisterPage.tsx"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.tsx"));
+const TvLinkPage = lazy(() => import("./pages/tv/TvLinkPage.tsx"));
 
 const isAuthenticated = () => !!localStorage.getItem(ACCESS_TOKEN_KEY);
 
@@ -90,6 +91,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     location.pathname === "/reset-password" ||
     location.pathname === "/confirm-email" ||
     location.pathname === "/xray/confirm-email" ||
+    location.pathname === "/tv/link" ||
     location.pathname === "/xray" ||
     location.pathname.startsWith("/xray/");
 
@@ -123,6 +125,7 @@ function App() {
         <Layout>
           <Routes>
             <Route path="/privacy" element={withSuspense(<PrivacyPolicy />)} />
+            <Route path="/tv/link" element={withSuspense(<TvLinkPage />)} />
             <Route path="/login" element={withSuspense(<LoginPage />)} />
             <Route path="/xray/login" element={withSuspense(<XrayLoginPage />)} />
             <Route path="/xray/register" element={withSuspense(<XrayRegisterPage />)} />

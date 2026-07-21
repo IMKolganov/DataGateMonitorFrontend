@@ -1,0 +1,130 @@
+.tv-link-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(56, 120, 180, 0.18), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 90% 100%, rgba(30, 80, 60, 0.16), transparent 50%),
+    linear-gradient(160deg, #0f1419 0%, #1a222c 45%, #12181f 100%);
+  color: #e8eef4;
+  font-family: "Segoe UI", "IBM Plex Sans", "Source Sans 3", sans-serif;
+}
+
+.tv-link-page__panel {
+  width: min(28rem, 100%);
+}
+
+.tv-link-page__brand {
+  margin: 0 0 0.35rem;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: #f4f8fb;
+}
+
+.tv-link-page__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #b8c5d1;
+}
+
+.tv-link-page__lead,
+.tv-link-page__hint {
+  margin: 0 0 1rem;
+  color: #8fa0b0;
+  line-height: 1.45;
+  font-size: 0.95rem;
+}
+
+.tv-link-page__code {
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.75rem, 6vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  font-variant-numeric: tabular-nums;
+  color: #f0f6fa;
+}
+
+.tv-link-page__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.8rem;
+  color: #8fa0b0;
+}
+
+.tv-link-page__row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.tv-link-page__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #3a4654;
+  border-radius: 0.35rem;
+  background: #151b22;
+  color: #e8eef4;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tv-link-page__input:focus {
+  outline: 2px solid #4a8fc4;
+  outline-offset: 1px;
+}
+
+.tv-link-page__primary,
+.tv-link-page__secondary {
+  padding: 0.65rem 1rem;
+  border-radius: 0.35rem;
+  border: 1px solid transparent;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.tv-link-page__primary {
+  background: #2f7ab8;
+  color: #fff;
+  border-color: #2f7ab8;
+}
+
+.tv-link-page__primary:disabled,
+.tv-link-page__secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.tv-link-page__secondary {
+  background: transparent;
+  color: #c5d0da;
+  border-color: #3a4654;
+}
+
+.tv-link-page__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.tv-link-page__error {
+  color: #e8a0a0;
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.tv-link-page__footer {
+  margin-top: 1.75rem;
+  font-size: 0.85rem;
+}
+
+.tv-link-page__footer a {
+  color: #8eb6d8;
+}
