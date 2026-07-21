@@ -31,8 +31,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  /* Vertical only — horizontal padding caused the old phantom right gutter with scrollbar-gutter. */
-  padding: 16px 0;
+  padding: 0;
   overflow-x: hidden;
   overflow-y: auto;
 }

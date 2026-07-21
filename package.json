@@ -1,7 +1,7 @@
 {
   "name": "datagate-monitor-frontend-vite",
   "private": true,
-  "version": "1.4.10",
+  "version": "1.4.11",
   "type": "module",
   "engines": {
     "node": ">=24.14.0"
@@ -39,7 +39,7 @@
     "react-router-dom": "^7.15.1",
     "react-toastify": "^11.1.0",
     "recharts": "^3.8.1",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "npm:@e965/xlsx@0.20.3"
   },
   "overrides": {
     "ws": "8.21.1"

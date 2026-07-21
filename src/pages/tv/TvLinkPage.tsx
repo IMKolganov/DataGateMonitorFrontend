@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { FaTv } from "react-icons/fa";
 import { apiRequest } from "../../api/apirequest";
 import { ACCESS_TOKEN_KEY } from "../../utils/const";
-import "../../css/TvLinkPage.css";
+import { loginUrlWithReturn } from "../../utils/auth/returnPath";
+import { appVersion } from "../../version.ts";
+import GdprFooterLinks from "../../components/gdpr/GdprFooterLinks";
+import "../../css/Login.css";
 
 type Preview = {
   sessionId: string;
@@ -17,25 +21,26 @@ function normalizeCode(raw: string): string {
   return raw.replace(/[\s-]/g, "").replace(/\D/g, "");
 }
 
-function formatCode(normalized: string): string {
-  return normalized;
-}
-
 /**
- * Minimal TV device-linking landing page.
- * Contract: GET /tv/link?code=482913 — phone opens this from QR or types the 6-digit code.
+ * TV device-linking approve page (phone).
+ * Unauthenticated users are sent to /login?redirect=/tv/link?code=… then returned here.
  */
 export default function TvLinkPage() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const codeFromQuery = searchParams.get("code") ?? "";
   const [codeInput, setCodeInput] = useState(codeFromQuery);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState<"approved" | "denied" | null>(null);
 
-  const isLoggedIn = useMemo(() => !!localStorage.getItem(ACCESS_TOKEN_KEY), []);
-  const displayCode = formatCode(normalizeCode(codeInput || codeFromQuery));
+  const isLoggedIn = !!localStorage.getItem(ACCESS_TOKEN_KEY);
+  const returnPath = useMemo(() => {
+    const q = searchParams.toString();
+    return q ? `/tv/link?${q}` : "/tv/link";
+  }, [searchParams]);
+
+  const displayCode = normalizeCode(codeInput || codeFromQuery);
 
   const loadPreview = useCallback(async (code: string) => {
     const normalized = normalizeCode(code);
@@ -45,18 +50,13 @@ export default function TvLinkPage() {
       return;
     }
 
-    if (!isLoggedIn) {
-      setPreview(null);
-      setError(null);
-      return;
-    }
-
     setBusy(true);
     setError(null);
+    setDone(null);
     try {
       const res = await apiRequest<Preview>(
         "get",
-        `/api/auth/tv/session/by-code/${encodeURIComponent(formatCode(normalized))}`,
+        `/api/auth/tv/session/by-code/${encodeURIComponent(normalized)}`,
       );
       if (!res.success || !res.data) {
         setPreview(null);
@@ -66,7 +66,8 @@ export default function TvLinkPage() {
       setPreview(res.data);
     } catch (err: unknown) {
       setPreview(null);
-      const status = (err as { response?: { status?: number; data?: { message?: string } } })?.response?.status;
+      const status = (err as { response?: { status?: number; data?: { message?: string } } })?.response
+        ?.status;
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       if (status === 410) setError(message || "This code has expired.");
       else if (status === 404) setError(message || "Code not found.");
@@ -74,14 +75,19 @@ export default function TvLinkPage() {
     } finally {
       setBusy(false);
     }
-  }, [isLoggedIn]);
+  }, []);
 
   useEffect(() => {
+    if (!isLoggedIn) return;
     if (codeFromQuery) {
       setCodeInput(codeFromQuery);
       void loadPreview(codeFromQuery);
     }
-  }, [codeFromQuery, loadPreview]);
+  }, [codeFromQuery, isLoggedIn, loadPreview]);
+
+  if (!isLoggedIn) {
+    return <Navigate to={loginUrlWithReturn(returnPath)} replace />;
+  }
 
   const approve = async () => {
     if (!preview) return;
@@ -95,6 +101,7 @@ export default function TvLinkPage() {
         return;
       }
       toast.success("TV login approved. You can return to your TV.");
+      setDone("approved");
       setPreview(null);
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -116,6 +123,7 @@ export default function TvLinkPage() {
         return;
       }
       toast.info("TV login denied.");
+      setDone("denied");
       setPreview(null);
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -126,84 +134,117 @@ export default function TvLinkPage() {
   };
 
   return (
-    <div className="tv-link-page">
-      <div className="tv-link-page__panel">
-        <p className="tv-link-page__brand">DataGate</p>
-        <h1 className="tv-link-page__title">Link your TV</h1>
-        <p className="tv-link-page__lead">
-          Enter the code shown on your TV, or open this page from the QR code.
-        </p>
-
-        {displayCode && (
-          <p className="tv-link-page__code" aria-label="TV link code">
-            {displayCode}
-          </p>
-        )}
-
-        <label className="tv-link-page__label" htmlFor="tv-code">
-          Code
-        </label>
-        <div className="tv-link-page__row">
-          <input
-            id="tv-code"
-            className="tv-link-page__input"
-            value={codeInput}
-            onChange={(e) => setCodeInput(e.target.value)}
-            placeholder="482913"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            spellCheck={false}
-            maxLength={8}
-          />
-          <button
-            type="button"
-            className="tv-link-page__secondary"
-            disabled={busy}
-            onClick={() => void loadPreview(codeInput)}
-          >
-            Look up
-          </button>
+    <div className="login-container">
+      <div className="login-wrapper">
+        <div className="login-logo-circle">
+          <img src="/favicon.png" alt="Logo" className="logo-icon-login" />
         </div>
 
-        {error && <p className="tv-link-page__error">{error}</p>}
+        <h1 className="login-page-title">
+          <FaTv className="icon" aria-hidden style={{ marginRight: 8, verticalAlign: "middle" }} />
+          Link your TV
+        </h1>
 
-        {!isLoggedIn && (
-          <div className="tv-link-page__actions">
-            <p className="tv-link-page__hint">
-              Sign in to DataGate on this device, then approve the TV login.
+        <div className="login">
+          <p className="login-info-text" style={{ marginBottom: 12 }}>
+            Enter the code shown on your TV, or keep this page open after scanning the QR code.
+          </p>
+
+          {displayCode.length === 6 && (
+            <p
+              className="login-info-text"
+              style={{
+                marginBottom: 16,
+                fontSize: "1.5rem",
+                fontWeight: 700,
+                letterSpacing: "0.2em",
+                textAlign: "center",
+                fontVariantNumeric: "tabular-nums",
+              }}
+              aria-label="TV link code"
+            >
+              {displayCode}
             </p>
+          )}
+
+          <div className="login-item">
+            <label htmlFor="tv-code">Code</label>
+            <input
+              id="tv-code"
+              className="input-login"
+              value={codeInput}
+              onChange={(e) => setCodeInput(e.target.value)}
+              placeholder="482913"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              spellCheck={false}
+              maxLength={8}
+            />
+          </div>
+
+          <div className="login-item">
             <button
               type="button"
-              className="tv-link-page__primary"
-              onClick={() => navigate("/login")}
+              className="btn secondary"
+              disabled={busy}
+              onClick={() => void loadPreview(codeInput)}
+              style={{ width: "100%" }}
             >
-              Sign in to approve
-            </button>
-            <p className="tv-link-page__hint">
-              After sign-in, reopen this page (or the QR link) to approve. Or enter the code in the DataGate mobile app.
-            </p>
-          </div>
-        )}
-
-        {isLoggedIn && preview && (
-          <div className="tv-link-page__actions">
-            <p className="tv-link-page__hint">
-              {preview.deviceName
-                ? `Approve login for “${preview.deviceName}”?`
-                : "Approve login for this TV?"}
-            </p>
-            <button type="button" className="tv-link-page__primary" disabled={busy} onClick={() => void approve()}>
-              Approve
-            </button>
-            <button type="button" className="tv-link-page__secondary" disabled={busy} onClick={() => void deny()}>
-              Deny
+              Look up
             </button>
           </div>
-        )}
 
-        <p className="tv-link-page__footer">
-          <Link to="/login">Back to sign in</Link>
-        </p>
+          {error && <p className="error-message">{error}</p>}
+
+          {done === "approved" && (
+            <p className="login-info-text">Approved. You can return to your TV — it should finish signing in.</p>
+          )}
+          {done === "denied" && (
+            <p className="login-info-text">Denied. The TV will not be signed in with your account.</p>
+          )}
+
+          {preview && !done && (
+            <>
+              <p className="login-info-text" style={{ marginTop: 8, marginBottom: 12 }}>
+                {preview.deviceName
+                  ? `Approve login for “${preview.deviceName}”?`
+                  : "Approve login for this TV?"}
+              </p>
+              <div className="login-item" style={{ display: "flex", gap: 8 }}>
+                <button
+                  type="button"
+                  className="btn"
+                  disabled={busy}
+                  onClick={() => void approve()}
+                  style={{ flex: 1 }}
+                >
+                  Approve
+                </button>
+                <button
+                  type="button"
+                  className="btn secondary"
+                  disabled={busy}
+                  onClick={() => void deny()}
+                  style={{ flex: 1 }}
+                >
+                  Deny
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="register-container">
+          <p>
+            <Link to="/" className="register-link">
+              Go to dashboard
+            </Link>
+          </p>
+          <p>
+            © {new Date().getFullYear()} DataGate Monitor v.{appVersion}
+          </p>
+          <GdprFooterLinks />
+        </div>
       </div>
     </div>
   );
