@@ -16,6 +16,11 @@ import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
+import {
+  collectSelectedOnPage,
+  emptyGridSelection,
+  slicePageRows,
+} from "../../utils/gridPageSelection";
 
 type CertificatesTableProps = {
   certificates: Certificate[];
@@ -25,11 +30,6 @@ type CertificatesTableProps = {
 };
 
 const ACTIVE_STATUS = 0;
-
-const emptySelection = (): GridRowSelectionModel => ({
-  type: "include",
-  ids: new Set(),
-});
 
 const renderStatus = (status: Certificate["status"]) => {
   switch (status) {
@@ -74,7 +74,7 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
   const [serialNumberQuery, setSerialNumberQuery] = useState("");
   const [revokingCN, setRevokingCN] = useState<string | null>(null);
   const [bulkRevoking, setBulkRevoking] = useState(false);
-  const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>(emptySelection);
+  const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>(emptyGridSelection);
   const [certsGridPage, setCertsGridPage] = useState(0);
   const [certsPageSize, setCertsPageSize] = usePersistedPageSize(
     `certs:${vpnServerId}`,
@@ -100,7 +100,7 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
 
   // Drop stale selection when filters, page, or server change.
   React.useEffect(() => {
-    setRowSelectionModel(emptySelection());
+    setRowSelectionModel(emptyGridSelection());
   }, [searchQuery, selectedStatus, serialNumberQuery, certsGridPage, certsPageSize, vpnServerId]);
 
   const rows = useMemo(
@@ -126,34 +126,20 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
     [filteredCertificates],
   );
 
-  const rowById = useMemo(() => new Map(rows.map((r) => [String(r.id), r])), [rows]);
+  const pageRows = useMemo(
+    () => slicePageRows(rows, certsGridPage, certsPageSize),
+    [rows, certsGridPage, certsPageSize],
+  );
 
-  const pageRows = useMemo(() => {
-    const start = certsGridPage * certsPageSize;
-    return rows.slice(start, start + certsPageSize);
-  }, [rows, certsGridPage, certsPageSize]);
+  const selectedActiveCommonNames = useMemo(
+    () =>
+      collectSelectedOnPage(rowSelectionModel, pageRows, (row) => row.status === ACTIVE_STATUS).map(
+        (row) => row.commonName,
+      ),
+    [rowSelectionModel, pageRows],
+  );
 
-  const pageRowIds = useMemo(() => new Set(pageRows.map((r) => r.id)), [pageRows]);
-
-  const selectedActiveCommonNames = useMemo(() => {
-    const names: string[] = [];
-    // Only revoke rows visible on the current page (select-all must not span pages).
-    if (rowSelectionModel.type === "exclude") {
-      for (const row of pageRows) {
-        if (row.status !== ACTIVE_STATUS) continue;
-        if (!rowSelectionModel.ids.has(row.id)) names.push(row.commonName);
-      }
-      return names;
-    }
-    for (const id of rowSelectionModel.ids) {
-      if (!pageRowIds.has(String(id))) continue;
-      const row = rowById.get(String(id));
-      if (row && row.status === ACTIVE_STATUS) names.push(row.commonName);
-    }
-    return names;
-  }, [rowSelectionModel, pageRows, pageRowIds, rowById]);
-
-  const clearSelection = useCallback(() => setRowSelectionModel(emptySelection()), []);
+  const clearSelection = useCallback(() => setRowSelectionModel(emptyGridSelection()), []);
 
   const handleRevokeMany = useCallback(
     async (commonNames: string[]) => {

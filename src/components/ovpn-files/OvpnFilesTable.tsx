@@ -15,6 +15,11 @@ import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
+import {
+  collectSelectedOnPage,
+  emptyGridSelection,
+  slicePageRows,
+} from "../../utils/gridPageSelection";
 import "../../css/Table.css";
 
 const safeFormatDate = (input?: string | null): string => {
@@ -22,11 +27,6 @@ const safeFormatDate = (input?: string | null): string => {
   const date = new Date(input);
   return isNaN(date.getTime()) ? "Invalid date" : formatDateWithOffset(date);
 };
-
-const emptySelection = (): GridRowSelectionModel => ({
-  type: "include",
-  ids: new Set(),
-});
 
 export type OvpnRowInput =
   | { issuedOvpnFile?: IssuedOvpnFileDto }
@@ -99,7 +99,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
   const [searchQuery, setSearchQuery] = useState("");
   const [issuedToFilter, setIssuedToFilter] = useState("");
   const [bulkRevoking, setBulkRevoking] = useState(false);
-  const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>(emptySelection);
+  const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>(emptyGridSelection);
   const [ovpnFilesGridPage, setOvpnFilesGridPage] = useState(0);
   const [ovpnFilesPageSize, setOvpnFilesPageSize] = usePersistedPageSize(
     `ovpn-files:${vpnServerId}`,
@@ -124,7 +124,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
   }, [items, searchQuery, issuedToFilter]);
 
   useEffect(() => {
-    setRowSelectionModel(emptySelection());
+    setRowSelectionModel(emptyGridSelection());
   }, [searchQuery, issuedToFilter, ovpnFilesGridPage, ovpnFilesPageSize, vpnServerId]);
 
   const rows: OvpnRow[] = useMemo(
@@ -155,34 +155,22 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
     [filtered],
   );
 
-  const rowById = useMemo(() => new Map(rows.map((r) => [r.id, r])), [rows]);
+  const pageRows = useMemo(
+    () => slicePageRows(rows, ovpnFilesGridPage, ovpnFilesPageSize),
+    [rows, ovpnFilesGridPage, ovpnFilesPageSize],
+  );
 
-  const pageRows = useMemo(() => {
-    const start = ovpnFilesGridPage * ovpnFilesPageSize;
-    return rows.slice(start, start + ovpnFilesPageSize);
-  }, [rows, ovpnFilesGridPage, ovpnFilesPageSize]);
+  const selectedActiveRows = useMemo(
+    () =>
+      collectSelectedOnPage(
+        rowSelectionModel,
+        pageRows,
+        (row) => !row.isRevoked && row.numericId != null,
+      ),
+    [rowSelectionModel, pageRows],
+  );
 
-  const pageRowIds = useMemo(() => new Set(pageRows.map((r) => r.id)), [pageRows]);
-
-  const selectedActiveRows = useMemo(() => {
-    const selected: OvpnRow[] = [];
-    // Only revoke rows visible on the current page (select-all must not span pages).
-    if (rowSelectionModel.type === "exclude") {
-      for (const row of pageRows) {
-        if (row.isRevoked || row.numericId == null) continue;
-        if (!rowSelectionModel.ids.has(row.id)) selected.push(row);
-      }
-      return selected;
-    }
-    for (const id of rowSelectionModel.ids) {
-      if (!pageRowIds.has(String(id))) continue;
-      const row = rowById.get(String(id));
-      if (row && !row.isRevoked && row.numericId != null) selected.push(row);
-    }
-    return selected;
-  }, [rowSelectionModel, pageRows, pageRowIds, rowById]);
-
-  const clearSelection = useCallback(() => setRowSelectionModel(emptySelection()), []);
+  const clearSelection = useCallback(() => setRowSelectionModel(emptyGridSelection()), []);
 
   const handleRevokeMany = useCallback(
     async (targets: OvpnRow[]) => {

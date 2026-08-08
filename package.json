@@ -1,7 +1,7 @@
 {
   "name": "datagate-monitor-frontend-vite",
   "private": true,
-  "version": "1.4.15",
+  "version": "1.4.16",
   "type": "module",
   "engines": {
     "node": ">=24.14.0"
@@ -12,6 +12,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "typecheck": "tsc -b --pretty false",
     "preview": "vite preview",
     "gen:api": "orval --config orval.config.ts",
     "orval": "orval --config orval.config.ts"
