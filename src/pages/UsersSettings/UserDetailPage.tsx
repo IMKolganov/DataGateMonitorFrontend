@@ -59,6 +59,7 @@ import type { MessageDto } from "../../api/orvalModelShim";
 import { useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { isCanceledError } from "../../utils/queryCanceled";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { useStabilizedRowCount } from "../../hooks/useStabilizedRowCount";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
@@ -230,7 +231,10 @@ export function UserDetailPage() {
   );
   const messagesPayload = (telegramMessagesData as GetByTelegramIdMessagesResponseApiResponse | undefined)?.data?.messages;
   const telegramMessages: MessageDto[] = messagesPayload?.items ?? [];
-  const telegramMessagesTotalCount = messagesPayload?.totalCount ?? 0;
+  const telegramMessagesTotalCount = useStabilizedRowCount(
+    messagesPayload?.totalCount,
+    telegramIdValid ? telegramId : 0,
+  );
   const telegramMessagesRefreshing = telegramMessagesFetching;
   const telegramMessagesErrorMessage = isCanceledError(telegramMessagesError)
     ? null

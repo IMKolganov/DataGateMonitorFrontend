@@ -41,6 +41,7 @@ import { useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import type { QuotaPlansResponse, QuotaPlanAllowedServerDto } from "../api/orvalModelShim";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
+import { useStabilizedRowCount } from "../hooks/useStabilizedRowCount";
 import { formatDateWithOffset } from "../utils/utils";
 import { useProxyTrafficFlow } from "../hooks/useProxyTrafficFlow";
 import { ServerAccessDenied } from "../components/ServerAccessDenied";
@@ -367,10 +368,14 @@ export function GeneralServerDetails() {
         ? mapLiveClientsResponse?.vpnClients ?? []
         : clients;
 
-    const totalClients =
+    const totalClients = useStabilizedRowCount(
         typeof activeClientsResponse?.totalCount === "number" && activeClientsResponse.totalCount >= 0
             ? activeClientsResponse.totalCount
-            : 0;
+            : activeClientsResponse
+              ? 0
+              : undefined,
+        `${numericServerId ?? 0}:${isLive ? "live" : "history"}`,
+    );
 
     const ovpnConfigQuery = useGetApiOpenVpnConfigsGetVpnServerId(numericServerId ?? 0, {
         query: {

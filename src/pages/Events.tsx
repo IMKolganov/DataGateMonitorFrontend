@@ -22,6 +22,7 @@ import { GridFilterBar } from "../components/ui/GridFilterBar.tsx";
 import { gridFilterFields } from "../config/gridFilters.ts";
 import { useGridFilters } from "../hooks/useGridFilterStub.ts";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
+import { useStabilizedRowCount } from "../hooks/useStabilizedRowCount";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import type { VpnServerEventLogDto } from "../api/orvalModelShim";
 
@@ -176,7 +177,14 @@ const Events: React.FC = () => {
     },
   });
 
-  const normalized = useMemo(() => (resp ? normalize<Item>(resp) : { items: [], totalCount: 0 } as Normalized<Item>), [resp]);
+  const normalized = useMemo(
+    () => (resp ? normalize<Item>(resp) : { items: [], totalCount: 0 } as Normalized<Item>),
+    [resp],
+  );
+  const eventsRowCount = useStabilizedRowCount(
+    resp ? normalized.totalCount : undefined,
+    numericServerId,
+  );
 
   const [paginationSyncKey, setPaginationSyncKey] = useState<unknown>(null);
   if (resp && resp !== paginationSyncKey) {
@@ -307,7 +315,7 @@ const Events: React.FC = () => {
               columns={columns}
               pageSizeOptions={[5, 10, 20, 50, 100]}
               paginationMode="server"
-              rowCount={normalized.totalCount}
+              rowCount={eventsRowCount}
               paginationModel={{ page, pageSize }}
               onPaginationModelChange={(model) => {
                 setPage(model.page);

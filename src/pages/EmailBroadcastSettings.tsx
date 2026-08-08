@@ -22,6 +22,7 @@ import type { EmailBroadcastResponsesSendAdminEmailResponse } from "../api/orval
 import type { SentEmailLogDto } from "../api/orvalModelShim";
 import { formatDateWithOffset } from "../utils/utils.ts";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize.ts";
+import { useStabilizedRowCount } from "../hooks/useStabilizedRowCount";
 import "../css/Settings.css";
 import "../css/Table.css";
 
@@ -229,10 +230,10 @@ const defaultHtml = `<!DOCTYPE html>
 /** Same idea as Events.tsx: API may return camelCase or PascalCase after JSON options. */
 function normalizeSentHistory(raw: unknown): {
   items: EmailBroadcastResponsesDtoSentEmailLogDto[];
-  totalCount: number;
+  totalCount: number | undefined;
 } {
   if (raw == null || typeof raw !== "object") {
-    return { items: [], totalCount: 0 };
+    return { items: [], totalCount: undefined };
   }
   const o = raw as Record<string, unknown>;
   const itemsRaw = o.items ?? o.Items;
@@ -300,7 +301,7 @@ export default function EmailBroadcastSettings() {
     [historyQuery.data],
   );
   const rows = historyNormalized.items;
-  const rowCount = historyNormalized.totalCount;
+  const rowCount = useStabilizedRowCount(historyNormalized.totalCount);
   const loading = historyQuery.isPending || historyQuery.isFetching;
 
   const maxHistoryPage = Math.max(0, Math.ceil(rowCount / historyPageSize) - 1);

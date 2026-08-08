@@ -35,6 +35,7 @@ import type { GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams } from
 import "../css/Table.css";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
+import { useStabilizedRowCount } from "../hooks/useStabilizedRowCount";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../utils/errorMessage";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
@@ -224,26 +225,14 @@ const OvpnFileConfigForm: React.FC = () => {
     | { items?: ConflogRow[] | null; totalCount?: number | null }
     | undefined;
   const conflogItems: ConflogRow[] = (conflogPageData?.items ?? []) as ConflogRow[];
-  // Stabilize rowCount across page fetches (MUI resets to page 0 if rowCount goes undefined/0).
-  const [conflogRowCountState, setConflogRowCountState] = useState({
-    serverId: parsedVpnServerId,
-    count: 0,
-  });
+  // Keep last totalCount while page fetch briefly omits it (MUI snaps to page 0 otherwise).
   const nextConflogTotal =
     typeof conflogPageData?.totalCount === "number"
       ? conflogPageData.totalCount
       : conflogHistoryResp
         ? conflogItems.length
-        : null;
-  if (conflogRowCountState.serverId !== parsedVpnServerId) {
-    setConflogRowCountState({
-      serverId: parsedVpnServerId,
-      count: nextConflogTotal ?? 0,
-    });
-  } else if (nextConflogTotal != null && nextConflogTotal !== conflogRowCountState.count) {
-    setConflogRowCountState({ serverId: parsedVpnServerId, count: nextConflogTotal });
-  }
-  const conflogTotalCount = conflogRowCountState.count;
+        : undefined;
+  const conflogTotalCount = useStabilizedRowCount(nextConflogTotal, parsedVpnServerId);
 
   const fetchAndSaveConflogMutation = usePostApiOpenVpnServersConflogFetchAndSaveByServerVpnServerId({
     mutation: {

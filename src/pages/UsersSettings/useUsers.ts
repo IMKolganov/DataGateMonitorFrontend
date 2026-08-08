@@ -7,6 +7,7 @@ import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { isCanceledError } from "../../utils/queryCanceled";
 import { getStoredPageSize, setStoredPageSize } from "../../hooks/usePersistedPageSize";
+import { useStabilizedRowCount } from "../../hooks/useStabilizedRowCount";
 import { useGridFilters } from "../../hooks/useGridFilterStub";
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -47,14 +48,14 @@ export function useUsers(options?: { mode?: UseUsersMode }) {
     query: { placeholderData: (prev) => prev },
   });
 
-  const { users, totalCount } = useMemo(() => {
+  const { users, rawTotalCount } = useMemo(() => {
     const payload = unwrapMaybeApiResponse<GetAllUsersResponse>(
       qUsers.data as GetAllUsersResponse | ApiEnvelope<GetAllUsersResponse> | undefined,
     );
     const list = (payload?.users ?? []) as UserDto[];
-    const total = payload?.totalCount ?? 0;
-    return { users: list, totalCount: total };
+    return { users: list, rawTotalCount: payload?.totalCount };
   }, [qUsers.data]);
+  const totalCount = useStabilizedRowCount(rawTotalCount, mode);
 
   const onPaginationModelChange = useCallback((model: GridPaginationModel) => {
     setPaginationModel((prev) => {

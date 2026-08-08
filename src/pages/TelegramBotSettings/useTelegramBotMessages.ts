@@ -13,6 +13,7 @@ import type {
 } from "../../api/orvalModelShim";
 import { isCanceledError } from "../../utils/queryCanceled";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { useStabilizedRowCount } from "../../hooks/useStabilizedRowCount";
 import { useGridFilters } from "../../hooks/useGridFilterStub";
 
 export function useTelegramBotMessages() {
@@ -47,12 +48,13 @@ export function useTelegramBotMessages() {
         return items as MessageDto[];
     }, [qMessages.data]);
 
-    const totalCount = useMemo(() => {
+    const rawTotalCount = useMemo(() => {
         const raw = qMessages.data as GetAllMessagesResponse | undefined;
         const envelope = raw?.messages;
-        if (!envelope) return 0;
-        return envelope.totalCount ?? envelope.items?.length ?? 0;
+        if (!envelope) return undefined;
+        return envelope.totalCount ?? envelope.items?.length;
     }, [qMessages.data]);
+    const totalCount = useStabilizedRowCount(rawTotalCount);
 
     const handleRefresh = async () => {
         if (qMessages.isFetching || manualRefreshing) return;

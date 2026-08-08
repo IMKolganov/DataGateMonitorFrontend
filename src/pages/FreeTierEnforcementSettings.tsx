@@ -23,6 +23,7 @@ import {
 } from "../api/orvalModelShim";
 import { formatDateWithOffset } from "../utils/utils";
 import { errorMessage } from "../utils/errorMessage";
+import { useStabilizedRowCount } from "../hooks/useStabilizedRowCount";
 import { GridRowActions, RowActionButton } from "../components/ui/GridRowActions.tsx";
 import "../css/Settings.css";
 import "../css/Table.css";
@@ -401,7 +402,7 @@ function DisconnectLogCard() {
 
   const pagedEntries = unwrapMaybeApiResponse(logQuery.data)?.entries;
   const entries = pagedEntries?.items ?? [];
-  const totalCount = pagedEntries?.totalCount ?? 0;
+  const totalCount = useStabilizedRowCount(pagedEntries?.totalCount);
 
   const rows = entries.map((e: FreeTierDisconnectLogEntryDto) => ({
     id: e.id,
