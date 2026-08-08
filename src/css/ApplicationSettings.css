@@ -62,28 +62,6 @@
     align-items: center;
     gap: 6px;
   }
-  
-  .copy-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background: var(--btn-secondary-bg);
-    color: var(--btn-secondary-text);
-    cursor: pointer;
-  }
-
-  .copy-btn:hover:not(:disabled) {
-    background: var(--btn-secondary-hover);
-    color: var(--text-primary);
-  }
-
-  .copy-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 
   .copied-text {
     color: var(--link-color);

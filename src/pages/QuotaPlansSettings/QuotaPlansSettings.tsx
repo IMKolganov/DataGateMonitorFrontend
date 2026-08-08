@@ -23,6 +23,7 @@ import { QuotaPlanFormModal } from "./QuotaPlanFormModal";
 import { QuotaPlanAllowedServersModal } from "./QuotaPlanAllowedServersModal";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import { GridFilterBar } from "../../components/ui/GridFilterBar.tsx";
+import { GridRowActions, RowActionButton } from "../../components/ui/GridRowActions.tsx";
 import { gridFilterFields } from "../../config/gridFilters.ts";
 import { useGridFilters } from "../../hooks/useGridFilterStub.ts";
 import "../../css/Settings.css";
@@ -220,50 +221,41 @@ export function QuotaPlansSettings() {
     {
       field: "actions",
       headerName: "Actions",
-      width: 260,
+      width: 180,
+      sortable: false,
+      filterable: false,
       renderCell: (params) => {
         const plan = params.row.raw as QuotaPlanDto;
         const planId = plan.id;
         if (planId == null) return null;
         return (
-          <div className="action-container">
-            <button
-              type="button"
-              className="btn secondary"
-              onClick={() => setAllowedServersPlan(plan)}
-              disabled={isBusy}
+          <GridRowActions>
+            <RowActionButton
               title="Allowed servers"
-            >
-              {FaServer({ className: "icon" })}
-            </button>
-            <button
-              type="button"
-              className="btn secondary"
-              onClick={() => handleSetDefault(planId)}
-              disabled={isBusy || plan.isDefault}
+              disabled={isBusy}
+              onClick={() => setAllowedServersPlan(plan)}
+              icon={<FaServer className="icon" />}
+            />
+            <RowActionButton
               title="Set as default"
-            >
-              {FaStar({ className: "icon" })}
-            </button>
-            <button
-              type="button"
-              className="btn secondary"
-              onClick={() => handleEdit(plan)}
-              disabled={isBusy}
+              disabled={isBusy || plan.isDefault}
+              onClick={() => handleSetDefault(planId)}
+              icon={<FaStar className="icon" />}
+            />
+            <RowActionButton
               title="Edit"
-            >
-              {FaEdit({ className: "icon" })}
-            </button>
-            <button
-              type="button"
-              className="btn danger"
-              onClick={() => handleDelete(planId)}
               disabled={isBusy}
+              onClick={() => handleEdit(plan)}
+              icon={<FaEdit className="icon" />}
+            />
+            <RowActionButton
+              variant="danger"
               title="Delete"
-            >
-              {FaTrash({ className: "icon" })}
-            </button>
-          </div>
+              disabled={isBusy}
+              onClick={() => handleDelete(planId)}
+              icon={<FaTrash className="icon" />}
+            />
+          </GridRowActions>
         );
       },
     },

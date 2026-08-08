@@ -19,6 +19,15 @@
   gap: 6px;
 }
 
+a.btn {
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+a.btn:hover {
+  text-decoration: none;
+}
+
 .btn:focus,
 .btn:focus-visible {
   outline: none;

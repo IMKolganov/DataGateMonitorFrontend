@@ -10,6 +10,7 @@ import {
   usePostApiTgbotUsersSetAdmin,
   usePostApiTgbotUsersUnsetAdmin,
 } from "../../api/orval/telegram-bot-user/telegram-bot-user.ts";
+import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
 import "../../css/Table.css";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import { UserAvatar } from "../ui/UserAvatar.tsx";
@@ -136,10 +137,11 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
     { field: "isAdmin", headerName: "Admin", type: "boolean", flex: 0.5 },
     { field: "isBlocked", headerName: "Blocked", type: "boolean", flex: 0.5 },
     {
-      field: "Actions",
+      field: "actions",
       headerName: "Actions",
-      flex: 1,
-      minWidth: 240,
+      width: 110,
+      sortable: false,
+      filterable: false,
       renderCell: (params) => {
         const tid: number = params.row.telegramId || 0;
         const isBlocked: boolean = !!params.row.isBlocked;
@@ -147,23 +149,21 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
         const disabled = mutationLoading || !tid;
 
         return (
-          <div className="action-container">
-            <button
-              className="btn danger"
+          <GridRowActions>
+            <RowActionButton
+              variant="danger"
+              title={isBlocked ? "Unblock" : "Block"}
               disabled={disabled}
               onClick={() => handleToggleBlock(tid, isBlocked)}
-            >
-              <FaBan className="icon" /> {isBlocked ? "Unblock" : "Block"}
-            </button>
-
-            <button
-              className="btn secondary"
+              icon={<FaBan className="icon" />}
+            />
+            <RowActionButton
+              title={isAdmin ? "Unset Admin" : "Set Admin"}
               disabled={disabled}
               onClick={() => handleToggleAdmin(tid, isAdmin)}
-            >
-              <FaUserShield className="icon" /> {isAdmin ? "Unset Admin" : "Set Admin"}
-            </button>
-          </div>
+              icon={<FaUserShield className="icon" />}
+            />
+          </GridRowActions>
         );
       },
     },

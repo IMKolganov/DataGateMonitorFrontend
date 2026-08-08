@@ -1,6 +1,6 @@
 // src/components/CertificatesTable.tsx
-import React, { useState, useCallback } from "react";
-import type { GridColDef } from "@mui/x-data-grid";
+import React, { useState, useCallback, useMemo } from "react";
+import type { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type {
@@ -8,19 +8,28 @@ import type {
   RevokeCertificateRequest,
 } from "../../api/orvalModelShim";
 import { postApiOpenVpnCertsRevoke } from "../../api/orval/vpn-server-certs/vpn-server-certs.ts";
+import { FaBan } from "react-icons/fa";
 import "../../css/Table.css";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
+import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
 
 type CertificatesTableProps = {
   certificates: Certificate[];
   vpnServerId: string | number;
-  onRevoke: () => Promise<void> | void;
+  onRevoke: (count?: number) => Promise<void> | void;
   loading?: boolean;
 };
+
+const ACTIVE_STATUS = 0;
+
+const emptySelection = (): GridRowSelectionModel => ({
+  type: "include",
+  ids: new Set(),
+});
 
 const renderStatus = (status: Certificate["status"]) => {
   switch (status) {
@@ -44,6 +53,16 @@ async function revokeCertificate(vpnServerId: string | number, commonName: strin
   await postApiOpenVpnCertsRevoke(req);
 }
 
+function formatRevokeError(error: unknown): string {
+  const data = axios.isAxiosError(error) ? error.response?.data : undefined;
+  return (
+    axiosResponseDataMessage(data) ??
+    (axios.isAxiosError(error) ? error.message : undefined) ??
+    errorMessage(error) ??
+    "Failed to revoke certificate."
+  );
+}
+
 const CertificatesTable: React.FC<CertificatesTableProps> = ({
   certificates = [],
   vpnServerId,
@@ -54,6 +73,8 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
   const [selectedStatus, setSelectedStatus] = useState("");
   const [serialNumberQuery, setSerialNumberQuery] = useState("");
   const [revokingCN, setRevokingCN] = useState<string | null>(null);
+  const [bulkRevoking, setBulkRevoking] = useState(false);
+  const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>(emptySelection);
   const [certsGridPage, setCertsGridPage] = useState(0);
   const [certsPageSize, setCertsPageSize] = usePersistedPageSize(
     `certs:${vpnServerId}`,
@@ -61,57 +82,142 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
     "5,10,20,100",
   );
 
-  const handleRevoke = useCallback(
-    async (commonName: string) => {
-      if (!window.confirm(`Are you sure you want to revoke certificate for ${commonName}?`)) return;
+  const filteredCertificates = useMemo(
+    () =>
+      certificates.filter((cert) => {
+        const name = cert.commonName?.toLowerCase() || "";
+        const serial = cert.serialNumber?.toLowerCase() || "";
+        const status = cert.status?.toString() ?? "";
 
-      try {
-        setRevokingCN(commonName);
-        await revokeCertificate(vpnServerId, commonName);
-        // success toast is handled by parent
-        await onRevoke();
-      } catch (error: unknown) {
-        const data = axios.isAxiosError(error) ? error.response?.data : undefined;
-        const msg =
-          axiosResponseDataMessage(data) ??
-          (axios.isAxiosError(error) ? error.message : undefined) ??
-          errorMessage(error) ??
-          "Failed to revoke certificate.";
-        toast.error(msg);
-      } finally {
-        setRevokingCN(null);
-      }
-    },
-    [vpnServerId, onRevoke],
+        return (
+          name.includes(searchQuery.toLowerCase()) &&
+          (selectedStatus === "" || status === selectedStatus) &&
+          serial.includes(serialNumberQuery.toLowerCase())
+        );
+      }),
+    [certificates, searchQuery, selectedStatus, serialNumberQuery],
   );
 
-  const filteredCertificates = certificates.filter((cert) => {
-    const name = cert.commonName?.toLowerCase() || "";
-    const serial = cert.serialNumber?.toLowerCase() || "";
-    const status = cert.status?.toString() ?? "";
+  // Drop stale selection when filters, page, or server change.
+  React.useEffect(() => {
+    setRowSelectionModel(emptySelection());
+  }, [searchQuery, selectedStatus, serialNumberQuery, certsGridPage, certsPageSize, vpnServerId]);
 
-    return (
-      name.includes(searchQuery.toLowerCase()) &&
-      (selectedStatus === "" || status === selectedStatus) &&
-      serial.includes(serialNumberQuery.toLowerCase())
-    );
-  });
+  const rows = useMemo(
+    () =>
+      filteredCertificates.map((cert, index) => {
+        const statusNumeric = typeof cert.status === "number" ? cert.status : 3;
+        const commonName = cert.commonName || "N/A";
+        const serialNumber = cert.serialNumber || "N/A";
+        const id =
+          cert.commonName?.trim() ||
+          cert.serialNumber?.trim() ||
+          `cert-row-${index}`;
+        return {
+          id,
+          commonName,
+          status: statusNumeric,
+          statusText: renderStatus(statusNumeric),
+          expiryDate: cert.expiryDate ? formatDateWithOffset(new Date(cert.expiryDate)) : "N/A",
+          revokeDate: cert.revokeDate ? formatDateWithOffset(new Date(cert.revokeDate)) : "N/A",
+          serialNumber,
+        };
+      }),
+    [filteredCertificates],
+  );
 
-  const rows = filteredCertificates.map((cert, index) => {
-    const statusNumeric = typeof cert.status === "number" ? cert.status : 3;
-    return {
-      id: index + 1,
-      commonName: cert.commonName || "N/A",
-      status: statusNumeric,
-      statusText: renderStatus(statusNumeric),
-      expiryDate: cert.expiryDate ? formatDateWithOffset(new Date(cert.expiryDate)) : "N/A",
-      revokeDate: cert.revokeDate ? formatDateWithOffset(new Date(cert.revokeDate)) : "N/A",
-      serialNumber: cert.serialNumber || "N/A",
-    };
-  });
+  const rowById = useMemo(() => new Map(rows.map((r) => [String(r.id), r])), [rows]);
+
+  const pageRows = useMemo(() => {
+    const start = certsGridPage * certsPageSize;
+    return rows.slice(start, start + certsPageSize);
+  }, [rows, certsGridPage, certsPageSize]);
+
+  const pageRowIds = useMemo(() => new Set(pageRows.map((r) => r.id)), [pageRows]);
+
+  const selectedActiveCommonNames = useMemo(() => {
+    const names: string[] = [];
+    // Only revoke rows visible on the current page (select-all must not span pages).
+    if (rowSelectionModel.type === "exclude") {
+      for (const row of pageRows) {
+        if (row.status !== ACTIVE_STATUS) continue;
+        if (!rowSelectionModel.ids.has(row.id)) names.push(row.commonName);
+      }
+      return names;
+    }
+    for (const id of rowSelectionModel.ids) {
+      if (!pageRowIds.has(String(id))) continue;
+      const row = rowById.get(String(id));
+      if (row && row.status === ACTIVE_STATUS) names.push(row.commonName);
+    }
+    return names;
+  }, [rowSelectionModel, pageRows, pageRowIds, rowById]);
+
+  const clearSelection = useCallback(() => setRowSelectionModel(emptySelection()), []);
+
+  const handleRevokeMany = useCallback(
+    async (commonNames: string[]) => {
+      const unique = [...new Set(commonNames.filter((cn) => cn && cn !== "N/A"))];
+      if (unique.length === 0) return;
+
+      const preview =
+        unique.length <= 5
+          ? unique.join(", ")
+          : `${unique.slice(0, 3).join(", ")} and ${unique.length - 3} more`;
+      const confirmed = window.confirm(
+        unique.length === 1
+          ? `Are you sure you want to revoke certificate for ${unique[0]}?`
+          : `Are you sure you want to revoke ${unique.length} certificates?\n\n${preview}\n\nThis cannot be undone.`,
+      );
+      if (!confirmed) return;
+
+      setBulkRevoking(true);
+      try {
+        const failures: string[] = [];
+        for (const commonName of unique) {
+          try {
+            setRevokingCN(commonName);
+            await revokeCertificate(vpnServerId, commonName);
+          } catch (error: unknown) {
+            failures.push(`${commonName}: ${formatRevokeError(error)}`);
+          }
+        }
+
+        const succeeded = unique.length - failures.length;
+        clearSelection();
+
+        if (succeeded > 0) {
+          await onRevoke(succeeded);
+        }
+        if (failures.length > 0) {
+          toast.error(
+            failures.length === 1
+              ? failures[0]
+              : `Failed to revoke ${failures.length} of ${unique.length} certificates.`,
+          );
+        }
+      } finally {
+        setRevokingCN(null);
+        setBulkRevoking(false);
+      }
+    },
+    [vpnServerId, onRevoke, clearSelection],
+  );
+
+  const handleRevoke = useCallback(
+    async (commonName: string) => {
+      await handleRevokeMany([commonName]);
+    },
+    [handleRevokeMany],
+  );
+
+  const handleBulkRevoke = useCallback(async () => {
+    await handleRevokeMany(selectedActiveCommonNames);
+  }, [handleRevokeMany, selectedActiveCommonNames]);
+
+  const busy = loading || bulkRevoking;
 
   const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 70 },
     { field: "commonName", headerName: "Common Name", flex: 1 },
     { field: "statusText", headerName: "Status", flex: 1 },
     { field: "expiryDate", headerName: "Expiry Date", flex: 1 },
@@ -120,25 +226,27 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
     {
       field: "actions",
       headerName: "Actions",
-      width: 150,
+      width: 90,
+      sortable: false,
+      filterable: false,
       renderCell: (params) => {
-        if (params.row.status !== 0) {
-          return <span className="no-actions">No actions</span>;
+        if (params.row.status !== ACTIVE_STATUS) {
+          return null;
         }
 
         const cn = params.row.commonName as string;
+        const isRevoking = revokingCN === cn;
 
         return (
-          <div className="action-container">
-            <button
-              className="btn danger"
+          <GridRowActions>
+            <RowActionButton
+              variant="danger"
+              title={isRevoking ? "Revoking..." : "Revoke"}
+              disabled={busy}
               onClick={() => handleRevoke(cn)}
-              disabled={loading || revokingCN === cn}
-              title={revokingCN === cn ? "Revoking..." : "Revoke"}
-            >
-              {revokingCN === cn ? "Revoking..." : "Revoke"}
-            </button>
-          </div>
+              icon={<FaBan className="icon" />}
+            />
+          </GridRowActions>
         );
       },
     },
@@ -186,11 +294,37 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
             onChange={(e) => setSerialNumberQuery(e.target.value)}
             className="input"
           />
+          <button
+            type="button"
+            className="btn danger"
+            disabled={busy || selectedActiveCommonNames.length === 0}
+            onClick={() => void handleBulkRevoke()}
+            title={
+              selectedActiveCommonNames.length === 0
+                ? "Select active certificates to revoke"
+                : `Revoke ${selectedActiveCommonNames.length} selected`
+            }
+          >
+            <FaBan className="icon" aria-hidden />
+            {bulkRevoking
+              ? "Revoking…"
+              : selectedActiveCommonNames.length > 0
+                ? `Revoke selected (${selectedActiveCommonNames.length})`
+                : "Revoke selected"}
+          </button>
         </div>
         <Grid
           gridId="certificates"
           rows={rows}
           columns={columns}
+          getRowId={(row) => row.id}
+          checkboxSelection
+          checkboxSelectionVisibleOnly
+          disableRowSelectionOnClick
+          disableRowSelectionExcludeModel
+          isRowSelectable={(params) => params.row.status === ACTIVE_STATUS}
+          rowSelectionModel={rowSelectionModel}
+          onRowSelectionModelChange={(model) => setRowSelectionModel(model)}
           pageSizeOptions={[5, 10, 20, 100]}
           paginationMode="client"
           paginationModel={{ page: certsGridPage, pageSize: certsPageSize }}
@@ -201,7 +335,7 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
           localeText={{
             noRowsLabel: loading ? "🔄 Loading certificates..." : "📭 No certificates found",
           }}
-          loading={loading}
+          loading={busy}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
         />
       </div>

@@ -197,7 +197,14 @@ const OvpnFileConfigForm: React.FC = () => {
     useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
       parsedVpnServerId,
       conflogHistoryParams,
-      { query: { enabled: parsedVpnServerId > 0 && openVpnPageEnabled } }
+      {
+        query: {
+          enabled: parsedVpnServerId > 0 && openVpnPageEnabled,
+          // Keep prior page + totalCount while fetching so MUI server pagination
+          // does not see rowCount→0/undefined and snap back to page 0.
+          placeholderData: (prev) => prev,
+        },
+      }
     );
 
   const latestConflogParams = useMemo<GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams>(
@@ -217,15 +224,34 @@ const OvpnFileConfigForm: React.FC = () => {
     | { items?: ConflogRow[] | null; totalCount?: number | null }
     | undefined;
   const conflogItems: ConflogRow[] = (conflogPageData?.items ?? []) as ConflogRow[];
-  const conflogTotalCount = conflogPageData?.totalCount ?? conflogItems.length;
+  // Stabilize rowCount across page fetches (MUI resets to page 0 if rowCount goes undefined/0).
+  const [conflogRowCountState, setConflogRowCountState] = useState({
+    serverId: parsedVpnServerId,
+    count: 0,
+  });
+  const nextConflogTotal =
+    typeof conflogPageData?.totalCount === "number"
+      ? conflogPageData.totalCount
+      : conflogHistoryResp
+        ? conflogItems.length
+        : null;
+  if (conflogRowCountState.serverId !== parsedVpnServerId) {
+    setConflogRowCountState({
+      serverId: parsedVpnServerId,
+      count: nextConflogTotal ?? 0,
+    });
+  } else if (nextConflogTotal != null && nextConflogTotal !== conflogRowCountState.count) {
+    setConflogRowCountState({ serverId: parsedVpnServerId, count: nextConflogTotal });
+  }
+  const conflogTotalCount = conflogRowCountState.count;
 
   const fetchAndSaveConflogMutation = usePostApiOpenVpnServersConflogFetchAndSaveByServerVpnServerId({
     mutation: {
       onSuccess: () => {
+        // Invalidate all history variants (current page + latest summary Page=1,PageSize=1).
         queryClient.invalidateQueries({
           queryKey: getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryKey(
-            parsedVpnServerId,
-            conflogHistoryParams
+            parsedVpnServerId
           ),
         });
         toast.success("Conflog fetched and saved");
@@ -655,11 +681,12 @@ const OvpnFileConfigForm: React.FC = () => {
                   />
                   <div className="checkbox-content">
                     <span className="checkbox-title">
-                      Try auto-detect Port/Proto from latest server conflog
+                      Try auto-detect Port/Proto from live node /api/info
                     </span>
                     <span className="checkbox-description">
-                      When enabled, save uses detected values from server config ({detectedPort ?? "—"} /{" "}
-                      {serverProto ?? "—"}).
+                      When enabled, save queries the OpenVPN manager live <code>/api/info</code> for
+                      Port/Proto. Last saved conflog showed {detectedPort ?? "—"} / {serverProto ?? "—"}{" "}
+                      (audit history below).
                     </span>
                   </div>
                 </label>
@@ -866,8 +893,10 @@ const OvpnFileConfigForm: React.FC = () => {
                       pageSize: conflogPageSize,
                     }}
                     onPaginationModelChange={(model: GridPaginationModel) => {
-                      setConflogPage(model.page + 1);
-                      setConflogPageSize(model.pageSize ?? conflogPageSize);
+                      const nextPage = model.page + 1;
+                      const nextSize = model.pageSize ?? conflogPageSize;
+                      if (nextPage !== conflogPage) setConflogPage(nextPage);
+                      if (nextSize !== conflogPageSize) setConflogPageSize(nextSize);
                     }}
                     loading={isConflogLoading}
                     slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}

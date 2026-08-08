@@ -35,16 +35,6 @@
   width: 100%;
 }
 
-.user-view-link {
-  color: #58a6ff;
-  text-decoration: none;
-  font-size: 13px;
-}
-
-.user-view-link:hover {
-  text-decoration: underline;
-}
-
 /* Notifications: severity as colored text (left border stays for row accent) */
 .notification-severity-badge {
   font-size: 12px;

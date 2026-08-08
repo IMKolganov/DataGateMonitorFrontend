@@ -75,6 +75,7 @@ import { useGridFilters } from "../../hooks/useGridFilterStub.ts";
 import type { GridColDef } from "@mui/x-data-grid";
 import "../../css/Settings.css";
 import "../../css/Table.css";
+import { GridRowActions, RowActionButton } from "../../components/ui/GridRowActions.tsx";
 import { UserAvatar } from "../../components/ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
 import { telegramPhotoIdForProvider } from "../../utils/telegramNumericId.ts";
@@ -789,35 +790,30 @@ export function UserDetailPage() {
                       </td>
                       <td>{a.note ?? "—"}</td>
                       <td>
-                        <div className="action-container">
-                          <button
-                            type="button"
-                            className="btn secondary"
+                        <GridRowActions>
+                          <RowActionButton
+                            title="Edit"
+                            disabled={
+                              updateAssignmentMutation.isPending ||
+                              deleteAssignmentMutation.isPending
+                            }
                             onClick={() => {
                               setEditingAssignment(a);
                               setAssignmentModalOpen(true);
                             }}
-                            disabled={
-                              updateAssignmentMutation.isPending ||
-                              deleteAssignmentMutation.isPending
-                            }
-                            title="Edit"
-                          >
-                            <FaEdit className="icon" />
-                          </button>
-                          <button
-                            type="button"
-                            className="btn danger"
-                            onClick={() => a.id != null && handleDeleteAssignment(a.id)}
-                            disabled={
-                              updateAssignmentMutation.isPending ||
-                              deleteAssignmentMutation.isPending
-                            }
+                            icon={<FaEdit className="icon" />}
+                          />
+                          <RowActionButton
+                            variant="danger"
                             title="Remove"
-                          >
-                            <FaTrash className="icon" />
-                          </button>
-                        </div>
+                            disabled={
+                              updateAssignmentMutation.isPending ||
+                              deleteAssignmentMutation.isPending
+                            }
+                            onClick={() => a.id != null && handleDeleteAssignment(a.id)}
+                            icon={<FaTrash className="icon" />}
+                          />
+                        </GridRowActions>
                       </td>
                     </tr>
                   );

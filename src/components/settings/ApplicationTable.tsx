@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 
 import type { ApplicationDto, RevokeApplicationRequest } from "../../api/orvalModelShim";
 import { usePostApiApplicationsRevoke } from "../../api/orval/applications/applications.ts";
+import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
 import "../../css/Table.css";
 import { errorMessage } from "../../utils/errorMessage";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
@@ -82,14 +83,12 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
             <span style={{ fontSize: 12 }}>
               {value ? value : "—"}
             </span>
-            <button
-              onClick={() => handleCopy(value)}
-              className="copy-btn"
-              disabled={!value}
+            <RowActionButton
               title={!value ? "Secret is not available (shown only once on create)" : "Copy"}
-            >
-              {FaCopy({ className: "icon" })}
-            </button>
+              disabled={!value}
+              onClick={() => handleCopy(value)}
+              icon={<FaCopy className="icon" />}
+            />
             {copied === value && value && (
               <span className="copied-text">✔ Copied!</span>
             )}
@@ -102,21 +101,22 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
     {
       field: "actions",
       headerName: "Actions",
-      width: 130,
+      width: 90,
+      sortable: false,
+      filterable: false,
       renderCell: (params) => {
         const clientId: string = params.row.clientId;
         const isRevoked = params.row.status === "Revoked ❌";
         return (
-          <div className="action-container">
-            <button
-              className="btn danger"
-              onClick={() => handleRevoke(clientId)}
-              disabled={loading || isRevoked}
+          <GridRowActions>
+            <RowActionButton
+              variant="danger"
               title={isRevoked ? "Already revoked" : "Revoke application"}
-            >
-              {FaTrash({ className: "icon" })} Revoke
-            </button>
-          </div>
+              disabled={loading || isRevoked}
+              onClick={() => handleRevoke(clientId)}
+              icon={<FaTrash className="icon" />}
+            />
+          </GridRowActions>
         );
       },
     },

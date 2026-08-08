@@ -23,6 +23,7 @@ import {
 } from "../api/orvalModelShim";
 import { formatDateWithOffset } from "../utils/utils";
 import { errorMessage } from "../utils/errorMessage";
+import { GridRowActions, RowActionButton } from "../components/ui/GridRowActions.tsx";
 import "../css/Settings.css";
 import "../css/Table.css";
 
@@ -299,35 +300,36 @@ function CandidatesCard() {
       headerName: "Actions",
       sortable: false,
       filterable: false,
-      width: 280,
+      width: 110,
       renderCell: (params) => {
         const candidate = (params.row as { _candidate: FreeTierEnforcementCandidateDto })._candidate;
         if (!candidate.isConnected || !candidate.commonName) return null;
         const busyKill = killBusyKey === `${candidate.commonName}:kill`;
         const busyRevoke = killBusyKey === `${candidate.commonName}:revoke`;
         return (
-          <div className="action-container">
-            <button
-              type="button"
-              className="btn secondary"
+          <GridRowActions>
+            <RowActionButton
               disabled={busyKill || busyRevoke}
-              title="Disconnect the active OpenVPN session; the client can reconnect."
+              title={
+                busyKill
+                  ? "Disconnecting…"
+                  : "Disconnect the active OpenVPN session; the client can reconnect."
+              }
               onClick={() => void handleKill(candidate, false)}
-            >
-              <FaBolt className="icon" aria-hidden />
-              {busyKill ? "…" : "Kill"}
-            </button>
-            <button
-              type="button"
-              className="btn danger"
+              icon={<FaBolt className="icon" aria-hidden />}
+            />
+            <RowActionButton
+              variant="danger"
               disabled={busyKill || busyRevoke}
-              title="Disconnect and revoke the OVPN certificate; the client cannot reconnect with this profile."
+              title={
+                busyRevoke
+                  ? "Revoking…"
+                  : "Disconnect and revoke the OVPN certificate; the client cannot reconnect with this profile."
+              }
               onClick={() => void handleKill(candidate, true)}
-            >
-              <FaBan className="icon" aria-hidden />
-              {busyRevoke ? "…" : "Revoke"}
-            </button>
-          </div>
+              icon={<FaBan className="icon" aria-hidden />}
+            />
+          </GridRowActions>
         );
       },
     },
