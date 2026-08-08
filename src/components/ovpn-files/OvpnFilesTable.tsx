@@ -396,7 +396,6 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           rows={rows}
           columns={columns}
           checkboxSelection
-          checkboxSelectionVisibleOnly
           disableRowSelectionOnClick
           disableRowSelectionExcludeModel
           isRowSelectable={(params) => !params.row.isRevoked && params.row.numericId != null}

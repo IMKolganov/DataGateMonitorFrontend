@@ -319,7 +319,6 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
           columns={columns}
           getRowId={(row) => row.id}
           checkboxSelection
-          checkboxSelectionVisibleOnly
           disableRowSelectionOnClick
           disableRowSelectionExcludeModel
           isRowSelectable={(params) => params.row.status === ACTIVE_STATUS}
