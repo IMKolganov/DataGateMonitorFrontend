@@ -14,6 +14,8 @@ describe("ServerDetailsInfo", () => {
         configPort={1194}
         quotaPlanLabels={["Free", "Gold"]}
         serverInfo={{
+          countConnectedClients: 2,
+          countSessions: 1,
           vpnServerResponses: {
             vpnServer: {
               id: 5,
@@ -23,10 +25,6 @@ describe("ServerDetailsInfo", () => {
               apiUrl: "https://node.example",
             },
           },
-          vpnServerStatusLogResponse: {
-            countConnectedClients: 2,
-            countSessions: 1,
-          },
         }}
       />,
     );
@@ -35,6 +33,8 @@ describe("ServerDetailsInfo", () => {
     expect(screen.getByText("Detail-5")).toBeInTheDocument();
     expect(screen.getByText(/10\.0\.0\.1/)).toBeInTheDocument();
     expect(screen.getByText(/Free/)).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
   });
 
   it("shows loading skeletons when loading", () => {

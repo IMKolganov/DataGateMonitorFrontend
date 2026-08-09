@@ -87,7 +87,7 @@ describe("useSignalRService", () => {
 
     await waitFor(() => expect(result.current.serviceData[12]?.vpnServerId).toBe(12));
     expect(result.current.serviceData[12]?.countConnectedClients).toBe(3);
-    expect(result.current.serviceData[12]?.isOnline).toBe(true);
+    expect((result.current.serviceData[12] as { isOnline?: boolean } | undefined)?.isOnline).toBe(true);
   });
 
   it("runServiceNow posts run-now", async () => {
