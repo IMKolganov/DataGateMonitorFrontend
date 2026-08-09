@@ -167,12 +167,12 @@ export default defineConfig(({ mode }) => {
           "src/test/**",
           "src/**/*.d.ts",
         ],
-        // Soft floor after cert/OpenVPN utils batch (~41% lines). Raise toward 50% in follow-ups.
+        // Soft floor after map/api/hook smoke batch (~45% lines). Raise toward 50% in follow-ups.
         thresholds: {
-          lines: 38,
-          statements: 36,
-          functions: 33,
-          branches: 30,
+          lines: 42,
+          statements: 40,
+          functions: 36,
+          branches: 32,
         },      },
     },
   };
