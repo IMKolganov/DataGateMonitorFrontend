@@ -167,12 +167,12 @@ export default defineConfig(({ mode }) => {
           "src/test/**",
           "src/**/*.d.ts",
         ],
-        // Soft floor after SignalR/date-range/utils batch (~48% lines). Raise toward 50% in follow-ups.
+        // Soft floor after crossing ~50% lines (notifications/console/SignalR deepen).
         thresholds: {
-          lines: 45,
-          statements: 43,
-          functions: 39,
-          branches: 35,
+          lines: 47,
+          statements: 45,
+          functions: 40,
+          branches: 36,
         },      },
     },
   };

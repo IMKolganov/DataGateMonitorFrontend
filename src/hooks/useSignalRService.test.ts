@@ -1,5 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor, act } from "@testing-library/react";
+
+const handlers = new Map<string, (payload: unknown) => void>();
+const startMock = vi.fn(async () => undefined);
+const stopMock = vi.fn(async () => undefined);
 
 vi.mock("@microsoft/signalr", () => ({
   HubConnectionBuilder: class {
@@ -14,9 +18,11 @@ vi.mock("@microsoft/signalr", () => ({
     }
     build() {
       return {
-        on: vi.fn(),
-        start: vi.fn(async () => undefined),
-        stop: vi.fn(async () => undefined),
+        on: (event: string, cb: (payload: unknown) => void) => {
+          handlers.set(event, cb);
+        },
+        start: startMock,
+        stop: stopMock,
         onreconnecting: vi.fn(),
         onreconnected: vi.fn(),
         onclose: vi.fn(),
@@ -36,15 +42,19 @@ vi.mock("../utils/signalrTransport.ts", () => ({
   getSignalRPreferredTransport: () => 0,
 }));
 vi.mock("../api/orval/vpn-servers/vpn-servers", () => ({
-  postApiOpenVpnServersRunNow: vi.fn(async () => ({})),
+  postApiOpenVpnServersRunNow: vi.fn(async () => ({ ok: true })),
 }));
 
 import useSignalRService from "./useSignalRService";
 import { ACCESS_TOKEN_KEY } from "../utils/const";
+import { postApiOpenVpnServersRunNow } from "../api/orval/vpn-servers/vpn-servers";
 
 describe("useSignalRService", () => {
   beforeEach(() => {
     localStorage.clear();
+    handlers.clear();
+    startMock.mockClear();
+    stopMock.mockClear();
   });
 
   it("reports no-token when access token is missing", async () => {
@@ -53,10 +63,40 @@ describe("useSignalRService", () => {
     expect(result.current.lastError).toMatch(/No token/i);
   });
 
-  it("connects when token is present", async () => {
+  it("connects when token is present and applies StatusUpdated payloads", async () => {
     localStorage.setItem(ACCESS_TOKEN_KEY, "tok");
     const { result } = renderHook(() => useSignalRService());
     await waitFor(() => expect(result.current.connectionState).toBe("connected"));
-    expect(result.current.serviceData).toEqual({});
+
+    const onStatus = handlers.get("StatusUpdated");
+    expect(onStatus).toBeTypeOf("function");
+
+    act(() => {
+      onStatus?.({
+        statuses: [
+          {
+            VpnServerId: 12,
+            Status: 1,
+            NextRunTime: "2024-06-01T12:00:00.000Z",
+            CountConnectedClients: 3,
+            IsOnline: true,
+          },
+        ],
+      });
+    });
+
+    await waitFor(() => expect(result.current.serviceData[12]?.vpnServerId).toBe(12));
+    expect(result.current.serviceData[12]?.countConnectedClients).toBe(3);
+    expect(result.current.serviceData[12]?.isOnline).toBe(true);
+  });
+
+  it("runServiceNow posts run-now", async () => {
+    localStorage.setItem(ACCESS_TOKEN_KEY, "tok");
+    const { result } = renderHook(() => useSignalRService());
+    await waitFor(() => expect(result.current.connectionState).toBe("connected"));
+    await act(async () => {
+      await result.current.runServiceNow();
+    });
+    expect(postApiOpenVpnServersRunNow).toHaveBeenCalled();
   });
 });
