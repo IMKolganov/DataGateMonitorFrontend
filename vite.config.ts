@@ -167,12 +167,12 @@ export default defineConfig(({ mode }) => {
           "src/test/**",
           "src/**/*.d.ts",
         ],
-        // Soft floor after map/api/hook smoke batch (~45% lines). Raise toward 50% in follow-ups.
+        // Soft floor after utils/banner smoke batch (~46% lines). Raise toward 50% in follow-ups.
         thresholds: {
-          lines: 42,
-          statements: 40,
-          functions: 36,
-          branches: 32,
+          lines: 43,
+          statements: 41,
+          functions: 37,
+          branches: 33,
         },      },
     },
   };
