@@ -167,14 +167,13 @@ export default defineConfig(({ mode }) => {
           "src/test/**",
           "src/**/*.d.ts",
         ],
-        // Soft floor after ServerItem/ServiceControls/helpers batch (~40% lines). Raise toward 50% in follow-ups.
+        // Soft floor after cert/OpenVPN utils batch (~41% lines). Raise toward 50% in follow-ups.
         thresholds: {
-          lines: 36,
-          statements: 35,
-          functions: 31,
-          branches: 28,
-        },
-      },
+          lines: 38,
+          statements: 36,
+          functions: 33,
+          branches: 30,
+        },      },
     },
   };
 });
