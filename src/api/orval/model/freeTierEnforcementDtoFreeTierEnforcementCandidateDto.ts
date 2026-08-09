@@ -26,4 +26,6 @@ export interface FreeTierEnforcementDtoFreeTierEnforcementCandidateDto {
   commonName?: string | null;
   /** @nullable */
   connectedSince?: string | null;
+  /** @nullable */
+  identityProviders?: string[] | null;
 }

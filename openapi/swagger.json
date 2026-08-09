@@ -2666,6 +2666,81 @@
         }
       }
     },
+    "/api/free-tier-enforcement/unsubscribed-vpn-digest": {
+      "get": {
+        "tags": [
+          "FreeTierEnforcement"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/free-tier-enforcement/remind-channel-subscribe/{target}": {
+      "post": {
+        "tags": [
+          "FreeTierEnforcement"
+        ],
+        "parameters": [
+          {
+            "name": "target",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/FreeTierEnforcement.Enums.FreeTierChannelSubscribeRemindChannel"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.FreeTierChannelSubscribeRemindResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.FreeTierChannelSubscribeRemindResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.FreeTierChannelSubscribeRemindResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/free-tier-enforcement/disconnect-log": {
       "get": {
         "tags": [
@@ -13557,6 +13632,38 @@
         },
         "additionalProperties": false
       },
+      "Api.FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.FreeTierEnforcement.Responses.FreeTierChannelSubscribeRemindResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/FreeTierEnforcement.Responses.FreeTierChannelSubscribeRemindResponse"
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.GeoLite.Responses.GeoLiteUpdateResponse": {
         "type": "object",
         "properties": {
@@ -17074,6 +17181,13 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "identityProviders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -17107,6 +17221,63 @@
           }
         },
         "additionalProperties": false
+      },
+      "FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FreeTierEnforcement.Dto.FreeTierEnforcementCandidateDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FreeTierEnforcement.Responses.FreeTierChannelSubscribeRemindResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/FreeTierEnforcement.Enums.FreeTierChannelSubscribeRemindChannel"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "telegramId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FreeTierEnforcement.Enums.FreeTierChannelSubscribeRemindChannel": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32",
+        "x-enumNames": [
+          "Telegram",
+          "Email"
+        ]
       },
       "GeoLite.Dto.OpenVpnGeoInfo": {
         "type": "object",
