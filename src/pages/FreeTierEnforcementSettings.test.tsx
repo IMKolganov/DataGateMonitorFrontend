@@ -129,4 +129,28 @@ describe("FreeTierEnforcementSettings enforce toggle", () => {
     expect(screen.getByText(/Enforcement interval must be at least 1 minute/i)).toBeInTheDocument();
     expect(setSettingMutateAsync).not.toHaveBeenCalled();
   });
+
+  it("saves notification toggles together with enforce settings", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(
+      screen.getByRole("checkbox", {
+        name: /Send Telegram reminders to unsubscribed Free\/Default users/i,
+      }),
+    );
+    await user.click(
+      screen.getByRole("checkbox", {
+        name: /Daily admin digest of VPN users without channel subscription/i,
+      }),
+    );
+    await user.click(screen.getByRole("button", { name: /Save/i }));
+
+    expect(setSettingMutateAsync).toHaveBeenCalledWith({
+      params: { Key: "FreeTier_Send_Unsubscribed_User_Reminders", Value: "true", Type: "bool" },
+    });
+    expect(setSettingMutateAsync).toHaveBeenCalledWith({
+      params: { Key: "FreeTier_Daily_Unsubscribed_Admin_Digest", Value: "true", Type: "bool" },
+    });
+  });
 });
