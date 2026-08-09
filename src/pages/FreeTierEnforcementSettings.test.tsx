@@ -23,10 +23,17 @@ const logEntries = Array.from({ length: 3 }, (_, i) => ({
   errorMessage: "",
 }));
 
+const setSettingMutateAsync = vi.fn().mockResolvedValue({});
+
 let logPage = 1;
 vi.mock("../api/orval/settings/settings", () => ({
-  useGetApiSettingsGet: () => ({ data: { value: "false" }, isFetching: false, refetch: vi.fn() }),
-  usePostApiSettingsSet: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useGetApiSettingsGet: () => ({
+    data: { value: "false" },
+    isLoading: false,
+    isFetching: false,
+    refetch: vi.fn(),
+  }),
+  usePostApiSettingsSet: () => ({ mutateAsync: setSettingMutateAsync, isPending: false }),
 }));
 vi.mock("../api/orval/free-tier-enforcement/free-tier-enforcement", () => ({
   useGetApiFreeTierEnforcementCandidates: () => ({
@@ -46,6 +53,7 @@ vi.mock("../api/orval/free-tier-enforcement/free-tier-enforcement", () => ({
       },
       isFetching: false,
       error: null,
+      refetch: vi.fn(),
     };
   },
 }));
@@ -67,6 +75,7 @@ function renderPage() {
 describe("FreeTierEnforcementSettings disconnect log pagination", () => {
   beforeEach(() => {
     logPage = 1;
+    setSettingMutateAsync.mockClear();
   });
 
   it("uses server pagination for disconnect log and advances page", async () => {
@@ -83,5 +92,41 @@ describe("FreeTierEnforcementSettings disconnect log pagination", () => {
     // candidates (client/uncontrolled) + disconnect log
     await user.click(nextButtons[nextButtons.length - 1]!);
     expect(logPage).toBe(2);
+  });
+});
+
+describe("FreeTierEnforcementSettings enforce toggle", () => {
+  beforeEach(() => {
+    setSettingMutateAsync.mockClear();
+    setSettingMutateAsync.mockResolvedValue({});
+  });
+
+  it("saves enforce toggle via Orval settings mutation", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    const enforce = screen.getByRole("checkbox", {
+      name: /Automatically disconnect non-compliant Free\/Default users/i,
+    });
+    await user.click(enforce);
+    await user.click(screen.getByRole("button", { name: /Save/i }));
+
+    expect(setSettingMutateAsync).toHaveBeenCalledWith({
+      params: { Key: "FreeTier_Enforce_OpenVpn_Sessions", Value: "true", Type: "bool" },
+    });
+    expect(screen.getByText(/Settings successfully updated/i)).toBeInTheDocument();
+  });
+
+  it("shows validation error when interval is below 1", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    const interval = screen.getByLabelText(/Check interval \(minutes\)/i);
+    await user.clear(interval);
+    await user.type(interval, "0");
+    await user.click(screen.getByRole("button", { name: /Save/i }));
+
+    expect(screen.getByText(/Enforcement interval must be at least 1 minute/i)).toBeInTheDocument();
+    expect(setSettingMutateAsync).not.toHaveBeenCalled();
   });
 });

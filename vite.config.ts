@@ -157,6 +157,24 @@ export default defineConfig(({ mode }) => {
       setupFiles: ["./src/test/setup.ts"],
       css: true,
       clearMocks: true,
+      coverage: {
+        provider: "v8",
+        all: true,
+        include: ["src/**/*.{ts,tsx}"],
+        exclude: [
+          "src/api/orval/**",
+          "src/**/*.test.*",
+          "src/test/**",
+          "src/**/*.d.ts",
+        ],
+        // Soft floor after Settings/ops smoke batch (~25% lines). Raise toward 35% / 50% in follow-ups.
+        thresholds: {
+          lines: 23,
+          statements: 22,
+          functions: 20,
+          branches: 17,
+        },
+      },
     },
   };
 });

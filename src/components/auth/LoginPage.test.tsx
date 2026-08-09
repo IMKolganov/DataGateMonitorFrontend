@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { renderWithProviders } from "../../test/renderWithProviders";
 import LoginPage from "./LoginPage";
 import type { TotpChallengeState } from "../../utils/auth/handleLoginResponse";
 
@@ -42,11 +42,7 @@ vi.mock("./TelegramCodeLoginForm", () => ({
 }));
 
 function renderLoginPage() {
-  return render(
-    <MemoryRouter>
-      <LoginPage />
-    </MemoryRouter>,
-  );
+  return renderWithProviders(<LoginPage />);
 }
 
 describe("LoginPage", () => {
