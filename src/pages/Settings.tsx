@@ -19,6 +19,7 @@ import {
   FaUsers,
   FaWindows,
   FaTv,
+  FaTachometerAlt,
 } from "react-icons/fa";
 import "../css/Settings.css";
 
@@ -44,6 +45,7 @@ const ALL_SETTINGS_TABS: SettingsTab[] = [
   { label: "Email broadcast", path: "email-broadcast", Icon: FaEnvelope, mobilePrefix: "✉️" },
   { label: "Android crashes", path: "android-crashes", Icon: FaBug, mobilePrefix: "🐞" },
   { label: "Windows crashes", path: "windows-crashes", Icon: FaWindows, mobilePrefix: "🪟" },
+  { label: "Performance", path: "performance", Icon: FaTachometerAlt, mobilePrefix: "⏱️" },
   { label: "Admin password", path: "admin-password", Icon: FaKey, mobilePrefix: "🔑" },
   { label: "Security (2FA)", path: "security", Icon: FaShieldAlt, mobilePrefix: "🛡️" },
 ];

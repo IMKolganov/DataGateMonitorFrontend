@@ -4176,6 +4176,227 @@
         }
       }
     },
+    "/api/performance/http-requests": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Performance.PerformanceHttpRequestsResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Performance.PerformanceHttpRequestsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Performance.PerformanceHttpRequestsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Performance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/db-queries": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Performance.PerformanceDbQueriesResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Performance.PerformanceDbQueriesResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Performance.PerformanceDbQueriesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Performance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance": {
+      "delete": {
+        "tags": [
+          "Performance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/healthcheck": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/healthcheck-with-jwt": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/quota-plans/get-all": {
       "post": {
         "tags": [
@@ -13544,6 +13765,38 @@
         },
         "additionalProperties": false
       },
+      "Api.Performance.PerformanceDbQueriesResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Performance.PerformanceDbQueriesResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Performance.PerformanceHttpRequestsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Performance.PerformanceHttpRequestsResponse"
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.QuotaPlanAllowedServers.Responses.GetAllQuotaPlanAllowedServersResponse": {
         "type": "object",
         "properties": {
@@ -16233,6 +16486,10 @@
             "type": "string",
             "nullable": true
           },
+          "publicIp": {
+            "type": "string",
+            "nullable": true
+          },
           "config": {
             "$ref": "#/components/schemas/DataGateOpenVpnManager.Info.ConfigInfoResponse"
           }
@@ -16300,6 +16557,10 @@
             "nullable": true
           },
           "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicIp": {
             "type": "string",
             "nullable": true
           },
@@ -17671,6 +17932,103 @@
           "hasPrev": {
             "type": "boolean",
             "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Performance.PerformanceDbQueriesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Performance.PerformanceDbQueryEntryDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Performance.PerformanceDbQueryEntryDto": {
+        "type": "object",
+        "properties": {
+          "timestampUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "requestId": {
+            "type": "string",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "commandType": {
+            "type": "string",
+            "nullable": true
+          },
+          "sql": {
+            "type": "string",
+            "nullable": true
+          },
+          "succeeded": {
+            "type": "boolean"
+          },
+          "exceptionMessage": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Performance.PerformanceHttpRequestEntryDto": {
+        "type": "object",
+        "properties": {
+          "timestampUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "requestId": {
+            "type": "string",
+            "nullable": true
+          },
+          "method": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "traceId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Performance.PerformanceHttpRequestsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Performance.PerformanceHttpRequestEntryDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -21153,6 +21511,9 @@
     },
     {
       "name": "OpenVpnFiles"
+    },
+    {
+      "name": "Performance"
     },
     {
       "name": "QuotaPlan"

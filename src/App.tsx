@@ -49,6 +49,7 @@ const GeoLiteDbSettings = lazy(() => import("./pages/GeoLiteDbSettings"));
 const NotificationVpnProfileSettings = lazy(() => import("./pages/NotificationVpnProfileSettings"));
 const AndroidCrashReportsSettings = lazy(() => import("./pages/AndroidCrashReportsSettings"));
 const WindowsCrashReportsSettings = lazy(() => import("./pages/WindowsCrashReportsSettings"));
+const PerformanceSettings = lazy(() => import("./pages/PerformanceSettings"));
 const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
 const UsersSettings = lazy(() => import("./pages/UsersSettings/UsersSettings"));
 const FreeTierEnforcementSettings = lazy(() => import("./pages/FreeTierEnforcementSettings"));
@@ -219,6 +220,7 @@ function App() {
                       <Route path="email-broadcast" element={withSuspense(<EmailBroadcastSettings />)} />
                       <Route path="android-crashes" element={withSuspense(<AndroidCrashReportsSettings />)} />
                       <Route path="windows-crashes" element={withSuspense(<WindowsCrashReportsSettings />)} />
+                      <Route path="performance" element={withSuspense(<PerformanceSettings />)} />
                       <Route path="admin-password" element={withSuspense(<AdminPasswordRecoverySettings />)} />
                       <Route path="security" element={withSuspense(<AdminSecuritySettings />)} />
                     </Route>

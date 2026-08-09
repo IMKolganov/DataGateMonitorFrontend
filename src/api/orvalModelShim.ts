@@ -127,6 +127,11 @@ export type { CertExpiryResponsesGetCertExpiryRunsResponse as GetCertExpiryRunsR
 export type { CertExpiryDtoCertExpiryServerResultDto as CertExpiryServerResultDto } from "./orval/model/certExpiryDtoCertExpiryServerResultDto";
 export type { CertExpiryDtoCertExpiryProfileResultDto as CertExpiryProfileResultDto } from "./orval/model/certExpiryDtoCertExpiryProfileResultDto";
 
+export type { PerformancePerformanceHttpRequestEntryDto as PerformanceHttpRequestEntryDto } from "./orval/model/performancePerformanceHttpRequestEntryDto";
+export type { PerformancePerformanceDbQueryEntryDto as PerformanceDbQueryEntryDto } from "./orval/model/performancePerformanceDbQueryEntryDto";
+export type { PerformancePerformanceHttpRequestsResponse as PerformanceHttpRequestsResponse } from "./orval/model/performancePerformanceHttpRequestsResponse";
+export type { PerformancePerformanceDbQueriesResponse as PerformanceDbQueriesResponse } from "./orval/model/performancePerformanceDbQueriesResponse";
+
 export { EnumsServiceStatus as ServiceStatus } from "./orval/model/enumsServiceStatus";
 export { EnumsDisconnectReason as DisconnectReason } from "./orval/model/enumsDisconnectReason";
 export { EnumsOverviewGrouping as OverviewGrouping } from "./orval/model/enumsOverviewGrouping";
