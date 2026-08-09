@@ -167,12 +167,12 @@ export default defineConfig(({ mode }) => {
           "src/test/**",
           "src/**/*.d.ts",
         ],
-        // Soft floor after avatar/idle utils batch (~47% lines). Raise toward 50% in follow-ups.
+        // Soft floor after SignalR/date-range/utils batch (~48% lines). Raise toward 50% in follow-ups.
         thresholds: {
-          lines: 44,
-          statements: 42,
-          functions: 38,
-          branches: 34,
+          lines: 45,
+          statements: 43,
+          functions: 39,
+          branches: 35,
         },      },
     },
   };

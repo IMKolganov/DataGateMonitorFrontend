@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   addDays,
+  buildFallbackOverviewResponse,
   formatBytes,
   mergeChartWithUsersSeries,
   normalizeGrouping,
@@ -46,5 +47,19 @@ describe("ServersOverview helpers", () => {
     const merged = mergeChartWithUsersSeries(points, users);
     expect(merged[0]).toMatchObject({ active: 3 });
     expect((merged[0] as { activeUsers?: number }).activeUsers ?? users[0]!.activeUsers).toBe(7);
+  });
+
+  it("builds fallback overview series for short auto span", () => {
+    const from = new Date("2024-01-01T00:00:00Z");
+    const to = new Date("2024-01-01T12:00:00Z");
+    const res = buildFallbackOverviewResponse({
+      from,
+      to,
+      grouping: "auto",
+      totals: { servers: 1, clients: 2, totalIn: 1024, totalOut: 2048, sessions: 3 },
+    });
+    expect(res.overviewSeriesRows?.length).toBeGreaterThan(0);
+    expect(res.summary?.totalTrafficInBytes).toBe(1024);
+    expect(res.meta?.grouping).toBe("tenminutes");
   });
 });
