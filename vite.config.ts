@@ -167,12 +167,12 @@ export default defineConfig(({ mode }) => {
           "src/test/**",
           "src/**/*.d.ts",
         ],
-        // Soft floor after utils/banner smoke batch (~46% lines). Raise toward 50% in follow-ups.
+        // Soft floor after avatar/idle utils batch (~47% lines). Raise toward 50% in follow-ups.
         thresholds: {
-          lines: 43,
-          statements: 41,
-          functions: 37,
-          branches: 33,
+          lines: 44,
+          statements: 42,
+          functions: 38,
+          branches: 34,
         },      },
     },
   };
