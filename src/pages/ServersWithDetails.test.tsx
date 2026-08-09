@@ -7,7 +7,7 @@ vi.mock("../components/servers/ServerList.tsx", () => ({
   default: () => <div data-testid="server-list">ServerList</div>,
 }));
 
-const mediaQuery = vi.fn(() => false);
+const mediaQuery = vi.fn((_q?: { maxWidth?: number }) => false);
 vi.mock("react-responsive", () => ({
   useMediaQuery: (q: { maxWidth?: number }) => mediaQuery(q),
 }));
