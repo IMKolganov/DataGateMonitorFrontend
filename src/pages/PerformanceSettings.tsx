@@ -8,12 +8,10 @@ import {
   useGetApiPerformanceDbQueries,
   useGetApiPerformanceHttpRequests,
 } from "../api/orval/performance/performance";
-import type {
-  PerformanceDbQueriesResponse,
-  PerformanceDbQueryEntryDto,
-  PerformanceHttpRequestEntryDto,
-  PerformanceHttpRequestsResponse,
-} from "../api/orvalModelShim";
+import type { PerformancePerformanceDbQueriesResponse } from "../api/orval/model/performancePerformanceDbQueriesResponse";
+import type { PerformancePerformanceDbQueryEntryDto } from "../api/orval/model/performancePerformanceDbQueryEntryDto";
+import type { PerformancePerformanceHttpRequestEntryDto } from "../api/orval/model/performancePerformanceHttpRequestEntryDto";
+import type { PerformancePerformanceHttpRequestsResponse } from "../api/orval/model/performancePerformanceHttpRequestsResponse";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 import { formatDateWithOffset } from "../utils/utils";
 import { errorMessage } from "../utils/errorMessage";
@@ -67,7 +65,8 @@ export default function PerformanceSettings() {
   const [limitInput, setLimitInput] = useState(String(DEFAULT_LIMIT));
   const [selectedSql, setSelectedSql] = useState<string | null>(null);
 
-  const httpQuery = useGetApiPerformanceHttpRequests<PerformanceHttpRequestsResponse>(
+  // ogmMutator unwraps ApiResponse — TData is the Orval payload type (items list).
+  const httpQuery = useGetApiPerformanceHttpRequests<PerformancePerformanceHttpRequestsResponse>(
     { limit },
     {
       query: {
@@ -76,7 +75,7 @@ export default function PerformanceSettings() {
       },
     },
   );
-  const dbQuery = useGetApiPerformanceDbQueries<PerformanceDbQueriesResponse>(
+  const dbQuery = useGetApiPerformanceDbQueries<PerformancePerformanceDbQueriesResponse>(
     { limit },
     {
       query: {
@@ -95,12 +94,10 @@ export default function PerformanceSettings() {
     },
   });
 
-  const httpItems =
-    unwrapMaybeApiResponse(httpQuery.data)?.items ??
-    ([] as PerformanceHttpRequestEntryDto[]);
-  const dbItems =
-    unwrapMaybeApiResponse(dbQuery.data)?.items ??
-    ([] as PerformanceDbQueryEntryDto[]);
+  const httpItems: PerformancePerformanceHttpRequestEntryDto[] =
+    unwrapMaybeApiResponse(httpQuery.data)?.items ?? [];
+  const dbItems: PerformancePerformanceDbQueryEntryDto[] =
+    unwrapMaybeApiResponse(dbQuery.data)?.items ?? [];
 
   const topSlowHttp = useMemo(
     () =>
