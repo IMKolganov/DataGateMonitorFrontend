@@ -167,12 +167,12 @@ export default defineConfig(({ mode }) => {
           "src/test/**",
           "src/**/*.d.ts",
         ],
-        // Soft floor after Settings/ops smoke batch (~25% lines). Raise toward 35% / 50% in follow-ups.
+        // Soft floor after Overview/Notifications/ops smoke batch (~31% lines). Raise toward 35% / 50% in follow-ups.
         thresholds: {
-          lines: 23,
-          statements: 22,
-          functions: 20,
-          branches: 17,
+          lines: 28,
+          statements: 27,
+          functions: 24,
+          branches: 20,
         },
       },
     },

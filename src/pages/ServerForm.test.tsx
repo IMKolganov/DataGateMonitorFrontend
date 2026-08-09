@@ -5,9 +5,20 @@ import { renderWithProviders } from "../test/renderWithProviders";
 
 vi.mock("react-toastify", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
+const { editServerPayload } = vi.hoisted(() => ({
+  editServerPayload: {
+    vpnServer: {
+      id: 7,
+      serverName: "Existing-7",
+      apiUrl: "https://node.example",
+      serverType: 0,
+    },
+  },
+}));
+
 vi.mock("../api/orval/vpn-servers/vpn-servers", () => ({
-  useGetApiOpenVpnServersGetVpnServerId: () => ({
-    data: undefined,
+  useGetApiOpenVpnServersGetVpnServerId: (id: number) => ({
+    data: id > 0 ? editServerPayload : undefined,
     isFetching: false,
     isLoading: false,
   }),
@@ -81,5 +92,17 @@ describe("ServerForm", () => {
     );
 
     expect(screen.getByLabelText(/API url/i)).toBeInTheDocument();
+  });
+
+  it("mounts Edit Server form for existing id", async () => {
+    renderWithProviders(
+      <Routes>
+        <Route path="/servers/edit/:serverId" element={<ServerForm />} />
+      </Routes>,
+      { route: "/servers/edit/7" },
+    );
+
+    expect(await screen.findByRole("heading", { name: /Edit Server/i })).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Existing-7")).toBeInTheDocument();
   });
 });

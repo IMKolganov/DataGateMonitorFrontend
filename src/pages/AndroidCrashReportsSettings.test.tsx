@@ -25,7 +25,7 @@ vi.mock("axios", () => ({
 
 import AndroidCrashReportsSettings from "./AndroidCrashReportsSettings";
 
-describe("AndroidCrashReportsSettings client pagination", () => {
+describe("AndroidCrashReportsSettings", () => {
   it("paginates crash rows across pages", async () => {
     localStorage.setItem("token", "t");
     const user = userEvent.setup();
@@ -39,6 +39,7 @@ describe("AndroidCrashReportsSettings client pagination", () => {
     await waitFor(() => {
       expect(screen.getByTestId("grid-rows").children.length).toBeGreaterThan(0);
     });
+    expect(screen.getByRole("heading", { name: /Android crash reports/i })).toBeInTheDocument();
     expect(screen.getByTestId("grid-rows").children).toHaveLength(10);
     expect(screen.getByTestId("grid-rows").textContent).toContain("android-0");
 
