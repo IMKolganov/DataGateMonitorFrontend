@@ -167,12 +167,12 @@ export default defineConfig(({ mode }) => {
           "src/test/**",
           "src/**/*.d.ts",
         ],
-        // Soft floor after GeneralServerDetails/auth/quota batch (~35% lines). Raise toward 50% in follow-ups.
+        // Soft floor after ServerItem/ServiceControls/helpers batch (~40% lines). Raise toward 50% in follow-ups.
         thresholds: {
-          lines: 32,
-          statements: 31,
-          functions: 27,
-          branches: 24,
+          lines: 36,
+          statements: 35,
+          functions: 31,
+          branches: 28,
         },
       },
     },
