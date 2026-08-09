@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
-import { FaEnvelope, FaPaperPlane, FaPlus, FaSync, FaSave, FaFileImport } from "react-icons/fa";
+import { FaEnvelope, FaPaperPlane, FaPlus, FaSync, FaSave, FaFileImport, FaEdit, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import type { GridColDef } from "@mui/x-data-grid";
 import Grid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
+import { GridRowActions, RowActionButton } from "../components/ui/GridRowActions.tsx";
 import {
   getApiAdminEmailBroadcastTemplatesId,
   useDeleteApiAdminEmailBroadcastTemplatesId,
@@ -21,6 +22,7 @@ import type { EmailBroadcastResponsesSendAdminEmailResponse } from "../api/orval
 import type { SentEmailLogDto } from "../api/orvalModelShim";
 import { formatDateWithOffset } from "../utils/utils.ts";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize.ts";
+import { useStabilizedRowCount } from "../hooks/useStabilizedRowCount";
 import "../css/Settings.css";
 import "../css/Table.css";
 
@@ -228,10 +230,10 @@ const defaultHtml = `<!DOCTYPE html>
 /** Same idea as Events.tsx: API may return camelCase or PascalCase after JSON options. */
 function normalizeSentHistory(raw: unknown): {
   items: EmailBroadcastResponsesDtoSentEmailLogDto[];
-  totalCount: number;
+  totalCount: number | undefined;
 } {
   if (raw == null || typeof raw !== "object") {
-    return { items: [], totalCount: 0 };
+    return { items: [], totalCount: undefined };
   }
   const o = raw as Record<string, unknown>;
   const itemsRaw = o.items ?? o.Items;
@@ -299,7 +301,7 @@ export default function EmailBroadcastSettings() {
     [historyQuery.data],
   );
   const rows = historyNormalized.items;
-  const rowCount = historyNormalized.totalCount;
+  const rowCount = useStabilizedRowCount(historyNormalized.totalCount);
   const loading = historyQuery.isPending || historyQuery.isFetching;
 
   const maxHistoryPage = Math.max(0, Math.ceil(rowCount / historyPageSize) - 1);
@@ -463,24 +465,32 @@ export default function EmailBroadcastSettings() {
     { field: "updated", headerName: "Updated", flex: 0.2, minWidth: 140 },
     {
       field: "actions",
-      headerName: "",
-      width: 260,
+      headerName: "Actions",
+      width: 140,
       sortable: false,
+      filterable: false,
       renderCell: (params) => {
         const id = Number(params.id);
         const name = String(params.row.name ?? "");
         return (
-          <div className="action-container">
-            <button type="button" className="btn secondary" onClick={() => void applyTemplateToComposer(id)}>
-              Use
-            </button>
-            <button type="button" className="btn secondary" onClick={() => void openEditTemplate(id)}>
-              Edit
-            </button>
-            <button type="button" className="btn danger" onClick={() => void removeTemplate(id, name)}>
-              Delete
-            </button>
-          </div>
+          <GridRowActions>
+            <RowActionButton
+              title="Use template"
+              onClick={() => void applyTemplateToComposer(id)}
+              icon={<FaFileImport className="icon" />}
+            />
+            <RowActionButton
+              title="Edit"
+              onClick={() => void openEditTemplate(id)}
+              icon={<FaEdit className="icon" />}
+            />
+            <RowActionButton
+              variant="danger"
+              title="Delete"
+              onClick={() => void removeTemplate(id, name)}
+              icon={<FaTrash className="icon" />}
+            />
+          </GridRowActions>
         );
       },
     },

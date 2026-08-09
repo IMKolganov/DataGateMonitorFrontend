@@ -203,8 +203,11 @@ const CertificatesData: React.FC<Props> = ({ vpnServerId, stack = "openvpn" }) =
           certificates={certificates}
           vpnServerId={vpnServerId}
           loading={certsQuery.isFetching}
-          onRevoke={async () => {
-            toast.success("Certificate revoked", { toastId: "cert-revoked" });
+          onRevoke={async (count = 1) => {
+            toast.success(
+              count === 1 ? "Certificate revoked" : `${count} certificates revoked`,
+              { toastId: "cert-revoked" },
+            );
             await silentRefetchCerts();
           }}
         />

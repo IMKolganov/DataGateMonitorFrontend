@@ -5,25 +5,32 @@
  * OpenAPI spec version: v1
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
+  ApiFreeTierEnforcementResponsesFreeTierChannelSubscribeRemindResponse,
+  ApiFreeTierEnforcementResponsesFreeTierUnsubscribedVpnDigestResponse,
   ApiFreeTierEnforcementResponsesGetFreeTierDisconnectLogResponse,
   ApiFreeTierEnforcementResponsesGetFreeTierEnforcementCandidatesResponse,
   ApiSystemString,
-  GetApiFreeTierEnforcementDisconnectLogParams
+  GetApiFreeTierEnforcementDisconnectLogParams,
+  PostApiFreeTierEnforcementRemindChannelSubscribeTargetParams
 } from '../model';
 
 import { ogmMutator } from '../../mutator';
@@ -134,7 +141,150 @@ export function useGetApiFreeTierEnforcementCandidates<TData = Awaited<ReturnTyp
 
 
 
-export const getApiFreeTierEnforcementDisconnectLog = (
+export const getApiFreeTierEnforcementUnsubscribedVpnDigest = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiFreeTierEnforcementResponsesFreeTierUnsubscribedVpnDigestResponse>(
+      {url: `/api/free-tier-enforcement/unsubscribed-vpn-digest`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiFreeTierEnforcementUnsubscribedVpnDigestQueryKey = () => {
+    return [
+    `/api/free-tier-enforcement/unsubscribed-vpn-digest`
+    ] as const;
+    }
+
+
+export const getGetApiFreeTierEnforcementUnsubscribedVpnDigestQueryOptions = <TData = Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiFreeTierEnforcementUnsubscribedVpnDigestQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>> = ({ signal }) => getApiFreeTierEnforcementUnsubscribedVpnDigest(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiFreeTierEnforcementUnsubscribedVpnDigestQueryResult = NonNullable<Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>>
+export type GetApiFreeTierEnforcementUnsubscribedVpnDigestQueryError = unknown
+
+
+export function useGetApiFreeTierEnforcementUnsubscribedVpnDigest<TData = Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>,
+          TError,
+          Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiFreeTierEnforcementUnsubscribedVpnDigest<TData = Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>,
+          TError,
+          Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiFreeTierEnforcementUnsubscribedVpnDigest<TData = Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiFreeTierEnforcementUnsubscribedVpnDigest<TData = Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiFreeTierEnforcementUnsubscribedVpnDigest>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiFreeTierEnforcementUnsubscribedVpnDigestQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const postApiFreeTierEnforcementRemindChannelSubscribeTarget = (
+    target: string,
+    params?: PostApiFreeTierEnforcementRemindChannelSubscribeTargetParams,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiFreeTierEnforcementResponsesFreeTierChannelSubscribeRemindResponse>(
+      {url: `/api/free-tier-enforcement/remind-channel-subscribe/${target}`, method: 'POST',
+        params, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiFreeTierEnforcementRemindChannelSubscribeTargetMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiFreeTierEnforcementRemindChannelSubscribeTarget>>, TError,{target: string;params?: PostApiFreeTierEnforcementRemindChannelSubscribeTargetParams}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiFreeTierEnforcementRemindChannelSubscribeTarget>>, TError,{target: string;params?: PostApiFreeTierEnforcementRemindChannelSubscribeTargetParams}, TContext> => {
+
+const mutationKey = ['postApiFreeTierEnforcementRemindChannelSubscribeTarget'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiFreeTierEnforcementRemindChannelSubscribeTarget>>, {target: string;params?: PostApiFreeTierEnforcementRemindChannelSubscribeTargetParams}> = (props) => {
+          const {target,params} = props ?? {};
+
+          return  postApiFreeTierEnforcementRemindChannelSubscribeTarget(target,params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiFreeTierEnforcementRemindChannelSubscribeTargetMutationResult = NonNullable<Awaited<ReturnType<typeof postApiFreeTierEnforcementRemindChannelSubscribeTarget>>>
+
+    export type PostApiFreeTierEnforcementRemindChannelSubscribeTargetMutationError = unknown
+
+    export const usePostApiFreeTierEnforcementRemindChannelSubscribeTarget = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiFreeTierEnforcementRemindChannelSubscribeTarget>>, TError,{target: string;params?: PostApiFreeTierEnforcementRemindChannelSubscribeTargetParams}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiFreeTierEnforcementRemindChannelSubscribeTarget>>,
+        TError,
+        {target: string;params?: PostApiFreeTierEnforcementRemindChannelSubscribeTargetParams},
+        TContext
+      > => {
+      return useMutation(getPostApiFreeTierEnforcementRemindChannelSubscribeTargetMutationOptions(options), queryClient);
+    }
+    export const getApiFreeTierEnforcementDisconnectLog = (
     params?: GetApiFreeTierEnforcementDisconnectLogParams,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {

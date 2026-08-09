@@ -225,12 +225,12 @@ export default function AdminSecuritySettings() {
                 <br />
                 <strong>Account:</strong> {setup.accountName}
               </p>
-              <p style={{ marginBottom: 16, wordBreak: "break-all" }}>
-                <code>{setup.sharedSecret}</code>{" "}
+              <div className="secret-copy-row">
+                <code>{setup.sharedSecret}</code>
                 <button type="button" className="btn secondary" onClick={() => void copySecret()}>
                   <FaCopy className="icon" /> Copy secret
                 </button>
-              </p>
+              </div>
               <form onSubmit={handleConfirmSetup}>
                 <div className="form-row">
                   <label htmlFor="totp-confirm-code">Verification code from app</label>

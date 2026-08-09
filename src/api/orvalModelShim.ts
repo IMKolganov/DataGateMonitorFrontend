@@ -43,6 +43,9 @@ export type { AuthResponsesTotpSetupResponse as TotpSetupResponse } from "./orva
 export type { AuthResponsesAuthSessionPolicyResponse as AuthSessionPolicyResponse } from "./orval/model/authResponsesAuthSessionPolicyResponse";
 export type { AuthResponsesGetUserSessionsResponse as GetUserSessionsResponse } from "./orval/model/authResponsesGetUserSessionsResponse";
 export type { AuthResponsesUserSessionDto as UserSessionDto } from "./orval/model/authResponsesUserSessionDto";
+export type { AuthResponsesAdminTvLoginSessionDto as AdminTvLoginSessionDto } from "./orval/model/authResponsesAdminTvLoginSessionDto";
+export type { AuthResponsesGetAdminTvLoginSessionsResponse as GetAdminTvLoginSessionsResponse } from "./orval/model/authResponsesGetAdminTvLoginSessionsResponse";
+export type { AuthResponsesUserTvLoginSummaryResponse as UserTvLoginSummaryResponse } from "./orval/model/authResponsesUserTvLoginSummaryResponse";
 export type { AuthRequestsRevokeUserSessionsRequest as RevokeUserSessionsRequest } from "./orval/model/authRequestsRevokeUserSessionsRequest";
 export type { AuthRequestsTotpVerifyLoginRequest as TotpVerifyLoginRequest } from "./orval/model/authRequestsTotpVerifyLoginRequest";
 export type { AuthRequestsTotpConfirmRequest as TotpConfirmRequest } from "./orval/model/authRequestsTotpConfirmRequest";

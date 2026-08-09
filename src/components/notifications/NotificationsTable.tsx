@@ -4,6 +4,7 @@ import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type { NotificationItemDto } from "../../api/orvalModelShim";
 import { FaCheck, FaExpandAlt } from "react-icons/fa";
+import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
 import "../../css/Table.css";
 import "../../css/Settings.css";
 
@@ -138,9 +139,11 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
     { field: "createDate", headerName: "Created", flex: 0.9, minWidth: 140 },
     { field: "isRead", headerName: "Read", type: "boolean", width: 70 },
     {
-      field: "Actions",
+      field: "actions",
       headerName: "Actions",
-      flex: 1,
+      width: 90,
+      sortable: false,
+      filterable: false,
       cellClassName: "grid-cell-actions",
       renderCell: (params) => {
         const notificationId: number = params.row.notificationId || 0;
@@ -149,19 +152,17 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
         const disabled = markReadLoading || !notificationId || isRead;
 
         return (
-          <div className="action-container">
-            <button
-              type="button"
-              className="btn secondary"
+          <GridRowActions>
+            <RowActionButton
+              title={isRead ? "Already read" : "Mark read"}
               disabled={disabled}
               onClick={() => {
                 if (disabled) return;
                 onMarkRead(notificationId);
               }}
-            >
-              <FaCheck className="icon" /> Mark read
-            </button>
-          </div>
+              icon={<FaCheck className="icon" />}
+            />
+          </GridRowActions>
         );
       },
     },

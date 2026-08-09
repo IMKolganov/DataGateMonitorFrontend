@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import PasswordLoginForm from "./PasswordLoginForm";
@@ -9,6 +9,7 @@ import { FaTelegramPlane, FaSun, FaMoon } from "react-icons/fa";
 import { appVersion } from "../../version.ts";
 import { useTheme } from "../../contexts/useTheme";
 import type { TotpChallengeState } from "../../utils/auth/handleLoginResponse";
+import { readRedirectFromSearch } from "../../utils/auth/returnPath";
 import GdprFooterLinks from "../gdpr/GdprFooterLinks";
 
 const LoginPage: React.FC = () => {
@@ -16,6 +17,14 @@ const LoginPage: React.FC = () => {
     const [totpChallenge, setTotpChallenge] = useState<TotpChallengeState | null>(null);
     const location = useLocation();
     const { theme, toggleTheme } = useTheme();
+    const redirectPath = useMemo(
+        () => readRedirectFromSearch(location.search, "/"),
+        [location.search],
+    );
+    const registerHref =
+        redirectPath !== "/"
+            ? `/register?redirect=${encodeURIComponent(redirectPath)}`
+            : "/register";
 
     useEffect(() => {
         const state = location.state as { registered?: boolean } | null;
@@ -34,7 +43,11 @@ const LoginPage: React.FC = () => {
                 <div className="login-logo-circle"><img src="/favicon.png" alt="Logo" className="logo-icon-login" /></div>
 
                 <h1 className="login-page-title">
-                    {totpChallenge ? "Two-factor authentication" : "Sign in to DataGate Monitor"}
+                    {totpChallenge
+                        ? "Two-factor authentication"
+                        : redirectPath.startsWith("/tv/link")
+                          ? "Sign in to link your TV"
+                          : "Sign in to DataGate Monitor"}
                 </h1>
 
                 <div className="login">
@@ -42,12 +55,16 @@ const LoginPage: React.FC = () => {
                         <TotpChallengeForm
                             loginChallengeId={totpChallenge.loginChallengeId}
                             displayName={totpChallenge.displayName}
+                            redirectPath={redirectPath}
                             onBack={handleTotpBack}
                             onBeforeStoreTokens={totpChallenge.onBeforeStoreTokens}
                         />
                     ) : (
                         <>
-                            <PasswordLoginForm onTotpChallenge={setTotpChallenge} />
+                            <PasswordLoginForm
+                                redirectPath={redirectPath}
+                                onTotpChallenge={setTotpChallenge}
+                            />
 
                             <div className="login-divider">
                                 <span>or</span>
@@ -55,7 +72,10 @@ const LoginPage: React.FC = () => {
 
                             <div className="social-login">
                                 <div className="social-login-item">
-                                    <GoogleLoginForm onTotpChallenge={setTotpChallenge} />
+                                    <GoogleLoginForm
+                                        redirectPath={redirectPath}
+                                        onTotpChallenge={setTotpChallenge}
+                                    />
                                 </div>
 
                                 <button
@@ -70,7 +90,10 @@ const LoginPage: React.FC = () => {
 
                             {showTelegramForm && (
                                 <div className="telegram-form-wrapper">
-                                    <TelegramCodeLoginForm onTotpChallenge={setTotpChallenge} />
+                                    <TelegramCodeLoginForm
+                                        redirectPath={redirectPath}
+                                        onTotpChallenge={setTotpChallenge}
+                                    />
                                 </div>
                             )}
                         </>
@@ -82,7 +105,7 @@ const LoginPage: React.FC = () => {
                         <>
                         <p>
                             New to DataGate Monitor?{" "}
-                            <Link to="/register" className="register-link">Create an account</Link>
+                            <Link to={registerHref} className="register-link">Create an account</Link>
                         </p>
                         <p>
                             Waiting for an email code?{" "}

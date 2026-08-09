@@ -1,9 +1,10 @@
 import React, { useMemo } from "react";
-import { Link } from "react-router-dom";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
+import { FaEye } from "react-icons/fa";
 import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type { UserDto } from "../../api/orvalModelShim";
+import { GridRowActions, RowActionLink } from "../ui/GridRowActions.tsx";
 import "../../css/Table.css";
 import { UserAvatar } from "../ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
@@ -79,14 +80,16 @@ const UsersTable: React.FC<UsersTableProps> = ({
       headerName: "Actions",
       width: 90,
       sortable: false,
+      filterable: false,
       renderCell: (params) => (
-        <Link
-          to={`/settings/users/${params.row.id}`}
-          className="user-view-link"
-          onClick={(e) => e.stopPropagation()}
-        >
-          View
-        </Link>
+        <GridRowActions>
+          <RowActionLink
+            to={`/settings/users/${params.row.id}`}
+            title="View"
+            onClick={(e) => e.stopPropagation()}
+            icon={<FaEye className="icon" />}
+          />
+        </GridRowActions>
       ),
     },
   ];

@@ -19,6 +19,7 @@ import type {
 } from "../../api/orvalModelShim";
 import { getCurrentUser } from "../../utils/auth/authSelectors";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { useStabilizedRowCount } from "../../hooks/useStabilizedRowCount";
 import { serializeNotificationsGetAllParams } from "../../utils/notificationsQuerySerialize";
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -112,7 +113,10 @@ export function useNotifications() {
   const listPayload = listQuery.data as unknown as GetNotificationsResponse | undefined;
   const paged = listPayload?.notifications;
   const notifications: NotificationItemDto[] = paged?.items ?? [];
-  const totalCount = paged?.totalCount ?? 0;
+  const totalCount = useStabilizedRowCount(
+    paged?.totalCount,
+    `${readFilter}:${typeFilter}:${severitiesForApi ?? ""}`,
+  );
   const totalPages = paged?.totalPages ?? 0;
   const unreadPayload = countQuery.data as unknown as UnreadCountResponse | undefined;
   const unreadCount = unreadPayload?.count ?? 0;

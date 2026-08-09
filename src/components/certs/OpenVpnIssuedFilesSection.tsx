@@ -103,8 +103,11 @@ const OpenVpnIssuedFilesSection: React.FC<Props> = ({ vpnServerId }) => {
         ovpnFiles={ovpnFiles}
         vpnServerId={vpnServerId}
         loading={filesQuery.isFetching}
-        onRevoke={async () => {
-          toast.success("OVPN file revoked", { toastId: "ovpn-revoked" });
+        onRevoke={async (count = 1) => {
+          toast.success(
+            count === 1 ? "OVPN file revoked" : `${count} OVPN files revoked`,
+            { toastId: "ovpn-revoked" },
+          );
           await silentRefetchFiles();
         }}
       />

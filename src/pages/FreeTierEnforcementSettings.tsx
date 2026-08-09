@@ -23,12 +23,16 @@ import {
 } from "../api/orvalModelShim";
 import { formatDateWithOffset } from "../utils/utils";
 import { errorMessage } from "../utils/errorMessage";
+import { useStabilizedRowCount } from "../hooks/useStabilizedRowCount";
+import { GridRowActions, RowActionButton } from "../components/ui/GridRowActions.tsx";
 import "../css/Settings.css";
 import "../css/Table.css";
 
 const KEY_ENFORCE = "FreeTier_Enforce_OpenVpn_Sessions";
 const KEY_INTERVAL_MINUTES = "FreeTier_Enforcement_Interval_Minutes";
 const KEY_REVOKE_ON_ENFORCEMENT = "FreeTier_Revoke_Ovpn_On_Enforcement";
+const KEY_USER_REMINDERS = "FreeTier_Send_Unsubscribed_User_Reminders";
+const KEY_ADMIN_DIGEST = "FreeTier_Daily_Unsubscribed_Admin_Digest";
 
 const REASON_LABELS: Record<number, string> = {
   [DisconnectReason.NUMBER_0]: "Enforcement",
@@ -52,8 +56,8 @@ export default function FreeTierEnforcementSettings() {
       </h2>
       <p className="settings-description">
         Disconnects Free/Default-plan users who are not subscribed to the required Telegram
-        channel and have not linked their account, and optionally revokes their OVPN
-        certificate so they cannot immediately reconnect.
+        channel (linked accounts are not exempt), and optionally revokes their OVPN certificate
+        so they cannot immediately reconnect.
       </p>
 
       <EnforcementSettingsCard />
@@ -67,6 +71,8 @@ function EnforcementSettingsCard() {
   const [enforceEnabled, setEnforceEnabled] = useState(false);
   const [intervalMinutes, setIntervalMinutes] = useState(15);
   const [revokeOnEnforcement, setRevokeOnEnforcement] = useState(false);
+  const [userRemindersEnabled, setUserRemindersEnabled] = useState(true);
+  const [adminDigestEnabled, setAdminDigestEnabled] = useState(true);
   const [appliedKey, setAppliedKey] = useState("");
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -80,8 +86,15 @@ function EnforcementSettingsCard() {
     { Key: KEY_REVOKE_ON_ENFORCEMENT },
     { query: { staleTime: 0 } },
   );
+  const remindersQuery = useGetApiSettingsGet({ Key: KEY_USER_REMINDERS }, { query: { staleTime: 0 } });
+  const digestQuery = useGetApiSettingsGet({ Key: KEY_ADMIN_DIGEST }, { query: { staleTime: 0 } });
 
-  const initialLoading = enforceQuery.isLoading || intervalQuery.isLoading || revokeQuery.isLoading;
+  const initialLoading =
+    enforceQuery.isLoading ||
+    intervalQuery.isLoading ||
+    revokeQuery.isLoading ||
+    remindersQuery.isLoading ||
+    digestQuery.isLoading;
 
   const snapshotKey = useMemo(
     () =>
@@ -89,8 +102,16 @@ function EnforcementSettingsCard() {
         enforce: pickSettingValue(enforceQuery.data),
         interval: pickSettingValue(intervalQuery.data),
         revoke: pickSettingValue(revokeQuery.data),
+        reminders: pickSettingValue(remindersQuery.data),
+        digest: pickSettingValue(digestQuery.data),
       }),
-    [enforceQuery.data, intervalQuery.data, revokeQuery.data],
+    [
+      enforceQuery.data,
+      intervalQuery.data,
+      revokeQuery.data,
+      remindersQuery.data,
+      digestQuery.data,
+    ],
   );
 
   if (snapshotKey !== appliedKey && !initialLoading) {
@@ -106,6 +127,14 @@ function EnforcementSettingsCard() {
     const revokeRaw = (pickSettingValue(revokeQuery.data) ?? "").toLowerCase();
     if (revokeRaw === "true") setRevokeOnEnforcement(true);
     else if (revokeRaw === "false") setRevokeOnEnforcement(false);
+
+    const remindersRaw = (pickSettingValue(remindersQuery.data) ?? "").toLowerCase();
+    if (remindersRaw === "true") setUserRemindersEnabled(true);
+    else if (remindersRaw === "false") setUserRemindersEnabled(false);
+
+    const digestRaw = (pickSettingValue(digestQuery.data) ?? "").toLowerCase();
+    if (digestRaw === "true") setAdminDigestEnabled(true);
+    else if (digestRaw === "false") setAdminDigestEnabled(false);
   }
 
   const setSettingMutation = usePostApiSettingsSet();
@@ -129,6 +158,12 @@ function EnforcementSettingsCard() {
         }),
         setSettingMutation.mutateAsync({
           params: { Key: KEY_REVOKE_ON_ENFORCEMENT, Value: String(revokeOnEnforcement), Type: "bool" },
+        }),
+        setSettingMutation.mutateAsync({
+          params: { Key: KEY_USER_REMINDERS, Value: String(userRemindersEnabled), Type: "bool" },
+        }),
+        setSettingMutation.mutateAsync({
+          params: { Key: KEY_ADMIN_DIGEST, Value: String(adminDigestEnabled), Type: "bool" },
         }),
       ]);
       setSuccessMessage("Settings successfully updated.");
@@ -163,8 +198,8 @@ function EnforcementSettingsCard() {
       </label>
       <p className="settings-item-description">
         When enabled, the background job periodically kills OpenVPN sessions of Free/Default
-        plan users who are not subscribed to the required Telegram channel and have not linked
-        their dashboard account (merged account).
+        plan users who are not subscribed to the required Telegram channel (including linked
+        accounts).
       </p>
 
       <div className="settings-item settings-item--mt-12">
@@ -195,6 +230,36 @@ function EnforcementSettingsCard() {
         Without this, a killed client's app may immediately reconnect using the same profile.
         Revoking the certificate forces the user to obtain a new one before they can connect
         again.
+      </p>
+
+      <label className="settings-item settings-item--gap-10 settings-item--mt-12">
+        <input
+          id="free-tier-user-reminders"
+          name="freeTierUserReminders"
+          type="checkbox"
+          checked={userRemindersEnabled}
+          onChange={(e) => setUserRemindersEnabled(e.target.checked)}
+        />
+        <span>Send Telegram reminders to unsubscribed Free/Default users</span>
+      </label>
+      <p className="settings-item-description">
+        When enabled, users with a Telegram account who are not subscribed to the required
+        channel receive a subscribe reminder (at most once per 24 hours per user).
+      </p>
+
+      <label className="settings-item settings-item--gap-10 settings-item--mt-12">
+        <input
+          id="free-tier-admin-digest"
+          name="freeTierAdminDigest"
+          type="checkbox"
+          checked={adminDigestEnabled}
+          onChange={(e) => setAdminDigestEnabled(e.target.checked)}
+        />
+        <span>Daily admin digest of VPN users without channel subscription</span>
+      </label>
+      <p className="settings-item-description">
+        When enabled, bot admins receive one Telegram message per UTC day listing Free/Default
+        users who are currently online without a channel subscription.
       </p>
 
       <div className="settings-item settings-item--mt-12">
@@ -263,6 +328,7 @@ function CandidatesCard() {
     id: c.userId ?? idx + 1,
     displayName: c.displayName ?? "-",
     email: c.email ?? "-",
+    identityProviders: (c.identityProviders ?? []).filter(Boolean).join("+") || "-",
     telegramId: c.telegramId ?? null,
     activePlanName: c.activePlanName ?? "-",
     isMergedAccount: Boolean(c.isMergedAccount),
@@ -287,6 +353,7 @@ function CandidatesCard() {
     },
     { field: "displayName", headerName: "Display Name", flex: 1 },
     { field: "email", headerName: "Email", flex: 1 },
+    { field: "identityProviders", headerName: "Providers", flex: 0.7 },
     { field: "activePlanName", headerName: "Plan", flex: 0.6 },
     { field: "isMergedAccount", headerName: "Merged", type: "boolean", flex: 0.4 },
     { field: "isChannelSubscribed", headerName: "Subscribed", type: "boolean", flex: 0.5 },
@@ -299,35 +366,36 @@ function CandidatesCard() {
       headerName: "Actions",
       sortable: false,
       filterable: false,
-      width: 220,
+      width: 110,
       renderCell: (params) => {
         const candidate = (params.row as { _candidate: FreeTierEnforcementCandidateDto })._candidate;
         if (!candidate.isConnected || !candidate.commonName) return null;
         const busyKill = killBusyKey === `${candidate.commonName}:kill`;
         const busyRevoke = killBusyKey === `${candidate.commonName}:revoke`;
         return (
-          <div className="action-container">
-            <button
-              type="button"
-              className="btn secondary"
+          <GridRowActions>
+            <RowActionButton
               disabled={busyKill || busyRevoke}
-              title="Disconnect the active OpenVPN session; the client can reconnect."
+              title={
+                busyKill
+                  ? "Disconnecting…"
+                  : "Disconnect the active OpenVPN session; the client can reconnect."
+              }
               onClick={() => void handleKill(candidate, false)}
-            >
-              <FaBolt className="icon" aria-hidden />
-              {busyKill ? "…" : "Kill"}
-            </button>
-            <button
-              type="button"
-              className="btn danger"
+              icon={<FaBolt className="icon" aria-hidden />}
+            />
+            <RowActionButton
+              variant="danger"
               disabled={busyKill || busyRevoke}
-              title="Disconnect and revoke the OVPN certificate; the client cannot reconnect with this profile."
+              title={
+                busyRevoke
+                  ? "Revoking…"
+                  : "Disconnect and revoke the OVPN certificate; the client cannot reconnect with this profile."
+              }
               onClick={() => void handleKill(candidate, true)}
-            >
-              <FaBan className="icon" aria-hidden />
-              {busyRevoke ? "…" : "Kill + Revoke"}
-            </button>
-          </div>
+              icon={<FaBan className="icon" aria-hidden />}
+            />
+          </GridRowActions>
         );
       },
     },
@@ -356,8 +424,7 @@ function CandidatesCard() {
       </div>
       <div className="settings-divider" />
       <p className="settings-item-description">
-        Users on a Free/Default plan who are not subscribed to the Telegram channel and have not
-        linked their dashboard account. This list is not auto-refreshed; click Refresh to
+        Users on a Free/Default plan who are not subscribed to the Telegram channel. Click Refresh to
         re-check compliance (checks the Telegram channel membership API).
       </p>
 
@@ -399,7 +466,7 @@ function DisconnectLogCard() {
 
   const pagedEntries = unwrapMaybeApiResponse(logQuery.data)?.entries;
   const entries = pagedEntries?.items ?? [];
-  const totalCount = pagedEntries?.totalCount ?? 0;
+  const totalCount = useStabilizedRowCount(pagedEntries?.totalCount);
 
   const rows = entries.map((e: FreeTierDisconnectLogEntryDto) => ({
     id: e.id,

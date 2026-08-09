@@ -11,6 +11,8 @@ export interface AuthResponsesFreeTierAccessStatusResponse {
   isMergedAccount?: boolean;
   isChannelSubscribed?: boolean;
   isGracePeriod?: boolean;
+  /** @nullable */
+  graceExpiresAtUtc?: string | null;
   isLinkedToTelegram?: boolean;
   canRequestAccountLinkCode?: boolean;
   /** @nullable */

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   FaArrowLeft,
   FaKey,
@@ -24,6 +24,7 @@ import {
   useGetApiUsersEmailConfirmationStatusId,
   usePostApiUsersConfirmEmailId,
 } from "../../api/orval/user/user";
+import { useGetApiAdminTvLoginSessionsByUserUserIdSummary } from "../../api/orval/tv-login-sessions-admin/tv-login-sessions-admin";
 import { usePostApiAuthForgotPassword } from "../../api/orval/auth/auth";
 import { usePostApiQuotaPlansGetAll } from "../../api/orval/quota-plan/quota-plan";
 import {
@@ -49,6 +50,7 @@ import type {
   RolesResponse,
   UserRoleAssignmentResponse,
   UserResponsesGetUserEmailConfirmationStatusResponse,
+  UserTvLoginSummaryResponse,
 } from "../../api/orvalModelShim";
 import type { UsersResponse } from "../../api/orvalModelShim";
 import type { GetUserQuotaPlansByUserIdResponse } from "../../api/orvalModelShim";
@@ -57,6 +59,7 @@ import type { MessageDto } from "../../api/orvalModelShim";
 import { useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { isCanceledError } from "../../utils/queryCanceled";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { useStabilizedRowCount } from "../../hooks/useStabilizedRowCount";
 import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
@@ -73,6 +76,7 @@ import { useGridFilters } from "../../hooks/useGridFilterStub.ts";
 import type { GridColDef } from "@mui/x-data-grid";
 import "../../css/Settings.css";
 import "../../css/Table.css";
+import { GridRowActions, RowActionButton } from "../../components/ui/GridRowActions.tsx";
 import { UserAvatar } from "../../components/ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
 import { telegramPhotoIdForProvider } from "../../utils/telegramNumericId.ts";
@@ -93,6 +97,14 @@ export function UserDetailPage() {
 
   const { data: userData, isLoading, error } = useGetApiUsersGetByIdId(id);
   const user = (userData as UsersResponse | undefined)?.user ?? null;
+
+  const tvSummaryQuery = useGetApiAdminTvLoginSessionsByUserUserIdSummary<UserTvLoginSummaryResponse>(
+    id,
+    {
+      query: { enabled: Number.isFinite(id) && id > 0 },
+    },
+  );
+  const tvSummary = unwrapMaybeApiResponse(tvSummaryQuery.data);
 
   const [quotaPlans, setQuotaPlans] = useState<QuotaPlanDto[]>([]);
   const getAllQuotaMutation = usePostApiQuotaPlansGetAll();
@@ -219,7 +231,10 @@ export function UserDetailPage() {
   );
   const messagesPayload = (telegramMessagesData as GetByTelegramIdMessagesResponseApiResponse | undefined)?.data?.messages;
   const telegramMessages: MessageDto[] = messagesPayload?.items ?? [];
-  const telegramMessagesTotalCount = messagesPayload?.totalCount ?? 0;
+  const telegramMessagesTotalCount = useStabilizedRowCount(
+    messagesPayload?.totalCount,
+    telegramIdValid ? telegramId : 0,
+  );
   const telegramMessagesRefreshing = telegramMessagesFetching;
   const telegramMessagesErrorMessage = isCanceledError(telegramMessagesError)
     ? null
@@ -487,6 +502,32 @@ export function UserDetailPage() {
           <dd>{user.isBlocked ? "Yes" : "No"}</dd>
           <dt>Dashboard access</dt>
           <dd>{user.hasDashboardAccess ? "Yes" : "No"}</dd>
+          <dt>TV device linking</dt>
+          <dd>
+            {tvSummaryQuery.isLoading
+              ? "Loading..."
+              : tvSummary?.hasUsedTvLogin
+                ? [
+                    "Yes",
+                    tvSummary.approvedOrConsumedCount != null
+                      ? `(${tvSummary.approvedOrConsumedCount})`
+                      : null,
+                    [tvSummary.lastDeviceName, tvSummary.lastClient].filter(Boolean).join(" / ") ||
+                      null,
+                    tvSummary.lastUsedAt
+                      ? new Date(tvSummary.lastUsedAt).toLocaleString()
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")
+                : "No"}
+            {user.id != null ? (
+              <>
+                {" · "}
+                <Link to={`/settings/tv-login?userId=${user.id}`}>Sessions</Link>
+              </>
+            ) : null}
+          </dd>
           <dt>Created</dt>
           <dd>
             {user.createDate
@@ -753,35 +794,30 @@ export function UserDetailPage() {
                       </td>
                       <td>{a.note ?? "—"}</td>
                       <td>
-                        <div className="action-container">
-                          <button
-                            type="button"
-                            className="btn secondary"
+                        <GridRowActions>
+                          <RowActionButton
+                            title="Edit"
+                            disabled={
+                              updateAssignmentMutation.isPending ||
+                              deleteAssignmentMutation.isPending
+                            }
                             onClick={() => {
                               setEditingAssignment(a);
                               setAssignmentModalOpen(true);
                             }}
-                            disabled={
-                              updateAssignmentMutation.isPending ||
-                              deleteAssignmentMutation.isPending
-                            }
-                            title="Edit"
-                          >
-                            <FaEdit className="icon" />
-                          </button>
-                          <button
-                            type="button"
-                            className="btn danger"
-                            onClick={() => a.id != null && handleDeleteAssignment(a.id)}
-                            disabled={
-                              updateAssignmentMutation.isPending ||
-                              deleteAssignmentMutation.isPending
-                            }
+                            icon={<FaEdit className="icon" />}
+                          />
+                          <RowActionButton
+                            variant="danger"
                             title="Remove"
-                          >
-                            <FaTrash className="icon" />
-                          </button>
-                        </div>
+                            disabled={
+                              updateAssignmentMutation.isPending ||
+                              deleteAssignmentMutation.isPending
+                            }
+                            onClick={() => a.id != null && handleDeleteAssignment(a.id)}
+                            icon={<FaTrash className="icon" />}
+                          />
+                        </GridRowActions>
                       </td>
                     </tr>
                   );
