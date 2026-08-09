@@ -1054,6 +1054,35 @@
         }
       }
     },
+    "/api/auth/free-tier-access/connect": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.FreeTierAccessStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.FreeTierAccessStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.FreeTierAccessStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/email/request-confirmation": {
       "post": {
         "tags": [
@@ -1385,6 +1414,284 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Api.Auth.Responses.LoginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/tv/session": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.CreateTvLoginSessionRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.CreateTvLoginSessionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.CreateTvLoginSessionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.CreateTvLoginSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.CreateTvLoginSessionResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.CreateTvLoginSessionResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.CreateTvLoginSessionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/tv/session/{sessionId}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.TvLoginSessionPollResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.TvLoginSessionPollResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.TvLoginSessionPollResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/tv/session/by-code/{userCode}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "name": "userCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.TvLoginSessionPreviewResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.TvLoginSessionPreviewResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.TvLoginSessionPreviewResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Mvc.ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/tv/session/approve": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.ApproveTvLoginSessionRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.ApproveTvLoginSessionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.ApproveTvLoginSessionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.ApproveTvLoginSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.TvLoginSessionActionResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.TvLoginSessionActionResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.TvLoginSessionActionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/tv/session/deny": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.DenyTvLoginSessionRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.DenyTvLoginSessionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.DenyTvLoginSessionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auth.Requests.DenyTvLoginSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.TvLoginSessionActionResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.TvLoginSessionActionResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.TvLoginSessionActionResponse"
                 }
               }
             }
@@ -2352,6 +2659,81 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.GetFreeTierEnforcementCandidatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/free-tier-enforcement/unsubscribed-vpn-digest": {
+      "get": {
+        "tags": [
+          "FreeTierEnforcement"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/free-tier-enforcement/remind-channel-subscribe/{target}": {
+      "post": {
+        "tags": [
+          "FreeTierEnforcement"
+        ],
+        "parameters": [
+          {
+            "name": "target",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/FreeTierEnforcement.Enums.FreeTierChannelSubscribeRemindChannel"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.FreeTierChannelSubscribeRemindResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.FreeTierChannelSubscribeRemindResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.FreeTierChannelSubscribeRemindResponse"
                 }
               }
             }
@@ -3844,6 +4226,227 @@
       "get": {
         "tags": [
           "OpenVpnFiles"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/http-requests": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Performance.PerformanceHttpRequestsResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Performance.PerformanceHttpRequestsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Performance.PerformanceHttpRequestsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Performance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/db-queries": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Performance.PerformanceDbQueriesResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Performance.PerformanceDbQueriesResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Performance.PerformanceDbQueriesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Performance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance": {
+      "delete": {
+        "tags": [
+          "Performance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/healthcheck": {
+      "get": {
+        "tags": [
+          "Performance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/healthcheck-with-jwt": {
+      "get": {
+        "tags": [
+          "Performance"
         ],
         "responses": {
           "200": {
@@ -6125,6 +6728,168 @@
       "get": {
         "tags": [
           "TelegramBotUser"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/tv-login-sessions": {
+      "get": {
+        "tags": [
+          "TvLoginSessionsAdmin"
+        ],
+        "parameters": [
+          {
+            "name": "approvedUserId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "take",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.GetAdminTvLoginSessionsResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.GetAdminTvLoginSessionsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.GetAdminTvLoginSessionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/tv-login-sessions/by-user/{userId}/summary": {
+      "get": {
+        "tags": [
+          "TvLoginSessionsAdmin"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.UserTvLoginSummaryResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.UserTvLoginSummaryResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.UserTvLoginSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/tv-login-sessions/healthcheck": {
+      "get": {
+        "tags": [
+          "TvLoginSessionsAdmin"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/tv-login-sessions/healthcheck-with-jwt": {
+      "get": {
+        "tags": [
+          "TvLoginSessionsAdmin"
         ],
         "responses": {
           "200": {
@@ -12451,6 +13216,22 @@
         },
         "additionalProperties": false
       },
+      "Api.Auth.Responses.CreateTvLoginSessionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Auth.Responses.CreateTvLoginSessionResponse"
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.Auth.Responses.FreeTierAccessStatusResponse": {
         "type": "object",
         "properties": {
@@ -12463,6 +13244,22 @@
           },
           "data": {
             "$ref": "#/components/schemas/Auth.Responses.FreeTierAccessStatusResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Auth.Responses.GetAdminTvLoginSessionsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Auth.Responses.GetAdminTvLoginSessionsResponse"
           }
         },
         "additionalProperties": false
@@ -12627,6 +13424,70 @@
         },
         "additionalProperties": false
       },
+      "Api.Auth.Responses.TvLoginSessionActionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Auth.Responses.TvLoginSessionActionResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Auth.Responses.TvLoginSessionPollResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Auth.Responses.TvLoginSessionPollResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Auth.Responses.TvLoginSessionPreviewResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Auth.Responses.TvLoginSessionPreviewResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Auth.Responses.UserTvLoginSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Auth.Responses.UserTvLoginSummaryResponse"
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.CertExpiry.Responses.CertExpiryCheckRunResponse": {
         "type": "object",
         "properties": {
@@ -12767,6 +13628,38 @@
           },
           "data": {
             "$ref": "#/components/schemas/FreeTierEnforcement.Responses.GetFreeTierEnforcementCandidatesResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.FreeTierEnforcement.Responses.FreeTierChannelSubscribeRemindResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/FreeTierEnforcement.Responses.FreeTierChannelSubscribeRemindResponse"
           }
         },
         "additionalProperties": false
@@ -12975,6 +13868,38 @@
           },
           "data": {
             "$ref": "#/components/schemas/OpenVpnFiles.Responses.OvpnFilesWithTokensResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Performance.PerformanceDbQueriesResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Performance.PerformanceDbQueriesResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Performance.PerformanceHttpRequestsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Performance.PerformanceHttpRequestsResponse"
           }
         },
         "additionalProperties": false
@@ -14370,6 +15295,21 @@
         },
         "additionalProperties": false
       },
+      "Auth.Requests.ApproveTvLoginSessionRequest": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "userCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Auth.Requests.CompleteTelegramAccountLinkFromAppRequest": {
         "required": [
           "code"
@@ -14392,6 +15332,35 @@
             "nullable": true
           },
           "code": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Auth.Requests.CreateTvLoginSessionRequest": {
+        "type": "object",
+        "properties": {
+          "deviceName": {
+            "type": "string",
+            "nullable": true
+          },
+          "client": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Auth.Requests.DenyTvLoginSessionRequest": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "userCode": {
             "type": "string",
             "nullable": true
           }
@@ -14624,6 +15593,66 @@
         },
         "additionalProperties": false
       },
+      "Auth.Responses.AdminTvLoginSessionDto": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "deviceName": {
+            "type": "string",
+            "nullable": true
+          },
+          "client": {
+            "type": "string",
+            "nullable": true
+          },
+          "deviceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "userAgent": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvedUserId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "approvedUserEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvedUserDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Auth.Responses.AuthSessionPolicyResponse": {
         "type": "object",
         "properties": {
@@ -14641,6 +15670,40 @@
             "type": "boolean"
           },
           "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Auth.Responses.CreateTvLoginSessionResponse": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "verificationUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "qrPayload": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pollIntervalSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "signalRHubPath": {
             "type": "string",
             "nullable": true
           }
@@ -14665,6 +15728,11 @@
           "isGracePeriod": {
             "type": "boolean"
           },
+          "graceExpiresAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
           "isLinkedToTelegram": {
             "type": "boolean"
           },
@@ -14678,6 +15746,23 @@
           "requiredChannel": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Auth.Responses.GetAdminTvLoginSessionsResponse": {
+        "type": "object",
+        "properties": {
+          "sessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Auth.Responses.AdminTvLoginSessionDto"
+            },
+            "nullable": true
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -14915,6 +16000,95 @@
         },
         "additionalProperties": false
       },
+      "Auth.Responses.TvLoginSessionActionResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Auth.Responses.TvLoginSessionPollResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiration": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "refreshToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "refreshExpiration": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "requiresTotp": {
+            "type": "boolean"
+          },
+          "loginChallengeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "requiresTotpSetup": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Auth.Responses.TvLoginSessionPreviewResponse": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "deviceName": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Auth.Responses.UserSessionDto": {
         "type": "object",
         "properties": {
@@ -14940,6 +16114,32 @@
           },
           "isCurrent": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Auth.Responses.UserTvLoginSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "hasUsedTvLogin": {
+            "type": "boolean"
+          },
+          "approvedOrConsumedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastUsedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastDeviceName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastClient": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -15393,6 +16593,10 @@
             "type": "string",
             "nullable": true
           },
+          "publicIp": {
+            "type": "string",
+            "nullable": true
+          },
           "config": {
             "$ref": "#/components/schemas/DataGateOpenVpnManager.Info.ConfigInfoResponse"
           }
@@ -15460,6 +16664,10 @@
             "nullable": true
           },
           "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicIp": {
             "type": "string",
             "nullable": true
           },
@@ -15973,6 +17181,13 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "identityProviders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -16006,6 +17221,63 @@
           }
         },
         "additionalProperties": false
+      },
+      "FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FreeTierEnforcement.Dto.FreeTierEnforcementCandidateDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FreeTierEnforcement.Responses.FreeTierChannelSubscribeRemindResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/FreeTierEnforcement.Enums.FreeTierChannelSubscribeRemindChannel"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "telegramId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FreeTierEnforcement.Enums.FreeTierChannelSubscribeRemindChannel": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32",
+        "x-enumNames": [
+          "Telegram",
+          "Email"
+        ]
       },
       "GeoLite.Dto.OpenVpnGeoInfo": {
         "type": "object",
@@ -16831,6 +18103,103 @@
           "hasPrev": {
             "type": "boolean",
             "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Performance.PerformanceDbQueriesResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Performance.PerformanceDbQueryEntryDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Performance.PerformanceDbQueryEntryDto": {
+        "type": "object",
+        "properties": {
+          "timestampUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "requestId": {
+            "type": "string",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "commandType": {
+            "type": "string",
+            "nullable": true
+          },
+          "sql": {
+            "type": "string",
+            "nullable": true
+          },
+          "succeeded": {
+            "type": "boolean"
+          },
+          "exceptionMessage": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Performance.PerformanceHttpRequestEntryDto": {
+        "type": "object",
+        "properties": {
+          "timestampUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "requestId": {
+            "type": "string",
+            "nullable": true
+          },
+          "method": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "traceId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Performance.PerformanceHttpRequestsResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Performance.PerformanceHttpRequestEntryDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -20315,6 +21684,9 @@
       "name": "OpenVpnFiles"
     },
     {
+      "name": "Performance"
+    },
+    {
       "name": "QuotaPlan"
     },
     {
@@ -20334,6 +21706,9 @@
     },
     {
       "name": "TelegramBotUser"
+    },
+    {
+      "name": "TvLoginSessionsAdmin"
     },
     {
       "name": "User"

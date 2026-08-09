@@ -15,5 +15,7 @@ export interface DataGateOpenVpnManagerInfoRootOpenVpnInfoResponse {
   application?: string | null;
   /** @nullable */
   description?: string | null;
+  /** @nullable */
+  publicIp?: string | null;
   config?: DataGateOpenVpnManagerInfoConfigInfoResponse;
 }

@@ -17,6 +17,7 @@ import { FaBolt, FaBan } from "react-icons/fa";
 import { usePostApiOpenVpnClientsKill } from "../api/orval/vpn-server-clients/vpn-server-clients";
 import { unwrapKillResponse } from "../utils/unwrapKillResponse";
 import { errorMessage } from "../utils/errorMessage";
+import { GridRowActions, RowActionButton } from "./ui/GridRowActions.tsx";
 
 type ClientDto = VpnClientInfoDto;
 
@@ -225,29 +226,32 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                     headerName: "Actions",
                     sortable: false,
                     filterable: false,
-                    width: 260,
+                    width: 110,
                     renderCell: (params) => {
                         const cn = (params.row as { _cn?: string })._cn ?? "";
                         if (!cn) return null;
                         const busyKick = actionBusyKey === `kick-user:${cn}`;
                         const busyDisable = actionBusyKey === `disable-user:${cn}`;
                         return (
-                            <div className="action-container">
-                                <button
-                                    type="button"
-                                    className="btn secondary"
+                            <GridRowActions>
+                                <RowActionButton
                                     disabled={busyKick || busyDisable}
-                                    title="Drop active sessions; client stays issued and can reconnect."
+                                    title={
+                                        busyKick
+                                            ? "Dropping session…"
+                                            : "Drop active sessions; client stays issued and can reconnect."
+                                    }
                                     onClick={() => void postXrayAction("kick-user", cn)}
-                                >
-                                    <FaBolt className="icon" aria-hidden />
-                                    {busyKick ? "…" : "Drop session"}
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn danger"
+                                    icon={<FaBolt className="icon" aria-hidden />}
+                                />
+                                <RowActionButton
+                                    variant="danger"
                                     disabled={busyKick || busyDisable}
-                                    title="Revoke client on this node (same as revoking an issued link)."
+                                    title={
+                                        busyDisable
+                                            ? "Revoking…"
+                                            : "Revoke client on this node (same as revoking an issued link)."
+                                    }
                                     onClick={() => {
                                         if (
                                             !window.confirm(
@@ -257,11 +261,9 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                                             return;
                                         void postXrayAction("disable-user", cn);
                                     }}
-                                >
-                                    <FaBan className="icon" aria-hidden />
-                                    {busyDisable ? "…" : "Revoke"}
-                                </button>
-                            </div>
+                                    icon={<FaBan className="icon" aria-hidden />}
+                                />
+                            </GridRowActions>
                         );
                     },
                 } satisfies GridColDef,
@@ -275,29 +277,32 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                     headerName: "Actions",
                     sortable: false,
                     filterable: false,
-                    width: 260,
+                    width: 110,
                     renderCell: (params) => {
                         const cn = (params.row as { _cn?: string })._cn ?? "";
                         if (!cn) return null;
                         const busyKill = actionBusyKey === `kill:${cn}`;
                         const busyKillRevoke = actionBusyKey === `kill-revoke:${cn}`;
                         return (
-                            <div className="action-container">
-                                <button
-                                    type="button"
-                                    className="btn secondary"
+                            <GridRowActions>
+                                <RowActionButton
                                     disabled={busyKill || busyKillRevoke}
-                                    title="Disconnect the active OpenVPN session; the client can reconnect."
+                                    title={
+                                        busyKill
+                                            ? "Disconnecting…"
+                                            : "Disconnect the active OpenVPN session; the client can reconnect."
+                                    }
                                     onClick={() => void handleOpenVpnKill(cn, false)}
-                                >
-                                    <FaBolt className="icon" aria-hidden />
-                                    {busyKill ? "…" : "Kill"}
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn danger"
+                                    icon={<FaBolt className="icon" aria-hidden />}
+                                />
+                                <RowActionButton
+                                    variant="danger"
                                     disabled={busyKill || busyKillRevoke}
-                                    title="Disconnect and revoke the OVPN certificate; the client cannot reconnect with this profile."
+                                    title={
+                                        busyKillRevoke
+                                            ? "Killing and revoking…"
+                                            : "Disconnect and revoke the OVPN certificate; the client cannot reconnect with this profile."
+                                    }
                                     onClick={() => {
                                         if (
                                             !window.confirm(
@@ -307,11 +312,9 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                                             return;
                                         void handleOpenVpnKill(cn, true);
                                     }}
-                                >
-                                    <FaBan className="icon" aria-hidden />
-                                    {busyKillRevoke ? "…" : "Kill + Revoke"}
-                                </button>
-                            </div>
+                                    icon={<FaBan className="icon" aria-hidden />}
+                                />
+                            </GridRowActions>
                         );
                     },
                 } satisfies GridColDef,

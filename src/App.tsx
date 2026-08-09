@@ -49,9 +49,11 @@ const GeoLiteDbSettings = lazy(() => import("./pages/GeoLiteDbSettings"));
 const NotificationVpnProfileSettings = lazy(() => import("./pages/NotificationVpnProfileSettings"));
 const AndroidCrashReportsSettings = lazy(() => import("./pages/AndroidCrashReportsSettings"));
 const WindowsCrashReportsSettings = lazy(() => import("./pages/WindowsCrashReportsSettings"));
+const PerformanceSettings = lazy(() => import("./pages/PerformanceSettings"));
 const TelegramBotSettings = lazy(() => import("./pages/TelegramBotSettings"));
 const UsersSettings = lazy(() => import("./pages/UsersSettings/UsersSettings"));
 const FreeTierEnforcementSettings = lazy(() => import("./pages/FreeTierEnforcementSettings"));
+const TvLoginSessionsSettings = lazy(() => import("./pages/TvLoginSessionsSettings"));
 const UserQuotasPage = lazy(() => import("./pages/UsersSettings/UserQuotasPage"));
 const UserDetailPage = lazy(() => import("./pages/UsersSettings/UserDetailPage"));
 const CertExpirySettings = lazy(() => import("./pages/CertExpirySettings"));
@@ -68,6 +70,7 @@ const XrayLoginPage = lazy(() => import("./pages/xray/XrayLoginPage.tsx"));
 const XrayPortalPage = lazy(() => import("./pages/xray/XrayPortalPage.tsx"));
 const XrayRegisterPage = lazy(() => import("./pages/xray/XrayRegisterPage.tsx"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.tsx"));
+const TvLinkPage = lazy(() => import("./pages/tv/TvLinkPage.tsx"));
 
 const isAuthenticated = () => !!localStorage.getItem(ACCESS_TOKEN_KEY);
 
@@ -90,6 +93,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     location.pathname === "/reset-password" ||
     location.pathname === "/confirm-email" ||
     location.pathname === "/xray/confirm-email" ||
+    location.pathname === "/tv/link" ||
     location.pathname === "/xray" ||
     location.pathname.startsWith("/xray/");
 
@@ -123,6 +127,7 @@ function App() {
         <Layout>
           <Routes>
             <Route path="/privacy" element={withSuspense(<PrivacyPolicy />)} />
+            <Route path="/tv/link" element={withSuspense(<TvLinkPage />)} />
             <Route path="/login" element={withSuspense(<LoginPage />)} />
             <Route path="/xray/login" element={withSuspense(<XrayLoginPage />)} />
             <Route path="/xray/register" element={withSuspense(<XrayRegisterPage />)} />
@@ -205,12 +210,17 @@ function App() {
                       <Route path="users" element={withSuspense(<UsersSettings />)} />
                       <Route path="users/:userId" element={withSuspense(<UserDetailPage />)} />
                       <Route
+                        path="tv-login"
+                        element={withSuspense(<TvLoginSessionsSettings />)}
+                      />
+                      <Route
                         path="free-tier-enforcement"
                         element={withSuspense(<FreeTierEnforcementSettings />)}
                       />
                       <Route path="email-broadcast" element={withSuspense(<EmailBroadcastSettings />)} />
                       <Route path="android-crashes" element={withSuspense(<AndroidCrashReportsSettings />)} />
                       <Route path="windows-crashes" element={withSuspense(<WindowsCrashReportsSettings />)} />
+                      <Route path="performance" element={withSuspense(<PerformanceSettings />)} />
                       <Route path="admin-password" element={withSuspense(<AdminPasswordRecoverySettings />)} />
                       <Route path="security" element={withSuspense(<AdminSecuritySettings />)} />
                     </Route>

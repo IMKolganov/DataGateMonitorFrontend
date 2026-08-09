@@ -169,7 +169,12 @@ export const logout = () => {
   clearStoredProfileAvatarUrl();
 
   if (window.location.pathname !== "/login") {
-    window.location.assign("/login");
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    const q =
+      returnTo.startsWith("/tv/link")
+        ? `?redirect=${encodeURIComponent(returnTo)}`
+        : "";
+    window.location.assign(`/login${q}`);
   }
 };
 
@@ -180,7 +185,12 @@ const softLogout = () => {
   clearStoredProfileAvatarUrl();
 
   if (window.location.pathname !== "/login") {
-    window.location.assign("/login");
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    const q =
+      returnTo.startsWith("/tv/link")
+        ? `?redirect=${encodeURIComponent(returnTo)}`
+        : "";
+    window.location.assign(`/login${q}`);
   }
 };
 

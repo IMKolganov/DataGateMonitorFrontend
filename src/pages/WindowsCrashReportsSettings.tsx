@@ -2,9 +2,10 @@ import { useMemo, useState } from "react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import type { GridColDef } from "@mui/x-data-grid";
-import { FaBug, FaSync, FaWindows } from "react-icons/fa";
+import { FaBug, FaEye, FaSync, FaWindows } from "react-icons/fa";
 import Grid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
+import { GridRowActions, RowActionButton } from "../components/ui/GridRowActions.tsx";
 import { getApiBaseUrlResolved } from "../api/apirequest";
 import { ACCESS_TOKEN_KEY } from "../utils/const";
 import { errorMessage } from "../utils/errorMessage";
@@ -143,18 +144,18 @@ export default function WindowsCrashReportsSettings() {
     },
     {
       field: "actions",
-      headerName: "Details",
-      width: 110,
+      headerName: "Actions",
+      width: 90,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <button
-          type="button"
-          className="btn secondary"
-          onClick={() => setSelectedCrash(params.row as RecentWindowsCrashReportDto)}
-        >
-          View
-        </button>
+        <GridRowActions>
+          <RowActionButton
+            title="View details"
+            onClick={() => setSelectedCrash(params.row as RecentWindowsCrashReportDto)}
+            icon={<FaEye className="icon" />}
+          />
+        </GridRowActions>
       ),
     },
   ];
@@ -245,8 +246,9 @@ export default function WindowsCrashReportsSettings() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header">
-              <h3>
-                <FaBug className="icon" aria-hidden /> Crash #{selectedCrash.id}
+              <h3 className="settings-card__h3-with-icon">
+                <FaBug className="icon" aria-hidden />
+                <span>Crash #{selectedCrash.id}</span>
               </h3>
               <button
                 type="button"

@@ -171,7 +171,7 @@ export default function UserQuotasPage() {
           <select
             id="user-quotas-page-size"
             name="userQuotasPageSize"
-            className="btn secondary dropdown-select"
+            className="input dropdown-select"
             value={pageSize}
             onChange={(e) => {
               const next = Number(e.target.value);

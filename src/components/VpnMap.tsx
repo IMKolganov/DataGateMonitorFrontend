@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import type { VpnClientInfoDto } from "../api/orvalModelShim";
 import type { ProxyTrafficFlowUpdate } from "../hooks/useProxyTrafficFlow";
+import { isWebGLAvailable, VpnGlobeBoundary } from "./VpnGlobeBoundary";
 import "../css/VpnMap.css";
 
 import "leaflet-defaulticon-compatibility";
@@ -414,6 +415,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
   const [globeTrafficLayer, setGlobeTrafficLayer] = useState<GlobeTrafficLayer>(
       (getPreferenceCookie("selectedGlobeTrafficLayer") as GlobeTrafficLayer) || "arcs"
   );
+  const [globeUnavailable, setGlobeUnavailable] = useState(() => !isWebGLAvailable());
   const [viewportSize, setViewportSize] = useState(() => ({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -445,6 +447,13 @@ const VpnMap: React.FC<VpnMapProps> = ({
   useEffect(() => {
     setPreferenceCookie("selectedGlobeTrafficLayer", globeTrafficLayer);
   }, [globeTrafficLayer]);
+
+  // Re-probe when entering globe mode so a prior failure does not lock the session forever
+  // (e.g. transient GPU process issues). Blocklisted WebGL still returns false immediately.
+  useEffect(() => {
+    if (viewMode !== "globe") return;
+    setGlobeUnavailable(!isWebGLAvailable());
+  }, [viewMode]);
 
   useEffect(() => {
     if (viewMode !== "globe") return;
@@ -1162,51 +1171,76 @@ const VpnMap: React.FC<VpnMapProps> = ({
 
               {/* 2D map mode is intentionally static (no traffic line animation). */}
             </MapContainer>
+        ) : globeUnavailable ? (
+            <div className="vpn-globe-fallback" role="alert">
+              <p>
+                3D globe is unavailable: WebGL context could not be created (common with software
+                Mesa/llvmpipe rendering or after GPU/process limits). Use the 2D map instead.
+              </p>
+              <button type="button" className="btn secondary" onClick={() => setViewMode("map")}>
+                Switch to map
+              </button>
+            </div>
         ) : (
             <div className="vpn-globe-root">
-              <Suspense fallback={<div className="vpn-globe-loading">Loading globe...</div>}>
-                <Globe
-                    width={globeWidth}
-                    height={globeHeight}
-                    backgroundColor="rgba(0,0,0,0)"
-                    globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
-                    bumpImageUrl="https://unpkg.com/three-globe/example/img/earth-topology.png"
-                    showAtmosphere={false}
-                    pointsData={globePointsData}
-                    pointLat="lat"
-                    pointLng="lng"
-                    pointColor="color"
-                    pointAltitude="altitude"
-                    pointRadius="radius"
-                    pointLabel="label"
-                    pointsMerge
-                    pointsTransitionDuration={0}
-                    arcsData={globeTrafficLayer === "arcs" ? globeArcsData : []}
-                    arcStartLat="startLat"
-                    arcStartLng="startLng"
-                    arcEndLat="endLat"
-                    arcEndLng="endLng"
-                    arcColor="dashColors"
-                    arcLabel="label"
-                    arcCurveResolution={24}
-                    arcDashLength={globeDash.arcLength}
-                    arcDashGap={globeDash.arcGap}
-                    arcDashAnimateTime="dashAnimateMs"
-                    arcsTransitionDuration={0}
-                    pathsData={globeTrafficLayer === "submarine" ? globeCablePathsData : []}
-                    pathPoints="points"
-                    pathPointLat="lat"
-                    pathPointLng="lng"
-                    pathPointAlt="alt"
-                    pathColor="color"
-                    pathStroke={(d: unknown) => (d as { width: number }).width}
-                    pathLabel="label"
-                    pathDashLength={globeDash.pathLength}
-                    pathDashGap={globeDash.pathGap}
-                    pathDashAnimateTime="dashAnimateMs"
-                    pathTransitionDuration={0}
-                />
-              </Suspense>
+              <VpnGlobeBoundary
+                onError={() => setGlobeUnavailable(true)}
+                fallback={
+                  <div className="vpn-globe-fallback" role="alert">
+                    <p>
+                      3D globe failed to start (WebGL error). The rest of the page is unaffected —
+                      switch to the 2D map to continue.
+                    </p>
+                    <button type="button" className="btn secondary" onClick={() => setViewMode("map")}>
+                      Switch to map
+                    </button>
+                  </div>
+                }
+              >
+                <Suspense fallback={<div className="vpn-globe-loading">Loading globe...</div>}>
+                  <Globe
+                      width={globeWidth}
+                      height={globeHeight}
+                      backgroundColor="rgba(0,0,0,0)"
+                      globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
+                      bumpImageUrl="https://unpkg.com/three-globe/example/img/earth-topology.png"
+                      showAtmosphere={false}
+                      pointsData={globePointsData}
+                      pointLat="lat"
+                      pointLng="lng"
+                      pointColor="color"
+                      pointAltitude="altitude"
+                      pointRadius="radius"
+                      pointLabel="label"
+                      pointsMerge
+                      pointsTransitionDuration={0}
+                      arcsData={globeTrafficLayer === "arcs" ? globeArcsData : []}
+                      arcStartLat="startLat"
+                      arcStartLng="startLng"
+                      arcEndLat="endLat"
+                      arcEndLng="endLng"
+                      arcColor="dashColors"
+                      arcLabel="label"
+                      arcCurveResolution={24}
+                      arcDashLength={globeDash.arcLength}
+                      arcDashGap={globeDash.arcGap}
+                      arcDashAnimateTime="dashAnimateMs"
+                      arcsTransitionDuration={0}
+                      pathsData={globeTrafficLayer === "submarine" ? globeCablePathsData : []}
+                      pathPoints="points"
+                      pathPointLat="lat"
+                      pathPointLng="lng"
+                      pathPointAlt="alt"
+                      pathColor="color"
+                      pathStroke={(d: unknown) => (d as { width: number }).width}
+                      pathLabel="label"
+                      pathDashLength={globeDash.pathLength}
+                      pathDashGap={globeDash.pathGap}
+                      pathDashAnimateTime="dashAnimateMs"
+                      pathTransitionDuration={0}
+                  />
+                </Suspense>
+              </VpnGlobeBoundary>
             </div>
         )}
       </div>

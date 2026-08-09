@@ -62,20 +62,9 @@
     align-items: center;
     gap: 6px;
   }
-  
-  .copy-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #00d4ff;
-  }
-  
-  .copy-btn:hover {
-    color: #fff;
-  }
-  
+
   .copied-text {
-    color: #00ff00;
+    color: var(--link-color);
     font-size: 12px;
   }
   

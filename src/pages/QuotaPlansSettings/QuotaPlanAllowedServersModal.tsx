@@ -17,6 +17,7 @@ import type {
 } from "../../api/orvalModelShim";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { GridRowActions, RowActionButton } from "../../components/ui/GridRowActions.tsx";
 import "../../css/Settings.css";
 import "../../css/Table.css";
 
@@ -187,17 +188,15 @@ export function QuotaPlanAllowedServersModal({
                           : "—"}
                       </td>
                       <td>
-                        <div className="action-container">
-                          <button
-                            type="button"
-                            className="btn danger"
-                            onClick={() => a.id != null && handleRemove(a.id)}
-                            disabled={deleteMutation.isPending}
+                        <GridRowActions>
+                          <RowActionButton
+                            variant="danger"
                             title="Remove"
-                          >
-                            <FaTrash className="icon" />
-                          </button>
-                        </div>
+                            disabled={deleteMutation.isPending}
+                            onClick={() => a.id != null && handleRemove(a.id)}
+                            icon={<FaTrash className="icon" />}
+                          />
+                        </GridRowActions>
                       </td>
                     </tr>
                   ))}

@@ -1,5 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithProviders } from "../../test/renderWithProviders";
+import { setCookieConsent } from "../../utils/gdpr/cookieConsent";
 import GoogleLoginForm from "./GoogleLoginForm";
 
 const renderButton = vi.fn();
@@ -20,6 +22,7 @@ describe("GoogleLoginForm", () => {
   beforeEach(() => {
     renderButton.mockReset();
     initialize.mockReset();
+    setCookieConsent({ functional: true, thirdParty: true });
 
     window.google = {
       accounts: {
@@ -38,7 +41,7 @@ describe("GoogleLoginForm", () => {
   });
 
   it("renders the Google button when mounted", async () => {
-    render(<GoogleLoginForm onTotpChallenge={vi.fn()} />);
+    renderWithProviders(<GoogleLoginForm onTotpChallenge={vi.fn()} />);
 
     await vi.waitFor(() => {
       expect(renderButton).toHaveBeenCalled();
@@ -48,7 +51,7 @@ describe("GoogleLoginForm", () => {
   });
 
   it("renders the Google button once on mount", async () => {
-    render(<GoogleLoginForm onTotpChallenge={vi.fn()} />);
+    renderWithProviders(<GoogleLoginForm onTotpChallenge={vi.fn()} />);
 
     await vi.waitFor(() => {
       expect(renderButton).toHaveBeenCalled();
@@ -72,7 +75,7 @@ describe("GoogleLoginForm", () => {
     }));
     HTMLElement.prototype.getBoundingClientRect = getBoundingClientRect;
 
-    render(<GoogleLoginForm onTotpChallenge={vi.fn()} />);
+    renderWithProviders(<GoogleLoginForm onTotpChallenge={vi.fn()} />);
 
     await vi.waitFor(() => {
       expect(renderButton).toHaveBeenCalled();
@@ -85,7 +88,7 @@ describe("GoogleLoginForm", () => {
 
   it("re-renders the Google button after unmount and remount", async () => {
     const onTotpChallenge = vi.fn();
-    const { unmount } = render(<GoogleLoginForm onTotpChallenge={onTotpChallenge} />);
+    const { unmount } = renderWithProviders(<GoogleLoginForm onTotpChallenge={onTotpChallenge} />);
 
     await vi.waitFor(() => {
       expect(renderButton).toHaveBeenCalled();
@@ -93,7 +96,7 @@ describe("GoogleLoginForm", () => {
 
     const callsAfterFirstMount = renderButton.mock.calls.length;
     unmount();
-    render(<GoogleLoginForm onTotpChallenge={onTotpChallenge} />);
+    renderWithProviders(<GoogleLoginForm onTotpChallenge={onTotpChallenge} />);
 
     await vi.waitFor(() => {
       expect(renderButton.mock.calls.length).toBeGreaterThan(callsAfterFirstMount);

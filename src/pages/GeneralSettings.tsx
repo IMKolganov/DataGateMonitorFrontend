@@ -332,7 +332,7 @@ export function GeneralSettings() {
             name="openvpnPollingIntervalUnit"
             value={intervalType}
             onChange={(e) => setIntervalType(e.target.value as Unit)}
-            className="btn secondary"
+            className="input dropdown-select"
           >
             <option value="seconds">Seconds</option>
             <option value="minutes">Minutes</option>
@@ -389,6 +389,16 @@ export function GeneralSettings() {
             className="input polling-interval-input"
           />
         </div>
+
+        <div className="settings-item settings-item--mt-12">
+          <button
+            className="btn primary"
+            onClick={handleSave}
+            disabled={loading || setSettingMutation.isPending}
+          >
+            <FaSave className="icon" aria-hidden /> Save
+          </button>
+        </div>
       </div>
 
       <div className="settings-polling">
@@ -407,15 +417,14 @@ export function GeneralSettings() {
             onChange={(e) => setAllowFreeTierGrace(e.target.checked)}
           />
           <span>
-            Allow temporary VPN access without channel subscription or merged account
+            Allow temporary VPN access without channel subscription
           </span>
         </label>
 
         <p className="settings-item-description">
           When enabled, users on Free/Default plans may receive VPN configs for a short grace
-          period even if they are not subscribed to the required Telegram channel and have not
-          linked their dashboard account. Disconnect enforcement respects the active grace window
-          and may disconnect them after it expires.
+          period even if they are not subscribed to the required Telegram channel. Disconnect
+          enforcement respects the active grace window and may disconnect them after it expires.
         </p>
 
         <div className="settings-item settings-item--mt-12">
@@ -431,6 +440,16 @@ export function GeneralSettings() {
             onChange={(e) => setFreeTierGraceMinutes(Number(e.target.value))}
             className="input polling-interval-input"
           />
+        </div>
+
+        <div className="settings-item settings-item--mt-12">
+          <button
+            className="btn primary"
+            onClick={handleSave}
+            disabled={loading || setSettingMutation.isPending}
+          >
+            <FaSave className="icon" aria-hidden /> Save
+          </button>
         </div>
       </div>
     </div>

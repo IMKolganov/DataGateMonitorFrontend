@@ -15,5 +15,7 @@ export interface DataGateXRayManagerInfoRootXrayInfoResponse {
   application?: string | null;
   /** @nullable */
   description?: string | null;
+  /** @nullable */
+  publicIp?: string | null;
   config?: DataGateXRayManagerInfoConfigInfoResponse;
 }

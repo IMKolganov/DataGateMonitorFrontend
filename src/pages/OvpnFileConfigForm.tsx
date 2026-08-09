@@ -35,6 +35,7 @@ import type { GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams } from
 import "../css/Table.css";
 import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
+import { useStabilizedRowCount } from "../hooks/useStabilizedRowCount";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../utils/errorMessage";
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
@@ -197,7 +198,14 @@ const OvpnFileConfigForm: React.FC = () => {
     useGetApiOpenVpnServersConflogHistoryByServerVpnServerId(
       parsedVpnServerId,
       conflogHistoryParams,
-      { query: { enabled: parsedVpnServerId > 0 && openVpnPageEnabled } }
+      {
+        query: {
+          enabled: parsedVpnServerId > 0 && openVpnPageEnabled,
+          // Keep prior page + totalCount while fetching so MUI server pagination
+          // does not see rowCount→0/undefined and snap back to page 0.
+          placeholderData: (prev) => prev,
+        },
+      }
     );
 
   const latestConflogParams = useMemo<GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams>(
@@ -217,15 +225,22 @@ const OvpnFileConfigForm: React.FC = () => {
     | { items?: ConflogRow[] | null; totalCount?: number | null }
     | undefined;
   const conflogItems: ConflogRow[] = (conflogPageData?.items ?? []) as ConflogRow[];
-  const conflogTotalCount = conflogPageData?.totalCount ?? conflogItems.length;
+  // Keep last totalCount while page fetch briefly omits it (MUI snaps to page 0 otherwise).
+  const nextConflogTotal =
+    typeof conflogPageData?.totalCount === "number"
+      ? conflogPageData.totalCount
+      : conflogHistoryResp
+        ? conflogItems.length
+        : undefined;
+  const conflogTotalCount = useStabilizedRowCount(nextConflogTotal, parsedVpnServerId);
 
   const fetchAndSaveConflogMutation = usePostApiOpenVpnServersConflogFetchAndSaveByServerVpnServerId({
     mutation: {
       onSuccess: () => {
+        // Invalidate all history variants (current page + latest summary Page=1,PageSize=1).
         queryClient.invalidateQueries({
           queryKey: getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryKey(
-            parsedVpnServerId,
-            conflogHistoryParams
+            parsedVpnServerId
           ),
         });
         toast.success("Conflog fetched and saved");
@@ -655,11 +670,12 @@ const OvpnFileConfigForm: React.FC = () => {
                   />
                   <div className="checkbox-content">
                     <span className="checkbox-title">
-                      Try auto-detect Port/Proto from latest server conflog
+                      Try auto-detect Port/Proto from live node /api/info
                     </span>
                     <span className="checkbox-description">
-                      When enabled, save uses detected values from server config ({detectedPort ?? "—"} /{" "}
-                      {serverProto ?? "—"}).
+                      When enabled, save queries the OpenVPN manager live <code>/api/info</code> for
+                      Port/Proto. Last saved conflog showed {detectedPort ?? "—"} / {serverProto ?? "—"}{" "}
+                      (audit history below).
                     </span>
                   </div>
                 </label>
@@ -866,8 +882,10 @@ const OvpnFileConfigForm: React.FC = () => {
                       pageSize: conflogPageSize,
                     }}
                     onPaginationModelChange={(model: GridPaginationModel) => {
-                      setConflogPage(model.page + 1);
-                      setConflogPageSize(model.pageSize ?? conflogPageSize);
+                      const nextPage = model.page + 1;
+                      const nextSize = model.pageSize ?? conflogPageSize;
+                      if (nextPage !== conflogPage) setConflogPage(nextPage);
+                      if (nextSize !== conflogPageSize) setConflogPageSize(nextSize);
                     }}
                     loading={isConflogLoading}
                     slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}

@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useMemo } from "react";
-import type { GridColDef } from "@mui/x-data-grid";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
+import type { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type {
@@ -10,10 +10,16 @@ import type {
   DownloadFileResponseApiResponse,
 } from "../../api/orvalModelShim";
 import { usePostApiOpenVpnFilesRevokeFile, usePostApiOpenVpnFilesDownloadFile } from "../../api/orval/open-vpn-files/open-vpn-files.ts";
-import { FaDownload } from "react-icons/fa";
+import { FaBan, FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
+import {
+  collectSelectedOnPage,
+  emptyGridSelection,
+  slicePageRows,
+} from "../../utils/gridPageSelection";
 import "../../css/Table.css";
 
 const safeFormatDate = (input?: string | null): string => {
@@ -30,9 +36,26 @@ export type OvpnRowInput =
 interface Props {
   ovpnFiles: OvpnRowInput[];
   vpnServerId: string;
-  onRevoke: () => Promise<void> | void;
+  onRevoke: (count?: number) => Promise<void> | void;
   loading: boolean;
 }
+
+type OvpnRow = {
+  id: string;
+  numericId: number | null;
+  externalId: string;
+  commonName: string;
+  fileName: string;
+  filePath: string;
+  issuedAt: string;
+  issuedTo: string;
+  certFilePath: string;
+  keyFilePath: string;
+  isRevoked: boolean | undefined;
+  message: string;
+  lastUpdate: string;
+  createDate: string;
+};
 
 function unwrapOvpnItem(x: OvpnRowInput): IssuedOvpnFileDto | null {
   if (!x) return null;
@@ -64,12 +87,19 @@ function unwrapOvpnItem(x: OvpnRowInput): IssuedOvpnFileDto | null {
   return null;
 }
 
+function revokeErrorMessage(err: unknown): string {
+  const e = err as { response?: { data?: { message?: string } }; message?: string };
+  return e.response?.data?.message || e.message || "Error revoking OVPN file.";
+}
+
 const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loading }) => {
   const { mutateAsync: revokeMutate, isPending: revokePending } = usePostApiOpenVpnFilesRevokeFile();
   const { mutateAsync: downloadMutate, isPending: downloadPending } = usePostApiOpenVpnFilesDownloadFile();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [issuedToFilter, setIssuedToFilter] = useState("");
+  const [bulkRevoking, setBulkRevoking] = useState(false);
+  const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>(emptyGridSelection);
   const [ovpnFilesGridPage, setOvpnFilesGridPage] = useState(0);
   const [ovpnFilesPageSize, setOvpnFilesPageSize] = usePersistedPageSize(
     `ovpn-files:${vpnServerId}`,
@@ -84,28 +114,127 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       .filter((x): x is IssuedOvpnFileDto => !!x && (x.id != null || x.commonName != null));
   }, [ovpnFiles]);
 
-  const handleRevoke = useCallback(
-    async (ovpnFileId: number, commonName: string) => {
-      if (!window.confirm(`Are you sure you want to revoke OVPN file ${commonName}?`)) return;
-      try {
-        const data: RevokeFileRequest = {
-          vpnServerId: Number(vpnServerId),
-          ovpnFileId: ovpnFileId,
-          commonName,
+  const filtered = useMemo(() => {
+    return items.filter((x) => {
+      const byCN = (x.commonName ?? "").toLowerCase().includes(searchQuery.toLowerCase());
+      const byIssuedTo =
+        issuedToFilter === "" || (x.issuedTo ?? "").toLowerCase().includes(issuedToFilter.toLowerCase());
+      return byCN && byIssuedTo;
+    });
+  }, [items, searchQuery, issuedToFilter]);
+
+  useEffect(() => {
+    setRowSelectionModel(emptyGridSelection());
+  }, [searchQuery, issuedToFilter, ovpnFilesGridPage, ovpnFilesPageSize, vpnServerId]);
+
+  const rows: OvpnRow[] = useMemo(
+    () =>
+      filtered.map((issuedOvpnFile, index) => {
+        const id =
+          issuedOvpnFile.id != null
+            ? String(issuedOvpnFile.id)
+            : `${issuedOvpnFile.commonName ?? "cn"}-${index}`;
+
+        return {
+          id,
+          numericId: issuedOvpnFile.id != null ? Number(issuedOvpnFile.id) : null,
+          externalId: issuedOvpnFile.externalId || "",
+          commonName: issuedOvpnFile.commonName || "",
+          fileName: issuedOvpnFile.fileName || "",
+          filePath: issuedOvpnFile.filePath || "",
+          issuedAt: safeFormatDate(issuedOvpnFile.issuedAt),
+          issuedTo: issuedOvpnFile.issuedTo || "",
+          certFilePath: issuedOvpnFile.certFilePath || "",
+          keyFilePath: issuedOvpnFile.keyFilePath || "",
+          isRevoked: issuedOvpnFile.isRevoked,
+          message: issuedOvpnFile.message || "",
+          lastUpdate: safeFormatDate(issuedOvpnFile.lastUpdate),
+          createDate: safeFormatDate(issuedOvpnFile.createDate),
         };
+      }),
+    [filtered],
+  );
 
-        await revokeMutate({ data });
-        await onRevoke();
-      } catch (err: unknown) {
-        const e = err as { response?: { data?: { message?: string } }; message?: string };
+  const pageRows = useMemo(
+    () => slicePageRows(rows, ovpnFilesGridPage, ovpnFilesPageSize),
+    [rows, ovpnFilesGridPage, ovpnFilesPageSize],
+  );
 
-        const msg = e.response?.data?.message || e.message || "Error revoking OVPN file.";
+  const selectedActiveRows = useMemo(
+    () =>
+      collectSelectedOnPage(
+        rowSelectionModel,
+        pageRows,
+        (row) => !row.isRevoked && row.numericId != null,
+      ),
+    [rowSelectionModel, pageRows],
+  );
 
-        toast.error(msg);
+  const clearSelection = useCallback(() => setRowSelectionModel(emptyGridSelection()), []);
+
+  const handleRevokeMany = useCallback(
+    async (targets: OvpnRow[]) => {
+      const unique = targets.filter((r) => r.numericId != null && !r.isRevoked);
+      if (unique.length === 0) return;
+
+      const labels = unique.map((r) => r.commonName || r.fileName || String(r.numericId));
+      const preview =
+        labels.length <= 5
+          ? labels.join(", ")
+          : `${labels.slice(0, 3).join(", ")} and ${labels.length - 3} more`;
+      const confirmed = window.confirm(
+        unique.length === 1
+          ? `Are you sure you want to revoke OVPN file ${labels[0]}?`
+          : `Are you sure you want to revoke ${unique.length} OVPN files?\n\n${preview}\n\nThis cannot be undone.`,
+      );
+      if (!confirmed) return;
+
+      setBulkRevoking(true);
+      try {
+        const failures: string[] = [];
+        for (const row of unique) {
+          try {
+            const data: RevokeFileRequest = {
+              vpnServerId: Number(vpnServerId),
+              ovpnFileId: row.numericId!,
+              commonName: row.commonName,
+            };
+            await revokeMutate({ data });
+          } catch (err: unknown) {
+            failures.push(`${row.commonName || row.id}: ${revokeErrorMessage(err)}`);
+          }
+        }
+
+        const succeeded = unique.length - failures.length;
+        clearSelection();
+
+        if (succeeded > 0) {
+          await onRevoke(succeeded);
+        }
+        if (failures.length > 0) {
+          toast.error(
+            failures.length === 1
+              ? failures[0]
+              : `Failed to revoke ${failures.length} of ${unique.length} OVPN files.`,
+          );
+        }
+      } finally {
+        setBulkRevoking(false);
       }
     },
-    [vpnServerId, revokeMutate, onRevoke],
+    [vpnServerId, revokeMutate, onRevoke, clearSelection],
   );
+
+  const handleRevoke = useCallback(
+    async (row: OvpnRow) => {
+      await handleRevokeMany([row]);
+    },
+    [handleRevokeMany],
+  );
+
+  const handleBulkRevoke = useCallback(async () => {
+    await handleRevokeMany(selectedActiveRows);
+  }, [handleRevokeMany, selectedActiveRows]);
 
   const handleDownload = useCallback(
     async (issuedOvpnFileId: number) => {
@@ -152,37 +281,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
     [downloadMutate, vpnServerId],
   );
 
-  const filtered = useMemo(() => {
-    return items.filter((x) => {
-      const byCN = (x.commonName ?? "").toLowerCase().includes(searchQuery.toLowerCase());
-      const byIssuedTo =
-        issuedToFilter === "" || (x.issuedTo ?? "").toLowerCase().includes(issuedToFilter.toLowerCase());
-      return byCN && byIssuedTo;
-    });
-  }, [items, searchQuery, issuedToFilter]);
-
-  const rows = filtered.map((issuedOvpnFile, index) => {
-    const id =
-      issuedOvpnFile.id != null
-        ? String(issuedOvpnFile.id)
-        : `${issuedOvpnFile.commonName ?? "cn"}-${index}`;
-
-    return {
-      id,
-      externalId: issuedOvpnFile.externalId || "",
-      commonName: issuedOvpnFile.commonName || "",
-      fileName: issuedOvpnFile.fileName || "",
-      filePath: issuedOvpnFile.filePath || "",
-      issuedAt: safeFormatDate(issuedOvpnFile.issuedAt),
-      issuedTo: issuedOvpnFile.issuedTo || "",
-      certFilePath: issuedOvpnFile.certFilePath || "",
-      keyFilePath: issuedOvpnFile.keyFilePath || "",
-      isRevoked: issuedOvpnFile.isRevoked,
-      message: issuedOvpnFile.message || "",
-      lastUpdate: safeFormatDate(issuedOvpnFile.lastUpdate),
-      createDate: safeFormatDate(issuedOvpnFile.createDate),
-    };
-  });
+  const busy = loading || bulkRevoking || revokePending;
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 110 },
@@ -200,31 +299,33 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
     {
       field: "actions",
       headerName: "Actions",
-      width: 230,
+      width: 110,
       sortable: false,
       filterable: false,
-      renderCell: (params) => (
-        <div className="action-container">
-          {!params.row.isRevoked && (
-            <button
-              className="btn danger"
-              onClick={() => handleRevoke(Number(params.row.id), params.row.commonName)}
-              disabled={revokePending}
-            >
-              Revoke
-            </button>
-          )}
-          <button
-            className="btn secondary"
-            onClick={() => handleDownload(Number(params.row.id))}
-            disabled={downloadPending}
-            title="Download OVPN"
-          >
-            <FaDownload className="icon" style={{ marginRight: 6 }} />
-            Download
-          </button>
-        </div>
-      ),
+      renderCell: (params) => {
+        const row = params.row as OvpnRow;
+        return (
+          <GridRowActions>
+            {!row.isRevoked && row.numericId != null && (
+              <RowActionButton
+                variant="danger"
+                title="Revoke"
+                disabled={busy}
+                onClick={() => void handleRevoke(row)}
+                icon={<FaBan className="icon" />}
+              />
+            )}
+            {row.numericId != null && (
+              <RowActionButton
+                title="Download OVPN"
+                disabled={downloadPending || bulkRevoking}
+                onClick={() => void handleDownload(row.numericId!)}
+                icon={<FaDownload className="icon" />}
+              />
+            )}
+          </GridRowActions>
+        );
+      },
     },
   ];
 
@@ -243,6 +344,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
             id="ovpn-files-search-common-name"
             name="ovpnFilesSearchCommonName"
             type="text"
+            placeholder="Search by Common Name"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="input"
@@ -256,6 +358,24 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
             onChange={(e) => setIssuedToFilter(e.target.value)}
             className="input"
           />
+          <button
+            type="button"
+            className="btn danger"
+            disabled={busy || selectedActiveRows.length === 0}
+            onClick={() => void handleBulkRevoke()}
+            title={
+              selectedActiveRows.length === 0
+                ? "Select active OVPN files to revoke"
+                : `Revoke ${selectedActiveRows.length} selected`
+            }
+          >
+            <FaBan className="icon" aria-hidden />
+            {bulkRevoking
+              ? "Revoking…"
+              : selectedActiveRows.length > 0
+                ? `Revoke selected (${selectedActiveRows.length})`
+                : "Revoke selected"}
+          </button>
         </div>
 
         <Grid
@@ -263,6 +383,12 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           getRowId={(row) => row.id}
           rows={rows}
           columns={columns}
+          checkboxSelection
+          disableRowSelectionOnClick
+          disableRowSelectionExcludeModel
+          isRowSelectable={(params) => !params.row.isRevoked && params.row.numericId != null}
+          rowSelectionModel={rowSelectionModel}
+          onRowSelectionModelChange={(model) => setRowSelectionModel(model)}
           pageSizeOptions={[5, 10, 20, 100]}
           paginationMode="client"
           paginationModel={{ page: ovpnFilesGridPage, pageSize: ovpnFilesPageSize }}
@@ -273,7 +399,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           localeText={{
             noRowsLabel: loading ? "🔄 Loading OVPN files..." : "📭 No OVPN files found",
           }}
-          loading={loading || revokePending || downloadPending}
+          loading={busy || downloadPending}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
         />
       </div>

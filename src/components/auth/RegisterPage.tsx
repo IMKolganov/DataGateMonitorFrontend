@@ -1,11 +1,12 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useMemo, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { postApiAuthRegister } from "../../api/orval/auth/auth";
 import type { RegisterUserRequest } from "../../api/orvalModelShim";
 import { FaUserPlus } from "react-icons/fa";
 import { PasswordInput } from "./PasswordInput";
 import GdprFooterLinks from "../gdpr/GdprFooterLinks";
 import { useCookieConsent } from "../../contexts/CookieConsentContext";
+import { loginUrlWithReturn, readRedirectFromSearch } from "../../utils/auth/returnPath";
 import "../../css/Login.css";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
@@ -20,7 +21,12 @@ const RegisterPage: React.FC<RegisterPageProps> = ({
   confirmEmailPath = "/confirm-email",
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { strings } = useCookieConsent();
+  const redirectPath = useMemo(() => readRedirectFromSearch(location.search, ""), [location.search]);
+  const resolvedLoginPath = redirectPath
+    ? loginUrlWithReturn(redirectPath)
+    : loginPath;
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [login, setLogin] = useState("");
@@ -75,7 +81,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({
         return;
       }
 
-      navigate(loginPath, { replace: true, state: { registered: true } });
+      navigate(resolvedLoginPath, { replace: true, state: { registered: true } });
     } catch (err: unknown) {
       let detailedMessage = "Registration failed.";
 
@@ -224,7 +230,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({
 
         <div className="register-container">
           <p>
-            Already have an account? <Link to={loginPath}>Sign in</Link>
+            Already have an account? <Link to={resolvedLoginPath}>Sign in</Link>
           </p>
           <GdprFooterLinks />
         </div>

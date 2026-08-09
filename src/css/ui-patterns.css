@@ -2,6 +2,7 @@
 
 .settings-divider {
   border-top: 1px solid var(--border-color);
+  margin: 12px 0;
 }
 
 .settings-divider:empty {
@@ -108,7 +109,38 @@
 }
 
 .settings-item-label--320 {
-  min-width: 320px;
+  min-width: min(320px, 100%);
+}
+
+@media (max-width: 480px) {
+  .settings-item-label--320 {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* Native select styled like .input (not .btn) */
+.dropdown-select,
+select.input {
+  display: inline-block;
+  width: auto;
+  min-width: 0;
+  padding: 8px 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--input-text);
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.dropdown-select:focus,
+select.input:focus {
+  outline: none;
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 1px var(--input-focus-ring);
 }
 
 .settings-item--gap-10 {
@@ -245,6 +277,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin: 0 0 8px;
 }
 
 .settings-page__h2-with-icon--flush {
@@ -253,4 +286,57 @@
 
 .form-hint--mt-8 {
   margin-top: 8px;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.admin-session-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-session-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admin-session-row__meta {
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
+.admin-session-row__meta strong {
+  word-break: break-word;
+}
+
+.admin-session-row__since {
+  font-size: 0.9em;
+  opacity: 0.75;
+  margin-top: 4px;
+}
+
+.admin-session-row__current {
+  margin-left: 8px;
+  opacity: 0.85;
+}
+
+.secret-copy-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  word-break: break-all;
 }

@@ -13,11 +13,12 @@ import {
   postApiXrayClientLinksDownloadFile,
   postApiXrayClientLinksRevokeFile,
 } from "../../api/xrayClientLinks.ts";
-import { FaDownload } from "react-icons/fa";
+import { FaBan, FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import type { OvpnRowInput } from "../ovpn-files/OvpnFilesTable.tsx";
+import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
 import "../../css/Table.css";
 
 const safeFormatDate = (input?: string | null): string => {
@@ -175,25 +176,25 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
     {
       field: "actions",
       headerName: "Actions",
-      width: 230,
+      width: 110,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
-        <div className="action-container">
+        <GridRowActions>
           {!params.row.isRevoked && (
-            <button className="btn danger" onClick={() => handleRevoke(Number(params.row.id), params.row.commonName)}>
-              Revoke
-            </button>
+            <RowActionButton
+              variant="danger"
+              title="Revoke"
+              onClick={() => handleRevoke(Number(params.row.id), params.row.commonName)}
+              icon={<FaBan className="icon" />}
+            />
           )}
-          <button
-            className="btn secondary"
-            onClick={() => handleDownload(Number(params.row.id))}
+          <RowActionButton
             title="Download client link file"
-          >
-            <FaDownload className="icon" style={{ marginRight: 6 }} />
-            Download
-          </button>
-        </div>
+            onClick={() => handleDownload(Number(params.row.id))}
+            icon={<FaDownload className="icon" />}
+          />
+        </GridRowActions>
       ),
     },
   ];

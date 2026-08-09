@@ -157,6 +157,23 @@ export default defineConfig(({ mode }) => {
       setupFiles: ["./src/test/setup.ts"],
       css: true,
       clearMocks: true,
+      coverage: {
+        provider: "v8",
+        all: true,
+        include: ["src/**/*.{ts,tsx}"],
+        exclude: [
+          "src/api/orval/**",
+          "src/**/*.test.*",
+          "src/test/**",
+          "src/**/*.d.ts",
+        ],
+        // Soft floor after crossing ~50% lines (notifications/console/SignalR deepen).
+        thresholds: {
+          lines: 47,
+          statements: 45,
+          functions: 40,
+          branches: 36,
+        },      },
     },
   };
 });
