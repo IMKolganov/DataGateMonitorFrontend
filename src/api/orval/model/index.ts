@@ -31,6 +31,7 @@ export * from './apiAuthResponsesUserTvLoginSummaryResponse';
 export * from './apiCertExpiryResponsesCertExpiryCheckRunResponse';
 export * from './apiCertExpiryResponsesGetCertExpiryRunsResponse';
 export * from './apiDataGateOpenVpnManagerDiagnosticsResponsesPiHoleDiagnosticsResponse';
+export * from './apiDataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse';
 export * from './apiEmailBroadcastResponsesDtoEmailBroadcastTemplateDto';
 export * from './apiEmailBroadcastResponsesGetEmailTemplatesResponse';
 export * from './apiEmailBroadcastResponsesGetSentEmailHistoryResponse';
@@ -194,6 +195,7 @@ export * from './dataGateOpenVpnManagerDiagnosticsResponsesPiHoleDiagnosticsResp
 export * from './dataGateOpenVpnManagerInfoConfigInfoResponse';
 export * from './dataGateOpenVpnManagerInfoOpenVpnManagementInfoResponse';
 export * from './dataGateOpenVpnManagerInfoRootOpenVpnInfoResponse';
+export * from './dataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse';
 export * from './dataGateXRayManagerInfoConfigInfoResponse';
 export * from './dataGateXRayManagerInfoRootXrayInfoResponse';
 export * from './dataGateXRayManagerInfoXRayManagementInfoResponse';

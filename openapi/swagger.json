@@ -13116,6 +13116,130 @@
           }
         }
       }
+    },
+    "/api/open-vpn-servers/{vpnServerId}/openvpn-process/status": {
+      "get": {
+        "tags": [
+          "VpnServerOpenVpnProcess"
+        ],
+        "operationId": "GetApiOpenVpnServersVpnServerIdOpenvpnProcessStatus",
+        "parameters": [
+          {
+            "name": "vpnServerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.DataGateOpenVpnManager.OpenVpnProcess.Responses.OpenVpnProcessStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/open-vpn-servers/{vpnServerId}/openvpn-process/start": {
+      "post": {
+        "tags": [
+          "VpnServerOpenVpnProcess"
+        ],
+        "operationId": "PostApiOpenVpnServersVpnServerIdOpenvpnProcessStart",
+        "parameters": [
+          {
+            "name": "vpnServerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.DataGateOpenVpnManager.OpenVpnProcess.Responses.OpenVpnProcessStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/open-vpn-servers/{vpnServerId}/openvpn-process/restart": {
+      "post": {
+        "tags": [
+          "VpnServerOpenVpnProcess"
+        ],
+        "operationId": "PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestart",
+        "parameters": [
+          {
+            "name": "vpnServerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.DataGateOpenVpnManager.OpenVpnProcess.Responses.OpenVpnProcessStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/open-vpn-servers/{vpnServerId}/openvpn-process/kill": {
+      "post": {
+        "tags": [
+          "VpnServerOpenVpnProcess"
+        ],
+        "operationId": "PostApiOpenVpnServersVpnServerIdOpenvpnProcessKill",
+        "parameters": [
+          {
+            "name": "vpnServerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.DataGateOpenVpnManager.OpenVpnProcess.Responses.OpenVpnProcessStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -15467,7 +15591,7 @@
         "type": "object",
         "properties": {
           "telegramId": {
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9.223372036854776e+18,
             "minimum": 1,
             "type": "integer",
             "format": "int64"
@@ -15479,7 +15603,7 @@
         "type": "object",
         "properties": {
           "telegramId": {
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9.223372036854776e+18,
             "minimum": 1,
             "type": "integer",
             "format": "int64",
@@ -17423,7 +17547,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": { }
+        "additionalProperties": {}
       },
       "Mobile.Dto.DeviceDto": {
         "required": [
@@ -18387,14 +18511,14 @@
             "nullable": true
           },
           "dailyQuotaBytes": {
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9.223372036854776e+18,
             "minimum": 0,
             "type": "integer",
             "format": "int64",
             "nullable": true
           },
           "monthlyQuotaBytes": {
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9.223372036854776e+18,
             "minimum": 0,
             "type": "integer",
             "format": "int64",
@@ -18953,7 +19077,7 @@
             "type": "string"
           },
           "telegramId": {
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9.223372036854776e+18,
             "minimum": 1,
             "type": "integer",
             "format": "int64"
@@ -21633,6 +21757,52 @@
           }
         },
         "additionalProperties": false
+      },
+      "DataGateOpenVpnManager.OpenVpnProcess.Responses.OpenVpnProcessStatusResponse": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "nullable": true
+          },
+          "isRunning": {
+            "type": "boolean"
+          },
+          "pid": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "configPath": {
+            "type": "string",
+            "nullable": true
+          },
+          "pidFilePath": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.DataGateOpenVpnManager.OpenVpnProcess.Responses.OpenVpnProcessStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataGateOpenVpnManager.OpenVpnProcess.Responses.OpenVpnProcessStatusResponse"
+          }
+        },
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
@@ -21646,7 +21816,7 @@
   },
   "security": [
     {
-      "Bearer": [ ]
+      "Bearer": []
     }
   ],
   "tags": [
@@ -21763,6 +21933,10 @@
     },
     {
       "name": "XrayClientLinks"
+    },
+    {
+      "name": "VpnServerOpenVpnProcess",
+      "description": "Admin OpenVPN process control proxy"
     }
   ]
 }

@@ -11,6 +11,7 @@ import { gridFilterFields } from "../config/gridFilters.ts";
 import { useGridFilters } from "../hooks/useGridFilterStub.ts";
 import VpnMap from "../components/VpnMap";
 import ServerDetailsInfoDefault from "../components/servers/ServerDetailsInfo.tsx";
+import { OpenVpnProcessControls } from "../components/servers/OpenVpnProcessControls.tsx";
 
 import {
     useGetApiOpenVpnClientsGetAllConnected,
@@ -558,6 +559,10 @@ export function GeneralServerDetails() {
                 latestConflogPayload={openVpnQueriesEnabled ? latestConflogPayload : null}
                 quotaPlanLabels={quotaPlanLabels}
             />
+
+            {canManage && openVpnQueriesEnabled && Number.isFinite(numericServerId) && (numericServerId ?? 0) > 0 ? (
+                <OpenVpnProcessControls vpnServerId={numericServerId!} disabled={loadingServer} />
+            ) : null}
 
             {quotaViewOnly ? <QuotaPlanViewOnlyNotice /> : null}
 
