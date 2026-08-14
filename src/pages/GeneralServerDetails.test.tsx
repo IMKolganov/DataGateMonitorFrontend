@@ -90,6 +90,10 @@ vi.mock("../api/orval/quota-plan-allowed-server/quota-plan-allowed-server", () =
   }),
 }));
 
+vi.mock("../components/servers/OpenVpnProcessControls.tsx", () => ({
+  OpenVpnProcessControls: () => <div data-testid="openvpn-process-controls" />,
+}));
+
 import GeneralServerDetails from "./GeneralServerDetails";
 
 describe("GeneralServerDetails", () => {
@@ -108,5 +112,6 @@ describe("GeneralServerDetails", () => {
     expect(screen.getByRole("button", { name: /Refresh/i })).toBeInTheDocument();
     expect(screen.getByText("Live")).toBeInTheDocument();
     expect(screen.getByText(/VPN Clients \(Connected\)/i)).toBeInTheDocument();
+    expect(screen.getByTestId("openvpn-process-controls")).toBeInTheDocument();
   });
 });
