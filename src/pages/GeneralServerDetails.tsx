@@ -63,6 +63,8 @@ type ConflogPayload = {
 };
 
 const MIN_PROXY_TRAFFIC_FLOW_VERSION = "1.2.5.54";
+/** OpenVPN manager version that first shipped start/restart/kill/status process API. */
+const MIN_OPENVPN_PROCESS_CONTROL_VERSION = "1.2.5.86";
 
 function parseVersionParts(raw: string): number[] {
     return raw
@@ -423,6 +425,12 @@ export function GeneralServerDetails() {
         return null;
     }, [openVpnQueriesEnabled, openVpnRuntimeVersion, proxyTrafficFlowSupported]);
 
+    const openVpnProcessControlSupported = useMemo(() => {
+        if (!openVpnQueriesEnabled) return false;
+        if (!openVpnRuntimeVersion) return false;
+        return compareDotVersions(openVpnRuntimeVersion, MIN_OPENVPN_PROCESS_CONTROL_VERSION) >= 0;
+    }, [openVpnQueriesEnabled, openVpnRuntimeVersion]);
+
     const loadingServer =
         v3ServersWithStatusQuery.isFetching || serverBasicQuery.isFetching;
 
@@ -561,7 +569,20 @@ export function GeneralServerDetails() {
             />
 
             {canManage && openVpnQueriesEnabled && Number.isFinite(numericServerId) && (numericServerId ?? 0) > 0 ? (
-                <OpenVpnProcessControls vpnServerId={numericServerId!} disabled={loadingServer} />
+                openVpnProcessControlSupported ? (
+                    <OpenVpnProcessControls vpnServerId={numericServerId!} disabled={loadingServer} />
+                ) : (
+                    <section className="openvpn-process-controls" aria-labelledby="openvpn-process-heading">
+                        <h3 id="openvpn-process-heading" className="settings-card__h3-with-icon">
+                            OpenVPN process
+                        </h3>
+                        <p className="server-details__muted server-details__intro">
+                            {openVpnRuntimeVersion
+                                ? `Process controls require OpenVPN manager >= ${MIN_OPENVPN_PROCESS_CONTROL_VERSION} (this node reports ${openVpnRuntimeVersion}).`
+                                : `Process controls require OpenVPN manager >= ${MIN_OPENVPN_PROCESS_CONTROL_VERSION} (node version unknown).`}
+                        </p>
+                    </section>
+                )
             ) : null}
 
             {quotaViewOnly ? <QuotaPlanViewOnlyNotice /> : null}

@@ -44,8 +44,24 @@ vi.mock("../api/orval/vpn-servers/vpn-servers", () => ({
 
 vi.mock("../api/orval/vpn-servers-v3/vpn-servers-v3", () => ({
   useGetApiV3OpenVpnServersGetAllWithStatus: () => ({
-    data: { servers: [] },
+    data: {
+      vpnServerWithStatuses: [
+        {
+          vpnServerResponses: {
+            vpnServer: {
+              id: 4,
+              serverName: "Edge-4",
+              serverType: VpnServerType.OpenVpn,
+            },
+          },
+          vpnServerStatusLogResponse: {
+            version: "1.2.5.90",
+          },
+        },
+      ],
+    },
     isLoading: false,
+    isFetching: false,
   }),
 }));
 

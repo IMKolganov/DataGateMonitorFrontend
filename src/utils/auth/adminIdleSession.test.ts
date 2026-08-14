@@ -17,7 +17,8 @@ vi.mock("./jwt", () => ({
 
 import { ACCESS_TOKEN_KEY } from "../const";
 import { SystemRoles } from "../../constants/systemRoles";
-import { startAdminIdleSession } from "./adminIdleSession";
+import { ADMIN_IDLE_WARNING_BEFORE_MS, startAdminIdleSession } from "./adminIdleSession";
+import { ADMIN_IDLE_WARNING_EVENT, type AdminIdleWarningDetail } from "./adminIdleSessionEvents";
 
 describe("startAdminIdleSession", () => {
   beforeEach(() => {
@@ -55,6 +56,36 @@ describe("startAdminIdleSession", () => {
     const stop = startAdminIdleSession();
     vi.advanceTimersByTime(60_000);
     expect(logout).toHaveBeenCalledTimes(1);
+    stop();
+  });
+
+  it("emits warning one minute before logout when timeout is longer", () => {
+    vi.useFakeTimers();
+    localStorage.setItem(ACCESS_TOKEN_KEY, "tok");
+    decodeToken.mockReturnValue({
+      role: SystemRoles.Admin,
+      adminIdleTimeoutMinutes: 3,
+    });
+
+    const warnings: AdminIdleWarningDetail[] = [];
+    const onWarn = (ev: Event) => {
+      warnings.push((ev as CustomEvent<AdminIdleWarningDetail>).detail);
+    };
+    window.addEventListener(ADMIN_IDLE_WARNING_EVENT, onWarn);
+
+    const stop = startAdminIdleSession();
+    const beforeWarning = 3 * 60_000 - ADMIN_IDLE_WARNING_BEFORE_MS - 1;
+    vi.advanceTimersByTime(beforeWarning);
+    expect(warnings).toHaveLength(0);
+
+    vi.advanceTimersByTime(2);
+    expect(warnings).toHaveLength(1);
+    expect(logout).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(ADMIN_IDLE_WARNING_BEFORE_MS);
+    expect(logout).toHaveBeenCalledTimes(1);
+
+    window.removeEventListener(ADMIN_IDLE_WARNING_EVENT, onWarn);
     stop();
   });
 });

@@ -142,7 +142,7 @@ export function OpenVpnProcessControls({ vpnServerId, disabled = false }: Props)
 
       <div className="openvpn-process-controls__status">
         <span className="detail-label">Daemon:</span>
-        <span>
+        <span className="notranslate" translate="no">
           {statusQuery.isLoading && !status
             ? "Checking…"
             : statusError
@@ -150,7 +150,7 @@ export function OpenVpnProcessControls({ vpnServerId, disabled = false }: Props)
               : formatPhase(status)}
         </span>
         {status?.currentOperation ? (
-          <span className="openvpn-process-controls__op">
+          <span className="openvpn-process-controls__op notranslate" translate="no">
             op: {status.currentOperation}
           </span>
         ) : null}
@@ -164,31 +164,37 @@ export function OpenVpnProcessControls({ vpnServerId, disabled = false }: Props)
         </button>
       </div>
 
-      {statusError ? (
-        <div className="server-details__alert" role="alert">
-          {statusError}
-        </div>
-      ) : null}
-      {remoteProgress && status?.message ? (
-        <div className="server-details__alert openvpn-process-controls__progress" role="status">
-          {status.message}
-        </div>
-      ) : null}
-      {status?.lastError && !remoteProgress ? (
-        <div className="server-details__alert" role="alert">
-          Last error: {status.lastError}
-        </div>
-      ) : null}
-      {actionError ? (
-        <div className="server-details__alert" role="alert">
-          {actionError}
-        </div>
-      ) : null}
-      {lastMessage ? (
-        <p className="openvpn-process-controls__success" role="status">
-          {lastMessage}
-        </p>
-      ) : null}
+      <div className="openvpn-process-controls__messages">
+        {statusError ? (
+          <div className="server-details__alert" role="alert">
+            {statusError}
+          </div>
+        ) : null}
+        {remoteProgress && status?.message ? (
+          <div
+            className="server-details__alert openvpn-process-controls__progress notranslate"
+            role="status"
+            translate="no"
+          >
+            {status.message}
+          </div>
+        ) : null}
+        {status?.lastError && !remoteProgress ? (
+          <div className="server-details__alert notranslate" role="alert" translate="no">
+            Last error: {status.lastError}
+          </div>
+        ) : null}
+        {actionError ? (
+          <div className="server-details__alert" role="alert">
+            {actionError}
+          </div>
+        ) : null}
+        {lastMessage ? (
+          <p className="openvpn-process-controls__success notranslate" role="status" translate="no">
+            {lastMessage}
+          </p>
+        ) : null}
+      </div>
 
       <div className="openvpn-process-controls__actions">
         <button

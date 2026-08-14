@@ -29,6 +29,7 @@ import { withSuspense } from "./utils/withSuspense.tsx";
 import { CookieConsentProvider } from "./contexts/CookieConsentContext.tsx";
 import CookieConsentBanner from "./components/gdpr/CookieConsentBanner.tsx";
 import CookieSettingsPanel from "./components/gdpr/CookieSettingsPanel.tsx";
+import { AdminIdleWarningModal } from "./components/auth/AdminIdleWarningModal.tsx";
 
 // Lazy pages
 const About = lazy(() => import("./pages/About"));
@@ -124,6 +125,7 @@ function App() {
     <div className="app-container">
       <Router>
         <CookieConsentProvider>
+        <AdminIdleWarningModal />
         <Layout>
           <Routes>
             <Route path="/privacy" element={withSuspense(<PrivacyPolicy />)} />
@@ -280,7 +282,7 @@ function App() {
         autoClose={3000}
         hideProgressBar={false}
         newestOnTop={false}
-        closeOnClick
+        closeOnClick={false}
         rtl={false}
         pauseOnFocusLoss
         draggable
