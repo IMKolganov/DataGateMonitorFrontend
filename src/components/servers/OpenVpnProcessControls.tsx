@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   getGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryKey,
@@ -8,41 +8,68 @@ import {
   useGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatus,
 } from "../../api/orval/vpn-server-open-vpn-process/vpn-server-open-vpn-process";
 import type { DataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse } from "../../api/orval/model";
+import { errorMessage } from "../../utils/errorMessage";
 
 type ProcessStatus = DataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse;
-
-function errorMessage(err: unknown): string {
-  if (err && typeof err === "object" && "message" in err && typeof (err as { message: unknown }).message === "string") {
-    return (err as { message: string }).message;
-  }
-  return "Request failed.";
-}
+type Action = "start" | "restart" | "kill";
 
 interface Props {
   vpnServerId: number;
   disabled?: boolean;
 }
 
+function formatPhase(status: ProcessStatus | undefined): string {
+  const phase = (status?.phase ?? "").toLowerCase();
+  switch (phase) {
+    case "starting":
+      return "Starting…";
+    case "stopping":
+      return "Stopping…";
+    case "restarting":
+      return "Restarting…";
+    case "failed":
+      return "Failed";
+    case "running":
+      return status?.pid != null ? `Running (pid ${status.pid})` : "Running";
+    case "stopped":
+      return "Stopped";
+    default:
+      if (status?.isRunning) {
+        return status.pid != null ? `Running (pid ${status.pid})` : "Running";
+      }
+      return status ? "Stopped" : "Checking…";
+  }
+}
+
 /**
  * Admin controls for the OpenVPN daemon on the node (start / restart / kill).
  * Kill and restart disconnect all VPN clients.
+ * Status is polled from that VPN server's manager (each node is independent).
  */
 export function OpenVpnProcessControls({ vpnServerId, disabled = false }: Props) {
   const queryClient = useQueryClient();
-  const [busy, setBusy] = useState<"start" | "restart" | "kill" | null>(null);
+  const inFlight = useRef(false);
+  const [busy, setBusy] = useState<Action | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [lastMessage, setLastMessage] = useState<string | null>(null);
 
   const statusQuery = useGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatus(vpnServerId, {
     query: {
       enabled: vpnServerId > 0 && !disabled,
-      refetchInterval: 10_000,
+      refetchInterval: (q) => {
+        const data = q.state.data as ProcessStatus | undefined;
+        if (busy || data?.operationInProgress) return 1_500;
+        return 10_000;
+      },
       retry: 1,
     },
   });
 
   const status = statusQuery.data as ProcessStatus | undefined;
   const statusError = statusQuery.isError ? errorMessage(statusQuery.error) : null;
+  const nodeBusy = status?.operationInProgress === true;
+  const remoteProgress =
+    nodeBusy || (status?.phase != null && /^(starting|stopping|restarting)$/i.test(status.phase));
 
   const invalidate = async () => {
     await queryClient.invalidateQueries({
@@ -50,8 +77,15 @@ export function OpenVpnProcessControls({ vpnServerId, disabled = false }: Props)
     });
   };
 
-  const run = async (action: "start" | "restart" | "kill") => {
-    if (busy || disabled) return;
+  const run = async (action: Action) => {
+    if (disabled) return;
+    if (inFlight.current || busy !== null || nodeBusy) {
+      setActionError(
+        status?.message?.trim() ||
+          "Please wait — an OpenVPN operation is already running on this node.",
+      );
+      return;
+    }
 
     if (action === "restart") {
       const ok = window.confirm(
@@ -66,9 +100,11 @@ export function OpenVpnProcessControls({ vpnServerId, disabled = false }: Props)
       if (!ok) return;
     }
 
+    inFlight.current = true;
     setBusy(action);
     setActionError(null);
     setLastMessage(null);
+
     try {
       const fn =
         action === "start"
@@ -77,17 +113,21 @@ export function OpenVpnProcessControls({ vpnServerId, disabled = false }: Props)
             ? postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart
             : postApiOpenVpnServersVpnServerIdOpenvpnProcessKill;
       const result = (await fn(vpnServerId)) as ProcessStatus;
-      setLastMessage(result.message ?? `${action} completed.`);
+      const okText = result.message?.trim() || `OpenVPN ${action} completed successfully.`;
+      setLastMessage(okText);
       await invalidate();
     } catch (err) {
-      setActionError(errorMessage(err));
+      setActionError(errorMessage(err) || `OpenVPN ${action} failed.`);
+      setLastMessage(null);
+      await invalidate();
     } finally {
+      inFlight.current = false;
       setBusy(null);
     }
   };
 
   const running = status?.isRunning === true;
-  const blocked = disabled || busy !== null;
+  const blocked = disabled || busy !== null || inFlight.current || nodeBusy;
 
   return (
     <section className="openvpn-process-controls" aria-labelledby="openvpn-process-heading">
@@ -95,8 +135,9 @@ export function OpenVpnProcessControls({ vpnServerId, disabled = false }: Props)
         OpenVPN process
       </h3>
       <p className="server-details__muted server-details__intro">
-        Controls the OpenVPN daemon inside the node container. Restart and kill drop all sessions; the
-        manager API keeps running.
+        Controls the OpenVPN daemon inside this node&apos;s container. Status is read live from that
+        server (other VPN nodes are independent). Restart and kill drop all sessions; the manager API
+        keeps running.
       </p>
 
       <div className="openvpn-process-controls__status">
@@ -106,10 +147,13 @@ export function OpenVpnProcessControls({ vpnServerId, disabled = false }: Props)
             ? "Checking…"
             : statusError
               ? "Unavailable"
-              : running
-                ? `Running${status?.pid != null ? ` (pid ${status.pid})` : ""}`
-                : "Stopped"}
+              : formatPhase(status)}
         </span>
+        {status?.currentOperation ? (
+          <span className="openvpn-process-controls__op">
+            op: {status.currentOperation}
+          </span>
+        ) : null}
         <button
           type="button"
           className="btn secondary"
@@ -125,37 +169,56 @@ export function OpenVpnProcessControls({ vpnServerId, disabled = false }: Props)
           {statusError}
         </div>
       ) : null}
+      {remoteProgress && status?.message ? (
+        <div className="server-details__alert openvpn-process-controls__progress" role="status">
+          {status.message}
+        </div>
+      ) : null}
+      {status?.lastError && !remoteProgress ? (
+        <div className="server-details__alert" role="alert">
+          Last error: {status.lastError}
+        </div>
+      ) : null}
       {actionError ? (
         <div className="server-details__alert" role="alert">
           {actionError}
         </div>
       ) : null}
-      {lastMessage ? <p className="server-details__muted">{lastMessage}</p> : null}
+      {lastMessage ? (
+        <p className="openvpn-process-controls__success" role="status">
+          {lastMessage}
+        </p>
+      ) : null}
 
       <div className="openvpn-process-controls__actions">
         <button
           type="button"
           className="btn primary"
           disabled={blocked || running}
+          aria-busy={busy === "start" || status?.phase === "starting"}
           onClick={() => void run("start")}
         >
-          {busy === "start" ? "Starting…" : "Start"}
+          {busy === "start" || status?.phase === "starting" ? "Starting…" : "Start"}
         </button>
         <button
           type="button"
           className="btn secondary"
           disabled={blocked}
+          aria-busy={busy === "restart" || status?.currentOperation === "restart"}
           onClick={() => void run("restart")}
         >
-          {busy === "restart" ? "Restarting…" : "Restart"}
+          {busy === "restart" || status?.currentOperation === "restart"
+            ? "Restarting…"
+            : "Restart"}
         </button>
         <button
           type="button"
           className="btn danger"
-          disabled={blocked || (!running && !statusError)}
+          disabled={blocked || (!running && !statusError && !nodeBusy)}
+          aria-busy={busy === "kill" || status?.currentOperation === "kill"}
           onClick={() => void run("kill")}
         >
-          {busy === "kill" ? "Stopping…" : "Kill"}
+          {busy === "kill" || status?.currentOperation === "kill" ? "Stopping…" : "Kill"}
         </button>
       </div>
     </section>

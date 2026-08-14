@@ -23,7 +23,14 @@ vi.mock("../../api/orval/vpn-server-open-vpn-process/vpn-server-open-vpn-process
     `/api/open-vpn-servers/${id}/openvpn-process/status`,
   ],
   useGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatus: () => ({
-    data: { action: "status", isRunning: true, pid: 4242, message: "OpenVPN is running." },
+    data: {
+      action: "status",
+      isRunning: true,
+      pid: 4242,
+      phase: "running",
+      operationInProgress: false,
+      message: "OpenVPN is running.",
+    },
     isLoading: false,
     isFetching: false,
     isError: false,
@@ -73,5 +80,53 @@ describe("OpenVpnProcessControls", () => {
     await user.click(screen.getByRole("button", { name: /^Kill$/i }));
 
     expect(killFn).not.toHaveBeenCalled();
+  });
+
+  it("ignores rapid multi-clicks and keeps a single in-flight call", async () => {
+    let resolveKill!: (value: unknown) => void;
+    killFn.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveKill = resolve;
+        }),
+    );
+    const { fireEvent } = await import("@testing-library/react");
+    renderWithProviders(<OpenVpnProcessControls vpnServerId={4} />);
+
+    const killBtn = screen.getByRole("button", { name: /^Kill$/i });
+    fireEvent.click(killBtn);
+    fireEvent.click(killBtn);
+    fireEvent.click(killBtn);
+
+    expect(killFn).toHaveBeenCalledTimes(1);
+    expect(restartFn).not.toHaveBeenCalled();
+    expect(await screen.findByRole("button", { name: /Stopping/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^Restart$/i })).toBeDisabled();
+
+    resolveKill({ action: "kill", isRunning: false, message: "OpenVPN stopped." });
+    expect(await screen.findByText(/OpenVPN stopped/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Kill$/i })).toBeEnabled();
+  });
+
+  it("shows API error message on failure", async () => {
+    const axios = await import("axios");
+    killFn.mockRejectedValue(
+      new axios.AxiosError("Request failed", "ERR_BAD_REQUEST", undefined, undefined, {
+        status: 409,
+        statusText: "Conflict",
+        headers: {},
+        config: {} as never,
+        data: {
+          success: false,
+          message: "OpenVPN process operation already in progress. Please wait and try again.",
+        },
+      }),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<OpenVpnProcessControls vpnServerId={4} />);
+
+    await user.click(screen.getByRole("button", { name: /^Kill$/i }));
+
+    expect(await screen.findByText(/already in progress/i)).toBeInTheDocument();
   });
 });

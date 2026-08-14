@@ -17,4 +17,17 @@ export interface DataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStat
   pidFilePath?: string | null;
   /** @nullable */
   message?: string | null;
+  operationInProgress?: boolean;
+  /** @nullable */
+  phase?: string | null;
+  /** @nullable */
+  currentOperation?: string | null;
+  /** @nullable */
+  operationStartedAtUtc?: string | null;
+  /** @nullable */
+  lastCompletedOperation?: string | null;
+  /** @nullable */
+  lastCompletedAtUtc?: string | null;
+  /** @nullable */
+  lastError?: string | null;
 }

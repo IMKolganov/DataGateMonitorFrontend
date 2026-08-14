@@ -21784,6 +21784,35 @@
           "message": {
             "type": "string",
             "nullable": true
+          },
+          "operationInProgress": {
+            "type": "boolean"
+          },
+          "phase": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentOperation": {
+            "type": "string",
+            "nullable": true
+          },
+          "operationStartedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastCompletedOperation": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastCompletedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastError": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

@@ -116,6 +116,21 @@
   margin-top: 0.5rem;
 }
 
+.openvpn-process-controls__success {
+  margin: 0.35rem 0 0.5rem;
+  font-size: 13px;
+  color: #3d8b5c;
+}
+
+.openvpn-process-controls__op {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.openvpn-process-controls__progress {
+  border-color: rgba(61, 139, 92, 0.35);
+}
+
 /* optional: slightly dim the block while loading */
 .server-info.is-loading {
   opacity: 0.97;
