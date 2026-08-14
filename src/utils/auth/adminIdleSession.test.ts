@@ -101,7 +101,7 @@ describe("startAdminIdleSession", () => {
     getPolicy.mockReset();
     getPolicy.mockResolvedValue(policyResponse(15));
     postActivity.mockClear();
-    postActivity.mockResolvedValue({});
+    postActivity.mockResolvedValue(undefined);
     stop = undefined;
     vi.useFakeTimers({ shouldAdvanceTime: false });
   });
