@@ -1,7 +1,8 @@
 /** Subpaths under `/servers/:id/...` that do not apply to Xray (OpenVPN-only UI). */
 export function isXrayBlockedSubpath(relative: string): boolean {
   if (!relative) return false;
-  const keys = ["console", "events", "pi-hole"];
+  // Pi-hole DNS logging is supported for Xray (node-side collector, same pattern as OpenVPN).
+  const keys = ["console", "events"];
   return keys.some((k) => relative === k || relative.startsWith(`${k}/`));
 }
 

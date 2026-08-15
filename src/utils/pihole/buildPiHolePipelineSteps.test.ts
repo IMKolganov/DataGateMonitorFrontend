@@ -76,6 +76,62 @@ describe("buildPiHolePipelineSteps", () => {
     expect(steps.find((s) => s.id === "pihole-api")?.status).toBe("ok");
   });
 
+  it("xray stack: step 3 is Xray node runtime (same pattern as OpenVPN)", () => {
+    const steps = buildPiHolePipelineSteps({
+      dashboardConfig: baseConfig,
+      serverPiHoleEnabled: true,
+      serverApiUrl: "https://xs2.datagateapp.com/",
+      diagnostics: runningDiagnostics,
+      stack: "xray",
+    });
+
+    const runtime = steps.find((s) => s.id === "runtime-push");
+    expect(runtime?.title).toMatch(/Xray/i);
+    expect(runtime?.status).toBe("ok");
+    expect(runtime?.flow).toMatch(/DataGateXRayManager/);
+    expect(runtime?.summary).toMatch(/CN/i);
+    expect(steps.find((s) => s.id === "collector")?.flow).toMatch(/SignalR/i);
+    expect(steps.find((s) => s.id === "storage")?.title).toMatch(/query log/i);
+  });
+
+  it("xray stack: storage waiting copy mentions client IP / no CN yet", () => {
+    const steps = buildPiHolePipelineSteps({
+      dashboardConfig: baseConfig,
+      serverPiHoleEnabled: true,
+      serverApiUrl: "https://xs2.datagateapp.com/",
+      diagnostics: {
+        ...runningDiagnostics,
+        storedQueryCount: 0,
+        lastStoredQueryAtUtc: undefined,
+        lastPollQueriesForwarded: 0,
+      },
+      stack: "xray",
+    });
+
+    const storage = steps.find((s) => s.id === "storage");
+    expect(storage?.status).toBe("ok");
+    expect(storage?.summary).toMatch(/client IP/i);
+    expect(storage?.summary).toMatch(/CN/i);
+  });
+
+  it("xray stack: collector poll error uses Xray node fix copy", () => {
+    const steps = buildPiHolePipelineSteps({
+      dashboardConfig: baseConfig,
+      serverPiHoleEnabled: true,
+      serverApiUrl: "https://xs2.datagateapp.com/",
+      diagnostics: {
+        ...runningDiagnostics,
+        lastPollError: "Pi-hole auth HTTP 401",
+        collectorRunning: true,
+      },
+      stack: "xray",
+    });
+
+    const collector = steps.find((s) => s.id === "collector");
+    expect(collector?.status).toBe("error");
+    expect(collector?.fix).toMatch(/Xray manager|PiHoleQueryCollector/i);
+  });
+
   it("marks step 6 as waiting when upstream ok but no dns rows in dashboard yet", () => {
     const steps = buildPiHolePipelineSteps({
       dashboardConfig: baseConfig,

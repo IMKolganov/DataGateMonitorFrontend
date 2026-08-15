@@ -2,6 +2,8 @@ import type { PiHoleDiagnosticsResponse, VpnServerPiHoleConfigDto } from "../../
 
 export type PiHolePipelineStepStatus = "ok" | "warning" | "error" | "pending" | "skipped";
 
+export type PiHolePipelineStack = "openvpn" | "xray";
+
 export type PiHolePipelineStep = {
   id: string;
   step: number;
@@ -21,6 +23,8 @@ export type PiHolePipelineInput = {
   diagnostics?: PiHoleDiagnosticsResponse | null;
   diagnosticsFetchError?: string | null;
   diagnosticsLoading?: boolean;
+  /** Both stacks push runtime to the VPN node collector (OpenVPN or Xray manager). */
+  stack?: PiHolePipelineStack;
 };
 
 function fmtUtc(value?: string | null): string {
@@ -49,8 +53,10 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
     diagnostics: d,
     diagnosticsFetchError,
     diagnosticsLoading,
+    stack = "openvpn",
   } = input;
 
+  const isXray = stack === "xray";
   const steps: PiHolePipelineStep[] = [];
   const apiUrl = serverApiUrl?.trim() || "—";
   const subnet = cfg?.clientSubnetPrefix?.trim() || "(all VPN clients)";
@@ -105,12 +111,14 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
       statusText,
       summary: serverPiHoleEnabled
         ? undefined
-        : "Integration is off — nothing is pushed to the OpenVPN microservice.",
+        : isXray
+          ? "Integration is off — nothing is pushed to the Xray node collector."
+          : "Integration is off — nothing is pushed to the OpenVPN microservice.",
       fix,
     });
   }
 
-  // 3 — Runtime push
+  // 3 — Runtime push (OpenVPN and Xray both apply to the VPN node)
   {
     let status: PiHolePipelineStepStatus = "skipped";
     let statusText = "Skipped";
@@ -123,31 +131,35 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
     } else if (diagnosticsLoading && !d) {
       status = "pending";
       statusText = "Checking…";
-      summary = "Reading OpenVPN microservice runtime…";
+      summary = isXray
+        ? "Reading Xray node Pi-hole runtime…"
+        : "Reading OpenVPN microservice runtime…";
     } else if (diagnosticsFetchError) {
       status = "error";
       statusText = "Unreachable";
       error = diagnosticsFetchError;
       summary = `Target: ${apiUrl}/api/pi-hole/config`;
-      fix =
-        "Verify server Api URL, microservice is running (≥ 1.2.5.67 with Pi-hole API), and backend JWT to the microservice works.";
+      fix = isXray
+        ? "Verify server Api URL, Xray manager is running with Pi-hole API, and backend JWT to the node works."
+        : "Verify server Api URL, microservice is running (≥ 1.2.5.67 with Pi-hole API), and backend JWT to the microservice works.";
     } else if (d) {
       if (!d.enabled) {
         status = "error";
         statusText = "Not applied";
-        error = "Collector is disabled on the OpenVPN microservice.";
-        summary = `Runtime on microservice: disabled, password ${d.hasAppPassword ? "set" : "not set"}.`;
-        fix =
-          "Click Save & apply (saved to $DATA_DIR/pihole-runtime-config.json), or set PIHOLE_ENABLED=true and related PIHOLE_* env vars (env wins when set).";
+        error = isXray
+          ? "Collector is disabled on the Xray node."
+          : "Collector is disabled on the OpenVPN microservice.";
+        summary = `Runtime on node: disabled, password ${d.hasAppPassword ? "set" : "not set"}.`;
+        fix = "Click Save & apply, or set PIHOLE_ENABLED=true and related PIHOLE_* env vars (env wins when set).";
       } else if (!d.hasAppPassword) {
         status = "error";
         statusText = "No password";
-        error = "Microservice runtime has no Pi-hole app password.";
+        error = "Node runtime has no Pi-hole app password.";
         fix = "Re-enter the app password and click Save & apply.";
       } else if (cfg?.baseUrl && d.baseUrl && cfg.baseUrl.trim() !== d.baseUrl.trim()) {
         status = "warning";
         statusText = "Mismatch";
-        error = `Dashboard Base URL (${cfg.baseUrl}) differs from microservice (${d.baseUrl}).`;
+        error = `Dashboard Base URL (${cfg.baseUrl}) differs from node (${d.baseUrl}).`;
         fix = "Click Save & apply to sync runtime with dashboard.";
       } else if (
         cfg?.clientSubnetPrefix?.trim() &&
@@ -156,7 +168,7 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
       ) {
         status = "warning";
         statusText = "Mismatch";
-        error = `Dashboard subnet (${cfg.clientSubnetPrefix}) differs from microservice (${d.clientSubnetPrefix || "(all)"}).`;
+        error = `Dashboard subnet (${cfg.clientSubnetPrefix}) differs from node (${d.clientSubnetPrefix || "(all)"}).`;
         fix = "Click Save & apply to sync subnet filter.";
       } else if (!d.runtimeConfigAppliedAtUtc) {
         status = "ok";
@@ -166,7 +178,9 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
       } else {
         status = "ok";
         statusText = "Applied";
-        summary = `Dashboard config saved at ${fmtUtc(d.runtimeConfigAppliedAtUtc)} ($DATA_DIR/pihole-runtime-config.json). PIHOLE_* env vars override these values when set.`;
+        summary = isXray
+          ? `Dashboard config applied at ${fmtUtc(d.runtimeConfigAppliedAtUtc)}. Xray node polls Pi-hole (CN mapping N/A).`
+          : `Dashboard config saved at ${fmtUtc(d.runtimeConfigAppliedAtUtc)} ($DATA_DIR/pihole-runtime-config.json). PIHOLE_* env vars override these values when set.`;
       }
     } else {
       status = "pending";
@@ -177,8 +191,10 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
     steps.push({
       id: "runtime-push",
       step: 3,
-      title: "Runtime on OpenVPN microservice",
-      flow: "Dashboard backend → PUT {ApiUrl}/api/pi-hole/config (JWT)",
+      title: isXray ? "Runtime on Xray node" : "Runtime on OpenVPN microservice",
+      flow: isXray
+        ? "Dashboard backend → PUT {ApiUrl}/api/pi-hole/config (JWT → DataGateXRayManager)"
+        : "Dashboard backend → PUT {ApiUrl}/api/pi-hole/config (JWT)",
       status,
       statusText,
       summary,
@@ -197,18 +213,33 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
 
     if (upstreamBlocked(steps, 4)) {
       summary = "Complete steps 1–3 first.";
+    } else if (diagnosticsLoading && !d) {
+      status = "pending";
+      statusText = "Checking…";
+      summary = isXray
+        ? "Probing Pi-hole API from the Xray node…"
+        : "Probing Pi-hole API from the OpenVPN microservice…";
+    } else if (diagnosticsFetchError) {
+      status = "error";
+      statusText = "Unreachable";
+      error = diagnosticsFetchError;
+      fix = isXray
+        ? "Check Pi-hole Base URL / password and that the Xray container can reach Pi-hole (not dashboard localhost)."
+        : "Check Pi-hole Base URL / password and that the OpenVPN host can reach Pi-hole.";
     } else if (d) {
       const probeError = d.error?.trim();
       if (probeError) {
         status = "error";
         statusText = "Probe failed";
         error = probeError;
-        fix = "On the VPN host, test: curl -X POST {BaseUrl}/api/auth with the app password.";
+        fix = "Test: curl -X POST {BaseUrl}/api/auth with the app password (from the host that runs the collector).";
       } else if (!d.authenticated) {
         status = "error";
         statusText = "Auth failed";
         error = "Pi-hole API authentication failed.";
-        fix = "Check application password and Pi-hole web/API port (e.g. http://127.0.0.1:8080).";
+        fix = isXray
+          ? "Check application password and Base URL from the Xray container (e.g. http://172.17.0.1:8080 when Pi-hole is in the OpenVPN netns)."
+          : "Check application password and Pi-hole web/API port (e.g. http://127.0.0.1:8080).";
       } else {
         status = "ok";
         statusText = "Reachable";
@@ -220,7 +251,9 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
       id: "pihole-api",
       step: 4,
       title: "Pi-hole API",
-      flow: "OpenVPN container → POST {BaseUrl}/api/auth → GET api/queries",
+      flow: isXray
+        ? "Xray node → POST {BaseUrl}/api/auth → GET api/queries"
+        : "OpenVPN container → POST {BaseUrl}/api/auth → GET api/queries",
       status,
       statusText,
       summary,
@@ -245,20 +278,28 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
         status = "error";
         statusText = "Poll error";
         error = pollError;
-        fix = "Check Pi-hole logs and microservice logs (openvpn-udp-wss).";
+        fix = isXray
+          ? "Check Xray manager logs (PiHoleQueryCollector) and Pi-hole reachability from that container."
+          : "Check Pi-hole logs and microservice logs (openvpn-udp-wss).";
       } else if (!d.collectorRunning) {
         status = "warning";
         statusText = "Stopped";
-        error = "Background collector is not running on the microservice.";
-        fix = "Save & apply again or inspect container logs.";
-      } else if (!d.lastSuccessfulPollAtUtc) {
+        error = isXray
+          ? "Background collector is not running on the Xray node."
+          : "Background collector is not running on the microservice.";
+        fix = "Save & apply again or inspect container / backend logs.";
+      } else if (!d.lastSuccessfulPollAtUtc && (d.storedQueryCount ?? 0) === 0) {
         status = "warning";
         statusText = "Starting";
-        summary = "Collector is running; waiting for the first successful poll.";
+        summary = isXray
+          ? "Collector is running; waiting for the first successful poll (clients must use Pi-hole DNS)."
+          : "Collector is running; waiting for the first successful poll.";
       } else {
         status = "ok";
         statusText = "Running";
-        summary = `Last success ${fmtUtc(d.lastSuccessfulPollAtUtc)}, forwarded ${d.lastPollQueriesForwarded ?? 0} on last poll.`;
+        summary = isXray
+          ? `Last success ${fmtUtc(d.lastSuccessfulPollAtUtc)}, forwarded ${d.lastPollQueriesForwarded ?? 0} on last poll (CN mapping N/A).`
+          : `Last success ${fmtUtc(d.lastSuccessfulPollAtUtc)}, forwarded ${d.lastPollQueriesForwarded ?? 0} on last poll.`;
       }
     }
 
@@ -266,7 +307,9 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
       id: "collector",
       step: 5,
       title: "DNS query collector",
-      flow: "Microservice background service → Pi-hole api/queries (subnet filter → enrich → forward)",
+      flow: isXray
+        ? "Xray node → Pi-hole api/queries → SignalR DnsQueriesReceived → dashboard"
+        : "Microservice background service → Pi-hole api/queries (subnet filter → enrich → forward)",
       status,
       statusText,
       summary,
@@ -275,7 +318,7 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
     });
   }
 
-  // 6 — Dashboard storage
+  // 6 — Dashboard storage (+ query log table)
   {
     let status: PiHolePipelineStepStatus = "skipped";
     let statusText = "Skipped";
@@ -291,29 +334,29 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
       if (stored === 0 && forwarded === 0) {
         status = "ok";
         statusText = "Waiting for DNS records";
-        summary =
-          "Steps 1–5 are OK. This step waits for DNS query rows in the dashboard DB (see the table below). " +
-          "Stay connected on VPN, browse for a minute, then refresh — up to one poll interval.";
-        fix =
-          "Normal after setup: collector must forward at least one batch before rows appear here. " +
-          "If it stays empty, check step 5 (forwarded count) and subnet prefix.";
+        summary = isXray
+          ? "Steps 1–5 are OK. Connect via Xray, use Pi-hole as DNS, browse a minute, then refresh the query log below. Rows are keyed by client IP (per-user CN not mapped yet)."
+          : "Steps 1–5 are OK. This step waits for DNS query rows in the dashboard DB (see the table below). " +
+            "Stay connected on VPN, browse for a minute, then refresh — up to one poll interval.";
+        fix = "If it stays empty, check subnet prefix and that clients resolve DNS through Pi-hole.";
       } else if (stored === 0 && forwarded > 0) {
         status = "ok";
         statusText = "Receiving";
-        summary =
-          `Collector forwarded ${forwarded} on the last poll; waiting for DNS rows in the dashboard DB.`;
+        summary = `Collector forwarded ${forwarded} on the last poll; waiting for DNS rows in the dashboard DB.`;
       } else {
         status = "ok";
         statusText = "Stored";
-        summary = `${stored} DNS queries in dashboard DB (last ${fmtUtc(d.lastStoredQueryAtUtc)}).`;
+        summary = `${stored} DNS queries in dashboard DB (last ${fmtUtc(d.lastStoredQueryAtUtc)}). See Recent DNS queries below.`;
       }
     }
 
     steps.push({
       id: "storage",
       step: 6,
-      title: "Dashboard storage",
-      flow: "Microservice → POST backend /api/vpn-dns-queries → Dashboard DB",
+      title: "Dashboard storage & query log",
+      flow: isXray
+        ? "Xray SignalR DnsQueriesReceived → VpnDnsQueryLog (grid below)"
+        : "OpenVPN SignalR DnsQueriesReceived → VpnDnsQueryLog (grid below)",
       status,
       statusText,
       summary,

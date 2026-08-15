@@ -7,17 +7,21 @@ UUID: {{uuid}}
 Endpoint: {{server_ip}}:{{server_port}}
 `;
 
-/** Default OpenVPN .ovpn export template for new servers. */
+/** Default OpenVPN .ovpn export template for new servers.
+ * Port/proto/cipher/auth/tls-version-min/verb are rewritten from live node /api/info on save (auto-detect)
+ * and again from node env when issuing the file.
+ */
 export const OPEN_VPN_EXPORT_TEMPLATE = `setenv FRIENDLY_NAME "{{friendly_name}}"
 client
 dev tun
-proto tcp
+proto udp
 remote {{server_ip}} {{server_port}}
 resolv-retry infinite
 nobind
 remote-cert-tls server
 tls-version-min 1.2
-cipher AES-256-CBC
+cipher AES-128-GCM
+data-ciphers AES-128-GCM:AES-256-GCM:CHACHA20-POLY1305
 auth SHA256
 auth-nocache
 verb 3

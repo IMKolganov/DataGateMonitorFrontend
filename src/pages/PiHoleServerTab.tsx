@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { FaGlobe, FaSave, FaSync } from "react-icons/fa";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { PasswordInput } from "../components/auth/PasswordInput";
 import {
   getGetApiOpenVpnServersGetVpnServerIdQueryKey,
   putApiOpenVpnServersUpdate,
@@ -30,7 +31,7 @@ import type {
   VpnServerResponse,
 } from "../api/orvalModelShim";
 import { PiHoleStatusPanel } from "../components/pihole/PiHoleStatusPanel";
-import { isOpenVpnStack } from "../constants/vpnServerType";
+import { isOpenVpnStack, VpnServerType } from "../constants/vpnServerType";
 import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 import { ServerAccessDenied } from "../components/ServerAccessDenied";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
@@ -95,6 +96,8 @@ export function PiHoleServerTab() {
   const payload = serverQuery.data as VpnServerResponse | undefined;
   const server = payload?.vpnServer;
   const piHoleEnabled = Boolean(server?.isPiHoleEnabled);
+  const isXray = server?.serverType === VpnServerType.Xray;
+  const isOpenVpn = isOpenVpnStack(server?.serverType);
 
   useEffect(() => {
     setEnableIntegration(piHoleEnabled);
@@ -196,7 +199,8 @@ export function PiHoleServerTab() {
   if (!admin) return <ServerAccessDenied />;
   if (serverQuery.isLoading) return <p>Loading server…</p>;
   if (isHttpForbidden(serverQuery.error)) return <ServerAccessDenied />;
-  if (server && !isOpenVpnStack(server.serverType)) {
+  // Keep placeholder only for unknown/future stacks — OpenVPN and Xray both supported.
+  if (server && !isOpenVpn && !isXray) {
     return <OpenVpnServerFeaturePlaceholder vpnServerId={String(id)} featureLabel="Pi-hole DNS logging" />;
   }
 
@@ -238,7 +242,11 @@ export function PiHoleServerTab() {
 
       if (enableIntegration) {
         await postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime(id);
-        toast.success("Pi-hole settings saved and applied to the VPN server.");
+        toast.success(
+          isXray
+            ? "Pi-hole settings saved and applied to the Xray node collector."
+            : "Pi-hole settings saved and applied to the VPN server.",
+        );
         await diagnosticsQuery.refetch();
       } else {
         toast.success("Pi-hole settings saved in the dashboard. Enable integration to start collection.");
@@ -261,8 +269,19 @@ export function PiHoleServerTab() {
         Pi-hole DNS logging
       </h2>
       <p className="server-details__intro">
-        Save connection settings in the dashboard first. When integration is enabled, the backend pushes them to the
-        OpenVPN microservice and polls Pi-hole for VPN client DNS queries.
+        {isXray ? (
+          <>
+            Save connection settings, then enable integration. Settings are pushed to the <strong>Xray node</strong>,
+            which polls Pi-hole locally (same pattern as OpenVPN). Use a Base URL reachable from the Xray container
+            (often <code>http://172.17.0.1:8080</code> when Pi-hole shares the OpenVPN netns — not dashboard
+            localhost). Per-user CN mapping is not available yet.
+          </>
+        ) : (
+          <>
+            Save connection settings in the dashboard first. When integration is enabled, the backend pushes them to the
+            OpenVPN microservice, which polls Pi-hole for VPN client DNS queries.
+          </>
+        )}
       </p>
 
       <PiHoleStatusPanel
@@ -274,6 +293,7 @@ export function PiHoleServerTab() {
         error={piHoleEnabled && diagnosticsQuery.isError ? diagnosticsError : null}
         refreshing={diagnosticsQuery.isFetching}
         onRefresh={() => void diagnosticsQuery.refetch()}
+        stack={isXray ? "xray" : "openvpn"}
       />
 
       {!piHoleEnabled && (
@@ -297,7 +317,9 @@ export function PiHoleServerTab() {
               <div className="checkbox-content">
                 <span className="checkbox-title">Enable Pi-hole integration</span>
                 <span className="checkbox-description">
-                  When enabled, the OpenVPN microservice polls Pi-hole and stores DNS queries in the dashboard.
+                  {isXray
+                    ? "When enabled, the Xray node polls Pi-hole and forwards DNS queries to the dashboard (by client IP; CN later)."
+                    : "When enabled, the OpenVPN microservice polls Pi-hole and stores DNS queries in the dashboard."}
                 </span>
               </div>
             </label>
@@ -320,9 +342,11 @@ export function PiHoleServerTab() {
           </div>
           <div className="form-group">
             <label htmlFor="pihole-app-password">Application password</label>
-            <input
+            <PasswordInput
               id="pihole-app-password"
-              type="password"
+              name="piholeAppPassword"
+              className=""
+              autoComplete="off"
               value={form.appPassword}
               onChange={(e) => setForm((p) => ({ ...p, appPassword: e.target.value }))}
               placeholder={

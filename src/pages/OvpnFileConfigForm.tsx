@@ -62,14 +62,6 @@ function normalizeProto(value: unknown): "tcp" | "udp" | null {
   return v === "tcp" || v === "udp" ? v : null;
 }
 
-function applyProtoToTemplate(template: string, proto: "tcp" | "udp"): string {
-  if (!template.trim()) return template;
-  if (/^\s*proto\s+\S+/im.test(template)) {
-    return template.replace(/^\s*proto\s+\S+/im, `proto ${proto}`);
-  }
-  return `proto ${proto}\n${template}`;
-}
-
 const DEFAULT_CONFLOG_PAGE_SIZE = 10;
 const DEFAULT_XRAY_PUBLIC_PORT = 443;
 
@@ -452,13 +444,7 @@ const OvpnFileConfigForm: React.FC = () => {
         : "VPN Server IP is required.";
       isValid = false;
     }
-    const effectivePort =
-      !isXrayStack &&
-      autoDetectServerSettings &&
-      typeof detectedPort === "number" &&
-      Number.isFinite(detectedPort)
-        ? detectedPort
-        : ovpnFileConfig.VpnServerPort;
+    const effectivePort = ovpnFileConfig.VpnServerPort;
     if (!effectivePort || effectivePort < 1 || effectivePort > 65535) {
       newErrors.VpnServerPort = isXrayStack
         ? "Public endpoint port must be between 1 and 65535."
@@ -491,14 +477,10 @@ const OvpnFileConfigForm: React.FC = () => {
     if (!validateForm()) return;
 
     const useOpenVpnAutoDetect = openVpnPageEnabled && autoDetectServerSettings;
-    const effectivePort =
-      useOpenVpnAutoDetect && typeof detectedPort === "number" && Number.isFinite(detectedPort)
-        ? detectedPort
-        : ovpnFileConfig.VpnServerPort;
-    const effectiveTemplate =
-      useOpenVpnAutoDetect && serverProto
-        ? applyProtoToTemplate(ovpnFileConfig.ConfigTemplate, serverProto)
-        : ovpnFileConfig.ConfigTemplate;
+    // Port/proto/cipher come from live node /api/info on the backend when autoDetect is on.
+    // Do not rewrite the template from stale conflog on the client — that masked live settings.
+    const effectivePort = ovpnFileConfig.VpnServerPort;
+    const effectiveTemplate = ovpnFileConfig.ConfigTemplate;
 
     const payload: AddOrUpdateOvpnFileConfigRequest = {
       vpnServerId: ovpnFileConfig.VpnServerId || parsedVpnServerId,
@@ -670,12 +652,14 @@ const OvpnFileConfigForm: React.FC = () => {
                   />
                   <div className="checkbox-content">
                     <span className="checkbox-title">
-                      Try auto-detect Port/Proto from live node /api/info
+                      Try auto-detect Port/Proto/Cipher/Auth/TLS from live node /api/info
                     </span>
                     <span className="checkbox-description">
-                      When enabled, save queries the OpenVPN manager live <code>/api/info</code> for
-                      Port/Proto. Last saved conflog showed {detectedPort ?? "—"} / {serverProto ?? "—"}{" "}
-                      (audit history below).
+                      When enabled, save queries the OpenVPN manager <strong>live</strong>{" "}
+                      <code>/api/info</code> (not conflog) for Port, Proto, Cipher, DataCiphers, Auth,
+                      TlsVersionMin, and ClientVerb. Conflog below is audit only (
+                      {detectedPort ?? "—"} / {serverProto ?? "—"}). DNS/gateway/mssfix stay server{" "}
+                      <code>push</code> and are not duplicated in the template.
                     </span>
                   </div>
                 </label>

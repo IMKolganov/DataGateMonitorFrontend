@@ -3,7 +3,7 @@ import { isNonAdminBlockedSubpath, isXrayBlockedSubpath } from "./serverDetailsP
 
 describe("serverDetailsPaths", () => {
   it("blocks Xray-only subpaths", () => {
-    expect(isXrayBlockedSubpath("pi-hole")).toBe(true);
+    expect(isXrayBlockedSubpath("pi-hole")).toBe(false);
     expect(isXrayBlockedSubpath("console/extra")).toBe(true);
     expect(isXrayBlockedSubpath("statistics")).toBe(false);
   });
