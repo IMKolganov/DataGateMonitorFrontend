@@ -67,11 +67,14 @@ vi.mock("../api/orval/performance/performance", () => ({
 
 import PerformanceSettings from "./PerformanceSettings";
 
+const writeText = vi.fn().mockResolvedValue(undefined);
+
 describe("PerformanceSettings", () => {
   beforeEach(() => {
     httpRefetch.mockClear();
     dbRefetch.mockClear();
     clearMutate.mockClear();
+    writeText.mockClear();
     vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
@@ -84,12 +87,52 @@ describe("PerformanceSettings", () => {
     expect(screen.getByText(/Top slow SQL/i)).toBeInTheDocument();
     expect(screen.getByText(/220 ms/)).toBeInTheDocument();
 
+    const httpTopSelect = screen.getByRole("combobox", { name: /Top slow HTTP count/i });
+    const sqlTopSelect = screen.getByRole("combobox", { name: /Top slow SQL count/i });
+    expect(httpTopSelect).toHaveValue("5");
+    expect(sqlTopSelect).toHaveValue("5");
+    for (const n of ["5", "10", "20", "50"]) {
+      expect(httpTopSelect.querySelector(`option[value="${n}"]`)).toBeTruthy();
+      expect(sqlTopSelect.querySelector(`option[value="${n}"]`)).toBeTruthy();
+    }
+
     const grids = screen.getAllByTestId("mock-grid");
     expect(grids).toHaveLength(2);
     expect(grids[0].querySelector('[data-testid="grid-rows"]')?.children).toHaveLength(2);
     expect(grids[1].querySelector('[data-testid="grid-rows"]')?.children).toHaveLength(1);
     expect(screen.getByText(/GET \/api\/servers/)).toBeInTheDocument();
     expect(screen.getByText(/SELECT \* FROM vpn_servers/)).toBeInTheDocument();
+  });
+
+  it("opens SQL detail modal from Top slow SQL with Copy", async () => {
+    const user = userEvent.setup();
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    render(<PerformanceSettings />);
+
+    await user.click(screen.getByRole("button", { name: /SELECT \* FROM vpn_servers/i }));
+    const dialog = screen.getByRole("dialog", { name: /SQL detail/i });
+    expect(dialog).toBeInTheDocument();
+    expect(dialog.querySelector("pre")?.textContent).toMatch(/FROM vpn_servers/);
+
+    const copyBtn = screen.getByRole("button", { name: /^Copy$/i });
+    expect(copyBtn).toBeEnabled();
+    await user.click(copyBtn);
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining("FROM vpn_servers"));
+    expect(await screen.findByRole("button", { name: /Copied!/i })).toBeInTheDocument();
+  });
+
+  it("changes top-slow take independently for HTTP and SQL", async () => {
+    const user = userEvent.setup();
+    render(<PerformanceSettings />);
+
+    await user.selectOptions(screen.getByRole("combobox", { name: /Top slow HTTP count/i }), "20");
+    await user.selectOptions(screen.getByRole("combobox", { name: /Top slow SQL count/i }), "50");
+
+    expect(screen.getByRole("combobox", { name: /Top slow HTTP count/i })).toHaveValue("20");
+    expect(screen.getByRole("combobox", { name: /Top slow SQL count/i })).toHaveValue("50");
   });
 
   it("Refresh refetches both Orval queries", async () => {

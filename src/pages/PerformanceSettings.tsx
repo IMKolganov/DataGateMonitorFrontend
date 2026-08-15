@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { FaSync, FaTachometerAlt, FaTrash } from "react-icons/fa";
+import { FaCopy, FaSync, FaTachometerAlt, FaTrash } from "react-icons/fa";
 import type { GridColDef } from "@mui/x-data-grid";
 import Grid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
@@ -13,7 +13,7 @@ import type { PerformancePerformanceDbQueryEntryDto } from "../api/orval/model/p
 import type { PerformancePerformanceHttpRequestEntryDto } from "../api/orval/model/performancePerformanceHttpRequestEntryDto";
 import type { PerformancePerformanceHttpRequestsResponse } from "../api/orval/model/performancePerformanceHttpRequestsResponse";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
-import { buildTopSlow, stripQuery } from "../utils/performanceAggregates";
+import { buildTopSlow, formatSqlForDisplay, stripQuery } from "../utils/performanceAggregates";
 import { formatDateWithOffset } from "../utils/utils";
 import { errorMessage } from "../utils/errorMessage";
 import "../css/Settings.css";
@@ -21,11 +21,38 @@ import "../css/Table.css";
 
 const DEFAULT_LIMIT = 200;
 const POLL_MS = 5000;
+const TOP_SLOW_OPTIONS = [5, 10, 20, 50] as const;
+type TopSlowTake = (typeof TOP_SLOW_OPTIONS)[number];
 
 export default function PerformanceSettings() {
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [limitInput, setLimitInput] = useState(String(DEFAULT_LIMIT));
+  const [topSlowHttpTake, setTopSlowHttpTake] = useState<TopSlowTake>(5);
+  const [topSlowDbTake, setTopSlowDbTake] = useState<TopSlowTake>(5);
   const [selectedSql, setSelectedSql] = useState<string | null>(null);
+  const [sqlCopyStatus, setSqlCopyStatus] = useState<"Copy" | "Copied!">("Copy");
+
+  const openSqlDetail = (sql: string) => {
+    setSqlCopyStatus("Copy");
+    setSelectedSql(sql);
+  };
+
+  const closeSqlDetail = () => {
+    setSelectedSql(null);
+    setSqlCopyStatus("Copy");
+  };
+
+  const copySelectedSql = async () => {
+    if (selectedSql == null) return;
+    const text = formatSqlForDisplay(selectedSql);
+    try {
+      await navigator.clipboard.writeText(text);
+      setSqlCopyStatus("Copied!");
+      window.setTimeout(() => setSqlCopyStatus("Copy"), 2000);
+    } catch {
+      setSqlCopyStatus("Copy");
+    }
+  };
 
   // ogmMutator unwraps ApiResponse — TData is the Orval payload type (items list).
   const httpQuery = useGetApiPerformanceHttpRequests<PerformancePerformanceHttpRequestsResponse>(
@@ -51,7 +78,7 @@ export default function PerformanceSettings() {
     mutation: {
       onSuccess: async () => {
         await Promise.all([httpQuery.refetch(), dbQuery.refetch()]);
-        setSelectedSql(null);
+        closeSqlDetail();
       },
     },
   });
@@ -69,24 +96,33 @@ export default function PerformanceSettings() {
           label: `${h.method ?? "?"} ${stripQuery(h.path ?? "/")}`,
           durationMs: h.durationMs ?? 0,
         })),
+        topSlowHttpTake,
       ),
-    [httpItems],
+    [httpItems, topSlowHttpTake],
   );
 
   const topSlowDb = useMemo(
     () =>
       buildTopSlow(
         dbItems.map((d) => {
-          const sql = (d.sql ?? "").replace(/\s+/g, " ").trim();
-          const label = sql.length > 80 ? `${sql.slice(0, 80)}…` : sql || "(empty)";
+          const fullSql = (d.sql ?? "").trim();
+          const normalized = fullSql.replace(/\s+/g, " ");
+          const label =
+            normalized.length > 80 ? `${normalized.slice(0, 80)}…` : normalized || "(empty)";
           return {
-            key: label,
+            key: normalized || "(empty)",
             label,
             durationMs: d.durationMs ?? 0,
           };
         }),
+        topSlowDbTake,
       ),
-    [dbItems],
+    [dbItems, topSlowDbTake],
+  );
+
+  const formattedSelectedSql = useMemo(
+    () => (selectedSql == null ? "" : formatSqlForDisplay(selectedSql)),
+    [selectedSql],
   );
 
   const httpRows = httpItems.map((h, idx) => ({
@@ -139,7 +175,7 @@ export default function PerformanceSettings() {
             type="button"
             className="btn link"
             title={sql}
-            onClick={() => setSelectedSql(sql || null)}
+            onClick={() => openSqlDetail(sql)}
             style={{ textAlign: "left", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}
           >
             {short || "—"}
@@ -228,7 +264,34 @@ export default function PerformanceSettings() {
         }}
       >
         <section className="settings-card" style={{ padding: 12 }}>
-          <h3 style={{ marginTop: 0 }}>Top slow HTTP</h3>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 8,
+              marginBottom: 8,
+            }}
+          >
+            <h3 style={{ margin: 0 }}>Top slow HTTP</h3>
+            <label htmlFor="perf-top-slow-http" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ color: "var(--text-muted)", fontSize: "0.9em" }}>Show</span>
+              <select
+                id="perf-top-slow-http"
+                className="input"
+                style={{ width: 72 }}
+                aria-label="Top slow HTTP count"
+                value={topSlowHttpTake}
+                onChange={(e) => setTopSlowHttpTake(Number(e.target.value) as TopSlowTake)}
+              >
+                {TOP_SLOW_OPTIONS.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           {topSlowHttp.length === 0 ? (
             <p style={{ color: "var(--text-muted)" }}>No samples yet.</p>
           ) : (
@@ -243,14 +306,51 @@ export default function PerformanceSettings() {
           )}
         </section>
         <section className="settings-card" style={{ padding: 12 }}>
-          <h3 style={{ marginTop: 0 }}>Top slow SQL</h3>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 8,
+              marginBottom: 8,
+            }}
+          >
+            <h3 style={{ margin: 0 }}>Top slow SQL</h3>
+            <label htmlFor="perf-top-slow-sql" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ color: "var(--text-muted)", fontSize: "0.9em" }}>Show</span>
+              <select
+                id="perf-top-slow-sql"
+                className="input"
+                style={{ width: 72 }}
+                aria-label="Top slow SQL count"
+                value={topSlowDbTake}
+                onChange={(e) => setTopSlowDbTake(Number(e.target.value) as TopSlowTake)}
+              >
+                {TOP_SLOW_OPTIONS.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           {topSlowDb.length === 0 ? (
             <p style={{ color: "var(--text-muted)" }}>No samples yet.</p>
           ) : (
             <ul style={{ margin: 0, paddingLeft: 18 }}>
               {topSlowDb.map((item) => (
                 <li key={item.key}>
-                  <strong>{item.maxDurationMs} ms</strong> · {item.label}{" "}
+                  <strong>{item.maxDurationMs} ms</strong>
+                  {" · "}
+                  <button
+                    type="button"
+                    className="btn link"
+                    title="Open full SQL"
+                    onClick={() => openSqlDetail(item.key === "(empty)" ? "" : item.key)}
+                    style={{ textAlign: "left", verticalAlign: "baseline" }}
+                  >
+                    {item.label}
+                  </button>{" "}
                   <span style={{ color: "var(--text-muted)" }}>({item.samples})</span>
                 </li>
               ))}
@@ -298,35 +398,52 @@ export default function PerformanceSettings() {
       </CustomThemeProvider>
 
       {selectedSql != null && (
-        <div className="modal-overlay" onClick={() => setSelectedSql(null)}>
+        <div className="modal-overlay" onClick={closeSqlDetail}>
           <div
             className="modal-content"
             style={{ maxWidth: 980, width: "100%" }}
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="perf-sql-detail-title"
           >
             <div className="modal-header">
-              <h3>SQL detail</h3>
-              <button
-                type="button"
-                className="modal-close"
-                aria-label="Close"
-                onClick={() => setSelectedSql(null)}
-              >
-                ×
-              </button>
+              <h3 id="perf-sql-detail-title">SQL detail</h3>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <button
+                  type="button"
+                  className="btn secondary"
+                  onClick={() => void copySelectedSql()}
+                  disabled={!formattedSelectedSql}
+                >
+                  <FaCopy className="icon" aria-hidden /> {sqlCopyStatus}
+                </button>
+                <button
+                  type="button"
+                  className="modal-close"
+                  aria-label="Close"
+                  onClick={closeSqlDetail}
+                >
+                  ×
+                </button>
+              </div>
             </div>
             <pre
               style={{
                 margin: "0 20px 20px",
                 padding: 12,
                 overflow: "auto",
+                maxHeight: "70vh",
                 whiteSpace: "pre-wrap",
                 wordBreak: "break-word",
                 background: "var(--bg-body)",
                 borderRadius: 6,
+                fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                fontSize: 13,
+                lineHeight: 1.55,
               }}
             >
-              {selectedSql}
+              {formattedSelectedSql || "(empty)"}
             </pre>
           </div>
         </div>
