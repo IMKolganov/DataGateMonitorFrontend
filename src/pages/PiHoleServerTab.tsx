@@ -31,6 +31,7 @@ import type {
   VpnServerResponse,
 } from "../api/orvalModelShim";
 import { PiHoleStatusPanel } from "../components/pihole/PiHoleStatusPanel";
+import { normalizePiHoleClientSubnetPrefix } from "../utils/pihole/normalizePiHoleClientSubnetPrefix";
 import { isOpenVpnStack, VpnServerType } from "../constants/vpnServerType";
 import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 import { ServerAccessDenied } from "../components/ServerAccessDenied";
@@ -231,7 +232,7 @@ export function PiHoleServerTab() {
         pollIntervalSeconds: form.pollIntervalSeconds,
         batchSize: form.batchSize,
         lookbackSeconds: form.lookbackSeconds,
-        clientSubnetPrefix: form.clientSubnetPrefix.trim(),
+        clientSubnetPrefix: normalizePiHoleClientSubnetPrefix(form.clientSubnetPrefix),
       });
 
       const integrationChanged = enableIntegration !== piHoleEnabled;

@@ -200,6 +200,24 @@ describe("buildPiHolePipelineSteps", () => {
     expect(runtime?.summary).toMatch(/PIHOLE_\*/i);
   });
 
+  it("does not warn when dashboard subnet omits trailing dot vs node", () => {
+    const steps = buildPiHolePipelineSteps({
+      dashboardConfig: { ...baseConfig, clientSubnetPrefix: "10.80.0" },
+      serverPiHoleEnabled: true,
+      serverApiUrl: "https://xs2.example.com/",
+      stack: "xray",
+      diagnostics: {
+        ...runningDiagnostics,
+        clientSubnetPrefix: "10.80.0.",
+        baseUrl: baseConfig.baseUrl,
+      },
+    });
+
+    const runtime = steps.find((s) => s.id === "runtime-push");
+    expect(runtime?.status).toBe("ok");
+    expect(runtime?.error).toBeUndefined();
+  });
+
   it("surfaces probe auth failure on step 4", () => {
     const steps = buildPiHolePipelineSteps({
       dashboardConfig: baseConfig,

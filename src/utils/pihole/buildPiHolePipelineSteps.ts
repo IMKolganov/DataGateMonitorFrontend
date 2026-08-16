@@ -1,4 +1,5 @@
 import type { PiHoleDiagnosticsResponse, VpnServerPiHoleConfigDto } from "../../api/orvalModelShim";
+import { piHoleClientSubnetPrefixesEqual } from "./normalizePiHoleClientSubnetPrefix";
 
 export type PiHolePipelineStepStatus = "ok" | "warning" | "error" | "pending" | "skipped";
 
@@ -164,12 +165,12 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
       } else if (
         cfg?.clientSubnetPrefix?.trim() &&
         d.clientSubnetPrefix?.trim() &&
-        cfg.clientSubnetPrefix.trim() !== d.clientSubnetPrefix.trim()
+        !piHoleClientSubnetPrefixesEqual(cfg.clientSubnetPrefix, d.clientSubnetPrefix)
       ) {
         status = "warning";
         statusText = "Mismatch";
         error = `Dashboard subnet (${cfg.clientSubnetPrefix}) differs from node (${d.clientSubnetPrefix || "(all)"}).`;
-        fix = "Click Save & apply to sync subnet filter.";
+        fix = "Use the identity pool form with a trailing dot (e.g. 10.80.0.) and click Save & apply.";
       } else if (!d.runtimeConfigAppliedAtUtc) {
         status = "ok";
         statusText = "From env";
