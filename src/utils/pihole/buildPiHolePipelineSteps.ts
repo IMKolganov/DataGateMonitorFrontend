@@ -314,6 +314,14 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
         fix =
           "Clients must use classic VPN DNS from the issued profile (dnsServers → Pi-hole). Enable XRAY_DNS_IDENTITY_*, Private DNS Off, then browse and refresh.";
         summary = `Last success ${fmtUtc(d.lastSuccessfulPollAtUtc)}, subnet filter matched queries but none mapped to CommonName.`;
+      } else if (isXray && (d.lastPollQueriesForwarded ?? 0) === 0) {
+        status = "warning";
+        statusText = "No DNS via Pi-hole";
+        error =
+          "Last poll forwarded 0 — Pi-hole is not seeing identity-pool clients (or the poll window had no matching queries).";
+        fix =
+          "1) Dashboard Xray Config Template must include dnsServers JSON. 2) Re-issue/download the link. 3) Client must apply dnsServers on TUN (no DoH). 4) Confirm access.log has udp:172.20.0.1:53 → dns-id-*.";
+        summary = `Last success ${fmtUtc(d.lastSuccessfulPollAtUtc)}, afterFilter=${d.lastPollQueriesAfterFilter ?? 0}, forwarded 0.`;
       } else {
         status = "ok";
         statusText = "Running";
@@ -363,6 +371,27 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
         status = "ok";
         statusText = "Receiving";
         summary = `Collector forwarded ${forwarded} on the last poll; waiting for DNS rows in the dashboard DB.`;
+      } else if (
+        isXray &&
+        stored > 0 &&
+        forwarded === 0 &&
+        d.lastStoredQueryAtUtc &&
+        d.lastSuccessfulPollAtUtc
+      ) {
+        const storedMs = Date.parse(d.lastStoredQueryAtUtc);
+        const pollMs = Date.parse(d.lastSuccessfulPollAtUtc);
+        if (Number.isFinite(storedMs) && Number.isFinite(pollMs) && storedMs + 60_000 < pollMs) {
+          status = "warning";
+          statusText = "Stale history";
+          error = `DB has ${stored} rows (last ${fmtUtc(d.lastStoredQueryAtUtc)}), but the collector forwarded 0 on the last poll (${fmtUtc(d.lastSuccessfulPollAtUtc)}). New queries are not arriving.`;
+          fix =
+            "Fix client DNS through Pi-hole (profile dnsServers). Old grid rows are historical — not proof the live path works.";
+          summary = error;
+        } else {
+          status = "ok";
+          statusText = "Stored";
+          summary = `${stored} DNS queries in dashboard DB (last ${fmtUtc(d.lastStoredQueryAtUtc)}). See Recent DNS queries below.`;
+        }
       } else {
         status = "ok";
         statusText = "Stored";

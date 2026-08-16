@@ -260,6 +260,32 @@ describe("buildPiHolePipelineSteps", () => {
     expect(firstPiHolePipelineIssue(steps)?.id).toBe("collector");
   });
 
+  it("xray: warns when last poll forwarded 0 (no Pi-hole DNS from clients)", () => {
+    const steps = buildPiHolePipelineSteps({
+      dashboardConfig: { ...baseConfig, clientSubnetPrefix: "10.80.0.", baseUrl: "http://172.20.0.1:8080" },
+      serverPiHoleEnabled: true,
+      serverApiUrl: "https://xs2.example.com/",
+      stack: "xray",
+      diagnostics: {
+        ...runningDiagnostics,
+        baseUrl: "http://172.20.0.1:8080",
+        clientSubnetPrefix: "10.80.0.",
+        lastPollQueriesAfterFilter: 0,
+        lastPollQueriesForwarded: 0,
+        storedQueryCount: 10,
+        lastStoredQueryAtUtc: "2026-08-16T15:50:51Z",
+        lastSuccessfulPollAtUtc: "2026-08-16T16:55:13Z",
+      },
+    });
+
+    const collector = steps.find((s) => s.id === "collector");
+    expect(collector?.status).toBe("warning");
+    expect(collector?.statusText).toBe("No DNS via Pi-hole");
+    const storage = steps.find((s) => s.id === "storage");
+    expect(storage?.status).toBe("warning");
+    expect(storage?.statusText).toBe("Stale history");
+  });
+
   it("marks storage Receiving when forwarded>0 but stored=0", () => {
     const steps = buildPiHolePipelineSteps({
       dashboardConfig: baseConfig,
