@@ -110,7 +110,8 @@ const GroupDetails: React.FC = () => {
   const groups = useMemo(() => readGroupsPayload(groupsQuery.data), [groupsQuery.data]);
 
   const serversQuery = useQuery({
-    queryKey: ["v3", "open-vpn-servers", "with-status"],
+    // Distinct from ServerList MappedServer cache (same REST, different shape).
+    queryKey: ["v3", "open-vpn-servers", "with-status", "group-details"],
     queryFn: async () => {
       const resp = await getApiV3OpenVpnServersGetAllWithStatus();
       const payload = resp as VpnServerWithStatusesV3Response;

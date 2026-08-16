@@ -188,21 +188,37 @@ const ServerList: React.FC = () => {
     },
   });
 
+  // Recover if another screen wrote a different shape under the same query key.
+  React.useEffect(() => {
+    const poisoned =
+      Array.isArray(baseServers) &&
+      baseServers.length > 0 &&
+      baseServers.some((s) => s == null || typeof s.id !== "number" || s.raw == null);
+    if (poisoned) {
+      void queryClient.invalidateQueries({ queryKey: V3_SERVERS_WITH_STATUS_KEY });
+    }
+  }, [baseServers, queryClient]);
+
   const groupsQuery = useGetApiVpnServerGroupsGetAll();
   const groups = useMemo(() => readGroupsPayload(groupsQuery.data), [groupsQuery.data]);
   const createGroupMutation = usePostApiVpnServerGroupsCreate();
 
   const servers = useMemo(() => {
-    if (!serviceData) return baseServers;
+    // Guard against a poisoned React Query cache (wrong shape under the same key).
+    const safeBase = (baseServers ?? []).filter(
+      (s) => s != null && typeof s.id === "number" && s.raw != null && typeof s.raw === "object",
+    ) as MappedServer[];
+
+    if (!serviceData) return safeBase;
 
     const normalized: Record<number, ServiceStatusDto> = {};
     for (const [key, value] of Object.entries(serviceData as Record<string, ServiceStatusDto>)) {
       const id = Number(key);
-      if (!Number.isFinite(id)) continue;
+      if (!Number.isFinite(id) || value == null) continue;
       normalized[id] = value;
     }
 
-    return baseServers.map((s) => {
+    return safeBase.map((s) => {
       const ws = pickServiceDataEntry(normalized, s.id);
       if (!ws) return s;
 
@@ -311,10 +327,10 @@ const ServerList: React.FC = () => {
 
       const base: ServiceStatusDto = {
         vpnServerId: id,
-        countConnectedClients: s.wsCountConnectedClients ?? s.raw.countConnectedClients,
-        countSessions: s.wsCountSessions ?? s.raw.countSessions,
-        totalBytesIn: s.raw.totalBytesIn,
-        totalBytesOut: s.raw.totalBytesOut,
+        countConnectedClients: s.wsCountConnectedClients ?? s.raw?.countConnectedClients,
+        countSessions: s.wsCountSessions ?? s.raw?.countSessions,
+        totalBytesIn: s.raw?.totalBytesIn,
+        totalBytesOut: s.raw?.totalBytesOut,
       };
 
       if (serverRowIsDisabled(s.raw)) {
