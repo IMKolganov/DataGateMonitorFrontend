@@ -303,6 +303,17 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
         summary = isXray
           ? "Collector is running; waiting for the first successful poll (clients must use Pi-hole DNS)."
           : "Collector is running; waiting for the first successful poll.";
+      } else if (
+        isXray &&
+        (d.lastPollQueriesAfterFilter ?? 0) > 0 &&
+        (d.lastPollQueriesForwarded ?? 0) === 0
+      ) {
+        status = "warning";
+        statusText = "No CN match";
+        error = `Last poll afterFilter=${d.lastPollQueriesAfterFilter}, forwarded=0 (IdentityIp → CN miss).`;
+        fix =
+          "Clients must use classic VPN DNS from the issued profile (dnsServers → Pi-hole). Enable XRAY_DNS_IDENTITY_*, Private DNS Off, then browse and refresh.";
+        summary = `Last success ${fmtUtc(d.lastSuccessfulPollAtUtc)}, subnet filter matched queries but none mapped to CommonName.`;
       } else {
         status = "ok";
         statusText = "Running";

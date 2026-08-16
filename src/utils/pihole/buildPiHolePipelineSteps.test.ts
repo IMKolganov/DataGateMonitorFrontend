@@ -218,6 +218,66 @@ describe("buildPiHolePipelineSteps", () => {
     expect(runtime?.error).toBeUndefined();
   });
 
+  it("warns when dashboard and node subnet prefixes truly differ", () => {
+    const steps = buildPiHolePipelineSteps({
+      dashboardConfig: { ...baseConfig, clientSubnetPrefix: "10.80.0." },
+      serverPiHoleEnabled: true,
+      serverApiUrl: "https://xs2.example.com/",
+      stack: "xray",
+      diagnostics: {
+        ...runningDiagnostics,
+        clientSubnetPrefix: "10.80.1.",
+        baseUrl: baseConfig.baseUrl,
+      },
+    });
+
+    const runtime = steps.find((s) => s.id === "runtime-push");
+    expect(runtime?.status).toBe("warning");
+    expect(runtime?.error).toMatch(/differs from node/i);
+  });
+
+  it("xray: warns when afterFilter>0 but forwarded=0 (IdentityIp miss)", () => {
+    const steps = buildPiHolePipelineSteps({
+      dashboardConfig: { ...baseConfig, clientSubnetPrefix: "10.80.0.", baseUrl: "http://172.20.0.1:8080" },
+      serverPiHoleEnabled: true,
+      serverApiUrl: "https://xs2.example.com/",
+      stack: "xray",
+      diagnostics: {
+        ...runningDiagnostics,
+        baseUrl: "http://172.20.0.1:8080",
+        clientSubnetPrefix: "10.80.0.",
+        lastPollQueriesAfterFilter: 4,
+        lastPollQueriesForwarded: 0,
+        lastPollQueriesEnriched: 0,
+        storedQueryCount: 0,
+      },
+    });
+
+    const collector = steps.find((s) => s.id === "collector");
+    expect(collector?.status).toBe("warning");
+    expect(collector?.statusText).toBe("No CN match");
+    expect(collector?.error).toMatch(/IdentityIp/i);
+    expect(firstPiHolePipelineIssue(steps)?.id).toBe("collector");
+  });
+
+  it("marks storage Receiving when forwarded>0 but stored=0", () => {
+    const steps = buildPiHolePipelineSteps({
+      dashboardConfig: baseConfig,
+      serverPiHoleEnabled: true,
+      serverApiUrl: "https://s6.datagateapp.com/",
+      diagnostics: {
+        ...runningDiagnostics,
+        storedQueryCount: 0,
+        lastStoredQueryAtUtc: undefined,
+        lastPollQueriesForwarded: 3,
+      },
+    });
+
+    const storage = steps.find((s) => s.id === "storage");
+    expect(storage?.status).toBe("ok");
+    expect(storage?.statusText).toBe("Receiving");
+  });
+
   it("surfaces probe auth failure on step 4", () => {
     const steps = buildPiHolePipelineSteps({
       dashboardConfig: baseConfig,
