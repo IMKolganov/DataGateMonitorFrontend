@@ -1,10 +1,9 @@
 import type { OvpnFileConfigResponse } from "../api/orvalModelShim";
 
-/** Default VLESS client export template (matches backend DefaultXrayClientLinkTemplate). */
-export const XRAY_EXPORT_TEMPLATE = `{{vless_uri}}
-# {{friendly_name}}
-UUID: {{uuid}}
-Endpoint: {{server_ip}}:{{server_port}}
+/** Default VLESS client export template (JSON profile for DataGate Android + share URI).
+ * dns_* placeholders are filled from node DNS1/DNS2 / XRAY_DNS_IDENTITY_* at link issue time.
+ */
+export const XRAY_EXPORT_TEMPLATE = `{"vless":"{{vless_uri}}","dnsServers":{{dns_servers_json}},"dnsIdentityEnabled":{{dns_identity_enabled}},"friendlyName":"{{friendly_name}}","uuid":"{{uuid}}","endpoint":"{{server_ip}}:{{server_port}}"}
 `;
 
 /** Default OpenVPN .ovpn export template for new servers.

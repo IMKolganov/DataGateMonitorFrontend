@@ -739,10 +739,14 @@ const OvpnFileConfigForm: React.FC = () => {
                 </p>
                 <h4>VLESS link template</h4>
                 <p>
-                  Use placeholders: <code>{"{{vless_uri}}"}</code>, <code>{"{{uuid}}"}</code>,{" "}
-                  <code>{"{{friendly_name}}"}</code>, <code>{"{{server_ip}}"}</code>, <code>{"{{server_port}}"}</code>.
-                  Include <code>{"{{vless_uri}}"}</code> to emit a shareable <code>vless://</code> line.
+                  Prefer a JSON profile so Android can read <code>dnsServers</code> (VLESS does not push DNS). Default
+                  template uses: <code>{"{{vless_uri}}"}</code>, <code>{"{{dns_servers_json}}"}</code>,{" "}
+                  <code>{"{{dns_identity_enabled}}"}</code>, <code>{"{{uuid}}"}</code>,{" "}
+                  <code>{"{{friendly_name}}"}</code>, <code>{"{{server_ip}}"}</code>, <code>{"{{server_port}}"}</code>,{" "}
+                  <code>{"{{dns1}}"}</code>, <code>{"{{dns2}}"}</code>. DNS values come from the Xray node env (
+                  <code>DNS1</code>/<code>DNS2</code>) when the link is issued.
                 </p>
+                <pre className="ovpn-template-sample">{XRAY_EXPORT_TEMPLATE.trim()}</pre>
               </>
             ) : (
               <>
