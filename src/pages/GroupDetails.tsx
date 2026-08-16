@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useMediaQuery } from "react-responsive";
 import {
   DndContext,
   closestCenter,
@@ -18,7 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { FaArrowLeft, FaGripVertical, FaSave, FaTrash } from "react-icons/fa";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   useGetApiVpnServerGroupsGetAll,
@@ -30,13 +31,87 @@ import {
   getGetApiVpnServerGroupsGetAllQueryKey,
 } from "../api/orval/vpn-server-groups/vpn-server-groups";
 import { getApiV3OpenVpnServersGetAllWithStatus } from "../api/orval/vpn-servers-v3/vpn-servers-v3";
+import { deleteApiOpenVpnServersDeleteVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
+import { getApiOpenVpnClientsGetAllConnected } from "../api/orval/vpn-server-clients/vpn-server-clients";
 import type { VpnServerGroupsDtoVpnServerGroupDto } from "../api/orval/model/vpnServerGroupsDtoVpnServerGroupDto";
-import type { VpnServerWithStatusesV3Response } from "../api/orvalModelShim";
+import { ServiceStatus } from "../api/orvalModelShim";
+import type {
+  ServiceStatusDto,
+  VpnServerClientsResponsesConnectedClientsResponse,
+  VpnServerWithStatusV2Dto,
+  VpnServerWithStatusesV3Response,
+} from "../api/orvalModelShim";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
+import { buildServerSwitchPath } from "../utils/buildServerSwitchPath";
 import { UNGROUPED_GROUP_ID } from "../utils/serverGroups";
+import useSignalRService from "../hooks/useSignalRService";
+import ServerItem from "../components/servers/ServerItem";
+import "../css/ServerList.css";
 import "../css/GroupDetails.css";
 
 type ServerRow = { id: number; name: string; sortOrder: number; groupId: number | null };
+
+type MappedServer = {
+  id: number;
+  vpnServerId: number;
+  serviceStatus: ServiceStatus | null;
+  errorMessage: string | null;
+  nextRunTime: string;
+  wsCountConnectedClients?: number;
+  wsCountSessions?: number;
+  wsOnline: boolean | null;
+  groupId?: number | null;
+  sortOrder?: number;
+  raw: VpnServerWithStatusV2Dto;
+};
+
+const NUMBER_0 = 0 as ServiceStatus;
+const NUMBER_1 = 1 as ServiceStatus;
+const NUMBER_2 = 2 as ServiceStatus;
+
+const stringToNumberStatus: Record<string, ServiceStatus> = {
+  idle: NUMBER_0,
+  running: NUMBER_1,
+  error: NUMBER_2,
+  "0": NUMBER_0,
+  "1": NUMBER_1,
+  "2": NUMBER_2,
+};
+
+const coerceStatus = (input: unknown): ServiceStatus => {
+  if (typeof input === "number") {
+    if (input === 0 || input === 1 || input === 2) return input as ServiceStatus;
+    return NUMBER_0;
+  }
+  if (typeof input === "string") {
+    return stringToNumberStatus[input.toLowerCase()] ?? NUMBER_0;
+  }
+  return NUMBER_0;
+};
+
+function wsStatusIsPresent(ws: ServiceStatusDto | undefined): ws is ServiceStatusDto & { status: ServiceStatus } {
+  return ws != null && ws.status !== undefined && ws.status !== null;
+}
+
+function pickServiceDataEntry(
+  map: Record<number, ServiceStatusDto>,
+  id: number,
+): ServiceStatusDto | undefined {
+  return map[id] ?? (map as unknown as Record<string, ServiceStatusDto>)[String(id)];
+}
+
+function readPayload<T>(value: T | { data?: T } | undefined): T | undefined {
+  if (!value) return undefined;
+  if (typeof value === "object" && "data" in value) {
+    return (value as { data?: T }).data;
+  }
+  return value as T;
+}
+
+function serverRowIsDisabled(raw: VpnServerWithStatusV2Dto): boolean {
+  const v = raw.vpnServerResponses?.vpnServer ?? raw.openVpnServerResponses?.vpnServer;
+  return Boolean(v?.isDisabled);
+}
 
 function SortableRow({
   id,
@@ -75,6 +150,45 @@ function SortableRow({
   );
 }
 
+function SortableServerCard({
+  id,
+  label,
+  disabled,
+  children,
+}: {
+  id: string;
+  label: string;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+    disabled,
+  });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.85 : 1,
+  };
+  return (
+    <li ref={setNodeRef} style={style} className="group-details-server-card">
+      {!disabled && (
+        <button
+          type="button"
+          className="group-details-drag-handle group-details-server-card-handle"
+          title="Drag to reorder"
+          aria-label={`Drag ${label}`}
+          {...attributes}
+          {...listeners}
+        >
+          {FaGripVertical({ className: "icon" })}
+        </button>
+      )}
+      <div className="group-details-server-card-body">{children}</div>
+    </li>
+  );
+}
+
 export function readGroupsPayload(data: unknown): VpnServerGroupsDtoVpnServerGroupDto[] {
   if (!data || typeof data !== "object") return [];
   const raw = data as Record<string, unknown>;
@@ -103,8 +217,13 @@ const GroupDetails: React.FC = () => {
   const isUngrouped = groupIdParam === UNGROUPED_GROUP_ID;
   const numericGroupId = isUngrouped ? null : Number.parseInt(groupIdParam, 10);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMobile = useMediaQuery({ maxWidth: 768 });
   const queryClient = useQueryClient();
-  const canEdit = isAdmin(getCurrentUser());
+  const user = getCurrentUser();
+  const canEdit = isAdmin(user);
+  const currentUserExternalId = (user?.providerExternalId ?? "").trim();
+  const { serviceData } = useSignalRService();
 
   const groupsQuery = useGetApiVpnServerGroupsGetAll();
   const groups = useMemo(() => readGroupsPayload(groupsQuery.data), [groupsQuery.data]);
@@ -115,26 +234,74 @@ const GroupDetails: React.FC = () => {
     queryFn: async () => {
       const resp = await getApiV3OpenVpnServersGetAllWithStatus();
       const payload = resp as VpnServerWithStatusesV3Response;
-      return payload.vpnServerWithStatuses ?? [];
+      const list = payload.vpnServerWithStatuses ?? [];
+      return list.flatMap((item) => {
+        const s = item.vpnServerResponses?.vpnServer;
+        const id = s?.id;
+        if (typeof id !== "number") return [];
+        return [
+          {
+            id,
+            vpnServerId: id,
+            serviceStatus: null,
+            errorMessage: null,
+            nextRunTime: "N/A",
+            wsCountConnectedClients: item.countConnectedClients,
+            wsCountSessions: item.countSessions,
+            wsOnline: null,
+            groupId: s?.groupId ?? null,
+            sortOrder: s?.sortOrder ?? 0,
+            raw: item,
+          } satisfies MappedServer,
+        ];
+      });
     },
   });
 
-  const allServers: ServerRow[] = useMemo(() => {
-    const list = serversQuery.data ?? [];
-    return list.flatMap((item) => {
-      const s = item.vpnServerResponses?.vpnServer;
-      const id = s?.id;
-      if (typeof id !== "number") return [];
-      return [
-        {
-          id,
-          name: s?.serverName?.trim() || `Server ${id}`,
-          sortOrder: s?.sortOrder ?? 0,
-          groupId: s?.groupId ?? null,
-        },
-      ];
+  const mappedServers = useMemo(() => {
+    const safeBase = (serversQuery.data ?? []).filter(
+      (s) => s != null && typeof s.id === "number" && s.raw != null,
+    );
+
+    if (!serviceData) return safeBase;
+
+    const normalized: Record<number, ServiceStatusDto> = {};
+    for (const [key, value] of Object.entries(serviceData as Record<string, ServiceStatusDto>)) {
+      const id = Number(key);
+      if (!Number.isFinite(id) || value == null) continue;
+      normalized[id] = value;
+    }
+
+    return safeBase.map((s) => {
+      const ws = pickServiceDataEntry(normalized, s.id);
+      if (!ws) return s;
+      const onlineRaw = (ws as ServiceStatusDto & { isOnline?: boolean }).isOnline;
+      return {
+        ...s,
+        serviceStatus: wsStatusIsPresent(ws) ? coerceStatus(ws.status) : s.serviceStatus,
+        errorMessage: ws.errorMessage !== undefined ? ws.errorMessage : s.errorMessage,
+        nextRunTime:
+          ws.nextRunTime !== undefined && ws.nextRunTime !== "" ? ws.nextRunTime : s.nextRunTime,
+        wsCountConnectedClients:
+          ws.countConnectedClients !== undefined ? ws.countConnectedClients : s.wsCountConnectedClients,
+        wsCountSessions: ws.countSessions !== undefined ? ws.countSessions : s.wsCountSessions,
+        wsOnline: typeof onlineRaw === "boolean" ? onlineRaw : s.wsOnline,
+      };
     });
-  }, [serversQuery.data]);
+  }, [serversQuery.data, serviceData]);
+
+  const allServers: ServerRow[] = useMemo(
+    () =>
+      mappedServers.map((s) => ({
+        id: s.id,
+        name: s.raw.vpnServerResponses?.vpnServer?.serverName?.trim() || `Server ${s.id}`,
+        sortOrder: s.sortOrder ?? 0,
+        groupId: s.groupId ?? null,
+      })),
+    [mappedServers],
+  );
+
+  const serverById = useMemo(() => new Map(mappedServers.map((s) => [s.id, s])), [mappedServers]);
 
   const currentGroup = useMemo(
     () => (typeof numericGroupId === "number" ? groups.find((g) => g.id === numericGroupId) : undefined),
@@ -189,7 +356,6 @@ const GroupDetails: React.FC = () => {
     }
   }, [groupIdParam, isUngrouped, currentGroup, groups, allServers]);
 
-  const nameById = useMemo(() => new Map(allServers.map((s) => [s.id, s.name])), [allServers]);
   const groupNameById = useMemo(
     () => new Map(groups.map((g) => [g.id!, g.name ?? `Group ${g.id}`])),
     [groups],
@@ -199,6 +365,48 @@ const GroupDetails: React.FC = () => {
     const inGroup = new Set(memberIds);
     return allServers.filter((s) => !inGroup.has(s.id));
   }, [allServers, memberIds]);
+
+  const memberServers = useMemo(() => {
+    const list: MappedServer[] = [];
+    for (const id of memberIds) {
+      const server = serverById.get(id);
+      if (server) list.push(server);
+    }
+    return list;
+  }, [memberIds, serverById]);
+
+  const connectedByServerQueries = useQueries({
+    queries: memberServers.map((server) => ({
+      queryKey: ["group-details-connected", server.id],
+      queryFn: () => getApiOpenVpnClientsGetAllConnected({ VpnServerId: server.id, Page: 1, PageSize: 300 }),
+      enabled: Boolean(currentUserExternalId),
+      staleTime: 12_000,
+      refetchInterval: 15_000,
+      retry: 1,
+    })),
+  });
+
+  const connectedByServerId = useMemo(() => {
+    const map = new Map<number, boolean>();
+    if (!currentUserExternalId) return map;
+    for (let i = 0; i < memberServers.length; i += 1) {
+      const server = memberServers[i];
+      if (!server) continue;
+      const q = connectedByServerQueries[i];
+      const payload = readPayload<VpnServerClientsResponsesConnectedClientsResponse>(
+        q?.data as
+          | VpnServerClientsResponsesConnectedClientsResponse
+          | { data?: VpnServerClientsResponsesConnectedClientsResponse }
+          | undefined,
+      );
+      const clients = payload?.vpnClients ?? [];
+      map.set(
+        server.id,
+        clients.some((c) => (c.externalId ?? "").trim() === currentUserExternalId),
+      );
+    }
+    return map;
+  }, [connectedByServerQueries, currentUserExternalId, memberServers]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -215,6 +423,24 @@ const GroupDetails: React.FC = () => {
   const reorderMutation = usePutApiVpnServerGroupsReorder();
   const setServersMutation = usePutApiVpnServerGroupsIdSetServers();
   const setUngroupedMutation = usePutApiVpnServerGroupsUngroupedSetServers();
+
+  const openServer = (id: number) => {
+    const target = buildServerSwitchPath(id, location.pathname, canEdit);
+    if (isMobile) navigate(target);
+    else navigate(target, { replace: true });
+  };
+
+  const handleDeleteServer = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this server?")) return;
+    try {
+      await deleteApiOpenVpnServersDeleteVpnServerId(id);
+      membersDirtyRef.current = true;
+      setMemberIds((prev) => prev.filter((x) => x !== id));
+      await invalidate();
+    } catch {
+      toast.error("Failed to delete server");
+    }
+  };
 
   const schedulePersistServerOrder = (ids: number[]) => {
     if (!canEdit) return;
@@ -384,7 +610,8 @@ const GroupDetails: React.FC = () => {
       <h2 className="group-details-title">{isUngrouped ? "Ungrouped" : name || "Group"}</h2>
       {canEdit && (
         <p className="group-details-hint">
-          Drag the grip handle to reorder. Changes save automatically when you drop.
+          Drag the grip handle to reorder. Click a server card to open full details. Changes save
+          automatically when you drop.
         </p>
       )}
 
@@ -432,28 +659,71 @@ const GroupDetails: React.FC = () => {
         </section>
       )}
 
-      <section className="group-details-section">
+      <section className="group-details-section group-details-section--servers">
         <div className="group-details-section-head">
           <h3>Servers in this group</h3>
           {savingServers && <span className="group-details-saving">Saving…</span>}
         </div>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onServersDragEnd}>
           <SortableContext items={memberIds.map(String)} strategy={verticalListSortingStrategy}>
-            <ul className="group-details-sortable-list">
-              {memberIds.map((id) => (
-                <li key={id} className="group-details-server-row">
-                  <SortableRow
+            <ul className="group-details-server-cards">
+              {memberIds.map((id) => {
+                const server = serverById.get(id);
+                const label = allServers.find((s) => s.id === id)?.name ?? `Server ${id}`;
+                if (!server) {
+                  return (
+                    <li key={id} className="group-details-server-card group-details-server-card--missing">
+                      <span>{label}</span>
+                      {canEdit && !isUngrouped && (
+                        <button type="button" className="btn secondary" onClick={() => removeServer(id)}>
+                          Remove
+                        </button>
+                      )}
+                    </li>
+                  );
+                }
+                return (
+                  <SortableServerCard
+                    key={id}
                     id={String(id)}
-                    label={nameById.get(id) ?? `Server ${id}`}
+                    label={label}
                     disabled={!canEdit}
-                  />
-                  {canEdit && !isUngrouped && (
-                    <button type="button" className="btn secondary" onClick={() => removeServer(id)}>
-                      Remove
-                    </button>
-                  )}
-                </li>
-              ))}
+                  >
+                    {canEdit && !isUngrouped && (
+                      <div className="group-details-server-card-toolbar">
+                        <button
+                          type="button"
+                          className="btn secondary"
+                          onClick={() => removeServer(id)}
+                        >
+                          Remove from group
+                        </button>
+                      </div>
+                    )}
+                    <div
+                      className={`server-item clickable${
+                        serverRowIsDisabled(server.raw) ? " server-item--polling-off" : ""
+                      }`}
+                      onClick={() => openServer(id)}
+                    >
+                      <ServerItem
+                        server={server.raw}
+                        vpnServerId={server.vpnServerId}
+                        serviceStatus={server.serviceStatus}
+                        errorMessage={server.errorMessage}
+                        nextRunTime={server.nextRunTime}
+                        wsOnline={server.wsOnline}
+                        wsCountConnectedClients={server.wsCountConnectedClients}
+                        wsCountSessions={server.wsCountSessions}
+                        isCurrentUserConnected={connectedByServerId.get(id) === true}
+                        onView={openServer}
+                        onEdit={(serverId) => navigate(`/servers/edit/${serverId}`)}
+                        onDelete={(serverId) => void handleDeleteServer(serverId)}
+                      />
+                    </div>
+                  </SortableServerCard>
+                );
+              })}
             </ul>
           </SortableContext>
         </DndContext>

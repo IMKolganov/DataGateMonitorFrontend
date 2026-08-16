@@ -1,7 +1,7 @@
 // src/components/ServerList.tsx
 import React, { useMemo, useState } from "react";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FaSyncAlt, FaPlus, FaFolderPlus } from "react-icons/fa";
+import { FaSyncAlt, FaPlus, FaFolderPlus, FaExpand, FaCompress } from "react-icons/fa";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
 import { toast } from "react-toastify";
@@ -299,6 +299,28 @@ const ServerList: React.FC = () => {
     });
   };
 
+  const expandAllGroups = () => {
+    setCollapsedMap(() => {
+      const next: CollapsedGroupsMap = {};
+      for (const section of sections) {
+        next[String(section.key)] = false;
+      }
+      saveCollapsedGroups(next);
+      return next;
+    });
+  };
+
+  const collapseAllGroups = () => {
+    setCollapsedMap(() => {
+      const next: CollapsedGroupsMap = {};
+      for (const section of sections) {
+        next[String(section.key)] = true;
+      }
+      saveCollapsedGroups(next);
+      return next;
+    });
+  };
+
   const addGroup = async () => {
     const name = window.prompt("New group name");
     if (!name?.trim()) return;
@@ -464,6 +486,28 @@ const ServerList: React.FC = () => {
             </ul>
         ) : (
             <div className="server-groups">
+              {sections.length > 0 && (
+                <div className="server-groups-toolbar" role="group" aria-label="Group expand controls">
+                  <button
+                    type="button"
+                    className="server-groups-toolbar__btn"
+                    onClick={expandAllGroups}
+                    title="Expand all"
+                    aria-label="Expand all groups"
+                  >
+                    {FaExpand({ className: "icon" })}
+                  </button>
+                  <button
+                    type="button"
+                    className="server-groups-toolbar__btn"
+                    onClick={collapseAllGroups}
+                    title="Collapse all"
+                    aria-label="Collapse all groups"
+                  >
+                    {FaCompress({ className: "icon" })}
+                  </button>
+                </div>
+              )}
               {servers.length > 0 || groups.length > 0 ? (
                   sections.map((section) => {
                     const key = String(section.key);
