@@ -19,12 +19,14 @@ function ServersWithDetails() {
 
   /** `/servers/123/...` — layout with ServerDetails (not `/servers/statistics/...` global user stats). */
   const isViewingDetails = /^\/servers\/\d+/.test(location.pathname);
+  /** `/servers/groups/:groupId` — group edit / reorder panel. */
+  const isViewingGroup = /^\/servers\/groups\//.test(location.pathname);
   /** `/servers/statistics/:externalId` — user statistics across all VPN servers (must not sit under the server list on mobile). */
   const isGlobalStatisticsRoute = /^\/servers\/statistics\//.test(location.pathname);
   /** Service Control → Details (Status Stream Logs). */
   const isStatusStreamLogsRoute = location.pathname === "/servers/status-stream-logs";
   const isMobileFullScreenOutlet =
-    isViewingDetails || isGlobalStatisticsRoute || isStatusStreamLogsRoute;
+    isViewingDetails || isViewingGroup || isGlobalStatisticsRoute || isStatusStreamLogsRoute;
 
   const [layoutIsMobile, setLayoutIsMobile] = useState(isMobile);
   if (layoutIsMobile !== isMobile) {

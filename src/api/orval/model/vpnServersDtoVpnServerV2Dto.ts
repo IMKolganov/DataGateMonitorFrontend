@@ -36,4 +36,9 @@ export interface VpnServersDtoVpnServerV2Dto {
   /** @nullable */
   xrayClientsPollError?: string | null;
   isDisabled?: boolean;
+  /** @nullable */
+  groupId?: number | null;
+  /** @nullable */
+  groupName?: string | null;
+  sortOrder?: number;
 }
