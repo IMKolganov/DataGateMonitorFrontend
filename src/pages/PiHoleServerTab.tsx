@@ -279,8 +279,10 @@ export function PiHoleServerTab() {
           <>
             Save connection settings, then enable integration. Settings are pushed to the <strong>Xray node</strong>,
             which polls Pi-hole locally (same pattern as OpenVPN). Use a Base URL reachable from the Xray container
-            (often <code>http://172.17.0.1:8080</code> when Pi-hole shares the OpenVPN netns — not dashboard
-            localhost). Per-user CN mapping is not available yet.
+            (often <code>http://host.docker.internal:8080</code> or the docker bridge gateway — not dashboard
+            localhost). Per-user CN mapping uses DNS identity IPs (<code>XRAY_DNS_IDENTITY_*</code>) when client DNS
+            goes through the tunnel to Pi-hole; set subnet prefix to the identity pool (default{" "}
+            <code>10.80.0.</code>).
           </>
         ) : (
           <>
