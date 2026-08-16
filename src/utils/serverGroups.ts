@@ -83,12 +83,14 @@ export function buildServerGroupSections<T extends GroupableServer>(
     .filter((s) => !assigned.has(s.id))
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.id - b.id);
 
-  sections.push({
-    key: UNGROUPED_GROUP_ID,
-    name: "Ungrouped",
-    sortOrder: Number.MAX_SAFE_INTEGER,
-    servers: ungrouped,
-  });
+  if (ungrouped.length > 0) {
+    sections.push({
+      key: UNGROUPED_GROUP_ID,
+      name: "Ungrouped",
+      sortOrder: Number.MAX_SAFE_INTEGER,
+      servers: ungrouped,
+    });
+  }
 
   return sections;
 }

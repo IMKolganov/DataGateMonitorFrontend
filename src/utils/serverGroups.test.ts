@@ -29,8 +29,15 @@ describe("buildServerGroupSections", () => {
       [{ id: 1, name: "Empty", sortOrder: 0, serverIds: [] }],
     );
     expect(sections[0].servers.map((s) => s.id)).toEqual([9]);
-    expect(sections[1].key).toBe(UNGROUPED_GROUP_ID);
-    expect(sections[1].servers).toHaveLength(0);
+    expect(sections.some((s) => s.key === UNGROUPED_GROUP_ID)).toBe(false);
+  });
+
+  it("omits Ungrouped when every server is in a group", () => {
+    const sections = buildServerGroupSections(
+      [{ id: 1, groupId: 10, sortOrder: 0 }],
+      [{ id: 10, name: "EU", sortOrder: 0, serverIds: [1] }],
+    );
+    expect(sections.map((s) => s.key)).toEqual([10]);
   });
 });
 
