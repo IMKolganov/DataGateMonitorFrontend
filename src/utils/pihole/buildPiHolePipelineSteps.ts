@@ -179,7 +179,7 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
         status = "ok";
         statusText = "Applied";
         summary = isXray
-          ? `Dashboard config applied at ${fmtUtc(d.runtimeConfigAppliedAtUtc)}. Xray node polls Pi-hole (CN mapping N/A).`
+          ? `Dashboard config applied at ${fmtUtc(d.runtimeConfigAppliedAtUtc)}. CN comes from IdentityIp (XRAY_DNS_IDENTITY_*) when client DNS goes through Pi-hole.`
           : `Dashboard config saved at ${fmtUtc(d.runtimeConfigAppliedAtUtc)} ($DATA_DIR/pihole-runtime-config.json). PIHOLE_* env vars override these values when set.`;
       }
     } else {
@@ -269,7 +269,15 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
     let error: string | undefined;
     let fix: string | undefined;
     let summary: string | undefined;
-    const pollError = d?.lastPollError?.trim();
+    // Ignore poll errors recorded before the last Save & apply (stale BaseUrl, etc.).
+    const pollError = (() => {
+      const raw = d?.lastPollError?.trim();
+      if (!raw) return undefined;
+      const applied = d?.runtimeConfigAppliedAtUtc ? Date.parse(d.runtimeConfigAppliedAtUtc) : NaN;
+      const lastPoll = d?.lastPollAtUtc ? Date.parse(d.lastPollAtUtc) : NaN;
+      if (Number.isFinite(applied) && Number.isFinite(lastPoll) && lastPoll < applied) return undefined;
+      return raw;
+    })();
 
     if (upstreamBlocked(steps, 5)) {
       summary = "Fix upstream steps before the collector can run.";
@@ -298,7 +306,7 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
         status = "ok";
         statusText = "Running";
         summary = isXray
-          ? `Last success ${fmtUtc(d.lastSuccessfulPollAtUtc)}, forwarded ${d.lastPollQueriesForwarded ?? 0} on last poll (CN mapping N/A).`
+          ? `Last success ${fmtUtc(d.lastSuccessfulPollAtUtc)}, forwarded ${d.lastPollQueriesForwarded ?? 0} on last poll (CN via IdentityIp).`
           : `Last success ${fmtUtc(d.lastSuccessfulPollAtUtc)}, forwarded ${d.lastPollQueriesForwarded ?? 0} on last poll.`;
       }
     }
@@ -335,7 +343,7 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
         status = "ok";
         statusText = "Waiting for DNS records";
         summary = isXray
-          ? "Steps 1–5 are OK. Connect via Xray, use Pi-hole as DNS, browse a minute, then refresh the query log below. Rows are keyed by client IP (per-user CN not mapped yet)."
+          ? "Steps 1–5 are OK. Enable XRAY_DNS_IDENTITY_*, set DNS1 to Pi-hole, client VPN DNS through the tunnel, browse a minute, then refresh. Rows match via IdentityIp → CN."
           : "Steps 1–5 are OK. This step waits for DNS query rows in the dashboard DB (see the table below). " +
             "Stay connected on VPN, browse for a minute, then refresh — up to one poll interval.";
         fix = "If it stays empty, check subnet prefix and that clients resolve DNS through Pi-hole.";

@@ -94,7 +94,7 @@ describe("buildPiHolePipelineSteps", () => {
     expect(steps.find((s) => s.id === "storage")?.title).toMatch(/query log/i);
   });
 
-  it("xray stack: storage waiting copy mentions client IP / no CN yet", () => {
+  it("xray stack: storage waiting copy mentions IdentityIp / CN", () => {
     const steps = buildPiHolePipelineSteps({
       dashboardConfig: baseConfig,
       serverPiHoleEnabled: true,
@@ -110,7 +110,7 @@ describe("buildPiHolePipelineSteps", () => {
 
     const storage = steps.find((s) => s.id === "storage");
     expect(storage?.status).toBe("ok");
-    expect(storage?.summary).toMatch(/client IP/i);
+    expect(storage?.summary).toMatch(/IdentityIp/i);
     expect(storage?.summary).toMatch(/CN/i);
   });
 
@@ -130,6 +130,36 @@ describe("buildPiHolePipelineSteps", () => {
     const collector = steps.find((s) => s.id === "collector");
     expect(collector?.status).toBe("error");
     expect(collector?.fix).toMatch(/Xray manager|PiHoleQueryCollector/i);
+  });
+
+  it("ignores collector poll error recorded before last Save & apply", () => {
+    const steps = buildPiHolePipelineSteps({
+      dashboardConfig: {
+        ...baseConfig,
+        baseUrl: "http://host.docker.internal:8080",
+      },
+      serverPiHoleEnabled: true,
+      serverApiUrl: "https://xs2.datagateapp.com/",
+      diagnostics: {
+        ...runningDiagnostics,
+        baseUrl: "http://host.docker.internal:8080",
+        authenticated: true,
+        sampleQueryCount: 5,
+        collectorRunning: true,
+        runtimeConfigAppliedAtUtc: "2026-08-16T12:10:23Z",
+        lastPollAtUtc: "2026-08-16T12:09:00Z",
+        lastSuccessfulPollAtUtc: undefined,
+        lastPollError: "Connection refused (127.0.0.1:8080)",
+        lastPollQueriesForwarded: 0,
+        storedQueryCount: 0,
+      },
+      stack: "xray",
+    });
+
+    const collector = steps.find((s) => s.id === "collector");
+    expect(collector?.status).toBe("warning");
+    expect(collector?.statusText).toBe("Starting");
+    expect(collector?.error).toBeUndefined();
   });
 
   it("marks step 6 as waiting when upstream ok but no dns rows in dashboard yet", () => {

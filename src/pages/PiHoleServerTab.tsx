@@ -210,6 +210,12 @@ export function PiHoleServerTab() {
       toast.error("Pi-hole API base URL is required.");
       return;
     }
+    if (isXray && enableIntegration && !form.clientSubnetPrefix.trim()) {
+      toast.error(
+        "Set a client subnet prefix for Xray (or leave integration off). Empty prefix on a shared Pi-hole would ingest OpenVPN DNS.",
+      );
+      return;
+    }
 
     setSaving(true);
     try {
@@ -318,7 +324,7 @@ export function PiHoleServerTab() {
                 <span className="checkbox-title">Enable Pi-hole integration</span>
                 <span className="checkbox-description">
                   {isXray
-                    ? "When enabled, the Xray node polls Pi-hole and forwards DNS queries to the dashboard (by client IP; CN later)."
+                    ? "When enabled, the Xray node polls Pi-hole. You must set a client subnet prefix (or excludes) — empty prefix would pull OpenVPN queries from a shared Pi-hole."
                     : "When enabled, the OpenVPN microservice polls Pi-hole and stores DNS queries in the dashboard."}
                 </span>
               </div>
@@ -390,14 +396,25 @@ export function PiHoleServerTab() {
               />
           </div>
           <div className="form-group">
-            <label htmlFor="pihole-subnet-prefix">VPN client subnet prefix</label>
+            <label htmlFor="pihole-subnet-prefix">
+              {isXray ? "Client subnet prefix (required on shared Pi-hole)" : "VPN client subnet prefix"}
+            </label>
             <input
               id="pihole-subnet-prefix"
               type="text"
               value={form.clientSubnetPrefix}
               onChange={(e) => setForm((p) => ({ ...p, clientSubnetPrefix: e.target.value }))}
-              placeholder="10.51.30."
+              placeholder={isXray ? "10.80.0. (DNS identity pool)" : "10.51.30."}
             />
+            {isXray && (
+              <p className="form-hint" style={{ marginTop: 6, opacity: 0.85, fontSize: "0.9em" }}>
+                Use the Xray DNS identity pool prefix (default <code>10.80.0.</code>) when{" "}
+                <code>XRAY_DNS_IDENTITY_ENABLED=true</code> on the node. Leave empty = ingest nothing (safe). Do not
+                use OpenVPN LAN prefixes like <code>10.51.15.</code>. Set node <code>DNS1</code>/<code>DNS2</code> to
+                Pi-hole and client VPN DNS through the tunnel. Optional excludes:{" "}
+                <code>PIHOLE_CLIENT_SUBNET_EXCLUDE_PREFIXES=10.51.15.,10.51.16.</code>
+              </p>
+            )}
           </div>
         </div>
 
