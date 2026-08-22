@@ -83,8 +83,61 @@
     background: #800000;
     color: #fff;
   }
-  
 
+  .status.system {
+    background: #1f4b7a;
+    color: #fff;
+  }
+
+  .api-client-created-modal__intro {
+    margin: 0 0 16px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .api-client-created-modal__field {
+    margin-bottom: 16px;
+  }
+
+  .api-client-created-modal__label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .api-client-created-modal__value-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .api-client-created-modal__value {
+    flex: 1;
+    min-width: 0;
+    word-break: break-all;
+    font-size: 13px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: var(--bg-body);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
+
+  .api-client-created-modal .modal-body {
+    padding: 16px 20px;
+  }
+
+  .api-client-created-modal .modal-actions {
+    padding: 0 20px 20px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
   .app-settings-description {
     color: #8b949e;
     font-size: 14px;
