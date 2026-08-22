@@ -1,10 +1,25 @@
 import type { OvpnFileConfigResponse } from "../api/orvalModelShim";
 
-/** Default VLESS client export template (JSON profile for DataGate Android + share URI).
+/** Default VLESS client export template (JSON profile for DataGate clients).
  * dns_* placeholders are filled from node DNS1/DNS2 / XRAY_DNS_IDENTITY_* at link issue time.
+ * Keep pretty-printed — dashboard editor and “Insert example” use this string as-is.
  */
-export const XRAY_EXPORT_TEMPLATE = `{"vless":"{{vless_uri}}","dnsServers":{{dns_servers_json}},"dnsIdentityEnabled":{{dns_identity_enabled}},"friendlyName":"{{friendly_name}}","uuid":"{{uuid}}","endpoint":"{{server_ip}}:{{server_port}}"}
+export const XRAY_EXPORT_TEMPLATE = `{
+  "vless": "{{vless_uri}}",
+  "dnsServers": {{dns_servers_json}},
+  "dnsIdentityEnabled": {{dns_identity_enabled}},
+  "friendlyName": "{{friendly_name}}",
+  "uuid": "{{uuid}}",
+  "endpoint": "{{server_ip}}:{{server_port}}"
+}
 `;
+
+/** Post-setup seeded a plain-text VLESS block before JSON profiles — detect for UI upgrade prompt. */
+export function isLegacyXrayExportTemplate(template: string): boolean {
+  const t = template.trim();
+  if (!t) return false;
+  return !t.startsWith("{") || !t.includes("dnsServers") || !t.includes("{{dns_servers_json}}");
+}
 
 /** Default OpenVPN .ovpn export template for new servers.
  * Port/proto/cipher/auth/tls-version-min/verb are rewritten from live node /api/info on save (auto-detect)

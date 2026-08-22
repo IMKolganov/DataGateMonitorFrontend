@@ -276,6 +276,42 @@ describe("startAdminIdleSession", () => {
     window.dispatchEvent(new Event("keydown"));
     expect(postActivity).toHaveBeenCalledTimes(2);
   });
+
+  it("gives a full warning minute after sleep/wake when idle already elapsed", async () => {
+    const { warnings, dispose } = listenWarnings();
+    stop = startAdmin(3);
+    await flushPolicyFetch();
+    logout.mockClear();
+
+    vi.setSystemTime(Date.now() + 20 * 60_000);
+    document.dispatchEvent(new Event("visibilitychange"));
+
+    expect(logout).not.toHaveBeenCalled();
+    expect(warnings.length).toBeGreaterThanOrEqual(1);
+
+    vi.advanceTimersByTime(ADMIN_IDLE_WARNING_BEFORE_MS - 1);
+    expect(logout).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    expect(logout).toHaveBeenCalledTimes(1);
+    dispose();
+  });
+
+  it("ignores scroll immediately after showing the warning so layout cannot dismiss it", async () => {
+    const { warnings, clears, dispose } = listenWarnings();
+    stop = startAdmin(1);
+    await flushPolicyFetch();
+    expect(warnings.length).toBeGreaterThanOrEqual(1);
+
+    const clearsBefore = clears.length;
+    window.dispatchEvent(new Event("scroll"));
+    expect(clears.length).toBe(clearsBefore);
+    expect(logout).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(400);
+    window.dispatchEvent(new Event("scroll"));
+    expect(clears.length).toBeGreaterThan(clearsBefore);
+    dispose();
+  });
 });
 
 describe("adminIdleSessionEvents", () => {

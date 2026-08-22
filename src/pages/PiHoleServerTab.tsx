@@ -346,7 +346,7 @@ export function PiHoleServerTab() {
               type="url"
               value={form.baseUrl}
               onChange={(e) => setForm((p) => ({ ...p, baseUrl: e.target.value }))}
-              placeholder="http://127.0.0.1:8080"
+              placeholder={isXray ? "http://172.17.0.1:8080" : "http://127.0.0.1:8080"}
             />
           </div>
           <div className="form-group">
@@ -407,7 +407,7 @@ export function PiHoleServerTab() {
               type="text"
               value={form.clientSubnetPrefix}
               onChange={(e) => setForm((p) => ({ ...p, clientSubnetPrefix: e.target.value }))}
-              placeholder={isXray ? "10.80.0. (DNS identity pool)" : "10.51.30."}
+              placeholder={isXray ? "10.80.2. (identity pool on this host)" : "10.51.44. or empty for all VPN clients"}
             />
             {isXray && (
               <p className="form-hint" style={{ marginTop: 6, opacity: 0.85, fontSize: "0.9em" }}>

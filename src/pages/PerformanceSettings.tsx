@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { FaCopy, FaSync, FaTachometerAlt, FaTrash } from "react-icons/fa";
 import type { GridColDef } from "@mui/x-data-grid";
 import Grid from "../components/ui/TableStyle.tsx";
@@ -24,6 +24,33 @@ const POLL_MS = 5000;
 const TOP_SLOW_OPTIONS = [5, 10, 20, 50] as const;
 type TopSlowTake = (typeof TOP_SLOW_OPTIONS)[number];
 
+const sqlLinkButtonStyle: CSSProperties = {
+  display: "block",
+  width: "100%",
+  minWidth: 0,
+  margin: 0,
+  padding: 0,
+  border: "none",
+  background: "none",
+  color: "var(--link-color, #58a6ff)",
+  cursor: "pointer",
+  font: "inherit",
+  textAlign: "left",
+  textDecoration: "underline",
+  textUnderlineOffset: 2,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+};
+
+const topSlowRowStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "baseline",
+  gap: 6,
+  minWidth: 0,
+  width: "100%",
+};
+
 export default function PerformanceSettings() {
   const [limit, setLimit] = useState(DEFAULT_LIMIT);
   const [limitInput, setLimitInput] = useState(String(DEFAULT_LIMIT));
@@ -31,6 +58,7 @@ export default function PerformanceSettings() {
   const [topSlowDbTake, setTopSlowDbTake] = useState<TopSlowTake>(5);
   const [selectedSql, setSelectedSql] = useState<string | null>(null);
   const [sqlCopyStatus, setSqlCopyStatus] = useState<"Copy" | "Copied!">("Copy");
+  const [manualRefresh, setManualRefresh] = useState(false);
 
   const openSqlDetail = (sql: string) => {
     setSqlCopyStatus("Copy");
@@ -173,10 +201,9 @@ export default function PerformanceSettings() {
         return (
           <button
             type="button"
-            className="btn link"
-            title={sql}
+            aria-label="Open full SQL"
             onClick={() => openSqlDetail(sql)}
-            style={{ textAlign: "left", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}
+            style={{ ...sqlLinkButtonStyle, display: "block", width: "100%" }}
           >
             {short || "—"}
           </button>
@@ -185,7 +212,8 @@ export default function PerformanceSettings() {
     },
   ];
 
-  const busy = httpQuery.isFetching || dbQuery.isFetching || clearMutation.isPending;
+  const clearing = clearMutation.isPending;
+  const toolbarBusy = clearing || manualRefresh;
   let errorText: string | null = null;
   if (httpQuery.error) errorText = errorMessage(httpQuery.error);
   else if (dbQuery.error) errorText = errorMessage(dbQuery.error);
@@ -195,6 +223,15 @@ export default function PerformanceSettings() {
     const n = Number(limitInput);
     if (!Number.isFinite(n)) return;
     setLimit(Math.min(2000, Math.max(1, Math.trunc(n))));
+  };
+
+  const runManualRefresh = async () => {
+    setManualRefresh(true);
+    try {
+      await Promise.all([httpQuery.refetch(), dbQuery.refetch()]);
+    } finally {
+      setManualRefresh(false);
+    }
   };
 
   return (
@@ -227,18 +264,17 @@ export default function PerformanceSettings() {
         <button
           type="button"
           className="btn secondary"
-          disabled={busy}
+          disabled={toolbarBusy}
           onClick={() => {
-            void httpQuery.refetch();
-            void dbQuery.refetch();
+            void runManualRefresh();
           }}
         >
-          <FaSync className={`icon ${busy ? "icon-spin" : ""}`} aria-hidden /> Refresh
+          <FaSync className={`icon ${manualRefresh ? "icon-spin" : ""}`} aria-hidden /> Refresh
         </button>
         <button
           type="button"
           className="btn danger"
-          disabled={busy}
+          disabled={toolbarBusy}
           onClick={() => {
             if (window.confirm("Clear all HTTP and DB performance samples?")) {
               clearMutation.mutate();
@@ -295,11 +331,26 @@ export default function PerformanceSettings() {
           {topSlowHttp.length === 0 ? (
             <p style={{ color: "var(--text-muted)" }}>No samples yet.</p>
           ) : (
-            <ul style={{ margin: 0, paddingLeft: 18 }}>
+            <ul style={{ margin: 0, paddingLeft: 18, listStyle: "disc" }}>
               {topSlowHttp.map((item) => (
-                <li key={item.key}>
-                  <strong>{item.maxDurationMs} ms</strong> · {item.label}{" "}
-                  <span style={{ color: "var(--text-muted)" }}>({item.samples})</span>
+                <li key={item.key} style={{ marginBottom: 6 }}>
+                  <div style={topSlowRowStyle}>
+                    <strong style={{ flexShrink: 0 }}>{item.maxDurationMs} ms</strong>
+                    <span style={{ flexShrink: 0, color: "var(--text-muted)" }}>·</span>
+                    <span
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                      title={item.label}
+                    >
+                      {item.label}
+                    </span>
+                    <span style={{ flexShrink: 0, color: "var(--text-muted)" }}>({item.samples})</span>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -337,21 +388,22 @@ export default function PerformanceSettings() {
           {topSlowDb.length === 0 ? (
             <p style={{ color: "var(--text-muted)" }}>No samples yet.</p>
           ) : (
-            <ul style={{ margin: 0, paddingLeft: 18 }}>
+            <ul style={{ margin: 0, paddingLeft: 18, listStyle: "disc" }}>
               {topSlowDb.map((item) => (
-                <li key={item.key}>
-                  <strong>{item.maxDurationMs} ms</strong>
-                  {" · "}
-                  <button
-                    type="button"
-                    className="btn link"
-                    title="Open full SQL"
-                    onClick={() => openSqlDetail(item.key === "(empty)" ? "" : item.key)}
-                    style={{ textAlign: "left", verticalAlign: "baseline" }}
-                  >
-                    {item.label}
-                  </button>{" "}
-                  <span style={{ color: "var(--text-muted)" }}>({item.samples})</span>
+                <li key={item.key} style={{ marginBottom: 6 }}>
+                  <div style={topSlowRowStyle}>
+                    <strong style={{ flexShrink: 0 }}>{item.maxDurationMs} ms</strong>
+                    <span style={{ flexShrink: 0, color: "var(--text-muted)" }}>·</span>
+                    <button
+                      type="button"
+                      aria-label={`Open full SQL: ${item.label}`}
+                      onClick={() => openSqlDetail(item.key === "(empty)" ? "" : item.key)}
+                      style={{ ...sqlLinkButtonStyle, flex: 1 }}
+                    >
+                      {item.label}
+                    </button>
+                    <span style={{ flexShrink: 0, color: "var(--text-muted)" }}>({item.samples})</span>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -370,7 +422,7 @@ export default function PerformanceSettings() {
             rows={httpRows}
             columns={httpColumns}
             getRowId={(r) => (r as { id: string }).id}
-            loading={httpQuery.isLoading || httpQuery.isFetching}
+            loading={httpQuery.isLoading}
             disableRowSelectionOnClick
             pageSizeOptions={[25, 50, 100]}
             localeText={{ noRowsLabel: "No slow/error HTTP samples." }}
@@ -389,7 +441,7 @@ export default function PerformanceSettings() {
             rows={dbRows}
             columns={dbColumns}
             getRowId={(r) => (r as { id: string }).id}
-            loading={dbQuery.isLoading || dbQuery.isFetching}
+            loading={dbQuery.isLoading}
             disableRowSelectionOnClick
             pageSizeOptions={[25, 50, 100]}
             localeText={{ noRowsLabel: "No slow/error DB samples." }}

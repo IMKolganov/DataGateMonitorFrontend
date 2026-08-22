@@ -361,6 +361,18 @@ const GroupDetails: React.FC = () => {
     [groups],
   );
 
+  /** Membership from group payloads (source of truth for Add/Move UI). */
+  const serverGroupIdByServerId = useMemo(() => {
+    const map = new Map<number, number>();
+    for (const g of groups) {
+      if (typeof g.id !== "number") continue;
+      for (const serverId of g.serverIds ?? []) {
+        map.set(serverId, g.id);
+      }
+    }
+    return map;
+  }, [groups]);
+
   const availableServers = useMemo(() => {
     const inGroup = new Set(memberIds);
     return allServers.filter((s) => !inGroup.has(s.id));
@@ -550,6 +562,19 @@ const GroupDetails: React.FC = () => {
   };
 
   const addServer = (id: number) => {
+    const serverName = allServers.find((s) => s.id === id)?.name ?? `Server ${id}`;
+    const fromGroupId = serverGroupIdByServerId.get(id) ?? null;
+    const fromGroupName =
+      fromGroupId != null ? (groupNameById.get(fromGroupId) ?? `Group ${fromGroupId}`) : null;
+
+    if (fromGroupId != null && fromGroupName) {
+      const targetLabel = isUngrouped ? "Ungrouped" : name.trim() || "this group";
+      const ok = window.confirm(
+        `"${serverName}" is in "${fromGroupName}". Move it to ${targetLabel}?`,
+      );
+      if (!ok) return;
+    }
+
     membersDirtyRef.current = true;
     setMemberIds((prev) => {
       const next = prev.includes(id) ? prev : [...prev, id];
@@ -739,14 +764,27 @@ const GroupDetails: React.FC = () => {
             </p>
           ) : (
             <ul className="group-details-available-list">
-              {availableServers.map((s) => (
-                <li key={s.id}>
-                  <span>{s.name}</span>
-                  <button type="button" className="btn secondary" onClick={() => addServer(s.id)}>
-                    {isUngrouped ? "Ungroup" : "Add"}
-                  </button>
-                </li>
-              ))}
+              {availableServers.map((s) => {
+                const fromGroupId = serverGroupIdByServerId.get(s.id) ?? null;
+                const fromGroupName =
+                  fromGroupId != null
+                    ? (groupNameById.get(fromGroupId) ?? `Group ${fromGroupId}`)
+                    : null;
+                const isMove = fromGroupId != null;
+                return (
+                  <li key={s.id}>
+                    <div className="group-details-available-meta">
+                      <span>{s.name}</span>
+                      <span className="group-details-available-group">
+                        {fromGroupName ? `In ${fromGroupName}` : "Ungrouped"}
+                      </span>
+                    </div>
+                    <button type="button" className="btn secondary" onClick={() => addServer(s.id)}>
+                      {isUngrouped ? "Ungroup" : isMove ? "Move" : "Add"}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>

@@ -1,7 +1,7 @@
 {
   "name": "datagate-monitor-frontend-vite",
   "private": true,
-  "version": "1.4.46",
+  "version": "1.4.48",
   "type": "module",
   "engines": {
     "node": ">=24.14.0"

@@ -389,6 +389,12 @@
   text-align: center;
 }
 
+.login-totp-code-wrap .input-login {
+  /* Match right clear-button gutter so centered digits stay visually centered */
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
 .login-totp-code-input {
   text-align: center;
   letter-spacing: 0.25em;

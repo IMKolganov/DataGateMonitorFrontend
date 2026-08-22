@@ -185,6 +185,18 @@
   background: var(--bg-content-alt);
 }
 
+.group-details-available-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.group-details-available-group {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
 .group-details-empty {
   margin: 0;
   opacity: 0.75;

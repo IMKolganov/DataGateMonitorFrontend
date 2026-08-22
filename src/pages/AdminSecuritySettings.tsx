@@ -219,7 +219,7 @@ export default function AdminSecuritySettings() {
                   autoComplete="one-time-code"
                   className="input"
                   value={disableCode}
-                  onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                  onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   required
                 />
               </div>
@@ -303,7 +303,7 @@ export default function AdminSecuritySettings() {
                     autoComplete="one-time-code"
                     className="input"
                     value={confirmCode}
-                    onChange={(e) => setConfirmCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                    onChange={(e) => setConfirmCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     placeholder="000000"
                     required
                   />
@@ -312,7 +312,7 @@ export default function AdminSecuritySettings() {
                   <button
                     type="submit"
                     className="btn primary"
-                    disabled={loading || confirmCode.trim().length < 6}
+                    disabled={loading || confirmCode.trim().length !== 6}
                   >
                     {loading ? "Confirming…" : "Confirm and enable"}
                   </button>

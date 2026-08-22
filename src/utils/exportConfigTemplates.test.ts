@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { XRAY_EXPORT_TEMPLATE, unwrapOvpnFileConfigPayload } from "./exportConfigTemplates";
+import { XRAY_EXPORT_TEMPLATE, isLegacyXrayExportTemplate, unwrapOvpnFileConfigPayload } from "./exportConfigTemplates";
 
 /** Mirrors dashboard default + node ClientLinkService placeholder expansion. */
 function expandDashboardXrayTemplate(vars: {
@@ -72,6 +72,24 @@ describe("XRAY_EXPORT_TEMPLATE (dashboard → Android profile)", () => {
 
     expect(profile.dnsServers).toEqual([]);
     expect(profile.dnsIdentityEnabled).toBe(false);
+  });
+});
+
+describe("isLegacyXrayExportTemplate", () => {
+  it("flags old plain-text post-setup default", () => {
+    expect(
+      isLegacyXrayExportTemplate(
+        "{{vless_uri}}\r\n# {{friendly_name}}\r\nUUID: {{uuid}}\r\nEndpoint: {{server_ip}}:{{server_port}}\r\n",
+      ),
+    ).toBe(true);
+  });
+
+  it("accepts current JSON profile", () => {
+    expect(isLegacyXrayExportTemplate(XRAY_EXPORT_TEMPLATE)).toBe(false);
+  });
+
+  it("ignores empty template", () => {
+    expect(isLegacyXrayExportTemplate("")).toBe(false);
   });
 });
 

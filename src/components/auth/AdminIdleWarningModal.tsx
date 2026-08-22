@@ -44,7 +44,12 @@ export function AdminIdleWarningModal() {
   if (logoutAtMs == null) return null;
 
   return (
-    <div className="modal-overlay" role="alertdialog" aria-modal="true" aria-labelledby="idle-warn-title">
+    <div
+      className="modal-overlay idle-warning-overlay"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="idle-warn-title"
+    >
       <div className="modal-content" style={{ maxWidth: 440 }}>
         <div className="modal-header">
           <h3 id="idle-warn-title">Session expiring soon</h3>

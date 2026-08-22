@@ -87,6 +87,12 @@ describe("PerformanceSettings", () => {
     expect(screen.getByText(/Top slow SQL/i)).toBeInTheDocument();
     expect(screen.getByText(/220 ms/)).toBeInTheDocument();
 
+    const sqlOpen = screen.getByRole("button", { name: /Open full SQL: SELECT \* FROM vpn_servers/i });
+    const sqlRow = sqlOpen.parentElement;
+    expect(sqlRow).toHaveStyle({ display: "flex" });
+    expect(sqlRow).toHaveTextContent(/220 ms/);
+    expect(sqlRow).toHaveTextContent("(1)");
+
     const httpTopSelect = screen.getByRole("combobox", { name: /Top slow HTTP count/i });
     const sqlTopSelect = screen.getByRole("combobox", { name: /Top slow SQL count/i });
     expect(httpTopSelect).toHaveValue("5");
@@ -112,7 +118,7 @@ describe("PerformanceSettings", () => {
     });
     render(<PerformanceSettings />);
 
-    await user.click(screen.getByRole("button", { name: /SELECT \* FROM vpn_servers/i }));
+    await user.click(screen.getByRole("button", { name: /Open full SQL: SELECT \* FROM vpn_servers/i }));
     const dialog = screen.getByRole("dialog", { name: /SQL detail/i });
     expect(dialog).toBeInTheDocument();
     expect(dialog.querySelector("pre")?.textContent).toMatch(/FROM vpn_servers/);

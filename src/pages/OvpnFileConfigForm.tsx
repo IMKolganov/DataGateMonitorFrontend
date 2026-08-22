@@ -33,7 +33,7 @@ import { gridFilterFields } from "../config/gridFilters.ts";
 import { useGridFilters } from "../hooks/useGridFilterStub.ts";
 import type { GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams } from "../api/orval/model/getApiOpenVpnServersConflogHistoryByServerVpnServerIdParams";
 import "../css/Table.css";
-import { highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
+import { highlightJsonExportTemplate, highlightOvpnConfig } from "../utils/ovpnConfigHighlight";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 import { useStabilizedRowCount } from "../hooks/useStabilizedRowCount";
 import axios from "axios";
@@ -47,6 +47,7 @@ import { isHttpForbidden } from "../utils/httpError";
 import {
   OPEN_VPN_EXPORT_TEMPLATE,
   XRAY_EXPORT_TEMPLATE,
+  isLegacyXrayExportTemplate,
   unwrapOvpnFileConfigPayload,
 } from "../utils/exportConfigTemplates";
 
@@ -333,6 +334,9 @@ const OvpnFileConfigForm: React.FC = () => {
 
   const loadedConfig = useMemo(() => unwrapOvpnFileConfigPayload(data), [data]);
   const exampleTemplate = isXrayStack ? XRAY_EXPORT_TEMPLATE : OPEN_VPN_EXPORT_TEMPLATE;
+  const highlightExportTemplate = isXrayStack ? highlightJsonExportTemplate : highlightOvpnConfig;
+  const legacyXrayTemplate =
+    isXrayStack && isLegacyXrayExportTemplate(ovpnFileConfig.ConfigTemplate);
 
   useEffect(() => {
     if (!isXrayStack || !parsedVpnServerId) return;
@@ -543,9 +547,9 @@ const OvpnFileConfigForm: React.FC = () => {
                 fontSize: 14,
               }}
             >
-              <strong>Xray (VLESS)</strong> — this screen is only the <strong>export template</strong> (text with
-              placeholders like <code>{"{{vless_uri}}"}</code>). It is <strong>not</strong> an OpenVPN server profile.
-              Issued links are created under <strong>Client links (VLESS)</strong> → <strong>Create client link</strong>.
+              <strong>Xray (VLESS)</strong> — this screen is the <strong>JSON export template</strong> (placeholders like{" "}
+              <code>{"{{vless_uri}}"}</code>, <code>{"{{dns_servers_json}}"}</code>). It is <strong>not</strong> an OpenVPN
+              server profile. Issued links: <strong>Client links (VLESS)</strong> → <strong>Create client link</strong>.
             </div>
           ) : (
             <div
@@ -594,6 +598,26 @@ const OvpnFileConfigForm: React.FC = () => {
 
           {/* Load error is shown via toast; keep inline API error (from submit) if you want a static indicator */}
           {errors.apiError && <p className="error-message">{errors.apiError}</p>}
+
+          {legacyXrayTemplate ? (
+            <div
+              className="server-details__muted"
+              role="alert"
+              style={{
+                margin: "0 0 16px",
+                padding: "12px 14px",
+                borderRadius: 8,
+                border: "1px solid var(--border-default, #30363d)",
+                background: "rgba(248, 81, 73, 0.1)",
+                lineHeight: 1.5,
+                fontSize: 14,
+              }}
+            >
+              <strong>Outdated template format.</strong> This server still has the old plain-text VLESS layout (no{" "}
+              <code>dnsServers</code>). DataGate clients need the JSON profile below — click{" "}
+              <strong>Insert into editor</strong>, then <strong>Save template</strong>, and re-issue client links.
+            </div>
+          ) : null}
 
           <form className="server-form" onSubmit={handleSubmit}>
             <div className="form-group">
@@ -684,7 +708,7 @@ const OvpnFileConfigForm: React.FC = () => {
                     aria-hidden
                     ref={highlightPreRef}
                   >
-                    {highlightOvpnConfig(ovpnFileConfig.ConfigTemplate || " ")}
+                    {highlightExportTemplate(ovpnFileConfig.ConfigTemplate || " ")}
                   </pre>
                   <textarea
                     id="ConfigTemplate"
@@ -699,7 +723,7 @@ const OvpnFileConfigForm: React.FC = () => {
                     }}
                     placeholder={
                       isXrayStack
-                        ? "VLESS export template with {{vless_uri}}, {{uuid}}, …"
+                        ? 'JSON profile with {{vless_uri}}, {{dns_servers_json}}, …'
                         : "Enter config template"
                     }
                     className="ovpn-textarea-overlay"
@@ -711,10 +735,10 @@ const OvpnFileConfigForm: React.FC = () => {
           </form>
 
           <div className="export-template-example" style={{ marginTop: 24 }}>
-            <h4>Example template</h4>
+            <h4>{isXrayStack ? "Example JSON profile" : "Example template"}</h4>
             <p className="form-hint" style={{ marginBottom: 10 }}>
               {isXrayStack
-                ? "Reference layout for VLESS export. Use “Insert into editor” if your saved template is empty or lost."
+                ? "Issued client links expand the placeholders below. Insert this if the editor is empty or you want the default layout back."
                 : "Reference .ovpn layout for new servers. Post-create setup also seeds a default on the server."}
             </p>
             <div className="toolbar" style={{ marginBottom: 8, display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -725,7 +749,18 @@ const OvpnFileConfigForm: React.FC = () => {
                 Insert into editor
               </button>
             </div>
-            <pre className="ovpn-template-sample">{highlightOvpnConfig(exampleTemplate)}</pre>
+            <pre
+              className="ovpn-template-sample"
+              style={{
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+                maxHeight: 320,
+                overflow: "auto",
+                margin: 0,
+              }}
+            >
+              {highlightExportTemplate(exampleTemplate)}
+            </pre>
           </div>
 
           <div className="form-hint-container">
@@ -733,20 +768,38 @@ const OvpnFileConfigForm: React.FC = () => {
             {isXrayStack ? (
               <>
                 <p>
-                  <strong>Public endpoint IP / port</strong> — values embedded in generated VLESS URIs and templates
-                  (e.g. <code>{"{{server_ip}}"}</code>, <code>{"{{server_port}}"}</code>). Default port is{" "}
-                  <code>{DEFAULT_XRAY_PUBLIC_PORT}</code> (not OpenVPN <code>1194</code>).
+                  <strong>Public endpoint IP / port</strong> — embedded in the VLESS URI via{" "}
+                  <code>{"{{server_ip}}"}</code> / <code>{"{{server_port}}"}</code>. Default port{" "}
+                  <code>{DEFAULT_XRAY_PUBLIC_PORT}</code>.
                 </p>
-                <h4>VLESS link template</h4>
                 <p>
-                  Prefer a JSON profile so Android can read <code>dnsServers</code> (VLESS does not push DNS). Default
-                  template uses: <code>{"{{vless_uri}}"}</code>, <code>{"{{dns_servers_json}}"}</code>,{" "}
-                  <code>{"{{dns_identity_enabled}}"}</code>, <code>{"{{uuid}}"}</code>,{" "}
-                  <code>{"{{friendly_name}}"}</code>, <code>{"{{server_ip}}"}</code>, <code>{"{{server_port}}"}</code>,{" "}
-                  <code>{"{{dns1}}"}</code>, <code>{"{{dns2}}"}</code>. DNS values come from the Xray node env (
-                  <code>DNS1</code>/<code>DNS2</code>) when the link is issued.
+                  <strong>JSON profile</strong> — clients read <code>dnsServers</code> from the issued file (VLESS does
+                  not push DNS like OpenVPN). Placeholders:
                 </p>
-                <pre className="ovpn-template-sample">{XRAY_EXPORT_TEMPLATE.trim()}</pre>
+                <ul style={{ margin: "0 0 12px", paddingLeft: 20, lineHeight: 1.6 }}>
+                  <li>
+                    <code>{"{{vless_uri}}"}</code> — share link
+                  </li>
+                  <li>
+                    <code>{"{{dns_servers_json}}"}</code> — raw array from node <code>DNS1</code>/<code>DNS2</code>{" "}
+                    (no quotes around the placeholder)
+                  </li>
+                  <li>
+                    <code>{"{{dns_identity_enabled}}"}</code> — <code>true</code>/<code>false</code> from{" "}
+                    <code>XRAY_DNS_IDENTITY_*</code>
+                  </li>
+                  <li>
+                    <code>{"{{uuid}}"}</code>, <code>{"{{friendly_name}}"}</code>, <code>{"{{server_ip}}"}</code>,{" "}
+                    <code>{"{{server_port}}"}</code>
+                  </li>
+                  <li>
+                    Optional: <code>{"{{dns1}}"}</code>, <code>{"{{dns2}}"}</code>
+                  </li>
+                </ul>
+                <p className="form-hint" style={{ marginBottom: 0 }}>
+                  After changing the template, re-issue or re-download client links so apps pick up{" "}
+                  <code>dnsServers</code>.
+                </p>
               </>
             ) : (
               <>
