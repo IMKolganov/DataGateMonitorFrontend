@@ -4,6 +4,23 @@ import type { OvpnFileConfigResponse } from "../api/orvalModelShim";
  * dns_* placeholders are filled from node DNS1/DNS2 / XRAY_DNS_IDENTITY_* at link issue time.
  * Keep pretty-printed — dashboard editor and “Insert example” use this string as-is.
  */
+/** Hostname only for VLESS export endpoint (no https:// or :port). */
+export function sanitizeXrayExportEndpointHost(value: string): string {
+  const v = value.trim();
+  if (!v) return v;
+  if (v.includes("://")) {
+    try {
+      return new URL(v).hostname;
+    } catch {
+      return v.replace(/^https?:\/\//i, "").split("/")[0].split(":")[0];
+    }
+  }
+  if (!v.includes("/") && /^[^:]+:\d+$/.test(v)) {
+    return v.split(":")[0];
+  }
+  return v.replace(/\/+$/, "");
+}
+
 export const XRAY_EXPORT_TEMPLATE = `{
   "vless": "{{vless_uri}}",
   "dnsServers": {{dns_servers_json}},

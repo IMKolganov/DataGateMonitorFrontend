@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { XRAY_EXPORT_TEMPLATE, isLegacyXrayExportTemplate, unwrapOvpnFileConfigPayload } from "./exportConfigTemplates";
+import { XRAY_EXPORT_TEMPLATE, isLegacyXrayExportTemplate, sanitizeXrayExportEndpointHost, unwrapOvpnFileConfigPayload } from "./exportConfigTemplates";
 
 /** Mirrors dashboard default + node ClientLinkService placeholder expansion. */
 function expandDashboardXrayTemplate(vars: {
@@ -90,6 +90,16 @@ describe("isLegacyXrayExportTemplate", () => {
 
   it("ignores empty template", () => {
     expect(isLegacyXrayExportTemplate("")).toBe(false);
+  });
+});
+
+describe("sanitizeXrayExportEndpointHost", () => {
+  it("strips https scheme", () => {
+    expect(sanitizeXrayExportEndpointHost("https://xs1-hel.datagateapp.com")).toBe("xs1-hel.datagateapp.com");
+  });
+
+  it("strips inline port", () => {
+    expect(sanitizeXrayExportEndpointHost("xs1-hel.datagateapp.com:443")).toBe("xs1-hel.datagateapp.com");
   });
 });
 

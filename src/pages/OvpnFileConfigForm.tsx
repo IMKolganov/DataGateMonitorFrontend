@@ -48,6 +48,7 @@ import {
   OPEN_VPN_EXPORT_TEMPLATE,
   XRAY_EXPORT_TEMPLATE,
   isLegacyXrayExportTemplate,
+  sanitizeXrayExportEndpointHost,
   unwrapOvpnFileConfigPayload,
 } from "../utils/exportConfigTemplates";
 
@@ -66,6 +67,7 @@ function normalizeProto(value: unknown): "tcp" | "udp" | null {
 const DEFAULT_CONFLOG_PAGE_SIZE = 10;
 const DEFAULT_XRAY_PUBLIC_PORT = 443;
 
+/** Extract hostname from server ApiUrl (hint only — GET api/open-vpn-configs returns resolved vpnServerIp). */
 function hostFromApiUrl(apiUrl: string | null | undefined): string {
   const raw = (apiUrl ?? "").trim();
   if (!raw) return "";
@@ -114,6 +116,7 @@ const OvpnFileConfigForm: React.FC = () => {
   const exportConfigPageEnabled = openVpnPageEnabled || isXrayStack;
   const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const legacyTemplateUpgradeNotifiedRef = React.useRef(false);
   const [conflogPageSize, setConflogPageSize] = usePersistedPageSize(
     parsedVpnServerId > 0 ? `ovpn-conflog:${parsedVpnServerId}` : "ovpn-conflog:0",
     DEFAULT_CONFLOG_PAGE_SIZE,
@@ -335,8 +338,8 @@ const OvpnFileConfigForm: React.FC = () => {
   const loadedConfig = useMemo(() => unwrapOvpnFileConfigPayload(data), [data]);
   const exampleTemplate = isXrayStack ? XRAY_EXPORT_TEMPLATE : OPEN_VPN_EXPORT_TEMPLATE;
   const highlightExportTemplate = isXrayStack ? highlightJsonExportTemplate : highlightOvpnConfig;
-  const legacyXrayTemplate =
-    isXrayStack && isLegacyXrayExportTemplate(ovpnFileConfig.ConfigTemplate);
+  const storedLegacyXrayTemplate =
+    isXrayStack && loadedConfig && isLegacyXrayExportTemplate((loadedConfig.configTemplate ?? "").trim());
 
   useEffect(() => {
     if (!isXrayStack || !parsedVpnServerId) return;
@@ -355,12 +358,18 @@ const OvpnFileConfigForm: React.FC = () => {
             ? DEFAULT_XRAY_PUBLIC_PORT
             : 1194;
       const templateFromApi = (loadedConfig.configTemplate ?? "").trim();
+      const legacyFromApi = isXrayStack && templateFromApi && isLegacyXrayExportTemplate(templateFromApi);
+      const configTemplate = legacyFromApi
+        ? XRAY_EXPORT_TEMPLATE
+        : templateFromApi || (isXrayStack ? XRAY_EXPORT_TEMPLATE : "");
       setServerConfig({
         Id: loadedConfig.id ?? 0,
         VpnServerId: loadedConfig.vpnServerId ?? parsedVpnServerId,
-        VpnServerIp: (loadedConfig.vpnServerIp ?? "").trim(),
+        VpnServerIp: isXrayStack
+          ? sanitizeXrayExportEndpointHost((loadedConfig.vpnServerIp ?? "").trim())
+          : (loadedConfig.vpnServerIp ?? "").trim(),
         VpnServerPort: port,
-        ConfigTemplate: templateFromApi || (isXrayStack ? XRAY_EXPORT_TEMPLATE : ""),
+        ConfigTemplate: configTemplate,
       });
       setAutoDetectServerSettings(!isXrayStack);
       return;
@@ -385,6 +394,14 @@ const OvpnFileConfigForm: React.FC = () => {
     parsedVpnServerId,
     apiUrlHost,
   ]);
+
+  useEffect(() => {
+    if (!storedLegacyXrayTemplate || legacyTemplateUpgradeNotifiedRef.current) return;
+    legacyTemplateUpgradeNotifiedRef.current = true;
+    toast.info("Outdated plain-text template replaced with JSON in the editor. Save template to persist.", {
+      toastId: "xray-export-template-legacy-upgrade",
+    });
+  }, [storedLegacyXrayTemplate]);
 
   // toast on load error (once per state change)
   useEffect(() => {
@@ -488,7 +505,9 @@ const OvpnFileConfigForm: React.FC = () => {
 
     const payload: AddOrUpdateOvpnFileConfigRequest = {
       vpnServerId: ovpnFileConfig.VpnServerId || parsedVpnServerId,
-      vpnServerIp: ovpnFileConfig.VpnServerIp.trim(),
+      vpnServerIp: isXrayStack
+        ? sanitizeXrayExportEndpointHost(ovpnFileConfig.VpnServerIp.trim())
+        : ovpnFileConfig.VpnServerIp.trim(),
       vpnServerPort: effectivePort,
       configTemplate: effectiveTemplate,
       autoDetectServerSettings: useOpenVpnAutoDetect,
@@ -599,7 +618,7 @@ const OvpnFileConfigForm: React.FC = () => {
           {/* Load error is shown via toast; keep inline API error (from submit) if you want a static indicator */}
           {errors.apiError && <p className="error-message">{errors.apiError}</p>}
 
-          {legacyXrayTemplate ? (
+          {storedLegacyXrayTemplate ? (
             <div
               className="server-details__muted"
               role="alert"
@@ -613,9 +632,8 @@ const OvpnFileConfigForm: React.FC = () => {
                 fontSize: 14,
               }}
             >
-              <strong>Outdated template format.</strong> This server still has the old plain-text VLESS layout (no{" "}
-              <code>dnsServers</code>). DataGate clients need the JSON profile below — click{" "}
-              <strong>Insert into editor</strong>, then <strong>Save template</strong>, and re-issue client links.
+              <strong>Outdated template on server.</strong> The editor shows the recommended JSON profile with{" "}
+              <code>dnsServers</code>. Click <strong>Save template</strong>, then re-issue client links.
             </div>
           ) : null}
 
@@ -639,10 +657,11 @@ const OvpnFileConfigForm: React.FC = () => {
                     : "Enter VPN Server IP"
                 }
               />
-              {isXrayStack && apiUrlHost && !ovpnFileConfig.VpnServerIp.trim() ? (
+              {isXrayStack && apiUrlHost ? (
                 <p className="form-hint" style={{ marginTop: 6 }}>
-                  Tip: server API URL host is <code>{apiUrlHost}</code> — use the public address clients reach, not
-                  necessarily the manager URL.
+                  Hostname only (no <code>https://</code> or port) — e.g. <code>{apiUrlHost}</code>. Port{" "}
+                  <code>{DEFAULT_XRAY_PUBLIC_PORT}</code> is the separate field below; manager API may use another port
+                  (e.g. <code>:9443</code>).
                 </p>
               ) : null}
               {errors.VpnServerIp && <p className="error-message">{errors.VpnServerIp}</p>}
@@ -694,42 +713,59 @@ const OvpnFileConfigForm: React.FC = () => {
               <div className="config-template-container">
                 <div className="toolbar">
                   <span>{isXrayStack ? "VLESS export template" : "Config Template"}</span>
-                  <button
-                    className="copy-button"
-                    type="button"
-                    onClick={() => handleCopy(ovpnFileConfig.ConfigTemplate)}
-                  >
-                    {FaCopy({})} {copyStatus}
-                  </button>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    {isXrayStack ? (
+                      <button type="button" className="btn secondary" onClick={applyExampleTemplate}>
+                        Insert JSON example
+                      </button>
+                    ) : null}
+                    <button
+                      className="copy-button"
+                      type="button"
+                      onClick={() => handleCopy(ovpnFileConfig.ConfigTemplate)}
+                    >
+                      {FaCopy({})} {copyStatus}
+                    </button>
+                  </div>
                 </div>
-                <div className="ovpn-textarea-wrap">
-                  <pre
-                    className="ovpn-highlight-pre"
-                    aria-hidden
-                    ref={highlightPreRef}
-                  >
-                    {highlightExportTemplate(ovpnFileConfig.ConfigTemplate || " ")}
-                  </pre>
+                {isXrayStack ? (
                   <textarea
                     id="ConfigTemplate"
                     name="ConfigTemplate"
                     value={ovpnFileConfig.ConfigTemplate}
                     onChange={handleChange}
-                    onScroll={() => {
-                      if (highlightPreRef.current && textareaRef.current) {
-                        highlightPreRef.current.scrollTop = textareaRef.current.scrollTop;
-                        highlightPreRef.current.scrollLeft = textareaRef.current.scrollLeft;
-                      }
-                    }}
-                    placeholder={
-                      isXrayStack
-                        ? 'JSON profile with {{vless_uri}}, {{dns_servers_json}}, …'
-                        : "Enter config template"
-                    }
-                    className="ovpn-textarea-overlay"
+                    placeholder='JSON profile with {{vless_uri}}, {{dns_servers_json}}, …'
+                    className="ovpn-config-textarea"
                     ref={textareaRef}
+                    spellCheck={false}
                   />
-                </div>
+                ) : (
+                  <div className="ovpn-textarea-wrap">
+                    <pre
+                      className="ovpn-highlight-pre"
+                      aria-hidden
+                      ref={highlightPreRef}
+                    >
+                      {highlightOvpnConfig(ovpnFileConfig.ConfigTemplate || " ")}
+                    </pre>
+                    <textarea
+                      id="ConfigTemplate"
+                      name="ConfigTemplate"
+                      value={ovpnFileConfig.ConfigTemplate}
+                      onChange={handleChange}
+                      onScroll={() => {
+                        if (highlightPreRef.current && textareaRef.current) {
+                          highlightPreRef.current.scrollTop = textareaRef.current.scrollTop;
+                          highlightPreRef.current.scrollLeft = textareaRef.current.scrollLeft;
+                        }
+                      }}
+                      placeholder="Enter config template"
+                      className="ovpn-textarea-overlay"
+                      ref={textareaRef}
+                      spellCheck={false}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </form>
