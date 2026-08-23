@@ -136,3 +136,13 @@ export { EnumsOverviewGrouping as OverviewGrouping } from "./orval/model/enumsOv
 export { EnumsQuotaOverlimitAction as QuotaOverlimitAction } from "./orval/model/enumsQuotaOverlimitAction";
 export { EnumsNotificationSeverity as NotificationSeverity } from "./orval/model/enumsNotificationSeverity";
 export { EnumsVpnServerType as VpnServerType } from "./orval/model/enumsVpnServerType";
+export { EnumsVpnServerDiscoveryStatus as VpnServerDiscoveryStatus } from "./orval/model/enumsVpnServerDiscoveryStatus";
+export { EnumsAnnounceVpnServerResultStatus as AnnounceVpnServerResultStatus } from "./orval/model/enumsAnnounceVpnServerResultStatus";
+
+export type { VpnServersDtoVpnServerDiscoveryDto as VpnServerDiscoveryDto } from "./orval/model/vpnServersDtoVpnServerDiscoveryDto";
+export type { VpnServersResponsesVpnServerDiscoveriesResponse as VpnServerDiscoveriesResponse } from "./orval/model/vpnServersResponsesVpnServerDiscoveriesResponse";
+export type { VpnServersResponsesVpnServerDiscoveryResponse as VpnServerDiscoveryResponse } from "./orval/model/vpnServersResponsesVpnServerDiscoveryResponse";
+export type { VpnServersRequestsApproveVpnServerDiscoveryRequest as ApproveVpnServerDiscoveryRequest } from "./orval/model/vpnServersRequestsApproveVpnServerDiscoveryRequest";
+export type { VpnServersRequestsDenyVpnServerDiscoveryRequest as DenyVpnServerDiscoveryRequest } from "./orval/model/vpnServersRequestsDenyVpnServerDiscoveryRequest";
+export type { VpnServersRequestsAnnounceVpnServerRequest as AnnounceVpnServerRequest } from "./orval/model/vpnServersRequestsAnnounceVpnServerRequest";
+export type { VpnServersResponsesAnnounceVpnServerResponse as AnnounceVpnServerResponse } from "./orval/model/vpnServersResponsesAnnounceVpnServerResponse";

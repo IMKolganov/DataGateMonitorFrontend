@@ -30,6 +30,7 @@ import { CookieConsentProvider } from "./contexts/CookieConsentContext.tsx";
 import CookieConsentBanner from "./components/gdpr/CookieConsentBanner.tsx";
 import CookieSettingsPanel from "./components/gdpr/CookieSettingsPanel.tsx";
 import { AdminIdleWarningModal } from "./components/auth/AdminIdleWarningModal.tsx";
+import { PendingServerDiscoveryModal } from "./components/servers/PendingServerDiscoveryModal.tsx";
 
 // Lazy pages
 const About = lazy(() => import("./pages/About"));
@@ -127,6 +128,7 @@ function App() {
       <Router>
         <CookieConsentProvider>
         <AdminIdleWarningModal />
+        <PendingServerDiscoveryModal />
         <Layout>
           <Routes>
             <Route path="/privacy" element={withSuspense(<PrivacyPolicy />)} />

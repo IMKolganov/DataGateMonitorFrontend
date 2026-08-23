@@ -1,14 +1,39 @@
 import React, { useMemo, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type { NotificationItemDto } from "../../api/orvalModelShim";
-import { FaCheck, FaExpandAlt } from "react-icons/fa";
+import { FaCheck, FaExpandAlt, FaServer } from "react-icons/fa";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
+import { openPendingServerDiscovery } from "../servers/pendingServerDiscoveryEvents";
 import "../../css/Table.css";
 import "../../css/Settings.css";
 
 const MESSAGE_TRUNCATE_LENGTH = 80;
+const SERVER_DISCOVERED_TYPE = "server.discovered";
+
+function parseDiscoveryIdFromMessage(message: string): number | undefined {
+  const match = /DiscoveryId=(\d+)/i.exec(message);
+  if (!match) return undefined;
+  const id = Number(match[1]);
+  return Number.isFinite(id) ? id : undefined;
+}
+
+function formatServerDiscoveredMessage(message: string): string {
+  const discoveryId = parseDiscoveryIdFromMessage(message);
+  const nameMatch = /(?:^|;\s*)Name=([^;]*)/i.exec(message);
+  const apiUrlMatch = /(?:^|;\s*)ApiUrl=([^;]*)/i.exec(message);
+  const name = nameMatch?.[1]?.trim();
+  const apiUrl = apiUrlMatch?.[1]?.trim();
+  const parts = [
+    "A new VPN server was discovered and is waiting for admin approval.",
+    discoveryId != null ? `Discovery #${discoveryId}` : null,
+    name ? `Suggested name: ${name}` : null,
+    apiUrl ? `API URL: ${apiUrl}` : null,
+  ].filter(Boolean);
+  return parts.join(" ");
+}
 
 /** IDE-style severity: 0=Info, 1=Warning, 2=Error, 3=Critical */
 const SEVERITY_CONFIG: Record<
@@ -22,12 +47,16 @@ const SEVERITY_CONFIG: Record<
 };
 
 function getSeverityConfig(severity: number | null | undefined) {
-  if (severity == null) return { label: "—", badgeClass: "notification-severity-badge--unknown", rowClass: "" };
-  return SEVERITY_CONFIG[severity] ?? {
-    label: `Lvl ${severity}`,
-    badgeClass: "notification-severity-badge--unknown",
-    rowClass: "",
-  };
+  if (severity == null) {
+    return { label: "—", badgeClass: "notification-severity-badge--unknown", rowClass: "" };
+  }
+  return (
+    SEVERITY_CONFIG[severity] ?? {
+      label: `Lvl ${severity}`,
+      badgeClass: "notification-severity-badge--unknown",
+      rowClass: "",
+    }
+  );
 }
 
 interface NotificationsTableProps {
@@ -57,7 +86,7 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
 
   const paginationModel: GridPaginationModel = useMemo(
     () => ({ page, pageSize }),
-    [page, pageSize]
+    [page, pageSize],
   );
 
   const rows = useMemo(
@@ -65,10 +94,16 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
       (notifications ?? []).map((n, idx) => {
         const id = n.id ?? idx + 1;
         const notificationId = n.id ?? 0;
+        const type = n.type != null ? String(n.type) : "-";
         const messageRaw = n.message ?? "";
-        const message = messageRaw || "-";
+        const message =
+          type === SERVER_DISCOVERED_TYPE && messageRaw
+            ? formatServerDiscoveredMessage(messageRaw)
+            : messageRaw || "-";
         const severityNum = n.severity ?? null;
         const severityCfg = getSeverityConfig(severityNum);
+        const discoveryId =
+          type === SERVER_DISCOVERED_TYPE ? parseDiscoveryIdFromMessage(messageRaw) : undefined;
 
         return {
           id,
@@ -81,10 +116,11 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
           severityRowClass: severityCfg.rowClass,
           isRead: Boolean(n.isRead),
           createDate: n.createdAt ? new Date(n.createdAt).toLocaleString() : "-",
-          type: n.type != null ? String(n.type) : "-",
+          type,
+          discoveryId,
         };
       }),
-    [notifications]
+    [notifications],
   );
 
   const columns: GridColDef[] = [
@@ -98,9 +134,7 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
       renderCell: (params) => {
         const msg = params.value as string;
         const isLong = msg.length > MESSAGE_TRUNCATE_LENGTH;
-        const display = isLong
-          ? `${msg.slice(0, MESSAGE_TRUNCATE_LENGTH)}…`
-          : msg;
+        const display = isLong ? `${msg.slice(0, MESSAGE_TRUNCATE_LENGTH)}…` : msg;
         return (
           <div className="notification-message-cell">
             <span className="message-text" title={isLong ? msg : undefined}>
@@ -141,18 +175,37 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
     {
       field: "actions",
       headerName: "Actions",
-      width: 90,
+      width: 150,
       sortable: false,
       filterable: false,
       cellClassName: "grid-cell-actions",
       renderCell: (params) => {
         const notificationId: number = params.row.notificationId || 0;
         const isRead: boolean = !!params.row.isRead;
-
+        const isDiscovered = params.row.type === SERVER_DISCOVERED_TYPE;
+        const discoveryId: number | undefined = params.row.discoveryId;
         const disabled = markReadLoading || !notificationId || isRead;
 
         return (
           <GridRowActions>
+            {isDiscovered && (
+              <RowActionButton
+                title="Review discovered server"
+                onClick={() => openPendingServerDiscovery(discoveryId)}
+                icon={<FaServer className="icon" />}
+              />
+            )}
+            {isDiscovered && (
+              <Link
+                to="/servers"
+                className="btn secondary"
+                title="Open servers list"
+                style={{ padding: "4px 8px", fontSize: 12, textDecoration: "none" }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                Servers
+              </Link>
+            )}
             <RowActionButton
               title={isRead ? "Already read" : "Mark read"}
               disabled={disabled}
