@@ -52,7 +52,7 @@ nobind
 remote-cert-tls server
 tls-version-min 1.2
 cipher AES-128-GCM
-data-ciphers AES-128-GCM:AES-256-GCM:CHACHA20-POLY1305
+data-ciphers AES-128-GCM:CHACHA20-POLY1305
 auth SHA256
 auth-nocache
 verb 3
