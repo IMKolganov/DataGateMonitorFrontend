@@ -10,11 +10,14 @@ import "../css/Table.css";
 import { UserAvatar } from "./ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../utils/readOptionalAvatarUrl.ts";
 import { parseTelegramNumericId } from "../utils/telegramNumericId.ts";
-import { apiRequest } from "../api/apirequest";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import { toast } from "react-toastify";
 import { FaBolt, FaBan } from "react-icons/fa";
 import { usePostApiOpenVpnClientsKill } from "../api/orval/vpn-server-clients/vpn-server-clients";
+import {
+  usePostApiVpnServersVpnServerIdXrayDisableUser,
+  usePostApiVpnServersVpnServerIdXrayKickUser,
+} from "../api/orval/vpn-server-xray-node/vpn-server-xray-node";
 import { unwrapKillResponse } from "../utils/unwrapKillResponse";
 import { errorMessage } from "../utils/errorMessage";
 import { GridRowActions, RowActionButton } from "./ui/GridRowActions.tsx";
@@ -75,6 +78,8 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
               : undefined;
 
     const killMutation = usePostApiOpenVpnClientsKill();
+    const xrayKickMutation = usePostApiVpnServersVpnServerIdXrayKickUser();
+    const xrayDisableMutation = usePostApiVpnServersVpnServerIdXrayDisableUser();
     const handleOpenVpnKill = useCallback(
         async (commonName: string, revoke: boolean) => {
             if (!serverIdForActions || serverIdForActions <= 0 || !commonName) return;
@@ -105,29 +110,30 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
     );
 
     const postXrayAction = useCallback(
-        async (path: "kick-user" | "disable-user", commonName: string) => {
+        async (action: "kick-user" | "disable-user", commonName: string) => {
             if (!serverIdForActions || serverIdForActions <= 0) return;
-            const key = `${path}:${commonName}`;
+            const key = `${action}:${commonName}`;
             setActionBusyKey(key);
             try {
-                const resp = await apiRequest<{ ok?: boolean }>(
-                    "post",
-                    `/api/vpn-servers/${serverIdForActions}/xray/${path}`,
-                    { data: { commonName } }
-                );
-                if (!resp.success) {
-                    toast.error(resp.errorMessage ?? "Request failed");
-                    return;
+                const payload = { vpnServerId: serverIdForActions, data: { commonName } };
+                if (action === "kick-user") {
+                    await xrayKickMutation.mutateAsync(payload);
+                } else {
+                    await xrayDisableMutation.mutateAsync(payload);
                 }
-                toast.success(path === "kick-user" ? "Session dropped; client can reconnect." : "Client revoked on node.");
+                toast.success(
+                    action === "kick-user"
+                        ? "Session dropped; client can reconnect."
+                        : "Client revoked on node.",
+                );
                 onClientsChanged?.();
             } catch (e) {
-                toast.error(e instanceof Error ? e.message : "Request failed");
+                toast.error(errorMessage(e));
             } finally {
                 setActionBusyKey(null);
             }
         },
-        [serverIdForActions, onClientsChanged]
+        [serverIdForActions, onClientsChanged, xrayKickMutation, xrayDisableMutation],
     );
 
     const rows = clients.map((client, index) => {

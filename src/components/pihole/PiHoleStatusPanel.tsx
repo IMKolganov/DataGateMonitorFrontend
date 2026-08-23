@@ -29,6 +29,8 @@ type PiHoleStatusPanelProps = {
   error?: string | null;
   onRefresh?: () => void;
   refreshing?: boolean;
+  /** openvpn (default) or xray — changes step 3–6 copy */
+  stack?: "openvpn" | "xray";
 };
 
 const STEP_ICONS: Record<string, typeof BsDatabase> = {
@@ -90,6 +92,7 @@ export function PiHoleStatusPanel({
   error,
   onRefresh,
   refreshing,
+  stack = "openvpn",
 }: PiHoleStatusPanelProps) {
   const steps = useMemo(
     () =>
@@ -100,8 +103,9 @@ export function PiHoleStatusPanel({
         diagnostics,
         diagnosticsFetchError: error,
         diagnosticsLoading: loading,
+        stack,
       }),
-    [dashboardConfig, serverPiHoleEnabled, serverApiUrl, diagnostics, error, loading],
+    [dashboardConfig, serverPiHoleEnabled, serverApiUrl, diagnostics, error, loading, stack],
   );
 
   const blocker = useMemo(() => firstPiHolePipelineIssue(steps), [steps]);

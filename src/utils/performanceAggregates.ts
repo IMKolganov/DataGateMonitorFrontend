@@ -10,6 +10,25 @@ export function stripQuery(path: string): string {
   return q >= 0 ? path.slice(0, q) : path;
 }
 
+/** Light pretty-print for EF/raw SQL (no dependency). Keeps already multi-line text. */
+export function formatSqlForDisplay(sql: string): string {
+  const trimmed = sql.trim();
+  if (!trimmed) return trimmed;
+  if (trimmed.includes("\n") && trimmed.split("\n").length > 2) {
+    return trimmed;
+  }
+
+  const keywords =
+    /\b(SELECT DISTINCT|SELECT|INSERT INTO|DELETE FROM|UPDATE|SET|FROM|LEFT OUTER JOIN|RIGHT OUTER JOIN|FULL OUTER JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|CROSS JOIN|JOIN|WHERE|GROUP BY|ORDER BY|HAVING|LIMIT|OFFSET|UNION ALL|UNION|VALUES|AND|OR)\b/gi;
+
+  return trimmed
+    .replace(/\s+/g, " ")
+    .replace(keywords, "\n$1")
+    .replace(/^\n+/, "")
+    .replace(/\n(AND|OR)\b/gi, "\n  $1")
+    .trim();
+}
+
 export function buildTopSlow(
   items: { key: string; label: string; durationMs: number }[],
   take = 5,

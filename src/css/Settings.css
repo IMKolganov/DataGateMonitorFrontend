@@ -265,6 +265,11 @@
   padding: 20px;
 }
 
+/* Idle warning must sit above header (1100), toasts (~9999), and cookie banner (12000). */
+.modal-overlay.idle-warning-overlay {
+  z-index: 13000;
+}
+
 .modal-content {
   background: var(--bg-card);
   border: 1px solid var(--border-color);

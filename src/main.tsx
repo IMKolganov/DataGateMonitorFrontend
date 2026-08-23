@@ -1,5 +1,7 @@
 import { createRoot } from "react-dom/client";
 import "./utils/auth/authSession.ts";
+import { installDomTranslationGuard } from "./utils/domTranslationGuard";
+import { installToastDefaults } from "./utils/installToastDefaults";
 import "./index.css";
 import "./css/ui-patterns.css";
 import "./css/buttons.css";
@@ -13,6 +15,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
+installDomTranslationGuard();
+installToastDefaults();
 const CHUNK_RELOAD_KEY = "chunk-reload:last-attempt-ms";
 const CHUNK_RELOAD_COOLDOWN_MS = 30_000;
 const CHUNK_RELOAD_OVERLAY_ID = "chunk-reload-overlay";

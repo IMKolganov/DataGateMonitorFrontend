@@ -1,6 +1,6 @@
 // src/pages/ApplicationSettings.tsx
 import { useMemo, useState } from "react";
-import { FaLaptopCode, FaPlus, FaSync, FaTerminal } from "react-icons/fa";
+import { FaCopy, FaLaptopCode, FaPlus, FaSync, FaTerminal } from "react-icons/fa";
 import "../css/ApplicationSettings.css";
 import "../css/Settings.css";
 import ApplicationTable from "../components/settings/ApplicationTable.tsx";
@@ -13,11 +13,10 @@ import {
   usePostApiApplicationsRegister,
 } from "../api/orval/applications/applications";
 import type { GetApiApplicationsGetAllParams } from "../api/orval/model/getApiApplicationsGetAllParams";
-import type { RegisterApplicationRequest, ApplicationDto } from "../api/orvalModelShim";
+import type { RegisterApplicationRequest, ApplicationDto, RegisterApplicationResponse } from "../api/orvalModelShim";
 import axios from "axios";
 import { errorMessage as formatError } from "../utils/errorMessage";
 
-// Normalizes different API response shapes into ApplicationDto[]
 function extractApps(raw: unknown): ApplicationDto[] {
   if (!raw) return [];
   if (Array.isArray(raw)) return raw as ApplicationDto[];
@@ -35,17 +34,29 @@ function extractApps(raw: unknown): ApplicationDto[] {
     if (Array.isArray(c)) return c as ApplicationDto[];
   }
 
-  const firstArray = Object.values(obj).find((v): v is unknown[] => Array.isArray(v));
-  if (firstArray) return firstArray as ApplicationDto[];
-
   return [];
 }
 
+function asCreatedClient(raw: unknown): RegisterApplicationResponse | null {
+  if (!raw || typeof raw !== "object") return null;
+  const res = raw as RegisterApplicationResponse;
+  const clientId = res.clientId?.trim();
+  const clientSecret = res.clientSecret?.trim();
+  if (!clientId || !clientSecret) return null;
+
+  return {
+    name: res.name?.trim() || "API client",
+    clientId,
+    clientSecret,
+  };
+}
+
 export function ApplicationSettings() {
-  const [appsOverlay, setAppsOverlay] = useState<ApplicationDto[] | null>(null);
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [newAppName, setNewAppName] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [createdClient, setCreatedClient] = useState<RegisterApplicationResponse | null>(null);
+  const [copiedField, setCopiedField] = useState<"clientId" | "clientSecret" | null>(null);
   const appFilters = useGridFilters("settings-applications");
 
   const listParams = useMemo<GetApiApplicationsGetAllParams>(
@@ -68,19 +79,22 @@ export function ApplicationSettings() {
 
   const registerMutation = usePostApiApplicationsRegister();
 
-  const appsFromServer = useMemo(() => extractApps(appsResp), [appsResp]);
-  const [appsSource, setAppsSource] = useState(appsResp);
-  if (appsResp !== appsSource) {
-    setAppsSource(appsResp);
-    setAppsOverlay(null);
-  }
-  const apps = appsOverlay ?? appsFromServer;
+  const apps = useMemo(() => extractApps(appsResp), [appsResp]);
   const errorMessage =
     registerError ??
-    (appsError ? (appsError as Error).message || "Failed to load applications" : null);
+    (appsError ? (appsError as Error).message || "Failed to load API clients" : null);
 
   const loading = isLoading;
   const spinner = refreshing || isFetching || registerMutation.isPending;
+
+  const apiTokenUrl =
+    typeof window !== "undefined" ? `${window.location.origin}/api/auth/token` : "/api/auth/token";
+
+  const handleCopy = async (text: string, field: "clientId" | "clientSecret") => {
+    await navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
 
   const handleRegister = async () => {
     const name = newAppName.trim();
@@ -90,30 +104,22 @@ export function ApplicationSettings() {
     try {
       const body: RegisterApplicationRequest = { name };
       const res = await registerMutation.mutateAsync({ data: body });
+      const created = asCreatedClient(res);
 
-      const createdList = extractApps(res);
-      const resRec = res && typeof res === "object" && res !== null ? (res as Record<string, unknown>) : null;
-      const single =
-        resRec && !Array.isArray(res) ? resRec["application"] : undefined;
-      const created =
-        createdList[0] ??
-        (Array.isArray(single) ? single[0] : single) ??
-        (Array.isArray(res) ? res[0] : res);
-
-      if (!created || typeof created !== "object" || !("clientId" in created) || !created.clientId) {
+      if (!created) {
         throw new Error("Invalid response from server");
       }
 
-      setAppsOverlay([...appsFromServer, created as ApplicationDto]);
+      setCreatedClient(created);
       setNewAppName("");
       await refetch();
     } catch (e: unknown) {
-      let msg = "Failed to register application";
+      let msg = "Failed to create API client";
       if (axios.isAxiosError(e)) {
         const d = e.response?.data;
         if (d && typeof d === "object" && d !== null) {
           const r = d as Record<string, unknown>;
-          const err = r["error"] ?? r["message"];
+          const err = r["message"] ?? r["error"];
           if (typeof err === "string") msg = err;
         } else if (e.message) msg = e.message;
       } else {
@@ -138,14 +144,13 @@ export function ApplicationSettings() {
     <div>
       <h2 className="settings-page__h2-with-icon">
         <FaLaptopCode className="icon" aria-hidden />
-        <span>Application Settings</span>
+        <span>API Clients</span>
       </h2>
       <div className="settings-divider" />
 
       <p className="app-settings-description">
-        Manage applications that require API access. Each registered application receives a unique{" "}
-        <strong>Client ID</strong> and <strong>Client Secret</strong>. These credentials can be used to
-        authenticate API requests.
+        Create and manage machine-to-machine API clients. Each client receives a unique{" "}
+        <strong>Client ID</strong> and <strong>Client Secret</strong> for authenticating API requests.
       </p>
 
       <div className="header-bar">
@@ -159,7 +164,7 @@ export function ApplicationSettings() {
       {loading ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p>Loading applications...</p>
+          <p>Loading API clients...</p>
         </div>
       ) : (
         <>
@@ -168,7 +173,7 @@ export function ApplicationSettings() {
               id="application-register-name"
               name="applicationName"
               type="text"
-              placeholder="Application Name"
+              placeholder="Client name"
               value={newAppName}
               onChange={(e) => setNewAppName(e.target.value)}
               disabled={spinner}
@@ -179,7 +184,7 @@ export function ApplicationSettings() {
               onClick={handleRegister}
               disabled={spinner || !newAppName.trim()}
             >
-              {FaPlus({ className: "icon" })} Register app
+              {FaPlus({ className: "icon" })} Create client
             </button>
           </div>
 
@@ -205,23 +210,86 @@ export function ApplicationSettings() {
 
       <div className="app-warning">
         <p>
-          ⚠️ <strong>Security Notice:</strong> The <code>clientSecret</code> is displayed only once
-          upon creation. Make sure to store it securely!
+          ⚠️ <strong>Security notice:</strong> The client secret is shown only once after creation.
+          Store it securely — it cannot be retrieved later.
         </p>
       </div>
 
       <h3 className="settings-card__h3-with-icon">
         <FaTerminal className="icon" aria-hidden />
-        <span>Example: Authenticate with API</span>
+        <span>Example: obtain an API token</span>
       </h3>
       <pre className="code-block">
-{`curl -X POST https://api.example.com/auth/token \\
+{`curl -X POST ${apiTokenUrl} \\
   -H "Content-Type: application/json" \\
   -d '{
     "clientId": "your-client-id",
     "clientSecret": "your-client-secret"
-  }'`}
+  }'
+
+# Response (wrapped):
+# { "success": true, "data": { "token": "...", "expiration": "..." } }`}
       </pre>
+
+      {createdClient && (
+        <div className="modal-overlay">
+          <div
+            className="modal-content api-client-created-modal"
+            role="dialog"
+            aria-labelledby="api-client-created-title"
+            aria-modal="true"
+          >
+            <div className="modal-header">
+              <h3 id="api-client-created-title">API client created</h3>
+            </div>
+            <div className="modal-body">
+              <p className="api-client-created-modal__intro">
+                Copy the credentials for <strong>{createdClient.name}</strong> now. The secret will not
+                be shown again. Confirm only after you have saved them.
+              </p>
+
+              <div className="api-client-created-modal__field">
+                <span className="api-client-created-modal__label">Client ID</span>
+                <div className="api-client-created-modal__value-row">
+                  <code className="api-client-created-modal__value">{createdClient.clientId}</code>
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    onClick={() => createdClient.clientId && handleCopy(createdClient.clientId, "clientId")}
+                  >
+                    <FaCopy className="icon" aria-hidden /> Copy
+                  </button>
+                  {copiedField === "clientId" && (
+                    <span className="copied-text">✔ Copied!</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="api-client-created-modal__field">
+                <span className="api-client-created-modal__label">Client Secret</span>
+                <div className="api-client-created-modal__value-row">
+                  <code className="api-client-created-modal__value">{createdClient.clientSecret}</code>
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    onClick={() => createdClient.clientSecret && handleCopy(createdClient.clientSecret, "clientSecret")}
+                  >
+                    <FaCopy className="icon" aria-hidden /> Copy
+                  </button>
+                  {copiedField === "clientSecret" && (
+                    <span className="copied-text">✔ Copied!</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="btn primary" onClick={() => setCreatedClient(null)}>
+                I saved the secret
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -81,7 +81,7 @@ export function ServerDetails() {
     const tabs = useMemo(() => {
         let base = canSeeAdminTabs ? ALL_SERVER_TABS : ALL_SERVER_TABS.filter((t) => !t.adminOnly);
         if (isXrayServer) {
-            const xrayHidden = new Set(["console", "events", "pi-hole"]);
+            const xrayHidden = new Set(["console", "events"]);
             base = base.filter((t) => !xrayHidden.has(t.path));
             base = base.map((t) => {
                 if (t.path === "certificates") {
@@ -96,7 +96,7 @@ export function ServerDetails() {
                 base = [{ label: "Overview", path: "", adminOnly: false, Icon: FaServer, mobilePrefix: "🖥️" }];
             }
         }
-        if (!isXrayServer && canSeeAdminTabs) {
+        if (canSeeAdminTabs) {
             base = [
                 ...base,
                 { label: "Pi-hole", path: "pi-hole", adminOnly: true, Icon: FaFilter, mobilePrefix: "🌐" },

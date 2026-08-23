@@ -1,5 +1,5 @@
 // src/components/ApplicationTable.tsx
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaTrash, FaCopy } from "react-icons/fa";
 import Grid from "../ui/TableStyle.tsx";
@@ -18,6 +18,17 @@ interface ApplicationTableProps {
   refreshApps: () => void;
 }
 
+type AppRow = {
+  id: string;
+  clientId: string;
+  name: string;
+  clientSecret: string;
+  createDate: string;
+  isRevoked: boolean;
+  isSystem: boolean;
+  statusLabel: string;
+};
+
 const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refreshApps }) => {
   const [copied, setCopied] = useState<string | null>(null);
   const [appsGridPage, setAppsGridPage] = useState(0);
@@ -30,74 +41,118 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
   const revokeMutation = usePostApiApplicationsRevoke({
     mutation: {
       onSuccess: () => {
-        toast.success("Application revoked");
+        toast.success("API client revoked");
         refreshApps();
       },
       onError: (e: unknown) => {
-        toast.error(errorMessage(e) || "Failed to revoke application.");
+        toast.error(errorMessage(e) || "Failed to revoke API client.");
       },
     },
   });
 
   const loading = revokeMutation.isPending;
 
-  const handleRevoke = async (clientId: string) => {
-    const body: RevokeApplicationRequest = { clientId };
-    await revokeMutation.mutateAsync({ data: body });
-  };
-
-  const handleCopy = (text?: string | null) => {
+  const handleCopy = useCallback((text?: string | null) => {
     if (!text) return;
     navigator.clipboard.writeText(text);
     setCopied(text);
     setTimeout(() => setCopied(null), 2000);
-  };
+  }, []);
 
-  const rows = useMemo(
-    () =>
-      (applications ?? []).map((app, index) => ({
-        id: index + 1,
-        clientId: String(app.clientId ?? ""),
-        name: String(app.name ?? ""),
-        clientSecret: app.clientSecret ?? "",
-        createDate: app.createDate
-          ? new Date(app.createDate).toLocaleString()
-          : "",
-        status: "unknown",//app.isRevoked ? "Revoked ❌" : "Active ✅",
-      })),
-    [applications]
+  const handleRevoke = useCallback(
+    async (row: AppRow) => {
+      if (row.isRevoked) return;
+      if (row.isSystem) {
+        toast.error("System API clients cannot be revoked.");
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `Revoke API client "${row.name}"?\n\nExisting tokens may remain valid until they expire, but new tokens will not be issued.`,
+      );
+      if (!confirmed) return;
+
+      const body: RevokeApplicationRequest = { clientId: row.clientId };
+      await revokeMutation.mutateAsync({ data: body });
+    },
+    [revokeMutation],
   );
 
-  const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Name", flex: 1 },
-    { field: "clientId", headerName: "Client ID", flex: 1 },
+  const rows = useMemo<AppRow[]>(
+    () =>
+      (applications ?? []).map((app) => {
+        const clientId = String(app.clientId ?? "");
+        const isRevoked = Boolean(app.isRevoked);
+        const isSystem = Boolean(app.isSystem);
+        let statusLabel = "Active";
+        if (isSystem && isRevoked) statusLabel = "System · Revoked";
+        else if (isSystem) statusLabel = "System";
+        else if (isRevoked) statusLabel = "Revoked";
+
+        return {
+          id: clientId || `row-${app.name ?? "unknown"}`,
+          clientId,
+          name: String(app.name ?? ""),
+          clientSecret: app.clientSecret ?? "",
+          createDate: app.createDate ? new Date(app.createDate).toLocaleString() : "",
+          isRevoked,
+          isSystem,
+          statusLabel,
+        };
+      }),
+    [applications],
+  );
+
+  const renderCopyableCell = (value: string, emptyHint: string) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <span className="small-text" title={value || emptyHint}>
+        {value || "—"}
+      </span>
+      <RowActionButton
+        title={value ? "Copy" : emptyHint}
+        disabled={!value}
+        onClick={() => handleCopy(value)}
+        icon={<FaCopy className="icon" />}
+      />
+      {copied === value && value && <span className="copied-text">✔ Copied!</span>}
+    </div>
+  );
+
+  const columns: GridColDef<AppRow>[] = [
+    { field: "name", headerName: "Name", flex: 1, minWidth: 140 },
+    {
+      field: "clientId",
+      headerName: "Client ID",
+      flex: 1.2,
+      minWidth: 220,
+      renderCell: (params) => renderCopyableCell(params.value as string, "No client ID"),
+    },
     {
       field: "clientSecret",
       headerName: "Client Secret",
       flex: 1,
+      minWidth: 180,
+      renderCell: (params) =>
+        renderCopyableCell(
+          params.value as string,
+          "Not available (shown only once on create)",
+        ),
+    },
+    { field: "createDate", headerName: "Created", flex: 1, minWidth: 160 },
+    {
+      field: "statusLabel",
+      headerName: "Status",
+      width: 130,
       renderCell: (params) => {
-        const value: string = params.value || "";
-        return (
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontSize: 12 }}>
-              {value ? value : "—"}
-            </span>
-            <RowActionButton
-              title={!value ? "Secret is not available (shown only once on create)" : "Copy"}
-              disabled={!value}
-              onClick={() => handleCopy(value)}
-              icon={<FaCopy className="icon" />}
-            />
-            {copied === value && value && (
-              <span className="copied-text">✔ Copied!</span>
-            )}
-          </div>
-        );
+        const row = params.row;
+        const className = row.isRevoked
+          ? "status revoked"
+          : row.isSystem
+            ? "status system"
+            : "status active";
+        return <span className={className}>{params.value}</span>;
       },
     },
-    { field: "createDate", headerName: "Created", flex: 1 },
-    { field: "status", headerName: "Status", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",
@@ -105,15 +160,19 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
       sortable: false,
       filterable: false,
       renderCell: (params) => {
-        const clientId: string = params.row.clientId;
-        const isRevoked = params.row.status === "Revoked ❌";
+        const row = params.row;
+        const revokeDisabled = loading || row.isRevoked || row.isSystem;
+        let revokeTitle = "Revoke API client";
+        if (row.isSystem) revokeTitle = "System clients cannot be revoked";
+        else if (row.isRevoked) revokeTitle = "Already revoked";
+
         return (
           <GridRowActions>
             <RowActionButton
               variant="danger"
-              title={isRevoked ? "Already revoked" : "Revoke application"}
-              disabled={loading || isRevoked}
-              onClick={() => handleRevoke(clientId)}
+              title={revokeTitle}
+              disabled={revokeDisabled}
+              onClick={() => handleRevoke(row)}
               icon={<FaTrash className="icon" />}
             />
           </GridRowActions>
@@ -144,7 +203,7 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
             setAppsPageSize(m.pageSize);
           }}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-          localeText={{ noRowsLabel: "📭 No applications registered" }}
+          localeText={{ noRowsLabel: "📭 No API clients registered" }}
         />
       </div>
     </CustomThemeProvider>

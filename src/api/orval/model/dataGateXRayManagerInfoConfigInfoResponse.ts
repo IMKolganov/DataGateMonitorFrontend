@@ -12,6 +12,9 @@ export interface DataGateXRayManagerInfoConfigInfoResponse {
   /** @nullable */
   dns2?: string | null;
   /** @nullable */
+  clientDnsServers?: string[] | null;
+  dnsIdentityEnabled?: boolean;
+  /** @nullable */
   vpnSubnet?: string | null;
   /** @nullable */
   vpnNetmask?: string | null;

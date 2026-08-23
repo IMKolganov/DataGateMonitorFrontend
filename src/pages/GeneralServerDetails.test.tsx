@@ -44,8 +44,24 @@ vi.mock("../api/orval/vpn-servers/vpn-servers", () => ({
 
 vi.mock("../api/orval/vpn-servers-v3/vpn-servers-v3", () => ({
   useGetApiV3OpenVpnServersGetAllWithStatus: () => ({
-    data: { servers: [] },
+    data: {
+      vpnServerWithStatuses: [
+        {
+          vpnServerResponses: {
+            vpnServer: {
+              id: 4,
+              serverName: "Edge-4",
+              serverType: VpnServerType.OpenVpn,
+            },
+          },
+          vpnServerStatusLogResponse: {
+            version: "1.2.5.90",
+          },
+        },
+      ],
+    },
     isLoading: false,
+    isFetching: false,
   }),
 }));
 
@@ -90,6 +106,10 @@ vi.mock("../api/orval/quota-plan-allowed-server/quota-plan-allowed-server", () =
   }),
 }));
 
+vi.mock("../components/servers/OpenVpnProcessControls.tsx", () => ({
+  OpenVpnProcessControls: () => <div data-testid="openvpn-process-controls" />,
+}));
+
 import GeneralServerDetails from "./GeneralServerDetails";
 
 describe("GeneralServerDetails", () => {
@@ -108,5 +128,6 @@ describe("GeneralServerDetails", () => {
     expect(screen.getByRole("button", { name: /Refresh/i })).toBeInTheDocument();
     expect(screen.getByText("Live")).toBeInTheDocument();
     expect(screen.getByText(/VPN Clients \(Connected\)/i)).toBeInTheDocument();
+    expect(screen.getByTestId("openvpn-process-controls")).toBeInTheDocument();
   });
 });

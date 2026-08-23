@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { FaGlobe, FaSave, FaSync } from "react-icons/fa";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { PasswordInput } from "../components/auth/PasswordInput";
 import {
   getGetApiOpenVpnServersGetVpnServerIdQueryKey,
   putApiOpenVpnServersUpdate,
@@ -30,7 +31,8 @@ import type {
   VpnServerResponse,
 } from "../api/orvalModelShim";
 import { PiHoleStatusPanel } from "../components/pihole/PiHoleStatusPanel";
-import { isOpenVpnStack } from "../constants/vpnServerType";
+import { normalizePiHoleClientSubnetPrefix } from "../utils/pihole/normalizePiHoleClientSubnetPrefix";
+import { isOpenVpnStack, VpnServerType } from "../constants/vpnServerType";
 import { OpenVpnServerFeaturePlaceholder } from "../components/servers/OpenVpnServerFeaturePlaceholder";
 import { ServerAccessDenied } from "../components/ServerAccessDenied";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
@@ -95,6 +97,8 @@ export function PiHoleServerTab() {
   const payload = serverQuery.data as VpnServerResponse | undefined;
   const server = payload?.vpnServer;
   const piHoleEnabled = Boolean(server?.isPiHoleEnabled);
+  const isXray = server?.serverType === VpnServerType.Xray;
+  const isOpenVpn = isOpenVpnStack(server?.serverType);
 
   useEffect(() => {
     setEnableIntegration(piHoleEnabled);
@@ -196,7 +200,8 @@ export function PiHoleServerTab() {
   if (!admin) return <ServerAccessDenied />;
   if (serverQuery.isLoading) return <p>Loading server…</p>;
   if (isHttpForbidden(serverQuery.error)) return <ServerAccessDenied />;
-  if (server && !isOpenVpnStack(server.serverType)) {
+  // Keep placeholder only for unknown/future stacks — OpenVPN and Xray both supported.
+  if (server && !isOpenVpn && !isXray) {
     return <OpenVpnServerFeaturePlaceholder vpnServerId={String(id)} featureLabel="Pi-hole DNS logging" />;
   }
 
@@ -204,6 +209,12 @@ export function PiHoleServerTab() {
     if (!id || !server) return;
     if (!form.baseUrl.trim()) {
       toast.error("Pi-hole API base URL is required.");
+      return;
+    }
+    if (isXray && enableIntegration && !form.clientSubnetPrefix.trim()) {
+      toast.error(
+        "Set a client subnet prefix for Xray (or leave integration off). Empty prefix on a shared Pi-hole would ingest OpenVPN DNS.",
+      );
       return;
     }
 
@@ -221,7 +232,7 @@ export function PiHoleServerTab() {
         pollIntervalSeconds: form.pollIntervalSeconds,
         batchSize: form.batchSize,
         lookbackSeconds: form.lookbackSeconds,
-        clientSubnetPrefix: form.clientSubnetPrefix.trim(),
+        clientSubnetPrefix: normalizePiHoleClientSubnetPrefix(form.clientSubnetPrefix),
       });
 
       const integrationChanged = enableIntegration !== piHoleEnabled;
@@ -238,7 +249,11 @@ export function PiHoleServerTab() {
 
       if (enableIntegration) {
         await postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime(id);
-        toast.success("Pi-hole settings saved and applied to the VPN server.");
+        toast.success(
+          isXray
+            ? "Pi-hole settings saved and applied to the Xray node collector."
+            : "Pi-hole settings saved and applied to the VPN server.",
+        );
         await diagnosticsQuery.refetch();
       } else {
         toast.success("Pi-hole settings saved in the dashboard. Enable integration to start collection.");
@@ -261,8 +276,21 @@ export function PiHoleServerTab() {
         Pi-hole DNS logging
       </h2>
       <p className="server-details__intro">
-        Save connection settings in the dashboard first. When integration is enabled, the backend pushes them to the
-        OpenVPN microservice and polls Pi-hole for VPN client DNS queries.
+        {isXray ? (
+          <>
+            Save connection settings, then enable integration. Settings are pushed to the <strong>Xray node</strong>,
+            which polls Pi-hole locally (same pattern as OpenVPN). Use a Base URL reachable from the Xray container
+            (often <code>http://host.docker.internal:8080</code> or the docker bridge gateway — not dashboard
+            localhost). Per-user CN mapping uses DNS identity IPs (<code>XRAY_DNS_IDENTITY_*</code>) when client DNS
+            goes through the tunnel to Pi-hole; set subnet prefix to the identity pool (default{" "}
+            <code>10.80.0.</code>).
+          </>
+        ) : (
+          <>
+            Save connection settings in the dashboard first. When integration is enabled, the backend pushes them to the
+            OpenVPN microservice, which polls Pi-hole for VPN client DNS queries.
+          </>
+        )}
       </p>
 
       <PiHoleStatusPanel
@@ -274,6 +302,7 @@ export function PiHoleServerTab() {
         error={piHoleEnabled && diagnosticsQuery.isError ? diagnosticsError : null}
         refreshing={diagnosticsQuery.isFetching}
         onRefresh={() => void diagnosticsQuery.refetch()}
+        stack={isXray ? "xray" : "openvpn"}
       />
 
       {!piHoleEnabled && (
@@ -297,7 +326,9 @@ export function PiHoleServerTab() {
               <div className="checkbox-content">
                 <span className="checkbox-title">Enable Pi-hole integration</span>
                 <span className="checkbox-description">
-                  When enabled, the OpenVPN microservice polls Pi-hole and stores DNS queries in the dashboard.
+                  {isXray
+                    ? "When enabled, the Xray node polls Pi-hole. You must set a client subnet prefix (or excludes) — empty prefix would pull OpenVPN queries from a shared Pi-hole."
+                    : "When enabled, the OpenVPN microservice polls Pi-hole and stores DNS queries in the dashboard."}
                 </span>
               </div>
             </label>
@@ -315,14 +346,16 @@ export function PiHoleServerTab() {
               type="url"
               value={form.baseUrl}
               onChange={(e) => setForm((p) => ({ ...p, baseUrl: e.target.value }))}
-              placeholder="http://127.0.0.1:8080"
+              placeholder={isXray ? "http://172.17.0.1:8080" : "http://127.0.0.1:8080"}
             />
           </div>
           <div className="form-group">
             <label htmlFor="pihole-app-password">Application password</label>
-            <input
+            <PasswordInput
               id="pihole-app-password"
-              type="password"
+              name="piholeAppPassword"
+              className=""
+              autoComplete="off"
               value={form.appPassword}
               onChange={(e) => setForm((p) => ({ ...p, appPassword: e.target.value }))}
               placeholder={
@@ -366,14 +399,25 @@ export function PiHoleServerTab() {
               />
           </div>
           <div className="form-group">
-            <label htmlFor="pihole-subnet-prefix">VPN client subnet prefix</label>
+            <label htmlFor="pihole-subnet-prefix">
+              {isXray ? "Client subnet prefix (required on shared Pi-hole)" : "VPN client subnet prefix"}
+            </label>
             <input
               id="pihole-subnet-prefix"
               type="text"
               value={form.clientSubnetPrefix}
               onChange={(e) => setForm((p) => ({ ...p, clientSubnetPrefix: e.target.value }))}
-              placeholder="10.51.30."
+              placeholder={isXray ? "10.80.2. (identity pool on this host)" : "10.51.44. or empty for all VPN clients"}
             />
+            {isXray && (
+              <p className="form-hint" style={{ marginTop: 6, opacity: 0.85, fontSize: "0.9em" }}>
+                Use the Xray DNS identity pool prefix (default <code>10.80.0.</code>) when{" "}
+                <code>XRAY_DNS_IDENTITY_ENABLED=true</code> on the node. Leave empty = ingest nothing (safe). Do not
+                use OpenVPN LAN prefixes like <code>10.51.15.</code>. Set node <code>DNS1</code>/<code>DNS2</code> to
+                Pi-hole and client VPN DNS through the tunnel. Optional excludes:{" "}
+                <code>PIHOLE_CLIENT_SUBNET_EXCLUDE_PREFIXES=10.51.15.,10.51.16.</code>
+              </p>
+            )}
           </div>
         </div>
 

@@ -1,21 +1,35 @@
 // src/components/ServerList.tsx
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FaSyncAlt, FaPlus } from "react-icons/fa";
-import { useNavigate, useLocation } from "react-router-dom";
+import { FaSyncAlt, FaPlus, FaFolderPlus, FaExpand, FaCompress } from "react-icons/fa";
+import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
+import { toast } from "react-toastify";
 import "../../css/ServerList.css";
 
 import useSignalRService from "../../hooks/useSignalRService";
 import ServerItem from "./ServerItem";
+import ServerGroupHeader from "./ServerGroupHeader";
 import ServiceControls from "../ServiceControls";
 
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { buildServerSwitchPath } from "../../utils/buildServerSwitchPath";
+import {
+  buildServerGroupSections,
+  loadCollapsedGroups,
+  saveCollapsedGroups,
+  type CollapsedGroupsMap,
+} from "../../utils/serverGroups";
 
 import { deleteApiOpenVpnServersDeleteVpnServerId } from "../../api/orval/vpn-servers/vpn-servers";
 import { getApiV3OpenVpnServersGetAllWithStatus } from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
 import { getApiOpenVpnClientsGetAllConnected } from "../../api/orval/vpn-server-clients/vpn-server-clients";
+import {
+  useGetApiVpnServerGroupsGetAll,
+  usePostApiVpnServerGroupsCreate,
+  getGetApiVpnServerGroupsGetAllQueryKey,
+} from "../../api/orval/vpn-server-groups/vpn-server-groups";
+import type { VpnServerGroupsDtoVpnServerGroupDto } from "../../api/orval/model/vpnServerGroupsDtoVpnServerGroupDto";
 
 import { ServiceStatus } from "../../api/orvalModelShim";
 import type {
@@ -32,14 +46,14 @@ type OrvalServerItem = VpnServerWithStatusV2Dto;
 type MappedServer = {
   id: number;
   vpnServerId: number;
-  /** Background service status; null until the status-stream hub sends a snapshot for this server. */
   serviceStatus: ServiceStatus | null;
   errorMessage: string | null;
   nextRunTime: string;
   wsCountConnectedClients?: number;
   wsCountSessions?: number;
-  /** When hub sends IsOnline, overrides REST badge for real-time offline/online. */
   wsOnline: boolean | null;
+  groupId?: number | null;
+  sortOrder?: number;
   raw: OrvalServerItem;
 };
 
@@ -93,6 +107,17 @@ function readPayload<T>(value: T | { data?: T } | undefined): T | undefined {
   return value as T;
 }
 
+function readGroupsPayload(data: unknown): VpnServerGroupsDtoVpnServerGroupDto[] {
+  if (!data || typeof data !== "object") return [];
+  const raw = data as Record<string, unknown>;
+  if (Array.isArray(raw.groups)) return raw.groups as VpnServerGroupsDtoVpnServerGroupDto[];
+  const nested = raw.data;
+  if (nested && typeof nested === "object" && Array.isArray((nested as { groups?: unknown }).groups)) {
+    return (nested as { groups: VpnServerGroupsDtoVpnServerGroupDto[] }).groups;
+  }
+  return [];
+}
+
 const resolveServerId = (item: OrvalServerItem): number => {
   const id =
       item.vpnServerResponses?.vpnServer?.id ??
@@ -118,12 +143,16 @@ const ServerList: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useMediaQuery({ maxWidth: 768 });
+  const groupMatch = useMatch({ path: "/servers/groups/:groupId", end: true });
+  const selectedGroupParam = groupMatch?.params.groupId ?? null;
 
   const { serviceData, runServiceNow, connectionState: hubConnectionState, lastError: hubLastError } =
       useSignalRService();
 
   const match = location.pathname.match(/\/servers\/(\d+)/);
   const selectedServerId = match ? Number.parseInt(match[1], 10) : null;
+
+  const [collapsedMap, setCollapsedMap] = useState<CollapsedGroupsMap>(() => loadCollapsedGroups());
 
   const {
     data: baseServers = [],
@@ -138,6 +167,7 @@ const ServerList: React.FC = () => {
       return list.flatMap((item) => {
         const id = resolveServerId(item);
         if (!id) return [];
+        const vpn = item.vpnServerResponses?.vpnServer;
 
         return [
           {
@@ -149,6 +179,8 @@ const ServerList: React.FC = () => {
             wsCountConnectedClients: item.countConnectedClients,
             wsCountSessions: item.countSessions,
             wsOnline: null,
+            groupId: vpn?.groupId ?? null,
+            sortOrder: vpn?.sortOrder ?? 0,
             raw: item,
           },
         ] satisfies MappedServer[];
@@ -156,17 +188,37 @@ const ServerList: React.FC = () => {
     },
   });
 
+  // Recover if another screen wrote a different shape under the same query key.
+  React.useEffect(() => {
+    const poisoned =
+      Array.isArray(baseServers) &&
+      baseServers.length > 0 &&
+      baseServers.some((s) => s == null || typeof s.id !== "number" || s.raw == null);
+    if (poisoned) {
+      void queryClient.invalidateQueries({ queryKey: V3_SERVERS_WITH_STATUS_KEY });
+    }
+  }, [baseServers, queryClient]);
+
+  const groupsQuery = useGetApiVpnServerGroupsGetAll();
+  const groups = useMemo(() => readGroupsPayload(groupsQuery.data), [groupsQuery.data]);
+  const createGroupMutation = usePostApiVpnServerGroupsCreate();
+
   const servers = useMemo(() => {
-    if (!serviceData) return baseServers;
+    // Guard against a poisoned React Query cache (wrong shape under the same key).
+    const safeBase = (baseServers ?? []).filter(
+      (s) => s != null && typeof s.id === "number" && s.raw != null && typeof s.raw === "object",
+    ) as MappedServer[];
+
+    if (!serviceData) return safeBase;
 
     const normalized: Record<number, ServiceStatusDto> = {};
     for (const [key, value] of Object.entries(serviceData as Record<string, ServiceStatusDto>)) {
       const id = Number(key);
-      if (!Number.isFinite(id)) continue;
+      if (!Number.isFinite(id) || value == null) continue;
       normalized[id] = value;
     }
 
-    return baseServers.map((s) => {
+    return safeBase.map((s) => {
       const ws = pickServiceDataEntry(normalized, s.id);
       if (!ws) return s;
 
@@ -186,6 +238,11 @@ const ServerList: React.FC = () => {
       };
     });
   }, [baseServers, serviceData]);
+
+  const sections = useMemo(
+    () => buildServerGroupSections(servers, groups),
+    [servers, groups],
+  );
 
   const connectedByServerQueries = useQueries({
     queries: servers.map((server) => ({
@@ -234,7 +291,54 @@ const ServerList: React.FC = () => {
     }
   };
 
-  /** Footer aggregates: REST baseline per server, then live WebSocket overlay (real-time status / next run / counts). */
+  const toggleCollapse = (key: string) => {
+    setCollapsedMap((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      saveCollapsedGroups(next);
+      return next;
+    });
+  };
+
+  const expandAllGroups = () => {
+    setCollapsedMap(() => {
+      const next: CollapsedGroupsMap = {};
+      for (const section of sections) {
+        next[String(section.key)] = false;
+      }
+      saveCollapsedGroups(next);
+      return next;
+    });
+  };
+
+  const collapseAllGroups = () => {
+    setCollapsedMap(() => {
+      const next: CollapsedGroupsMap = {};
+      for (const section of sections) {
+        next[String(section.key)] = true;
+      }
+      saveCollapsedGroups(next);
+      return next;
+    });
+  };
+
+  const addGroup = async () => {
+    const name = window.prompt("New group name");
+    if (!name?.trim()) return;
+    try {
+      const created = await createGroupMutation.mutateAsync({ data: { name: name.trim() } });
+      const payload = created as Record<string, unknown> | undefined;
+      const group =
+        (payload?.group as { id?: number } | undefined) ??
+        ((payload?.data as { group?: { id?: number } } | undefined)?.group);
+      const id = group?.id;
+      await queryClient.invalidateQueries({ queryKey: getGetApiVpnServerGroupsGetAllQueryKey() });
+      toast.success("Group created");
+      if (typeof id === "number") navigate(`/servers/groups/${id}`);
+    } catch {
+      toast.error("Failed to create group");
+    }
+  };
+
   const normalizedServiceControlsData: Record<number, ServiceStatusDto> = useMemo(() => {
     const hub = (serviceData ?? {}) as Record<number, ServiceStatusDto>;
     const acc: Record<number, ServiceStatusDto> = {};
@@ -245,10 +349,10 @@ const ServerList: React.FC = () => {
 
       const base: ServiceStatusDto = {
         vpnServerId: id,
-        countConnectedClients: s.wsCountConnectedClients ?? s.raw.countConnectedClients,
-        countSessions: s.wsCountSessions ?? s.raw.countSessions,
-        totalBytesIn: s.raw.totalBytesIn,
-        totalBytesOut: s.raw.totalBytesOut,
+        countConnectedClients: s.wsCountConnectedClients ?? s.raw?.countConnectedClients,
+        countSessions: s.wsCountSessions ?? s.raw?.countSessions,
+        totalBytesIn: s.raw?.totalBytesIn,
+        totalBytesOut: s.raw?.totalBytesOut,
       };
 
       if (serverRowIsDisabled(s.raw)) {
@@ -279,6 +383,37 @@ const ServerList: React.FC = () => {
     return acc;
   }, [servers, serviceData]);
 
+  const renderServer = (server: MappedServer) => (
+    <li
+      key={server.id}
+      className={`server-item clickable ${selectedServerId === server.id ? "selected" : ""}${
+        serverRowIsDisabled(server.raw) ? " server-item--polling-off" : ""
+      }`}
+      onClick={() =>
+        navigate(buildServerSwitchPath(server.id, location.pathname, canAddServer))
+      }
+    >
+      <ServerItem
+        server={server.raw}
+        vpnServerId={server.vpnServerId}
+        serviceStatus={server.serviceStatus}
+        errorMessage={server.errorMessage}
+        nextRunTime={server.nextRunTime}
+        wsOnline={server.wsOnline}
+        wsCountConnectedClients={server.wsCountConnectedClients}
+        wsCountSessions={server.wsCountSessions}
+        isCurrentUserConnected={connectedByServerId.get(server.id) === true}
+        onView={(id) => {
+          const target = buildServerSwitchPath(id, location.pathname, canAddServer);
+          if (isMobile) navigate(target);
+          else navigate(target, { replace: true });
+        }}
+        onEdit={(id) => navigate(`/servers/edit/${id}`)}
+        onDelete={handleDelete}
+      />
+    </li>
+  );
+
   return (
       <div>
         <div className="header-container">
@@ -288,6 +423,13 @@ const ServerList: React.FC = () => {
                   <button className="btn primary" onClick={() => navigate("/servers/add")}>
                     <span className="icon">{FaPlus({ className: "icon" })}</span>
                     Add Server
+                  </button>
+              )}
+
+              {canAddServer && (
+                  <button className="btn secondary" onClick={() => void addGroup()}>
+                    <span className="icon">{FaFolderPlus({ className: "icon" })}</span>
+                    Add Group
                   </button>
               )}
 
@@ -343,44 +485,60 @@ const ServerList: React.FC = () => {
               ))}
             </ul>
         ) : (
-            <ul className="list">
-              {servers.length > 0 ? (
-                  servers.map((server) => (
-                      <li
-                          key={server.id}
-                          className={`server-item clickable ${selectedServerId === server.id ? "selected" : ""}${
-                              serverRowIsDisabled(server.raw) ? " server-item--polling-off" : ""
-                          }`}
-                          onClick={() =>
-                              navigate(
-                                  buildServerSwitchPath(server.id, location.pathname, canAddServer),
-                              )
-                          }
-                      >
-                        <ServerItem
-                            server={server.raw}
-                            vpnServerId={server.vpnServerId}
-                            serviceStatus={server.serviceStatus}
-                            errorMessage={server.errorMessage}
-                            nextRunTime={server.nextRunTime}
-                            wsOnline={server.wsOnline}
-                            wsCountConnectedClients={server.wsCountConnectedClients}
-                            wsCountSessions={server.wsCountSessions}
-                            isCurrentUserConnected={connectedByServerId.get(server.id) === true}
-                            onView={(id) => {
-                              const target = buildServerSwitchPath(id, location.pathname, canAddServer);
-                              if (isMobile) navigate(target);
-                              else navigate(target, { replace: true });
-                            }}
-                            onEdit={(id) => navigate(`/servers/edit/${id}`)}
-                            onDelete={handleDelete}
+            <div className="server-groups">
+              {sections.length > 0 && (
+                <div className="server-groups-toolbar" role="group" aria-label="Group expand controls">
+                  <button
+                    type="button"
+                    className="server-groups-toolbar__btn"
+                    onClick={expandAllGroups}
+                    title="Expand all"
+                    aria-label="Expand all groups"
+                  >
+                    {FaExpand({ className: "icon" })}
+                  </button>
+                  <button
+                    type="button"
+                    className="server-groups-toolbar__btn"
+                    onClick={collapseAllGroups}
+                    title="Collapse all"
+                    aria-label="Collapse all groups"
+                  >
+                    {FaCompress({ className: "icon" })}
+                  </button>
+                </div>
+              )}
+              {servers.length > 0 || groups.length > 0 ? (
+                  sections.map((section) => {
+                    const key = String(section.key);
+                    const collapsed = Boolean(collapsedMap[key]);
+                    const selected = selectedGroupParam === key;
+                    return (
+                      <div key={key} className="server-group">
+                        <ServerGroupHeader
+                          name={section.name}
+                          count={section.servers.length}
+                          collapsed={collapsed}
+                          selected={selected}
+                          onToggleCollapse={() => toggleCollapse(key)}
+                          onOpen={() => navigate(`/servers/groups/${key}`)}
                         />
-                      </li>
-                  ))
+                        {!collapsed && (
+                          <ul className="list server-group-list">
+                            {section.servers.length > 0
+                              ? section.servers.map(renderServer)
+                              : (
+                                <li className="server-group-empty">No servers in this group.</li>
+                              )}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })
               ) : (
                   <p>No servers available.</p>
               )}
-            </ul>
+            </div>
         )}
 
         <ServiceControls

@@ -4,18 +4,20 @@ import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../../test/renderWithProviders";
 import { ACCESS_TOKEN_KEY } from "../../utils/const";
 
-const apiRequest = vi.fn();
-vi.mock("../../api/apirequest", () => ({
-  apiRequest: (...args: unknown[]) => apiRequest(...args),
+const getApiAuthTvSessionByCodeUserCode = vi.fn();
+vi.mock("../../api/orval/auth/auth", () => ({
+  getApiAuthTvSessionByCodeUserCode: (...args: unknown[]) => getApiAuthTvSessionByCodeUserCode(...args),
+  postApiAuthTvSessionApprove: vi.fn(),
+  postApiAuthTvSessionDeny: vi.fn(),
 }));
-vi.mock("react-toastify", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
+vi.mock("react-toastify", () => ({ toast: { error: vi.fn(), success: vi.fn(), info: vi.fn() } }));
 vi.mock("../../components/gdpr/GdprFooterLinks", () => ({ default: () => null }));
 
 import TvLinkPage from "./TvLinkPage";
 
 describe("TvLinkPage", () => {
   beforeEach(() => {
-    apiRequest.mockReset();
+    getApiAuthTvSessionByCodeUserCode.mockReset();
     localStorage.setItem(ACCESS_TOKEN_KEY, "token");
   });
 
@@ -28,15 +30,12 @@ describe("TvLinkPage", () => {
 
   it("looks up a 6-digit code and shows approve/deny", async () => {
     const user = userEvent.setup();
-    apiRequest.mockResolvedValueOnce({
-      success: true,
-      data: {
-        sessionId: "s1",
-        userCode: "123456",
-        deviceName: "Living room",
-        expiresAt: "2099-01-01T00:00:00Z",
-        status: "pending",
-      },
+    getApiAuthTvSessionByCodeUserCode.mockResolvedValueOnce({
+      sessionId: "s1",
+      userCode: "123456",
+      deviceName: "Living room",
+      expiresAt: "2099-01-01T00:00:00Z",
+      status: "pending",
     });
 
     renderWithProviders(<TvLinkPage />, { route: "/tv/link" });

@@ -29,6 +29,11 @@ export interface VpnServersDtoVpnServerV2Dto {
   /** @nullable */
   tags?: string[] | null;
   /** @nullable */
+  groupId?: number | null;
+  /** @nullable */
+  groupName?: string | null;
+  sortOrder?: number;
+  /** @nullable */
   quotaPlanGroups?: VpnServersDtoQuotaPlanGroupDto[] | null;
   isAccessibleForUserQuotaPlan?: boolean;
   /** @nullable */

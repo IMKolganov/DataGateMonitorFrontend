@@ -8,7 +8,8 @@ import type { FreeTierEnforcementEnumsFreeTierChannelSubscribeRemindChannel } fr
 
 export interface FreeTierEnforcementResponsesFreeTierChannelSubscribeRemindResponse {
   success?: boolean;
-  message?: string;
+  /** @nullable */
+  message?: string | null;
   channel?: FreeTierEnforcementEnumsFreeTierChannelSubscribeRemindChannel;
   /** @nullable */
   userId?: number | null;

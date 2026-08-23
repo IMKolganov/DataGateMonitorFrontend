@@ -29,6 +29,8 @@ import { withSuspense } from "./utils/withSuspense.tsx";
 import { CookieConsentProvider } from "./contexts/CookieConsentContext.tsx";
 import CookieConsentBanner from "./components/gdpr/CookieConsentBanner.tsx";
 import CookieSettingsPanel from "./components/gdpr/CookieSettingsPanel.tsx";
+import { AdminIdleWarningModal } from "./components/auth/AdminIdleWarningModal.tsx";
+import { PendingServerDiscoveryModal } from "./components/servers/PendingServerDiscoveryModal.tsx";
 
 // Lazy pages
 const About = lazy(() => import("./pages/About"));
@@ -64,6 +66,7 @@ const AdminSecuritySettings = lazy(() => import("./pages/AdminSecuritySettings")
 const QuotaPlansSettings = lazy(() => import("./pages/QuotaPlansSettings/QuotaPlansSettings"));
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
 const ServersOverview = lazy(() => import("./pages/ServersOverview"));
+const GroupDetails = lazy(() => import("./pages/GroupDetails"));
 const OvpnFileConfigForm = lazy(() => import("./pages/OvpnFileConfigForm"));
 const StatusStreamLogs = lazy(() => import("./pages/StatusStreamLogs"));
 const XrayLoginPage = lazy(() => import("./pages/xray/XrayLoginPage.tsx"));
@@ -124,6 +127,8 @@ function App() {
     <div className="app-container">
       <Router>
         <CookieConsentProvider>
+        <AdminIdleWarningModal />
+        <PendingServerDiscoveryModal />
         <Layout>
           <Routes>
             <Route path="/privacy" element={withSuspense(<PrivacyPolicy />)} />
@@ -171,6 +176,7 @@ function App() {
                       <Route index element={withSuspense(<ServersOverview />)} />
                       <Route path="status-stream-logs" element={withSuspense(<StatusStreamLogs />)} />
                       <Route path="statistics/:externalId" element={withSuspense(<ServersOverview />)} />
+                      <Route path="groups/:groupId" element={withSuspense(<GroupDetails />)} />
 
                       <Route path=":vpnServerId" element={withSuspense(<ServerDetails />)}>
                         <Route index element={withSuspense(<GeneralTab />)} />
@@ -280,7 +286,7 @@ function App() {
         autoClose={3000}
         hideProgressBar={false}
         newestOnTop={false}
-        closeOnClick
+        closeOnClick={false}
         rtl={false}
         pauseOnFocusLoss
         draggable

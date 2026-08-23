@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useMemo } from "react";
-import type { GridColDef } from "@mui/x-data-grid";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
+import type { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type {
@@ -19,6 +19,11 @@ import { formatDateWithOffset } from "../../utils/utils.ts";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import type { OvpnRowInput } from "../ovpn-files/OvpnFilesTable.tsx";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
+import {
+  collectSelectedOnPage,
+  emptyGridSelection,
+  slicePageRows,
+} from "../../utils/gridPageSelection";
 import "../../css/Table.css";
 
 const safeFormatDate = (input?: string | null): string => {
@@ -48,16 +53,40 @@ function unwrapLinkRow(x: OvpnRowInput): IssuedOvpnFileDto | null {
   return null;
 }
 
+function revokeErrorMessage(err: unknown): string {
+  const e = err as { response?: { data?: { message?: string } }; message?: string };
+  return e.response?.data?.message || e.message || "Error revoking client link.";
+}
+
 interface Props {
   links: OvpnRowInput[];
   vpnServerId: string;
-  onRevoke: () => Promise<void> | void;
+  onRevoke: (count?: number) => Promise<void> | void;
   loading: boolean;
 }
+
+type LinkRow = {
+  id: string;
+  numericId: number | null;
+  externalId: string;
+  commonName: string;
+  fileName: string;
+  filePath: string;
+  issuedAt: string;
+  issuedTo: string;
+  certFilePath: string;
+  keyFilePath: string;
+  isRevoked: boolean | undefined;
+  message: string;
+  lastUpdate: string;
+  createDate: string;
+};
 
 const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, loading }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [issuedToFilter, setIssuedToFilter] = useState("");
+  const [bulkRevoking, setBulkRevoking] = useState(false);
+  const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>(emptyGridSelection);
   const [gridPage, setGridPage] = useState(0);
   const [pageSize, setPageSize] = usePersistedPageSize(`xray-client-links:${vpnServerId}`, 10, "5,10,20,100");
 
@@ -68,25 +97,120 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
       .filter((x): x is IssuedOvpnFileDto => !!x && (x.id != null || x.commonName != null));
   }, [links]);
 
-  const handleRevoke = useCallback(
-    async (linkId: number, commonName: string) => {
-      if (!window.confirm(`Revoke VLESS client link for ${commonName}?`)) return;
-      try {
-        const data: RevokeFileRequest = {
-          vpnServerId: Number(vpnServerId),
-          ovpnFileId: linkId,
-          commonName,
+  const filtered = useMemo(() => {
+    return items.filter((x) => {
+      const byCN = (x.commonName ?? "").toLowerCase().includes(searchQuery.toLowerCase());
+      const byIssuedTo =
+        issuedToFilter === "" || (x.issuedTo ?? "").toLowerCase().includes(issuedToFilter.toLowerCase());
+      return byCN && byIssuedTo;
+    });
+  }, [items, searchQuery, issuedToFilter]);
+
+  useEffect(() => {
+    setRowSelectionModel(emptyGridSelection());
+  }, [searchQuery, issuedToFilter, gridPage, pageSize, vpnServerId]);
+
+  const rows: LinkRow[] = useMemo(
+    () =>
+      filtered.map((row, index) => {
+        const id = row.id != null ? String(row.id) : `${row.commonName ?? "cn"}-${index}`;
+        return {
+          id,
+          numericId: row.id != null ? Number(row.id) : null,
+          externalId: row.externalId || "",
+          commonName: row.commonName || "",
+          fileName: row.fileName || "",
+          filePath: row.filePath || "",
+          issuedAt: safeFormatDate(row.issuedAt),
+          issuedTo: row.issuedTo || "",
+          certFilePath: row.certFilePath || "",
+          keyFilePath: row.keyFilePath || "",
+          isRevoked: row.isRevoked,
+          message: row.message || "",
+          lastUpdate: safeFormatDate(row.lastUpdate),
+          createDate: safeFormatDate(row.createDate),
         };
-        await postApiXrayClientLinksRevokeFile(data);
-        await onRevoke();
-      } catch (err: unknown) {
-        const e = err as { response?: { data?: { message?: string } }; message?: string };
-        const msg = e.response?.data?.message || e.message || "Error revoking client link.";
-        toast.error(msg);
+      }),
+    [filtered],
+  );
+
+  const pageRows = useMemo(() => slicePageRows(rows, gridPage, pageSize), [rows, gridPage, pageSize]);
+
+  const selectedActiveRows = useMemo(
+    () =>
+      collectSelectedOnPage(
+        rowSelectionModel,
+        pageRows,
+        (row) => !row.isRevoked && row.numericId != null,
+      ),
+    [rowSelectionModel, pageRows],
+  );
+
+  const clearSelection = useCallback(() => setRowSelectionModel(emptyGridSelection()), []);
+
+  const handleRevokeMany = useCallback(
+    async (targets: LinkRow[]) => {
+      const unique = targets.filter((r) => r.numericId != null && !r.isRevoked);
+      if (unique.length === 0) return;
+
+      const labels = unique.map((r) => r.commonName || r.fileName || String(r.numericId));
+      const preview =
+        labels.length <= 5
+          ? labels.join(", ")
+          : `${labels.slice(0, 3).join(", ")} and ${labels.length - 3} more`;
+      const confirmed = window.confirm(
+        unique.length === 1
+          ? `Revoke VLESS client link for ${labels[0]}?`
+          : `Revoke ${unique.length} VLESS client links?\n\n${preview}\n\nThis cannot be undone.`,
+      );
+      if (!confirmed) return;
+
+      setBulkRevoking(true);
+      try {
+        const failures: string[] = [];
+        for (const row of unique) {
+          try {
+            const data: RevokeFileRequest = {
+              vpnServerId: Number(vpnServerId),
+              ovpnFileId: row.numericId!,
+              commonName: row.commonName,
+            };
+            await postApiXrayClientLinksRevokeFile(data);
+          } catch (err: unknown) {
+            failures.push(`${row.commonName || row.id}: ${revokeErrorMessage(err)}`);
+          }
+        }
+
+        const succeeded = unique.length - failures.length;
+        clearSelection();
+
+        if (succeeded > 0) {
+          await onRevoke(succeeded);
+        }
+        if (failures.length > 0) {
+          toast.error(
+            failures.length === 1
+              ? failures[0]
+              : `Failed to revoke ${failures.length} of ${unique.length} client links.`,
+          );
+        }
+      } finally {
+        setBulkRevoking(false);
       }
     },
-    [vpnServerId, onRevoke],
+    [vpnServerId, onRevoke, clearSelection],
   );
+
+  const handleRevoke = useCallback(
+    async (row: LinkRow) => {
+      await handleRevokeMany([row]);
+    },
+    [handleRevokeMany],
+  );
+
+  const handleBulkRevoke = useCallback(async () => {
+    await handleRevokeMany(selectedActiveRows);
+  }, [handleRevokeMany, selectedActiveRows]);
 
   const handleDownload = useCallback(
     async (issuedFileId: number) => {
@@ -132,33 +256,7 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
     [vpnServerId],
   );
 
-  const filtered = useMemo(() => {
-    return items.filter((x) => {
-      const byCN = (x.commonName ?? "").toLowerCase().includes(searchQuery.toLowerCase());
-      const byIssuedTo =
-        issuedToFilter === "" || (x.issuedTo ?? "").toLowerCase().includes(issuedToFilter.toLowerCase());
-      return byCN && byIssuedTo;
-    });
-  }, [items, searchQuery, issuedToFilter]);
-
-  const rows = filtered.map((row, index) => {
-    const id = row.id != null ? String(row.id) : `${row.commonName ?? "cn"}-${index}`;
-    return {
-      id,
-      externalId: row.externalId || "",
-      commonName: row.commonName || "",
-      fileName: row.fileName || "",
-      filePath: row.filePath || "",
-      issuedAt: safeFormatDate(row.issuedAt),
-      issuedTo: row.issuedTo || "",
-      certFilePath: row.certFilePath || "",
-      keyFilePath: row.keyFilePath || "",
-      isRevoked: row.isRevoked,
-      message: row.message || "",
-      lastUpdate: safeFormatDate(row.lastUpdate),
-      createDate: safeFormatDate(row.createDate),
-    };
-  });
+  const busy = loading || bulkRevoking;
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 110 },
@@ -179,23 +277,30 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
       width: 110,
       sortable: false,
       filterable: false,
-      renderCell: (params) => (
-        <GridRowActions>
-          {!params.row.isRevoked && (
-            <RowActionButton
-              variant="danger"
-              title="Revoke"
-              onClick={() => handleRevoke(Number(params.row.id), params.row.commonName)}
-              icon={<FaBan className="icon" />}
-            />
-          )}
-          <RowActionButton
-            title="Download client link file"
-            onClick={() => handleDownload(Number(params.row.id))}
-            icon={<FaDownload className="icon" />}
-          />
-        </GridRowActions>
-      ),
+      renderCell: (params) => {
+        const row = params.row as LinkRow;
+        return (
+          <GridRowActions>
+            {!row.isRevoked && row.numericId != null && (
+              <RowActionButton
+                variant="danger"
+                title="Revoke"
+                disabled={busy}
+                onClick={() => void handleRevoke(row)}
+                icon={<FaBan className="icon" />}
+              />
+            )}
+            {row.numericId != null && (
+              <RowActionButton
+                title="Download client link file"
+                disabled={bulkRevoking}
+                onClick={() => void handleDownload(row.numericId!)}
+                icon={<FaDownload className="icon" />}
+              />
+            )}
+          </GridRowActions>
+        );
+      },
     },
   ];
 
@@ -228,6 +333,24 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
             onChange={(e) => setIssuedToFilter(e.target.value)}
             className="input"
           />
+          <button
+            type="button"
+            className="btn danger"
+            disabled={busy || selectedActiveRows.length === 0}
+            onClick={() => void handleBulkRevoke()}
+            title={
+              selectedActiveRows.length === 0
+                ? "Select active VLESS links to revoke"
+                : `Revoke ${selectedActiveRows.length} selected`
+            }
+          >
+            <FaBan className="icon" aria-hidden />
+            {bulkRevoking
+              ? "Revoking…"
+              : selectedActiveRows.length > 0
+                ? `Revoke selected (${selectedActiveRows.length})`
+                : "Revoke selected"}
+          </button>
         </div>
 
         <Grid
@@ -235,6 +358,12 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
           getRowId={(row) => row.id}
           rows={rows}
           columns={columns}
+          checkboxSelection
+          disableRowSelectionOnClick
+          disableRowSelectionExcludeModel
+          isRowSelectable={(params) => !params.row.isRevoked && params.row.numericId != null}
+          rowSelectionModel={rowSelectionModel}
+          onRowSelectionModelChange={(model) => setRowSelectionModel(model)}
           pageSizeOptions={[5, 10, 20, 100]}
           paginationMode="client"
           paginationModel={{ page: gridPage, pageSize }}
@@ -245,7 +374,7 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
           localeText={{
             noRowsLabel: loading ? "Loading client links…" : "No client links yet",
           }}
-          loading={loading}
+          loading={busy}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
         />
       </div>

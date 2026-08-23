@@ -56,6 +56,45 @@ function tokenizeLine(line: string): Segment[] {
   return segments;
 }
 
+/** Placeholder-only highlight for JSON export templates (VLESS profile). */
+export function highlightJsonExportTemplate(text: string): React.ReactNode {
+  const lines = text.split("\n");
+  return (
+    <>
+      {lines.map((line, lineIdx) => {
+        const parts: React.ReactNode[] = [];
+        let rest = line;
+        let partIdx = 0;
+        while (rest.length > 0) {
+          const placeholderMatch = rest.match(/^\{\{[^}]*\}\}/);
+          if (placeholderMatch) {
+            const chunk = placeholderMatch[0];
+            parts.push(
+              <span
+                key={partIdx++}
+                className="ovpn-placeholder"
+                dangerouslySetInnerHTML={{ __html: escapeHtml(chunk) }}
+              />
+            );
+            rest = rest.slice(chunk.length);
+            continue;
+          }
+          parts.push(
+            <span key={partIdx++} dangerouslySetInnerHTML={{ __html: escapeHtml(rest[0]) }} />
+          );
+          rest = rest.slice(1);
+        }
+        return (
+          <React.Fragment key={lineIdx}>
+            {parts}
+            {lineIdx < lines.length - 1 ? "\n" : null}
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
+}
+
 export function highlightOvpnConfig(text: string): React.ReactNode {
   const lines = text.split("\n");
   return (

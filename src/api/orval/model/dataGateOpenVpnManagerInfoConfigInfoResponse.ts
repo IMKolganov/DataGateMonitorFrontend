@@ -25,6 +25,20 @@ export interface DataGateOpenVpnManagerInfoConfigInfoResponse {
   apiPort?: string | null;
   /** @nullable */
   proto?: string | null;
+  /** @nullable */
+  cipher?: string | null;
+  /** @nullable */
+  dataCiphers?: string | null;
+  /** @nullable */
+  dco?: string | null;
+  /** @nullable */
+  auth?: string | null;
+  /** @nullable */
+  tlsVersionMin?: string | null;
+  /** @nullable */
+  mssFix?: string | null;
+  /** @nullable */
+  clientVerb?: string | null;
   openVpnManagement?: DataGateOpenVpnManagerInfoOpenVpnManagementInfoResponse;
   /** @nullable */
   backendBaseUrl?: string | null;

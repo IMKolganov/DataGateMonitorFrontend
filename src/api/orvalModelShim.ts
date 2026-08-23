@@ -45,6 +45,8 @@ export type { AuthResponsesGetUserSessionsResponse as GetUserSessionsResponse } 
 export type { AuthResponsesUserSessionDto as UserSessionDto } from "./orval/model/authResponsesUserSessionDto";
 export type { AuthResponsesAdminTvLoginSessionDto as AdminTvLoginSessionDto } from "./orval/model/authResponsesAdminTvLoginSessionDto";
 export type { AuthResponsesGetAdminTvLoginSessionsResponse as GetAdminTvLoginSessionsResponse } from "./orval/model/authResponsesGetAdminTvLoginSessionsResponse";
+export type { AuthResponsesTvLoginSessionPreviewResponse as TvLoginSessionPreviewResponse } from "./orval/model/authResponsesTvLoginSessionPreviewResponse";
+export type { AuthResponsesTvLoginSessionActionResponse as TvLoginSessionActionResponse } from "./orval/model/authResponsesTvLoginSessionActionResponse";
 export type { AuthResponsesUserTvLoginSummaryResponse as UserTvLoginSummaryResponse } from "./orval/model/authResponsesUserTvLoginSummaryResponse";
 export type { AuthRequestsRevokeUserSessionsRequest as RevokeUserSessionsRequest } from "./orval/model/authRequestsRevokeUserSessionsRequest";
 export type { AuthRequestsTotpVerifyLoginRequest as TotpVerifyLoginRequest } from "./orval/model/authRequestsTotpVerifyLoginRequest";
@@ -72,6 +74,7 @@ export type { QuotaPlansResponsesQuotaPlansResponse as QuotaPlansResponse } from
 export type { AuthRequestsRefreshRequest as RefreshRequest } from "./orval/model/authRequestsRefreshRequest";
 export type { AuthResponsesRefreshResponse as RefreshResponse } from "./orval/model/authResponsesRefreshResponse";
 export type { ApplicationsRequestsRegisterApplicationRequest as RegisterApplicationRequest } from "./orval/model/applicationsRequestsRegisterApplicationRequest";
+export type { ApplicationsResponsesRegisterApplicationResponse as RegisterApplicationResponse } from "./orval/model/applicationsResponsesRegisterApplicationResponse";
 export type { AuthRequestsRegisterUserRequest as RegisterUserRequest } from "./orval/model/authRequestsRegisterUserRequest";
 export type { ApplicationsRequestsRevokeApplicationRequest as RevokeApplicationRequest } from "./orval/model/applicationsRequestsRevokeApplicationRequest";
 export type { VpnServerCertsRequestsRevokeCertificateRequest as RevokeCertificateRequest } from "./orval/model/vpnServerCertsRequestsRevokeCertificateRequest";
@@ -133,3 +136,13 @@ export { EnumsOverviewGrouping as OverviewGrouping } from "./orval/model/enumsOv
 export { EnumsQuotaOverlimitAction as QuotaOverlimitAction } from "./orval/model/enumsQuotaOverlimitAction";
 export { EnumsNotificationSeverity as NotificationSeverity } from "./orval/model/enumsNotificationSeverity";
 export { EnumsVpnServerType as VpnServerType } from "./orval/model/enumsVpnServerType";
+export { EnumsVpnServerDiscoveryStatus as VpnServerDiscoveryStatus } from "./orval/model/enumsVpnServerDiscoveryStatus";
+export { EnumsAnnounceVpnServerResultStatus as AnnounceVpnServerResultStatus } from "./orval/model/enumsAnnounceVpnServerResultStatus";
+
+export type { VpnServersDtoVpnServerDiscoveryDto as VpnServerDiscoveryDto } from "./orval/model/vpnServersDtoVpnServerDiscoveryDto";
+export type { VpnServersResponsesVpnServerDiscoveriesResponse as VpnServerDiscoveriesResponse } from "./orval/model/vpnServersResponsesVpnServerDiscoveriesResponse";
+export type { VpnServersResponsesVpnServerDiscoveryResponse as VpnServerDiscoveryResponse } from "./orval/model/vpnServersResponsesVpnServerDiscoveryResponse";
+export type { VpnServersRequestsApproveVpnServerDiscoveryRequest as ApproveVpnServerDiscoveryRequest } from "./orval/model/vpnServersRequestsApproveVpnServerDiscoveryRequest";
+export type { VpnServersRequestsDenyVpnServerDiscoveryRequest as DenyVpnServerDiscoveryRequest } from "./orval/model/vpnServersRequestsDenyVpnServerDiscoveryRequest";
+export type { VpnServersRequestsAnnounceVpnServerRequest as AnnounceVpnServerRequest } from "./orval/model/vpnServersRequestsAnnounceVpnServerRequest";
+export type { VpnServersResponsesAnnounceVpnServerResponse as AnnounceVpnServerResponse } from "./orval/model/vpnServersResponsesAnnounceVpnServerResponse";

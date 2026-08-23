@@ -26,10 +26,10 @@ describe("ApplicationTable client pagination", () => {
 
     expect(screen.getByTestId("mock-grid")).toHaveAttribute("data-pagination-mode", "client");
     expect(screen.getByTestId("grid-rows").children).toHaveLength(5);
-    expect(screen.getByTestId("row-1")).toHaveTextContent("App 0");
+    expect(screen.getByTestId("row-c0")).toHaveTextContent("App 0");
 
     await user.click(screen.getByTestId("next-page"));
-    expect(screen.getByTestId("row-6")).toHaveTextContent("App 5");
-    expect(screen.queryByTestId("row-1")).not.toBeInTheDocument();
+    expect(screen.getByTestId("row-c5")).toHaveTextContent("App 5");
+    expect(screen.queryByTestId("row-c0")).not.toBeInTheDocument();
   });
 });

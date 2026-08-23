@@ -9,6 +9,6 @@ export type FreeTierEnforcementEnumsFreeTierChannelSubscribeRemindChannel = type
 
 
 export const FreeTierEnforcementEnumsFreeTierChannelSubscribeRemindChannel = {
-  Telegram: 1,
-  Email: 2,
+  NUMBER_1: 1,
+  NUMBER_2: 2,
 } as const;

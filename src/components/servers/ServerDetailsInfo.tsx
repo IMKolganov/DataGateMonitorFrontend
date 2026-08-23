@@ -83,8 +83,10 @@ const ServerDetailsInfo: React.FC<Props> = ({
   return (
     <div className={`server-info ${loading ? "is-loading" : ""}`}>
       {!loading && dcoIsEnabled && (
-        <div className="dco-stats-alert" role="alert">
-          <strong>DCO enabled:</strong> Traffic and session statistics on this page may be less accurate. With Data Channel Offload enabled, part of the VPN processing runs in the kernel and may not be fully reported to the monitoring layer, so displayed totals can differ from actual usage.
+        <div className="dco-stats-alert" role="note">
+          <strong>DCO enabled.</strong> Server traffic totals are the sum of currently connected clients
+          from OpenVPN <code>status 3</code> (CLIENT_LIST). With DCO, OpenVPN refreshes those counters
+          from the kernel on each status poll. Totals do not include disconnected sessions.
         </div>
       )}
       <div className="server-header">
