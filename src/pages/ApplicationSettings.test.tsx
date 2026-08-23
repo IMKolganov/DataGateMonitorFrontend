@@ -29,7 +29,9 @@ vi.mock("../components/ui/GridFilterBar.tsx", () => ({
 
 const refetch = vi.fn().mockResolvedValue({});
 const mutateAsync = vi.fn().mockResolvedValue({
-  application: { id: 9, name: "New App", clientId: "c", clientSecret: "s" },
+  name: "New App",
+  clientId: "new-client-id",
+  clientSecret: "new-client-secret",
 });
 
 const appsData = {
@@ -60,7 +62,7 @@ describe("ApplicationSettings", () => {
 
   it("renders applications from Orval list", () => {
     renderWithProviders(<ApplicationSettings />);
-    expect(screen.getByText(/Application Settings/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /API Clients/i })).toBeInTheDocument();
     expect(screen.getByTestId("apps-list").textContent).toContain("Existing App");
   });
 
@@ -74,8 +76,10 @@ describe("ApplicationSettings", () => {
   it("registers a new app via Orval mutation", async () => {
     const user = userEvent.setup();
     renderWithProviders(<ApplicationSettings />);
-    await user.type(screen.getByPlaceholderText(/Application Name/i), "New App");
-    await user.click(screen.getByRole("button", { name: /Register app/i }));
+    await user.type(screen.getByPlaceholderText(/Client name/i), "New App");
+    await user.click(screen.getByRole("button", { name: /Create client/i }));
     expect(mutateAsync).toHaveBeenCalled();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText("new-client-secret")).toBeInTheDocument();
   });
 });

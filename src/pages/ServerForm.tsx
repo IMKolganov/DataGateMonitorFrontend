@@ -62,7 +62,7 @@ import {
 import type { ApiEnvelope } from "./TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 import { errorMessage } from "../utils/errorMessage";
-import { VpnServerType, vpnServerTypeLabel } from "../constants/vpnServerType";
+import { VpnServerType, vpnServerTypeLabel, supportsPiHoleIntegration } from "../constants/vpnServerType";
 
 type GetByIdResult = Awaited<ReturnType<typeof getApiOpenVpnServersGetVpnServerId>>;
 
@@ -1066,12 +1066,14 @@ const ServerForm: React.FC = () => {
                     name="isPiHoleEnabled"
                     checked={Boolean(serverData.isPiHoleEnabled)}
                     onChange={handleCheckboxChange}
-                    disabled={isFetching || (serverData.serverType ?? VpnServerType.OpenVpn) !== VpnServerType.OpenVpn}
+                    disabled={isFetching || !supportsPiHoleIntegration(serverData.serverType)}
                 />
                 <div className="checkbox-content">
                   <span className="checkbox-title">Enable Pi-hole integration</span>
                   <span className="checkbox-description">
-                    Start DNS query collection on this server (configure connection on the Pi-hole tab first).
+                    {(serverData.serverType ?? VpnServerType.OpenVpn) === VpnServerType.Xray
+                      ? "Start DNS collection on the Xray node (set Base URL and subnet prefix on the Pi-hole tab after save)."
+                      : "Start DNS query collection on this server (configure connection on the Pi-hole tab first)."}
                   </span>
                 </div>
               </label>

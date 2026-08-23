@@ -16,3 +16,9 @@ export function isOpenVpnStack(serverType: number | null | undefined): boolean {
   if (serverType === null || serverType === undefined) return true;
   return serverType !== VpnServerType.Xray;
 }
+
+/** Pi-hole DNS logging: OpenVPN (management CN) and Xray (identity IP CN). */
+export function supportsPiHoleIntegration(serverType: number | null | undefined): boolean {
+  if (serverType === null || serverType === undefined) return true;
+  return serverType === VpnServerType.OpenVpn || serverType === VpnServerType.Xray;
+}

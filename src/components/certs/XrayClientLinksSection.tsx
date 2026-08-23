@@ -106,8 +106,11 @@ const XrayClientLinksSection: React.FC<Props> = ({ vpnServerId }) => {
         links={links}
         vpnServerId={vpnServerId}
         loading={filesQuery.isFetching}
-        onRevoke={async () => {
-          toast.success("Client link revoked", { toastId: "xray-link-revoked" });
+        onRevoke={async (count = 1) => {
+          toast.success(
+            count === 1 ? "Client link revoked" : `${count} client links revoked`,
+            { toastId: "xray-link-revoked" },
+          );
           await silentRefetchLinks();
         }}
       />

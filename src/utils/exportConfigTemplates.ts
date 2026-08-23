@@ -1,23 +1,58 @@
 import type { OvpnFileConfigResponse } from "../api/orvalModelShim";
 
-/** Default VLESS client export template (matches backend DefaultXrayClientLinkTemplate). */
-export const XRAY_EXPORT_TEMPLATE = `{{vless_uri}}
-# {{friendly_name}}
-UUID: {{uuid}}
-Endpoint: {{server_ip}}:{{server_port}}
+/** Default VLESS client export template (JSON profile for DataGate clients).
+ * dns_* placeholders are filled from node DNS1/DNS2 / XRAY_DNS_IDENTITY_* at link issue time.
+ * Keep pretty-printed — dashboard editor and “Insert example” use this string as-is.
+ */
+/** Hostname only for VLESS export endpoint (no https:// or :port). */
+export function sanitizeXrayExportEndpointHost(value: string): string {
+  const v = value.trim();
+  if (!v) return v;
+  if (v.includes("://")) {
+    try {
+      return new URL(v).hostname;
+    } catch {
+      return v.replace(/^https?:\/\//i, "").split("/")[0].split(":")[0];
+    }
+  }
+  if (!v.includes("/") && /^[^:]+:\d+$/.test(v)) {
+    return v.split(":")[0];
+  }
+  return v.replace(/\/+$/, "");
+}
+
+export const XRAY_EXPORT_TEMPLATE = `{
+  "vless": "{{vless_uri}}",
+  "dnsServers": {{dns_servers_json}},
+  "dnsIdentityEnabled": {{dns_identity_enabled}},
+  "friendlyName": "{{friendly_name}}",
+  "uuid": "{{uuid}}",
+  "endpoint": "{{server_ip}}:{{server_port}}"
+}
 `;
 
-/** Default OpenVPN .ovpn export template for new servers. */
+/** Post-setup seeded a plain-text VLESS block before JSON profiles — detect for UI upgrade prompt. */
+export function isLegacyXrayExportTemplate(template: string): boolean {
+  const t = template.trim();
+  if (!t) return false;
+  return !t.startsWith("{") || !t.includes("dnsServers") || !t.includes("{{dns_servers_json}}");
+}
+
+/** Default OpenVPN .ovpn export template for new servers.
+ * Port/proto/cipher/auth/tls-version-min/verb are rewritten from live node /api/info on save (auto-detect)
+ * and again from node env when issuing the file.
+ */
 export const OPEN_VPN_EXPORT_TEMPLATE = `setenv FRIENDLY_NAME "{{friendly_name}}"
 client
 dev tun
-proto tcp
+proto udp
 remote {{server_ip}} {{server_port}}
 resolv-retry infinite
 nobind
 remote-cert-tls server
 tls-version-min 1.2
-cipher AES-256-CBC
+cipher AES-128-GCM
+data-ciphers AES-128-GCM:CHACHA20-POLY1305
 auth SHA256
 auth-nocache
 verb 3

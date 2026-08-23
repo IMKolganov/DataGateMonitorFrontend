@@ -70,7 +70,10 @@ export default function ServiceControls({
   hubConnectionState,
   hubLastError,
 }: Props) {
-  const entries = useMemo(() => Object.values(serviceData ?? {}), [serviceData]);
+  const entries = useMemo(
+    () => Object.values(serviceData ?? {}).filter((s): s is ServiceStatusDto => s != null),
+    [serviceData],
+  );
 
   const totals = useMemo(() => {
     let clients = 0;

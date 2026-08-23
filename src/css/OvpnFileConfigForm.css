@@ -52,6 +52,7 @@
     min-height: 0;
     background: transparent;
     color: transparent;
+    -webkit-text-fill-color: transparent;
     caret-color: var(--text-secondary);
     border: none;
     font-family: "Courier New", monospace;
@@ -186,6 +187,48 @@
     font-size: 14px;
     line-height: 1.5;
     color: var(--text-secondary);
+  }
+
+  /* VLESS JSON editor — plain visible textarea (overlay highlighter duplicates text while typing). */
+  .ovpn-config-textarea {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 456px;
+    max-height: 456px;
+    min-height: 280px;
+    margin: 0;
+    background-color: var(--bg-body);
+    border: none;
+    color: var(--text-secondary);
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 8px;
+    resize: vertical;
+    overflow: auto;
+    outline: none;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) var(--bg-body);
+  }
+
+  .config-template-container textarea.ovpn-config-textarea::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .config-template-container textarea.ovpn-config-textarea::-webkit-scrollbar-track {
+    background-color: var(--bg-body);
+  }
+
+  .config-template-container textarea.ovpn-config-textarea::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+  }
+
+  .config-template-container textarea.ovpn-config-textarea:focus {
+    outline: none;
+    box-shadow: none;
   }
 
   .conflog-history-section {

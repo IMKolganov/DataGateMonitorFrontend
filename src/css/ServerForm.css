@@ -306,6 +306,35 @@
     background-color: var(--input-bg);
   }
 
+  .server-form .password-input-wrap {
+    position: relative;
+    width: 100%;
+  }
+
+  .server-form .password-input-wrap input:not([type="checkbox"]) {
+    padding-right: 40px;
+  }
+
+  .server-form .password-toggle-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .server-form .password-toggle-btn:hover {
+    color: var(--text-secondary);
+  }
+
   .server-form .config-template-container textarea.ovpn-textarea-overlay:focus {
     background-color: transparent;
     color: transparent;

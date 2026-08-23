@@ -17,6 +17,8 @@ export interface FreeTierEnforcementDtoFreeTierEnforcementCandidateDto {
   activePlanName?: string | null;
   isMergedAccount?: boolean;
   isChannelSubscribed?: boolean;
+  /** @nullable */
+  identityProviders?: string[] | null;
   isConnected?: boolean;
   /** @nullable */
   vpnServerId?: number | null;
@@ -26,6 +28,4 @@ export interface FreeTierEnforcementDtoFreeTierEnforcementCandidateDto {
   commonName?: string | null;
   /** @nullable */
   connectedSince?: string | null;
-  /** @nullable */
-  identityProviders?: string[] | null;
 }
