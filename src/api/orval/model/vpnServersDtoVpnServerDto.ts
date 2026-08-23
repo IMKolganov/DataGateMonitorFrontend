@@ -29,13 +29,13 @@ export interface VpnServersDtoVpnServerDto {
   /** @nullable */
   tags?: string[] | null;
   /** @nullable */
-  xrayClientsPolledAt?: string | null;
-  /** @nullable */
-  xrayClientsPollError?: string | null;
-  isDisabled?: boolean;
-  /** @nullable */
   groupId?: number | null;
   /** @nullable */
   groupName?: string | null;
   sortOrder?: number;
+  /** @nullable */
+  xrayClientsPolledAt?: string | null;
+  /** @nullable */
+  xrayClientsPollError?: string | null;
+  isDisabled?: boolean;
 }

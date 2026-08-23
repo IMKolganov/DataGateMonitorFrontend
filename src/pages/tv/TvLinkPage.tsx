@@ -2,23 +2,30 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaTv } from "react-icons/fa";
-import { apiRequest } from "../../api/apirequest";
+import {
+  getApiAuthTvSessionByCodeUserCode,
+  postApiAuthTvSessionApprove,
+  postApiAuthTvSessionDeny,
+} from "../../api/orval/auth/auth";
+import type { TvLoginSessionPreviewResponse } from "../../api/orvalModelShim";
 import { ACCESS_TOKEN_KEY } from "../../utils/const";
 import { loginUrlWithReturn } from "../../utils/auth/returnPath";
+import { errorMessage } from "../../utils/errorMessage";
 import { appVersion } from "../../version.ts";
 import GdprFooterLinks from "../../components/gdpr/GdprFooterLinks";
 import "../../css/Login.css";
 
-type Preview = {
-  sessionId: string;
-  userCode: string;
-  deviceName?: string | null;
-  expiresAt: string;
-  status: string;
-};
-
 function normalizeCode(raw: string): string {
   return raw.replace(/[\s-]/g, "").replace(/\D/g, "");
+}
+
+function previewErrorMessage(err: unknown): string {
+  const status = (err as { response?: { status?: number; data?: { message?: string } } })?.response
+    ?.status;
+  const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+  if (status === 410) return message || "This code has expired.";
+  if (status === 404) return message || "Code not found.";
+  return message || errorMessage(err) || "Could not look up this TV code.";
 }
 
 /**
@@ -29,7 +36,7 @@ export default function TvLinkPage() {
   const [searchParams] = useSearchParams();
   const codeFromQuery = searchParams.get("code") ?? "";
   const [codeInput, setCodeInput] = useState(codeFromQuery);
-  const [preview, setPreview] = useState<Preview | null>(null);
+  const [preview, setPreview] = useState<TvLoginSessionPreviewResponse | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<"approved" | "denied" | null>(null);
@@ -54,24 +61,16 @@ export default function TvLinkPage() {
     setError(null);
     setDone(null);
     try {
-      const res = await apiRequest<Preview>(
-        "get",
-        `/api/auth/tv/session/by-code/${encodeURIComponent(normalized)}`,
-      );
-      if (!res.success || !res.data) {
+      const res = (await getApiAuthTvSessionByCodeUserCode(normalized)) as TvLoginSessionPreviewResponse | undefined;
+      if (!res?.sessionId) {
         setPreview(null);
-        setError(res.errorMessage || "Could not look up this TV code.");
+        setError("Could not look up this TV code.");
         return;
       }
-      setPreview(res.data);
+      setPreview(res);
     } catch (err: unknown) {
       setPreview(null);
-      const status = (err as { response?: { status?: number; data?: { message?: string } } })?.response
-        ?.status;
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      if (status === 410) setError(message || "This code has expired.");
-      else if (status === 404) setError(message || "Code not found.");
-      else setError(message || "Could not look up this TV code.");
+      setError(previewErrorMessage(err));
     } finally {
       setBusy(false);
     }
@@ -90,44 +89,30 @@ export default function TvLinkPage() {
   }
 
   const approve = async () => {
-    if (!preview) return;
+    if (!preview?.sessionId) return;
     setBusy(true);
     try {
-      const res = await apiRequest<{ status: string }>("post", "/api/auth/tv/session/approve", {
-        data: { sessionId: preview.sessionId },
-      });
-      if (!res.success) {
-        toast.error(res.errorMessage || "Could not approve TV login.");
-        return;
-      }
+      await postApiAuthTvSessionApprove({ sessionId: preview.sessionId });
       toast.success("TV login approved. You can return to your TV.");
       setDone("approved");
       setPreview(null);
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      toast.error(message || "Could not approve TV login.");
+      toast.error(errorMessage(err) || "Could not approve TV login.");
     } finally {
       setBusy(false);
     }
   };
 
   const deny = async () => {
-    if (!preview) return;
+    if (!preview?.sessionId) return;
     setBusy(true);
     try {
-      const res = await apiRequest<{ status: string }>("post", "/api/auth/tv/session/deny", {
-        data: { sessionId: preview.sessionId },
-      });
-      if (!res.success) {
-        toast.error(res.errorMessage || "Could not deny TV login.");
-        return;
-      }
+      await postApiAuthTvSessionDeny({ sessionId: preview.sessionId });
       toast.info("TV login denied.");
       setDone("denied");
       setPreview(null);
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      toast.error(message || "Could not deny TV login.");
+      toast.error(errorMessage(err) || "Could not deny TV login.");
     } finally {
       setBusy(false);
     }

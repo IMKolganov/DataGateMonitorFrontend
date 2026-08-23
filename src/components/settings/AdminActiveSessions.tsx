@@ -110,17 +110,17 @@ export function AdminActiveSessions() {
                   <span className="admin-session-row__current">(this device)</span>
                 ) : null}
                 <div className="admin-session-row__since">
-                  Since {new Date(session.createdAt).toLocaleString()}
+                  Since {session.createdAt ? new Date(session.createdAt).toLocaleString() : "—"}
                 </div>
               </div>
-              {!session.isCurrent ? (
+              {!session.isCurrent && session.id != null ? (
                 <button
                   type="button"
                   className="btn secondary"
                   disabled={loading}
                   onClick={() =>
                     void runAction(
-                      () => revokeAdminSession(session.id),
+                      () => revokeAdminSession(session.id!),
                       "Session revoked.",
                     )
                   }

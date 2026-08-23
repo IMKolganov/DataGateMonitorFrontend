@@ -13,16 +13,9 @@ import {
   usePostApiApplicationsRegister,
 } from "../api/orval/applications/applications";
 import type { GetApiApplicationsGetAllParams } from "../api/orval/model/getApiApplicationsGetAllParams";
-import type { RegisterApplicationRequest, ApplicationDto } from "../api/orvalModelShim";
-import type { ApplicationsResponsesRegisterApplicationResponse } from "../api/orval/model/applicationsResponsesRegisterApplicationResponse";
+import type { RegisterApplicationRequest, ApplicationDto, RegisterApplicationResponse } from "../api/orvalModelShim";
 import axios from "axios";
 import { errorMessage as formatError } from "../utils/errorMessage";
-
-type CreatedClientCredentials = {
-  name: string;
-  clientId: string;
-  clientSecret: string;
-};
 
 function extractApps(raw: unknown): ApplicationDto[] {
   if (!raw) return [];
@@ -44,9 +37,9 @@ function extractApps(raw: unknown): ApplicationDto[] {
   return [];
 }
 
-function asCreatedClient(raw: unknown): CreatedClientCredentials | null {
+function asCreatedClient(raw: unknown): RegisterApplicationResponse | null {
   if (!raw || typeof raw !== "object") return null;
-  const res = raw as ApplicationsResponsesRegisterApplicationResponse;
+  const res = raw as RegisterApplicationResponse;
   const clientId = res.clientId?.trim();
   const clientSecret = res.clientSecret?.trim();
   if (!clientId || !clientSecret) return null;
@@ -62,7 +55,7 @@ export function ApplicationSettings() {
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [newAppName, setNewAppName] = useState("");
   const [refreshing, setRefreshing] = useState(false);
-  const [createdClient, setCreatedClient] = useState<CreatedClientCredentials | null>(null);
+  const [createdClient, setCreatedClient] = useState<RegisterApplicationResponse | null>(null);
   const [copiedField, setCopiedField] = useState<"clientId" | "clientSecret" | null>(null);
   const appFilters = useGridFilters("settings-applications");
 
@@ -239,29 +232,20 @@ export function ApplicationSettings() {
       </pre>
 
       {createdClient && (
-        <div className="modal-overlay" onClick={() => setCreatedClient(null)}>
+        <div className="modal-overlay">
           <div
             className="modal-content api-client-created-modal"
-            onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-labelledby="api-client-created-title"
             aria-modal="true"
           >
             <div className="modal-header">
               <h3 id="api-client-created-title">API client created</h3>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => setCreatedClient(null)}
-                aria-label="Close"
-              >
-                ×
-              </button>
             </div>
             <div className="modal-body">
               <p className="api-client-created-modal__intro">
                 Copy the credentials for <strong>{createdClient.name}</strong> now. The secret will not
-                be shown again.
+                be shown again. Confirm only after you have saved them.
               </p>
 
               <div className="api-client-created-modal__field">
@@ -271,7 +255,7 @@ export function ApplicationSettings() {
                   <button
                     type="button"
                     className="btn secondary"
-                    onClick={() => handleCopy(createdClient.clientId, "clientId")}
+                    onClick={() => createdClient.clientId && handleCopy(createdClient.clientId, "clientId")}
                   >
                     <FaCopy className="icon" aria-hidden /> Copy
                   </button>
@@ -288,7 +272,7 @@ export function ApplicationSettings() {
                   <button
                     type="button"
                     className="btn secondary"
-                    onClick={() => handleCopy(createdClient.clientSecret, "clientSecret")}
+                    onClick={() => createdClient.clientSecret && handleCopy(createdClient.clientSecret, "clientSecret")}
                   >
                     <FaCopy className="icon" aria-hidden /> Copy
                   </button>

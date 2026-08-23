@@ -25,4 +25,6 @@ export interface VpnServerCertsResponsesDtoMonitorServerCertificate {
   expiryDate?: string;
   /** @nullable */
   revokeDate?: string | null;
+  /** @nullable */
+  identityIp?: string | null;
 }

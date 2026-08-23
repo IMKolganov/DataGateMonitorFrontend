@@ -1,46 +1,38 @@
-import { apiRequest } from "../../api/apirequest";
+import {
+  deleteApiAuthSessionsSessionId,
+  getApiAuthSessions,
+  postApiAuthSessionsRevokeAll,
+  postApiAuthSessionsRevokeOthers,
+} from "../../api/orval/auth/auth";
+import type { GetUserSessionsResponse } from "../../api/orvalModelShim";
 import { REFRESH_TOKEN_KEY } from "../const";
 
-export type UserSessionDto = {
-  id: number;
-  deviceId?: string | null;
-  userAgent?: string | null;
-  createdAt: string;
-  expiresAt: string;
-  isCurrent: boolean;
-};
+export type { UserSessionDto, GetUserSessionsResponse } from "../../api/orvalModelShim";
 
-export type GetUserSessionsResponse = {
-  sessions: UserSessionDto[];
-};
-
-function refreshHeader(): Record<string, string> {
+function refreshRequestOptions() {
   const token = localStorage.getItem(REFRESH_TOKEN_KEY);
-  return token ? { "X-Refresh-Token": token } : {};
+  return token ? { headers: { "X-Refresh-Token": token } } : undefined;
 }
 
 export async function fetchAdminSessions(): Promise<GetUserSessionsResponse> {
-  const res = await apiRequest<GetUserSessionsResponse>("get", "/api/auth/sessions", {
-    headers: refreshHeader(),
-  });
-  return res.data ?? { sessions: [] };
+  const res = (await getApiAuthSessions(refreshRequestOptions())) as GetUserSessionsResponse | undefined;
+  return res ?? { sessions: [] };
 }
 
 export async function revokeAdminSession(sessionId: number): Promise<void> {
-  await apiRequest("delete", `/api/auth/sessions/${sessionId}`);
+  await deleteApiAuthSessionsSessionId(sessionId);
 }
 
 export async function revokeOtherAdminSessions(): Promise<number> {
   const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY) ?? undefined;
-  const res = await apiRequest<number>("post", "/api/auth/sessions/revoke-others", {
-    data: { keepRefreshToken: refreshToken },
-  });
-  return res.data ?? 0;
+  const res = (await postApiAuthSessionsRevokeOthers(
+    { keepRefreshToken: refreshToken },
+    refreshRequestOptions(),
+  )) as number | undefined;
+  return res ?? 0;
 }
 
 export async function revokeAllAdminSessions(): Promise<number> {
-  const res = await apiRequest<number>("post", "/api/auth/sessions/revoke-all", {
-    data: {},
-  });
-  return res.data ?? 0;
+  const res = (await postApiAuthSessionsRevokeAll({}, refreshRequestOptions())) as number | undefined;
+  return res ?? 0;
 }

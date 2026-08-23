@@ -25,6 +25,7 @@ import type {
 
 import type {
   ApiSystemBoolean,
+  ApiSystemString,
   ApiVpnServerGroupsResponsesVpnServerGroupResponse,
   ApiVpnServerGroupsResponsesVpnServerGroupsResponse,
   VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest,
@@ -234,7 +235,7 @@ export const postApiVpnServerGroupsCreate = (
 
       return ogmMutator<ApiVpnServerGroupsResponsesVpnServerGroupResponse>(
       {url: `/api/vpn-server-groups/create`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json-patch+json', },
       data: vpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest, signal
     },
       options);
@@ -292,7 +293,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return ogmMutator<ApiVpnServerGroupsResponsesVpnServerGroupResponse>(
       {url: `/api/vpn-server-groups/update/${id}`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json-patch+json', },
       data: vpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest, signal
     },
       options);
@@ -404,7 +405,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return ogmMutator<ApiSystemBoolean>(
       {url: `/api/vpn-server-groups/reorder`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json-patch+json', },
       data: vpnServerGroupsRequestsReorderVpnServerGroupsRequest, signal
     },
       options);
@@ -462,7 +463,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return ogmMutator<ApiVpnServerGroupsResponsesVpnServerGroupResponse>(
       {url: `/api/vpn-server-groups/${id}/set-servers`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json-patch+json', },
       data: vpnServerGroupsRequestsSetVpnServerGroupServersRequest, signal
     },
       options);
@@ -519,7 +520,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return ogmMutator<ApiSystemBoolean>(
       {url: `/api/vpn-server-groups/ungrouped/set-servers`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
+      headers: {'Content-Type': 'application/json-patch+json', },
       data: vpnServerGroupsRequestsSetVpnServerGroupServersRequest, signal
     },
       options);
@@ -568,3 +569,175 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPutApiVpnServerGroupsUngroupedSetServersMutationOptions(options), queryClient);
     }
+    export const getApiVpnServerGroupsHealthcheck = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/vpn-server-groups/healthcheck`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiVpnServerGroupsHealthcheckQueryKey = () => {
+    return [
+    `/api/vpn-server-groups/healthcheck`
+    ] as const;
+    }
+
+
+export const getGetApiVpnServerGroupsHealthcheckQueryOptions = <TData = Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiVpnServerGroupsHealthcheckQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>> = ({ signal }) => getApiVpnServerGroupsHealthcheck(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiVpnServerGroupsHealthcheckQueryResult = NonNullable<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>>
+export type GetApiVpnServerGroupsHealthcheckQueryError = unknown
+
+
+export function useGetApiVpnServerGroupsHealthcheck<TData = Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>,
+          TError,
+          Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiVpnServerGroupsHealthcheck<TData = Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>,
+          TError,
+          Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiVpnServerGroupsHealthcheck<TData = Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiVpnServerGroupsHealthcheck<TData = Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiVpnServerGroupsHealthcheckQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiVpnServerGroupsHealthcheckWithJwt = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/vpn-server-groups/healthcheck-with-jwt`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiVpnServerGroupsHealthcheckWithJwtQueryKey = () => {
+    return [
+    `/api/vpn-server-groups/healthcheck-with-jwt`
+    ] as const;
+    }
+
+
+export const getGetApiVpnServerGroupsHealthcheckWithJwtQueryOptions = <TData = Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiVpnServerGroupsHealthcheckWithJwtQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>> = ({ signal }) => getApiVpnServerGroupsHealthcheckWithJwt(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiVpnServerGroupsHealthcheckWithJwtQueryResult = NonNullable<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>>
+export type GetApiVpnServerGroupsHealthcheckWithJwtQueryError = unknown
+
+
+export function useGetApiVpnServerGroupsHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>,
+          TError,
+          Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiVpnServerGroupsHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>,
+          TError,
+          Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiVpnServerGroupsHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiVpnServerGroupsHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiVpnServerGroupsHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiVpnServerGroupsHealthcheckWithJwtQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+

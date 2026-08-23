@@ -7,7 +7,8 @@
 import type { FreeTierEnforcementDtoFreeTierEnforcementCandidateDto } from './freeTierEnforcementDtoFreeTierEnforcementCandidateDto';
 
 export interface FreeTierEnforcementResponsesFreeTierUnsubscribedVpnDigestResponse {
-  text?: string;
+  /** @nullable */
+  text?: string | null;
   /** @nullable */
   candidates?: FreeTierEnforcementDtoFreeTierEnforcementCandidateDto[] | null;
 }

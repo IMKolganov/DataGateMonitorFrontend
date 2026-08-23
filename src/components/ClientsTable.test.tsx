@@ -17,6 +17,10 @@ vi.mock("../utils/auth/authSelectors", () => ({
 vi.mock("../api/orval/vpn-server-clients/vpn-server-clients", () => ({
   usePostApiOpenVpnClientsKill: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
+vi.mock("../api/orval/vpn-server-xray-node/vpn-server-xray-node", () => ({
+  usePostApiVpnServersVpnServerIdXrayKickUser: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  usePostApiVpnServersVpnServerIdXrayDisableUser: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}));
 
 import ClientsTable from "./ClientsTable";
 

@@ -24,7 +24,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  ApiDataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse
+  ApiDataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse,
+  ApiSystemString
 } from '../model';
 
 import { ogmMutator } from '../../mutator';
@@ -300,3 +301,175 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationOptions(options), queryClient);
     }
+    export const getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck = (
+    vpnServerId: string,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/open-vpn-servers/${vpnServerId}/openvpn-process/healthcheck`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckQueryKey = (vpnServerId: string,) => {
+    return [
+    `/api/open-vpn-servers/${vpnServerId}/openvpn-process/healthcheck`
+    ] as const;
+    }
+
+
+export const getGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>, TError = unknown>(vpnServerId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckQueryKey(vpnServerId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>> = ({ signal }) => getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck(vpnServerId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>>
+export type GetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckQueryError = unknown
+
+
+export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>, TError = unknown>(
+ vpnServerId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>, TError = unknown>(
+ vpnServerId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>, TError = unknown>(
+ vpnServerId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>, TError = unknown>(
+ vpnServerId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckQueryOptions(vpnServerId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt = (
+    vpnServerId: string,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/open-vpn-servers/${vpnServerId}/openvpn-process/healthcheck-with-jwt`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwtQueryKey = (vpnServerId: string,) => {
+    return [
+    `/api/open-vpn-servers/${vpnServerId}/openvpn-process/healthcheck-with-jwt`
+    ] as const;
+    }
+
+
+export const getGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwtQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>, TError = unknown>(vpnServerId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwtQueryKey(vpnServerId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>> = ({ signal }) => getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt(vpnServerId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwtQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>>
+export type GetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwtQueryError = unknown
+
+
+export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>, TError = unknown>(
+ vpnServerId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>, TError = unknown>(
+ vpnServerId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>, TError = unknown>(
+ vpnServerId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>, TError = unknown>(
+ vpnServerId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJwtQueryOptions(vpnServerId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+

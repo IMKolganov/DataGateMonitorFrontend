@@ -45,6 +45,8 @@ export type { AuthResponsesGetUserSessionsResponse as GetUserSessionsResponse } 
 export type { AuthResponsesUserSessionDto as UserSessionDto } from "./orval/model/authResponsesUserSessionDto";
 export type { AuthResponsesAdminTvLoginSessionDto as AdminTvLoginSessionDto } from "./orval/model/authResponsesAdminTvLoginSessionDto";
 export type { AuthResponsesGetAdminTvLoginSessionsResponse as GetAdminTvLoginSessionsResponse } from "./orval/model/authResponsesGetAdminTvLoginSessionsResponse";
+export type { AuthResponsesTvLoginSessionPreviewResponse as TvLoginSessionPreviewResponse } from "./orval/model/authResponsesTvLoginSessionPreviewResponse";
+export type { AuthResponsesTvLoginSessionActionResponse as TvLoginSessionActionResponse } from "./orval/model/authResponsesTvLoginSessionActionResponse";
 export type { AuthResponsesUserTvLoginSummaryResponse as UserTvLoginSummaryResponse } from "./orval/model/authResponsesUserTvLoginSummaryResponse";
 export type { AuthRequestsRevokeUserSessionsRequest as RevokeUserSessionsRequest } from "./orval/model/authRequestsRevokeUserSessionsRequest";
 export type { AuthRequestsTotpVerifyLoginRequest as TotpVerifyLoginRequest } from "./orval/model/authRequestsTotpVerifyLoginRequest";
@@ -72,6 +74,7 @@ export type { QuotaPlansResponsesQuotaPlansResponse as QuotaPlansResponse } from
 export type { AuthRequestsRefreshRequest as RefreshRequest } from "./orval/model/authRequestsRefreshRequest";
 export type { AuthResponsesRefreshResponse as RefreshResponse } from "./orval/model/authResponsesRefreshResponse";
 export type { ApplicationsRequestsRegisterApplicationRequest as RegisterApplicationRequest } from "./orval/model/applicationsRequestsRegisterApplicationRequest";
+export type { ApplicationsResponsesRegisterApplicationResponse as RegisterApplicationResponse } from "./orval/model/applicationsResponsesRegisterApplicationResponse";
 export type { AuthRequestsRegisterUserRequest as RegisterUserRequest } from "./orval/model/authRequestsRegisterUserRequest";
 export type { ApplicationsRequestsRevokeApplicationRequest as RevokeApplicationRequest } from "./orval/model/applicationsRequestsRevokeApplicationRequest";
 export type { VpnServerCertsRequestsRevokeCertificateRequest as RevokeCertificateRequest } from "./orval/model/vpnServerCertsRequestsRevokeCertificateRequest";
