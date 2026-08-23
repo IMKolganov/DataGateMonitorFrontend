@@ -391,6 +391,20 @@
     vertical-align: middle;
   }
 
+  .server-update-pill {
+    margin-left: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(210, 168, 255, 0.18);
+    color: #d2a8ff;
+    border: 1px solid rgba(210, 168, 255, 0.45);
+    vertical-align: middle;
+  }
+
 .server-groups {
   display: flex;
   flex-direction: column;

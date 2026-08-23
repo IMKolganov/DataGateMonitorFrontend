@@ -89,6 +89,20 @@ const ServerDetailsInfo: React.FC<Props> = ({
           from the kernel on each status poll. Totals do not include disconnected sessions.
         </div>
       )}
+      {!loading && safe.isManagerUpdateAvailable && (
+        <div className="dco-stats-alert manager-update-alert" role="status">
+          <strong>Manager update available.</strong>{" "}
+          {safe.installedManagerVersion ?? "unknown"} → {safe.latestManagerVersion ?? "unknown"}
+          {safe.managerReleaseUrl ? (
+            <>
+              {" "}
+              <a href={safe.managerReleaseUrl} target="_blank" rel="noopener noreferrer">
+                View release
+              </a>
+            </>
+          ) : null}
+        </div>
+      )}
       <div className="server-header">
         <div className="server-meta">
           <strong className="server-name">
@@ -130,6 +144,27 @@ const ServerDetailsInfo: React.FC<Props> = ({
             <span>{loading ? <Skeleton width={90} /> : (status?.version || "Unknown")}</span>
           </div>
         </div>
+
+        {(loading || safe.installedManagerVersion || safe.latestManagerVersion) && (
+          <div className="detail-row">
+            <RiHardDrive2Line className="detail-icon" aria-hidden />
+            <div className="detail-row-main">
+              <span className="detail-label">Manager:</span>
+              <span>
+                {loading ? (
+                  <Skeleton width={120} />
+                ) : (
+                  <>
+                    {safe.installedManagerVersion ?? "—"}
+                    {safe.latestManagerVersion
+                      ? ` (latest ${safe.latestManagerVersion})`
+                      : null}
+                  </>
+                )}
+              </span>
+            </div>
+          </div>
+        )}
 
         <div className="detail-row">
           <BsCpu className="detail-icon" aria-hidden />

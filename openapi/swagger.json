@@ -22317,6 +22317,22 @@
           "totalBytesOut": {
             "type": "integer",
             "format": "int64"
+          },
+
+          "installedManagerVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "latestManagerVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "isManagerUpdateAvailable": {
+            "type": "boolean"
+          },
+          "managerReleaseUrl": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -22348,6 +22364,22 @@
           "totalBytesOut": {
             "type": "integer",
             "format": "int64"
+          },
+
+          "installedManagerVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "latestManagerVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "isManagerUpdateAvailable": {
+            "type": "boolean"
+          },
+          "managerReleaseUrl": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
