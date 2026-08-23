@@ -320,7 +320,7 @@ export function buildPiHolePipelineSteps(input: PiHolePipelineInput): PiHolePipe
         error =
           "Last poll forwarded 0 — Pi-hole is not seeing identity-pool clients (or the poll window had no matching queries).";
         fix =
-          "1) Dashboard Xray Config Template must include dnsServers JSON. 2) Re-issue/download the link. 3) Client must apply dnsServers on TUN (no DoH). 4) Confirm access.log has udp:172.20.0.1:53 → dns-id-*.";
+          "1) Dashboard Xray Config Template must include dnsServers JSON (Pi-hole TCP .1). 2) Re-issue/download the link. 3) Client must apply dnsServers on TUN (no DoH). 4) Confirm access.log has udp:{DNS1}:53 → dns-id-* (not docker0).";
         summary = `Last success ${fmtUtc(d.lastSuccessfulPollAtUtc)}, afterFilter=${d.lastPollQueriesAfterFilter ?? 0}, forwarded 0.`;
       } else {
         status = "ok";
