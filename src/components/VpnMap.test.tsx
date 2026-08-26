@@ -25,6 +25,10 @@ vi.mock("react-leaflet", () => ({
   TileLayer: () => null,
   Marker: () => null,
   Popup: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  useMap: () => ({
+    stop: vi.fn(),
+    getContainer: () => ({ isConnected: true }),
+  }),
 }));
 
 vi.mock("leaflet", () => {

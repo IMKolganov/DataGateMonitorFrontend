@@ -1,6 +1,6 @@
 // src/components/ServerList.tsx
 import React, { useMemo, useState } from "react";
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FaSyncAlt, FaPlus, FaFolderPlus, FaExpand, FaCompress } from "react-icons/fa";
 import { useNavigate, useLocation, useMatch } from "react-router-dom";
 import { useMediaQuery } from "react-responsive";
@@ -22,8 +22,10 @@ import {
 } from "../../utils/serverGroups";
 
 import { deleteApiOpenVpnServersDeleteVpnServerId } from "../../api/orval/vpn-servers/vpn-servers";
-import { getApiV3OpenVpnServersGetAllWithStatus } from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
-import { getApiOpenVpnClientsGetAllConnected } from "../../api/orval/vpn-server-clients/vpn-server-clients";
+import {
+  getApiV3OpenVpnServersGetAllWithStatus,
+  getGetApiV3OpenVpnServersGetAllWithStatusQueryKey,
+} from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
 import {
   useGetApiVpnServerGroupsGetAll,
   usePostApiVpnServerGroupsCreate,
@@ -36,8 +38,11 @@ import type {
   ServiceStatusDto,
   VpnServerWithStatusV2Dto,
   VpnServerWithStatusesV3Response,
-  VpnServerClientsResponsesConnectedClientsResponse,
 } from "../../api/orvalModelShim";
+import {
+  isUserConnectedToServer,
+  useCurrentUserConnectedServerIds,
+} from "../../hooks/useCurrentUserConnectedServerIds";
 
 type GetAllWithStatusData = Awaited<ReturnType<typeof getApiV3OpenVpnServersGetAllWithStatus>>;
 
@@ -99,14 +104,6 @@ const extractList = (resp: GetAllWithStatusData): OrvalServerItem[] => {
   return Array.isArray(list) ? list : [];
 };
 
-function readPayload<T>(value: T | { data?: T } | undefined): T | undefined {
-  if (!value) return undefined;
-  if (typeof value === "object" && "data" in value) {
-    return (value as { data?: T }).data;
-  }
-  return value as T;
-}
-
 function readGroupsPayload(data: unknown): VpnServerGroupsDtoVpnServerGroupDto[] {
   if (!data || typeof data !== "object") return [];
   const raw = data as Record<string, unknown>;
@@ -131,14 +128,23 @@ function serverRowIsDisabled(raw: OrvalServerItem): boolean {
   return Boolean(v?.isDisabled);
 }
 
-const V3_SERVERS_WITH_STATUS_KEY = ["v3", "open-vpn-servers", "with-status"] as const;
+const V3_SERVERS_WITH_STATUS_KEY = [
+  ...getGetApiV3OpenVpnServersGetAllWithStatusQueryKey(undefined),
+  "mapped-list",
+] as const;
+
+function readApiIsOnline(item: OrvalServerItem): boolean {
+  const vpn = item.vpnServerResponses?.vpnServer ?? item.openVpnServerResponses?.vpnServer;
+  return Boolean(vpn?.isOnline);
+}
 
 const ServerList: React.FC = () => {
   const queryClient = useQueryClient();
 
   const user = getCurrentUser();
   const canAddServer = isAdmin(user);
-  const currentUserExternalId = (user?.providerExternalId ?? "").trim();
+
+  const { connectedServerIds } = useCurrentUserConnectedServerIds();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -157,6 +163,7 @@ const ServerList: React.FC = () => {
   const {
     data: baseServers = [],
     isLoading: loading,
+    isFetching: refreshing,
     refetch: loadServers,
   } = useQuery({
     queryKey: V3_SERVERS_WITH_STATUS_KEY,
@@ -178,7 +185,7 @@ const ServerList: React.FC = () => {
             nextRunTime: "N/A",
             wsCountConnectedClients: item.countConnectedClients,
             wsCountSessions: item.countSessions,
-            wsOnline: null,
+            wsOnline: readApiIsOnline(item),
             groupId: vpn?.groupId ?? null,
             sortOrder: vpn?.sortOrder ?? 0,
             raw: item,
@@ -244,40 +251,6 @@ const ServerList: React.FC = () => {
     [servers, groups],
   );
 
-  const connectedByServerQueries = useQueries({
-    queries: servers.map((server) => ({
-      queryKey: ["server-list-connected", server.id],
-      queryFn: () => getApiOpenVpnClientsGetAllConnected({ VpnServerId: server.id, Page: 1, PageSize: 300 }),
-      enabled: Boolean(currentUserExternalId),
-      staleTime: 12_000,
-      refetchInterval: 15_000,
-      retry: 1,
-    })),
-  });
-
-  const connectedByServerId = useMemo(() => {
-    const map = new Map<number, boolean>();
-    if (!currentUserExternalId) return map;
-
-    for (let i = 0; i < servers.length; i += 1) {
-      const server = servers[i];
-      const q = connectedByServerQueries[i];
-      const payload = readPayload<VpnServerClientsResponsesConnectedClientsResponse>(
-        q?.data as
-          | VpnServerClientsResponsesConnectedClientsResponse
-          | { data?: VpnServerClientsResponsesConnectedClientsResponse }
-          | undefined
-      );
-      const clients = payload?.vpnClients ?? [];
-      map.set(
-        server.id,
-        clients.some((c) => (c.externalId ?? "").trim() === currentUserExternalId),
-      );
-    }
-
-    return map;
-  }, [connectedByServerQueries, currentUserExternalId, servers]);
-
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this server?")) return;
 
@@ -337,6 +310,10 @@ const ServerList: React.FC = () => {
     } catch {
       toast.error("Failed to create group");
     }
+  };
+
+  const handleRefresh = () => {
+    void Promise.all([loadServers(), groupsQuery.refetch()]);
   };
 
   const normalizedServiceControlsData: Record<number, ServiceStatusDto> = useMemo(() => {
@@ -402,7 +379,7 @@ const ServerList: React.FC = () => {
         wsOnline={server.wsOnline}
         wsCountConnectedClients={server.wsCountConnectedClients}
         wsCountSessions={server.wsCountSessions}
-        isCurrentUserConnected={connectedByServerId.get(server.id) === true}
+        isCurrentUserConnected={isUserConnectedToServer(connectedServerIds, server.id)}
         onView={(id) => {
           const target = buildServerSwitchPath(id, location.pathname, canAddServer);
           if (isMobile) navigate(target);
@@ -433,13 +410,48 @@ const ServerList: React.FC = () => {
                   </button>
               )}
 
-              <button className="btn secondary" onClick={() => void loadServers()} disabled={loading}>
-              <span className={`icon ${loading ? "icon-spin" : ""}`}>
-                {FaSyncAlt({ className: `icon ${loading ? "icon-spin" : ""}` })}
+              <button
+                className="btn secondary"
+                onClick={handleRefresh}
+                disabled={refreshing}
+                aria-busy={refreshing}
+              >
+              <span className={`icon ${refreshing ? "icon-spin" : ""}`}>
+                {FaSyncAlt({ className: `icon ${refreshing ? "icon-spin" : ""}` })}
               </span>
                 Refresh
               </button>
             </div>
+
+            {!loading && (servers.length > 0 || sections.length > 0) && (
+              <div className="header-bar__meta">
+                <span className="server-list-count">
+                  {servers.length} {servers.length === 1 ? "server" : "servers"}
+                </span>
+                {sections.length > 0 && (
+                  <div className="server-groups-toolbar" role="group" aria-label="Group expand controls">
+                    <button
+                      type="button"
+                      className="server-groups-toolbar__btn"
+                      onClick={expandAllGroups}
+                      title="Expand all"
+                      aria-label="Expand all groups"
+                    >
+                      {FaExpand({ className: "icon" })}
+                    </button>
+                    <button
+                      type="button"
+                      className="server-groups-toolbar__btn"
+                      onClick={collapseAllGroups}
+                      title="Collapse all"
+                      aria-label="Collapse all groups"
+                    >
+                      {FaCompress({ className: "icon" })}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -486,28 +498,6 @@ const ServerList: React.FC = () => {
             </ul>
         ) : (
             <div className="server-groups">
-              {sections.length > 0 && (
-                <div className="server-groups-toolbar" role="group" aria-label="Group expand controls">
-                  <button
-                    type="button"
-                    className="server-groups-toolbar__btn"
-                    onClick={expandAllGroups}
-                    title="Expand all"
-                    aria-label="Expand all groups"
-                  >
-                    {FaExpand({ className: "icon" })}
-                  </button>
-                  <button
-                    type="button"
-                    className="server-groups-toolbar__btn"
-                    onClick={collapseAllGroups}
-                    title="Collapse all"
-                    aria-label="Collapse all groups"
-                  >
-                    {FaCompress({ className: "icon" })}
-                  </button>
-                </div>
-              )}
               {servers.length > 0 || groups.length > 0 ? (
                   sections.map((section) => {
                     const key = String(section.key);
