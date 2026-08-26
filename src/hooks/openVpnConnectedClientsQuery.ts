@@ -4,6 +4,14 @@ import {
 } from "../api/orval/vpn-server-clients/vpn-server-clients";
 
 export const OPEN_VPN_LIVE_CONNECTED_CLIENTS_PAGE_SIZE = 300;
+export const OPEN_VPN_SERVER_MAP_CONNECTED_CLIENTS_PAGE_SIZE = 1000;
+
+export const openVpnServerMapConnectedClientsParams = (vpnServerId: number) =>
+  ({
+    VpnServerId: vpnServerId,
+    Page: 1,
+    PageSize: OPEN_VPN_SERVER_MAP_CONNECTED_CLIENTS_PAGE_SIZE,
+  }) as const;
 
 export const openVpnLiveConnectedClientsParams = (vpnServerId: number) =>
   ({
