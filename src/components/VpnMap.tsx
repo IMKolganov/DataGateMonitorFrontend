@@ -7,6 +7,7 @@ import type { VpnClientInfoDto } from "../api/orvalModelShim";
 import type { ProxyTrafficFlowUpdate } from "../hooks/useProxyTrafficFlow";
 import { isWebGLAvailable, VpnGlobeBoundary } from "./VpnGlobeBoundary";
 import "../css/VpnMap.css";
+import { LeafletMapLifecycle } from "../utils/leafletMapSafe";
 
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
@@ -1125,7 +1126,13 @@ const VpnMap: React.FC<VpnMapProps> = ({
         </div>
 
         {viewMode === "map" ? (
-            <MapContainer className="map-container-full-size" center={DEFAULT_MAP_CENTER} zoom={4}>
+            <MapContainer
+                className="map-container-full-size"
+                center={DEFAULT_MAP_CENTER}
+                zoom={4}
+                zoomAnimation={false}
+            >
+              <LeafletMapLifecycle />
               <TileLayer
                   url={tileLayers[selectedLayer].url}
                   attribution={tileLayers[selectedLayer].attribution}

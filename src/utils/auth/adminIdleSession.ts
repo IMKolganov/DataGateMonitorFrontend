@@ -111,7 +111,7 @@ export function startAdminIdleSession(): () => void {
       return;
     }
     clearWarning();
-    logout();
+    logout("idleTimeout");
   };
 
   const armTimers = (resetActivity: boolean) => {

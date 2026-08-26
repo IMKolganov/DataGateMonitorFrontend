@@ -21,6 +21,7 @@ import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./components/auth/ResetPasswordPage";
 import ConfirmEmailPage from "./components/auth/ConfirmEmailPage";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./utils/const.ts";
+import { isAuthenticated } from "./utils/auth/authSelectors.ts";
 import { startAdminIdleSession } from "./utils/auth/adminIdleSession.ts";
 import { scheduleAutoLogout } from "./utils/auth/tokenExpiryScheduler.ts";
 import { RequireAdmin } from "./components/auth/RequireAdmin.tsx";
@@ -75,7 +76,6 @@ const XrayRegisterPage = lazy(() => import("./pages/xray/XrayRegisterPage.tsx"))
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.tsx"));
 const TvLinkPage = lazy(() => import("./pages/tv/TvLinkPage.tsx"));
 
-const isAuthenticated = () => !!localStorage.getItem(ACCESS_TOKEN_KEY);
 
 const PrivateRoute = ({ children }: { children: ReactNode }): React.ReactElement =>
   isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;

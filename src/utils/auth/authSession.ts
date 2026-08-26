@@ -10,7 +10,7 @@ async function refreshOrLogout(): Promise<void> {
         const { expiresInMs } = getTokenExpiration(newToken);
         if (expiresInMs <= 0) {
             authLog("refreshOrLogout: new token already expired per JWT exp — logging out");
-            logout();
+            logout("sessionExpired");
             return;
         }
         scheduleAutoLogout(newToken);
@@ -18,7 +18,7 @@ async function refreshOrLogout(): Promise<void> {
     } catch (err) {
         if (shouldLogoutOnRefreshError(err)) {
             authLog("refreshOrLogout: refresh rejected — logging out", authErrFields(err));
-            logout();
+            logout("refreshRejected");
         } else {
             authLog("refreshOrLogout: transient error — keeping session; next API 401 will retry", authErrFields(err));
         }

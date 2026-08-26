@@ -9,6 +9,7 @@ import {
 import { clearStoredProfileAvatarUrl } from "../utils/auth/storedProfileAvatar.ts";
 import { notifyAccessTokenRefreshed } from "../utils/auth/accessTokenEvents.ts";
 import { authErrFields, authLog } from "../utils/auth/authLog.ts";
+import { buildLoginRedirectUrl, type LogoutReason } from "../utils/auth/logoutReason.ts";
 import { scheduleAutoLogout } from "../utils/auth/tokenExpiryScheduler.ts";
 import type { RefreshRequest, RefreshResponse } from "./orvalModelShim";
 
@@ -56,7 +57,7 @@ export const apiRequest = async <T>(
   // If token is required but missing -> soft logout (no reload loop)
   if (!token && !skipAuth && !isAuthEndpoint(url)) {
     authLog("apiRequest: no access token, redirecting to login", { url, method });
-    softLogout();
+    softLogout("missingToken");
     throw new Error("User is not authenticated");
   }
 
@@ -114,7 +115,7 @@ export const apiRequest = async <T>(
           method,
         });
         if (shouldLogoutOnRefreshError(refreshErr)) {
-          logout();
+          logout("refreshRejected");
         }
         throw error;
       }
@@ -162,37 +163,34 @@ export const getApiBaseUrlResolved = async (): Promise<string> => {
   return API_BASE_URL.replace(/\/+$/, "");
 };
 
-export const logout = () => {
+export const logout = (reason?: LogoutReason) => {
+  clearAuthStorage();
+
+  if (window.location.pathname !== "/login") {
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    window.location.assign(
+      buildLoginRedirectUrl({ returnPath: returnTo, reason }),
+    );
+  }
+};
+
+const softLogout = (reason: LogoutReason = "missingToken") => {
+  clearAuthStorage();
+
+  if (window.location.pathname !== "/login") {
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    window.location.assign(
+      buildLoginRedirectUrl({ returnPath: returnTo, reason }),
+    );
+  }
+};
+
+function clearAuthStorage(): void {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_EXPIRATION);
   clearStoredProfileAvatarUrl();
-
-  if (window.location.pathname !== "/login") {
-    const returnTo = `${window.location.pathname}${window.location.search}`;
-    const q =
-      returnTo.startsWith("/tv/link")
-        ? `?redirect=${encodeURIComponent(returnTo)}`
-        : "";
-    window.location.assign(`/login${q}`);
-  }
-};
-
-const softLogout = () => {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_EXPIRATION);
-  clearStoredProfileAvatarUrl();
-
-  if (window.location.pathname !== "/login") {
-    const returnTo = `${window.location.pathname}${window.location.search}`;
-    const q =
-      returnTo.startsWith("/tv/link")
-        ? `?redirect=${encodeURIComponent(returnTo)}`
-        : "";
-    window.location.assign(`/login${q}`);
-  }
-};
+}
 
 export const getWebSocketUrlForBackgroundService = async (): Promise<string> => {
   await ensureApiBaseUrl();
@@ -200,7 +198,7 @@ export const getWebSocketUrlForBackgroundService = async (): Promise<string> => 
 
   const token = localStorage.getItem(ACCESS_TOKEN_KEY);
   if (!token) {
-    logout();
+    logout("missingToken");
     throw new Error("User is not authenticated");
   }
 
