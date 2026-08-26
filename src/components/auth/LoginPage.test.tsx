@@ -95,6 +95,29 @@ describe("LoginPage", () => {
     );
   });
 
+  it.each([
+    ["idleTimeout", /inactivity/i],
+    ["refreshRejected", /no longer valid/i],
+    ["missingToken", /no active session/i],
+    ["sessionExpired", /session expired/i],
+  ] as const)("shows notice for ?reason=%s", (reason, pattern) => {
+    vi.mocked(toast.info).mockClear();
+    renderLoginPage(`/login?reason=${reason}`);
+
+    expect(screen.getByTestId("logout-reason-notice")).toHaveTextContent(pattern);
+    expect(vi.mocked(toast.info)).toHaveBeenCalledWith(
+      expect.stringMatching(pattern),
+      expect.objectContaining({ autoClose: 8000 }),
+    );
+  });
+
+  it("does not show forced-logout notice on voluntary return to login", () => {
+    renderLoginPage("/login");
+
+    expect(screen.queryByTestId("logout-reason-notice")).not.toBeInTheDocument();
+    expect(vi.mocked(toast.info)).not.toHaveBeenCalled();
+  });
+
   it("redirects to home when a session is already stored", () => {
     localStorage.setItem(ACCESS_TOKEN_KEY, "existing-token");
 

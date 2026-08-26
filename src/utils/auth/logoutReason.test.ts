@@ -3,7 +3,15 @@ import {
   buildLoginRedirectUrl,
   logoutReasonMessage,
   readLogoutReasonFromSearch,
+  type LogoutReason,
 } from "./logoutReason";
+
+const ALL_REASONS: LogoutReason[] = [
+  "sessionExpired",
+  "refreshRejected",
+  "missingToken",
+  "idleTimeout",
+];
 
 describe("logoutReason", () => {
   it("builds login url with reason", () => {
@@ -21,13 +29,21 @@ describe("logoutReason", () => {
     ).toBe("/login?redirect=%2Ftv%2Flink%3Fcode%3DABC&reason=refreshRejected");
   });
 
-  it("reads reason from search params", () => {
-    expect(readLogoutReasonFromSearch("?reason=idleTimeout")).toBe("idleTimeout");
+  it.each(ALL_REASONS)("reads %s from search params", (reason) => {
+    expect(readLogoutReasonFromSearch(`?reason=${reason}`)).toBe(reason);
+  });
+
+  it("rejects unknown reason values", () => {
     expect(readLogoutReasonFromSearch("?reason=unknown")).toBeNull();
   });
 
-  it("returns human-readable messages", () => {
+  it("returns distinct human-readable messages for every forced logout reason", () => {
+    const messages = ALL_REASONS.map((reason) => logoutReasonMessage(reason));
+    const unique = new Set(messages);
+    expect(unique.size).toBe(ALL_REASONS.length);
     expect(logoutReasonMessage("idleTimeout")).toMatch(/inactivity/i);
     expect(logoutReasonMessage("sessionExpired")).toMatch(/expired/i);
+    expect(logoutReasonMessage("refreshRejected")).toMatch(/no longer valid/i);
+    expect(logoutReasonMessage("missingToken")).toMatch(/no active session/i);
   });
 });

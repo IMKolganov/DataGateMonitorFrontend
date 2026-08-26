@@ -164,7 +164,15 @@ export default function useSignalRService() {
                         patch[id] = d;
                     }
 
-                    setServiceData((prev) => ({ ...prev, ...patch }));
+                    setServiceData((prev) => {
+                        const next = { ...prev };
+                        for (const [idStr, dto] of Object.entries(patch)) {
+                            const id = Number(idStr);
+                            if (!Number.isFinite(id) || id <= 0) continue;
+                            next[id] = { ...prev[id], ...dto };
+                        }
+                        return next;
+                    });
                 });
 
                 setConnectionState("starting");

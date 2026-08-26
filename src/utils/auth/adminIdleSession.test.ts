@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
 const logout = vi.fn();
-vi.mock("../../api/apirequest", () => ({ logout: () => logout() }));
+vi.mock("../../api/apirequest", () => ({ logout: (...args: unknown[]) => logout(...args) }));
 vi.mock("../../api/orval/auth/auth", () => ({
   getApiAuthSessionPolicy: vi.fn(async () => ({
     success: true,
@@ -137,6 +137,7 @@ describe("startAdminIdleSession", () => {
     expect(logout).not.toHaveBeenCalled();
     vi.advanceTimersByTime(1);
     expect(logout).toHaveBeenCalledTimes(1);
+    expect(logout).toHaveBeenCalledWith("idleTimeout");
   });
 
   it("reads admin role from long-form claim and string timeout", async () => {

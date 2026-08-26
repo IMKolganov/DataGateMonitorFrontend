@@ -163,26 +163,29 @@ export const getApiBaseUrlResolved = async (): Promise<string> => {
   return API_BASE_URL.replace(/\/+$/, "");
 };
 
-export const logout = (reason?: LogoutReason) => {
-  clearAuthStorage();
+let loginRedirectStarted = false;
 
-  if (window.location.pathname !== "/login") {
-    const returnTo = `${window.location.pathname}${window.location.search}`;
-    window.location.assign(
-      buildLoginRedirectUrl({ returnPath: returnTo, reason }),
-    );
+/** @internal Resets module redirect guard between Vitest cases. */
+export function resetLoginRedirectGuardForTests(): void {
+  loginRedirectStarted = false;
+}
+
+function redirectToLogin(reason?: LogoutReason): void {
+  clearAuthStorage();
+  if (loginRedirectStarted || window.location.pathname === "/login") {
+    return;
   }
+  loginRedirectStarted = true;
+  const returnTo = `${window.location.pathname}${window.location.search}`;
+  window.location.assign(buildLoginRedirectUrl({ returnPath: returnTo, reason }));
+}
+
+export const logout = (reason?: LogoutReason) => {
+  redirectToLogin(reason);
 };
 
 const softLogout = (reason: LogoutReason = "missingToken") => {
-  clearAuthStorage();
-
-  if (window.location.pathname !== "/login") {
-    const returnTo = `${window.location.pathname}${window.location.search}`;
-    window.location.assign(
-      buildLoginRedirectUrl({ returnPath: returnTo, reason }),
-    );
-  }
+  redirectToLogin(reason);
 };
 
 function clearAuthStorage(): void {

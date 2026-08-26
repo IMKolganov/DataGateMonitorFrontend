@@ -20,10 +20,8 @@ import RegisterPage from "./components/auth/RegisterPage";
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./components/auth/ResetPasswordPage";
 import ConfirmEmailPage from "./components/auth/ConfirmEmailPage";
-import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./utils/const.ts";
 import { isAuthenticated } from "./utils/auth/authSelectors.ts";
-import { startAdminIdleSession } from "./utils/auth/adminIdleSession.ts";
-import { scheduleAutoLogout } from "./utils/auth/tokenExpiryScheduler.ts";
+import { restoreAuthSessionOnStartup } from "./utils/auth/authStartup.ts";
 import { RequireAdmin } from "./components/auth/RequireAdmin.tsx";
 import { RequireAdminTotpSetup } from "./components/auth/RequireAdminTotpSetup.tsx";
 import { withSuspense } from "./utils/withSuspense.tsx";
@@ -78,7 +76,7 @@ const TvLinkPage = lazy(() => import("./pages/tv/TvLinkPage.tsx"));
 
 
 const PrivateRoute = ({ children }: { children: ReactNode }): React.ReactElement =>
-  isAuthenticated() ? <>{children}</> : <Navigate to="/login" replace />;
+  isAuthenticated() ? <>{children}</> : <Navigate to="/login?reason=missingToken" replace />;
 
 const XrayPrivateRoute = ({ children }: { children: ReactNode }): React.ReactElement =>
   isAuthenticated() ? <>{children}</> : <Navigate to="/xray/login" replace />;
@@ -115,13 +113,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 function App() {
   // Restore JWT expiry timer after full page load so idle refresh runs even if the tab was closed overnight.
   // If the access JWT is already expired, scheduleAutoLogout triggers refresh immediately (same as after 401).
-  useEffect(() => {
-    const access = localStorage.getItem(ACCESS_TOKEN_KEY);
-    const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
-    if (!access || !refresh) return;
-    scheduleAutoLogout(access);
-    return startAdminIdleSession();
-  }, []);
+  useEffect(() => restoreAuthSessionOnStartup(), []);
 
   return (
     <div className="app-container">

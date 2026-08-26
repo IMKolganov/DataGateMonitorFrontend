@@ -34,7 +34,7 @@ vi.mock("axios", () => {
   };
 });
 
-import { apiRequest, logout, shouldLogoutOnRefreshError } from "./apirequest";
+import { apiRequest, getWebSocketUrlForBackgroundService, logout, resetLoginRedirectGuardForTests, shouldLogoutOnRefreshError } from "./apirequest";
 
 describe("shouldLogoutOnRefreshError", () => {
   it("returns false for non-objects", () => {
@@ -58,6 +58,7 @@ describe("logout redirect with reason", () => {
   const assign = vi.fn();
 
   beforeEach(() => {
+    resetLoginRedirectGuardForTests();
     localStorage.clear();
     assign.mockClear();
     Object.defineProperty(window, "location", {
@@ -116,12 +117,21 @@ describe("logout redirect with reason", () => {
       "/login?redirect=%2Ftv%2Flink%3Fcode%3DABC&reason=refreshRejected",
     );
   });
+
+  it("keeps the first logout reason when a second redirect is attempted", () => {
+    logout("idleTimeout");
+    logout("missingToken");
+
+    expect(assign).toHaveBeenCalledTimes(1);
+    expect(assign).toHaveBeenCalledWith("/login?reason=idleTimeout");
+  });
 });
 
 describe("apiRequest auth failure paths", () => {
   const assign = vi.fn();
 
   beforeEach(() => {
+    resetLoginRedirectGuardForTests();
     localStorage.clear();
     assign.mockClear();
     scheduleAutoLogout.mockClear();
@@ -200,5 +210,56 @@ describe("apiRequest auth failure paths", () => {
 
     expect(axiosPost).not.toHaveBeenCalled();
     expect(assign).not.toHaveBeenCalled();
+  });
+
+  it("does not logout on transient refresh failure after 401", async () => {
+    axiosRequest.mockRejectedValueOnce({ isAxiosError: true, response: { status: 401 } });
+    axiosPost.mockRejectedValueOnce({ isAxiosError: true, response: { status: 503 } });
+
+    await expect(apiRequest("get", "/api/servers")).rejects.toBeTruthy();
+
+    expect(assign).not.toHaveBeenCalled();
+    expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBe("access-token");
+  });
+
+  it("logs out with refreshRejected when refresh token is missing after 401", async () => {
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    axiosRequest.mockRejectedValueOnce({ isAxiosError: true, response: { status: 401 } });
+
+    await expect(apiRequest("get", "/api/servers")).rejects.toBeTruthy();
+
+    expect(assign).toHaveBeenCalledWith("/login?reason=refreshRejected");
+  });
+
+  it("does not attempt refresh when already on /login", async () => {
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { pathname: "/login", search: "", assign },
+    });
+    axiosRequest.mockRejectedValueOnce({ isAxiosError: true, response: { status: 401 } });
+
+    await expect(apiRequest("get", "/api/servers")).rejects.toBeTruthy();
+
+    expect(axiosPost).not.toHaveBeenCalled();
+    expect(assign).not.toHaveBeenCalled();
+  });
+
+  it("logs out with missingToken from getWebSocketUrlForBackgroundService", async () => {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+
+    await expect(getWebSocketUrlForBackgroundService()).rejects.toThrow(/not authenticated/);
+
+    expect(assign).toHaveBeenCalledWith("/login?reason=missingToken");
+  });
+
+  it("softLogout after idleTimeout does not overwrite redirect reason", async () => {
+    resetLoginRedirectGuardForTests();
+    logout("idleTimeout");
+
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    await expect(apiRequest("get", "/api/servers")).rejects.toThrow(/not authenticated/);
+
+    expect(assign).toHaveBeenCalledTimes(1);
+    expect(assign).toHaveBeenCalledWith("/login?reason=idleTimeout");
   });
 });

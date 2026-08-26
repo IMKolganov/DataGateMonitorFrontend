@@ -7,6 +7,7 @@ import { ACCESS_TOKEN_KEY } from "../const";
 import { decodeToken } from "./jwt";
 import {
   ADMIN_IDLE_POLICY_CHANGED_EVENT,
+  notifyAdminIdleState,
   notifyAdminIdleWarning,
   notifyAdminIdleWarningCleared,
 } from "./adminIdleSessionEvents";
@@ -133,6 +134,7 @@ export function startAdminIdleSession(): () => void {
       const effectiveLogoutAt = Date.now() + waitMs;
       presentWarning(effectiveLogoutAt);
       idleTimer = window.setTimeout(performIdleLogout, waitMs);
+      notifyAdminIdleState({ idleLogoutAtMs: effectiveLogoutAt });
       return;
     }
 
@@ -142,6 +144,7 @@ export function startAdminIdleSession(): () => void {
     }, untilWarning);
 
     idleTimer = window.setTimeout(performIdleLogout, untilLogout);
+    notifyAdminIdleState({ idleLogoutAtMs: logoutAtMs });
   };
 
   const staySignedIn = () => {
@@ -206,6 +209,7 @@ export function startAdminIdleSession(): () => void {
     stopped = true;
     clearTimers();
     clearWarning();
+    notifyAdminIdleState({ idleLogoutAtMs: null });
     delete (window as unknown as { __datagateStaySignedIn?: () => void }).__datagateStaySignedIn;
     window.removeEventListener(ADMIN_IDLE_POLICY_CHANGED_EVENT, onPolicyChanged);
     document.removeEventListener("visibilitychange", onResume);
