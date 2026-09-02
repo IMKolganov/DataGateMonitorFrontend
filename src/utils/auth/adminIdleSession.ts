@@ -6,19 +6,16 @@ import { SystemRoles } from "../../constants/systemRoles";
 import { ACCESS_TOKEN_KEY } from "../const";
 import { decodeToken } from "./jwt";
 import {
+  ADMIN_IDLE_API_ACTIVITY_EVENT,
   ADMIN_IDLE_POLICY_CHANGED_EVENT,
+  notifyAdminIdleState,
   notifyAdminIdleWarning,
   notifyAdminIdleWarningCleared,
 } from "./adminIdleSessionEvents";
 
 const ROLE_CLAIM = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
-const HEARTBEAT_MIN_INTERVAL_MS = 30_000;
 /** Show warning this long before idle logout. */
 export const ADMIN_IDLE_WARNING_BEFORE_MS = 60_000;
-/** Ignore activity right after opening the modal (layout/scroll must not dismiss it). */
-const IGNORE_ACTIVITY_AFTER_WARNING_MS = 400;
-
-const ACTIVITY_EVENTS = ["mousedown", "keydown", "scroll", "touchstart", "click"] as const;
 
 function readAdminIdleTimeoutMinutes(token: string): number | null {
   try {
@@ -51,8 +48,9 @@ async function fetchSessionPolicyMinutes(): Promise<number> {
 }
 
 /**
- * Logs out administrators after a period without user interaction.
- * Shows a warning in the last minute. Backend enforces the same idle window on token refresh.
+ * Logs out administrators after a period without authenticated API activity.
+ * Shows a warning in the last minute. Backend enforces the same idle window on
+ * token refresh (and Touches idle state on authenticated admin requests).
  *
  * Sleep/wake and background-tab timer coalescing can fire the warning and logout
  * timeouts in the same turn (no paint). Logout is delayed until the warning has
@@ -67,10 +65,8 @@ export function startAdminIdleSession(): () => void {
 
   let idleTimer: number | null = null;
   let warningTimer: number | null = null;
-  let lastHeartbeatAt = 0;
   let lastActivityAt = Date.now();
   let warningFirstShownAt: number | null = null;
-  let ignoreActivityUntil = 0;
   let stopped = false;
   let warningVisible = false;
 
@@ -91,7 +87,6 @@ export function startAdminIdleSession(): () => void {
   const presentWarning = (logoutAtMs: number) => {
     warningVisible = true;
     if (warningFirstShownAt == null) warningFirstShownAt = Date.now();
-    ignoreActivityUntil = Date.now() + IGNORE_ACTIVITY_AFTER_WARNING_MS;
     notifyAdminIdleWarning({ logoutAtMs });
   };
 
@@ -111,7 +106,7 @@ export function startAdminIdleSession(): () => void {
       return;
     }
     clearWarning();
-    logout();
+    logout("idleTimeout");
   };
 
   const armTimers = (resetActivity: boolean) => {
@@ -133,6 +128,7 @@ export function startAdminIdleSession(): () => void {
       const effectiveLogoutAt = Date.now() + waitMs;
       presentWarning(effectiveLogoutAt);
       idleTimer = window.setTimeout(performIdleLogout, waitMs);
+      notifyAdminIdleState({ idleLogoutAtMs: effectiveLogoutAt });
       return;
     }
 
@@ -142,30 +138,20 @@ export function startAdminIdleSession(): () => void {
     }, untilWarning);
 
     idleTimer = window.setTimeout(performIdleLogout, untilLogout);
+    notifyAdminIdleState({ idleLogoutAtMs: logoutAtMs });
   };
 
   const staySignedIn = () => {
     if (stopped) return;
-    lastHeartbeatAt = Date.now();
     armTimers(true);
     void postApiAuthActivity().catch(() => {
       // ignore transient errors; refresh path will enforce idle on backend
     });
   };
 
-  const onActivity = (event: Event) => {
+  const onApiActivity = () => {
     if (stopped) return;
-    // Opening the modal can emit a layout scroll; that must not count as "stay signed in".
-    if (event.type === "scroll" && Date.now() < ignoreActivityUntil) return;
     armTimers(true);
-
-    const now = Date.now();
-    if (now - lastHeartbeatAt < HEARTBEAT_MIN_INTERVAL_MS) return;
-    lastHeartbeatAt = now;
-
-    void postApiAuthActivity().catch(() => {
-      // ignore transient errors; refresh path will enforce idle on backend
-    });
   };
 
   const onResume = () => {
@@ -173,10 +159,6 @@ export function startAdminIdleSession(): () => void {
     if (typeof document !== "undefined" && document.hidden) return;
     armTimers(false);
   };
-
-  for (const eventName of ACTIVITY_EVENTS) {
-    window.addEventListener(eventName, onActivity, { passive: true });
-  }
 
   const onPolicyChanged = () => {
     if (stopped) return;
@@ -187,6 +169,7 @@ export function startAdminIdleSession(): () => void {
     });
   };
 
+  window.addEventListener(ADMIN_IDLE_API_ACTIVITY_EVENT, onApiActivity);
   window.addEventListener(ADMIN_IDLE_POLICY_CHANGED_EVENT, onPolicyChanged);
   document.addEventListener("visibilitychange", onResume);
   window.addEventListener("pageshow", onResume);
@@ -206,13 +189,12 @@ export function startAdminIdleSession(): () => void {
     stopped = true;
     clearTimers();
     clearWarning();
+    notifyAdminIdleState({ idleLogoutAtMs: null });
     delete (window as unknown as { __datagateStaySignedIn?: () => void }).__datagateStaySignedIn;
+    window.removeEventListener(ADMIN_IDLE_API_ACTIVITY_EVENT, onApiActivity);
     window.removeEventListener(ADMIN_IDLE_POLICY_CHANGED_EVENT, onPolicyChanged);
     document.removeEventListener("visibilitychange", onResume);
     window.removeEventListener("pageshow", onResume);
-    for (const eventName of ACTIVITY_EVENTS) {
-      window.removeEventListener(eventName, onActivity);
-    }
   };
 }
 

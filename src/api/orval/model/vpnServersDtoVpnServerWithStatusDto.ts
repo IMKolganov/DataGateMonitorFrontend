@@ -14,4 +14,11 @@ export interface VpnServersDtoVpnServerWithStatusDto {
   countSessions?: number;
   totalBytesIn?: number;
   totalBytesOut?: number;
+  /** @nullable */
+  installedManagerVersion?: string | null;
+  /** @nullable */
+  latestManagerVersion?: string | null;
+  isManagerUpdateAvailable?: boolean;
+  /** @nullable */
+  managerReleaseUrl?: string | null;
 }

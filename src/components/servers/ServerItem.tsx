@@ -156,6 +156,18 @@ const ServerItem: React.FC<Props> = ({
                                 Polling off
                             </span>
                         )}
+                        {server.isManagerUpdateAvailable && (
+                            <span
+                                className="server-update-pill"
+                                title={
+                                    `Manager update available: ${
+                                        server.installedManagerVersion ?? "?"
+                                    } → ${server.latestManagerVersion ?? "?"}`
+                                }
+                            >
+                                Update
+                            </span>
+                        )}
                     </strong>
                     {quotaPlanGroups.length > 0 && (
                         <div

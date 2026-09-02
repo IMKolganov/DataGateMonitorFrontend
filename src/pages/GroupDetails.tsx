@@ -19,7 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { FaArrowLeft, FaGripVertical, FaSave, FaTrash } from "react-icons/fa";
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   useGetApiVpnServerGroupsGetAll,
@@ -30,17 +30,22 @@ import {
   usePutApiVpnServerGroupsUngroupedSetServers,
   getGetApiVpnServerGroupsGetAllQueryKey,
 } from "../api/orval/vpn-server-groups/vpn-server-groups";
-import { getApiV3OpenVpnServersGetAllWithStatus } from "../api/orval/vpn-servers-v3/vpn-servers-v3";
+import {
+  getApiV3OpenVpnServersGetAllWithStatus,
+  getGetApiV3OpenVpnServersGetAllWithStatusQueryKey,
+} from "../api/orval/vpn-servers-v3/vpn-servers-v3";
 import { deleteApiOpenVpnServersDeleteVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
-import { getApiOpenVpnClientsGetAllConnected } from "../api/orval/vpn-server-clients/vpn-server-clients";
 import type { VpnServerGroupsDtoVpnServerGroupDto } from "../api/orval/model/vpnServerGroupsDtoVpnServerGroupDto";
 import { ServiceStatus } from "../api/orvalModelShim";
 import type {
   ServiceStatusDto,
-  VpnServerClientsResponsesConnectedClientsResponse,
   VpnServerWithStatusV2Dto,
   VpnServerWithStatusesV3Response,
 } from "../api/orvalModelShim";
+import {
+  isUserConnectedToServer,
+  useCurrentUserConnectedServerIds,
+} from "../hooks/useCurrentUserConnectedServerIds";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import { buildServerSwitchPath } from "../utils/buildServerSwitchPath";
 import { UNGROUPED_GROUP_ID } from "../utils/serverGroups";
@@ -98,14 +103,6 @@ function pickServiceDataEntry(
   id: number,
 ): ServiceStatusDto | undefined {
   return map[id] ?? (map as unknown as Record<string, ServiceStatusDto>)[String(id)];
-}
-
-function readPayload<T>(value: T | { data?: T } | undefined): T | undefined {
-  if (!value) return undefined;
-  if (typeof value === "object" && "data" in value) {
-    return (value as { data?: T }).data;
-  }
-  return value as T;
 }
 
 function serverRowIsDisabled(raw: VpnServerWithStatusV2Dto): boolean {
@@ -222,7 +219,7 @@ const GroupDetails: React.FC = () => {
   const queryClient = useQueryClient();
   const user = getCurrentUser();
   const canEdit = isAdmin(user);
-  const currentUserExternalId = (user?.providerExternalId ?? "").trim();
+  const { connectedServerIds } = useCurrentUserConnectedServerIds();
   const { serviceData } = useSignalRService();
 
   const groupsQuery = useGetApiVpnServerGroupsGetAll();
@@ -230,7 +227,7 @@ const GroupDetails: React.FC = () => {
 
   const serversQuery = useQuery({
     // Distinct from ServerList MappedServer cache (same REST, different shape).
-    queryKey: ["v3", "open-vpn-servers", "with-status", "group-details"],
+    queryKey: [...getGetApiV3OpenVpnServersGetAllWithStatusQueryKey(undefined), "group-details"],
     queryFn: async () => {
       const resp = await getApiV3OpenVpnServersGetAllWithStatus();
       const payload = resp as VpnServerWithStatusesV3Response;
@@ -248,7 +245,7 @@ const GroupDetails: React.FC = () => {
             nextRunTime: "N/A",
             wsCountConnectedClients: item.countConnectedClients,
             wsCountSessions: item.countSessions,
-            wsOnline: null,
+            wsOnline: Boolean(s?.isOnline),
             groupId: s?.groupId ?? null,
             sortOrder: s?.sortOrder ?? 0,
             raw: item,
@@ -378,48 +375,6 @@ const GroupDetails: React.FC = () => {
     return allServers.filter((s) => !inGroup.has(s.id));
   }, [allServers, memberIds]);
 
-  const memberServers = useMemo(() => {
-    const list: MappedServer[] = [];
-    for (const id of memberIds) {
-      const server = serverById.get(id);
-      if (server) list.push(server);
-    }
-    return list;
-  }, [memberIds, serverById]);
-
-  const connectedByServerQueries = useQueries({
-    queries: memberServers.map((server) => ({
-      queryKey: ["group-details-connected", server.id],
-      queryFn: () => getApiOpenVpnClientsGetAllConnected({ VpnServerId: server.id, Page: 1, PageSize: 300 }),
-      enabled: Boolean(currentUserExternalId),
-      staleTime: 12_000,
-      refetchInterval: 15_000,
-      retry: 1,
-    })),
-  });
-
-  const connectedByServerId = useMemo(() => {
-    const map = new Map<number, boolean>();
-    if (!currentUserExternalId) return map;
-    for (let i = 0; i < memberServers.length; i += 1) {
-      const server = memberServers[i];
-      if (!server) continue;
-      const q = connectedByServerQueries[i];
-      const payload = readPayload<VpnServerClientsResponsesConnectedClientsResponse>(
-        q?.data as
-          | VpnServerClientsResponsesConnectedClientsResponse
-          | { data?: VpnServerClientsResponsesConnectedClientsResponse }
-          | undefined,
-      );
-      const clients = payload?.vpnClients ?? [];
-      map.set(
-        server.id,
-        clients.some((c) => (c.externalId ?? "").trim() === currentUserExternalId),
-      );
-    }
-    return map;
-  }, [connectedByServerQueries, currentUserExternalId, memberServers]);
-
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -427,7 +382,9 @@ const GroupDetails: React.FC = () => {
 
   const invalidate = async () => {
     await queryClient.invalidateQueries({ queryKey: getGetApiVpnServerGroupsGetAllQueryKey() });
-    await queryClient.invalidateQueries({ queryKey: ["v3", "open-vpn-servers", "with-status"] });
+    await queryClient.invalidateQueries({
+      queryKey: getGetApiV3OpenVpnServersGetAllWithStatusQueryKey(undefined),
+    });
   };
 
   const updateMutation = usePutApiVpnServerGroupsUpdateId();
@@ -740,7 +697,7 @@ const GroupDetails: React.FC = () => {
                         wsOnline={server.wsOnline}
                         wsCountConnectedClients={server.wsCountConnectedClients}
                         wsCountSessions={server.wsCountSessions}
-                        isCurrentUserConnected={connectedByServerId.get(id) === true}
+                        isCurrentUserConnected={isUserConnectedToServer(connectedServerIds, id)}
                         onView={openServer}
                         onEdit={(serverId) => navigate(`/servers/edit/${serverId}`)}
                         onDelete={(serverId) => void handleDeleteServer(serverId)}

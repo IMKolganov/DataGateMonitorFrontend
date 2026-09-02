@@ -21,12 +21,12 @@ describe("signalr-url", () => {
     expect(() => getSignalRUrl("")).toThrow(/vpnServerId is required/);
   });
 
-  it("returns token or logs out", () => {
+  it("returns token or logs out with missingToken", () => {
     localStorage.setItem(ACCESS_TOKEN_KEY, "tok");
     expect(getAccessTokenOrLogout()).toBe("tok");
 
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     expect(() => getAccessTokenOrLogout()).toThrow(/not authenticated/);
-    expect(logout).toHaveBeenCalled();
+    expect(logout).toHaveBeenCalledWith("missingToken");
   });
 });

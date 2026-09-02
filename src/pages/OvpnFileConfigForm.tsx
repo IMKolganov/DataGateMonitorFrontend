@@ -814,7 +814,12 @@ const OvpnFileConfigForm: React.FC = () => {
                 </p>
                 <ul style={{ margin: "0 0 12px", paddingLeft: 20, lineHeight: 1.6 }}>
                   <li>
-                    <code>{"{{vless_uri}}"}</code> — share link
+                    <code>{"{{vless_uri}}"}</code> — share link for the transport the node issues
+                    (<code>XRAY_CLIENT_LINK_TRANSPORT</code>)
+                  </li>
+                  <li>
+                    <code>{"{{vless_uri_xhttp}}"}</code> — same client over the node's xHTTP inbound; empty string
+                    unless <code>XRAY_XHTTP_ENABLED</code>
                   </li>
                   <li>
                     <code>{"{{dns_servers_json}}"}</code> — raw array from node <code>DNS1</code>/<code>DNS2</code>{" "}
@@ -833,8 +838,8 @@ const OvpnFileConfigForm: React.FC = () => {
                   </li>
                 </ul>
                 <p className="form-hint" style={{ marginBottom: 0 }}>
-                  After changing the template, re-issue or re-download client links so apps pick up{" "}
-                  <code>dnsServers</code>.
+                  Nodes re-render the profile on every download, so template changes reach clients issued by the
+                  current manager on their next connect. Links issued before that need one re-issue.
                 </p>
               </>
             ) : (

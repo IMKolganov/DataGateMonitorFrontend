@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
 const logout = vi.fn();
-vi.mock("../../api/apirequest", () => ({ logout: () => logout() }));
+vi.mock("../../api/apirequest", () => ({ logout: (...args: unknown[]) => logout(...args) }));
 vi.mock("../../api/orval/auth/auth", () => ({
   getApiAuthSessionPolicy: vi.fn(async () => ({
     success: true,
@@ -41,6 +41,7 @@ import {
   ADMIN_IDLE_POLICY_CHANGED_EVENT,
   ADMIN_IDLE_WARNING_CLEARED_EVENT,
   ADMIN_IDLE_WARNING_EVENT,
+  notifyAdminApiActivity,
   notifyAdminIdlePolicyChanged,
   type AdminIdleWarningDetail,
 } from "./adminIdleSessionEvents";
@@ -137,6 +138,7 @@ describe("startAdminIdleSession", () => {
     expect(logout).not.toHaveBeenCalled();
     vi.advanceTimersByTime(1);
     expect(logout).toHaveBeenCalledTimes(1);
+    expect(logout).toHaveBeenCalledWith("idleTimeout");
   });
 
   it("reads admin role from long-form claim and string timeout", async () => {
@@ -210,7 +212,7 @@ describe("startAdminIdleSession", () => {
     dispose();
   });
 
-  it("activity after warning clears it and resets the idle timer", async () => {
+  it("authenticated API activity clears warning and resets the idle timer", async () => {
     const { warnings, clears, dispose } = listenWarnings();
     stop = startAdmin(3);
     await flushPolicyFetch();
@@ -219,12 +221,27 @@ describe("startAdminIdleSession", () => {
     expect(warnings.length).toBeGreaterThanOrEqual(1);
 
     logout.mockClear();
-    window.dispatchEvent(new Event("mousedown"));
+    notifyAdminApiActivity();
     expect(clears.length).toBeGreaterThanOrEqual(1);
+    expect(postActivity).not.toHaveBeenCalled();
 
     vi.advanceTimersByTime(ADMIN_IDLE_WARNING_BEFORE_MS);
     expect(logout).not.toHaveBeenCalled();
     dispose();
+  });
+
+  it("does not treat DOM interaction as activity", async () => {
+    stop = startAdmin(3);
+    await flushPolicyFetch();
+    logout.mockClear();
+
+    window.dispatchEvent(new Event("mousedown"));
+    window.dispatchEvent(new Event("keydown"));
+    document.dispatchEvent(new Event("scroll", { bubbles: false }));
+
+    vi.advanceTimersByTime(3 * 60_000);
+    expect(logout).toHaveBeenCalledTimes(1);
+    expect(logout).toHaveBeenCalledWith("idleTimeout");
   });
 
   it("applies updated timeout after ADMIN_IDLE_POLICY_CHANGED_EVENT", async () => {
@@ -261,22 +278,6 @@ describe("startAdminIdleSession", () => {
     expect(logout).not.toHaveBeenCalled();
   });
 
-  it("throttles activity heartbeats to 30 seconds", async () => {
-    stop = startAdmin(5);
-    await flushPolicyFetch();
-    postActivity.mockClear();
-
-    window.dispatchEvent(new Event("keydown"));
-    expect(postActivity).toHaveBeenCalledTimes(1);
-
-    window.dispatchEvent(new Event("keydown"));
-    expect(postActivity).toHaveBeenCalledTimes(1);
-
-    vi.advanceTimersByTime(30_000);
-    window.dispatchEvent(new Event("keydown"));
-    expect(postActivity).toHaveBeenCalledTimes(2);
-  });
-
   it("gives a full warning minute after sleep/wake when idle already elapsed", async () => {
     const { warnings, dispose } = listenWarnings();
     stop = startAdmin(3);
@@ -293,23 +294,6 @@ describe("startAdminIdleSession", () => {
     expect(logout).not.toHaveBeenCalled();
     vi.advanceTimersByTime(1);
     expect(logout).toHaveBeenCalledTimes(1);
-    dispose();
-  });
-
-  it("ignores scroll immediately after showing the warning so layout cannot dismiss it", async () => {
-    const { warnings, clears, dispose } = listenWarnings();
-    stop = startAdmin(1);
-    await flushPolicyFetch();
-    expect(warnings.length).toBeGreaterThanOrEqual(1);
-
-    const clearsBefore = clears.length;
-    window.dispatchEvent(new Event("scroll"));
-    expect(clears.length).toBe(clearsBefore);
-    expect(logout).not.toHaveBeenCalled();
-
-    vi.advanceTimersByTime(400);
-    window.dispatchEvent(new Event("scroll"));
-    expect(clears.length).toBeGreaterThan(clearsBefore);
     dispose();
   });
 });

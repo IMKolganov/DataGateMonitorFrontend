@@ -1,9 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../../test/renderWithProviders";
+import { toast } from "react-toastify";
+import { ACCESS_TOKEN_KEY } from "../../utils/const";
 import LoginPage from "./LoginPage";
-import type { TotpChallengeState } from "../../utils/auth/handleLoginResponse";
 
 vi.mock("../../contexts/useTheme", () => ({
   useTheme: () => ({
@@ -13,7 +14,7 @@ vi.mock("../../contexts/useTheme", () => ({
 }));
 
 vi.mock("react-toastify", () => ({
-  toast: { success: vi.fn() },
+  toast: { success: vi.fn(), info: vi.fn() },
 }));
 
 vi.mock("./PasswordLoginForm", () => ({
@@ -41,11 +42,17 @@ vi.mock("./TelegramCodeLoginForm", () => ({
   default: () => <div data-testid="telegram-login-form">Telegram form</div>,
 }));
 
-function renderLoginPage() {
-  return renderWithProviders(<LoginPage />);
+import type { TotpChallengeState } from "../../utils/auth/handleLoginResponse";
+
+function renderLoginPage(route = "/login") {
+  return renderWithProviders(<LoginPage />, { route });
 }
 
 describe("LoginPage", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it("shows the sign-in screen by default", () => {
     renderLoginPage();
 
@@ -76,5 +83,55 @@ describe("LoginPage", () => {
     expect(screen.getByRole("heading", { name: /sign in to datagate monitor/i })).toBeInTheDocument();
     expect(screen.getByTestId("google-login-button")).toBeInTheDocument();
     expect(screen.queryByTestId("totp-challenge-screen")).not.toBeInTheDocument();
+  });
+
+  it("shows a notice when redirected after forced logout", () => {
+    renderLoginPage("/login?reason=sessionExpired");
+
+    expect(screen.getByTestId("logout-reason-notice")).toHaveTextContent(/session expired/i);
+    expect(vi.mocked(toast.info)).toHaveBeenCalledWith(
+      expect.stringMatching(/session expired/i),
+      expect.objectContaining({ autoClose: 8000 }),
+    );
+  });
+
+  it.each([
+    ["idleTimeout", /inactivity/i],
+    ["refreshRejected", /no longer valid/i],
+    ["missingToken", /no active session/i],
+    ["sessionExpired", /session expired/i],
+  ] as const)("shows notice for ?reason=%s", (reason, pattern) => {
+    vi.mocked(toast.info).mockClear();
+    renderLoginPage(`/login?reason=${reason}`);
+
+    expect(screen.getByTestId("logout-reason-notice")).toHaveTextContent(pattern);
+    expect(vi.mocked(toast.info)).toHaveBeenCalledWith(
+      expect.stringMatching(pattern),
+      expect.objectContaining({ autoClose: 8000 }),
+    );
+  });
+
+  it("does not show forced-logout notice on voluntary return to login", () => {
+    renderLoginPage("/login");
+
+    expect(screen.queryByTestId("logout-reason-notice")).not.toBeInTheDocument();
+    expect(vi.mocked(toast.info)).not.toHaveBeenCalled();
+  });
+
+  it("redirects to home when a session is already stored", () => {
+    localStorage.setItem(ACCESS_TOKEN_KEY, "existing-token");
+
+    renderLoginPage("/login");
+
+    expect(screen.queryByRole("heading", { name: /sign in to datagate monitor/i })).not.toBeInTheDocument();
+  });
+
+  it("redirects to safe return path when session exists", () => {
+    localStorage.setItem(ACCESS_TOKEN_KEY, "existing-token");
+
+    const { queryClient } = renderLoginPage("/login?redirect=%2Fservers");
+
+    expect(screen.queryByRole("heading", { name: /sign in to datagate monitor/i })).not.toBeInTheDocument();
+    expect(queryClient).toBeDefined();
   });
 });

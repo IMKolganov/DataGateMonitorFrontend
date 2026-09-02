@@ -8,6 +8,11 @@ import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { toast } from "react-toastify";
 import "../../css/GeoPointsMap.css";
+import {
+    isMapContainerConnected,
+    LeafletMapLifecycle,
+    safeMapCall,
+} from "../../utils/leafletMapSafe";
 
 import { getApiOpenVpnClientsOverviewPoints } from "../../api/orval/vpn-server-clients/vpn-server-clients.ts";
 import type {
@@ -140,7 +145,20 @@ const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }
     const map = useMap();
     const [lat, lng] = center;
     useEffect(() => {
-        map.setView([lat, lng], zoom);
+        let alive = true;
+        const id = window.setTimeout(() => {
+            if (!alive || !isMapContainerConnected(map)) return;
+            safeMapCall(map, () => map.setView([lat, lng], zoom));
+        }, 0);
+        return () => {
+            alive = false;
+            clearTimeout(id);
+            try {
+                map.stop();
+            } catch {
+                /* map already removed */
+            }
+        };
     }, [map, lat, lng, zoom]);
     return null;
 };
@@ -417,10 +435,12 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                 className="geo-points-map__container"
                 center={center}
                 zoom={zoom}
+                zoomAnimation={false}
             >
+                <LeafletMapLifecycle />
                 <InvalidateMapSize trigger={isFullscreen} />
                 <FullscreenControl isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
-                <ChangeView center={center} zoom={zoom} />
+                {!bounds && <ChangeView center={center} zoom={zoom} />}
                 <TileLayer
                     url={tileLayers[selectedLayer].url}
                     attribution={tileLayers[selectedLayer].attribution}
@@ -505,18 +525,19 @@ const FitBounds: React.FC<{ bounds: L.LatLngBounds }> = ({ bounds }) => {
     useEffect(() => {
         let alive = true;
         const id = window.setTimeout(() => {
-            if (!alive) return;
-            try {
-                const el = map.getContainer();
-                if (!el?.isConnected) return;
-                map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
-            } catch {
-                /* map unmounting mid-zoom — avoids Leaflet _leaflet_pos on torn panes */
-            }
+            if (!alive || !isMapContainerConnected(map)) return;
+            safeMapCall(map, () =>
+                map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 })
+            );
         }, 0);
         return () => {
             alive = false;
             clearTimeout(id);
+            try {
+                map.stop();
+            } catch {
+                /* map already removed */
+            }
         };
     }, [map, bounds]);
     return null;
@@ -525,14 +546,20 @@ const FitBounds: React.FC<{ bounds: L.LatLngBounds }> = ({ bounds }) => {
 const InvalidateMapSize: React.FC<{ trigger: boolean }> = ({ trigger }) => {
     const map = useMap();
     useEffect(() => {
+        let alive = true;
         const id = window.setTimeout(() => {
-            try {
-                map.invalidateSize();
-            } catch {
-                /* map may be unmounted while toggling fullscreen */
-            }
+            if (!alive || !isMapContainerConnected(map)) return;
+            safeMapCall(map, () => map.invalidateSize());
         }, 50);
-        return () => clearTimeout(id);
+        return () => {
+            alive = false;
+            clearTimeout(id);
+            try {
+                map.stop();
+            } catch {
+                /* map already removed */
+            }
+        };
     }, [map, trigger]);
     return null;
 };

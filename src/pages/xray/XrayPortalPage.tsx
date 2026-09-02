@@ -19,6 +19,10 @@ import { VpnServerType } from "../../constants/vpnServerType";
 import { getXrayLanguage, setXrayLanguage, XRAY_LANGUAGE_OPTIONS, XRAY_TRANSLATIONS } from "./i18n";
 import { appVersion } from "../../version";
 import GdprFooterLinks from "../../components/gdpr/GdprFooterLinks";
+import {
+  decodeXrayClientLinkContent,
+  extractVlessUriFromClientLinkContent,
+} from "../../utils/xrayClientLinkContent";
 import "../../css/XrayPortal.css";
 
 const EMAIL_CLAIM = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress";
@@ -32,15 +36,6 @@ function buildXrayCommonName(externalId: string): string {
   return `xray-${externalId.slice(0, 64)}-${Date.now()}`;
 }
 
-function decodeBase64Utf8(value: string): string {
-  try {
-    const bytes = Uint8Array.from(atob(value), (c) => c.charCodeAt(0));
-    return new TextDecoder("utf-8").decode(bytes);
-  } catch {
-    return value;
-  }
-}
-
 function claimString(source: Record<string, unknown>, ...keys: string[]): string {
   for (const key of keys) {
     const value = source[key];
@@ -49,6 +44,22 @@ function claimString(source: Record<string, unknown>, ...keys: string[]): string
     }
   }
   return "";
+}
+
+function readIssuedFileMeta(result: unknown): { vpnServerId?: number; commonName?: string } {
+  if (!result || typeof result !== "object") return {};
+
+  const root = result as Record<string, unknown>;
+  const file = root.issuedOvpnFile ?? root.IssuedOvpnFile;
+  if (!file || typeof file !== "object") return {};
+
+  const record = file as Record<string, unknown>;
+  const vpnServerIdRaw = record.vpnServerId ?? record.VpnServerId;
+  const vpnServerId =
+    typeof vpnServerIdRaw === "number" && Number.isFinite(vpnServerIdRaw) ? vpnServerIdRaw : undefined;
+  const commonName = claimString(record, "commonName", "CommonName");
+
+  return { vpnServerId, commonName };
 }
 
 const XrayPortalPage: React.FC = () => {
@@ -130,13 +141,8 @@ const XrayPortalPage: React.FC = () => {
         commonName: generatedCommonName,
       };
 
-      const result = (await postApiXrayClientLinksAddWithToken(payload)) as {
-        issuedOvpnFile?: { vpnServerId?: number; commonName?: string | null };
-        issuedOvpnFileToken?: { token?: string | null };
-      };
-
-      const vpnServerId = result.issuedOvpnFile?.vpnServerId;
-      const commonName = result.issuedOvpnFile?.commonName?.trim();
+      const result = await postApiXrayClientLinksAddWithToken(payload);
+      const { vpnServerId, commonName } = readIssuedFileMeta(result);
       if (!vpnServerId || !commonName) {
         setStatus(t.accessCreatedNoToken);
         return;
@@ -146,15 +152,10 @@ const XrayPortalPage: React.FC = () => {
         vpnServerId,
         commonName,
       };
-      const downloaded = (await postApiXrayClientLinksDownloadFileByCn(downloadPayload)) as
-        | DownloadFileResponse
-        | { data?: DownloadFileResponse };
-      const envelope = downloaded as { data?: DownloadFileResponse };
-      const direct = downloaded as DownloadFileResponse;
-      const content = (envelope.data?.content ?? direct.content ?? "").trim();
-      const decoded = decodeBase64Utf8(content).trim();
-      const lines = decoded.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-      const vlessLine = lines.find((line) => line.startsWith("vless://")) ?? "";
+      const downloaded = (await postApiXrayClientLinksDownloadFileByCn(downloadPayload)) as DownloadFileResponse;
+      const content = (downloaded.content ?? "").trim();
+      const decoded = decodeXrayClientLinkContent(content);
+      const vlessLine = extractVlessUriFromClientLinkContent(content);
       if (!vlessLine) {
         setStatus(t.accessCreatedNoToken);
         return;

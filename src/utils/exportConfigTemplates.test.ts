@@ -10,9 +10,11 @@ function expandDashboardXrayTemplate(vars: {
   uuid: string;
   serverIp: string;
   serverPort: string;
+  vlessXhttp?: string;
 }): string {
   return XRAY_EXPORT_TEMPLATE.trim()
     .replaceAll("{{vless_uri}}", vars.vless)
+    .replaceAll("{{vless_uri_xhttp}}", vars.vlessXhttp ?? "")
     .replaceAll("{{dns_servers_json}}", vars.dnsServersJson)
     .replaceAll("{{dns_identity_enabled}}", vars.dnsIdentityEnabled ? "true" : "false")
     .replaceAll("{{friendly_name}}", vars.friendlyName)
@@ -55,6 +57,42 @@ describe("XRAY_EXPORT_TEMPLATE (dashboard → Android profile)", () => {
     expect(profile.vless.startsWith("vless://")).toBe(true);
     expect(profile.endpoint).toBe("xs2.example.com:443");
     expect(profile.uuid).toBe("11111111-1111-1111-1111-111111111111");
+  });
+
+  it("carries the node's xHTTP profile next to the primary one", () => {
+    expect(XRAY_EXPORT_TEMPLATE).toContain("{{vless_uri_xhttp}}");
+
+    const profile = JSON.parse(
+      expandDashboardXrayTemplate({
+        vless: "vless://u@h:443?encryption=none&security=tls&sni=h&type=tcp#DataGate",
+        vlessXhttp: "vless://u@h:2053?encryption=none&security=tls&sni=h&alpn=h2&type=xhttp&path=%2Fapi%2Fv1%2Fupdate&mode=auto#DataGate+xHTTP",
+        dnsServersJson: '["172.20.0.1"]',
+        dnsIdentityEnabled: true,
+        friendlyName: "xs2",
+        uuid: "u",
+        serverIp: "h",
+        serverPort: "443",
+      }),
+    ) as { vless: string; vlessXhttp: string };
+
+    expect(profile.vless).toContain("type=tcp");
+    expect(profile.vlessXhttp).toContain("type=xhttp");
+  });
+
+  it("stays valid JSON when the node has no xHTTP inbound", () => {
+    const profile = JSON.parse(
+      expandDashboardXrayTemplate({
+        vless: "vless://u@h:443?encryption=none&type=tcp#x",
+        dnsServersJson: "[]",
+        dnsIdentityEnabled: false,
+        friendlyName: "plain",
+        uuid: "u",
+        serverIp: "h",
+        serverPort: "443",
+      }),
+    ) as { vlessXhttp: string };
+
+    expect(profile.vlessXhttp).toBe("");
   });
 
   it("expands empty dnsServers when node has no DNS1/DNS2", () => {

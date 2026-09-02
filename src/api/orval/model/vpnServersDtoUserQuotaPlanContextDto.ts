@@ -15,4 +15,8 @@ export interface VpnServersDtoUserQuotaPlanContextDto {
   quotaPlanName?: string | null;
   /** @nullable */
   allowedVpnServerIds?: number[] | null;
+  /** @nullable */
+  personalAllowedVpnServerIds?: number[] | null;
+  /** @nullable */
+  personalDeniedVpnServerIds?: number[] | null;
 }

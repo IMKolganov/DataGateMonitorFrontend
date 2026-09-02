@@ -66,6 +66,7 @@ import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse
 import { UserQuotaPlanAssignmentModal } from "./UserQuotaPlanAssignmentModal";
 import { UserPasswordAdminSection } from "./UserPasswordAdminSection";
 import { UserVpnConnectionsSection } from "./UserVpnConnectionsSection";
+import { UserVpnServerAccessRulesSection } from "./UserVpnServerAccessRulesSection";
 import { UserDnsQueriesSection } from "../../components/pihole/UserDnsQueriesSection";
 import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
 import Grid from "../../components/ui/TableStyle.tsx";
@@ -827,6 +828,8 @@ export function UserDetailPage() {
           </div>
         )}
       </section>
+
+      {canManageRoles && userIdValid && <UserVpnServerAccessRulesSection userId={id} />}
 
       <section className="settings-card">
         <h3 className="settings-card__h3-with-icon">
