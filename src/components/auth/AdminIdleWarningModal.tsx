@@ -56,7 +56,8 @@ export function AdminIdleWarningModal() {
         </div>
         <div className="modal-body" style={{ padding: "16px 20px" }}>
           <p className="settings-item-description" style={{ marginBottom: 12 }}>
-            You will be signed out in <strong>{formatRemainingTime(remainingMs)}</strong> due to inactivity.
+            You will be signed out in <strong>{formatRemainingTime(remainingMs)}</strong> due to no recent API
+            activity.
           </p>
           <p className="settings-item-description" style={{ marginBottom: 0 }}>
             Stay signed in to keep working, or sign out now.

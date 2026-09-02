@@ -8,6 +8,7 @@ import {
 } from "../utils/const.ts";
 import { clearStoredProfileAvatarUrl } from "../utils/auth/storedProfileAvatar.ts";
 import { notifyAccessTokenRefreshed } from "../utils/auth/accessTokenEvents.ts";
+import { notifyAdminApiActivity } from "../utils/auth/adminIdleSessionEvents.ts";
 import { authErrFields, authLog } from "../utils/auth/authLog.ts";
 import { buildLoginRedirectUrl, type LogoutReason } from "../utils/auth/logoutReason.ts";
 import { scheduleAutoLogout } from "../utils/auth/tokenExpiryScheduler.ts";
@@ -75,6 +76,10 @@ export const apiRequest = async <T>(
       },
     });
 
+    if (!skipAuth && token) {
+      notifyAdminApiActivity();
+    }
+
     return response.data as ApiResponse<T>;
   } catch (error: unknown) {
     const status = axios.isAxiosError(error) ? error.response?.status : undefined;
@@ -106,6 +111,7 @@ export const apiRequest = async <T>(
           },
         });
 
+        notifyAdminApiActivity();
         return retryResponse.data as ApiResponse<T>;
       } catch (refreshErr) {
         authLog("apiRequest: refresh failed after 401", {

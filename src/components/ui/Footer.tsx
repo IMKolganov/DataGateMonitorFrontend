@@ -14,7 +14,10 @@ const Footer: React.FC = () => {
                 © {new Date().getFullYear()} DataGate Monitor v.{appVersion}
             </p>
             {sessionDebugLine ? (
-                <p className="footer-session-debug" title="Session timers (local debug)">
+                <p
+                    className="footer-session-debug"
+                    title="JWT = access token. Idle = admin logout without API activity (any authenticated call resets it). Refresh = refresh token."
+                >
                     Session: {sessionDebugLine}
                 </p>
             ) : null}

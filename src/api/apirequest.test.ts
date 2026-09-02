@@ -4,6 +4,7 @@ import {
   REFRESH_TOKEN_EXPIRATION,
   REFRESH_TOKEN_KEY,
 } from "../utils/const";
+import { ADMIN_IDLE_API_ACTIVITY_EVENT } from "../utils/auth/adminIdleSessionEvents";
 
 const scheduleAutoLogout = vi.fn();
 const axiosRequest = vi.fn();
@@ -183,12 +184,46 @@ describe("apiRequest auth failure paths", () => {
       },
     });
 
+    const onApiActivity = vi.fn();
+    window.addEventListener(ADMIN_IDLE_API_ACTIVITY_EVENT, onApiActivity);
+
     const result = await apiRequest<{ id: number }>("get", "/api/servers");
 
     expect(result.data.id).toBe(1);
     expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBe("new-access");
     expect(scheduleAutoLogout).toHaveBeenCalledWith("new-access");
     expect(assign).not.toHaveBeenCalled();
+    expect(onApiActivity).toHaveBeenCalledTimes(1);
+
+    window.removeEventListener(ADMIN_IDLE_API_ACTIVITY_EVENT, onApiActivity);
+  });
+
+  it("notifies admin API activity after a successful authenticated request", async () => {
+    axiosRequest.mockResolvedValueOnce({
+      data: { success: true, data: { ok: true } },
+    });
+
+    const onApiActivity = vi.fn();
+    window.addEventListener(ADMIN_IDLE_API_ACTIVITY_EVENT, onApiActivity);
+
+    await apiRequest("get", "/api/servers");
+
+    expect(onApiActivity).toHaveBeenCalledTimes(1);
+    window.removeEventListener(ADMIN_IDLE_API_ACTIVITY_EVENT, onApiActivity);
+  });
+
+  it("does not notify admin API activity for skipAuth requests", async () => {
+    axiosRequest.mockResolvedValueOnce({
+      data: { success: true, data: { ok: true } },
+    });
+
+    const onApiActivity = vi.fn();
+    window.addEventListener(ADMIN_IDLE_API_ACTIVITY_EVENT, onApiActivity);
+
+    await apiRequest("post", "/api/auth/login", {}, true);
+
+    expect(onApiActivity).not.toHaveBeenCalled();
+    window.removeEventListener(ADMIN_IDLE_API_ACTIVITY_EVENT, onApiActivity);
   });
 
   it("logs out with refreshRejected when 401 refresh returns 403", async () => {

@@ -5,6 +5,8 @@ export const ADMIN_IDLE_WARNING_CLEARED_EVENT = "datagate:admin-idle-warning-cle
 export const ADMIN_IDLE_POLICY_CHANGED_EVENT = "datagate:admin-idle-policy-changed";
 /** Fired when admin idle logout deadline changes (arm/reset/stop). */
 export const ADMIN_IDLE_STATE_EVENT = "datagate:admin-idle-state";
+/** Fired after a successful authenticated API call — resets the local idle countdown. */
+export const ADMIN_IDLE_API_ACTIVITY_EVENT = "datagate:admin-idle-api-activity";
 
 export type AdminIdleWarningDetail = {
   /** Absolute time when idle logout will fire. */
@@ -30,4 +32,9 @@ export function notifyAdminIdlePolicyChanged(): void {
 
 export function notifyAdminIdleState(detail: AdminIdleStateDetail): void {
   window.dispatchEvent(new CustomEvent(ADMIN_IDLE_STATE_EVENT, { detail }));
+}
+
+/** Call from the HTTP client after authenticated requests succeed (no dedicated heartbeat). */
+export function notifyAdminApiActivity(): void {
+  window.dispatchEvent(new CustomEvent(ADMIN_IDLE_API_ACTIVITY_EVENT));
 }
