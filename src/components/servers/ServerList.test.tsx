@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../../test/renderWithProviders";
 
 const authState = vi.hoisted(() => ({ admin: true }));
@@ -54,13 +55,16 @@ vi.mock("../../api/orval/vpn-servers-v3/vpn-servers-v3", () => ({
       },
     ],
   })),
+  getGetApiV3OpenVpnServersGetAllWithStatusQueryKey: () => ["/api/v3/open-vpn-servers/get-all-with-status"],
 }));
 
-vi.mock("../../api/orval/vpn-server-clients/vpn-server-clients", () => ({
-  getApiOpenVpnClientsGetAllConnected: vi.fn(async () => ({ vpnClients: [] })),
+vi.mock("../../hooks/useCurrentUserConnectedServerIds", () => ({
+  useCurrentUserConnectedServerIds: () => ({ connectedServerIds: new Set<number>() }),
+  isUserConnectedToServer: () => false,
 }));
 
 import ServerList from "./ServerList";
+import { getApiV3OpenVpnServersGetAllWithStatus } from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
 
 describe("ServerList", () => {
   beforeEach(() => {
@@ -81,5 +85,19 @@ describe("ServerList", () => {
 
     expect(await screen.findByRole("button", { name: /Refresh/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Add Server/i })).not.toBeInTheDocument();
+  });
+
+  it("refetches servers on refresh click", async () => {
+    vi.mocked(getApiV3OpenVpnServersGetAllWithStatus).mockClear();
+    renderWithProviders(<ServerList />, { route: "/servers" });
+
+    const refreshButton = await screen.findByRole("button", { name: /Refresh/i });
+    await screen.findByTestId("server-item-1");
+
+    expect(vi.mocked(getApiV3OpenVpnServersGetAllWithStatus)).toHaveBeenCalledTimes(1);
+
+    await userEvent.click(refreshButton);
+
+    expect(vi.mocked(getApiV3OpenVpnServersGetAllWithStatus)).toHaveBeenCalledTimes(2);
   });
 });

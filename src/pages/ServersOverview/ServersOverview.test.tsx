@@ -31,6 +31,11 @@ vi.mock("../../components/openvpn/UserClientAppVersionsSection", () => ({
 }));
 vi.mock("../../components/pihole/TopVisitedDomainsSection", () => ({ TopVisitedDomainsSection: () => null }));
 
+vi.mock("../../hooks/useCurrentUserConnectedServerIds", () => ({
+  useCurrentUserConnectedServerIds: () => ({ connectedServerIds: new Set<number>() }),
+  isUserConnectedToServer: () => false,
+}));
+
 vi.mock("../../api/orval/vpn-server-clients/vpn-server-clients", () => ({
   getApiOpenVpnClientsGetAllConnected: vi.fn(),
   useGetApiOpenVpnClientsGetAllConnected: () => ({ data: { clients: [] }, isLoading: false }),

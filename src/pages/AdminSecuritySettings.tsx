@@ -340,7 +340,7 @@ export default function AdminSecuritySettings() {
         <span>Admin session idle timeout</span>
       </h3>
       <p className="settings-item-description" style={{ marginBottom: 16, maxWidth: 720 }}>
-        After this many minutes without interaction, administrators are signed out. A warning is shown in the
+        After this many minutes without authenticated API activity, administrators are signed out. A warning is shown in the
         last minute. Minimum {MIN_IDLE_MINUTES} minutes.
       </p>
       {idleLoadErr ? (

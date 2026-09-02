@@ -12,6 +12,7 @@ export type { VpnServerCertsRequestsBuildCertificateRequest as BuildCertificateR
 export type { VpnServerClientsResponsesConnectedClientsResponse as ConnectedClientsResponse } from "./orval/model/vpnServerClientsResponsesConnectedClientsResponse";
 export type { QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest as CreateOrUpdateQuotaPlanRequest } from "./orval/model/quotaPlansRequestsCreateOrUpdateQuotaPlanRequest";
 export type { UserQuotaPlansRequestsCreateOrUpdateUserQuotaPlanRequest as CreateOrUpdateUserQuotaPlanRequest } from "./orval/model/userQuotaPlansRequestsCreateOrUpdateUserQuotaPlanRequest";
+export type { UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest as CreateOrUpdateUserVpnServerAccessRuleRequest } from "./orval/model/userVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest";
 export type { OpenVpnFilesRequestsDownloadFileRequest as DownloadFileRequest } from "./orval/model/openVpnFilesRequestsDownloadFileRequest";
 export type { OpenVpnFilesResponsesDownloadFileResponse as DownloadFileResponse } from "./orval/model/openVpnFilesResponsesDownloadFileResponse";
 export type { ApiOpenVpnFilesResponsesDownloadFileResponse as DownloadFileResponseApiResponse } from "./orval/model/apiOpenVpnFilesResponsesDownloadFileResponse";
@@ -31,6 +32,7 @@ export type { ApiTelegramBotIncomingMessageLogResponsesGetByTelegramIdMessagesRe
 export type { NotificationsResponsesGetNotificationsResponse as GetNotificationsResponse } from "./orval/model/notificationsResponsesGetNotificationsResponse";
 export type { QuotaPlanAllowedServersResponsesGetQuotaPlanAllowedServersByQuotaPlanIdResponse as GetQuotaPlanAllowedServersByQuotaPlanIdResponse } from "./orval/model/quotaPlanAllowedServersResponsesGetQuotaPlanAllowedServersByQuotaPlanIdResponse";
 export type { UserQuotaPlansResponsesGetUserQuotaPlansByUserIdResponse as GetUserQuotaPlansByUserIdResponse } from "./orval/model/userQuotaPlansResponsesGetUserQuotaPlansByUserIdResponse";
+export type { UserVpnServerAccessRulesResponsesGetUserVpnServerAccessRulesByUserIdResponse as GetUserVpnServerAccessRulesByUserIdResponse } from "./orval/model/userVpnServerAccessRulesResponsesGetUserVpnServerAccessRulesByUserIdResponse";
 export type { GeoLiteResponsesGetVersionDatabaseResponse as GetVersionDatabaseResponse } from "./orval/model/geoLiteResponsesGetVersionDatabaseResponse";
 export type { VpnProfileNotificationPreferencesGetVpnProfileNotificationPreferencesResponse as GetVpnProfileNotificationPreferencesResponse } from "./orval/model/vpnProfileNotificationPreferencesGetVpnProfileNotificationPreferencesResponse";
 export type { AuthRequestsGoogleLoginRequest as GoogleLoginRequest } from "./orval/model/authRequestsGoogleLoginRequest";
@@ -69,6 +71,7 @@ export type { ApiOpenVpnFilesResponsesOvpnFileResponse as OvpnFileResponseApiRes
 export type { OpenVpnFilesResponsesOvpnFilesResponse as OvpnFilesResponse } from "./orval/model/openVpnFilesResponsesOvpnFilesResponse";
 export type { ApiOpenVpnFilesResponsesOvpnFilesResponse as OvpnFilesResponseApiResponse } from "./orval/model/apiOpenVpnFilesResponsesOvpnFilesResponse";
 export type { QuotaPlanAllowedServersDtoQuotaPlanAllowedServerDto as QuotaPlanAllowedServerDto } from "./orval/model/quotaPlanAllowedServersDtoQuotaPlanAllowedServerDto";
+export type { UserVpnServerAccessRulesDtoUserVpnServerAccessRuleDto as UserVpnServerAccessRuleDto } from "./orval/model/userVpnServerAccessRulesDtoUserVpnServerAccessRuleDto";
 export type { QuotaPlansDtoQuotaPlanDto as QuotaPlanDto } from "./orval/model/quotaPlansDtoQuotaPlanDto";
 export type { QuotaPlansResponsesQuotaPlansResponse as QuotaPlansResponse } from "./orval/model/quotaPlansResponsesQuotaPlansResponse";
 export type { AuthRequestsRefreshRequest as RefreshRequest } from "./orval/model/authRequestsRefreshRequest";

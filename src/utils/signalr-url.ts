@@ -11,7 +11,7 @@ export const getSignalRUrl = (vpnServerId: string): string => {
 export const getAccessTokenOrLogout = (): string => {
   const t = localStorage.getItem(ACCESS_TOKEN_KEY);
   if (!t) {
-    logout?.();
+    logout("missingToken");
     throw new Error("User is not authenticated");
   }
   return t;

@@ -4,6 +4,10 @@ import { SystemRoles } from "../../constants/systemRoles";
 import { ACCESS_TOKEN_KEY } from "../const.ts";
 import { getStoredProfileAvatarUrl } from "./storedProfileAvatar";
 
+export function isAuthenticated(): boolean {
+    return !!localStorage.getItem(ACCESS_TOKEN_KEY);
+}
+
 const ROLE_CLAIM =
     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
 /** .NET ClaimTypes.NameIdentifier (JWT subject / user id) */

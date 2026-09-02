@@ -50,6 +50,11 @@ import { QuotaPlanViewOnlyNotice } from "../components/servers/QuotaPlanViewOnly
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import { isHttpForbidden } from "../utils/httpError";
 import { useGetApiV3OpenVpnServersGetAllWithStatus } from "../api/orval/vpn-servers-v3/vpn-servers-v3";
+import { openVpnServerMapConnectedClientsParams } from "../hooks/openVpnConnectedClientsQuery";
+import {
+    shouldServeConnectedTableFromMapFetch,
+    sliceConnectedClientsTablePage,
+} from "../utils/openVpnConnectedClientsTable";
 
 type ConflogPayload = {
     application?: string | null;
@@ -262,12 +267,14 @@ export function GeneralServerDetails() {
     );
 
     const mapConnectedParams: GetApiOpenVpnClientsGetAllConnectedParams = useMemo(
-        () => ({
-            VpnServerId: numericServerId ?? 0,
-            Page: 1,
-            PageSize: 1000,
-        }),
-        [numericServerId]
+        () => openVpnServerMapConnectedClientsParams(numericServerId ?? 0),
+        [numericServerId],
+    );
+
+    const serveTableFromMapFetch = shouldServeConnectedTableFromMapFetch(
+        isLive,
+        page,
+        clientFilters.queryParams,
     );
 
     const historyParams: GetApiOpenVpnClientsGetAllHistoryParams = useMemo(
@@ -305,7 +312,11 @@ export function GeneralServerDetails() {
 
     const connectedQuery = useGetApiOpenVpnClientsGetAllConnected(connectedParams, {
         query: {
-            enabled: Number.isFinite(numericServerId) && isLive && clientInsightsEnabled,
+            enabled:
+                Number.isFinite(numericServerId) &&
+                isLive &&
+                clientInsightsEnabled &&
+                !serveTableFromMapFetch,
             staleTime: 10000,
             refetchInterval: isLive && liveRefreshSeconds > 0 ? liveRefreshSeconds * 1000 : false,
             retry: 1,
@@ -333,34 +344,57 @@ export function GeneralServerDetails() {
     });
 
     const loadingClients =
-        (isLive ? connectedQuery.isFetching : historyQuery.isFetching) ?? false;
+        (isLive
+            ? serveTableFromMapFetch
+                ? mapConnectedQuery.isFetching
+                : connectedQuery.isFetching
+            : historyQuery.isFetching) ?? false;
 
     const clientsAccessDenied =
         clientInsightsEnabled &&
         ((isLive &&
-            (isHttpForbidden(connectedQuery.error) || isHttpForbidden(mapConnectedQuery.error))) ||
+            (serveTableFromMapFetch
+                ? isHttpForbidden(mapConnectedQuery.error)
+                : isHttpForbidden(connectedQuery.error) || isHttpForbidden(mapConnectedQuery.error))) ||
             (!isLive && isHttpForbidden(historyQuery.error)));
+
+    const liveClientsQueryError =
+        serveTableFromMapFetch ? mapConnectedQuery.error : connectedQuery.error;
+    const liveClientsQueryIsError =
+        serveTableFromMapFetch ? mapConnectedQuery.isError : connectedQuery.isError;
 
     const xrayClientsQueryErrorMessage =
         clientsAccessDenied
             ? null
-            : isLive && connectedQuery.isError
-              ? connectedQuery.error instanceof Error
-                  ? connectedQuery.error.message
-                  : String(connectedQuery.error ?? "Request failed")
+            : isLive && liveClientsQueryIsError
+              ? liveClientsQueryError instanceof Error
+                  ? liveClientsQueryError.message
+                  : String(liveClientsQueryError ?? "Request failed")
               : !isLive && historyQuery.isError
                 ? historyQuery.error instanceof Error
                     ? historyQuery.error.message
                     : String(historyQuery.error ?? "Request failed")
                 : null;
 
-    const activeClientsResponse = useMemo(
-        () =>
-            unwrapMaybeApiResponse<ConnectedClientsResponse>(
-                (isLive ? connectedQuery.data : historyQuery.data) as never,
-            ),
-        [isLive, connectedQuery.data, historyQuery.data],
-    );
+    const activeClientsResponse = useMemo(() => {
+        if (isLive) {
+            if (serveTableFromMapFetch) {
+                const mapResp = unwrapMaybeApiResponse<ConnectedClientsResponse>(
+                    mapConnectedQuery.data as never,
+                );
+                return sliceConnectedClientsTablePage(mapResp, pageSize);
+            }
+            return unwrapMaybeApiResponse<ConnectedClientsResponse>(connectedQuery.data as never);
+        }
+        return unwrapMaybeApiResponse<ConnectedClientsResponse>(historyQuery.data as never);
+    }, [
+        isLive,
+        serveTableFromMapFetch,
+        mapConnectedQuery.data,
+        connectedQuery.data,
+        historyQuery.data,
+        pageSize,
+    ]);
 
     const clients: VpnClientInfoDto[] = activeClientsResponse?.vpnClients ?? [];
     const mapLiveClientsResponse = useMemo(
@@ -474,8 +508,12 @@ export function GeneralServerDetails() {
 
     const handleRefresh = () => {
         if (clientInsightsEnabled) {
-            if (isLive) connectedQuery.refetch();
-            else historyQuery.refetch();
+            if (isLive) {
+                void mapConnectedQuery.refetch();
+                if (!serveTableFromMapFetch) void connectedQuery.refetch();
+            } else {
+                void historyQuery.refetch();
+            }
         }
         if (openVpnQueriesEnabled) {
             latestConflogQuery.refetch();
@@ -665,8 +703,12 @@ export function GeneralServerDetails() {
                             xrayPollError={serverEntity?.xrayClientsPollError ?? null}
                             xrayQueryErrorMessage={xrayClientsQueryErrorMessage}
                             onClientsChanged={() => {
-                                if (isLive) void connectedQuery.refetch();
-                                else void historyQuery.refetch();
+                                if (isLive) {
+                                    void mapConnectedQuery.refetch();
+                                    if (!serveTableFromMapFetch) void connectedQuery.refetch();
+                                } else {
+                                    void historyQuery.refetch();
+                                }
                                 void v3ServersWithStatusQuery.refetch();
                                 void serverBasicQuery.refetch();
                             }}

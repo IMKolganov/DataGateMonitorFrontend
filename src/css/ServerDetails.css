@@ -94,6 +94,11 @@
   color: #d2a8ff;
 }
 
+.manager-update-alert a {
+  color: #d2a8ff;
+  text-decoration: underline;
+}
+
 .openvpn-process-controls {
   margin: 1rem 0 1.25rem;
   padding: 0.85rem 1rem;

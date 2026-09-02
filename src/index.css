@@ -29,6 +29,8 @@
   --btn-secondary-text: #c9d1d9;
   --link-color: #58a6ff;
   --skeleton-shine: rgba(255, 255, 255, 0.08);
+  --font-size-ui: 14px;
+  --font-size-ui-sm: 13px;
 }
 
 [data-theme="light"] {
@@ -55,6 +57,8 @@
   --btn-secondary-text: #1f2328;
   --link-color: #0969da;
   --skeleton-shine: rgba(0, 0, 0, 0.06);
+  --font-size-ui: 14px;
+  --font-size-ui-sm: 13px;
 }
 
 .loading-spinner {

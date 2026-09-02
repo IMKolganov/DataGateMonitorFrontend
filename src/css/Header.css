@@ -13,25 +13,22 @@
   color: var(--text-primary);
 }
 
-/*
- * Mobile nav is `position: absolute` under the header. <main> comes after <header> in the DOM,
- * so in-flow siblings with z-index (e.g. `.servers-mobile-home-switcher` sticky z-index: 6) paint
- * on top of the dropdown unless the header creates a higher stacking context while the menu is open.
- */
-@media (max-width: 850px) {
-  .header.header--nav-open {
-    z-index: 1100;
-  }
-}
-
 .logo {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   font-weight: bold;
   font-size: 1.0em;
   cursor: pointer;
   color: var(--text-primary);
   text-decoration: none;
+}
+
+.header nav {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .logo-icon {
@@ -48,7 +45,10 @@
 .nav-links {
   list-style: none;
   display: flex;
+  align-items: center;
   gap: 12px;
+  margin: 0;
+  padding: 0;
   transition: transform 0.3s ease-in-out;
 }
 
@@ -56,9 +56,11 @@
   text-decoration: none;
   color: var(--text-secondary);
   font-weight: 500;
+  font-size: var(--font-size-ui);
   padding: 8px 14px;
   border-radius: 6px;
   transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
+  white-space: nowrap;
 }
 
 .nav-links a:hover {
@@ -78,6 +80,10 @@
   gap: 4px;
 }
 
+.header nav .btn.secondary {
+  font-size: var(--font-size-ui);
+}
+
 .nav-links li.user-info {
   display: flex;
   align-items: center;
@@ -85,13 +91,19 @@
 }
 
 .nav-links li.user-info .user-name {
-  font-size: 0.65em;
+  font-size: var(--font-size-ui);
   font-weight: 600;
   color: var(--text-secondary);
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.nav-links li.separator {
+  color: var(--text-muted);
+  font-size: var(--font-size-ui);
+  user-select: none;
 }
 
 .header-notifications-badge {
@@ -114,6 +126,7 @@
   display: none;
   flex-direction: column;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .burger-menu div {
@@ -124,7 +137,66 @@
   transition: all 0.3s ease-in-out;
 }
 
+/*
+ * Compact desktop: tighter nav, icon-only actions — still horizontal bar (not burger).
+ * Typical second monitor / snapped half-window (~900–1280px) stays desktop-like.
+ */
+@media (max-width: 1280px) and (min-width: 851px) {
+  .header {
+    font-size: 20px;
+    padding: 10px 16px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    margin-right: 6px;
+  }
+
+  .nav-links {
+    gap: 6px;
+  }
+
+  .nav-links a {
+    padding: 6px 10px;
+    font-size: var(--font-size-ui);
+  }
+
+  .nav-links li.user-info .user-name,
+  .nav-links li.separator {
+    display: none;
+  }
+
+  .header nav .btn.secondary {
+    font-size: 0;
+    padding: 8px 10px;
+  }
+
+  .header nav .btn.secondary .icon {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 851px) {
+  .logo {
+    font-size: 0;
+  }
+
+  .logo-icon {
+    margin-right: 0;
+  }
+}
+
+/*
+ * Mobile nav is `position: absolute` under the header. <main> comes after <header> in the DOM,
+ * so in-flow siblings with z-index paint on top of the dropdown unless the header creates
+ * a higher stacking context while the menu is open.
+ */
 @media (max-width: 850px) {
+  .header.header--nav-open {
+    z-index: 1100;
+  }
+
   .nav-links {
     position: absolute;
     top: 100%;
@@ -145,6 +217,23 @@
     visibility: visible;
   }
 
+  .nav-links li.user-info .user-name {
+    display: block;
+  }
+
+  .header nav .btn.secondary {
+    font-size: var(--font-size-ui);
+    padding: 8px 14px;
+  }
+
+  .header nav .btn.secondary .icon {
+    font-size: inherit;
+  }
+
+  .logo {
+    font-size: 1em;
+  }
+
   .burger-menu {
     display: flex;
   }
@@ -161,5 +250,3 @@
     transform: rotate(-45deg) translate(5px, -5px);
   }
 }
-
-/* Header.css */

@@ -2,7 +2,8 @@ import { formatBytes } from "./helpers";
 
 type Totals = {
   sessionsCount: number;
-  usersCount: number;
+  devicesCount: number;
+  accountsCount: number;
   trafficInBytes: number;
   trafficOutBytes: number;
   trafficTotalBytes: number;
@@ -23,7 +24,8 @@ export default function StatsCards({ totals, loading }: Props) {
         marginBottom: 12,
       }}
     >
-      <Card title="Users (unique externalId)" value={totals.usersCount} />
+      <Card title="Devices (unique externalId)" value={totals.devicesCount} />
+      <Card title="Users (accounts)" value={totals.accountsCount} />
       <Card title="Sessions" value={totals.sessionsCount} />
       <Card title="Traffic IN (total)" value={formatBytes(totals.trafficInBytes)} />
       <Card title="Traffic OUT (total)" value={formatBytes(totals.trafficOutBytes)} />

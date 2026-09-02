@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import PasswordLoginForm from "./PasswordLoginForm";
 import GoogleLoginForm from "./GoogleLoginForm";
@@ -10,6 +10,11 @@ import { appVersion } from "../../version.ts";
 import { useTheme } from "../../contexts/useTheme";
 import type { TotpChallengeState } from "../../utils/auth/handleLoginResponse";
 import { readRedirectFromSearch } from "../../utils/auth/returnPath";
+import {
+  logoutReasonMessage,
+  readLogoutReasonFromSearch,
+} from "../../utils/auth/logoutReason";
+import { isAuthenticated } from "../../utils/auth/authSelectors";
 import GdprFooterLinks from "../gdpr/GdprFooterLinks";
 
 const LoginPage: React.FC = () => {
@@ -19,6 +24,10 @@ const LoginPage: React.FC = () => {
     const { theme, toggleTheme } = useTheme();
     const redirectPath = useMemo(
         () => readRedirectFromSearch(location.search, "/"),
+        [location.search],
+    );
+    const logoutReason = useMemo(
+        () => readLogoutReasonFromSearch(location.search),
         [location.search],
     );
     const registerHref =
@@ -33,9 +42,18 @@ const LoginPage: React.FC = () => {
         }
     }, [location.state]);
 
+    useEffect(() => {
+        if (!logoutReason) return;
+        toast.info(logoutReasonMessage(logoutReason), { autoClose: 8000 });
+    }, [logoutReason]);
+
     const handleTotpBack = () => {
         setTotpChallenge(null);
     };
+
+    if (isAuthenticated()) {
+        return <Navigate to={redirectPath} replace />;
+    }
 
     return (
         <div className="login-container">
@@ -49,6 +67,16 @@ const LoginPage: React.FC = () => {
                           ? "Sign in to link your TV"
                           : "Sign in to DataGate Monitor"}
                 </h1>
+
+                {logoutReason && !totpChallenge ? (
+                    <div
+                        className="login-session-notice"
+                        role="status"
+                        data-testid="logout-reason-notice"
+                    >
+                        {logoutReasonMessage(logoutReason)}
+                    </div>
+                ) : null}
 
                 <div className="login">
                     {totpChallenge ? (

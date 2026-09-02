@@ -5,9 +5,6 @@
  * OpenAPI spec version: v1
  */
 
-/**
- * Pending=0, AlreadyRegistered=1, Rejected=2
- */
 export type EnumsAnnounceVpnServerResultStatus = typeof EnumsAnnounceVpnServerResultStatus[keyof typeof EnumsAnnounceVpnServerResultStatus];
 
 

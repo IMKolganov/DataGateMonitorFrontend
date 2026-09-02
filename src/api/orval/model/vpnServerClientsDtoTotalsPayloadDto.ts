@@ -8,6 +8,7 @@
 export interface VpnServerClientsDtoTotalsPayloadDto {
   sessionsCount?: number;
   usersCount?: number;
+  accountsCount?: number;
   trafficInBytes?: number;
   trafficOutBytes?: number;
   readonly trafficTotalBytes?: number;

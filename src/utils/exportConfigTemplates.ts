@@ -2,6 +2,7 @@ import type { OvpnFileConfigResponse } from "../api/orvalModelShim";
 
 /** Default VLESS client export template (JSON profile for DataGate clients).
  * dns_* placeholders are filled from node DNS1/DNS2 / XRAY_DNS_IDENTITY_* at link issue time.
+ * vlessXhttp is the node's second (HTTP-looking) transport and stays empty unless XRAY_XHTTP_ENABLED.
  * Keep pretty-printed — dashboard editor and “Insert example” use this string as-is.
  */
 /** Hostname only for VLESS export endpoint (no https:// or :port). */
@@ -23,6 +24,7 @@ export function sanitizeXrayExportEndpointHost(value: string): string {
 
 export const XRAY_EXPORT_TEMPLATE = `{
   "vless": "{{vless_uri}}",
+  "vlessXhttp": "{{vless_uri_xhttp}}",
   "dnsServers": {{dns_servers_json}},
   "dnsIdentityEnabled": {{dns_identity_enabled}},
   "friendlyName": "{{friendly_name}}",

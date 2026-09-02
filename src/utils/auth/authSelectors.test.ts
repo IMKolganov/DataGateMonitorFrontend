@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { getCurrentUser, isAdmin } from "./authSelectors";
+import { getCurrentUser, isAdmin, isAuthenticated } from "./authSelectors";
 import { ACCESS_TOKEN_KEY } from "../const";
 import { SystemRoles } from "../../constants/systemRoles";
 
@@ -26,6 +26,12 @@ describe("authSelectors", () => {
 
   it("returns null without token", () => {
     expect(getCurrentUser()).toBeNull();
+    expect(isAuthenticated()).toBe(false);
+  });
+
+  it("isAuthenticated is true when access token is stored", () => {
+    localStorage.setItem(ACCESS_TOKEN_KEY, "tok");
+    expect(isAuthenticated()).toBe(true);
   });
 
   it("decodes user id, email and admin role from JWT", () => {

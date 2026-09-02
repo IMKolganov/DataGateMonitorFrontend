@@ -16,11 +16,18 @@ import { addDays, endOfToday, startOfToday, toChartPoints, toUsersSeriesChartPoi
 import type { ChartPoint, MergedChartPoint } from "./types";
 
 import { keepPreviousData, useQueries } from "@tanstack/react-query";
+import {
+  fetchOpenVpnLiveConnectedClients,
+  openVpnLiveConnectedClientsQueryKey,
+  openVpnLiveConnectedClientsQueryOptions,
+} from "../../hooks/openVpnConnectedClientsQuery";
+import {
+  isUserConnectedToServer,
+  useCurrentUserConnectedServerIds,
+} from "../../hooks/useCurrentUserConnectedServerIds";
 
 // orval hooks & types
 import {
-  getApiOpenVpnClientsGetAllConnected,
-  useGetApiOpenVpnClientsGetAllConnected,
   useGetApiOpenVpnClientsOverviewPoints,
   useGetApiOpenVpnClientsOverviewSeries,
   useGetApiOpenVpnClientsOverviewSummary,
@@ -139,7 +146,8 @@ function readPayload<T>(value: T | { data?: T } | undefined): T | undefined {
 // Strict totals for UI
 type SafeTotals = {
   sessionsCount: number;
-  usersCount: number;
+  devicesCount: number;
+  accountsCount: number;
   trafficInBytes: number;
   trafficOutBytes: number;
   trafficTotalBytes: number;
@@ -147,18 +155,20 @@ type SafeTotals = {
 
 function makeSafeTotals(resp?: OverviewTotalsResponse): SafeTotals {
   const sessionsCount = resp?.totals?.sessionsCount ?? 0;
-  const usersCount = resp?.totals?.usersCount ?? 0;
+  const devicesCount = resp?.totals?.usersCount ?? 0;
+  const accountsCount = resp?.totals?.accountsCount ?? 0;
   const trafficInBytes = resp?.totals?.trafficInBytes ?? 0;
   const trafficOutBytes = resp?.totals?.trafficOutBytes ?? 0;
   const trafficTotalBytes =
     resp?.totals?.trafficTotalBytes ?? (trafficInBytes + trafficOutBytes);
 
-  return { sessionsCount, usersCount, trafficInBytes, trafficOutBytes, trafficTotalBytes };
+  return { sessionsCount, devicesCount, accountsCount, trafficInBytes, trafficOutBytes, trafficTotalBytes };
 }
 
 export default function ServersOverview() {
   const currentUser = getCurrentUser();
   const currentUserExternalId = (currentUser?.providerExternalId ?? "").trim();
+  const { connectedServerIds } = useCurrentUserConnectedServerIds();
 
   const { vpnServerId: vpnServerIdParam, externalId: externalIdParam } = useParams<{
     vpnServerId?: string;
@@ -300,33 +310,8 @@ export default function ServersOverview() {
   const apiData = seriesQuery.data as OverviewSeriesResponse | undefined;
   const totalsResp = totalsQuery.data as OverviewTotalsResponse | undefined;
   const usersSeriesData = usersSeriesQuery.data as OverviewUsersSeriesResponse | undefined;
-  const connectedOnCurrentServerQuery = useGetApiOpenVpnClientsGetAllConnected(
-    {
-      VpnServerId: vpnServerId ?? 0,
-      Page: 1,
-      PageSize: 300,
-    },
-    {
-      query: {
-        enabled: Boolean(vpnServerId && currentUserExternalId),
-        staleTime: 12_000,
-        refetchInterval: 15_000,
-        retry: 1,
-      },
-    }
-  );
 
-  const isCurrentUserConnectedOnServer = useMemo(() => {
-    if (!vpnServerId || !currentUserExternalId) return false;
-    const payload = readPayload<VpnServerClientsResponsesConnectedClientsResponse>(
-      connectedOnCurrentServerQuery.data as
-        | VpnServerClientsResponsesConnectedClientsResponse
-        | { data?: VpnServerClientsResponsesConnectedClientsResponse }
-        | undefined
-    );
-    const clients = payload?.vpnClients ?? [];
-    return clients.some((client) => (client.externalId ?? "").trim() === currentUserExternalId);
-  }, [connectedOnCurrentServerQuery.data, currentUserExternalId, vpnServerId]);
+  const isCurrentUserConnectedOnServer = isUserConnectedToServer(connectedServerIds, vpnServerId);
 
   const loadingSeries = seriesQuery.isFetching || usersSeriesQuery.isFetching;
   const loadingTotals = totalsQuery.isFetching;
@@ -552,12 +537,10 @@ export default function ServersOverview() {
 
   const allConnectedClientsQueries = useQueries({
     queries: globalFlowServerIds.map((serverId) => ({
-      queryKey: ["overview-live-connected-clients", serverId],
+      queryKey: openVpnLiveConnectedClientsQueryKey(serverId),
       enabled: isGlobalServersPage && !offlinePlaybackMode,
-      queryFn: () => getApiOpenVpnClientsGetAllConnected({ VpnServerId: serverId, Page: 1, PageSize: 300 }),
-      staleTime: 12_000,
-      refetchInterval: 15_000,
-      retry: 1,
+      queryFn: () => fetchOpenVpnLiveConnectedClients(serverId),
+      ...openVpnLiveConnectedClientsQueryOptions,
     })),
   });
 

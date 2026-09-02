@@ -77,17 +77,13 @@ function EnforcementSettingsCard() {
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const enforceQuery = useGetApiSettingsGet({ Key: KEY_ENFORCE }, { query: { staleTime: 0 } });
-  const intervalQuery = useGetApiSettingsGet(
-    { Key: KEY_INTERVAL_MINUTES },
-    { query: { staleTime: 0 } },
-  );
-  const revokeQuery = useGetApiSettingsGet(
-    { Key: KEY_REVOKE_ON_ENFORCEMENT },
-    { query: { staleTime: 0 } },
-  );
-  const remindersQuery = useGetApiSettingsGet({ Key: KEY_USER_REMINDERS }, { query: { staleTime: 0 } });
-  const digestQuery = useGetApiSettingsGet({ Key: KEY_ADMIN_DIGEST }, { query: { staleTime: 0 } });
+  // 404 until DB seed/migration exists — no retry (avoids console spam on older backends).
+  const settingsQueryOpts = { query: { staleTime: 0, retry: false } as const };
+  const enforceQuery = useGetApiSettingsGet({ Key: KEY_ENFORCE }, settingsQueryOpts);
+  const intervalQuery = useGetApiSettingsGet({ Key: KEY_INTERVAL_MINUTES }, settingsQueryOpts);
+  const revokeQuery = useGetApiSettingsGet({ Key: KEY_REVOKE_ON_ENFORCEMENT }, settingsQueryOpts);
+  const remindersQuery = useGetApiSettingsGet({ Key: KEY_USER_REMINDERS }, settingsQueryOpts);
+  const digestQuery = useGetApiSettingsGet({ Key: KEY_ADMIN_DIGEST }, settingsQueryOpts);
 
   const initialLoading =
     enforceQuery.isLoading ||

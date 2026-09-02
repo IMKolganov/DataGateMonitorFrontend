@@ -645,6 +645,265 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPostApiOpenVpnServersAddMutationOptions(options), queryClient);
     }
+    export const postApiOpenVpnServersDiscover = (
+    vpnServersRequestsAnnounceVpnServerRequest?: VpnServersRequestsAnnounceVpnServerRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServersResponsesAnnounceVpnServerResponse>(
+      {url: `/api/open-vpn-servers/discover`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: vpnServersRequestsAnnounceVpnServerRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiOpenVpnServersDiscoverMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscover>>, TError,{data?: VpnServersRequestsAnnounceVpnServerRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscover>>, TError,{data?: VpnServersRequestsAnnounceVpnServerRequest}, TContext> => {
+
+const mutationKey = ['postApiOpenVpnServersDiscover'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersDiscover>>, {data?: VpnServersRequestsAnnounceVpnServerRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiOpenVpnServersDiscover(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOpenVpnServersDiscoverMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersDiscover>>>
+    export type PostApiOpenVpnServersDiscoverMutationBody = VpnServersRequestsAnnounceVpnServerRequest | undefined
+    export type PostApiOpenVpnServersDiscoverMutationError = unknown
+
+    export const usePostApiOpenVpnServersDiscover = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscover>>, TError,{data?: VpnServersRequestsAnnounceVpnServerRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOpenVpnServersDiscover>>,
+        TError,
+        {data?: VpnServersRequestsAnnounceVpnServerRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiOpenVpnServersDiscoverMutationOptions(options), queryClient);
+    }
+    export const getApiOpenVpnServersDiscoveriesPending = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServersResponsesVpnServerDiscoveriesResponse>(
+      {url: `/api/open-vpn-servers/discoveries/pending`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiOpenVpnServersDiscoveriesPendingQueryKey = () => {
+    return [
+    `/api/open-vpn-servers/discoveries/pending`
+    ] as const;
+    }
+
+
+export const getGetApiOpenVpnServersDiscoveriesPendingQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersDiscoveriesPendingQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>> = ({ signal }) => getApiOpenVpnServersDiscoveriesPending(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOpenVpnServersDiscoveriesPendingQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>>
+export type GetApiOpenVpnServersDiscoveriesPendingQueryError = unknown
+
+
+export function useGetApiOpenVpnServersDiscoveriesPending<TData = Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersDiscoveriesPending<TData = Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersDiscoveriesPending<TData = Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOpenVpnServersDiscoveriesPending<TData = Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOpenVpnServersDiscoveriesPendingQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const postApiOpenVpnServersDiscoveriesDiscoveryIdApprove = (
+    discoveryId: number,
+    vpnServersRequestsApproveVpnServerDiscoveryRequest?: VpnServersRequestsApproveVpnServerDiscoveryRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServersResponsesVpnServerDiscoveryResponse>(
+      {url: `/api/open-vpn-servers/discoveries/${discoveryId}/approve`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: vpnServersRequestsApproveVpnServerDiscoveryRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiOpenVpnServersDiscoveriesDiscoveryIdApproveMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdApprove>>, TError,{discoveryId: number;data?: VpnServersRequestsApproveVpnServerDiscoveryRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdApprove>>, TError,{discoveryId: number;data?: VpnServersRequestsApproveVpnServerDiscoveryRequest}, TContext> => {
+
+const mutationKey = ['postApiOpenVpnServersDiscoveriesDiscoveryIdApprove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdApprove>>, {discoveryId: number;data?: VpnServersRequestsApproveVpnServerDiscoveryRequest}> = (props) => {
+          const {discoveryId,data} = props ?? {};
+
+          return  postApiOpenVpnServersDiscoveriesDiscoveryIdApprove(discoveryId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOpenVpnServersDiscoveriesDiscoveryIdApproveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdApprove>>>
+    export type PostApiOpenVpnServersDiscoveriesDiscoveryIdApproveMutationBody = VpnServersRequestsApproveVpnServerDiscoveryRequest | undefined
+    export type PostApiOpenVpnServersDiscoveriesDiscoveryIdApproveMutationError = unknown
+
+    export const usePostApiOpenVpnServersDiscoveriesDiscoveryIdApprove = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdApprove>>, TError,{discoveryId: number;data?: VpnServersRequestsApproveVpnServerDiscoveryRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdApprove>>,
+        TError,
+        {discoveryId: number;data?: VpnServersRequestsApproveVpnServerDiscoveryRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiOpenVpnServersDiscoveriesDiscoveryIdApproveMutationOptions(options), queryClient);
+    }
+    export const postApiOpenVpnServersDiscoveriesDiscoveryIdDeny = (
+    discoveryId: number,
+    vpnServersRequestsDenyVpnServerDiscoveryRequest?: VpnServersRequestsDenyVpnServerDiscoveryRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServersResponsesVpnServerDiscoveryResponse>(
+      {url: `/api/open-vpn-servers/discoveries/${discoveryId}/deny`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: vpnServersRequestsDenyVpnServerDiscoveryRequest, signal
+    },
+      options);
+    }
+
+
+
+export const getPostApiOpenVpnServersDiscoveriesDiscoveryIdDenyMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdDeny>>, TError,{discoveryId: number;data?: VpnServersRequestsDenyVpnServerDiscoveryRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdDeny>>, TError,{discoveryId: number;data?: VpnServersRequestsDenyVpnServerDiscoveryRequest}, TContext> => {
+
+const mutationKey = ['postApiOpenVpnServersDiscoveriesDiscoveryIdDeny'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdDeny>>, {discoveryId: number;data?: VpnServersRequestsDenyVpnServerDiscoveryRequest}> = (props) => {
+          const {discoveryId,data} = props ?? {};
+
+          return  postApiOpenVpnServersDiscoveriesDiscoveryIdDeny(discoveryId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOpenVpnServersDiscoveriesDiscoveryIdDenyMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdDeny>>>
+    export type PostApiOpenVpnServersDiscoveriesDiscoveryIdDenyMutationBody = VpnServersRequestsDenyVpnServerDiscoveryRequest | undefined
+    export type PostApiOpenVpnServersDiscoveriesDiscoveryIdDenyMutationError = unknown
+
+    export const usePostApiOpenVpnServersDiscoveriesDiscoveryIdDeny = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdDeny>>, TError,{discoveryId: number;data?: VpnServersRequestsDenyVpnServerDiscoveryRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdDeny>>,
+        TError,
+        {discoveryId: number;data?: VpnServersRequestsDenyVpnServerDiscoveryRequest},
+        TContext
+      > => {
+      return useMutation(getPostApiOpenVpnServersDiscoveriesDiscoveryIdDenyMutationOptions(options), queryClient);
+    }
     export const postApiOpenVpnServersPostSetupVpnServerIdStart = (
     vpnServerId: number,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
@@ -1361,286 +1620,3 @@ export function useGetApiOpenVpnServersHealthcheckWithJwt<TData = Awaited<Return
 
 
 
-/**
- * @summary VPN node self-announce. Creates or refreshes a pending discovery row for admin approve/deny.
- */
-export const postApiOpenVpnServersDiscover = (
-    vpnServersRequestsAnnounceVpnServerRequest?: VpnServersRequestsAnnounceVpnServerRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServersResponsesAnnounceVpnServerResponse>(
-      {url: `/api/open-vpn-servers/discover`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: vpnServersRequestsAnnounceVpnServerRequest, signal
-    },
-      options);
-    }
-
-
-
-export const getPostApiOpenVpnServersDiscoverMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscover>>, TError,{data?: VpnServersRequestsAnnounceVpnServerRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscover>>, TError,{data?: VpnServersRequestsAnnounceVpnServerRequest}, TContext> => {
-
-const mutationKey = ['postApiOpenVpnServersDiscover'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersDiscover>>, {data?: VpnServersRequestsAnnounceVpnServerRequest}> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiOpenVpnServersDiscover(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiOpenVpnServersDiscoverMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersDiscover>>>
-    export type PostApiOpenVpnServersDiscoverMutationBody = VpnServersRequestsAnnounceVpnServerRequest | undefined
-    export type PostApiOpenVpnServersDiscoverMutationError = unknown
-
-    /**
- * @summary VPN node self-announce. Creates or refreshes a pending discovery row for admin approve/deny.
- */
-export const usePostApiOpenVpnServersDiscover = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscover>>, TError,{data?: VpnServersRequestsAnnounceVpnServerRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiOpenVpnServersDiscover>>,
-        TError,
-        {data?: VpnServersRequestsAnnounceVpnServerRequest},
-        TContext
-      > => {
-      return useMutation(getPostApiOpenVpnServersDiscoverMutationOptions(options), queryClient);
-    }
-    /**
- * @summary List pending VPN server discoveries for admin approve/deny.
- */
-export const getApiOpenVpnServersDiscoveriesPending = (
-
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServersResponsesVpnServerDiscoveriesResponse>(
-      {url: `/api/open-vpn-servers/discoveries/pending`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiOpenVpnServersDiscoveriesPendingQueryKey = () => {
-    return [
-    `/api/open-vpn-servers/discoveries/pending`
-    ] as const;
-    }
-
-
-export const getGetApiOpenVpnServersDiscoveriesPendingQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersDiscoveriesPendingQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>> = ({ signal }) => getApiOpenVpnServersDiscoveriesPending(requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiOpenVpnServersDiscoveriesPendingQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>>
-export type GetApiOpenVpnServersDiscoveriesPendingQueryError = unknown
-
-
-export function useGetApiOpenVpnServersDiscoveriesPending<TData = Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersDiscoveriesPending<TData = Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersDiscoveriesPending<TData = Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary List pending VPN server discoveries for admin approve/deny.
- */
-
-export function useGetApiOpenVpnServersDiscoveriesPending<TData = Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersDiscoveriesPending>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiOpenVpnServersDiscoveriesPendingQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-/**
- * @summary Approve a pending VPN server discovery and create the server.
- */
-export const postApiOpenVpnServersDiscoveriesDiscoveryIdApprove = (
-    discoveryId: number,
-    vpnServersRequestsApproveVpnServerDiscoveryRequest?: VpnServersRequestsApproveVpnServerDiscoveryRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServersResponsesVpnServerDiscoveryResponse>(
-      {url: `/api/open-vpn-servers/discoveries/${discoveryId}/approve`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: vpnServersRequestsApproveVpnServerDiscoveryRequest, signal
-    },
-      options);
-    }
-
-
-
-export const getPostApiOpenVpnServersDiscoveriesDiscoveryIdApproveMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdApprove>>, TError,{discoveryId: number;data?: VpnServersRequestsApproveVpnServerDiscoveryRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdApprove>>, TError,{discoveryId: number;data?: VpnServersRequestsApproveVpnServerDiscoveryRequest}, TContext> => {
-
-const mutationKey = ['postApiOpenVpnServersDiscoveriesDiscoveryIdApprove'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdApprove>>, {discoveryId: number;data?: VpnServersRequestsApproveVpnServerDiscoveryRequest}> = (props) => {
-          const {discoveryId,data} = props ?? {};
-
-          return  postApiOpenVpnServersDiscoveriesDiscoveryIdApprove(discoveryId,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiOpenVpnServersDiscoveriesDiscoveryIdApproveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdApprove>>>
-    export type PostApiOpenVpnServersDiscoveriesDiscoveryIdApproveMutationBody = VpnServersRequestsApproveVpnServerDiscoveryRequest | undefined
-    export type PostApiOpenVpnServersDiscoveriesDiscoveryIdApproveMutationError = unknown
-
-    /**
- * @summary Approve a pending VPN server discovery and create the server.
- */
-export const usePostApiOpenVpnServersDiscoveriesDiscoveryIdApprove = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdApprove>>, TError,{discoveryId: number;data?: VpnServersRequestsApproveVpnServerDiscoveryRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdApprove>>,
-        TError,
-        {discoveryId: number;data?: VpnServersRequestsApproveVpnServerDiscoveryRequest},
-        TContext
-      > => {
-      return useMutation(getPostApiOpenVpnServersDiscoveriesDiscoveryIdApproveMutationOptions(options), queryClient);
-    }
-    /**
- * @summary Deny a pending VPN server discovery.
- */
-export const postApiOpenVpnServersDiscoveriesDiscoveryIdDeny = (
-    discoveryId: number,
-    vpnServersRequestsDenyVpnServerDiscoveryRequest?: VpnServersRequestsDenyVpnServerDiscoveryRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServersResponsesVpnServerDiscoveryResponse>(
-      {url: `/api/open-vpn-servers/discoveries/${discoveryId}/deny`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: vpnServersRequestsDenyVpnServerDiscoveryRequest, signal
-    },
-      options);
-    }
-
-
-
-export const getPostApiOpenVpnServersDiscoveriesDiscoveryIdDenyMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdDeny>>, TError,{discoveryId: number;data?: VpnServersRequestsDenyVpnServerDiscoveryRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdDeny>>, TError,{discoveryId: number;data?: VpnServersRequestsDenyVpnServerDiscoveryRequest}, TContext> => {
-
-const mutationKey = ['postApiOpenVpnServersDiscoveriesDiscoveryIdDeny'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdDeny>>, {discoveryId: number;data?: VpnServersRequestsDenyVpnServerDiscoveryRequest}> = (props) => {
-          const {discoveryId,data} = props ?? {};
-
-          return  postApiOpenVpnServersDiscoveriesDiscoveryIdDeny(discoveryId,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiOpenVpnServersDiscoveriesDiscoveryIdDenyMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdDeny>>>
-    export type PostApiOpenVpnServersDiscoveriesDiscoveryIdDenyMutationBody = VpnServersRequestsDenyVpnServerDiscoveryRequest | undefined
-    export type PostApiOpenVpnServersDiscoveriesDiscoveryIdDenyMutationError = unknown
-
-    /**
- * @summary Deny a pending VPN server discovery.
- */
-export const usePostApiOpenVpnServersDiscoveriesDiscoveryIdDeny = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdDeny>>, TError,{discoveryId: number;data?: VpnServersRequestsDenyVpnServerDiscoveryRequest}, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiOpenVpnServersDiscoveriesDiscoveryIdDeny>>,
-        TError,
-        {discoveryId: number;data?: VpnServersRequestsDenyVpnServerDiscoveryRequest},
-        TContext
-      > => {
-      return useMutation(getPostApiOpenVpnServersDiscoveriesDiscoveryIdDenyMutationOptions(options), queryClient);
-    }
