@@ -528,3 +528,42 @@
   opacity: 0.75;
   font-size: 0.9rem;
 }
+
+.service-status-container {
+  margin-top: 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background-color: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.service-status-container__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.service-status-container .settings-divider {
+  margin: 0;
+}
+
+.service-status-container__meta {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.service-status-container__actions {
+  margin-top: 0.25rem;
+}
+
+.service-status-container__hint {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-ui-sm);
+  line-height: 1.45;
+}
