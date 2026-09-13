@@ -11,11 +11,12 @@ import { usePostApiApplicationsRevoke } from "../../api/orval/applications/appli
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
 import "../../css/Table.css";
 import { errorMessage } from "../../utils/errorMessage";
-import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import type { ServerGridPagination } from "../../hooks/useServerGridPagination";
 
 interface ApplicationTableProps {
   applications: ApplicationDto[];
   refreshApps: () => void;
+  gridProps: ServerGridPagination["gridProps"];
 }
 
 type AppRow = {
@@ -29,14 +30,12 @@ type AppRow = {
   statusLabel: string;
 };
 
-const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refreshApps }) => {
+const ApplicationTable: React.FC<ApplicationTableProps> = ({
+  applications,
+  refreshApps,
+  gridProps,
+}) => {
   const [copied, setCopied] = useState<string | null>(null);
-  const [appsGridPage, setAppsGridPage] = useState(0);
-  const [appsPageSize, setAppsPageSize] = usePersistedPageSize(
-    "applications-settings",
-    10,
-    "5,10,20,50,100",
-  );
 
   const revokeMutation = usePostApiApplicationsRevoke({
     mutation: {
@@ -195,13 +194,7 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, refre
           gridId="applications"
           rows={rows}
           columns={columns}
-          pageSizeOptions={[5, 10, 20, 50, 100]}
-          paginationMode="client"
-          paginationModel={{ page: appsGridPage, pageSize: appsPageSize }}
-          onPaginationModelChange={(m) => {
-            setAppsGridPage(m.page);
-            setAppsPageSize(m.pageSize);
-          }}
+          {...gridProps}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
           localeText={{ noRowsLabel: "📭 No API clients registered" }}
         />

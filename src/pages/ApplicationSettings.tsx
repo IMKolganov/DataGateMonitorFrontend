@@ -1,5 +1,5 @@
 // src/pages/ApplicationSettings.tsx
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FaCopy, FaLaptopCode, FaPlus, FaSync, FaTerminal } from "react-icons/fa";
 import "../css/ApplicationSettings.css";
 import "../css/Settings.css";
@@ -7,34 +7,23 @@ import ApplicationTable from "../components/settings/ApplicationTable.tsx";
 import { GridFilterBar } from "../components/ui/GridFilterBar.tsx";
 import { gridFilterFields } from "../config/gridFilters.ts";
 import { useGridFilters } from "../hooks/useGridFilterStub.ts";
+import { useServerGridPagination } from "../hooks/useServerGridPagination";
 
 import {
-  useGetApiApplicationsGetAll,
   usePostApiApplicationsRegister,
 } from "../api/orval/applications/applications";
-import type { GetApiApplicationsGetAllParams } from "../api/orval/model/getApiApplicationsGetAllParams";
+import {
+  useGetApiV2Applications,
+} from "../api/orval/applications-v2/applications-v2";
+import type { GetApiV2ApplicationsParams } from "../api/orval/model/getApiV2ApplicationsParams";
+import type { ApplicationsResponsesApplicationsV2Response } from "../api/orval/model/applicationsResponsesApplicationsV2Response";
 import type { RegisterApplicationRequest, ApplicationDto, RegisterApplicationResponse } from "../api/orvalModelShim";
 import axios from "axios";
 import { errorMessage as formatError } from "../utils/errorMessage";
 
-function extractApps(raw: unknown): ApplicationDto[] {
-  if (!raw) return [];
-  if (Array.isArray(raw)) return raw as ApplicationDto[];
-
-  const obj = raw as Record<string, unknown>;
-  const data = obj["data"] as Record<string, unknown> | undefined;
-  const candidates = [
-    obj["applications"],
-    obj["application"],
-    data?.["applications"],
-    data?.["application"],
-  ];
-
-  for (const c of candidates) {
-    if (Array.isArray(c)) return c as ApplicationDto[];
-  }
-
-  return [];
+/** ogmMutator unwraps ApiResponse.data at runtime; Orval types still use the Api* wrapper. */
+function unwrapApplicationsV2(raw: unknown): ApplicationsResponsesApplicationsV2Response {
+  return (raw ?? {}) as ApplicationsResponsesApplicationsV2Response;
 }
 
 function asCreatedClient(raw: unknown): RegisterApplicationResponse | null {
@@ -57,11 +46,29 @@ export function ApplicationSettings() {
   const [refreshing, setRefreshing] = useState(false);
   const [createdClient, setCreatedClient] = useState<RegisterApplicationResponse | null>(null);
   const [copiedField, setCopiedField] = useState<"clientId" | "clientSecret" | null>(null);
+  const [rowCount, setRowCount] = useState(0);
   const appFilters = useGridFilters("settings-applications");
 
-  const listParams = useMemo<GetApiApplicationsGetAllParams>(
-    () => ({ ...appFilters.queryParams }),
+  const filterResetKey = useMemo(
+    () => JSON.stringify(appFilters.queryParams),
     [appFilters.queryParams],
+  );
+
+  const paging = useServerGridPagination({
+    storageKey: "applications-settings",
+    defaultPageSize: 10,
+    allowedKey: "5,10,20,50,100",
+    rowCount,
+    resetKey: filterResetKey,
+  });
+
+  const listParams = useMemo<GetApiV2ApplicationsParams>(
+    () => ({
+      ...appFilters.queryParams,
+      Page: paging.apiPage,
+      PageSize: paging.pageSize,
+    }),
+    [appFilters.queryParams, paging.apiPage, paging.pageSize],
   );
 
   const {
@@ -70,16 +77,29 @@ export function ApplicationSettings() {
     isLoading,
     isFetching,
     refetch,
-  } = useGetApiApplicationsGetAll(listParams, {
+  } = useGetApiV2Applications(listParams, {
     query: {
       staleTime: 0,
       gcTime: 5 * 60 * 1000,
+      placeholderData: (prev) => prev,
     },
   });
 
   const registerMutation = usePostApiApplicationsRegister();
 
-  const apps = useMemo(() => extractApps(appsResp), [appsResp]);
+  const appsPage = unwrapApplicationsV2(appsResp).applications;
+
+  useEffect(() => {
+    if (typeof appsPage?.totalCount === "number") {
+      setRowCount(appsPage.totalCount);
+    }
+  }, [appsPage?.totalCount]);
+
+  const apps: ApplicationDto[] = useMemo(
+    () => (appsPage?.items ?? []) as ApplicationDto[],
+    [appsPage?.items],
+  );
+
   const errorMessage =
     registerError ??
     (appsError ? (appsError as Error).message || "Failed to load API clients" : null);
@@ -199,12 +219,22 @@ export function ApplicationSettings() {
             fields={gridFilterFields("settings-applications")}
             values={appFilters.values}
             onChange={appFilters.onChange}
-            onApply={appFilters.onApply}
-            onReset={appFilters.onReset}
+            onApply={() => {
+              appFilters.onApply();
+              paging.resetPage();
+            }}
+            onReset={() => {
+              appFilters.onReset();
+              paging.resetPage();
+            }}
             disabled={isLoading || isFetching}
           />
 
-          <ApplicationTable applications={apps} refreshApps={handleRefresh} />
+          <ApplicationTable
+            applications={apps}
+            refreshApps={handleRefresh}
+            gridProps={paging.gridProps}
+          />
         </>
       )}
 

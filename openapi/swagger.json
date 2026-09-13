@@ -599,6 +599,136 @@
         }
       }
     },
+    "/api/v2/applications": {
+      "get": {
+        "tags": [
+          "ApplicationsV2"
+        ],
+        "parameters": [
+          {
+            "name": "Name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ClientId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IsRevoked",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Applications.Responses.ApplicationsV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Applications.Responses.ApplicationsV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Applications.Responses.ApplicationsV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/applications/healthcheck": {
+      "get": {
+        "tags": [
+          "ApplicationsV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/applications/healthcheck-with-jwt": {
+      "get": {
+        "tags": [
+          "ApplicationsV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/session-policy": {
       "get": {
         "tags": [
@@ -2637,6 +2767,123 @@
         }
       }
     },
+    "/api/v2/cert-expiry/runs": {
+      "get": {
+        "tags": [
+          "CertExpiryV2"
+        ],
+        "parameters": [
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "VpnServerId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.CertExpiry.Responses.GetCertExpiryRunsV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.CertExpiry.Responses.GetCertExpiryRunsV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.CertExpiry.Responses.GetCertExpiryRunsV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/cert-expiry/healthcheck": {
+      "get": {
+        "tags": [
+          "CertExpiryV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/cert-expiry/healthcheck-with-jwt": {
+      "get": {
+        "tags": [
+          "CertExpiryV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/free-tier-enforcement/candidates": {
       "get": {
         "tags": [
@@ -2825,6 +3072,115 @@
       "get": {
         "tags": [
           "FreeTierEnforcement"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/free-tier-enforcement/candidates": {
+      "get": {
+        "tags": [
+          "FreeTierEnforcementV2"
+        ],
+        "parameters": [
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.GetFreeTierCandidatesV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.GetFreeTierCandidatesV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.FreeTierEnforcement.Responses.GetFreeTierCandidatesV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/free-tier-enforcement/healthcheck": {
+      "get": {
+        "tags": [
+          "FreeTierEnforcementV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/free-tier-enforcement/healthcheck-with-jwt": {
+      "get": {
+        "tags": [
+          "FreeTierEnforcementV2"
         ],
         "responses": {
           "200": {
@@ -4251,6 +4607,126 @@
         }
       }
     },
+    "/api/v2/open-vpn-files": {
+      "get": {
+        "tags": [
+          "OpenVpnFilesV2"
+        ],
+        "parameters": [
+          {
+            "name": "VpnServerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/open-vpn-files/healthcheck": {
+      "get": {
+        "tags": [
+          "OpenVpnFilesV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/open-vpn-files/healthcheck-with-jwt": {
+      "get": {
+        "tags": [
+          "OpenVpnFilesV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/performance/http-requests": {
       "get": {
         "tags": [
@@ -5179,6 +5655,122 @@
       "get": {
         "tags": [
           "QuotaPlanAllowedServer"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/quota-plans": {
+      "get": {
+        "tags": [
+          "QuotaPlansV2"
+        ],
+        "parameters": [
+          {
+            "name": "IncludeInactive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.QuotaPlans.Responses.QuotaPlansV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.QuotaPlans.Responses.QuotaPlansV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.QuotaPlans.Responses.QuotaPlansV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/quota-plans/healthcheck": {
+      "get": {
+        "tags": [
+          "QuotaPlansV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/quota-plans/healthcheck-with-jwt": {
+      "get": {
+        "tags": [
+          "QuotaPlansV2"
         ],
         "responses": {
           "200": {
@@ -6753,6 +7345,151 @@
         }
       }
     },
+    "/api/v2/tgbot-users": {
+      "get": {
+        "tags": [
+          "TelegramBotUsersV2"
+        ],
+        "parameters": [
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TelegramId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "Username",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IsAdmin",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "IsBlocked",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.TelegramBotUser.Responses.GetTelegramBotUsersV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.TelegramBotUser.Responses.GetTelegramBotUsersV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.TelegramBotUser.Responses.GetTelegramBotUsersV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/tgbot-users/healthcheck": {
+      "get": {
+        "tags": [
+          "TelegramBotUsersV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/tgbot-users/healthcheck-with-jwt": {
+      "get": {
+        "tags": [
+          "TelegramBotUsersV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/tv-login-sessions": {
       "get": {
         "tags": [
@@ -6890,6 +7627,130 @@
       "get": {
         "tags": [
           "TvLoginSessionsAdmin"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/admin/tv-login-sessions": {
+      "get": {
+        "tags": [
+          "TvLoginSessionsAdminV2"
+        ],
+        "parameters": [
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "ApprovedUserId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.GetAdminTvLoginSessionsV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.GetAdminTvLoginSessionsV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.Auth.Responses.GetAdminTvLoginSessionsV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/admin/tv-login-sessions/healthcheck": {
+      "get": {
+        "tags": [
+          "TvLoginSessionsAdminV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/admin/tv-login-sessions/healthcheck-with-jwt": {
+      "get": {
+        "tags": [
+          "TvLoginSessionsAdminV2"
         ],
         "responses": {
           "200": {
@@ -9199,6 +10060,126 @@
         }
       }
     },
+    "/api/v2/open-vpn-certs": {
+      "get": {
+        "tags": [
+          "VpnServerCertsV2"
+        ],
+        "parameters": [
+          {
+            "name": "VpnServerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerCerts.Responses.GetCertificatesV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerCerts.Responses.GetCertificatesV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerCerts.Responses.GetCertificatesV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/open-vpn-certs/healthcheck": {
+      "get": {
+        "tags": [
+          "VpnServerCertsV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/open-vpn-certs/healthcheck-with-jwt": {
+      "get": {
+        "tags": [
+          "VpnServerCertsV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/open-vpn-clients/kill": {
       "post": {
         "tags": [
@@ -9471,6 +10452,172 @@
         }
       }
     },
+    "/api/open-vpn-clients/get-all-connected-paged": {
+      "get": {
+        "tags": [
+          "VpnServerClients"
+        ],
+        "parameters": [
+          {
+            "name": "VpnServerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "CommonName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.VpnClientsV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.VpnClientsV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.VpnClientsV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/vpn-sessions/get-all-connected-paged": {
+      "get": {
+        "tags": [
+          "VpnServerClients"
+        ],
+        "parameters": [
+          {
+            "name": "VpnServerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "CommonName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.VpnClientsV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.VpnClientsV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.VpnClientsV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/open-vpn-clients/user-connected-server-ids": {
       "get": {
         "tags": [
@@ -9688,6 +10835,172 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Api.VpnServerClients.Responses.ConnectedClientsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/open-vpn-clients/get-all-history-paged": {
+      "get": {
+        "tags": [
+          "VpnServerClients"
+        ],
+        "parameters": [
+          {
+            "name": "VpnServerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "CommonName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.VpnClientsV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.VpnClientsV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.VpnClientsV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/vpn-sessions/get-all-history-paged": {
+      "get": {
+        "tags": [
+          "VpnServerClients"
+        ],
+        "parameters": [
+          {
+            "name": "VpnServerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "CommonName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.VpnClientsV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.VpnClientsV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.VpnClientsV2Response"
                 }
               }
             }
@@ -10242,6 +11555,188 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Api.VpnServerClients.Responses.OverviewUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/open-vpn-clients/overview/users-paged": {
+      "get": {
+        "tags": [
+          "VpnServerClients"
+        ],
+        "parameters": [
+          {
+            "name": "From",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "To",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "VpnServerId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DisplayName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.OverviewUsersV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.OverviewUsersV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.OverviewUsersV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/vpn-sessions/overview/users-paged": {
+      "get": {
+        "tags": [
+          "VpnServerClients"
+        ],
+        "parameters": [
+          {
+            "name": "From",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "To",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "VpnServerId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "ExternalId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "DisplayName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.OverviewUsersV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.OverviewUsersV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.VpnServerClients.Responses.OverviewUsersV2Response"
                 }
               }
             }
@@ -14471,6 +15966,126 @@
           }
         }
       }
+    },
+    "/api/v2/xray-client-links": {
+      "get": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "parameters": [
+          {
+            "name": "VpnServerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "maximum": 500,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesV2Response"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesV2Response"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesV2Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links/healthcheck": {
+      "get": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links/healthcheck-with-jwt": {
+      "get": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -14487,6 +16102,22 @@
           },
           "data": {
             "$ref": "#/components/schemas/Applications.Responses.ApplicationsResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Applications.Responses.ApplicationsV2Response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Applications.Responses.ApplicationsV2Response"
           }
         },
         "additionalProperties": false
@@ -14615,6 +16246,22 @@
           },
           "data": {
             "$ref": "#/components/schemas/Auth.Responses.GetAdminTvLoginSessionsResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.Auth.Responses.GetAdminTvLoginSessionsV2Response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Auth.Responses.GetAdminTvLoginSessionsV2Response"
           }
         },
         "additionalProperties": false
@@ -14875,6 +16522,22 @@
         },
         "additionalProperties": false
       },
+      "Api.CertExpiry.Responses.GetCertExpiryRunsV2Response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/CertExpiry.Responses.GetCertExpiryRunsV2Response"
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.DataGateOpenVpnManager.Diagnostics.Responses.PiHoleDiagnosticsResponse": {
         "type": "object",
         "properties": {
@@ -14999,6 +16662,22 @@
           },
           "data": {
             "$ref": "#/components/schemas/FreeTierEnforcement.Responses.FreeTierUnsubscribedVpnDigestResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.FreeTierEnforcement.Responses.GetFreeTierCandidatesV2Response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/FreeTierEnforcement.Responses.GetFreeTierCandidatesV2Response"
           }
         },
         "additionalProperties": false
@@ -15227,6 +16906,22 @@
         },
         "additionalProperties": false
       },
+      "Api.OpenVpnFiles.Responses.OvpnFilesV2Response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/OpenVpnFiles.Responses.OvpnFilesV2Response"
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.OpenVpnFiles.Responses.OvpnFilesWithTokensResponse": {
         "type": "object",
         "properties": {
@@ -15367,6 +17062,22 @@
           },
           "data": {
             "$ref": "#/components/schemas/QuotaPlans.Responses.QuotaPlansResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.QuotaPlans.Responses.QuotaPlansV2Response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/QuotaPlans.Responses.QuotaPlansV2Response"
           }
         },
         "additionalProperties": false
@@ -15665,6 +17376,22 @@
           },
           "data": {
             "$ref": "#/components/schemas/TelegramBotUser.Responses.GetAllTelegramUsersResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.TelegramBotUser.Responses.GetTelegramBotUsersV2Response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/TelegramBotUser.Responses.GetTelegramBotUsersV2Response"
           }
         },
         "additionalProperties": false
@@ -16101,6 +17828,22 @@
         },
         "additionalProperties": false
       },
+      "Api.VpnServerCerts.Responses.GetCertificatesV2Response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/VpnServerCerts.Responses.GetCertificatesV2Response"
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.VpnServerCerts.Responses.RevokeCertificateResponse": {
         "type": "object",
         "properties": {
@@ -16229,6 +17972,22 @@
         },
         "additionalProperties": false
       },
+      "Api.VpnServerClients.Responses.OverviewUsersV2Response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/VpnServerClients.Responses.OverviewUsersV2Response"
+          }
+        },
+        "additionalProperties": false
+      },
       "Api.VpnServerClients.Responses.UserConnectedServerIdsResponse": {
         "type": "object",
         "properties": {
@@ -16241,6 +18000,22 @@
           },
           "data": {
             "$ref": "#/components/schemas/VpnServerClients.Responses.UserConnectedServerIdsResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.VpnServerClients.Responses.VpnClientsV2Response": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/VpnServerClients.Responses.VpnClientsV2Response"
           }
         },
         "additionalProperties": false
@@ -16774,6 +18549,15 @@
         },
         "additionalProperties": false
       },
+      "Applications.Responses.ApplicationsV2Response": {
+        "type": "object",
+        "properties": {
+          "applications": {
+            "$ref": "#/components/schemas/Paged.Applications.Dto.ApplicationDto"
+          }
+        },
+        "additionalProperties": false
+      },
       "Applications.Responses.RegisterApplicationResponse": {
         "type": "object",
         "properties": {
@@ -17294,6 +19078,15 @@
           "totalCount": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Auth.Responses.GetAdminTvLoginSessionsV2Response": {
+        "type": "object",
+        "properties": {
+          "sessions": {
+            "$ref": "#/components/schemas/Paged.Auth.Responses.AdminTvLoginSessionDto"
           }
         },
         "additionalProperties": false
@@ -17931,6 +19724,15 @@
               "$ref": "#/components/schemas/CertExpiry.Responses.CertExpiryRunSummaryDto"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CertExpiry.Responses.GetCertExpiryRunsV2Response": {
+        "type": "object",
+        "properties": {
+          "runs": {
+            "$ref": "#/components/schemas/Paged.CertExpiry.Responses.CertExpiryRunSummaryDto"
           }
         },
         "additionalProperties": false
@@ -18902,6 +20704,19 @@
         },
         "additionalProperties": false
       },
+      "FreeTierEnforcement.Responses.GetFreeTierCandidatesV2Response": {
+        "type": "object",
+        "properties": {
+          "candidates": {
+            "$ref": "#/components/schemas/Paged.FreeTierEnforcement.Dto.FreeTierEnforcementCandidateDto"
+          },
+          "connectedCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "FreeTierEnforcement.Responses.GetFreeTierDisconnectLogResponse": {
         "type": "object",
         "properties": {
@@ -19588,6 +21403,15 @@
         },
         "additionalProperties": false
       },
+      "OpenVpnFiles.Responses.OvpnFilesV2Response": {
+        "type": "object",
+        "properties": {
+          "files": {
+            "$ref": "#/components/schemas/Paged.OpenVpnFiles.Responses.Dto.IssuedOvpnFileDto"
+          }
+        },
+        "additionalProperties": false
+      },
       "OpenVpnFiles.Responses.OvpnFilesWithTokensResponse": {
         "type": "object",
         "properties": {
@@ -19604,6 +21428,120 @@
               "$ref": "#/components/schemas/OpenVpnFiles.Responses.Dto.IssuedOvpnFileTokenDto"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Paged.Applications.Dto.ApplicationDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Applications.Dto.ApplicationDto"
+            },
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hasNext": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Paged.Auth.Responses.AdminTvLoginSessionDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Auth.Responses.AdminTvLoginSessionDto"
+            },
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hasNext": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Paged.CertExpiry.Responses.CertExpiryRunSummaryDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CertExpiry.Responses.CertExpiryRunSummaryDto"
+            },
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hasNext": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -19627,6 +21565,44 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FreeTierEnforcement.Dto.FreeTierDisconnectLogEntryDto"
+            },
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hasNext": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Paged.FreeTierEnforcement.Dto.FreeTierEnforcementCandidateDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FreeTierEnforcement.Dto.FreeTierEnforcementCandidateDto"
             },
             "nullable": true
           },
@@ -19684,6 +21660,82 @@
         },
         "additionalProperties": false
       },
+      "Paged.OpenVpnFiles.Responses.Dto.IssuedOvpnFileDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OpenVpnFiles.Responses.Dto.IssuedOvpnFileDto"
+            },
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hasNext": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Paged.QuotaPlans.Dto.QuotaPlanDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuotaPlans.Dto.QuotaPlanDto"
+            },
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hasNext": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Paged.TelegramBotIncomingMessageLog.Dto.MessageDto": {
         "type": "object",
         "properties": {
@@ -19722,6 +21774,120 @@
         },
         "additionalProperties": false
       },
+      "Paged.TelegramBotUser.Responses.Dto.TelegramBotUserDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TelegramBotUser.Responses.Dto.TelegramBotUserDto"
+            },
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hasNext": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Paged.VpnServerCerts.Responses.Dto.MonitorServerCertificate": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VpnServerCerts.Responses.Dto.MonitorServerCertificate"
+            },
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hasNext": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Paged.VpnServerClients.Dto.OverviewUserDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VpnServerClients.Dto.OverviewUserDto"
+            },
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hasNext": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Paged.VpnServerEvent.Dto.VpnServerEventLogDto": {
         "type": "object",
         "properties": {
@@ -19741,6 +21907,44 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/VpnServerEvent.Dto.VpnServerEventLogDto"
+            },
+            "nullable": true
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "hasNext": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Paged.VpnServers.Dto.VpnClientInfoDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VpnServers.Dto.VpnClientInfoDto"
             },
             "nullable": true
           },
@@ -20124,6 +22328,15 @@
         },
         "additionalProperties": false
       },
+      "QuotaPlans.Responses.QuotaPlansV2Response": {
+        "type": "object",
+        "properties": {
+          "quotaPlans": {
+            "$ref": "#/components/schemas/Paged.QuotaPlans.Dto.QuotaPlanDto"
+          }
+        },
+        "additionalProperties": false
+      },
       "Settings.Responses.SettingResponse": {
         "type": "object",
         "properties": {
@@ -20464,6 +22677,15 @@
               "$ref": "#/components/schemas/TelegramBotUser.Responses.Dto.TelegramBotUserDto"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TelegramBotUser.Responses.GetTelegramBotUsersV2Response": {
+        "type": "object",
+        "properties": {
+          "telegramBotUsers": {
+            "$ref": "#/components/schemas/Paged.TelegramBotUser.Responses.Dto.TelegramBotUserDto"
           }
         },
         "additionalProperties": false
@@ -21587,6 +23809,15 @@
         },
         "additionalProperties": false
       },
+      "VpnServerCerts.Responses.GetCertificatesV2Response": {
+        "type": "object",
+        "properties": {
+          "certificates": {
+            "$ref": "#/components/schemas/Paged.VpnServerCerts.Responses.Dto.MonitorServerCertificate"
+          }
+        },
+        "additionalProperties": false
+      },
       "VpnServerCerts.Responses.RevokeCertificateResponse": {
         "type": "object",
         "properties": {
@@ -21955,6 +24186,15 @@
         },
         "additionalProperties": false
       },
+      "VpnServerClients.Responses.OverviewUsersV2Response": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "$ref": "#/components/schemas/Paged.VpnServerClients.Dto.OverviewUserDto"
+          }
+        },
+        "additionalProperties": false
+      },
       "VpnServerClients.Responses.UserConnectedServerIdsResponse": {
         "type": "object",
         "properties": {
@@ -21965,6 +24205,15 @@
               "format": "int32"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "VpnServerClients.Responses.VpnClientsV2Response": {
+        "type": "object",
+        "properties": {
+          "clients": {
+            "$ref": "#/components/schemas/Paged.VpnServers.Dto.VpnClientInfoDto"
           }
         },
         "additionalProperties": false
@@ -23806,6 +26055,9 @@
       "name": "Applications"
     },
     {
+      "name": "ApplicationsV2"
+    },
+    {
       "name": "Auth"
     },
     {
@@ -23815,7 +26067,13 @@
       "name": "CertExpiry"
     },
     {
+      "name": "CertExpiryV2"
+    },
+    {
       "name": "FreeTierEnforcement"
+    },
+    {
+      "name": "FreeTierEnforcementV2"
     },
     {
       "name": "GeoLite"
@@ -23833,6 +26091,9 @@
       "name": "OpenVpnFiles"
     },
     {
+      "name": "OpenVpnFilesV2"
+    },
+    {
       "name": "Performance"
     },
     {
@@ -23840,6 +26101,9 @@
     },
     {
       "name": "QuotaPlanAllowedServer"
+    },
+    {
+      "name": "QuotaPlansV2"
     },
     {
       "name": "Settings"
@@ -23857,7 +26121,13 @@
       "name": "TelegramBotUser"
     },
     {
+      "name": "TelegramBotUsersV2"
+    },
+    {
       "name": "TvLoginSessionsAdmin"
+    },
+    {
+      "name": "TvLoginSessionsAdminV2"
     },
     {
       "name": "User"
@@ -23879,6 +26149,9 @@
     },
     {
       "name": "VpnServerCerts"
+    },
+    {
+      "name": "VpnServerCertsV2"
     },
     {
       "name": "VpnServerClients"
@@ -23921,6 +26194,9 @@
     },
     {
       "name": "XrayClientLinks"
+    },
+    {
+      "name": "XrayClientLinksV2"
     }
   ]
 }

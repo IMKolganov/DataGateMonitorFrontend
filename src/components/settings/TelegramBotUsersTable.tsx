@@ -12,28 +12,24 @@ import {
 } from "../../api/orval/telegram-bot-user/telegram-bot-user.ts";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
 import "../../css/Table.css";
-import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import { UserAvatar } from "../ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
+import type { ServerGridPagination } from "../../hooks/useServerGridPagination";
 
 interface TelegramBotUsersTableProps {
   users: TelegramBotUserDto[];
   refreshUsers: () => void;
-  loading: boolean; // loading from data-fetch (query)
+  loading: boolean;
+  gridProps: ServerGridPagination["gridProps"];
 }
 
 const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
   users,
   refreshUsers,
   loading,
+  gridProps,
 }) => {
   const [mutationLoading, setMutationLoading] = useState(false);
-  const [tgUsersGridPage, setTgUsersGridPage] = useState(0);
-  const [tgUsersPageSize, setTgUsersPageSize] = usePersistedPageSize(
-    "telegram-bot-users",
-    10,
-    "5,10,20,50,100",
-  );
 
   const mBlock = usePostApiTgbotUsersBlock();
   const mUnblock = usePostApiTgbotUsersUnblock();
@@ -185,13 +181,7 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
           gridId="telegram-bot-users"
           rows={rows}
           columns={columns}
-          pageSizeOptions={[5, 10, 20, 50, 100]}
-          paginationMode="client"
-          paginationModel={{ page: tgUsersGridPage, pageSize: tgUsersPageSize }}
-          onPaginationModelChange={(m) => {
-            setTgUsersGridPage(m.page);
-            setTgUsersPageSize(m.pageSize);
-          }}
+          {...gridProps}
           localeText={{ noRowsLabel: "📭 No users found" }}
           loading={isGridLoading}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}

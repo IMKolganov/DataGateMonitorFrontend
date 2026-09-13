@@ -4,6 +4,7 @@ import TelegramBotUsersTable from "../../components/settings/TelegramBotUsersTab
 import { GridFilterBar } from "../../components/ui/GridFilterBar.tsx";
 import { gridFilterFields } from "../../config/gridFilters.ts";
 import type { TelegramBotUserDto } from "../../api/orvalModelShim";
+import type { ServerGridPagination } from "../../hooks/useServerGridPagination";
 
 import "../../css/Settings.css";
 import "../../css/TelegramBotUsers.css";
@@ -18,6 +19,7 @@ export function TelegramBotUsersSection({
   onTgUserFilterChange,
   onTgUserFilterApply,
   onTgUserFilterReset,
+  gridProps,
 }: {
   users: TelegramBotUserDto[];
   anyLoading: boolean;
@@ -28,6 +30,7 @@ export function TelegramBotUsersSection({
   onTgUserFilterChange: (id: string, value: string) => void;
   onTgUserFilterApply: () => void;
   onTgUserFilterReset: () => void;
+  gridProps: ServerGridPagination["gridProps"];
 }) {
   return (
     <>
@@ -59,6 +62,7 @@ export function TelegramBotUsersSection({
         users={users}
         refreshUsers={handleRefresh}
         loading={anyLoading}
+        gridProps={gridProps}
       />
     </>
   );

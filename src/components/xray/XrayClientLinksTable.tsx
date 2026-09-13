@@ -16,7 +16,7 @@ import {
 import { FaBan, FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
-import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { useClientGridPagination } from "../../hooks/useClientGridPagination";
 import type { OvpnRowInput } from "../ovpn-files/OvpnFilesTable.tsx";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
 import {
@@ -87,9 +87,13 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
   const [issuedToFilter, setIssuedToFilter] = useState("");
   const [bulkRevoking, setBulkRevoking] = useState(false);
   const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>(emptyGridSelection);
-  const [gridPage, setGridPage] = useState(0);
-  const [pageSize, setPageSize] = usePersistedPageSize(`xray-client-links:${vpnServerId}`, 10, "5,10,20,100");
-
+  const paging = useClientGridPagination({
+    storageKey: `xray-client-links:${vpnServerId}`,
+    defaultPageSize: 10,
+    allowedKey: "5,10,20,100",
+  });
+  const gridPage = paging.page;
+  const pageSize = paging.pageSize;
   const items: IssuedOvpnFileDto[] = useMemo(() => {
     const arr = Array.isArray(links) ? links : [];
     return arr
@@ -364,13 +368,7 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
           isRowSelectable={(params) => !params.row.isRevoked && params.row.numericId != null}
           rowSelectionModel={rowSelectionModel}
           onRowSelectionModelChange={(model) => setRowSelectionModel(model)}
-          pageSizeOptions={[5, 10, 20, 100]}
-          paginationMode="client"
-          paginationModel={{ page: gridPage, pageSize }}
-          onPaginationModelChange={(m) => {
-            setGridPage(m.page);
-            setPageSize(m.pageSize);
-          }}
+          {...paging.gridProps}
           localeText={{
             noRowsLabel: loading ? "Loading client links…" : "No client links yet",
           }}

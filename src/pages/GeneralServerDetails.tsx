@@ -14,13 +14,11 @@ import ServerDetailsInfoDefault from "../components/servers/ServerDetailsInfo.ts
 import { OpenVpnProcessControls } from "../components/servers/OpenVpnProcessControls.tsx";
 
 import {
-    useGetApiOpenVpnClientsGetAllConnected,
-    useGetApiOpenVpnClientsGetAllHistory,
+    useGetApiV2VpnSessionsGetAllConnected,
+    useGetApiV2VpnSessionsGetAllHistory,
 } from "../api/orval/vpn-server-clients/vpn-server-clients";
 
 import type {
-    GetApiOpenVpnClientsGetAllConnectedParams,
-    GetApiOpenVpnClientsGetAllHistoryParams,
     ConnectedClientsResponse,
     VpnClientInfoDto,
     VpnServerWithStatusDto,
@@ -29,6 +27,8 @@ import type {
     VpnServerWithStatusV2Dto,
     VpnServerWithStatusesV3Response,
 } from "../api/orvalModelShim";
+import type { GetApiV2VpnSessionsGetAllConnectedParams } from "../api/orval/model/getApiV2VpnSessionsGetAllConnectedParams";
+import type { GetApiV2VpnSessionsGetAllHistoryParams } from "../api/orval/model/getApiV2VpnSessionsGetAllHistoryParams";
 
 import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import { useGetApiOpenVpnConfigsGetVpnServerId } from "../api/orval/vpn-server-ovpn-file-config/vpn-server-ovpn-file-config";
@@ -256,7 +256,7 @@ export function GeneralServerDetails() {
         return labels;
     }, [numericServerId, allowedByVpnRaw, planNameById]);
 
-    const connectedParams: GetApiOpenVpnClientsGetAllConnectedParams = useMemo(
+    const connectedParams: GetApiV2VpnSessionsGetAllConnectedParams = useMemo(
         () => ({
             VpnServerId: numericServerId ?? 0,
             Page: page + 1,
@@ -266,7 +266,7 @@ export function GeneralServerDetails() {
         [numericServerId, page, pageSize, clientFilters.queryParams]
     );
 
-    const mapConnectedParams: GetApiOpenVpnClientsGetAllConnectedParams = useMemo(
+    const mapConnectedParams: GetApiV2VpnSessionsGetAllConnectedParams = useMemo(
         () => openVpnServerMapConnectedClientsParams(numericServerId ?? 0),
         [numericServerId],
     );
@@ -277,7 +277,7 @@ export function GeneralServerDetails() {
         clientFilters.queryParams,
     );
 
-    const historyParams: GetApiOpenVpnClientsGetAllHistoryParams = useMemo(
+    const historyParams: GetApiV2VpnSessionsGetAllHistoryParams = useMemo(
         () => ({
             VpnServerId: numericServerId ?? 0,
             Page: page + 1,
@@ -310,7 +310,7 @@ export function GeneralServerDetails() {
         Number.isFinite(numericServerId) && serverKindReady && scopedStackType === VpnServerType.Xray;
     const clientInsightsEnabled = openVpnQueriesEnabled || xrayClientsEnabled;
 
-    const connectedQuery = useGetApiOpenVpnClientsGetAllConnected(connectedParams, {
+    const connectedQuery = useGetApiV2VpnSessionsGetAllConnected(connectedParams, {
         query: {
             enabled:
                 Number.isFinite(numericServerId) &&
@@ -324,7 +324,7 @@ export function GeneralServerDetails() {
         },
     });
 
-    const mapConnectedQuery = useGetApiOpenVpnClientsGetAllConnected(mapConnectedParams, {
+    const mapConnectedQuery = useGetApiV2VpnSessionsGetAllConnected(mapConnectedParams, {
         query: {
             enabled: Number.isFinite(numericServerId) && isLive && clientInsightsEnabled,
             staleTime: 10000,
@@ -334,7 +334,7 @@ export function GeneralServerDetails() {
         },
     });
 
-    const historyQuery = useGetApiOpenVpnClientsGetAllHistory(historyParams, {
+    const historyQuery = useGetApiV2VpnSessionsGetAllHistory(historyParams, {
         query: {
             enabled: Number.isFinite(numericServerId) && !isLive && clientInsightsEnabled,
             staleTime: 10000,

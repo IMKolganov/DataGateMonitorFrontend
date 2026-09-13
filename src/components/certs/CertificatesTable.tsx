@@ -12,7 +12,7 @@ import { FaBan } from "react-icons/fa";
 import "../../css/Table.css";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
-import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { useClientGridPagination } from "../../hooks/useClientGridPagination";
 import axios from "axios";
 import { axiosResponseDataMessage, errorMessage } from "../../utils/errorMessage";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
@@ -75,12 +75,13 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
   const [revokingCN, setRevokingCN] = useState<string | null>(null);
   const [bulkRevoking, setBulkRevoking] = useState(false);
   const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>(emptyGridSelection);
-  const [certsGridPage, setCertsGridPage] = useState(0);
-  const [certsPageSize, setCertsPageSize] = usePersistedPageSize(
-    `certs:${vpnServerId}`,
-    10,
-    "5,10,20,100",
-  );
+  const paging = useClientGridPagination({
+    storageKey: `certs:${vpnServerId}`,
+    defaultPageSize: 10,
+    allowedKey: "5,10,20,100",
+  });
+  const certsGridPage = paging.page;
+  const certsPageSize = paging.pageSize;
 
   const filteredCertificates = useMemo(
     () =>
@@ -310,13 +311,7 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
           isRowSelectable={(params) => params.row.status === ACTIVE_STATUS}
           rowSelectionModel={rowSelectionModel}
           onRowSelectionModelChange={(model) => setRowSelectionModel(model)}
-          pageSizeOptions={[5, 10, 20, 100]}
-          paginationMode="client"
-          paginationModel={{ page: certsGridPage, pageSize: certsPageSize }}
-          onPaginationModelChange={(m) => {
-            setCertsGridPage(m.page);
-            setCertsPageSize(m.pageSize);
-          }}
+          {...paging.gridProps}
           localeText={{
             noRowsLabel: loading ? "🔄 Loading certificates..." : "📭 No certificates found",
           }}
