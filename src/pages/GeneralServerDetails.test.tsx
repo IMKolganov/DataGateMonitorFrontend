@@ -66,7 +66,7 @@ vi.mock("../api/orval/vpn-servers-v3/vpn-servers-v3", () => ({
 }));
 
 vi.mock("../api/orval/vpn-server-clients/vpn-server-clients", () => ({
-  useGetApiOpenVpnClientsGetAllConnected: () => ({
+  useGetApiV2VpnSessionsGetAllConnected: () => ({
     data: { vpnClients: [], totalCount: 0 },
     isLoading: false,
     isFetching: false,
@@ -74,7 +74,7 @@ vi.mock("../api/orval/vpn-server-clients/vpn-server-clients", () => ({
     error: null,
     refetch: vi.fn(),
   }),
-  useGetApiOpenVpnClientsGetAllHistory: () => ({
+  useGetApiV2VpnSessionsGetAllHistory: () => ({
     data: { vpnClients: [], totalCount: 0 },
     isLoading: false,
     isFetching: false,

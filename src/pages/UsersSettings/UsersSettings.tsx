@@ -32,7 +32,8 @@ export function UsersSettings() {
       </div>
       <div className="settings-divider" />
       <p className="app-settings-description">
-        List of application users. Open a user to see profile, traffic vs quota usage, and plan assignments.
+        Filter users below. Each row shows traffic quota usage and VPN servers available to that person
+        (quota plan allowlist plus personal grants/blocks). Open a user for full details.
       </p>
 
       <UsersSection

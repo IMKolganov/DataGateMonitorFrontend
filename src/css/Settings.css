@@ -714,3 +714,98 @@ h2.settings-page__h2-with-icon > .icon {
 .settings-card__header h3 {
   margin: 0;
 }
+
+/* User detail page */
+.user-detail-page__subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: min(100%, 28rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-detail-page > .app-settings-description {
+  text-align: left;
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.user-detail-tabs.tabs {
+  margin-top: 0.25rem;
+}
+
+.user-detail-tab-content {
+  min-width: 0;
+}
+
+.user-detail-tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+button.tab.tab--with-icon {
+  background: transparent;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.user-servers-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.user-servers-chips--compact {
+  gap: 4px;
+  max-width: 100%;
+}
+
+.user-servers-chips__chip {
+  display: inline-block;
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  background: var(--bg-content-alt);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.user-servers-chips--compact .user-servers-chips__chip {
+  max-width: 7.5rem;
+  padding: 1px 6px;
+  font-size: 11px;
+}
+
+.user-servers-chips__more {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.user-servers-chips__muted {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.users-table-quota-cell {
+  width: 100%;
+  min-width: 0;
+  padding: 4px 0;
+}
+
+.users-table-quota-cell .traffic-quota-progress {
+  width: 100%;
+}
+

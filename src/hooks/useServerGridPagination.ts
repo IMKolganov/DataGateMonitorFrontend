@@ -69,6 +69,11 @@ export function useServerGridPagination({
 
   const resetPage = useCallback(() => setPageState(0), []);
 
+  // Dataset identity changed (filters, server, scope) — always return to page 0.
+  useEffect(() => {
+    setPageState(0);
+  }, [resetKey]);
+
   useEffect(() => {
     setPageState((prev) => clampPage(prev, rowCount, pageSize));
   }, [rowCount, pageSize]);

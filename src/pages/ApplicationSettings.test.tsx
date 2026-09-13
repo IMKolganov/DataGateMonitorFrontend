@@ -4,7 +4,12 @@ import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../test/renderWithProviders";
 
 vi.mock("../components/settings/ApplicationTable.tsx", () => ({
-  default: ({ applications }: { applications: { name?: string }[] }) => (
+  default: ({
+    applications,
+  }: {
+    applications: { name?: string }[];
+    gridProps: unknown;
+  }) => (
     <ul data-testid="apps-list">
       {applications.map((a, i) => (
         <li key={i}>{a.name ?? `app-${i}`}</li>
@@ -34,18 +39,22 @@ const mutateAsync = vi.fn().mockResolvedValue({
   clientSecret: "new-client-secret",
 });
 
-const appsData = {
-  applications: [{ id: 1, name: "Existing App", clientId: "a", clientSecret: "b" }],
-};
-
-vi.mock("../api/orval/applications/applications", () => ({
-  useGetApiApplicationsGetAll: () => ({
-    data: appsData,
+vi.mock("../api/orval/applications-v2/applications-v2", () => ({
+  useGetApiV2Applications: () => ({
+    data: {
+      applications: {
+        items: [{ id: 1, name: "Existing App", clientId: "a", clientSecret: "b" }],
+        totalCount: 1,
+      },
+    },
     error: null,
     isLoading: false,
     isFetching: false,
     refetch,
   }),
+}));
+
+vi.mock("../api/orval/applications/applications", () => ({
   usePostApiApplicationsRegister: () => ({
     mutateAsync,
     isPending: false,

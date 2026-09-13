@@ -28,6 +28,10 @@ export type UserDnsQueriesSectionProps = {
   selectedCn?: string | null;
   onSelectedCnChange?: (cn: string | null) => void;
   hideProfilePicker?: boolean;
+  /** When set with `to`, uses parent date range and hides the local DateRangeFilter. */
+  from?: Date;
+  to?: Date;
+  grouping?: Grouping;
 };
 
 export function UserDnsQueriesSection({
@@ -38,13 +42,20 @@ export function UserDnsQueriesSection({
   selectedCn: selectedCnProp,
   onSelectedCnChange,
   hideProfilePicker = false,
+  from: fromProp,
+  to: toProp,
+  grouping: groupingProp,
 }: UserDnsQueriesSectionProps) {
   const admin = isAdmin(getCurrentUser());
   const ext = typeof externalId === "string" ? externalId.trim() : "";
   const hasIdentity = ext.length > 0;
-  const [from, setFrom] = useState(() => addDays(startOfToday(), -6));
-  const [to, setTo] = useState(() => endOfToday());
-  const [grouping, setGrouping] = useState<Grouping>("auto");
+  const dateRangeControlled = fromProp != null && toProp != null;
+  const [localFrom, setLocalFrom] = useState(() => addDays(startOfToday(), -6));
+  const [localTo, setLocalTo] = useState(() => endOfToday());
+  const [localGrouping, setLocalGrouping] = useState<Grouping>("auto");
+  const from = dateRangeControlled ? fromProp : localFrom;
+  const to = dateRangeControlled ? toProp : localTo;
+  const grouping = dateRangeControlled ? (groupingProp ?? "auto") : localGrouping;
   const [domainFilter, setDomainFilter] = useState("");
   const [internalCn, setInternalCn] = useState<string | null>(null);
   const selectedCn = selectedCnProp !== undefined ? selectedCnProp : internalCn;
@@ -54,12 +65,12 @@ export function UserDnsQueriesSection({
 
   useEffect(() => {
     setPage(0);
-  }, [selectedCn]);
+  }, [selectedCn, from, to]);
 
   const onFilterChange = (c: DateRangeChange) => {
-    setFrom(c.from);
-    setTo(c.to);
-    setGrouping(c.grouping);
+    setLocalFrom(c.from);
+    setLocalTo(c.to);
+    setLocalGrouping(c.grouping);
     setPage(0);
   };
 
@@ -208,7 +219,9 @@ export function UserDnsQueriesSection({
         </div>
       )}
 
-      <DateRangeFilter from={from} to={to} grouping={grouping} onChange={onFilterChange} />
+      {dateRangeControlled ? null : (
+        <DateRangeFilter from={from} to={to} grouping={grouping} onChange={onFilterChange} />
+      )}
       <div className="server-form">
         <div className="form-group">
           <label htmlFor="user-dns-domain-filter">Domain contains</label>

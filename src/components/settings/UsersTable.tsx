@@ -5,6 +5,8 @@ import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type { UserDto } from "../../api/orvalModelShim";
 import { GridRowActions, RowActionLink } from "../ui/GridRowActions.tsx";
+import { UserTrafficQuotaProgress } from "../quota/UserTrafficQuotaProgress";
+import { UserAvailableServersChips } from "../quota/UserAvailableServersChips";
 import "../../css/Table.css";
 import { UserAvatar } from "../ui/UserAvatar.tsx";
 import { readOptionalAvatarUrl } from "../../utils/readOptionalAvatarUrl.ts";
@@ -43,6 +45,7 @@ const UsersTable: React.FC<UsersTableProps> = ({
           isAdmin: Boolean(u.isAdmin),
           isBlocked: Boolean(u.isBlocked),
           hasDashboardAccess: Boolean(u.hasDashboardAccess),
+          externalIdRaw: u.externalId,
         };
       }),
     [users]
@@ -66,15 +69,40 @@ const UsersTable: React.FC<UsersTableProps> = ({
       ),
     },
     { field: "id", headerName: "ID", width: 70 },
-    { field: "displayName", headerName: "Display Name", flex: 1 },
-    { field: "email", headerName: "Email", flex: 1 },
-    { field: "provider", headerName: "Provider", flex: 0.8 },
-    { field: "externalId", headerName: "External ID", flex: 0.8 },
-    { field: "createDate", headerName: "Created", flex: 1 },
-    { field: "lastUpdate", headerName: "Updated", flex: 1 },
-    { field: "isAdmin", headerName: "Admin", type: "boolean", flex: 0.5 },
-    { field: "isBlocked", headerName: "Blocked", type: "boolean", flex: 0.5 },
-    { field: "hasDashboardAccess", headerName: "Dashboard", type: "boolean", flex: 0.5 },
+    { field: "displayName", headerName: "Display Name", flex: 1, minWidth: 120 },
+    { field: "email", headerName: "Email", flex: 1, minWidth: 140 },
+    {
+      field: "quota",
+      headerName: "Quota",
+      flex: 1.4,
+      minWidth: 200,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <div className="users-table-quota-cell">
+          <UserTrafficQuotaProgress
+            userId={params.row.id as number}
+            externalId={params.row.externalIdRaw as string | null | undefined}
+            compact
+            suppressInlineTitle
+          />
+        </div>
+      ),
+    },
+    {
+      field: "servers",
+      headerName: "Available servers",
+      flex: 1.2,
+      minWidth: 180,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <UserAvailableServersChips userId={params.row.id as number} compact />
+      ),
+    },
+    { field: "provider", headerName: "Provider", flex: 0.7, minWidth: 90 },
+    { field: "isAdmin", headerName: "Admin", type: "boolean", width: 80 },
+    { field: "isBlocked", headerName: "Blocked", type: "boolean", width: 90 },
     {
       field: "actions",
       headerName: "Actions",
@@ -113,9 +141,16 @@ const UsersTable: React.FC<UsersTableProps> = ({
           paginationModel={paginationModel}
           onPaginationModelChange={onPaginationModelChange}
           pageSizeOptions={[5, 10, 20, 50, 100]}
+          getRowHeight={() => "auto"}
           localeText={{ noRowsLabel: "📭 No users found" }}
           loading={loading}
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
+          sx={{
+            "& .MuiDataGrid-cell": {
+              alignItems: "center",
+              py: 1,
+            },
+          }}
         />
       </div>
     </CustomThemeProvider>

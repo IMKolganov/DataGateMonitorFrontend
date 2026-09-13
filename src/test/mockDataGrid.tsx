@@ -95,9 +95,11 @@ export function MockDataGrid(props: MockGridProps) {
             (row.eventType as string | undefined) ??
             (row.messageText as string | undefined) ??
             (row.username as string | undefined) ??
+            (row.deviceName as string | undefined) ??
             (row.clientId as string | undefined) ??
             (row.appProcess as string | undefined) ??
             (row.text as string | undefined) ??
+            (row.runId as string | undefined) ??
             String(id);
           return (
             <li key={String(id)} data-testid={`row-${id}`}>
