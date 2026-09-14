@@ -1,19 +1,16 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { FaPlus, FaTrash, FaUserShield } from "react-icons/fa";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   useGetApiUserVpnServerAccessRulesGetByUserIdUserId,
-  getGetApiUserVpnServerAccessRulesGetByUserIdUserIdQueryKey,
   usePostApiUserVpnServerAccessRulesCreate,
   usePutApiUserVpnServerAccessRulesUpdate,
   useDeleteApiUserVpnServerAccessRulesDeleteId,
 } from "../../api/orval/user-vpn-server-access-rule/user-vpn-server-access-rule";
-import {
-  useGetApiV3OpenVpnServersGetAll,
-  getGetApiV3OpenVpnServersGetAllQueryKey,
-  getGetApiV3OpenVpnServersGetAllWithStatusQueryKey,
-} from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
+import { useGetApiV3OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
+import { invalidateVpnAccessQueries } from "../VpnAccessSettings/invalidateVpnAccessQueries";
 import type {
   EnumsVpnServerAccessRuleMode,
   GetUserVpnServerAccessRulesByUserIdResponse,
@@ -67,15 +64,7 @@ export function UserVpnServerAccessRulesSection({ userId }: Props) {
   const availableServers = servers.filter((s) => s.id != null && !ruledServerIds.has(s.id));
 
   const invalidate = () => {
-    queryClient.invalidateQueries({
-      queryKey: getGetApiUserVpnServerAccessRulesGetByUserIdUserIdQueryKey(userId),
-    });
-    queryClient.invalidateQueries({
-      queryKey: getGetApiV3OpenVpnServersGetAllQueryKey(undefined),
-    });
-    queryClient.invalidateQueries({
-      queryKey: getGetApiV3OpenVpnServersGetAllWithStatusQueryKey(undefined),
-    });
+    invalidateVpnAccessQueries(queryClient);
   };
 
   const handleAdd = () => {
@@ -142,7 +131,12 @@ export function UserVpnServerAccessRulesSection({ userId }: Props) {
       </h3>
       <p className="settings-item-description">
         Grants and blocks for this user on top of the quota plan allowlist. A grant opens a
-        server the plan does not cover; a block wins over the plan and over a grant.
+        server the plan does not cover; a block wins over the plan and over a grant. To pick a
+        server first and then choose people, use{" "}
+        <Link to="/settings/access" className="vpn-access-inline-link">
+          Access settings
+        </Link>
+        .
       </p>
 
       <div className="header-bar header-bar--mb-12">

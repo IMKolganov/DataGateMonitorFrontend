@@ -15,6 +15,8 @@ export function pickArray(payload: unknown): unknown[] {
   if (Array.isArray(p["ovpnFiles"])) return p["ovpnFiles"];
   if (Array.isArray(p["issuedOvpnFile"])) return p["issuedOvpnFile"];
   if (Array.isArray(p["issuedOvpnFiles"])) return p["issuedOvpnFiles"];
+  if (Array.isArray(p["issuedXrayClientLink"])) return p["issuedXrayClientLink"];
+  if (Array.isArray(p["issuedXrayClientLinks"])) return p["issuedXrayClientLinks"];
 
   if (Array.isArray(p["serverCertificates"])) return p["serverCertificates"];
   if (Array.isArray(p["certificates"])) return p["certificates"];

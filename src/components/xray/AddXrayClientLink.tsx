@@ -4,8 +4,8 @@ import { FaPlus, FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
-import { postApiXrayClientLinksAdd } from "../../api/xrayClientLinks.ts";
-import type { AddFileRequest } from "../../api/orvalModelShim";
+import { postApiV2XrayClientLinks } from "../../api/orval/xray-client-links-v2/xray-client-links-v2";
+import type { XrayClientLinksRequestsAddXrayClientLinkRequest as AddXrayClientLinkRequest } from "../../api/orvalModelShim";
 import axios from "axios";
 import { axiosResponseDataMessage, axiosResponseDetail, errorMessage } from "../../utils/errorMessage";
 
@@ -20,7 +20,7 @@ const AddXrayClientLink: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const { mutateAsync: addMutate, isPending } = useMutation({
-    mutationFn: (vars: { data: AddFileRequest }) => postApiXrayClientLinksAdd(vars.data),
+    mutationFn: (vars: { data: AddXrayClientLinkRequest }) => postApiV2XrayClientLinks(vars.data),
   });
 
   const navigate = useNavigate();
@@ -42,11 +42,12 @@ const AddXrayClientLink: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
     setMessage(null);
 
     try {
-      const data = {
+      const data: AddXrayClientLinkRequest = {
         vpnServerId: Number(vpnServerId),
         externalId: newExternalId.trim(),
         commonName: newCommonName.trim(),
-      } as unknown as AddFileRequest;
+        issuedTo: "xrayClient",
+      };
 
       await addMutate({ data });
 
@@ -124,7 +125,7 @@ const AddXrayClientLink: React.FC<Props> = ({ vpnServerId, onSuccess }) => {
       </button>
 
       <p className="certificate-description" style={{ marginTop: 10, maxWidth: 720, lineHeight: 1.45 }}>
-        Calls <code>/api/xray-client-links/add</code> → DataGateXRayManager. Not an <code>.ovpn</code> file. Template:
+        Calls <code>/api/v2/xray-client-links</code> → DataGateXRayManager. Not an <code>.ovpn</code> file. Template:
         server <strong>Client export template</strong>.
       </p>
 

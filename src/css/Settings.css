@@ -716,3 +716,128 @@ h2.settings-page__h2-with-icon > .icon {
 .settings-card__header h3 {
   margin: 0;
 }
+
+.vpn-access-toolbar .input {
+  max-width: 280px;
+}
+
+.vpn-access-toolbar .input--mode {
+  max-width: 160px;
+}
+
+.vpn-access-inline-link {
+  color: var(--text-link, var(--text-primary));
+  text-decoration: underline;
+}
+
+.vpn-access-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.vpn-access-picker__search {
+  width: 100%;
+  max-width: none;
+}
+
+.vpn-access-picker__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.vpn-access-picker__fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.vpn-access-picker__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 280px;
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-content);
+}
+
+.vpn-access-picker__row {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.vpn-access-picker__row:last-child {
+  border-bottom: none;
+}
+
+.vpn-access-picker__row--all {
+  background: var(--bg-content-alt);
+}
+
+.vpn-access-picker__label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.vpn-access-picker__label:hover {
+  background: var(--bg-content-alt);
+}
+
+.vpn-access-picker__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.vpn-access-picker__meta strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.vpn-access-picker__meta span {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vpn-access-picker__empty {
+  margin: 0;
+  padding: 12px;
+}
+
+.vpn-access-plan__label {
+  align-items: flex-start;
+}
+
+.vpn-access-plan__badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.vpn-access-plan__label .vpn-access-picker__meta span {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+}

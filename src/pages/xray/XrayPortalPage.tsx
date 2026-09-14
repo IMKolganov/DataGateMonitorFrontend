@@ -3,12 +3,12 @@ import { Navigate } from "react-router-dom";
 import { FaTelegramPlane } from "react-icons/fa";
 import { useGetApiV3OpenVpnServersGetAll } from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
 import {
-  postApiXrayClientLinksAddWithToken,
-  postApiXrayClientLinksDownloadFileByCn,
-} from "../../api/orval/xray-client-links/xray-client-links";
+  postApiV2XrayClientLinksWithToken,
+  postApiV2XrayClientLinksDownloadByCn,
+} from "../../api/orval/xray-client-links-v2/xray-client-links-v2";
 import type {
-  AddFileRequest,
-  DownloadFileResponse,
+  XrayClientLinksRequestsAddXrayClientLinkRequest as AddXrayClientLinkRequest,
+  XrayClientLinksResponsesDownloadXrayClientLinkResponse as DownloadXrayClientLinkResponse,
   VpnServerV2Dto,
   VpnServersV3Response,
 } from "../../api/orvalModelShim";
@@ -23,6 +23,7 @@ import {
   decodeXrayClientLinkContent,
   extractVlessUriFromClientLinkContent,
 } from "../../utils/xrayClientLinkContent";
+import { readIssuedXrayClientLinkMeta } from "../../utils/xrayClientLinkRow";
 import "../../css/XrayPortal.css";
 
 const EMAIL_CLAIM = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress";
@@ -44,22 +45,6 @@ function claimString(source: Record<string, unknown>, ...keys: string[]): string
     }
   }
   return "";
-}
-
-function readIssuedFileMeta(result: unknown): { vpnServerId?: number; commonName?: string } {
-  if (!result || typeof result !== "object") return {};
-
-  const root = result as Record<string, unknown>;
-  const file = root.issuedOvpnFile ?? root.IssuedOvpnFile;
-  if (!file || typeof file !== "object") return {};
-
-  const record = file as Record<string, unknown>;
-  const vpnServerIdRaw = record.vpnServerId ?? record.VpnServerId;
-  const vpnServerId =
-    typeof vpnServerIdRaw === "number" && Number.isFinite(vpnServerIdRaw) ? vpnServerIdRaw : undefined;
-  const commonName = claimString(record, "commonName", "CommonName");
-
-  return { vpnServerId, commonName };
 }
 
 const XrayPortalPage: React.FC = () => {
@@ -134,15 +119,15 @@ const XrayPortalPage: React.FC = () => {
     try {
       const shortExternalId = userInfo.externalId.slice(0, 64);
       const generatedCommonName = buildXrayCommonName(shortExternalId);
-      const payload: AddFileRequest = {
+      const payload: AddXrayClientLinkRequest = {
         vpnServerId: server.id,
         externalId: shortExternalId,
         issuedTo: userInfo.issuedTo.slice(0, 128),
         commonName: generatedCommonName,
       };
 
-      const result = await postApiXrayClientLinksAddWithToken(payload);
-      const { vpnServerId, commonName } = readIssuedFileMeta(result);
+      const result = await postApiV2XrayClientLinksWithToken(payload);
+      const { vpnServerId, commonName } = readIssuedXrayClientLinkMeta(result);
       if (!vpnServerId || !commonName) {
         setStatus(t.accessCreatedNoToken);
         return;
@@ -152,7 +137,7 @@ const XrayPortalPage: React.FC = () => {
         vpnServerId,
         commonName,
       };
-      const downloaded = (await postApiXrayClientLinksDownloadFileByCn(downloadPayload)) as DownloadFileResponse;
+      const downloaded = (await postApiV2XrayClientLinksDownloadByCn(downloadPayload)) as DownloadXrayClientLinkResponse;
       const content = (downloaded.content ?? "").trim();
       const decoded = decodeXrayClientLinkContent(content);
       const vlessLine = extractVlessUriFromClientLinkContent(content);

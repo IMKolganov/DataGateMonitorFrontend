@@ -13,6 +13,8 @@ import {
     LeafletMapLifecycle,
     safeMapCall,
 } from "../../utils/leafletMapSafe";
+import { withCartoApiKey } from "../../utils/cartoBasemapUrl";
+import { getRuntimeEnv } from "../../utils/runtimeEnv";
 
 import { getApiOpenVpnClientsOverviewPoints } from "../../api/orval/vpn-server-clients/vpn-server-clients.ts";
 import type {
@@ -442,7 +444,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                 <FullscreenControl isFullscreen={isFullscreen} onToggle={toggleFullscreen} />
                 {!bounds && <ChangeView center={center} zoom={zoom} />}
                 <TileLayer
-                    url={tileLayers[selectedLayer].url}
+                    url={withCartoApiKey(tileLayers[selectedLayer].url, getRuntimeEnv().cartoApiKey)}
                     attribution={tileLayers[selectedLayer].attribution}
                 />
 

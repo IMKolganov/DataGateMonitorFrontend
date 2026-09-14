@@ -8,6 +8,8 @@ import type { ProxyTrafficFlowUpdate } from "../hooks/useProxyTrafficFlow";
 import { isWebGLAvailable, VpnGlobeBoundary } from "./VpnGlobeBoundary";
 import "../css/VpnMap.css";
 import { LeafletMapLifecycle } from "../utils/leafletMapSafe";
+import { withCartoApiKey } from "../utils/cartoBasemapUrl";
+import { getRuntimeEnv } from "../utils/runtimeEnv";
 
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
@@ -1134,7 +1136,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
             >
               <LeafletMapLifecycle />
               <TileLayer
-                  url={tileLayers[selectedLayer].url}
+                  url={withCartoApiKey(tileLayers[selectedLayer].url, getRuntimeEnv().cartoApiKey)}
                   attribution={tileLayers[selectedLayer].attribution}
               />
 

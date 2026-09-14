@@ -15,9 +15,9 @@ vi.mock("../../api/orval/vpn-servers-v3/vpn-servers-v3", () => ({
     error: null,
   }),
 }));
-vi.mock("../../api/orval/xray-client-links/xray-client-links", () => ({
-  postApiXrayClientLinksAddWithToken: vi.fn(),
-  postApiXrayClientLinksDownloadFileByCn: vi.fn(),
+vi.mock("../../api/orval/xray-client-links-v2/xray-client-links-v2", () => ({
+  postApiV2XrayClientLinksWithToken: vi.fn(),
+  postApiV2XrayClientLinksDownloadByCn: vi.fn(),
 }));
 
 import XrayRegisterPage from "./XrayRegisterPage";
