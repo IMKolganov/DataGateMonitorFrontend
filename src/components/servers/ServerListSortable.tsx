@@ -55,9 +55,9 @@ export const serverListCollisionDetection: CollisionDetection = (args) => {
   }
 
   const pointer = pointerWithin(args);
-  const overServer = pointer.filter((c) => c.data.current?.type === "server");
+  const overServer = pointer.filter((c) => c.data?.current?.type === "server");
   if (overServer.length > 0) return overServer;
-  const overGroup = pointer.filter((c) => c.data.current?.type === "group-drop");
+  const overGroup = pointer.filter((c) => c.data?.current?.type === "group-drop");
   if (overGroup.length > 0) return overGroup;
 
   return closestCenter({

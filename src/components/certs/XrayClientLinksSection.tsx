@@ -4,9 +4,9 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import XrayClientLinksTable from "../xray/XrayClientLinksTable.tsx";
 import AddXrayClientLink from "../xray/AddXrayClientLink.tsx";
-import { useGetApiXrayClientLinksGetAllVpnServerId } from "../../api/xrayClientLinks.ts";
-import type { OvpnFilesResponse } from "../../api/orvalModelShim";
-import type { OvpnRowInput } from "../ovpn-files/OvpnFilesTable.tsx";
+import { useGetApiV2XrayClientLinksByServerVpnServerId } from "../../api/orval/xray-client-links-v2/xray-client-links-v2";
+import type { XrayClientLinksResponsesXrayClientLinksResponse as XrayClientLinksResponse } from "../../api/orvalModelShim";
+import type { XrayClientLinkRowInput } from "../../utils/xrayClientLinkRow";
 import { pickArray } from "../../utils/pickPayloadArray.ts";
 import { errorMessage as baseErrorMessage } from "../../utils/errorMessage";
 
@@ -33,14 +33,14 @@ const XrayClientLinksSection: React.FC<Props> = ({ vpnServerId }) => {
   const numericId = useMemo(() => Number(vpnServerId), [vpnServerId]);
   const isValidId = Number.isFinite(numericId) && numericId > 0;
 
-  const filesQuery = useGetApiXrayClientLinksGetAllVpnServerId(
+  const filesQuery = useGetApiV2XrayClientLinksByServerVpnServerId(
     isValidId ? numericId : (undefined as unknown as number),
     {
       query: { enabled: isValidId, staleTime: 10_000, retry: 1 },
     },
   );
 
-  const links = pickArray(filesQuery.data as OvpnFilesResponse) as OvpnRowInput[];
+  const links = pickArray(filesQuery.data as XrayClientLinksResponse) as XrayClientLinkRowInput[];
 
   useEffect(() => {
     if (filesQuery.isError) {

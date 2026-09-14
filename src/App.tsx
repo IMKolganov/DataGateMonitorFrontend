@@ -39,6 +39,7 @@ const ServerDetails = lazy(() => import("./pages/ServerDetails"));
 const ServerForm = lazy(() => import("./pages/ServerForm"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PiHoleServerTab = lazy(() => import("./pages/PiHoleServerTab"));
+const ServerAccessTab = lazy(() => import("./pages/ServerAccessTab"));
 const Settings = lazy(() => import("./pages/Settings"));
 const ApplicationSettings = lazy(() => import("./pages/ApplicationSettings"));
 const GeneralTab = lazy(() => import("./pages/GeneralServerDetails"));
@@ -63,6 +64,7 @@ const EmailBroadcastSettings = lazy(() => import("./pages/EmailBroadcastSettings
 const AdminPasswordRecoverySettings = lazy(() => import("./pages/AdminPasswordRecoverySettings"));
 const AdminSecuritySettings = lazy(() => import("./pages/AdminSecuritySettings"));
 const QuotaPlansSettings = lazy(() => import("./pages/QuotaPlansSettings/QuotaPlansSettings"));
+const VpnAccessSettings = lazy(() => import("./pages/VpnAccessSettings/VpnAccessSettings"));
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
 const ServersOverview = lazy(() => import("./pages/ServersOverview"));
 const OvpnFileConfigForm = lazy(() => import("./pages/OvpnFileConfigForm"));
@@ -182,6 +184,7 @@ function App() {
                         </Route>
 
                         <Route path="events" element={withSuspense(<Events />)} />
+                        <Route path="access" element={withSuspense(<ServerAccessTab />)} />
                         <Route path="pi-hole" element={withSuspense(<PiHoleServerTab />)} />
                       </Route>
                     </Route>
@@ -198,6 +201,7 @@ function App() {
                       <Route path="general" element={withSuspense(<GeneralSettings />)} />
                       <Route path="applications" element={withSuspense(<ApplicationSettings />)} />
                       <Route path="quotas" element={withSuspense(<QuotaPlansSettings />)} />
+                      <Route path="access" element={withSuspense(<VpnAccessSettings />)} />
                       <Route path="geolitedb" element={withSuspense(<GeoLiteDbSettings />)} />
                       <Route path="vpn-notifications" element={withSuspense(<NotificationVpnProfileSettings />)} />
                       <Route path="cert-expiry" element={withSuspense(<CertExpirySettings />)} />

@@ -13908,17 +13908,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
                 }
               }
             }
@@ -13950,17 +13950,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
                 }
               }
             }
@@ -14000,17 +14000,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
                 }
               }
             }
@@ -14042,17 +14042,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesWithTokensResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesWithTokensResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesWithTokensResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
                 }
               }
             }
@@ -14092,17 +14092,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesWithTokensResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesWithTokensResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesWithTokensResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
                 }
               }
             }
@@ -14131,17 +14131,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFilesResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
                 }
               }
             }
@@ -14158,22 +14158,22 @@
           "content": {
             "application/json-patch+json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.AddFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
               }
             },
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.AddFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.AddFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.AddFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
               }
             }
           }
@@ -14184,17 +14184,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
                 }
               }
             }
@@ -14211,22 +14211,22 @@
           "content": {
             "application/json-patch+json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.AddFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
               }
             },
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.AddFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.AddFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.AddFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
               }
             }
           }
@@ -14237,17 +14237,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFileWithTokenResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkWithTokenResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFileWithTokenResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkWithTokenResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFileWithTokenResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkWithTokenResponse"
                 }
               }
             }
@@ -14264,22 +14264,22 @@
           "content": {
             "application/json-patch+json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.RevokeFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.RevokeXrayClientLinkRequest"
               }
             },
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.RevokeFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.RevokeXrayClientLinkRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.RevokeFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.RevokeXrayClientLinkRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.RevokeFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.RevokeXrayClientLinkRequest"
               }
             }
           }
@@ -14290,17 +14290,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.OvpnFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
                 }
               }
             }
@@ -14317,22 +14317,22 @@
           "content": {
             "application/json-patch+json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.DownloadFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkRequest"
               }
             },
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.DownloadFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.DownloadFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.DownloadFileRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkRequest"
               }
             }
           }
@@ -14343,17 +14343,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.DownloadFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.DownloadFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.DownloadFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
                 }
               }
             }
@@ -14370,22 +14370,22 @@
           "content": {
             "application/json-patch+json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.DownloadFileByCnRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkByCnRequest"
               }
             },
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.DownloadFileByCnRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkByCnRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.DownloadFileByCnRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkByCnRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/OpenVpnFiles.Requests.DownloadFileByCnRequest"
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkByCnRequest"
               }
             }
           }
@@ -14396,17 +14396,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.DownloadFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.DownloadFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.OpenVpnFiles.Responses.DownloadFileResponse"
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
                 }
               }
             }
@@ -14465,6 +14465,533 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Api.System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links/by-token/{token}": {
+      "get": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links/by-server/{vpnServerId}": {
+      "get": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "parameters": [
+          {
+            "name": "vpnServerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links/by-server/{vpnServerId}/by-external-id/{externalId}": {
+      "get": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "parameters": [
+          {
+            "name": "vpnServerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "externalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links/by-server/{vpnServerId}/with-tokens": {
+      "get": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "parameters": [
+          {
+            "name": "vpnServerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links/by-server/{vpnServerId}/by-external-id/{externalId}/with-tokens": {
+      "get": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "parameters": [
+          {
+            "name": "vpnServerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maximum": 2147483647,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "externalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links/by-external-id/{externalId}": {
+      "get": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "parameters": [
+          {
+            "name": "externalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinksResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links": {
+      "post": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links/with-token": {
+      "post": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.AddXrayClientLinkRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkWithTokenResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkWithTokenResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkWithTokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links/revoke": {
+      "post": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.RevokeXrayClientLinkRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.RevokeXrayClientLinkRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.RevokeXrayClientLinkRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.RevokeXrayClientLinkRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.XrayClientLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links/download": {
+      "post": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/xray-client-links/download-by-cn": {
+      "post": {
+        "tags": [
+          "XrayClientLinksV2"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkByCnRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkByCnRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkByCnRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/XrayClientLinks.Requests.DownloadXrayClientLinkByCnRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
                 }
               }
             }
@@ -16998,7 +17525,7 @@
         "type": "object",
         "properties": {
           "telegramId": {
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9.223372036854776e+18,
             "minimum": 1,
             "type": "integer",
             "format": "int64"
@@ -17010,7 +17537,7 @@
         "type": "object",
         "properties": {
           "telegramId": {
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9.223372036854776e+18,
             "minimum": 1,
             "type": "integer",
             "format": "int64",
@@ -19076,7 +19603,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": { }
+        "additionalProperties": {}
       },
       "Mobile.Dto.DeviceDto": {
         "required": [
@@ -20040,14 +20567,14 @@
             "nullable": true
           },
           "dailyQuotaBytes": {
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9.223372036854776e+18,
             "minimum": 0,
             "type": "integer",
             "format": "int64",
             "nullable": true
           },
           "monthlyQuotaBytes": {
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9.223372036854776e+18,
             "minimum": 0,
             "type": "integer",
             "format": "int64",
@@ -20606,7 +21133,7 @@
             "type": "string"
           },
           "telegramId": {
-            "maximum": 9.223372036854776E+18,
+            "maximum": 9.223372036854776e+18,
             "minimum": 1,
             "type": "integer",
             "format": "int64"
@@ -23782,6 +24309,379 @@
           }
         },
         "additionalProperties": false
+      },
+      "XrayClientLinks.Requests.AddXrayClientLinkRequest": {
+        "required": [
+          "commonName",
+          "externalId",
+          "issuedTo",
+          "vpnServerId"
+        ],
+        "type": "object",
+        "properties": {
+          "externalId": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "commonName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "vpnServerId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "issuedTo": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "linkExpireDays": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "XrayClientLinks.Requests.DownloadXrayClientLinkByCnRequest": {
+        "required": [
+          "commonName",
+          "vpnServerId"
+        ],
+        "type": "object",
+        "properties": {
+          "vpnServerId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "commonName": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "XrayClientLinks.Requests.DownloadXrayClientLinkRequest": {
+        "required": [
+          "issuedXrayClientLinkId",
+          "vpnServerId"
+        ],
+        "type": "object",
+        "properties": {
+          "issuedXrayClientLinkId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "vpnServerId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "XrayClientLinks.Requests.RevokeXrayClientLinkRequest": {
+        "required": [
+          "commonName",
+          "issuedXrayClientLinkId",
+          "vpnServerId"
+        ],
+        "type": "object",
+        "properties": {
+          "vpnServerId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "issuedXrayClientLinkId": {
+            "maximum": 2147483647,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "commonName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "isRevoked": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "XrayClientLinks.Responses.Dto.IssuedXrayClientLinkDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "vpnServerId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "externalId": {
+            "type": "string",
+            "nullable": true
+          },
+          "commonName": {
+            "type": "string",
+            "nullable": true
+          },
+          "certId": {
+            "type": "string",
+            "nullable": true
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "filePath": {
+            "type": "string",
+            "nullable": true
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "issuedTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "pemFilePath": {
+            "type": "string",
+            "nullable": true
+          },
+          "certFilePath": {
+            "type": "string",
+            "nullable": true
+          },
+          "keyFilePath": {
+            "type": "string",
+            "nullable": true
+          },
+          "reqFilePath": {
+            "type": "string",
+            "nullable": true
+          },
+          "isRevoked": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastUpdate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "XrayClientLinks.Responses.Dto.IssuedXrayClientLinkTokenDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isUsed": {
+            "type": "boolean"
+          },
+          "purpose": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastUpdate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "issuedXrayClientLinkId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "XrayClientLinks.Responses.DownloadXrayClientLinkResponse": {
+        "type": "object",
+        "properties": {
+          "issuedXrayClientLink": {
+            "$ref": "#/components/schemas/XrayClientLinks.Responses.Dto.IssuedXrayClientLinkDto"
+          },
+          "fileSizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "content": {
+            "type": "string",
+            "format": "byte",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "XrayClientLinks.Responses.XrayClientLinkResponse": {
+        "type": "object",
+        "properties": {
+          "issuedXrayClientLink": {
+            "$ref": "#/components/schemas/XrayClientLinks.Responses.Dto.IssuedXrayClientLinkDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "XrayClientLinks.Responses.XrayClientLinkWithTokenResponse": {
+        "type": "object",
+        "properties": {
+          "issuedXrayClientLink": {
+            "$ref": "#/components/schemas/XrayClientLinks.Responses.Dto.IssuedXrayClientLinkDto"
+          },
+          "issuedXrayClientLinkToken": {
+            "$ref": "#/components/schemas/XrayClientLinks.Responses.Dto.IssuedXrayClientLinkTokenDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "XrayClientLinks.Responses.XrayClientLinksResponse": {
+        "type": "object",
+        "properties": {
+          "issuedXrayClientLinks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/XrayClientLinks.Responses.Dto.IssuedXrayClientLinkDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "XrayClientLinks.Responses.XrayClientLinksWithTokensResponse": {
+        "type": "object",
+        "properties": {
+          "issuedXrayClientLinks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/XrayClientLinks.Responses.Dto.IssuedXrayClientLinkDto"
+            },
+            "nullable": true
+          },
+          "issuedXrayClientLinkTokens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/XrayClientLinks.Responses.Dto.IssuedXrayClientLinkTokenDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.XrayClientLinks.Responses.XrayClientLinkResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/XrayClientLinks.Responses.XrayClientLinkResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.XrayClientLinks.Responses.XrayClientLinksResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/XrayClientLinks.Responses.XrayClientLinksResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.XrayClientLinks.Responses.XrayClientLinksWithTokensResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/XrayClientLinks.Responses.XrayClientLinksWithTokensResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.XrayClientLinks.Responses.XrayClientLinkWithTokenResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/XrayClientLinks.Responses.XrayClientLinkWithTokenResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Api.XrayClientLinks.Responses.DownloadXrayClientLinkResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/XrayClientLinks.Responses.DownloadXrayClientLinkResponse"
+          }
+        },
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
@@ -23795,7 +24695,7 @@
   },
   "security": [
     {
-      "Bearer": [ ]
+      "Bearer": []
     }
   ],
   "tags": [
@@ -23921,6 +24821,9 @@
     },
     {
       "name": "XrayClientLinks"
+    },
+    {
+      "name": "XrayClientLinksV2"
     }
   ]
 }

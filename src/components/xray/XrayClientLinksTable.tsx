@@ -3,21 +3,21 @@ import type { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type {
-  IssuedOvpnFileDto,
-  RevokeFileRequest,
-  DownloadFileRequest,
-  DownloadFileResponse,
-  DownloadFileResponseApiResponse,
+  XrayClientLinksRequestsDownloadXrayClientLinkRequest as DownloadXrayClientLinkRequest,
+  XrayClientLinksRequestsRevokeXrayClientLinkRequest as RevokeXrayClientLinkRequest,
+  XrayClientLinksResponsesDownloadXrayClientLinkResponse as DownloadXrayClientLinkResponse,
+  XrayClientLinksResponsesDtoIssuedXrayClientLinkDto as IssuedXrayClientLinkDto,
+  ApiXrayClientLinksResponsesDownloadXrayClientLinkResponse as DownloadXrayClientLinkResponseApiResponse,
 } from "../../api/orvalModelShim";
 import {
-  postApiXrayClientLinksDownloadFile,
-  postApiXrayClientLinksRevokeFile,
-} from "../../api/xrayClientLinks.ts";
+  postApiV2XrayClientLinksDownload,
+  postApiV2XrayClientLinksRevoke,
+} from "../../api/orval/xray-client-links-v2/xray-client-links-v2";
 import { FaBan, FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
-import type { OvpnRowInput } from "../ovpn-files/OvpnFilesTable.tsx";
+import { unwrapXrayClientLinkRow, type XrayClientLinkRowInput } from "../../utils/xrayClientLinkRow";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
 import {
   collectSelectedOnPage,
@@ -32,34 +32,13 @@ const safeFormatDate = (input?: string | null): string => {
   return isNaN(date.getTime()) ? "Invalid date" : formatDateWithOffset(date);
 };
 
-function unwrapLinkRow(x: OvpnRowInput): IssuedOvpnFileDto | null {
-  if (!x) return null;
-  if ((x as IssuedOvpnFileDto).commonName != null || (x as IssuedOvpnFileDto).id != null) {
-    return x as IssuedOvpnFileDto;
-  }
-  const rec = x as Record<string, unknown>;
-  for (const k of ["issuedOvpnFile", "issuedOvpnFileDto", "ovpnFile", "file", "item", "value", "data"]) {
-    const v = rec[k];
-    if (v && typeof v === "object" && v !== null) {
-      const o = v as IssuedOvpnFileDto;
-      if (o.commonName != null || o.id != null) return o;
-    }
-  }
-  const payload = rec["payload"];
-  if (payload && typeof payload === "object" && payload !== null) {
-    const nested = (payload as Record<string, unknown>)["issuedOvpnFile"];
-    if (nested && typeof nested === "object") return nested as IssuedOvpnFileDto;
-  }
-  return null;
-}
-
 function revokeErrorMessage(err: unknown): string {
   const e = err as { response?: { data?: { message?: string } }; message?: string };
   return e.response?.data?.message || e.message || "Error revoking client link.";
 }
 
 interface Props {
-  links: OvpnRowInput[];
+  links: XrayClientLinkRowInput[];
   vpnServerId: string;
   onRevoke: (count?: number) => Promise<void> | void;
   loading: boolean;
@@ -90,11 +69,11 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
   const [gridPage, setGridPage] = useState(0);
   const [pageSize, setPageSize] = usePersistedPageSize(`xray-client-links:${vpnServerId}`, 10, "5,10,20,100");
 
-  const items: IssuedOvpnFileDto[] = useMemo(() => {
+  const items: IssuedXrayClientLinkDto[] = useMemo(() => {
     const arr = Array.isArray(links) ? links : [];
     return arr
-      .map(unwrapLinkRow)
-      .filter((x): x is IssuedOvpnFileDto => !!x && (x.id != null || x.commonName != null));
+      .map(unwrapXrayClientLinkRow)
+      .filter((x): x is IssuedXrayClientLinkDto => !!x && (x.id != null || x.commonName != null));
   }, [links]);
 
   const filtered = useMemo(() => {
@@ -170,12 +149,12 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
         const failures: string[] = [];
         for (const row of unique) {
           try {
-            const data: RevokeFileRequest = {
+            const data: RevokeXrayClientLinkRequest = {
               vpnServerId: Number(vpnServerId),
-              ovpnFileId: row.numericId!,
+              issuedXrayClientLinkId: row.numericId!,
               commonName: row.commonName,
             };
-            await postApiXrayClientLinksRevokeFile(data);
+            await postApiV2XrayClientLinksRevoke(data);
           } catch (err: unknown) {
             failures.push(`${row.commonName || row.id}: ${revokeErrorMessage(err)}`);
           }
@@ -215,16 +194,17 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
   const handleDownload = useCallback(
     async (issuedFileId: number) => {
       try {
-        const payload: DownloadFileRequest = {
+        const payload: DownloadXrayClientLinkRequest = {
           vpnServerId: Number(vpnServerId),
-          issuedOvpnFileId: issuedFileId,
+          issuedXrayClientLinkId: issuedFileId,
         };
-        const apiResult = (await postApiXrayClientLinksDownloadFile(payload)) as
-          | DownloadFileResponseApiResponse
-          | DownloadFileResponse;
+        const apiResult = (await postApiV2XrayClientLinksDownload(payload)) as
+          | DownloadXrayClientLinkResponseApiResponse
+          | DownloadXrayClientLinkResponse;
 
-        const resp: DownloadFileResponse | undefined =
-          (apiResult as DownloadFileResponseApiResponse)?.data ?? (apiResult as DownloadFileResponse);
+        const resp: DownloadXrayClientLinkResponse | undefined =
+          (apiResult as DownloadXrayClientLinkResponseApiResponse)?.data ??
+          (apiResult as DownloadXrayClientLinkResponse);
 
         const b64 = resp?.content ?? null;
         if (!b64) throw new Error("No file content received.");
@@ -232,7 +212,7 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
         const raw = atob(b64);
         const bytes = new Uint8Array([...raw].map((c) => c.charCodeAt(0)));
 
-        const fileName = resp?.issuedOvpn?.fileName ?? `client_${issuedFileId}.txt`;
+        const fileName = resp?.issuedXrayClientLink?.fileName ?? `client_${issuedFileId}.txt`;
         const mime = /\.(txt|json)$/i.test(fileName)
           ? "text/plain;charset=utf-8"
           : "application/octet-stream";

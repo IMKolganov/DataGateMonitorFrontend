@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_SIGNALR_LONG_POLLING_ONLY?: string;
   /** Dev: "1" = serve UI against local stubs, no backend. */
   readonly VITE_MOCK_API?: string;
+  /** Optional CARTO raster basemap key (`?key=` on cartocdn tile URLs). */
+  readonly VITE_CARTO_API_KEY?: string;
 }
 
 declare const __APP_VERSION__: string;

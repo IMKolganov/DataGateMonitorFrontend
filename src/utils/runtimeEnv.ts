@@ -12,9 +12,11 @@ export function getRuntimeEnv() {
     const runtime = (w.__ENV__ ?? {}) as Record<string, unknown>;
     const buildGoogleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     const buildBackendUrl = import.meta.env.VITE_BACKEND_URL;
+    const buildCartoApiKey = import.meta.env.VITE_CARTO_API_KEY;
 
     return {
         googleClientId: readString(runtime["VITE_GOOGLE_CLIENT_ID"]) || readString(buildGoogleClientId),
         backendUrl: readString(runtime["BACKEND_URL"]) || readString(buildBackendUrl),
+        cartoApiKey: readString(runtime["VITE_CARTO_API_KEY"]) || readString(buildCartoApiKey),
     };
 }
