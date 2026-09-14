@@ -235,7 +235,73 @@ function overviewSeries() {
   };
 }
 
-function mockPayload(pathname: string, method: string, body: Record<string, unknown> = {}): Json | null {
+type MockUser = {
+  id: number;
+  displayName: string;
+  email: string;
+  isAdmin?: boolean;
+  isBlocked?: boolean;
+  hasDashboardAccess?: boolean;
+  provider?: string;
+  externalId?: string | null;
+};
+
+const mockUsers: MockUser[] = [
+  {
+    id: 1,
+    displayName: "Mock Admin",
+    email: "admin@mock.local",
+    isAdmin: true,
+    hasDashboardAccess: true,
+    provider: "password",
+  },
+  {
+    id: 2,
+    displayName: "Alice",
+    email: "alice@mock.local",
+    hasDashboardAccess: true,
+    provider: "google",
+  },
+  {
+    id: 3,
+    displayName: "Bob",
+    email: "bob@mock.local",
+    provider: "telegram",
+    externalId: "10001",
+  },
+];
+
+type MockAccessRule = { id: number; userId: number; vpnServerId: number; mode: 1 | 2 };
+
+let nextMockAccessRuleId = 2;
+let mockAccessRules: MockAccessRule[] = [{ id: 1, userId: 2, vpnServerId: 1, mode: 1 }];
+
+type MockQuotaLink = { id: number; quotaPlanId: number; vpnServerId: number };
+let nextMockQuotaLinkId = 2;
+let mockQuotaLinks: MockQuotaLink[] = [{ id: 1, quotaPlanId: 4, vpnServerId: 1 }];
+
+function toUserDto(user: MockUser) {
+  return {
+    id: user.id,
+    displayName: user.displayName,
+    email: user.email,
+    avatarUrl: null,
+    isAdmin: Boolean(user.isAdmin),
+    isBlocked: Boolean(user.isBlocked),
+    hasDashboardAccess: Boolean(user.hasDashboardAccess),
+    provider: user.provider ?? null,
+    externalId: user.externalId ?? null,
+    createDate: nowIso(),
+    lastUpdate: nowIso(),
+  };
+}
+
+function mockPayload(
+  pathname: string,
+  method: string,
+  body: Record<string, unknown> = {},
+  search: URLSearchParams = new URLSearchParams(),
+): Json | null {
   if (pathname.includes("/api/hubs/")) {
     return { error: "SignalR is disabled in mock mode" };
   }
@@ -403,11 +469,72 @@ function mockPayload(pathname: string, method: string, body: Record<string, unkn
     return { tags: [] };
   }
   if (pathname.includes("/api/quota-plans/get-all") || pathname.endsWith("/api/quota-plans/get-all")) {
-    return { quotaPlans: [] };
+    return {
+      quotaPlans: [
+        {
+          id: 1,
+          name: "Free",
+          description: "Entry plan (5 GB/day, 20 GB/month)",
+          dailyQuotaBytes: 5 * 1024 ** 3,
+          monthlyQuotaBytes: 20 * 1024 ** 3,
+          isActive: true,
+          isDefault: false,
+        },
+        {
+          id: 2,
+          name: "Default",
+          description: "Default plan (10 GB/day, 50 GB/month)",
+          dailyQuotaBytes: 10 * 1024 ** 3,
+          monthlyQuotaBytes: 50 * 1024 ** 3,
+          isActive: true,
+          isDefault: true,
+        },
+        {
+          id: 3,
+          name: "Standard",
+          description: "Balanced plan (20 GB/day, 100 GB/month)",
+          dailyQuotaBytes: 20 * 1024 ** 3,
+          monthlyQuotaBytes: 100 * 1024 ** 3,
+          isActive: true,
+        },
+        {
+          id: 4,
+          name: "Pro",
+          description: "Heavy users (50 GB/day, 300 GB/month)",
+          dailyQuotaBytes: 50 * 1024 ** 3,
+          monthlyQuotaBytes: 300 * 1024 ** 3,
+          isActive: true,
+        },
+        {
+          id: 5,
+          name: "Unlimited",
+          description: "No traffic limits",
+          isActive: true,
+        },
+      ],
+    };
   }
   const quotaByServer = pathname.match(/\/api\/quota-plan-allowed-servers\/get-by-vpn-server-id\/(\d+)$/);
   if (quotaByServer) {
-    return { items: [] };
+    const vpnServerId = Number(quotaByServer[1]);
+    return { items: mockQuotaLinks.filter((row) => row.vpnServerId === vpnServerId) };
+  }
+  if (method === "POST" && pathname.endsWith("/api/quota-plan-allowed-servers/create")) {
+    const quotaPlanId = Number(body.quotaPlanId);
+    const vpnServerId = Number(body.vpnServerId);
+    const existing = mockQuotaLinks.find(
+      (row) => row.quotaPlanId === quotaPlanId && row.vpnServerId === vpnServerId,
+    );
+    if (existing) return { quotaPlanAllowedServer: existing };
+    const created = { id: nextMockQuotaLinkId++, quotaPlanId, vpnServerId };
+    mockQuotaLinks = [...mockQuotaLinks, created];
+    return { quotaPlanAllowedServer: created };
+  }
+  const deleteQuotaLink = pathname.match(/\/api\/quota-plan-allowed-servers\/delete\/(\d+)$/);
+  if (method === "DELETE" && deleteQuotaLink) {
+    const id = Number(deleteQuotaLink[1]);
+    mockQuotaLinks = mockQuotaLinks.filter((row) => row.id !== id);
+    return {};
   }
 
   const getById = pathname.match(/\/api\/open-vpn-servers\/get\/(\d+)$/);
@@ -461,6 +588,91 @@ function mockPayload(pathname: string, method: string, body: Record<string, unkn
     return { status: "ok", mock: true };
   }
 
+  if (pathname.endsWith("/api/users/get-all")) {
+    const q = (search.get("Search") ?? "").trim().toLowerCase();
+    let users = mockUsers.filter((user) => {
+      if (!q) return true;
+      return (
+        user.displayName.toLowerCase().includes(q) || user.email.toLowerCase().includes(q)
+      );
+    });
+    const page = Math.max(1, Number(search.get("Page") || 1) || 1);
+    const pageSize = Math.min(500, Math.max(1, Number(search.get("PageSize") || 50) || 50));
+    const totalCount = users.length;
+    const start = (page - 1) * pageSize;
+    users = users.slice(start, start + pageSize);
+    return { page, pageSize, totalCount, users: users.map(toUserDto) };
+  }
+
+  const userById = pathname.match(/\/api\/users\/get-by-id\/(\d+)$/);
+  if (userById) {
+    const user = mockUsers.find((row) => row.id === Number(userById[1]));
+    return { user: user ? toUserDto(user) : null };
+  }
+
+  if (pathname.endsWith("/api/user-vpn-server-access-rules/get-all")) {
+    const userId = Number(search.get("UserId") || 0);
+    const vpnServerId = Number(search.get("VpnServerId") || 0);
+    let items = mockAccessRules.filter((rule) => {
+      if (userId > 0 && rule.userId !== userId) return false;
+      if (vpnServerId > 0 && rule.vpnServerId !== vpnServerId) return false;
+      return true;
+    });
+    const page = Math.max(1, Number(search.get("Page") || 1) || 1);
+    const pageSize = Math.min(500, Math.max(1, Number(search.get("PageSize") || 50) || 50));
+    const totalCount = items.length;
+    const start = (page - 1) * pageSize;
+    items = items.slice(start, start + pageSize);
+    return { page, pageSize, totalCount, items };
+  }
+
+  const rulesByUser = pathname.match(/\/api\/user-vpn-server-access-rules\/get-by-user-id\/(\d+)$/);
+  if (rulesByUser) {
+    const userId = Number(rulesByUser[1]);
+    return { items: mockAccessRules.filter((rule) => rule.userId === userId) };
+  }
+
+  const rulesByServer = pathname.match(
+    /\/api\/user-vpn-server-access-rules\/get-by-vpn-server-id\/(\d+)$/,
+  );
+  if (rulesByServer) {
+    const vpnServerId = Number(rulesByServer[1]);
+    return { items: mockAccessRules.filter((rule) => rule.vpnServerId === vpnServerId) };
+  }
+
+  if (method === "POST" && pathname.endsWith("/api/user-vpn-server-access-rules/create")) {
+    const userId = Number(body.userId);
+    const vpnServerId = Number(body.vpnServerId);
+    const mode: 1 | 2 = Number(body.mode) === 2 ? 2 : 1;
+    const existing = mockAccessRules.find(
+      (rule) => rule.userId === userId && rule.vpnServerId === vpnServerId,
+    );
+    if (existing) {
+      existing.mode = mode;
+      return { userVpnServerAccessRule: existing };
+    }
+    const created: MockAccessRule = { id: nextMockAccessRuleId++, userId, vpnServerId, mode };
+    mockAccessRules = [...mockAccessRules, created];
+    return { userVpnServerAccessRule: created };
+  }
+
+  if (method === "PUT" && pathname.endsWith("/api/user-vpn-server-access-rules/update")) {
+    const id = Number(body.id);
+    const rule = mockAccessRules.find((row) => row.id === id);
+    if (!rule) return {};
+    if (typeof body.userId === "number") rule.userId = body.userId;
+    if (typeof body.vpnServerId === "number") rule.vpnServerId = body.vpnServerId;
+    rule.mode = Number(body.mode) === 2 ? 2 : 1;
+    return {};
+  }
+
+  const deleteRule = pathname.match(/\/api\/user-vpn-server-access-rules\/delete\/(\d+)$/);
+  if (method === "DELETE" && deleteRule) {
+    const id = Number(deleteRule[1]);
+    mockAccessRules = mockAccessRules.filter((rule) => rule.id !== id);
+    return {};
+  }
+
   if (method === "GET") return {};
   return {};
 }
@@ -487,7 +699,13 @@ export function mockApiPlugin(enabled: boolean): Plugin {
         const finish = async () => {
           const body =
             method === "GET" || method === "HEAD" ? {} : await readJsonBody(req);
-          sendJson(res, envelope(mockPayload(pathname, method, body)));
+          let search = new URLSearchParams();
+          try {
+            search = new URL(req.url ?? "/", "http://127.0.0.1").searchParams;
+          } catch {
+            search = new URLSearchParams();
+          }
+          sendJson(res, envelope(mockPayload(pathname, method, body, search)));
         };
         void finish();
       });

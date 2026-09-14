@@ -3,9 +3,8 @@ import { pickArray } from "./pickPayloadArray";
 
 describe("pickArray", () => {
   it("unwraps common list shapes", () => {
-    expect(pickArray({ items: [1, 2] })).toEqual([1, 2]);
-    expect(pickArray({ data: [{ a: 1 }] })).toEqual([{ a: 1 }]);
-    expect(pickArray([9])).toEqual([9]);
+    expect(pickArray({ issuedXrayClientLinks: [{ id: 1 }] })).toEqual([{ id: 1 }]);
+    expect(pickArray({ issuedOvpnFiles: [{ id: 2 }] })).toEqual([{ id: 2 }]);
   });
 
   it("returns empty for nullish or object without arrays", () => {

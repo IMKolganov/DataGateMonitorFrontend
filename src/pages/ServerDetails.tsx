@@ -11,6 +11,7 @@ import {
   FaKey,
   FaServer,
   FaTerminal,
+  FaUserShield,
 } from "react-icons/fa";
 import "../css/ServerDetails.css";
 
@@ -31,6 +32,7 @@ type Tab = {
 
 const ALL_SERVER_TABS: Tab[] = [
     { label: "General", path: "", adminOnly: true, Icon: FaServer, mobilePrefix: "🖥️" },
+    { label: "Access", path: "access", adminOnly: true, Icon: FaUserShield, mobilePrefix: "🔓" },
     {
         label: "Manage Certificates",
         path: "certificates",

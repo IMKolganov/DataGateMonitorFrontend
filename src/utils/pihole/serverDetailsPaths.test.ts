@@ -12,6 +12,7 @@ describe("serverDetailsPaths", () => {
     expect(isNonAdminBlockedSubpath("")).toBe(true);
     expect(isNonAdminBlockedSubpath("pi-hole")).toBe(true);
     expect(isNonAdminBlockedSubpath("certificates")).toBe(true);
+    expect(isNonAdminBlockedSubpath("access")).toBe(true);
     expect(isNonAdminBlockedSubpath("statistics")).toBe(false);
   });
 });

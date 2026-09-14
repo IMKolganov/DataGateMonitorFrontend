@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaChartPie, FaUsers } from "react-icons/fa";
+import { FaChartPie, FaUserShield, FaUsers } from "react-icons/fa";
 import { useUsers } from "./useUsers";
 import { UsersSection } from "./UsersSection";
 
@@ -26,9 +26,14 @@ export function UsersSettings() {
           <FaUsers className="icon" aria-hidden />
           <span>Users</span>
         </h2>
-        <Link to="/settings/users/quotas" className="btn secondary">
-          <FaChartPie className="icon" /> User quotas
-        </Link>
+        <div className="left-buttons">
+          <Link to="/settings/access" className="btn secondary">
+            <FaUserShield className="icon" /> Server access
+          </Link>
+          <Link to="/settings/users/quotas" className="btn secondary">
+            <FaChartPie className="icon" /> User quotas
+          </Link>
+        </div>
       </div>
       <div className="settings-divider" />
       <p className="app-settings-description">
