@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { FaChevronRight } from "react-icons/fa";
 import ServerList from "../components/servers/ServerList.tsx";
+import ServersGrid from "../components/servers/ServersGrid.tsx";
 import { useMediaQuery } from "react-responsive";
 import "../css/ServersWithDetails.css";
 import { Suspense } from "react";
@@ -11,7 +12,7 @@ function ServersWithDetails() {
   const isMobile = useMediaQuery({ maxWidth: 768 });
   const location = useLocation();
 
-  /** `/servers` exact — full-width grouped list. */
+  /** `/servers` exact — full-width grouped tile grid. */
   const isServersIndexOnly = /^\/servers\/?$/.test(location.pathname);
   /** `/servers/123/...` — layout with ServerDetails. */
   const isViewingDetails = /^\/servers\/\d+/.test(location.pathname);
@@ -46,7 +47,7 @@ function ServersWithDetails() {
         }`}
       >
         <div className="servers-home-panel">
-          <ServerList />
+          <ServersGrid />
         </div>
       </div>
     );

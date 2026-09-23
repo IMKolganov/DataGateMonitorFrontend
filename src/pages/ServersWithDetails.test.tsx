@@ -16,6 +16,10 @@ vi.mock("../components/servers/ServerList.tsx", () => ({
   ),
 }));
 
+vi.mock("../components/servers/ServersGrid.tsx", () => ({
+  default: () => <div data-testid="servers-grid">ServersGrid</div>,
+}));
+
 const mediaQuery = vi.fn((_q?: { maxWidth?: number }) => false);
 vi.mock("react-responsive", () => ({
   useMediaQuery: (q: { maxWidth?: number }) => mediaQuery(q),
@@ -28,7 +32,7 @@ describe("ServersWithDetails", () => {
     mediaQuery.mockReturnValue(false);
   });
 
-  it("renders full-width grouped server list on desktop index", () => {
+  it("renders grouped tile grid on desktop index", () => {
     renderWithProviders(
       <Routes>
         <Route path="/servers" element={<ServersWithDetails />}>
@@ -38,8 +42,8 @@ describe("ServersWithDetails", () => {
       { route: "/servers" },
     );
 
-    expect(screen.getByTestId("server-list")).toBeInTheDocument();
-    expect(screen.queryByRole("tablist", { name: "Servers page view" })).not.toBeInTheDocument();
+    expect(screen.getByTestId("servers-grid")).toBeInTheDocument();
+    expect(screen.queryByTestId("server-list")).not.toBeInTheDocument();
   });
 
   it("keeps desktop split with hide list when viewing a server", () => {
@@ -57,7 +61,7 @@ describe("ServersWithDetails", () => {
     expect(screen.getByRole("button", { name: "Hide servers" })).toBeInTheDocument();
   });
 
-  it("shows server list on mobile servers index", () => {
+  it("shows tile grid on mobile servers index", () => {
     mediaQuery.mockReturnValue(true);
 
     renderWithProviders(
@@ -69,7 +73,7 @@ describe("ServersWithDetails", () => {
       { route: "/servers" },
     );
 
-    expect(screen.getByTestId("server-list")).toBeInTheDocument();
+    expect(screen.getByTestId("servers-grid")).toBeInTheDocument();
   });
 
   it("uses fullscreen outlet for server details on mobile", () => {

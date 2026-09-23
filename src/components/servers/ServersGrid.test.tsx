@@ -84,9 +84,23 @@ vi.mock("../../api/orval/vpn-servers-v3/vpn-servers-v3", () => ({
 
 vi.mock("../../api/orval/vpn-server-groups/vpn-server-groups", () => ({
   useGetApiVpnServerGroupsGetAll: () => ({
-    data: { groups: [] },
+    data: {
+      groups: [{ id: 10, name: "EU", serverIds: [1], sortOrder: 0 }],
+    },
     refetch: vi.fn(),
   }),
+  usePostApiVpnServerGroupsCreate: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  usePutApiVpnServerGroupsUpdateId: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useDeleteApiVpnServerGroupsDeleteId: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  getGetApiVpnServerGroupsGetAllQueryKey: () => ["/api/vpn-server-groups/get-all"],
+}));
+
+vi.mock("./PendingDiscoveriesBadgeButton", () => ({
+  PendingDiscoveriesBadgeButton: () => null,
+}));
+
+vi.mock("./AddServersToGroupModal", () => ({
+  AddServersToGroupModal: () => null,
 }));
 
 vi.mock("../../hooks/useCurrentUserConnectedServerIds", () => ({
@@ -108,13 +122,15 @@ describe("ServersGrid", () => {
     }
   });
 
-  it("renders active servers in a grid and hides deleted by default", async () => {
+  it("renders grouped tile grid and hides deleted by default", async () => {
     renderWithProviders(<ServersGrid />, { route: "/servers" });
 
     expect(await screen.findByTestId("server-item-1")).toHaveTextContent("Alpha");
     expect(screen.queryByTestId("server-item-2")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Add Server/i })).toBeInTheDocument();
+    expect(screen.getByText("EU")).toBeInTheDocument();
     expect(document.querySelector(".servers-grid")).toBeTruthy();
+    expect(document.querySelector(".servers-grid-groups")).toBeTruthy();
   });
 
   it("shows deleted servers after toggle", async () => {
@@ -125,6 +141,7 @@ describe("ServersGrid", () => {
     await user.click(screen.getByRole("button", { name: /Show deleted/i }));
 
     expect(await screen.findByTestId("server-item-2")).toHaveTextContent("Ghost");
+    expect(screen.getByText("Deleted")).toBeInTheDocument();
   });
 
   it("filters by IP search including deleted matches", async () => {

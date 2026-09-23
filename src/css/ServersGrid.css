@@ -5,6 +5,20 @@
   min-width: 0;
 }
 
+.servers-grid-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.servers-grid-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
 .servers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
@@ -25,6 +39,11 @@
   margin: 12px 0;
   color: var(--text-muted);
   font-size: var(--font-size-md);
+}
+
+.servers-grid-empty--group {
+  margin: 0 0 4px;
+  padding-left: 2px;
 }
 
 @media (max-width: 768px) {
