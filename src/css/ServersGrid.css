@@ -1,0 +1,35 @@
+.servers-grid-root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.servers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 12px;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.servers-grid > .server-item {
+  margin: 0;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.servers-grid-empty {
+  margin: 12px 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-md);
+}
+
+@media (max-width: 768px) {
+  .servers-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}

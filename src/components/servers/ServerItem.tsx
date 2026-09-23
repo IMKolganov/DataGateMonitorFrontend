@@ -121,6 +121,7 @@ const ServerItem: React.FC<Props> = ({
     const isOnline = wsOnline === null ? isOnlineFromApi : wsOnline;
     const isDefault = !!vpnServer?.isDefault;
     const isDisabled = Boolean(vpnServer?.isDisabled);
+    const isDeleted = Boolean(vpnServer?.isDeleted);
 
     const connectedClients =
         wsCountConnectedClients ?? server.countConnectedClients ?? 0;
@@ -152,6 +153,14 @@ const ServerItem: React.FC<Props> = ({
                         >
                             {stackLabel}
                         </span>
+                        {isDeleted && (
+                            <span
+                                className="server-deleted-pill"
+                                title="Server is soft-deleted and hidden from the default list."
+                            >
+                                Deleted
+                            </span>
+                        )}
                         {isDisabled && (
                             <span
                                 className="server-disabled-pill"
@@ -326,11 +335,17 @@ const ServerItem: React.FC<Props> = ({
                     <button
                         type="button"
                         className="btn secondary"
-                        disabled={!canManage}
-                        title={!canManage ? "Admin only" : undefined}
+                        disabled={!canManage || isDeleted}
+                        title={
+                            !canManage
+                                ? "Admin only"
+                                : isDeleted
+                                  ? "Server is already deleted"
+                                  : undefined
+                        }
                         onClick={(e) => {
                             e.stopPropagation();
-                            if (!canManage) return;
+                            if (!canManage || isDeleted) return;
                             onDelete(resolvedId);
                         }}
                     >
