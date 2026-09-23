@@ -35,6 +35,16 @@ describe("extractApiUrlSearchTokens", () => {
     expect(tokens).toContain("212.147.239.128");
     expect(tokens.some((t) => t.includes("212.147.239.128"))).toBe(true);
   });
+
+  it("accepts host without scheme", () => {
+    const tokens = extractApiUrlSearchTokens("node.example:5010");
+    expect(tokens).toContain("node.example");
+  });
+
+  it("returns empty for blank input", () => {
+    expect(extractApiUrlSearchTokens(null)).toEqual([]);
+    expect(extractApiUrlSearchTokens("")).toEqual([]);
+  });
 });
 
 describe("serverMatchesSearchQuery", () => {
@@ -54,6 +64,16 @@ describe("serverMatchesSearchQuery", () => {
     expect(serverMatchesSearchQuery(raw, "poland")).toBe(true);
   });
 
+  it("matches openVpnServerResponses fallback fields", () => {
+    const raw = {
+      openVpnServerResponses: {
+        vpnServer: { serverName: "Legacy", apiUrl: "https://9.9.9.9/" },
+      },
+    } as VpnServerWithStatusV2Dto;
+    expect(serverMatchesSearchQuery(raw, "legacy")).toBe(true);
+    expect(serverMatchesSearchQuery(raw, "9.9.9.9")).toBe(true);
+  });
+
   it("empty query matches all", () => {
     expect(serverMatchesSearchQuery(rawStub({}), "  ")).toBe(true);
   });
@@ -70,5 +90,10 @@ describe("collectServerSearchHaystack / isVpnServerDeleted", () => {
   it("detects deleted flag", () => {
     expect(isVpnServerDeleted(rawStub({ isDeleted: true }))).toBe(true);
     expect(isVpnServerDeleted(rawStub({ isDeleted: false }))).toBe(false);
+    expect(
+      isVpnServerDeleted({
+        openVpnServerResponses: { vpnServer: { isDeleted: true } },
+      } as VpnServerWithStatusV2Dto),
+    ).toBe(true);
   });
 });

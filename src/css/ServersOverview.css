@@ -1,0 +1,17 @@
+.overview-section-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 10px;
+  padding: 0;
+}
+
+.overview-section-tabs__btn {
+  min-height: 32px;
+  padding: 4px 12px;
+  font-size: var(--font-size-md);
+}
+
+.overview-section-panel {
+  min-width: 0;
+}

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
 import { renderWithProviders } from "../../test/renderWithProviders";
 
@@ -22,7 +22,12 @@ vi.mock("../../components/DateRangeFilter", () => ({
 vi.mock("./StatsCards", () => ({ default: () => <div data-testid="stats-cards" /> }));
 vi.mock("./OverviewChart", () => ({ default: () => <div data-testid="overview-chart" /> }));
 vi.mock("./GeoMap", () => ({ default: () => <div data-testid="geo-map" /> }));
-vi.mock("./StatisticsScopeBanner", () => ({ StatisticsScopeBanner: () => null }));
+vi.mock("../../components/OverviewUsersTable", () => ({
+  OverviewUsersTable: () => <div data-testid="overview-users" />,
+}));
+vi.mock("../../components/VpnMap", () => ({
+  default: () => <div data-testid="vpn-map" />,
+}));
 vi.mock("./OverviewUserProfileCard", () => ({ OverviewUserProfileCard: () => null }));
 vi.mock("../../components/pihole/UserDnsQueriesSection", () => ({ UserDnsQueriesSection: () => null }));
 vi.mock("../../components/openvpn/UserOpenVpnEventsSection", () => ({ UserOpenVpnEventsSection: () => null }));
@@ -86,11 +91,36 @@ vi.mock("../../api/orval/user/user", () => ({
 import ServersOverview from "./index";
 
 describe("ServersOverview", () => {
-  it("renders aggregate overview heading and core sections", async () => {
-    renderWithProviders(<ServersOverview />, { route: "/servers" });
+  beforeEach(() => {
+    try {
+      localStorage.removeItem("datagate.overviewSection");
+    } catch {
+      // ignore
+    }
+  });
+
+  it("renders aggregate overview heading, filter, stats, and section tabs", async () => {
+    renderWithProviders(<ServersOverview />, { route: "/overview" });
 
     expect(await screen.findByRole("heading", { name: /All servers overview|Server statistics/i })).toBeInTheDocument();
     expect(screen.getByTestId("date-range")).toBeInTheDocument();
     expect(screen.getByTestId("stats-cards")).toBeInTheDocument();
+    expect(screen.getByRole("tablist", { name: "Overview sections" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Chart" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByTestId("overview-chart")).toBeInTheDocument();
+  });
+
+  it("switches to Users and Map sections", async () => {
+    const user = await import("@testing-library/user-event").then((m) => m.default.setup());
+    renderWithProviders(<ServersOverview />, { route: "/overview" });
+
+    await screen.findByRole("tab", { name: "Chart" });
+    await user.click(screen.getByRole("tab", { name: "Users" }));
+    expect(screen.getByRole("tab", { name: "Users" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.queryByTestId("overview-chart")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("tab", { name: "Map" }));
+    expect(screen.getByRole("tab", { name: "Map" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByTestId("geo-map")).toBeInTheDocument();
   });
 });

@@ -165,8 +165,10 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Navigate to="/servers" replace />} />
 
+                    <Route path="/overview" element={withSuspense(<ServersOverview />)} />
+
                     <Route path="/servers" element={withSuspense(<ServersWithDetails />)}>
-                      <Route index element={withSuspense(<ServersOverview />)} />
+                      <Route index element={null} />
                       <Route path="status-stream-logs" element={withSuspense(<StatusStreamLogs />)} />
                       <Route path="statistics/:externalId" element={withSuspense(<ServersOverview />)} />
                       <Route path="groups/:groupId" element={<Navigate to="/servers" replace />} />
