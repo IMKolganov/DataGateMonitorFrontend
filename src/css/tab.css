@@ -18,6 +18,17 @@
   transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
+button.tab {
+  background: transparent;
+  border-top: none;
+  border-right: none;
+  border-left: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font: inherit;
+  font-family: inherit;
+}
+
 .tab.tab--with-icon {
   display: inline-flex;
   align-items: center;

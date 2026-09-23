@@ -28,6 +28,7 @@ vi.mock("../../components/OverviewUsersTable", () => ({
 vi.mock("../../components/VpnMap", () => ({
   default: () => <div data-testid="vpn-map" />,
 }));
+vi.mock("./StatisticsScopeBanner", () => ({ StatisticsScopeBanner: () => null }));
 vi.mock("./OverviewUserProfileCard", () => ({ OverviewUserProfileCard: () => null }));
 vi.mock("../../components/pihole/UserDnsQueriesSection", () => ({ UserDnsQueriesSection: () => null }));
 vi.mock("../../components/openvpn/UserOpenVpnEventsSection", () => ({ UserOpenVpnEventsSection: () => null }));
@@ -106,21 +107,22 @@ describe("ServersOverview", () => {
     expect(screen.getByTestId("date-range")).toBeInTheDocument();
     expect(screen.getByTestId("stats-cards")).toBeInTheDocument();
     expect(screen.getByRole("tablist", { name: "Overview sections" })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Chart" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: /Chart/i })).toHaveClass("active-tab");
     expect(screen.getByTestId("overview-chart")).toBeInTheDocument();
+    expect(screen.getByLabelText("Overview section")).toBeInTheDocument();
   });
 
   it("switches to Users and Map sections", async () => {
     const user = await import("@testing-library/user-event").then((m) => m.default.setup());
     renderWithProviders(<ServersOverview />, { route: "/overview" });
 
-    await screen.findByRole("tab", { name: "Chart" });
-    await user.click(screen.getByRole("tab", { name: "Users" }));
-    expect(screen.getByRole("tab", { name: "Users" })).toHaveAttribute("aria-selected", "true");
+    await screen.findByRole("tab", { name: /Chart/i });
+    await user.click(screen.getByRole("tab", { name: /Users/i }));
+    expect(screen.getByRole("tab", { name: /Users/i })).toHaveClass("active-tab");
     expect(screen.queryByTestId("overview-chart")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("tab", { name: "Map" }));
-    expect(screen.getByRole("tab", { name: "Map" })).toHaveAttribute("aria-selected", "true");
+    await user.click(screen.getByRole("tab", { name: /Map/i }));
+    expect(screen.getByRole("tab", { name: /Map/i })).toHaveClass("active-tab");
     expect(screen.getByTestId("geo-map")).toBeInTheDocument();
   });
 });

@@ -2,7 +2,8 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { FaChartLine } from "react-icons/fa";
+import { FaChartLine, FaUsers, FaGlobe, FaBolt, FaFilter } from "react-icons/fa";
+import type { IconType } from "react-icons";
 
 import { errorMessage } from "../../utils/errorMessage";
 import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
@@ -253,6 +254,27 @@ export default function ServersOverview() {
       setOverviewSection("chart");
     }
   }, [overviewSection, showActivitySection, showDomainsSection]);
+
+  const overviewTabs = useMemo(() => {
+    type Tab = {
+      id: OverviewSection;
+      label: string;
+      Icon: IconType;
+      mobilePrefix: string;
+    };
+    const tabs: Tab[] = [
+      { id: "chart", label: "Chart", Icon: FaChartLine, mobilePrefix: "📈" },
+      { id: "users", label: "Users", Icon: FaUsers, mobilePrefix: "👥" },
+      { id: "map", label: "Map", Icon: FaGlobe, mobilePrefix: "🗺️" },
+    ];
+    if (showActivitySection) {
+      tabs.push({ id: "activity", label: "Activity", Icon: FaBolt, mobilePrefix: "⚡" });
+    }
+    if (showDomainsSection) {
+      tabs.push({ id: "domains", label: "Domains", Icon: FaFilter, mobilePrefix: "🌐" });
+    }
+    return tabs;
+  }, [showActivitySection, showDomainsSection]);
 
   const [userProfileCn, setUserProfileCn] = useState<string | null>(null);
 
@@ -850,63 +872,42 @@ export default function ServersOverview() {
       <DateRangeFilter from={from} to={to} grouping={grouping} onChange={onFilterChange} />
       <StatsCards totals={totalsForCards} loading={loadingTotals} />
 
-      <div
-        className="overview-section-tabs"
-        role="tablist"
-        aria-label="Overview sections"
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={overviewSection === "chart"}
-          className={`overview-section-tabs__btn btn ${overviewSection === "chart" ? "primary" : "secondary"}`}
-          onClick={() => setOverviewSection("chart")}
-        >
-          Chart
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={overviewSection === "users"}
-          className={`overview-section-tabs__btn btn ${overviewSection === "users" ? "primary" : "secondary"}`}
-          onClick={() => setOverviewSection("users")}
-        >
-          Users
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={overviewSection === "map"}
-          className={`overview-section-tabs__btn btn ${overviewSection === "map" ? "primary" : "secondary"}`}
-          onClick={() => setOverviewSection("map")}
-        >
-          Map
-        </button>
-        {showActivitySection ? (
-          <button
-            type="button"
-            role="tab"
-            aria-selected={overviewSection === "activity"}
-            className={`overview-section-tabs__btn btn ${overviewSection === "activity" ? "primary" : "secondary"}`}
-            onClick={() => setOverviewSection("activity")}
-          >
-            Activity
-          </button>
-        ) : null}
-        {showDomainsSection ? (
-          <button
-            type="button"
-            role="tab"
-            aria-selected={overviewSection === "domains"}
-            className={`overview-section-tabs__btn btn ${overviewSection === "domains" ? "primary" : "secondary"}`}
-            onClick={() => setOverviewSection("domains")}
-          >
-            Domains
-          </button>
-        ) : null}
+      <div className="tabs desktop-tabs" role="tablist" aria-label="Overview sections">
+        {overviewTabs.map((tab) => {
+          const Icon = tab.Icon;
+          const active = overviewSection === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              className={["tab", "tab--with-icon", active ? "active-tab" : ""].filter(Boolean).join(" ")}
+              onClick={() => setOverviewSection(tab.id)}
+            >
+              <Icon className="icon" aria-hidden />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
-      <div className="overview-section-panel" role="tabpanel">
+      <select
+        id="overview-section-tabs"
+        name="overviewSectionTabs"
+        className="tabs-dropdown mobile-tabs"
+        aria-label="Overview section"
+        value={overviewSection}
+        onChange={(e) => setOverviewSection(e.target.value as OverviewSection)}
+      >
+        {overviewTabs.map((tab) => (
+          <option key={tab.id} value={tab.id}>
+            {tab.mobilePrefix} {tab.label}
+          </option>
+        ))}
+      </select>
+
+      <div className="tab-content overview-section-panel" role="tabpanel">
         {overviewSection === "chart" ? (
           <OverviewChart data={chartData} loading={loadingSeries} error={null} />
         ) : null}
