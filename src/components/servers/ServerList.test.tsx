@@ -30,6 +30,10 @@ vi.mock("./ServerItem", () => ({
 
 vi.mock("../ServiceControls", () => ({ default: () => <div data-testid="service-controls" /> }));
 
+vi.mock("./PendingDiscoveriesBadgeButton", () => ({
+  PendingDiscoveriesBadgeButton: () => null,
+}));
+
 vi.mock("react-responsive", () => ({
   useMediaQuery: () => false,
 }));
