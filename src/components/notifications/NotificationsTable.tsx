@@ -1,12 +1,11 @@
 import React, { useMemo, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import type { NotificationItemDto } from "../../api/orvalModelShim";
 import { FaCheck, FaExpandAlt, FaServer } from "react-icons/fa";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
-import { openPendingServerDiscovery } from "../servers/pendingServerDiscoveryEvents";
 import "../../css/Table.css";
 import "../../css/Settings.css";
 
@@ -81,6 +80,7 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
   markReadLoading,
 }) => {
   const [detailsMessage, setDetailsMessage] = useState<string | null>(null);
+  const navigate = useNavigate();
   const openDetails = useCallback((message: string) => setDetailsMessage(message), []);
   const closeDetails = useCallback(() => setDetailsMessage(null), []);
 
@@ -191,19 +191,25 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
             {isDiscovered && (
               <RowActionButton
                 title="Review discovered server"
-                onClick={() => openPendingServerDiscovery(discoveryId)}
+                onClick={() => {
+                  if (discoveryId != null) {
+                    navigate(`/servers/pending-discoveries/${discoveryId}`);
+                  } else {
+                    navigate("/servers/pending-discoveries");
+                  }
+                }}
                 icon={<FaServer className="icon" />}
               />
             )}
             {isDiscovered && (
               <Link
-                to="/servers"
+                to="/servers/pending-discoveries"
                 className="btn secondary"
-                title="Open servers list"
+                title="Open pending discoveries"
                 style={{ padding: "4px 8px", fontSize: 12, textDecoration: "none" }}
                 onClick={(e) => e.stopPropagation()}
               >
-                Servers
+                Pending
               </Link>
             )}
             <RowActionButton

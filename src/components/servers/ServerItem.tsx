@@ -117,11 +117,16 @@ const ServerItem: React.FC<Props> = ({
 
     const name = vpnServer?.serverName ?? "";
     const stackLabel = vpnServerTypeLabel(vpnServer?.serverType as number | undefined);
-    const isOnlineFromApi = !!vpnServer?.isOnline;
-    const isOnline = wsOnline === null ? isOnlineFromApi : wsOnline;
     const isDefault = !!vpnServer?.isDefault;
     const isDisabled = Boolean(vpnServer?.isDisabled);
     const isDeleted = Boolean(vpnServer?.isDeleted);
+    const isOnlineFromApi = !!vpnServer?.isOnline;
+    // Soft-deleted rows are not polled; never show Online even if DB still has a stale flag.
+    const isOnline = isDeleted
+        ? false
+        : wsOnline === null
+          ? isOnlineFromApi
+          : wsOnline;
 
     const connectedClients =
         wsCountConnectedClients ?? server.countConnectedClients ?? 0;

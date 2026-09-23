@@ -37,6 +37,10 @@ const Contact = lazy(() => import("./pages/Contact"));
 const ServersWithDetails = lazy(() => import("./pages/ServersWithDetails"));
 const ServerDetails = lazy(() => import("./pages/ServerDetails"));
 const ServerForm = lazy(() => import("./pages/ServerForm"));
+const PendingServerDiscoveriesPage = lazy(() => import("./pages/PendingServerDiscoveriesPage"));
+const PendingServerDiscoveryReviewPage = lazy(
+  () => import("./pages/PendingServerDiscoveryReviewPage"),
+);
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PiHoleServerTab = lazy(() => import("./pages/PiHoleServerTab"));
 const ServerAccessTab = lazy(() => import("./pages/ServerAccessTab"));
@@ -251,6 +255,22 @@ function App() {
                       element={
                         <RequireAdmin>
                           {withSuspense(<ServerForm />)}
+                        </RequireAdmin>
+                      }
+                    />
+                    <Route
+                      path="/servers/pending-discoveries"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<PendingServerDiscoveriesPage />)}
+                        </RequireAdmin>
+                      }
+                    />
+                    <Route
+                      path="/servers/pending-discoveries/:discoveryId"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<PendingServerDiscoveryReviewPage />)}
                         </RequireAdmin>
                       }
                     />

@@ -49,6 +49,10 @@ export default defineConfig(({ mode }) => {
 
     server: {
       port,
+      // Quiets Google Identity Services COOP/postMessage console noise in Chrome during local login.
+      headers: {
+        "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+      },
       ...(mockApi
         ? {}
         : {
@@ -77,6 +81,9 @@ export default defineConfig(({ mode }) => {
 
     preview: {
       port,
+      headers: {
+        "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+      },
       proxy: {
         "/api/hubs": {
           target: proxyTarget,
