@@ -37,6 +37,7 @@ import "../../css/ServerList.css";
 import ServerItem from "./ServerItem";
 import ServerGroupHeader from "./ServerGroupHeader";
 import { AddServersToGroupModal } from "./AddServersToGroupModal";
+import { PendingDiscoveriesBadgeButton } from "./PendingDiscoveriesBadgeButton";
 import {
   DroppableGroupSection,
   SortableGroupSection,
@@ -484,6 +485,8 @@ const ServerList: React.FC<ServerListProps> = ({ onHideList, hideServiceControls
               </button>
             )}
 
+            {canAddServer && <PendingDiscoveriesBadgeButton />}
+
             {canAddServer && (
               <button className="btn secondary" onClick={addGroup} disabled={creatingGroup}>
                 <span className="icon">{FaFolderPlus({ className: "icon" })}</span>
@@ -524,7 +527,7 @@ const ServerList: React.FC<ServerListProps> = ({ onHideList, hideServiceControls
             <input
               id="server-list-search-ip"
               className="input server-list-search__input"
-              type="search"
+              type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by IP, API URL, or name"
