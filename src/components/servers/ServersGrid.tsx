@@ -21,6 +21,7 @@ import ServiceControls from "../ServiceControls";
 import { PendingDiscoveriesBadgeButton } from "./PendingDiscoveriesBadgeButton";
 import { buildServerSwitchPath } from "../../utils/buildServerSwitchPath";
 import { isVpnServerDeleted } from "../../utils/serverListSearch";
+import { duplicateServerPath } from "../../utils/servers/duplicateServer";
 import {
   useServersWithStatusList,
   serverRowIsDisabled,
@@ -231,6 +232,7 @@ const ServersGrid: React.FC = () => {
             else navigate(target, { replace: true });
           }}
           onEdit={(id) => navigate(`/servers/edit/${id}`)}
+          onDuplicate={(id) => navigate(duplicateServerPath(id))}
           onDelete={handleDelete}
         />
       </li>
