@@ -3,6 +3,7 @@ import {
     FaEye,
     FaEdit,
     FaTrash,
+    FaCopy,
     FaPlayCircle,
     FaTimesCircle,
     FaUser,
@@ -40,6 +41,7 @@ interface Props {
 
     onView: (id: number) => void;
     onEdit: (id: number) => void;
+    onDuplicate?: (id: number) => void;
     onDelete: (id: number) => void;
     groups?: { id: number; name: string }[];
     currentGroupId?: number | null;
@@ -100,6 +102,7 @@ const ServerItem: React.FC<Props> = ({
                                          isCurrentUserConnected,
                                          onView,
                                          onEdit,
+                                         onDuplicate,
                                          onDelete,
                                          groups = [],
                                          currentGroupId = null,
@@ -336,6 +339,28 @@ const ServerItem: React.FC<Props> = ({
                     >
                         <FaEdit className="icon" /> Edit
                     </button>
+
+                    {onDuplicate && (
+                        <button
+                            type="button"
+                            className="btn secondary"
+                            disabled={!canManage || isDeleted}
+                            title={
+                                !canManage
+                                    ? "Admin only"
+                                    : isDeleted
+                                      ? "Cannot duplicate a deleted server"
+                                      : "Create a new server from this one’s settings"
+                            }
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (!canManage || isDeleted) return;
+                                onDuplicate(resolvedId);
+                            }}
+                        >
+                            <FaCopy className="icon" /> Duplicate
+                        </button>
+                    )}
 
                     <button
                         type="button"

@@ -53,6 +53,8 @@ import {
 import ServiceControls from "../ServiceControls";
 
 import { buildServerSwitchPath } from "../../utils/buildServerSwitchPath";
+import { isVpnServerDeleted } from "../../utils/serverListSearch";
+import { duplicateServerPath } from "../../utils/servers/duplicateServer";
 import {
   loadCollapsedGroups,
   saveCollapsedGroups,
@@ -68,7 +70,6 @@ import {
   type GroupAssignTarget,
 } from "../../utils/serverGroups";
 import { assignServersToGroup } from "../../utils/assignServerGroup";
-import { isVpnServerDeleted } from "../../utils/serverListSearch";
 import {
   useServersWithStatusList,
   serverRowIsDisabled,
@@ -442,6 +443,7 @@ const ServerList: React.FC<ServerListProps> = ({ onHideList, hideServiceControls
             else navigate(target, { replace: true });
           }}
           onEdit={(id) => navigate(`/servers/edit/${id}`)}
+          onDuplicate={(id) => navigate(duplicateServerPath(id))}
           onDelete={handleDelete}
           groups={groups
             .filter((g): g is typeof g & { id: number } => typeof g.id === "number")
