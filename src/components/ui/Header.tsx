@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../../css/Header.css";
-import { FaBell, FaDoorClosed, FaSun, FaMoon, FaServer, FaCog, FaInfoCircle, FaEnvelope } from "react-icons/fa";
+import { FaBell, FaDoorClosed, FaSun, FaMoon, FaServer, FaCog, FaInfoCircle, FaEnvelope, FaChartLine } from "react-icons/fa";
 import { logout } from "../../api/apirequest.ts";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { parseTelegramNumericId } from "../../utils/telegramNumericId.ts";
@@ -33,6 +33,11 @@ export function Header() {
                     <li>
                         <Link to="/servers" onClick={() => setMenuOpen(false)}>
                             <FaServer className="icon" /> Servers
+                        </Link>
+                    </li>
+                    <li>
+                        <Link to="/overview" onClick={() => setMenuOpen(false)}>
+                            <FaChartLine className="icon" /> Overview
                         </Link>
                     </li>
 

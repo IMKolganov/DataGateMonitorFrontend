@@ -23,6 +23,8 @@ declare global {
           initialize: (config: {
             client_id: string;
             callback: (response: GoogleCredentialResponse) => void;
+            /** Prefer FedCM so GIS avoids COOP/opener postMessage warnings in Chrome. */
+            use_fedcm_for_prompt?: boolean;
           }) => void;
           renderButton: (el: HTMLElement, opts: Record<string, unknown>) => void;
         };
@@ -208,6 +210,7 @@ const GoogleLoginForm: React.FC<GoogleLoginFormProps> = ({
 
                 window.google.accounts.id.initialize({
                     client_id: googleClientId,
+                    use_fedcm_for_prompt: true,
                     callback: (response: GoogleCredentialResponse) => {
                         if (response?.credential) {
                             void handleGoogleCredential(response.credential);

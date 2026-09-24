@@ -37,6 +37,10 @@ const Contact = lazy(() => import("./pages/Contact"));
 const ServersWithDetails = lazy(() => import("./pages/ServersWithDetails"));
 const ServerDetails = lazy(() => import("./pages/ServerDetails"));
 const ServerForm = lazy(() => import("./pages/ServerForm"));
+const PendingServerDiscoveriesPage = lazy(() => import("./pages/PendingServerDiscoveriesPage"));
+const PendingServerDiscoveryReviewPage = lazy(
+  () => import("./pages/PendingServerDiscoveryReviewPage"),
+);
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PiHoleServerTab = lazy(() => import("./pages/PiHoleServerTab"));
 const ServerAccessTab = lazy(() => import("./pages/ServerAccessTab"));
@@ -165,8 +169,10 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Navigate to="/servers" replace />} />
 
+                    <Route path="/overview" element={withSuspense(<ServersOverview />)} />
+
                     <Route path="/servers" element={withSuspense(<ServersWithDetails />)}>
-                      <Route index element={withSuspense(<ServersOverview />)} />
+                      <Route index element={null} />
                       <Route path="status-stream-logs" element={withSuspense(<StatusStreamLogs />)} />
                       <Route path="statistics/:externalId" element={withSuspense(<ServersOverview />)} />
                       <Route path="groups/:groupId" element={<Navigate to="/servers" replace />} />
@@ -249,6 +255,22 @@ function App() {
                       element={
                         <RequireAdmin>
                           {withSuspense(<ServerForm />)}
+                        </RequireAdmin>
+                      }
+                    />
+                    <Route
+                      path="/servers/pending-discoveries"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<PendingServerDiscoveriesPage />)}
+                        </RequireAdmin>
+                      }
+                    />
+                    <Route
+                      path="/servers/pending-discoveries/:discoveryId"
+                      element={
+                        <RequireAdmin>
+                          {withSuspense(<PendingServerDiscoveryReviewPage />)}
                         </RequireAdmin>
                       }
                     />

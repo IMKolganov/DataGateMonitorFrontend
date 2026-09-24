@@ -9,6 +9,9 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # Google Identity popups need opener access; same-origin alone triggers COOP console noise / broken GSI.
+    add_header Cross-Origin-Opener-Policy "same-origin-allow-popups" always;
+
     # Browser uses same origin (config.json has no apiBaseUrl) → /api/* must reach ASP.NET, not SPA static files.
     location /api/ {
         proxy_pass ${BACKEND_INTERNAL_URL}/api/;
@@ -26,10 +29,12 @@ server {
         add_header Cache-Control "no-cache, no-store, must-revalidate" always;
         add_header Pragma "no-cache" always;
         add_header Expires "0" always;
+        add_header Cross-Origin-Opener-Policy "same-origin-allow-popups" always;
     }
 
     location ~* ^/assets/.*\.(js|css|map|png|jpg|jpeg|gif|svg|webp|ico|woff2?|ttf|eot)$ {
         add_header Cache-Control "public, max-age=31536000, immutable" always;
+        add_header Cross-Origin-Opener-Policy "same-origin-allow-popups" always;
         try_files $uri =404;
     }
 

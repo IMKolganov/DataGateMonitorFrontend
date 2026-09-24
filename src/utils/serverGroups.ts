@@ -1,8 +1,9 @@
 import type { VpnServerGroupsDtoVpnServerGroupDto } from "../api/orval/model/vpnServerGroupsDtoVpnServerGroupDto";
 
 export const UNGROUPED_GROUP_ID = "ungrouped" as const;
+export const DELETED_GROUP_ID = "deleted" as const;
 
-export type ServerGroupSectionId = number | typeof UNGROUPED_GROUP_ID;
+export type ServerGroupSectionId = number | typeof UNGROUPED_GROUP_ID | typeof DELETED_GROUP_ID;
 
 const COLLAPSE_STORAGE_KEY = "datagate.serverGroup.collapsed";
 
@@ -58,6 +59,24 @@ export function loadGroupAssignVisible(): boolean {
 export function saveGroupAssignVisible(visible: boolean): void {
   try {
     localStorage.setItem(GROUP_ASSIGN_VISIBLE_STORAGE_KEY, visible ? "1" : "0");
+  } catch {
+    // ignore quota / private mode
+  }
+}
+
+const SHOW_DELETED_STORAGE_KEY = "datagate.serverList.showDeleted";
+
+export function loadShowDeletedServers(): boolean {
+  try {
+    return localStorage.getItem(SHOW_DELETED_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function saveShowDeletedServers(visible: boolean): void {
+  try {
+    localStorage.setItem(SHOW_DELETED_STORAGE_KEY, visible ? "1" : "0");
   } catch {
     // ignore quota / private mode
   }

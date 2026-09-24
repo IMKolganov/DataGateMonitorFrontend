@@ -8,6 +8,8 @@
 export interface VpnServersRequestsApproveVpnServerDiscoveryRequest {
   /** @nullable */
   serverName?: string | null;
+  /** Optional override for the manager ApiUrl. Falls back to the discovery ApiUrl. @nullable */
+  apiUrl?: string | null;
   isDefault?: boolean;
   isEnableWss?: boolean;
   isPiHoleEnabled?: boolean;
