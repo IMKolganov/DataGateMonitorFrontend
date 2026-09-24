@@ -79,6 +79,8 @@ const ServerDetailsInfo: React.FC<Props> = ({
   const countSessions = safe.countSessions ?? 0;
 
   const dcoIsEnabled = server?.dcoIsEnabled === true;
+  const isDeleted = Boolean(server?.isDeleted);
+  const isOnline = !isDeleted && Boolean(server?.isOnline);
 
   return (
     <div className={`server-info ${loading ? "is-loading" : ""}`}>
@@ -109,7 +111,7 @@ const ServerDetailsInfo: React.FC<Props> = ({
             {loading ? <Skeleton width={220} height={16} /> : (server?.serverName ?? "(unknown??)")}
           </strong>
         </div>
-        <div className={`server-status ${server?.isOnline ? "status-online" : "status-offline"}`}>
+        <div className={`server-status ${isOnline ? "status-online" : "status-offline"}`}>
           {loading ? (
             <Skeleton width={80} />
           ) : (
@@ -118,7 +120,7 @@ const ServerDetailsInfo: React.FC<Props> = ({
                 serverType={server?.serverType as number | undefined}
                 size={18}
               />
-              {server?.isOnline ? "✅ Online" : "❌ Offline"}
+              {isOnline ? "✅ Online" : "❌ Offline"}
             </>
           )}
         </div>

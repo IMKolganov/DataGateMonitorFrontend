@@ -2,7 +2,8 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { FaChartLine } from "react-icons/fa";
+import { FaChartLine, FaUsers, FaGlobe, FaBolt, FaFilter } from "react-icons/fa";
+import type { IconType } from "react-icons";
 
 import { errorMessage } from "../../utils/errorMessage";
 import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
@@ -12,6 +13,7 @@ import GeoMap from "./GeoMap";
 import { StatisticsScopeBanner } from "./StatisticsScopeBanner";
 import { OverviewUserProfileCard } from "./OverviewUserProfileCard";
 import "../../css/Settings.css";
+import "../../css/ServersOverview.css";
 import { addDays, endOfToday, startOfToday, toChartPoints, toUsersSeriesChartPoints, mergeChartWithUsersSeries, buildFallbackOverviewResponse, normalizeGrouping } from "./helpers";
 import type { ChartPoint, MergedChartPoint } from "./types";
 
@@ -211,6 +213,68 @@ export default function ServersOverview() {
   );
   const showUserOpenVpnEvents =
     Boolean(statsExternalId && vpnServerId != null && vpnServerId > 0 && viewerIsAdmin);
+
+  const showActivitySection = showUserOpenVpnEvents || showUserDnsQueries;
+  const showDomainsSection = vpnServerId == null && !statsExternalId && viewerIsAdmin;
+
+  type OverviewSection = "chart" | "users" | "map" | "activity" | "domains";
+  const OVERVIEW_SECTION_KEY = "datagate.overviewSection";
+
+  const [overviewSection, setOverviewSectionState] = useState<OverviewSection>(() => {
+    try {
+      const raw = localStorage.getItem(OVERVIEW_SECTION_KEY);
+      if (
+        raw === "chart" ||
+        raw === "users" ||
+        raw === "map" ||
+        raw === "activity" ||
+        raw === "domains"
+      ) {
+        return raw;
+      }
+    } catch {
+      // ignore
+    }
+    return "chart";
+  });
+
+  const setOverviewSection = (section: OverviewSection) => {
+    setOverviewSectionState(section);
+    try {
+      localStorage.setItem(OVERVIEW_SECTION_KEY, section);
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    if (overviewSection === "activity" && !showActivitySection) {
+      setOverviewSection("chart");
+    } else if (overviewSection === "domains" && !showDomainsSection) {
+      setOverviewSection("chart");
+    }
+  }, [overviewSection, showActivitySection, showDomainsSection]);
+
+  const overviewTabs = useMemo(() => {
+    type Tab = {
+      id: OverviewSection;
+      label: string;
+      Icon: IconType;
+      mobilePrefix: string;
+    };
+    const tabs: Tab[] = [
+      { id: "chart", label: "Chart", Icon: FaChartLine, mobilePrefix: "📈" },
+      { id: "users", label: "Users", Icon: FaUsers, mobilePrefix: "👥" },
+      { id: "map", label: "Map", Icon: FaGlobe, mobilePrefix: "🗺️" },
+    ];
+    if (showActivitySection) {
+      tabs.push({ id: "activity", label: "Activity", Icon: FaBolt, mobilePrefix: "⚡" });
+    }
+    if (showDomainsSection) {
+      tabs.push({ id: "domains", label: "Domains", Icon: FaFilter, mobilePrefix: "🌐" });
+    }
+    return tabs;
+  }, [showActivitySection, showDomainsSection]);
 
   const [userProfileCn, setUserProfileCn] = useState<string | null>(null);
 
@@ -807,100 +871,149 @@ export default function ServersOverview() {
 
       <DateRangeFilter from={from} to={to} grouping={grouping} onChange={onFilterChange} />
       <StatsCards totals={totalsForCards} loading={loadingTotals} />
-      <OverviewChart data={chartData} loading={loadingSeries} error={null} />
 
-      <Suspense fallback={<p style={{ margin: "12px 0" }}>Loading users table…</p>}>
-        <OverviewUsersTable
-          from={from}
-          to={to}
-          vpnServerId={vpnServerId ?? null}
-          externalId={statsExternalId ?? null}
-          currentUserExternalId={currentUserExternalId || null}
-        />
-      </Suspense>
-
-      {isGlobalServersPage ? (
-        <section style={{ marginTop: 14 }}>
-          <h3 style={{ margin: "0 0 8px" }}>Live proxy traffic map (all OpenVPN servers)</h3>
-          <div style={{ margin: "0 0 8px", display: "flex", gap: 10, alignItems: "center" }}>
-            <label style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13 }}>
-              <input
-                id="overview-offline-playback-mode"
-                name="overviewOfflinePlaybackMode"
-                type="checkbox"
-                checked={offlinePlaybackMode}
-                onChange={(e) => setOfflinePlaybackMode(e.target.checked)}
-              />
-              Offline mode (looped animation from filtered overview data)
-            </label>
-            {offlinePlaybackMode ? (
-              <button
-                type="button"
-                className="btn secondary"
-                onClick={() => {
-                  void offlineOverviewUsersQuery.refetch();
-                  void offlineOverviewPointsQuery.refetch();
-                }}
-              >
-                Refresh offline data
-              </button>
-            ) : null}
-          </div>
-          <p style={{ margin: "0 0 10px", fontSize: 12, opacity: 0.88 }}>
-            Stream:{" "}
-            <code>{offlinePlaybackMode ? "offline-playback" : globalFlowHub.connectionState}</code>
-            {!offlinePlaybackMode && globalFlowHub.lastError ? ` (${globalFlowHub.lastError})` : ""} | Servers:{" "}
-            {globalFlowServerIds.length} | Clients:{" "}
-            {offlinePlaybackMode ? offlinePlaybackData.clients.length : globalLiveClients.length}
-          </p>
-          <h4 style={{ margin: "16px 0 8px" }}>All active connections map</h4>
-          <div style={{ marginTop: 8, paddingTop: 6 }}>
-            <Suspense fallback={<p>Loading traffic map…</p>}>
-              <VpnMap
-                clients={offlinePlaybackMode ? offlinePlaybackData.clients : globalLiveClients}
-                trafficFlows={offlinePlaybackMode ? offlinePlaybackData.flows : globalFlowHub.flows}
-                serverMarkers={globalFlowServerMarkers}
-                animationMode={offlinePlaybackMode ? "offline" : "live"}
-              />
-            </Suspense>
-          </div>
-        </section>
-      ) : null}
-
-      <div className="servers-overview-geo-map">
-        <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} externalId={statsExternalId ?? null} />
+      <div className="tabs desktop-tabs" role="tablist" aria-label="Overview sections">
+        {overviewTabs.map((tab) => {
+          const Icon = tab.Icon;
+          const active = overviewSection === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              className={["tab", "tab--with-icon", active ? "active-tab" : ""].filter(Boolean).join(" ")}
+              onClick={() => setOverviewSection(tab.id)}
+            >
+              <Icon className="icon" aria-hidden />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {showUserOpenVpnEvents ? (
-        <div className="servers-overview-user-details">
-          <UserClientAppVersionsSection
-            externalId={statsExternalId}
-            vpnServerId={vpnServerId!}
-            selectedCn={userProfileCn}
-          />
-          <UserOpenVpnEventsSection
-            externalId={statsExternalId}
-            vpnServerId={vpnServerId!}
-            selectedCn={userProfileCn}
-            onSelectedCnChange={setUserProfileCn}
-          />
-        </div>
-      ) : null}
+      <select
+        id="overview-section-tabs"
+        name="overviewSectionTabs"
+        className="tabs-dropdown mobile-tabs"
+        aria-label="Overview section"
+        value={overviewSection}
+        onChange={(e) => setOverviewSection(e.target.value as OverviewSection)}
+      >
+        {overviewTabs.map((tab) => (
+          <option key={tab.id} value={tab.id}>
+            {tab.mobilePrefix} {tab.label}
+          </option>
+        ))}
+      </select>
 
-      {showUserDnsQueries ? (
-        <UserDnsQueriesSection
-          externalId={statsExternalId}
-          vpnServerId={vpnServerId ?? 0}
-          title="Pi-hole DNS history"
-          selectedCn={showUserOpenVpnEvents ? userProfileCn : undefined}
-          onSelectedCnChange={showUserOpenVpnEvents ? setUserProfileCn : undefined}
-          hideProfilePicker={showUserOpenVpnEvents}
-        />
-      ) : null}
+      <div className="tab-content overview-section-panel" role="tabpanel">
+        {overviewSection === "chart" ? (
+          <OverviewChart data={chartData} loading={loadingSeries} error={null} />
+        ) : null}
 
-      {isGlobalServersPage && viewerIsAdmin ? (
-        <TopVisitedDomainsSection from={from} to={to} />
-      ) : null}
+        {overviewSection === "users" ? (
+          <Suspense fallback={<p style={{ margin: "12px 0" }}>Loading users table…</p>}>
+            <OverviewUsersTable
+              from={from}
+              to={to}
+              vpnServerId={vpnServerId ?? null}
+              externalId={statsExternalId ?? null}
+              currentUserExternalId={currentUserExternalId || null}
+            />
+          </Suspense>
+        ) : null}
+
+        {overviewSection === "map" ? (
+          <>
+            {isGlobalServersPage ? (
+              <section style={{ marginTop: 4 }}>
+                <h3 style={{ margin: "0 0 8px" }}>Live proxy traffic map (all OpenVPN servers)</h3>
+                <div style={{ margin: "0 0 8px", display: "flex", gap: 10, alignItems: "center" }}>
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13 }}>
+                    <input
+                      id="overview-offline-playback-mode"
+                      name="overviewOfflinePlaybackMode"
+                      type="checkbox"
+                      checked={offlinePlaybackMode}
+                      onChange={(e) => setOfflinePlaybackMode(e.target.checked)}
+                    />
+                    Offline mode (looped animation from filtered overview data)
+                  </label>
+                  {offlinePlaybackMode ? (
+                    <button
+                      type="button"
+                      className="btn secondary"
+                      onClick={() => {
+                        void offlineOverviewUsersQuery.refetch();
+                        void offlineOverviewPointsQuery.refetch();
+                      }}
+                    >
+                      Refresh offline data
+                    </button>
+                  ) : null}
+                </div>
+                <p style={{ margin: "0 0 10px", fontSize: 12, opacity: 0.88 }}>
+                  Stream:{" "}
+                  <code>{offlinePlaybackMode ? "offline-playback" : globalFlowHub.connectionState}</code>
+                  {!offlinePlaybackMode && globalFlowHub.lastError ? ` (${globalFlowHub.lastError})` : ""} | Servers:{" "}
+                  {globalFlowServerIds.length} | Clients:{" "}
+                  {offlinePlaybackMode ? offlinePlaybackData.clients.length : globalLiveClients.length}
+                </p>
+                <h4 style={{ margin: "16px 0 8px" }}>All active connections map</h4>
+                <div style={{ marginTop: 8, paddingTop: 6 }}>
+                  <Suspense fallback={<p>Loading traffic map…</p>}>
+                    <VpnMap
+                      clients={offlinePlaybackMode ? offlinePlaybackData.clients : globalLiveClients}
+                      trafficFlows={offlinePlaybackMode ? offlinePlaybackData.flows : globalFlowHub.flows}
+                      serverMarkers={globalFlowServerMarkers}
+                      animationMode={offlinePlaybackMode ? "offline" : "live"}
+                    />
+                  </Suspense>
+                </div>
+              </section>
+            ) : null}
+
+            <div className="servers-overview-geo-map">
+              <GeoMap from={from} to={to} vpnServerId={vpnServerId ?? null} externalId={statsExternalId ?? null} />
+            </div>
+          </>
+        ) : null}
+
+        {overviewSection === "activity" && showActivitySection ? (
+          <div className="servers-overview-user-details">
+            {showUserOpenVpnEvents ? (
+              <>
+                <UserClientAppVersionsSection
+                  externalId={statsExternalId}
+                  vpnServerId={vpnServerId!}
+                  selectedCn={userProfileCn}
+                />
+                <UserOpenVpnEventsSection
+                  externalId={statsExternalId}
+                  vpnServerId={vpnServerId!}
+                  selectedCn={userProfileCn}
+                  onSelectedCnChange={setUserProfileCn}
+                />
+              </>
+            ) : null}
+            {showUserDnsQueries ? (
+              <UserDnsQueriesSection
+                externalId={statsExternalId}
+                vpnServerId={vpnServerId ?? 0}
+                title="Pi-hole DNS history"
+                selectedCn={showUserOpenVpnEvents ? userProfileCn : undefined}
+                onSelectedCnChange={showUserOpenVpnEvents ? setUserProfileCn : undefined}
+                hideProfilePicker={showUserOpenVpnEvents}
+              />
+            ) : null}
+          </div>
+        ) : null}
+
+        {overviewSection === "domains" && showDomainsSection ? (
+          <TopVisitedDomainsSection from={from} to={to} />
+        ) : null}
+      </div>
     </div>
   );
 }
