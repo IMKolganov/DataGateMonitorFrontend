@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import type { DataGridProps, GridCallbackDetails, GridColumnResizeParams } from "@mui/x-data-grid";
+import type { DataGridProps, GridColumnResizeParams } from "@mui/x-data-grid";
 import { styled } from "@mui/material/styles";
 import type {} from "@mui/x-data-grid/themeAugmentation";
 import GridToolbarWithExcelClipboard from "./GridToolbarWithExcelClipboard";
@@ -139,7 +139,7 @@ const Grid = React.forwardRef<HTMLDivElement, GridProps>(function Grid(props, re
     (
       params: GridColumnResizeParams,
       event: Parameters<NonNullable<DataGridProps["onColumnWidthChange"]>>[1],
-      details: GridCallbackDetails,
+      details: Parameters<NonNullable<DataGridProps["onColumnWidthChange"]>>[2],
     ) => {
       const field = params.colDef.field;
       const width = params.width;

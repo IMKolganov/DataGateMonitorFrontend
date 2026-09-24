@@ -1,24 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { vpnServerTypeLabel } from "../../constants/vpnServerType";
 import { errorMessage } from "../../utils/errorMessage";
-import { unwrapMaybeApiResponse } from "../../pages/TelegramBotSettings/unwrapApiResponse";
+import {
+  isPendingDiscoveryModalSnoozed,
+  pendingDiscoveriesFingerprint,
+  readPendingDiscoverySnoozeFingerprint,
+  unwrapDiscoveryActionResult,
+  unwrapPendingDiscoveries,
+  writePendingDiscoverySnoozeFingerprint,
+} from "../../utils/servers/pendingServerDiscovery";
 import {
   getGetApiOpenVpnServersDiscoveriesPendingQueryKey,
   getGetApiOpenVpnServersGetServerWithStatusVpnServerIdQueryKey,
   getGetApiOpenVpnServersGetVpnServerIdQueryKey,
   useGetApiOpenVpnServersDiscoveriesPending,
   usePostApiOpenVpnServersDiscoveriesDiscoveryIdApprove,
-  usePostApiOpenVpnServersDiscoveriesDiscoveryIdDeny,
 } from "../../api/orval/vpn-servers/vpn-servers";
 import { getGetApiV3OpenVpnServersGetAllWithStatusQueryKey } from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
 import { getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey } from "../../api/orval/quota-plan-allowed-server/quota-plan-allowed-server";
-import type { VpnServersDtoVpnServerDiscoveryDto } from "../../api/orval/model/vpnServersDtoVpnServerDiscoveryDto";
-import type { VpnServersResponsesVpnServerDiscoveriesResponse } from "../../api/orval/model/vpnServersResponsesVpnServerDiscoveriesResponse";
-import type { VpnServersResponsesVpnServerDiscoveryResponse } from "../../api/orval/model/vpnServersResponsesVpnServerDiscoveryResponse";
 import {
   OPEN_PENDING_SERVER_DISCOVERY_EVENT,
   type OpenPendingServerDiscoveryDetail,
@@ -27,35 +30,23 @@ import "../../css/Settings.css";
 
 const POLL_MS = 30_000;
 
-function unwrapDiscoveries(raw: unknown): VpnServersDtoVpnServerDiscoveryDto[] {
-  const payload = unwrapMaybeApiResponse<VpnServersResponsesVpnServerDiscoveriesResponse>(
-    raw as
-      | VpnServersResponsesVpnServerDiscoveriesResponse
-      | { data?: VpnServersResponsesVpnServerDiscoveriesResponse }
-      | undefined,
-  );
-  return payload?.discoveries ?? [];
-}
-
-function unwrapDiscoveryResult(raw: unknown): VpnServersResponsesVpnServerDiscoveryResponse | undefined {
-  return unwrapMaybeApiResponse<VpnServersResponsesVpnServerDiscoveryResponse>(
-    raw as
-      | VpnServersResponsesVpnServerDiscoveryResponse
-      | { data?: VpnServersResponsesVpnServerDiscoveryResponse }
-      | undefined,
-  );
-}
-
 /**
- * Admin-only modal: polls pending VPN discoveries and prompts to Add or Dismiss one at a time.
+ * Admin-only modal: polls pending VPN discoveries and prompts to Add / Review / Later.
+ * Later only snoozes the UI for the current pending set — it does not deny.
  */
 export function PendingServerDiscoveryModal() {
   const user = getCurrentUser();
   const admin = isAdmin(user);
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
+  const onPendingInbox = location.pathname.startsWith("/servers/pending-discoveries");
   const [preferredDiscoveryId, setPreferredDiscoveryId] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
+  const [snoozeFingerprint, setSnoozeFingerprint] = useState<string | null>(
+    readPendingDiscoverySnoozeFingerprint,
+  );
+  const [forceShow, setForceShow] = useState(false);
 
   const pendingQuery = useGetApiOpenVpnServersDiscoveriesPending({
     query: {
@@ -64,6 +55,7 @@ export function PendingServerDiscoveryModal() {
       refetchOnWindowFocus: admin,
     },
   });
+  const refetchPending = pendingQuery.refetch;
 
   useEffect(() => {
     if (!admin) return;
@@ -72,13 +64,21 @@ export function PendingServerDiscoveryModal() {
       if (detail?.discoveryId != null && Number.isFinite(detail.discoveryId)) {
         setPreferredDiscoveryId(detail.discoveryId);
       }
-      void pendingQuery.refetch();
+      setForceShow(true);
+      void refetchPending();
     };
     window.addEventListener(OPEN_PENDING_SERVER_DISCOVERY_EVENT, onOpen);
     return () => window.removeEventListener(OPEN_PENDING_SERVER_DISCOVERY_EVENT, onOpen);
-  }, [admin, pendingQuery]);
+  }, [admin, refetchPending]);
 
-  const discoveries = useMemo(() => unwrapDiscoveries(pendingQuery.data), [pendingQuery.data]);
+  const discoveries = useMemo(
+    () => unwrapPendingDiscoveries(pendingQuery.data),
+    [pendingQuery.data],
+  );
+  const currentFingerprint = useMemo(
+    () => pendingDiscoveriesFingerprint(discoveries.map((d) => d.id)),
+    [discoveries],
+  );
 
   const current = useMemo(() => {
     if (discoveries.length === 0) return null;
@@ -89,8 +89,13 @@ export function PendingServerDiscoveryModal() {
     return discoveries[0] ?? null;
   }, [discoveries, preferredDiscoveryId]);
 
+  const snoozed = isPendingDiscoveryModalSnoozed({
+    forceShow,
+    snoozeFingerprint,
+    currentFingerprint,
+  });
+
   const approveMutation = usePostApiOpenVpnServersDiscoveriesDiscoveryIdApprove();
-  const denyMutation = usePostApiOpenVpnServersDiscoveriesDiscoveryIdDeny();
 
   const invalidateServerLists = async (vpnServerId?: number | null) => {
     await queryClient.invalidateQueries({
@@ -119,15 +124,15 @@ export function PendingServerDiscoveryModal() {
       const raw = await approveMutation.mutateAsync({
         discoveryId: current.id,
         data: {
-          // Defaults; backend ORs isEnableWss with the discovery flag.
           isEnableWss: current.isEnableWss ?? false,
           serverName: current.suggestedName ?? undefined,
         },
       });
-      const result = unwrapDiscoveryResult(raw);
+      const result = unwrapDiscoveryActionResult(raw);
       const vpnServerId = result?.vpnServerId ?? null;
       toast.success("Server added successfully!");
       setPreferredDiscoveryId(null);
+      setForceShow(false);
       await invalidateServerLists(vpnServerId);
       if (vpnServerId != null && vpnServerId > 0) {
         navigate(`/servers/edit/${vpnServerId}`);
@@ -139,22 +144,25 @@ export function PendingServerDiscoveryModal() {
     }
   };
 
-  const handleDismiss = async () => {
-    if (!current?.id || busy) return;
-    setBusy(true);
-    try {
-      await denyMutation.mutateAsync({ discoveryId: current.id, data: {} });
-      toast.info("Discovery dismissed");
-      setPreferredDiscoveryId(null);
-      await invalidateServerLists();
-    } catch (err) {
-      toast.error(errorMessage(err) || "Failed to dismiss discovery");
-    } finally {
-      setBusy(false);
-    }
+  const handleLater = () => {
+    writePendingDiscoverySnoozeFingerprint(currentFingerprint);
+    setSnoozeFingerprint(currentFingerprint);
+    setForceShow(false);
+    setPreferredDiscoveryId(null);
   };
 
-  if (!admin || !current) return null;
+  const handleReview = () => {
+    if (!current?.id) return;
+    setForceShow(false);
+    navigate(`/servers/pending-discoveries/${current.id}`);
+  };
+
+  const handleOpenAll = () => {
+    setForceShow(false);
+    navigate("/servers/pending-discoveries");
+  };
+
+  if (!admin || !current || snoozed || onPendingInbox) return null;
 
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pending-discovery-title">
@@ -192,7 +200,8 @@ export function PendingServerDiscoveryModal() {
           </dl>
           {discoveries.length > 1 ? (
             <p className="settings-item-description" style={{ marginTop: 12, marginBottom: 0 }}>
-              {discoveries.length} pending discoveries — showing one at a time.
+              {discoveries.length} pending discoveries — showing one at a time. Open all to review the
+              full queue.
             </p>
           ) : null}
         </div>
@@ -207,8 +216,16 @@ export function PendingServerDiscoveryModal() {
             borderTop: "1px solid var(--border-color)",
           }}
         >
-          <button type="button" className="btn secondary" disabled={busy} onClick={() => void handleDismiss()}>
-            Dismiss
+          <button type="button" className="btn secondary" disabled={busy} onClick={handleLater}>
+            Later
+          </button>
+          {discoveries.length > 1 ? (
+            <button type="button" className="btn secondary" disabled={busy} onClick={handleOpenAll}>
+              Open all ({discoveries.length})
+            </button>
+          ) : null}
+          <button type="button" className="btn secondary" disabled={busy} onClick={handleReview}>
+            Review…
           </button>
           <button type="button" className="btn primary" disabled={busy} onClick={() => void handleAdd()}>
             Add

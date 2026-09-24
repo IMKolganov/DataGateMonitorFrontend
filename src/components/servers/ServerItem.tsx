@@ -117,10 +117,16 @@ const ServerItem: React.FC<Props> = ({
 
     const name = vpnServer?.serverName ?? "";
     const stackLabel = vpnServerTypeLabel(vpnServer?.serverType as number | undefined);
-    const isOnlineFromApi = !!vpnServer?.isOnline;
-    const isOnline = wsOnline === null ? isOnlineFromApi : wsOnline;
     const isDefault = !!vpnServer?.isDefault;
     const isDisabled = Boolean(vpnServer?.isDisabled);
+    const isDeleted = Boolean(vpnServer?.isDeleted);
+    const isOnlineFromApi = !!vpnServer?.isOnline;
+    // Soft-deleted rows are not polled; never show Online even if DB still has a stale flag.
+    const isOnline = isDeleted
+        ? false
+        : wsOnline === null
+          ? isOnlineFromApi
+          : wsOnline;
 
     const connectedClients =
         wsCountConnectedClients ?? server.countConnectedClients ?? 0;
@@ -152,6 +158,14 @@ const ServerItem: React.FC<Props> = ({
                         >
                             {stackLabel}
                         </span>
+                        {isDeleted && (
+                            <span
+                                className="server-deleted-pill"
+                                title="Server is soft-deleted and hidden from the default list."
+                            >
+                                Deleted
+                            </span>
+                        )}
                         {isDisabled && (
                             <span
                                 className="server-disabled-pill"
@@ -236,9 +250,9 @@ const ServerItem: React.FC<Props> = ({
                     <div className="detail-row">
                         <FaLink className="detail-icon" aria-hidden />
                         <span className="detail-label">API</span>
-                        <a href={apiUrl} target="_blank" rel="noreferrer" className="detail-link" onClick={(e) => e.stopPropagation()}>
+                        <span className="detail-value" title={apiUrl}>
                             {apiUrl}
-                        </a>
+                        </span>
                     </div>
                 )}
 
@@ -326,11 +340,17 @@ const ServerItem: React.FC<Props> = ({
                     <button
                         type="button"
                         className="btn secondary"
-                        disabled={!canManage}
-                        title={!canManage ? "Admin only" : undefined}
+                        disabled={!canManage || isDeleted}
+                        title={
+                            !canManage
+                                ? "Admin only"
+                                : isDeleted
+                                  ? "Server is already deleted"
+                                  : undefined
+                        }
                         onClick={(e) => {
                             e.stopPropagation();
-                            if (!canManage) return;
+                            if (!canManage || isDeleted) return;
                             onDelete(resolvedId);
                         }}
                     >

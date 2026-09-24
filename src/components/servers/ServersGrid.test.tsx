@@ -11,7 +11,12 @@ vi.mock("../../utils/auth/authSelectors", () => ({
 }));
 
 vi.mock("../../hooks/useSignalRService", () => ({
-  default: () => ({ serviceData: null, connected: false }),
+  default: () => ({
+    serviceData: null,
+    runServiceNow: vi.fn(),
+    connectionState: "Disconnected",
+    lastError: null,
+  }),
 }));
 
 vi.mock("./ServerItem", () => ({
@@ -19,20 +24,17 @@ vi.mock("./ServerItem", () => ({
     server,
     vpnServerId,
   }: {
-    server: { vpnServerResponses?: { vpnServer?: { serverName?: string } } };
+    server: { vpnServerResponses?: { vpnServer?: { serverName?: string; isDeleted?: boolean } } };
     vpnServerId: number;
   }) => (
     <div data-testid={`server-item-${vpnServerId}`}>
       {server.vpnServerResponses?.vpnServer?.serverName ?? vpnServerId}
+      {server.vpnServerResponses?.vpnServer?.isDeleted ? " [deleted]" : ""}
     </div>
   ),
 }));
 
 vi.mock("../ServiceControls", () => ({ default: () => <div data-testid="service-controls" /> }));
-
-vi.mock("./PendingDiscoveriesBadgeButton", () => ({
-  PendingDiscoveriesBadgeButton: () => null,
-}));
 
 vi.mock("react-responsive", () => ({
   useMediaQuery: () => false,
@@ -52,7 +54,6 @@ vi.mock("../../api/orval/vpn-servers-v3/vpn-servers-v3", () => ({
             serverName: "Alpha",
             apiUrl: "https://10.51.48.12:5010/",
             isOnline: true,
-            serverType: 0,
             isDeleted: false,
           },
         },
@@ -67,7 +68,6 @@ vi.mock("../../api/orval/vpn-servers-v3/vpn-servers-v3", () => ({
             serverName: "Ghost",
             apiUrl: "https://212.147.239.128:8443/",
             isOnline: false,
-            serverType: 0,
             isDeleted: true,
           },
         },
@@ -84,16 +84,23 @@ vi.mock("../../api/orval/vpn-servers-v3/vpn-servers-v3", () => ({
 
 vi.mock("../../api/orval/vpn-server-groups/vpn-server-groups", () => ({
   useGetApiVpnServerGroupsGetAll: () => ({
-    data: { groups: [] },
+    data: {
+      groups: [{ id: 10, name: "EU", serverIds: [1], sortOrder: 0 }],
+    },
     refetch: vi.fn(),
   }),
   usePostApiVpnServerGroupsCreate: () => ({ mutateAsync: vi.fn(), isPending: false }),
   usePutApiVpnServerGroupsUpdateId: () => ({ mutateAsync: vi.fn(), isPending: false }),
   useDeleteApiVpnServerGroupsDeleteId: () => ({ mutateAsync: vi.fn(), isPending: false }),
-  putApiVpnServerGroupsReorder: vi.fn(),
-  putApiVpnServerGroupsIdSetServers: vi.fn(),
-  putApiVpnServerGroupsUngroupedSetServers: vi.fn(),
   getGetApiVpnServerGroupsGetAllQueryKey: () => ["/api/vpn-server-groups/get-all"],
+}));
+
+vi.mock("./PendingDiscoveriesBadgeButton", () => ({
+  PendingDiscoveriesBadgeButton: () => null,
+}));
+
+vi.mock("./AddServersToGroupModal", () => ({
+  AddServersToGroupModal: () => null,
 }));
 
 vi.mock("../../hooks/useCurrentUserConnectedServerIds", () => ({
@@ -101,12 +108,13 @@ vi.mock("../../hooks/useCurrentUserConnectedServerIds", () => ({
   isUserConnectedToServer: () => false,
 }));
 
-import ServerList from "./ServerList";
+import ServersGrid from "./ServersGrid";
 import { getApiV3OpenVpnServersGetAllWithStatus } from "../../api/orval/vpn-servers-v3/vpn-servers-v3";
 
-describe("ServerList", () => {
+describe("ServersGrid", () => {
   beforeEach(() => {
     authState.admin = true;
+    vi.clearAllMocks();
     try {
       localStorage.removeItem("datagate.serverList.showDeleted");
     } catch {
@@ -114,40 +122,31 @@ describe("ServerList", () => {
     }
   });
 
-  it("renders refresh and add server for admins after load", async () => {
-    renderWithProviders(<ServerList />, { route: "/servers" });
+  it("renders grouped tile grid and hides deleted by default", async () => {
+    renderWithProviders(<ServersGrid />, { route: "/servers" });
 
-    expect(await screen.findByRole("button", { name: /Refresh/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Add Server/i })).toBeInTheDocument();
     expect(await screen.findByTestId("server-item-1")).toHaveTextContent("Alpha");
     expect(screen.queryByTestId("server-item-2")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Add Server/i })).toBeInTheDocument();
+    expect(screen.getByText("EU")).toBeInTheDocument();
+    expect(document.querySelector(".servers-grid")).toBeTruthy();
+    expect(document.querySelector(".servers-grid-groups")).toBeTruthy();
   });
 
-  it("hides add server for non-admins", async () => {
-    authState.admin = false;
-    renderWithProviders(<ServerList />, { route: "/servers" });
-
-    expect(await screen.findByRole("button", { name: /Refresh/i })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Add Server/i })).not.toBeInTheDocument();
-  });
-
-  it("refetches servers on refresh click", async () => {
-    vi.mocked(getApiV3OpenVpnServersGetAllWithStatus).mockClear();
-    renderWithProviders(<ServerList />, { route: "/servers" });
-
-    const refreshButton = await screen.findByRole("button", { name: /Refresh/i });
-    await screen.findByTestId("server-item-1");
-
-    expect(vi.mocked(getApiV3OpenVpnServersGetAllWithStatus)).toHaveBeenCalledTimes(1);
-
-    await userEvent.click(refreshButton);
-
-    expect(vi.mocked(getApiV3OpenVpnServersGetAllWithStatus)).toHaveBeenCalledTimes(2);
-  });
-
-  it("filters by IP and reveals deleted matches in Deleted section", async () => {
+  it("shows deleted servers after toggle", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<ServerList />, { route: "/servers" });
+    renderWithProviders(<ServersGrid />, { route: "/servers" });
+
+    await screen.findByTestId("server-item-1");
+    await user.click(screen.getByRole("button", { name: /Show deleted/i }));
+
+    expect(await screen.findByTestId("server-item-2")).toHaveTextContent("Ghost");
+    expect(screen.getByText("Deleted")).toBeInTheDocument();
+  });
+
+  it("filters by IP search including deleted matches", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ServersGrid />, { route: "/servers" });
 
     await screen.findByTestId("server-item-1");
     await user.type(
@@ -157,16 +156,16 @@ describe("ServerList", () => {
 
     expect(await screen.findByTestId("server-item-2")).toBeInTheDocument();
     expect(screen.queryByTestId("server-item-1")).not.toBeInTheDocument();
-    expect(screen.getByText("Deleted")).toBeInTheDocument();
   });
 
-  it("shows deleted servers when Show deleted is pressed", async () => {
+  it("refetches on refresh", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<ServerList />, { route: "/servers" });
+    renderWithProviders(<ServersGrid />, { route: "/servers" });
 
     await screen.findByTestId("server-item-1");
-    await user.click(screen.getByRole("button", { name: /Show deleted/i }));
+    expect(vi.mocked(getApiV3OpenVpnServersGetAllWithStatus)).toHaveBeenCalledTimes(1);
 
-    expect(await screen.findByTestId("server-item-2")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Refresh/i }));
+    expect(vi.mocked(getApiV3OpenVpnServersGetAllWithStatus)).toHaveBeenCalledTimes(2);
   });
 });

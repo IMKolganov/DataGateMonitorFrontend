@@ -377,6 +377,15 @@
     opacity: 0.92;
   }
 
+  .server-item.server-item--deleted {
+    opacity: 0.72;
+    border-style: dashed;
+  }
+
+  .server-item.server-item--deleted:hover {
+    opacity: 0.88;
+  }
+
   .server-disabled-pill {
     margin-left: 8px;
     font-size: var(--font-size-2xs);
@@ -388,6 +397,20 @@
     background: var(--bg-content-alt);
     color: var(--text-muted);
     border: 1px solid var(--border-color);
+    vertical-align: middle;
+  }
+
+  .server-deleted-pill {
+    margin-left: 8px;
+    font-size: var(--font-size-2xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(255, 107, 90, 0.14);
+    color: #ff9a8f;
+    border: 1px solid rgba(255, 107, 90, 0.35);
     vertical-align: middle;
   }
 
@@ -433,7 +456,40 @@
   white-space: nowrap;
 }
 
+.server-list-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 220px;
+  min-width: 180px;
+  max-width: 360px;
+}
+
+.server-list-search__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.server-list-search__input {
+  width: 100%;
+  min-height: 32px;
+  margin: 0;
+}
+
 @media (max-width: 768px) {
+  .server-list-search {
+    max-width: none;
+    width: 100%;
+    flex: 1 1 auto;
+  }
+
   .header-bar__meta {
     margin-left: 0;
     width: 100%;
