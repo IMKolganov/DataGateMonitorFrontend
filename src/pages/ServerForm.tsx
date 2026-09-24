@@ -1,6 +1,6 @@
 // src/pages/ServerForm.tsx
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../css/ServerForm.css";
 import "../css/OvpnFileConfigForm.css";
 import { FaArrowLeft, FaPlus, FaCopy, FaCheckCircle, FaTrash } from "react-icons/fa";
@@ -47,6 +47,12 @@ import {
   OPEN_VPN_EXPORT_TEMPLATE,
   unwrapOvpnFileConfigPayload,
 } from "../utils/exportConfigTemplates";
+import {
+  buildDuplicatedServerName,
+  duplicateServerPath,
+  parseDuplicateFromParam,
+  DUPLICATE_FROM_QUERY,
+} from "../utils/servers/duplicateServer";
 import { usePostApiQuotaPlansGetAll } from "../api/orval/quota-plan/quota-plan";
 import {
   useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId,
@@ -430,13 +436,18 @@ function toNumberOrNull(value: string): number | null {
 const ServerForm: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
   const { serverId } = useParams<{ serverId?: string }>();
   const idNum = Number(serverId || 0);
+  const duplicateFromId = parseDuplicateFromParam(searchParams.get(DUPLICATE_FROM_QUERY));
+  const isDuplicate = idNum <= 0 && duplicateFromId > 0;
+  /** Edit id, or source id when prefilling a duplicate create form. */
+  const loadServerId = idNum > 0 ? idNum : duplicateFromId;
   const highlightPreRef = React.useRef<HTMLPreElement | null>(null);
   const configTextareaRef = React.useRef<HTMLTextAreaElement | null>(null);
 
-  const { data: serverResp, isFetching } = useGetApiOpenVpnServersGetVpnServerId(idNum, {
-    query: { enabled: !!idNum },
+  const { data: serverResp, isFetching } = useGetApiOpenVpnServersGetVpnServerId(loadServerId, {
+    query: { enabled: loadServerId > 0 },
   });
 
   const { data: tagsResp } = useGetApiTagsGetAll();
@@ -451,7 +462,7 @@ const ServerForm: React.FC = () => {
   React.useEffect(() => {
     initialGroupHydrated.current = false;
     setSelectedGroupTarget(UNGROUPED_GROUP_ID);
-  }, [idNum]);
+  }, [idNum, duplicateFromId]);
 
   const getPlansMutation = usePostApiQuotaPlansGetAll();
   const [quotaPlans, setQuotaPlans] = React.useState<QuotaPlanDto[]>([]);
@@ -459,8 +470,8 @@ const ServerForm: React.FC = () => {
   const [quotaPlansHydrated, setQuotaPlansHydrated] = React.useState(false);
 
   const { data: allowedByServerRaw, isFetched: allowedPlansFetched } =
-    useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId(idNum, {
-      query: { enabled: idNum > 0 },
+    useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId(loadServerId, {
+      query: { enabled: loadServerId > 0 },
     });
 
   const allTags = React.useMemo(() => {
@@ -489,9 +500,9 @@ const ServerForm: React.FC = () => {
   });
 
   React.useEffect(() => {
-    if (!idNum || initialGroupHydrated.current) return;
+    if (!loadServerId || initialGroupHydrated.current) return;
     if (!groupsQuery.isFetched) return;
-    const fromGroups = findGroupForServer(groups, idNum)?.id ?? null;
+    const fromGroups = findGroupForServer(groups, loadServerId)?.id ?? null;
     if (fromGroups != null) {
       setSelectedGroupTarget(String(fromGroups));
       initialGroupHydrated.current = true;
@@ -501,12 +512,12 @@ const ServerForm: React.FC = () => {
     const fromDto = unwrapServerDto(serverResp)?.groupId ?? serverData.groupId ?? null;
     setSelectedGroupTarget(fromDto != null ? String(fromDto) : UNGROUPED_GROUP_ID);
     initialGroupHydrated.current = true;
-  }, [idNum, groups, groupsQuery.isFetched, serverResp, serverData.groupId]);
+  }, [loadServerId, groups, groupsQuery.isFetched, serverResp, serverData.groupId]);
 
   const isOpenVpnForQueries = (serverData.serverType ?? VpnServerType.OpenVpn) === VpnServerType.OpenVpn;
 
-  const { data: ovpnConfigData } = useGetApiOpenVpnConfigsGetVpnServerId(idNum, {
-    query: { enabled: idNum > 0 && isOpenVpnForQueries },
+  const { data: ovpnConfigData } = useGetApiOpenVpnConfigsGetVpnServerId(loadServerId, {
+    query: { enabled: loadServerId > 0 && isOpenVpnForQueries },
   });
 
   const [selectedTagIds, setSelectedTagIds] = React.useState<number[]>([]);
@@ -581,7 +592,7 @@ const ServerForm: React.FC = () => {
     () => (allowedByServerRaw ? JSON.stringify(allowedByServerRaw) : `empty:${allowedPlansFetched}`),
     [allowedByServerRaw, allowedPlansFetched],
   );
-  if (idNum && allowedPlansKey !== appliedAllowedPlansKey) {
+  if ((idNum > 0 || isDuplicate) && allowedPlansKey !== appliedAllowedPlansKey) {
     setAppliedAllowedPlansKey(allowedPlansKey);
     if (allowedByServerRaw) {
       const items = getAllowedItemsByVpnServer(allowedByServerRaw);
@@ -625,22 +636,24 @@ const ServerForm: React.FC = () => {
     setAppliedServerResp(serverResp);
     const dto = unwrapServerDto(serverResp);
     if (dto) {
+      const sourceName = dto.serverName ?? "";
       setServerData((prev) => ({
         ...prev,
         ...dto,
-        id: dto.id ?? prev.id ?? (idNum || undefined),
+        // Create/duplicate must not keep the source primary key.
+        id: idNum > 0 ? (dto.id ?? prev.id ?? idNum) : undefined,
         serverType: dto.serverType ?? VpnServerType.OpenVpn,
-        serverName: dto.serverName ?? "",
+        serverName: isDuplicate ? buildDuplicatedServerName(sourceName) : sourceName,
         apiUrl: dto.apiUrl ?? null,
         latitude: dto.latitude ?? null,
         longitude: dto.longitude ?? null,
-        isOnline: dto.isOnline ?? false,
+        isOnline: isDuplicate ? false : (dto.isOnline ?? false),
         isDisabled: dto.isDisabled ?? false,
-        isDefault: dto.isDefault ?? false,
+        isDefault: isDuplicate ? false : (dto.isDefault ?? false),
         isEnableWss: dto.isEnableWss ?? false,
         isPiHoleEnabled: dto.isPiHoleEnabled ?? false,
-        lastUpdate: dto.lastUpdate ?? prev.lastUpdate,
-        createDate: dto.createDate ?? prev.createDate,
+        lastUpdate: isDuplicate ? new Date().toISOString() : (dto.lastUpdate ?? prev.lastUpdate),
+        createDate: isDuplicate ? new Date().toISOString() : (dto.createDate ?? prev.createDate),
         groupId: dto.groupId ?? prev.groupId ?? null,
       }));
 
@@ -936,6 +949,22 @@ const ServerForm: React.FC = () => {
           } catch {
             toast.warning("Server added, but group assignment failed.");
           }
+
+          const isOpenVpnServer = (serverData.serverType ?? VpnServerType.OpenVpn) === VpnServerType.OpenVpn;
+          if (isOpenVpnServer && String(ovpnConfig.vpnServerIp ?? "").trim()) {
+            try {
+              await saveOvpnConfigMutation.mutateAsync({
+                data: {
+                  vpnServerId: newId,
+                  vpnServerIp: String(ovpnConfig.vpnServerIp ?? "").trim(),
+                  vpnServerPort: ovpnConfig.vpnServerPort || 1194,
+                  configTemplate: ovpnConfig.configTemplate || null,
+                },
+              });
+            } catch {
+              toast.warning("Server added, but OpenVPN export config could not be saved.");
+            }
+          }
         }
 
         let navigateTo: string | null = "/";
@@ -1035,7 +1064,15 @@ const ServerForm: React.FC = () => {
   return (
       <div className="content-wrapper wide-table">
         <div className="server-form-container">
-          <h2 className="server-form-header">{idNum ? "Edit Server" : "Add New Server"}</h2>
+          <h2 className="server-form-header">
+            {idNum ? "Edit Server" : isDuplicate ? "Duplicate Server" : "Add New Server"}
+          </h2>
+          {isDuplicate && (
+            <p className="form-hint" style={{ marginTop: "-0.5rem", marginBottom: "1rem" }}>
+              Prefilled from server #{duplicateFromId}. Change the API URL (and name) before saving —
+              this creates a <strong>new</strong> server.
+            </p>
+          )}
 
           <form className="server-form" onSubmit={handleSubmit}>
             <div className="form-group">
@@ -1475,12 +1512,23 @@ const ServerForm: React.FC = () => {
                   </button>
                 </div>
                 <div className="right-buttons">
+                  {idNum > 0 && (
+                    <button
+                      type="button"
+                      className="btn secondary"
+                      disabled={postSetupBusy}
+                      title="Create a new server starting from this one’s settings"
+                      onClick={() => navigate(duplicateServerPath(idNum))}
+                    >
+                      {FaCopy({ className: "icon" })} Duplicate
+                    </button>
+                  )}
                   <button
                       type="submit"
                       className="btn primary"
                       disabled={
                     postSetupBusy ||
-                    (idNum > 0 && !quotaPlansHydrated) ||
+                    ((idNum > 0 || isDuplicate) && !quotaPlansHydrated) ||
                     addMutation.isPending ||
                     updateMutation.isPending ||
                     (((serverData.serverType ?? VpnServerType.OpenVpn) === VpnServerType.OpenVpn) &&
@@ -1494,7 +1542,9 @@ const ServerForm: React.FC = () => {
                         ? "Saving server…"
                         : idNum
                           ? "Update Server"
-                          : "Add Server"}
+                          : isDuplicate
+                            ? "Create copy"
+                            : "Add Server"}
                   </button>
                 </div>
               </div>

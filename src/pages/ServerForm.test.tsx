@@ -105,4 +105,29 @@ describe("ServerForm", () => {
     expect(await screen.findByRole("heading", { name: /Edit Server/i })).toBeInTheDocument();
     expect(screen.getByDisplayValue("Existing-7")).toBeInTheDocument();
   });
+
+  it("prefills Duplicate Server form from duplicateFrom query", async () => {
+    renderWithProviders(
+      <Routes>
+        <Route path="/servers/add" element={<ServerForm />} />
+      </Routes>,
+      { route: "/servers/add?duplicateFrom=7" },
+    );
+
+    expect(await screen.findByRole("heading", { name: /Duplicate Server/i })).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Existing-7 (copy)")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Create copy/i })).toBeInTheDocument();
+  });
+
+  it("offers Duplicate on the edit form", async () => {
+    renderWithProviders(
+      <Routes>
+        <Route path="/servers/edit/:serverId" element={<ServerForm />} />
+        <Route path="/servers/add" element={<div>Add form</div>} />
+      </Routes>,
+      { route: "/servers/edit/7" },
+    );
+
+    expect(await screen.findByRole("button", { name: /Duplicate/i })).toBeInTheDocument();
+  });
 });
