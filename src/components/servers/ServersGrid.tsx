@@ -294,7 +294,7 @@ const ServersGrid: React.FC = () => {
             <input
               id="servers-grid-search"
               className="input server-list-search__input"
-              type="text"
+              type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by IP, API URL, or name"

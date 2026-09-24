@@ -151,7 +151,7 @@ describe("ServerList", () => {
 
     await screen.findByTestId("server-item-1");
     await user.type(
-      screen.getByRole("textbox", { name: /Search servers by IP/i }),
+      screen.getByRole("searchbox", { name: /Search servers by IP/i }),
       "212.147.239.128",
     );
 

@@ -250,9 +250,9 @@ const ServerItem: React.FC<Props> = ({
                     <div className="detail-row">
                         <FaLink className="detail-icon" aria-hidden />
                         <span className="detail-label">API</span>
-                        <a href={apiUrl} target="_blank" rel="noreferrer" className="detail-link" onClick={(e) => e.stopPropagation()}>
+                        <span className="detail-value" title={apiUrl}>
                             {apiUrl}
-                        </a>
+                        </span>
                     </div>
                 )}
 
