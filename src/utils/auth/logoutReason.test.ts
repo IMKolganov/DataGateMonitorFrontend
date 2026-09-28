@@ -1,8 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildLoginRedirectUrl,
+  consumeStoredLogoutReason,
+  LOGOUT_REASON_STORAGE_KEY,
   logoutReasonMessage,
   readLogoutReasonFromSearch,
+  rememberLogoutReason,
   type LogoutReason,
 } from "./logoutReason";
 
@@ -14,6 +17,14 @@ const ALL_REASONS: LogoutReason[] = [
 ];
 
 describe("logoutReason", () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
+
+  afterEach(() => {
+    sessionStorage.clear();
+  });
+
   it("builds login url with reason", () => {
     expect(buildLoginRedirectUrl({ reason: "sessionExpired" })).toBe(
       "/login?reason=sessionExpired",
@@ -45,5 +56,12 @@ describe("logoutReason", () => {
     expect(logoutReasonMessage("sessionExpired")).toMatch(/expired/i);
     expect(logoutReasonMessage("refreshRejected")).toMatch(/no longer valid/i);
     expect(logoutReasonMessage("missingToken")).toMatch(/no active session/i);
+  });
+
+  it("remembers and consumes sticky logout reason once", () => {
+    rememberLogoutReason("idleTimeout");
+    expect(sessionStorage.getItem(LOGOUT_REASON_STORAGE_KEY)).toBe("idleTimeout");
+    expect(consumeStoredLogoutReason()).toBe("idleTimeout");
+    expect(consumeStoredLogoutReason()).toBeNull();
   });
 });

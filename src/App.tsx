@@ -20,6 +20,7 @@ import RegisterPage from "./components/auth/RegisterPage";
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./components/auth/ResetPasswordPage";
 import ConfirmEmailPage from "./components/auth/ConfirmEmailPage";
+import { PrivateRoute } from "./components/auth/PrivateRoute.tsx";
 import { isAuthenticated } from "./utils/auth/authSelectors.ts";
 import { restoreAuthSessionOnStartup } from "./utils/auth/authStartup.ts";
 import { RequireAdmin } from "./components/auth/RequireAdmin.tsx";
@@ -78,10 +79,6 @@ const XrayPortalPage = lazy(() => import("./pages/xray/XrayPortalPage.tsx"));
 const XrayRegisterPage = lazy(() => import("./pages/xray/XrayRegisterPage.tsx"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy.tsx"));
 const TvLinkPage = lazy(() => import("./pages/tv/TvLinkPage.tsx"));
-
-
-const PrivateRoute = ({ children }: { children: ReactNode }): React.ReactElement =>
-  isAuthenticated() ? <>{children}</> : <Navigate to="/login?reason=missingToken" replace />;
 
 const XrayPrivateRoute = ({ children }: { children: ReactNode }): React.ReactElement =>
   isAuthenticated() ? <>{children}</> : <Navigate to="/xray/login" replace />;

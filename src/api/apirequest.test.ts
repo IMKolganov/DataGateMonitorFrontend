@@ -35,7 +35,7 @@ vi.mock("axios", () => {
   };
 });
 
-import { apiRequest, getWebSocketUrlForBackgroundService, logout, resetLoginRedirectGuardForTests, shouldLogoutOnRefreshError } from "./apirequest";
+import { apiRequest, getWebSocketUrlForBackgroundService, logout, resetLoginRedirectGuardForTests, resetRefreshPromiseForTests, shouldLogoutOnRefreshError } from "./apirequest";
 
 describe("shouldLogoutOnRefreshError", () => {
   it("returns false for non-objects", () => {
@@ -133,6 +133,7 @@ describe("apiRequest auth failure paths", () => {
 
   beforeEach(() => {
     resetLoginRedirectGuardForTests();
+    resetRefreshPromiseForTests();
     localStorage.clear();
     assign.mockClear();
     scheduleAutoLogout.mockClear();
@@ -156,6 +157,7 @@ describe("apiRequest auth failure paths", () => {
   });
 
   afterEach(() => {
+    resetRefreshPromiseForTests();
     vi.unstubAllGlobals();
   });
 
@@ -196,6 +198,44 @@ describe("apiRequest auth failure paths", () => {
     expect(onApiActivity).toHaveBeenCalledTimes(1);
 
     window.removeEventListener(ADMIN_IDLE_API_ACTIVITY_EVENT, onApiActivity);
+  });
+
+  it("single-flights concurrent 401 refreshes (one POST /refresh for two requests)", async () => {
+    let resolveRefresh!: (value: unknown) => void;
+    const refreshGate = new Promise((resolve) => {
+      resolveRefresh = resolve;
+    });
+
+    axiosRequest.mockImplementation(async (config: { headers?: { Authorization?: string } }) => {
+      const auth = config?.headers?.Authorization ?? "";
+      if (auth.includes("new-access")) {
+        return { data: { success: true, data: { ok: true } } };
+      }
+      throw { isAxiosError: true, response: { status: 401 } };
+    });
+
+    axiosPost.mockImplementation(async () => {
+      await refreshGate;
+      return {
+        data: {
+          success: true,
+          data: { token: "new-access", refreshToken: "new-refresh" },
+        },
+      };
+    });
+
+    const p1 = apiRequest("get", "/api/servers/1");
+    const p2 = apiRequest("get", "/api/servers/2");
+
+    await vi.waitFor(() => {
+      expect(axiosPost).toHaveBeenCalledTimes(1);
+    });
+
+    resolveRefresh(undefined);
+    const results = await Promise.all([p1, p2]);
+    expect(results).toHaveLength(2);
+    expect(axiosPost).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBe("new-access");
   });
 
   it("notifies admin API activity after a successful authenticated request", async () => {

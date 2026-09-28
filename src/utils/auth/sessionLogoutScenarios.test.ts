@@ -16,6 +16,11 @@
  *
  * Shared:
  * - missingToken / voluntary sign-out / SignalR no-logout / redirect race (below + signalRAccessToken.test)
+ * - PrivateRoute must not overwrite first logout reason (PrivateRoute.test)
+ * - Concurrent 401 → single-flight refresh (apirequest.test)
+ * - Cross-tab storage clear → refreshRejected (authCrossTab.test)
+ * - Startup silent refresh when access missing (authStartup.test)
+ * - Backend refresh rotation / reuse / lost atomic claim (TokenServiceRefreshRotationTests)
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -87,6 +92,7 @@ describe("Session logout scenario matrix", () => {
 
     beforeEach(() => {
       localStorage.clear();
+      sessionStorage.clear();
       assign.mockClear();
       Object.defineProperty(window, "location", {
         configurable: true,
@@ -107,6 +113,7 @@ describe("Session logout scenario matrix", () => {
 
       expect(assign).toHaveBeenCalledTimes(1);
       expect(assign).toHaveBeenCalledWith("/login?reason=idleTimeout");
+      expect(sessionStorage.getItem("datagate.logoutReason")).toBe("idleTimeout");
     });
 
     it("refreshRejected is kept when missingToken follows token clear", async () => {
@@ -121,6 +128,19 @@ describe("Session logout scenario matrix", () => {
 
       expect(assign).toHaveBeenCalledTimes(1);
       expect(assign).toHaveBeenCalledWith("/login?reason=refreshRejected");
+      expect(sessionStorage.getItem("datagate.logoutReason")).toBe("refreshRejected");
+    });
+
+    it("isLoginRedirectInProgress blocks PrivateRoute from inventing missingToken", async () => {
+      vi.resetModules();
+      const mod = await import("../../api/apirequest");
+      mod.resetLoginRedirectGuardForTests();
+
+      localStorage.setItem(ACCESS_TOKEN_KEY, "access");
+      mod.logout("idleTimeout");
+
+      expect(mod.isLoginRedirectInProgress()).toBe(true);
+      expect(localStorage.getItem(ACCESS_TOKEN_KEY)).toBeNull();
     });
   });
 });

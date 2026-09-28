@@ -1,5 +1,8 @@
 export const LOGOUT_REASON_PARAM = "reason";
 
+/** Survives SPA history races that rewrite `?reason=` before a hard redirect lands. */
+export const LOGOUT_REASON_STORAGE_KEY = "datagate.logoutReason";
+
 export type LogoutReason =
   | "sessionExpired"
   | "refreshRejected"
@@ -21,6 +24,25 @@ export function readLogoutReasonFromSearch(search: string): LogoutReason | null 
   const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
   const raw = params.get(LOGOUT_REASON_PARAM);
   return isLogoutReason(raw) ? raw : null;
+}
+
+export function rememberLogoutReason(reason: LogoutReason): void {
+  try {
+    sessionStorage.setItem(LOGOUT_REASON_STORAGE_KEY, reason);
+  } catch {
+    // private mode / quota — URL reason is still best-effort
+  }
+}
+
+/** Read and clear the sticky reason (one-shot for the login screen). */
+export function consumeStoredLogoutReason(): LogoutReason | null {
+  try {
+    const raw = sessionStorage.getItem(LOGOUT_REASON_STORAGE_KEY);
+    sessionStorage.removeItem(LOGOUT_REASON_STORAGE_KEY);
+    return isLogoutReason(raw) ? raw : null;
+  } catch {
+    return null;
+  }
 }
 
 export function logoutReasonMessage(reason: LogoutReason): string {
