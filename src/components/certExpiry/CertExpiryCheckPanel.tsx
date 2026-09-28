@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaEye, FaPlay, FaSync } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -7,15 +7,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
 import {
-  getGetApiCertExpiryRunsQueryKey,
-  useGetApiCertExpiryRuns,
-  usePostApiCertExpiryCheck,
-} from "../../api/orval/cert-expiry/cert-expiry.ts";
+  getGetApiV2CertExpiryRunsQueryKey,
+  useGetApiV2CertExpiryRuns,
+} from "../../api/orval/cert-expiry-v2/cert-expiry-v2.ts";
+import { usePostApiCertExpiryCheck } from "../../api/orval/cert-expiry/cert-expiry.ts";
 import type {
   CertExpiryCheckRunResponse,
   CertExpiryRunSummaryDto,
-  GetCertExpiryRunsResponse,
 } from "../../api/orvalModelShim";
+import type { CertExpiryResponsesGetCertExpiryRunsV2Response } from "../../api/orval/model/certExpiryResponsesGetCertExpiryRunsV2Response";
 import { formatDateWithOffset } from "../../utils/utils.ts";
 import { errorMessage } from "../../utils/errorMessage.ts";
 import {
@@ -23,7 +23,7 @@ import {
   certExpiryRunStatusLabel,
 } from "../../utils/certExpiryLabels.ts";
 import { certExpiryRunDetailPath } from "../../utils/certExpiryRoutes.ts";
-import { usePersistedPageSize } from "../../hooks/usePersistedPageSize.ts";
+import { useServerGridPagination } from "../../hooks/useServerGridPagination.ts";
 import "../../css/Settings.css";
 import "../../css/Table.css";
 
@@ -32,15 +32,15 @@ function unwrapCertExpiryRun(raw: unknown): CertExpiryCheckRunResponse {
   return raw as CertExpiryCheckRunResponse;
 }
 
-function unwrapCertExpiryRuns(raw: unknown): CertExpiryRunSummaryDto[] {
-  const payload = raw as GetCertExpiryRunsResponse | null | undefined;
-  return payload?.runs ?? [];
+function unwrapCertExpiryRunsV2(raw: unknown): CertExpiryResponsesGetCertExpiryRunsV2Response {
+  return (raw ?? {}) as CertExpiryResponsesGetCertExpiryRunsV2Response;
 }
 
 type Props = {
   vpnServerId?: number;
   serverName?: string;
   showHistory?: boolean;
+  /** @deprecated v2 uses Page/PageSize; kept for call-site compatibility */
   historyLimit?: number;
 };
 
@@ -48,31 +48,52 @@ export function CertExpiryCheckPanel({
   vpnServerId,
   serverName,
   showHistory = true,
-  historyLimit = 20,
 }: Props) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
   const [sendNotifications, setSendNotifications] = useState(false);
   const [lastResult, setLastResult] = useState<CertExpiryCheckRunResponse | null>(null);
+  const [rowCount, setRowCount] = useState(0);
 
   const returnTo = location.pathname + location.search;
+  const resetKey = vpnServerId ?? "all";
+
+  const paging = useServerGridPagination({
+    storageKey: vpnServerId ? `cert-expiry-history:${vpnServerId}` : "cert-expiry-history:all",
+    defaultPageSize: 10,
+    allowedKey: "5,10,20,50",
+    rowCount,
+    resetKey,
+  });
 
   const historyParams = useMemo(
-    () => ({ limit: historyLimit, vpnServerId: vpnServerId ?? undefined }),
-    [historyLimit, vpnServerId],
+    () => ({
+      Page: paging.apiPage,
+      PageSize: paging.pageSize,
+      VpnServerId: vpnServerId ?? undefined,
+    }),
+    [paging.apiPage, paging.pageSize, vpnServerId],
   );
 
-  const historyQuery = useGetApiCertExpiryRuns(historyParams, {
+  const historyQuery = useGetApiV2CertExpiryRuns(historyParams, {
     query: { enabled: showHistory, staleTime: 5_000 },
   });
+
+  const runsPage = unwrapCertExpiryRunsV2(historyQuery.data).runs;
+
+  useEffect(() => {
+    if (typeof runsPage?.totalCount === "number") {
+      setRowCount(runsPage.totalCount);
+    }
+  }, [runsPage?.totalCount]);
 
   const checkMutation = usePostApiCertExpiryCheck({
     mutation: {
       onSuccess: (result) => {
         const run = unwrapCertExpiryRun(result);
         setLastResult(run);
-        void queryClient.invalidateQueries({ queryKey: getGetApiCertExpiryRunsQueryKey(historyParams) });
+        void queryClient.invalidateQueries({ queryKey: getGetApiV2CertExpiryRunsQueryKey(historyParams) });
         if (certExpiryRunHasIssues(run)) {
           toast.warn("Certificate expiry check finished with findings.");
         } else {
@@ -82,12 +103,6 @@ export function CertExpiryCheckPanel({
       onError: (err) => toast.error(errorMessage(err)),
     },
   });
-
-  const [pageSize, setPageSize] = usePersistedPageSize(
-    vpnServerId ? `cert-expiry-history:${vpnServerId}` : "cert-expiry-history:all",
-    10,
-    "5,10,20,50",
-  );
 
   const runCheck = () => {
     checkMutation.mutate({
@@ -103,12 +118,11 @@ export function CertExpiryCheckPanel({
   };
 
   const historyRows = useMemo(() => {
-    if (!historyQuery.data) return [];
-    return unwrapCertExpiryRuns(historyQuery.data).map((r: CertExpiryRunSummaryDto, idx: number) => ({
+    return (runsPage?.items ?? []).map((r: CertExpiryRunSummaryDto, idx: number) => ({
       ...r,
       id: r.runId ?? `run-${idx}`,
     }));
-  }, [historyQuery.data]);
+  }, [runsPage?.items]);
 
   const historyColumns: GridColDef[] = [
     {
@@ -228,9 +242,7 @@ export function CertExpiryCheckPanel({
                 rows={historyRows}
                 columns={historyColumns}
                 loading={historyQuery.isLoading}
-                pageSizeOptions={[5, 10, 20, 50]}
-                paginationModel={{ page: 0, pageSize }}
-                onPaginationModelChange={(m: { page: number; pageSize: number }) => setPageSize(m.pageSize)}
+                {...paging.gridProps}
                 disableRowSelectionOnClick
                 slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
                 localeText={{ noRowsLabel: "No checks logged yet." }}

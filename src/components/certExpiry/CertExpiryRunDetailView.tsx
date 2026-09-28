@@ -12,7 +12,7 @@ import {
   certExpiryProfileOutcomeLabel,
   certExpiryRunStatusLabel,
 } from "../../utils/certExpiryLabels.ts";
-import { usePersistedPageSize } from "../../hooks/usePersistedPageSize.ts";
+import { useClientGridPagination } from "../../hooks/useClientGridPagination.ts";
 import "../../css/Settings.css";
 import "../../css/Table.css";
 
@@ -52,11 +52,11 @@ function ServerProfilesGrid({
   server: CertExpiryDtoCertExpiryServerResultDto;
   issuesOnly: boolean;
 }) {
-  const [pageSize, setPageSize] = usePersistedPageSize(
-    `cert-expiry-run-${runId}-server-${server.vpnServerId}${issuesOnly ? ":issues" : ":all"}`,
-    20,
-    "10,20,50,100",
-  );
+  const paging = useClientGridPagination({
+    storageKey: `cert-expiry-run-${runId}-server-${server.vpnServerId}${issuesOnly ? ":issues" : ":all"}`,
+    defaultPageSize: 20,
+    allowedKey: "10,20,50,100",
+  });
 
   const allRows = useMemo(
     () =>
@@ -92,9 +92,7 @@ function ServerProfilesGrid({
           rows={rows}
           columns={profileColumns}
           loading={false}
-          pageSizeOptions={[10, 20, 50, 100]}
-          paginationModel={{ page: 0, pageSize }}
-          onPaginationModelChange={(m: { page: number; pageSize: number }) => setPageSize(m.pageSize)}
+          {...paging.gridProps}
           disableRowSelectionOnClick
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
           localeText={{ noRowsLabel: "No profiles on this server." }}

@@ -163,11 +163,13 @@ export default function ServiceControls({
   }, [anyRunning, anyError, anyPending, hubConnectionState]);
 
   return (
-      <div className="service-status-container">
-        <h2>Service Control</h2>
+      <section className="service-status-container" aria-labelledby="service-control-heading">
+        <h2 id="service-control-heading" className="service-status-container__title">
+          Service Control
+        </h2>
         <div className="settings-divider" />
 
-        <p>
+        <p className="service-status-container__meta">
           <strong>Service Status:</strong>{" "}
           <span
             className="status-color-dynamic"
@@ -177,33 +179,34 @@ export default function ServiceControls({
           </span>
         </p>
 
-        <p>
+        <p className="service-status-container__meta">
           <strong>Next Run:</strong>{" "}
           {timeLeft !== null ? `${timeLeft}s` : "N/A"}
         </p>
 
-        <p>
+        <p className="service-status-container__meta">
           <strong>Total Connected Clients:</strong> {totals.clients}
         </p>
 
-        <p>
+        <p className="service-status-container__meta">
           <strong>Total Sessions:</strong> {totals.sessions.toLocaleString()}
         </p>
 
-        <div className="flex-wrap-gap-8">
-          <button className="btn primary" onClick={onRunNow} disabled={anyRunning}>
-            <FaPlay className="icon" /> Sync All Now
+        <div className="flex-wrap-gap-8 service-status-container__actions">
+          <button type="button" className="btn primary" onClick={onRunNow} disabled={anyRunning}>
+            <FaPlay className="icon" aria-hidden />
+            Sync All Now
           </button>
-          <button className="btn secondary" onClick={onOpenDetails}>
+          <button type="button" className="btn secondary" onClick={onOpenDetails}>
             Details
           </button>
         </div>
 
-        <p className="description mt-12">
+        <p className="service-status-container__hint">
           This service periodically queries the OpenVPN server to collect data about connected clients
-          and stores this information in the database. Use the button below to manually trigger the service
+          and stores this information in the database. Use Sync All Now to manually trigger the service
           and update the data immediately.
         </p>
-      </div>
+      </section>
   );
 }

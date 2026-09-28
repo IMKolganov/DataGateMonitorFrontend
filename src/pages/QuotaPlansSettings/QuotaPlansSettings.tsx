@@ -1,33 +1,40 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaPlus, FaSync, FaEdit, FaTrash, FaStar, FaServer, FaClipboardList } from "react-icons/fa";
 import type { GridColDef } from "@mui/x-data-grid";
 import Grid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
 import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
 import {
-  usePostApiQuotaPlansGetAll,
   usePostApiQuotaPlansCreate,
   usePutApiQuotaPlansUpdate,
   useDeleteApiQuotaPlansDeleteId,
   usePostApiQuotaPlansSetDefaultId,
 } from "../../api/orval/quota-plan/quota-plan";
+import {
+  getGetApiV2QuotaPlansQueryKey,
+  useGetApiV2QuotaPlans,
+} from "../../api/orval/quota-plans-v2/quota-plans-v2";
 import type {
   QuotaPlanDto,
   CreateOrUpdateQuotaPlanRequest,
-  QuotaPlansResponse,
 } from "../../api/orvalModelShim";
-import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
-import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
+import type { QuotaPlansResponsesQuotaPlansV2Response } from "../../api/orval/model/quotaPlansResponsesQuotaPlansV2Response";
 import { QuotaPlanFormModal } from "./QuotaPlanFormModal";
 import { QuotaPlanAllowedServersModal } from "./QuotaPlanAllowedServersModal";
-import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { useServerGridPagination } from "../../hooks/useServerGridPagination";
 import { GridFilterBar } from "../../components/ui/GridFilterBar.tsx";
 import { GridRowActions, RowActionButton } from "../../components/ui/GridRowActions.tsx";
 import { gridFilterFields } from "../../config/gridFilters.ts";
 import { useGridFilters } from "../../hooks/useGridFilterStub.ts";
 import "../../css/Settings.css";
 import "../../css/Table.css";
+
+/** ogmMutator unwraps ApiResponse.data at runtime; Orval types still use the Api* wrapper. */
+function unwrapQuotaPlansV2(raw: unknown): QuotaPlansResponsesQuotaPlansV2Response {
+  return (raw ?? {}) as QuotaPlansResponsesQuotaPlansV2Response;
+}
 
 function formatBytes(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
@@ -38,54 +45,53 @@ function formatBytes(n: number | null | undefined): string {
 }
 
 export function QuotaPlansSettings() {
-  const [plans, setPlans] = useState<QuotaPlanDto[]>([]);
+  const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<QuotaPlanDto | null>(null);
   const [allowedServersPlan, setAllowedServersPlan] = useState<QuotaPlanDto | null>(null);
-  const [quotaPlansGridPage, setQuotaPlansGridPage] = useState(0);
-  const [quotaPlansPageSize, setQuotaPlansPageSize] = usePersistedPageSize(
-    "quota-plans",
-    10,
-    "5,10,20,50,100",
-  );
+  const [rowCount, setRowCount] = useState(0);
   const quotaPlanFilters = useGridFilters("quota-plans");
 
-  const getAllMutation = usePostApiQuotaPlansGetAll();
-  const loadPlansMutate = getAllMutation.mutate;
+  const paging = useServerGridPagination({
+    storageKey: "quota-plans",
+    defaultPageSize: 10,
+    allowedKey: "5,10,20,50,100",
+    rowCount,
+  });
+
+  const listParams = useMemo(
+    () => ({
+      IncludeInactive: true,
+      Page: paging.apiPage,
+      PageSize: paging.pageSize,
+    }),
+    [paging.apiPage, paging.pageSize],
+  );
+
+  const listQuery = useGetApiV2QuotaPlans(listParams, {
+    query: { placeholderData: (prev) => prev },
+  });
+
+  const plansPage = unwrapQuotaPlansV2(listQuery.data).quotaPlans;
+  const plans = plansPage?.items ?? [];
+
+  useEffect(() => {
+    if (typeof plansPage?.totalCount === "number") {
+      setRowCount(plansPage.totalCount);
+    }
+  }, [plansPage?.totalCount]);
+
   const createMutation = usePostApiQuotaPlansCreate();
   const updateMutation = usePutApiQuotaPlansUpdate();
   const deleteMutation = useDeleteApiQuotaPlansDeleteId();
   const setDefaultMutation = usePostApiQuotaPlansSetDefaultId();
 
   const loadPlans = useCallback(() => {
-    loadPlansMutate(
-      { data: { includeInactive: true } },
-      {
-        onSuccess: (raw) => {
-          const payload = unwrapMaybeApiResponse<QuotaPlansResponse>(
-            raw as QuotaPlansResponse | ApiEnvelope<QuotaPlansResponse> | undefined,
-          );
-          setPlans(payload?.quotaPlans ?? []);
-        },
-        onError: (e: unknown) => {
-          const err = e as { response?: { data?: { error?: string; message?: string } }; message?: string };
-          toast.error(
-            err?.response?.data?.error ??
-              err?.response?.data?.message ??
-              (err as Error)?.message ??
-              "Failed to load quota plans"
-          );
-        },
-      }
-    );
-  }, [loadPlansMutate]);
-
-  useEffect(() => {
-    loadPlans();
-  }, [loadPlans]);
+    void queryClient.invalidateQueries({ queryKey: getGetApiV2QuotaPlansQueryKey(listParams) });
+  }, [queryClient, listParams]);
 
   const isBusy =
-    getAllMutation.isPending ||
+    listQuery.isFetching ||
     createMutation.isPending ||
     updateMutation.isPending ||
     deleteMutation.isPending ||
@@ -281,7 +287,7 @@ export function QuotaPlansSettings() {
             onClick={loadPlans}
             disabled={isBusy}
           >
-            {FaSync({ className: `icon ${getAllMutation.isPending ? "icon-spin" : ""}` })} Refresh
+            {FaSync({ className: `icon ${listQuery.isFetching ? "icon-spin" : ""}` })} Refresh
           </button>
           <button
             type="button"
@@ -294,7 +300,7 @@ export function QuotaPlansSettings() {
         </div>
       </div>
 
-      {getAllMutation.isPending && plans.length === 0 ? (
+      {listQuery.isLoading && plans.length === 0 ? (
         <div className="loading-container">
           <div className="loading-spinner" />
           <p>Loading quota plans…</p>
@@ -309,7 +315,7 @@ export function QuotaPlansSettings() {
             onApply={quotaPlanFilters.onApply}
             onReset={quotaPlanFilters.onReset}
             pendingOrval
-            disabled={getAllMutation.isPending}
+            disabled={listQuery.isFetching}
           />
           <div
             className="data-grid-wrap"
@@ -323,13 +329,8 @@ export function QuotaPlansSettings() {
               gridId="quota-plans"
               rows={rows}
               columns={columns}
-              pageSizeOptions={[5, 10, 20, 50, 100]}
-              paginationMode="client"
-              paginationModel={{ page: quotaPlansGridPage, pageSize: quotaPlansPageSize }}
-              onPaginationModelChange={(m) => {
-                setQuotaPlansGridPage(m.page);
-                setQuotaPlansPageSize(m.pageSize);
-              }}
+              loading={listQuery.isFetching}
+              {...paging.gridProps}
               slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
               localeText={{ noRowsLabel: "No quota plans. Click «Add plan» to create one." }}
             />

@@ -97,4 +97,20 @@ describe("clampPage", () => {
     expect(clampPage(-3, 23, 10)).toBe(0);
     expect(clampPage(0, 0, 10)).toBe(0);
   });
+
+  it("treats invalid pageSize as 1 and empty totals as page 0", () => {
+    expect(clampPage(5, 10, 0)).toBe(5); // pageSize falls back to 1 → maxPage 9
+    expect(clampPage(2, Number.NaN, 10)).toBe(0);
+    expect(clampPage(Number.NaN, 50, 10)).toBe(0);
+  });
+});
+
+describe("slicePageRows edge cases", () => {
+  it("returns an empty array for an empty source", () => {
+    expect(slicePageRows([], 0, 10)).toEqual([]);
+  });
+
+  it("floors fractional page indexes", () => {
+    expect(slicePageRows(rows, 1.9, 5).map((r) => r.id)).toEqual(["r5", "r6", "r7", "r8", "r9"]);
+  });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MockDataGrid, themeProviderMock } from "../test/mockDataGrid";
@@ -35,13 +35,19 @@ vi.mock("../api/orval/settings/settings", () => ({
   }),
   usePostApiSettingsSet: () => ({ mutateAsync: setSettingMutateAsync, isPending: false }),
 }));
-vi.mock("../api/orval/free-tier-enforcement/free-tier-enforcement", () => ({
-  useGetApiFreeTierEnforcementCandidates: () => ({
-    data: { candidates: [], totalCount: 0, connectedCount: 0 },
+vi.mock("../api/orval/free-tier-enforcement-v2/free-tier-enforcement-v2", () => ({
+  useGetApiV2FreeTierEnforcementCandidates: () => ({
+    data: {
+      candidates: { items: [], totalCount: 0 },
+      connectedCount: 0,
+    },
     isFetching: false,
+    isSuccess: true,
     error: null,
     refetch: vi.fn(),
   }),
+}));
+vi.mock("../api/orval/free-tier-enforcement/free-tier-enforcement", () => ({
   useGetApiFreeTierEnforcementDisconnectLog: (params: { Page: number; PageSize: number }) => {
     logPage = params.Page;
     return {
@@ -82,14 +88,19 @@ describe("FreeTierEnforcementSettings disconnect log pagination", () => {
     const user = userEvent.setup();
     renderPage();
 
-    const grids = screen.getAllByTestId("mock-grid");
-    const logGrid = grids.find((g) => g.getAttribute("data-pagination-mode") === "server");
-    expect(logGrid).toBeTruthy();
-    expect(logGrid).toHaveAttribute("data-row-count", "55");
-    expect(logGrid).toHaveAttribute("data-page-size", "20");
+    const logGrid = await waitFor(() => {
+      const grids = screen.getAllByTestId("mock-grid");
+      const match = grids.find((g) => g.getAttribute("data-page-size") === "20");
+      expect(match).toBeTruthy();
+      return match!;
+    });
+    expect(logGrid).toHaveAttribute("data-pagination-mode", "server");
+    await waitFor(() => {
+      expect(logGrid).toHaveAttribute("data-row-count", "55");
+    });
 
     const nextButtons = screen.getAllByTestId("next-page");
-    // candidates (client/uncontrolled) + disconnect log
+    // candidates (server) + disconnect log — last next-page is the log
     await user.click(nextButtons[nextButtons.length - 1]!);
     expect(logPage).toBe(2);
   });

@@ -1,9 +1,9 @@
 // src/pages/servers/ServersOverview.tsx
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaChartLine, FaUsers, FaGlobe, FaBolt, FaFilter } from "react-icons/fa";
-import type { IconType } from "react-icons";
+import type { IconType } from "react-icons";>>>>>>> feature/vpn-manager-update-reminder
 
 import { errorMessage } from "../../utils/errorMessage";
 import DateRangeFilter, { type Grouping, type DateRangeChange } from "../../components/DateRangeFilter";
@@ -16,6 +16,18 @@ import "../../css/Settings.css";
 import "../../css/ServersOverview.css";
 import { addDays, endOfToday, startOfToday, toChartPoints, toUsersSeriesChartPoints, mergeChartWithUsersSeries, buildFallbackOverviewResponse, normalizeGrouping } from "./helpers";
 import type { ChartPoint, MergedChartPoint } from "./types";
+
+type OverviewSectionTab = "overview" | "map" | "dns";
+
+const OVERVIEW_SECTION_TABS: {
+  id: OverviewSectionTab;
+  label: string;
+  Icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+}[] = [
+  { id: "overview", label: "Overview", Icon: FaChartLine },
+  { id: "map", label: "Map", Icon: FaMapMarkedAlt },
+  { id: "dns", label: "DNS", Icon: FaGlobe },
+];
 
 import { keepPreviousData, useQueries } from "@tanstack/react-query";
 import {
@@ -302,6 +314,7 @@ export default function ServersOverview() {
   const [to, setTo] = useState<Date>(endOfToday());
   const [grouping, setGrouping] = useState<Grouping>("auto");
   const [offlinePlaybackMode, setOfflinePlaybackMode] = useState(false);
+  const [sectionTab, setSectionTab] = useState<OverviewSectionTab>("overview");
 
   const seriesParams: GetApiOpenVpnClientsOverviewSeriesParams = useMemo(
     () => ({
@@ -500,6 +513,19 @@ export default function ServersOverview() {
   }, [userStatsAccessDenied, statsExternalId, vpnServerId, titleUserPart, titleServerPart]);
 
   const isGlobalServersPage = vpnServerId == null && !statsExternalId;
+  const showGlobalDns = isGlobalServersPage && viewerIsAdmin;
+  const showDnsTab = showUserDnsQueries || showGlobalDns;
+
+  useEffect(() => {
+    if (sectionTab === "dns" && !showDnsTab) {
+      setSectionTab("overview");
+    }
+  }, [sectionTab, showDnsTab]);
+
+  const visibleSectionTabs = useMemo(
+    () => OVERVIEW_SECTION_TABS.filter((tab) => tab.id !== "dns" || showDnsTab),
+    [showDnsTab],
+  );
   const allServersWithStatusQuery = useGetApiV3OpenVpnServersGetAllWithStatus(
     {},
     {
@@ -839,6 +865,8 @@ export default function ServersOverview() {
         <UserStatisticsAccessDenied vpnServerId={vpnServerId} />
       ) : null}
 
+      {userStatsAccessDenied ? null : (
+        <>
       <StatisticsScopeBanner
         externalId={statsExternalId}
         vpnServerId={vpnServerId}
@@ -875,7 +903,7 @@ export default function ServersOverview() {
       <div className="tabs desktop-tabs" role="tablist" aria-label="Overview sections">
         {overviewTabs.map((tab) => {
           const Icon = tab.Icon;
-          const active = overviewSection === tab.id;
+          const active = overviewSection === tab.id;>>>>>>> feature/vpn-manager-update-reminder
           return (
             <button
               key={tab.id}
@@ -883,7 +911,7 @@ export default function ServersOverview() {
               role="tab"
               aria-selected={active}
               className={["tab", "tab--with-icon", active ? "active-tab" : ""].filter(Boolean).join(" ")}
-              onClick={() => setOverviewSection(tab.id)}
+              onClick={() => setOverviewSection(tab.id)}>>>>>>> feature/vpn-manager-update-reminder
             >
               <Icon className="icon" aria-hidden />
               <span>{tab.label}</span>
@@ -1013,7 +1041,7 @@ export default function ServersOverview() {
         {overviewSection === "domains" && showDomainsSection ? (
           <TopVisitedDomainsSection from={from} to={to} />
         ) : null}
-      </div>
+      </div>>>>>>>> feature/vpn-manager-update-reminder
     </div>
   );
 }

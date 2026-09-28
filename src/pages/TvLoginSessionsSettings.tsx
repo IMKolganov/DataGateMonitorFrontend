@@ -1,18 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { FaSync, FaTv } from "react-icons/fa";
-import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
+import type { GridColDef } from "@mui/x-data-grid";
 import Grid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
-import { useGetApiAdminTvLoginSessions } from "../api/orval/tv-login-sessions-admin/tv-login-sessions-admin";
-import type {
-  AdminTvLoginSessionDto,
-  GetAdminTvLoginSessionsResponse,
-} from "../api/orvalModelShim";
-import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
+import { useGetApiV2AdminTvLoginSessions } from "../api/orval/tv-login-sessions-admin-v2/tv-login-sessions-admin-v2";
+import type { AdminTvLoginSessionDto } from "../api/orvalModelShim";
+import type { AuthResponsesGetAdminTvLoginSessionsV2Response } from "../api/orval/model/authResponsesGetAdminTvLoginSessionsV2Response";
 import { formatDateWithOffset } from "../utils/utils";
 import { errorMessage } from "../utils/errorMessage";
-import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
+import { useServerGridPagination } from "../hooks/useServerGridPagination";
 import "../css/Settings.css";
 import "../css/Table.css";
 import "../css/GridFilterBar.css";
@@ -27,6 +24,11 @@ const STATUS_OPTIONS = [
   "consumed",
 ] as const;
 
+/** ogmMutator unwraps ApiResponse.data at runtime; Orval types still use the Api* wrapper. */
+function unwrapTvLoginSessionsV2(raw: unknown): AuthResponsesGetAdminTvLoginSessionsV2Response {
+  return (raw ?? {}) as AuthResponsesGetAdminTvLoginSessionsV2Response;
+}
+
 export default function TvLoginSessionsSettings() {
   const [searchParams, setSearchParams] = useSearchParams();
   const userIdParam = searchParams.get("userId");
@@ -36,34 +38,44 @@ export default function TvLoginSessionsSettings() {
   const [userIdFilter, setUserIdFilter] = useState(
     Number.isFinite(initialUserId) ? String(initialUserId) : "",
   );
-  const [pageSize, setPageSize] = usePersistedPageSize(
-    "settings-tv-login-sessions",
-    25,
-    "10,25,50,100",
-  );
-  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
-    page: 0,
-    pageSize,
-  });
+  const [rowCount, setRowCount] = useState(0);
 
   const approvedUserId = useMemo(() => {
     const n = Number(userIdFilter);
     return userIdFilter.trim() !== "" && Number.isFinite(n) ? n : undefined;
   }, [userIdFilter]);
 
-  const listQuery = useGetApiAdminTvLoginSessions<GetAdminTvLoginSessionsResponse>(
+  const resetKey = `${approvedUserId ?? "all"}:${status || "all"}`;
+
+  const paging = useServerGridPagination({
+    storageKey: "settings-tv-login-sessions",
+    defaultPageSize: 25,
+    allowedKey: "10,25,50,100",
+    rowCount,
+    resetKey,
+  });
+
+  const listQuery = useGetApiV2AdminTvLoginSessions(
     {
-      approvedUserId,
-      status: status || undefined,
-      skip: paginationModel.page * paginationModel.pageSize,
-      take: paginationModel.pageSize,
+      ApprovedUserId: approvedUserId,
+      Status: status || undefined,
+      Page: paging.apiPage,
+      PageSize: paging.pageSize,
     },
     { query: { placeholderData: (prev) => prev } },
   );
 
-  const payload = unwrapMaybeApiResponse(listQuery.data);
-  const sessions = payload?.sessions ?? [];
-  const totalCount = payload?.totalCount ?? 0;
+  const payload = unwrapTvLoginSessionsV2(listQuery.data);
+  const sessionsPage = payload.sessions;
+
+  useEffect(() => {
+    if (typeof sessionsPage?.totalCount === "number") {
+      setRowCount(sessionsPage.totalCount);
+    }
+  }, [sessionsPage?.totalCount]);
+
+  const sessions = sessionsPage?.items ?? [];
+  const totalCount = paging.rowCount;
 
   const rows = sessions.map((s: AdminTvLoginSessionDto, idx: number) => ({
     id: s.sessionId ?? `${idx}`,
@@ -107,7 +119,7 @@ export default function TvLoginSessionsSettings() {
     if (approvedUserId != null) next.set("userId", String(approvedUserId));
     else next.delete("userId");
     setSearchParams(next, { replace: true });
-    setPaginationModel((m) => ({ ...m, page: 0 }));
+    paging.resetPage();
   };
 
   return (
@@ -160,7 +172,7 @@ export default function TvLoginSessionsSettings() {
                 value={status}
                 onChange={(e) => {
                   setStatus(e.target.value);
-                  setPaginationModel((m) => ({ ...m, page: 0 }));
+                  paging.resetPage();
                 }}
               >
                 {STATUS_OPTIONS.map((s) => (
@@ -188,14 +200,7 @@ export default function TvLoginSessionsSettings() {
             rows={rows}
             columns={columns}
             loading={listQuery.isLoading || listQuery.isFetching}
-            paginationMode="server"
-            rowCount={totalCount}
-            paginationModel={paginationModel}
-            onPaginationModelChange={(model) => {
-              setPaginationModel(model);
-              if (model.pageSize !== pageSize) setPageSize(model.pageSize);
-            }}
-            pageSizeOptions={[10, 25, 50, 100]}
+            {...paging.gridProps}
             disableRowSelectionOnClick
             localeText={{ noRowsLabel: "No TV login sessions" }}
             slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}

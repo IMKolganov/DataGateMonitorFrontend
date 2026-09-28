@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MockDataGrid, persistedPageSizeMock, themeProviderMock } from "../test/mockDataGrid";
 
@@ -29,7 +29,7 @@ vi.mock("react-router-dom", async () => {
   return { ...actual, useParams: () => ({}) };
 });
 
-const overviewUsers = Array.from({ length: 12 }, (_, i) => ({
+const pageItems = Array.from({ length: 5 }, (_, i) => ({
   externalId: `ext-${i}`,
   displayName: `User ${i}`,
   vpnServerId: 1,
@@ -40,8 +40,15 @@ const overviewUsers = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 vi.mock("../api/orval/vpn-server-clients/vpn-server-clients", () => ({
-  useGetApiOpenVpnClientsOverviewUsers: () => ({
-    data: { overviewUserItems: overviewUsers },
+  useGetApiV2VpnSessionsOverviewUsersPaged: () => ({
+    data: {
+      users: {
+        items: pageItems,
+        totalCount: 12,
+        page: 1,
+        pageSize: 5,
+      },
+    },
     isFetching: false,
     isError: false,
     error: null,
@@ -53,18 +60,23 @@ vi.mock("../api/orval/user/user", () => ({
 
 import { OverviewUsersTable } from "./OverviewUsersTable";
 
-describe("OverviewUsersTable client pagination", () => {
-  it("slices overview users across pages", async () => {
+describe("OverviewUsersTable server pagination", () => {
+  it("uses server mode and advances data-page", async () => {
     const user = userEvent.setup();
     render(
       <OverviewUsersTable from={new Date("2024-01-01")} to={new Date("2024-01-31")} vpnServerId={1} />,
     );
 
+    const grid = screen.getByTestId("mock-grid");
+    expect(grid).toHaveAttribute("data-pagination-mode", "server");
+    await waitFor(() => {
+      expect(grid).toHaveAttribute("data-row-count", "12");
+    });
     expect(screen.getByTestId("grid-rows").children).toHaveLength(5);
     expect(screen.getByTestId("grid-rows").textContent).toContain("User 0");
 
     await user.click(screen.getByTestId("next-page"));
-    expect(screen.getByTestId("grid-rows").textContent).toContain("User 5");
-    expect(screen.getByTestId("grid-rows").textContent).not.toContain("User 0");
+    expect(screen.getByTestId("mock-grid")).toHaveAttribute("data-page", "1");
+    expect(screen.getByTestId("mock-grid")).toHaveAttribute("data-pagination-mode", "server");
   });
 });

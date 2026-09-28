@@ -13,7 +13,7 @@ import { usePostApiOpenVpnFilesRevokeFile, usePostApiOpenVpnFilesDownloadFile } 
 import { FaBan, FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
-import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
+import { useClientGridPagination } from "../../hooks/useClientGridPagination";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
 import {
   collectSelectedOnPage,
@@ -100,12 +100,13 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
   const [issuedToFilter, setIssuedToFilter] = useState("");
   const [bulkRevoking, setBulkRevoking] = useState(false);
   const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>(emptyGridSelection);
-  const [ovpnFilesGridPage, setOvpnFilesGridPage] = useState(0);
-  const [ovpnFilesPageSize, setOvpnFilesPageSize] = usePersistedPageSize(
-    `ovpn-files:${vpnServerId}`,
-    10,
-    "5,10,20,100",
-  );
+  const paging = useClientGridPagination({
+    storageKey: `ovpn-files:${vpnServerId}`,
+    defaultPageSize: 10,
+    allowedKey: "5,10,20,100",
+  });
+  const ovpnFilesGridPage = paging.page;
+  const ovpnFilesPageSize = paging.pageSize;
 
   const items: IssuedOvpnFileDto[] = useMemo(() => {
     const arr = Array.isArray(ovpnFiles) ? ovpnFiles : [];
@@ -389,13 +390,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           isRowSelectable={(params) => !params.row.isRevoked && params.row.numericId != null}
           rowSelectionModel={rowSelectionModel}
           onRowSelectionModelChange={(model) => setRowSelectionModel(model)}
-          pageSizeOptions={[5, 10, 20, 100]}
-          paginationMode="client"
-          paginationModel={{ page: ovpnFilesGridPage, pageSize: ovpnFilesPageSize }}
-          onPaginationModelChange={(m) => {
-            setOvpnFilesGridPage(m.page);
-            setOvpnFilesPageSize(m.pageSize);
-          }}
+          {...paging.gridProps}
           localeText={{
             noRowsLabel: loading ? "🔄 Loading OVPN files..." : "📭 No OVPN files found",
           }}

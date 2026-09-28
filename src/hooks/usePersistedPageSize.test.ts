@@ -1,3 +1,4 @@
+import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../utils/auth/authSelectors", () => ({
@@ -5,7 +6,11 @@ vi.mock("../utils/auth/authSelectors", () => ({
 }));
 
 import { getCurrentUser } from "../utils/auth/authSelectors";
-import { getStoredPageSize, setStoredPageSize } from "../hooks/usePersistedPageSize";
+import {
+  getStoredPageSize,
+  setStoredPageSize,
+  usePersistedPageSize,
+} from "../hooks/usePersistedPageSize";
 
 describe("persisted page size", () => {
   beforeEach(() => {
@@ -42,5 +47,50 @@ describe("persisted page size", () => {
 
     vi.mocked(getCurrentUser).mockReturnValue({ id: 8 });
     expect(getStoredPageSize("certs:1", 10, [5, 10, 20])).toBe(10);
+  });
+});
+
+describe("usePersistedPageSize", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.mocked(getCurrentUser).mockReturnValue({ id: 7 });
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it("loads the stored size and writes on setPageSize", () => {
+    setStoredPageSize("hook:1", 20);
+    const { result } = renderHook(() => usePersistedPageSize("hook:1", 10, "5,10,20"));
+    expect(result.current[0]).toBe(20);
+
+    act(() => {
+      result.current[1](5);
+    });
+    expect(result.current[0]).toBe(5);
+    expect(getStoredPageSize("hook:1", 10, [5, 10, 20])).toBe(5);
+  });
+
+  it("falls back to default when setPageSize receives a disallowed value", () => {
+    const { result } = renderHook(() => usePersistedPageSize("hook:bad", 10, "5,10,20"));
+    act(() => {
+      result.current[1](99);
+    });
+    expect(result.current[0]).toBe(10);
+  });
+
+  it("reloads when storageKey changes", () => {
+    setStoredPageSize("hook:a", 5);
+    setStoredPageSize("hook:b", 20);
+
+    const { result, rerender } = renderHook(
+      ({ key }) => usePersistedPageSize(key, 10, "5,10,20"),
+      { initialProps: { key: "hook:a" } },
+    );
+    expect(result.current[0]).toBe(5);
+
+    rerender({ key: "hook:b" });
+    expect(result.current[0]).toBe(20);
   });
 });
