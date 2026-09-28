@@ -19,11 +19,15 @@ export function startAuthCrossTabSync(): () => void {
 
     const access = localStorage.getItem(ACCESS_TOKEN_KEY);
     if (access) return;
+    // Access-only clear is recoverable (silent refresh / other tab mid-refresh).
+    // Full logout clears refresh too — only then end this tab's session.
+    const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
+    if (refresh) return;
     if (isLoginRedirectInProgress()) return;
     if (window.location.pathname === "/login") return;
 
     authLog("crossTab: auth tokens cleared in another tab — signing out");
-    logout("refreshRejected");
+    logout("loggedOutElsewhere");
   };
 
   window.addEventListener("storage", onStorage);

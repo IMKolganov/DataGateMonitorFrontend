@@ -5,6 +5,10 @@ import {
 } from "../../api/apirequest";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../const";
 import { startAdminIdleSession } from "./adminIdleSession";
+import {
+  beginAuthBootstrap,
+  markAuthBootstrapSettled,
+} from "./authBootstrap";
 import { startAuthCrossTabSync } from "./authCrossTab";
 import { authErrFields, authLog } from "./authLog";
 import { scheduleAutoLogout } from "./tokenExpiryScheduler";
@@ -31,10 +35,11 @@ export function restoreAuthSessionOnStartup(): () => void {
   const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
 
   if (access) {
+    markAuthBootstrapSettled();
     armSession(access);
   } else if (refresh) {
     authLog("restoreAuthSessionOnStartup: access missing, attempting silent refresh");
-    void refreshSessionTokens()
+    const work = refreshSessionTokens()
       .then((token) => {
         authLog("restoreAuthSessionOnStartup: silent refresh OK");
         armSession(token);
@@ -46,6 +51,9 @@ export function restoreAuthSessionOnStartup(): () => void {
           logout("refreshRejected");
         }
       });
+    void beginAuthBootstrap(work);
+  } else {
+    markAuthBootstrapSettled();
   }
 
   return () => {
