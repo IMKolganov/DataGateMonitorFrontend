@@ -10,7 +10,11 @@ import { clearStoredProfileAvatarUrl } from "../utils/auth/storedProfileAvatar.t
 import { notifyAccessTokenRefreshed } from "../utils/auth/accessTokenEvents.ts";
 import { notifyAdminApiActivity } from "../utils/auth/adminIdleSessionEvents.ts";
 import { authErrFields, authLog } from "../utils/auth/authLog.ts";
-import { buildLoginRedirectUrl, type LogoutReason } from "../utils/auth/logoutReason.ts";
+import {
+  buildLoginRedirectUrl,
+  rememberLogoutReason,
+  type LogoutReason,
+} from "../utils/auth/logoutReason.ts";
 import { scheduleAutoLogout } from "../utils/auth/tokenExpiryScheduler.ts";
 import type { RefreshRequest, RefreshResponse } from "./orvalModelShim";
 
@@ -171,6 +175,11 @@ export const getApiBaseUrlResolved = async (): Promise<string> => {
 
 let loginRedirectStarted = false;
 
+/** True after the first forced login redirect in this tab (SPA must not Navigate with a different reason). */
+export function isLoginRedirectInProgress(): boolean {
+  return loginRedirectStarted;
+}
+
 /** @internal Resets module redirect guard between Vitest cases. */
 export function resetLoginRedirectGuardForTests(): void {
   loginRedirectStarted = false;
@@ -182,6 +191,10 @@ function redirectToLogin(reason?: LogoutReason): void {
     return;
   }
   loginRedirectStarted = true;
+  if (reason) {
+    rememberLogoutReason(reason);
+  }
+  authLog("redirectToLogin", { reason: reason ?? "voluntary", pathname: window.location.pathname });
   const returnTo = `${window.location.pathname}${window.location.search}`;
   window.location.assign(buildLoginRedirectUrl({ returnPath: returnTo, reason }));
 }
@@ -283,6 +296,11 @@ const getOrCreateRefresh = (): Promise<string> => {
   }
   return refreshPromise;
 };
+
+/** @internal Clears in-flight refresh between Vitest cases. */
+export function resetRefreshPromiseForTests(): void {
+  refreshPromise = null;
+}
 
 /** Single-flight refresh (same promise if multiple callers during 401). Safe when access JWT expired but refresh token still valid. */
 export const refreshSessionTokens = (): Promise<string> => getOrCreateRefresh();

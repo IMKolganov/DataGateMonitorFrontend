@@ -51,6 +51,7 @@ function renderLoginPage(route = "/login") {
 describe("LoginPage", () => {
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
   });
 
   it("shows the sign-in screen by default", () => {
@@ -109,6 +110,14 @@ describe("LoginPage", () => {
       expect.stringMatching(pattern),
       expect.objectContaining({ autoClose: 8000 }),
     );
+  });
+
+  it("shows sticky stored reason when URL was rewritten to missingToken", () => {
+    sessionStorage.setItem("datagate.logoutReason", "idleTimeout");
+    renderLoginPage("/login?reason=missingToken");
+
+    expect(screen.getByTestId("logout-reason-notice")).toHaveTextContent(/inactivity/i);
+    expect(sessionStorage.getItem("datagate.logoutReason")).toBeNull();
   });
 
   it("does not show forced-logout notice on voluntary return to login", () => {

@@ -11,8 +11,10 @@ import { useTheme } from "../../contexts/useTheme";
 import type { TotpChallengeState } from "../../utils/auth/handleLoginResponse";
 import { readRedirectFromSearch } from "../../utils/auth/returnPath";
 import {
+  consumeStoredLogoutReason,
   logoutReasonMessage,
   readLogoutReasonFromSearch,
+  type LogoutReason,
 } from "../../utils/auth/logoutReason";
 import { isAuthenticated } from "../../utils/auth/authSelectors";
 import GdprFooterLinks from "../gdpr/GdprFooterLinks";
@@ -26,10 +28,10 @@ const LoginPage: React.FC = () => {
         () => readRedirectFromSearch(location.search, "/"),
         [location.search],
     );
-    const logoutReason = useMemo(
-        () => readLogoutReasonFromSearch(location.search),
-        [location.search],
-    );
+    // Sticky reason from logout() wins over a SPA-rewritten `?reason=missingToken`.
+    const [logoutReason] = useState<LogoutReason | null>(() => {
+        return consumeStoredLogoutReason() ?? readLogoutReasonFromSearch(location.search);
+    });
     const registerHref =
         redirectPath !== "/"
             ? `/register?redirect=${encodeURIComponent(redirectPath)}`
