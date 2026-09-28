@@ -2,6 +2,9 @@
 
 .info-page {
   color: var(--text-primary);
+  /* Match .settings outer spacing (content-wrapper defaults differ) */
+  margin: 16px auto;
+  padding: 20px;
 }
 
 .info-page h2 {

@@ -1,5 +1,5 @@
 // src/pages/FreeTierEnforcementSettings.tsx
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FaBan, FaBolt, FaSave, FaSync, FaUserSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
@@ -7,10 +7,8 @@ import Grid from "../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
 import { UserAvatar } from "../components/ui/UserAvatar.tsx";
 import { useGetApiSettingsGet, usePostApiSettingsSet } from "../api/orval/settings/settings";
-import {
-  useGetApiFreeTierEnforcementCandidates,
-  useGetApiFreeTierEnforcementDisconnectLog,
-} from "../api/orval/free-tier-enforcement/free-tier-enforcement";
+import { useGetApiFreeTierEnforcementDisconnectLog } from "../api/orval/free-tier-enforcement/free-tier-enforcement";
+import { useGetApiV2FreeTierEnforcementCandidates } from "../api/orval/free-tier-enforcement-v2/free-tier-enforcement-v2";
 import { usePostApiOpenVpnClientsKill } from "../api/orval/vpn-server-clients/vpn-server-clients";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
 import { unwrapKillResponse } from "../utils/unwrapKillResponse";
@@ -18,15 +16,23 @@ import {
   DisconnectReason,
   type FreeTierEnforcementCandidateDto,
   type FreeTierDisconnectLogEntryDto,
-  type GetFreeTierEnforcementCandidatesResponse,
   type GetFreeTierDisconnectLogResponse,
 } from "../api/orvalModelShim";
+import type { FreeTierEnforcementResponsesGetFreeTierCandidatesV2Response } from "../api/orval/model/freeTierEnforcementResponsesGetFreeTierCandidatesV2Response";
 import { formatDateWithOffset } from "../utils/utils";
 import { errorMessage } from "../utils/errorMessage";
 import { useStabilizedRowCount } from "../hooks/useStabilizedRowCount";
+import { useServerGridPagination } from "../hooks/useServerGridPagination";
 import { GridRowActions, RowActionButton } from "../components/ui/GridRowActions.tsx";
 import "../css/Settings.css";
 import "../css/Table.css";
+
+/** ogmMutator unwraps ApiResponse.data at runtime; Orval types still use the Api* wrapper. */
+function unwrapFreeTierCandidatesV2(
+  raw: unknown,
+): FreeTierEnforcementResponsesGetFreeTierCandidatesV2Response {
+  return (raw ?? {}) as FreeTierEnforcementResponsesGetFreeTierCandidatesV2Response;
+}
 
 const KEY_ENFORCE = "FreeTier_Enforce_OpenVpn_Sessions";
 const KEY_INTERVAL_MINUTES = "FreeTier_Enforcement_Interval_Minutes";
@@ -274,15 +280,41 @@ function EnforcementSettingsCard() {
 
 function CandidatesCard() {
   const [killBusyKey, setKillBusyKey] = useState<string | null>(null);
-  const candidatesQuery = useGetApiFreeTierEnforcementCandidates<GetFreeTierEnforcementCandidatesResponse>({
-    query: { enabled: false },
+  const [queryEnabled, setQueryEnabled] = useState(false);
+  const [rowCount, setRowCount] = useState(0);
+  const [connectedCount, setConnectedCount] = useState<number | null>(null);
+
+  const paging = useServerGridPagination({
+    storageKey: "free-tier-enforcement-candidates",
+    defaultPageSize: 10,
+    allowedKey: "10,20,50,100",
+    rowCount,
   });
+
+  const candidatesQuery = useGetApiV2FreeTierEnforcementCandidates(
+    { Page: paging.apiPage, PageSize: paging.pageSize },
+    { query: { enabled: queryEnabled, placeholderData: (prev) => prev } },
+  );
   const killMutation = usePostApiOpenVpnClientsKill();
 
-  const payload = unwrapMaybeApiResponse(candidatesQuery.data);
-  const candidates = payload?.candidates ?? [];
+  const payload = unwrapFreeTierCandidatesV2(candidatesQuery.data);
+  const candidatesPage = payload.candidates;
+  const candidates = candidatesPage?.items ?? [];
+
+  useEffect(() => {
+    if (typeof candidatesPage?.totalCount === "number") {
+      setRowCount(candidatesPage.totalCount);
+    }
+  }, [candidatesPage?.totalCount]);
+
+  useEffect(() => {
+    if (typeof payload.connectedCount === "number") {
+      setConnectedCount(payload.connectedCount);
+    }
+  }, [payload.connectedCount]);
 
   const handleRefresh = () => {
+    setQueryEnabled(true);
     void candidatesQuery.refetch();
   };
 
@@ -397,14 +429,18 @@ function CandidatesCard() {
     },
   ];
 
+  const headerCount =
+    queryEnabled && (candidatesQuery.isSuccess || rowCount > 0 || connectedCount != null)
+      ? `(${rowCount}, ${connectedCount ?? 0} online)`
+      : "";
+
   return (
     <div className="settings-polling">
       <div className="header-bar">
         <h3 className="settings-card__h3-with-icon">
           <FaUserSlash className="icon" aria-hidden />
           <span>
-            Candidates{" "}
-            {payload ? `(${payload.totalCount ?? candidates.length}, ${payload.connectedCount ?? 0} online)` : ""}
+            Candidates {headerCount}
           </span>
         </h3>
         <div className="left-buttons">
@@ -437,8 +473,7 @@ function CandidatesCard() {
             gridId="free-tier-enforcement-candidates"
             rows={rows}
             columns={columns}
-            pageSizeOptions={[10, 20, 50, 100]}
-            initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+            {...paging.gridProps}
             localeText={{ noRowsLabel: "📭 No candidates loaded — click Refresh" }}
             loading={candidatesQuery.isFetching}
             slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}

@@ -17,6 +17,7 @@ export function TelegramBotSettings() {
         onTgUserFilterChange,
         onTgUserFilterApply,
         onTgUserFilterReset,
+        gridProps: tgUsersGridProps,
     } = useTelegramBotUsers();
 
     const {
@@ -57,6 +58,7 @@ export function TelegramBotSettings() {
                 onTgUserFilterChange={onTgUserFilterChange}
                 onTgUserFilterApply={onTgUserFilterApply}
                 onTgUserFilterReset={onTgUserFilterReset}
+                gridProps={tgUsersGridProps}
             />
 
             <TelegramBotMessagesSection

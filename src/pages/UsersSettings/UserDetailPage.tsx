@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import {
   FaArrowLeft,
   FaKey,
@@ -16,6 +16,8 @@ import {
   FaChartBar,
   FaIdCard,
   FaSave,
+  FaServer,
+  FaChartLine,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import {
@@ -69,6 +71,7 @@ import { UserVpnConnectionsSection } from "./UserVpnConnectionsSection";
 import { UserVpnServerAccessRulesSection } from "./UserVpnServerAccessRulesSection";
 import { UserDnsQueriesSection } from "../../components/pihole/UserDnsQueriesSection";
 import { UserTrafficQuotaProgress } from "../../components/quota/UserTrafficQuotaProgress";
+import { UserAvailableServersChips } from "../../components/quota/UserAvailableServersChips";
 import Grid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
 import { GridFilterBar } from "../../components/ui/GridFilterBar.tsx";
@@ -90,11 +93,43 @@ function formatBytes(n: number | null | undefined): string {
   return String(n);
 }
 
+type UserDetailTabId = "profile" | "quota" | "servers" | "activity";
+
+const USER_DETAIL_TABS: {
+  id: UserDetailTabId;
+  label: string;
+  Icon: typeof FaUser;
+}[] = [
+  { id: "profile", label: "Profile", Icon: FaUser },
+  { id: "quota", label: "Quota", Icon: FaChartBar },
+  { id: "servers", label: "Servers", Icon: FaServer },
+  { id: "activity", label: "Activity", Icon: FaChartLine },
+];
+
+function parseUserDetailTab(raw: string | null): UserDetailTabId {
+  if (raw === "quota" || raw === "servers" || raw === "activity" || raw === "profile") return raw;
+  return "profile";
+}
+
 export function UserDetailPage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const id = userId != null ? parseInt(userId, 10) : NaN;
+  const activeTab = parseUserDetailTab(searchParams.get("tab"));
+
+  const setActiveTab = (tab: UserDetailTabId) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (tab === "profile") next.delete("tab");
+        else next.set("tab", tab);
+        return next;
+      },
+      { replace: true },
+    );
+  };
 
   const { data: userData, isLoading, error } = useGetApiUsersGetByIdId(id);
   const user = (userData as UsersResponse | undefined)?.user ?? null;
@@ -431,9 +466,11 @@ export function UserDetailPage() {
     );
   }
 
+  const displayTitle = user.displayName?.trim() || user.email?.trim() || `User #${user.id ?? id}`;
+
   return (
-    <div>
-      <div className="header-bar">
+    <div className="user-detail-page">
+      <div className="header-bar header-bar--mb-12">
         <div className="left-buttons">
           <button className="btn secondary" onClick={() => navigate("/settings/users")}>
             <FaArrowLeft className="icon" /> Back to users
@@ -441,425 +478,526 @@ export function UserDetailPage() {
         </div>
       </div>
 
-      <h2 className="settings-page__h2-with-icon">
-        <FaIdCard className="icon" aria-hidden />
-        <span>User details</span>
-      </h2>
+      <div className="page-header-row">
+        <h2 className="settings-page__h2-with-icon settings-page__h2-with-icon--flush">
+          <FaIdCard className="icon" aria-hidden />
+          <span>User details</span>
+        </h2>
+        <span className="user-detail-page__subtitle">{displayTitle}</span>
+      </div>
+      <div className="settings-divider" />
+      <p className="app-settings-description">
+        Profile, quota, VPN server access, and activity are split into tabs so this page stays short.
+      </p>
 
-      <section className="settings-card settings-card--mb">
-        <h3 className="settings-card__h3-with-icon">
-          <FaUser className="icon" aria-hidden />
-          <span>Profile</span>
-        </h3>
-        <div className="user-detail-profile-banner">
-          <UserAvatar
-            src={readOptionalAvatarUrl(user as object)}
-            telegramPhotoTelegramId={telegramPhotoIdForProvider(user.provider, user.externalId)}
-            name={user.displayName ?? user.email ?? `User #${user.id ?? ""}`}
-            colorSeed={`${user.id ?? ""}|${user.email ?? ""}`}
-            size={56}
-          />
-          <div className="user-detail-profile-banner__text">
-            <p className="user-detail-profile-banner__name">{user.displayName?.trim() || "—"}</p>
-            <p className="user-detail-profile-banner__sub">{user.email?.trim() || "No email"}</p>
-          </div>
-        </div>
-        <dl className="user-detail-dl">
-          <dt>ID</dt>
-          <dd>{user.id ?? "—"}</dd>
-          <dt>Display name</dt>
-          <dd>{user.displayName ?? "—"}</dd>
-          <dt>Email</dt>
-          <dd>{user.email ?? "—"}</dd>
-          <dt>Email confirmed</dt>
-          <dd>
-            {!user.email
-              ? "No email"
-              : emailStatusLoading
-                ? "Loading..."
-                : isEmailConfirmed === true
-                  ? "Yes"
-                  : isEmailConfirmed === false
-                    ? "No"
-                    : "—"}
-          </dd>
-          <dt>Sign-in method</dt>
-          <dd>
-            {user.provider
-              ? isTelegramUser
-                ? `Telegram${user.externalId != null ? ` (ID: ${user.externalId})` : ""}`
-                : user.provider
-              : "—"}
-          </dd>
-          <dt>Provider</dt>
-          <dd>{user.provider ?? "—"}</dd>
-          <dt>External ID</dt>
-          <dd>{user.externalId ?? "—"}</dd>
-          <dt>Provider row ID</dt>
-          <dd>{user.providerRowId ?? "—"}</dd>
-          <dt>Admin</dt>
-          <dd>{user.isAdmin ? "Yes" : "No"}</dd>
-          <dt>Blocked</dt>
-          <dd>{user.isBlocked ? "Yes" : "No"}</dd>
-          <dt>Dashboard access</dt>
-          <dd>{user.hasDashboardAccess ? "Yes" : "No"}</dd>
-          <dt>TV device linking</dt>
-          <dd>
-            {tvSummaryQuery.isLoading
-              ? "Loading..."
-              : tvSummary?.hasUsedTvLogin
-                ? [
-                    "Yes",
-                    tvSummary.approvedOrConsumedCount != null
-                      ? `(${tvSummary.approvedOrConsumedCount})`
-                      : null,
-                    [tvSummary.lastDeviceName, tvSummary.lastClient].filter(Boolean).join(" / ") ||
-                      null,
-                    tvSummary.lastUsedAt
-                      ? new Date(tvSummary.lastUsedAt).toLocaleString()
-                      : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")
-                : "No"}
-            {user.id != null ? (
-              <>
-                {" · "}
-                <Link to={`/settings/tv-login?userId=${user.id}`}>Sessions</Link>
-              </>
-            ) : null}
-          </dd>
-          <dt>Created</dt>
-          <dd>
-            {user.createDate
-              ? new Date(user.createDate).toLocaleString()
-              : "—"}
-          </dd>
-          <dt>Last update</dt>
-          <dd>
-            {user.lastUpdate
-              ? new Date(user.lastUpdate).toLocaleString()
-              : "—"}
-          </dd>
-        </dl>
-      </section>
+      <div
+        className="tabs desktop-tabs user-detail-tabs"
+        role="tablist"
+        aria-label="User detail sections"
+      >
+        {USER_DETAIL_TABS.map((tab) => {
+          const Icon = tab.Icon;
+          const active = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              id={`user-detail-tab-${tab.id}`}
+              aria-selected={active}
+              aria-controls={`user-detail-panel-${tab.id}`}
+              className={["tab", "tab--with-icon", active ? "active-tab" : ""].filter(Boolean).join(" ")}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <Icon className="icon" aria-hidden />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
-      {user.id != null && (
-        <section className="settings-card settings-card--mb">
-          <h3 className="settings-card__h3-with-icon">
-            <FaChartBar className="icon" aria-hidden />
-            <span>Traffic quota</span>
-          </h3>
-          <UserTrafficQuotaProgress
-            userId={user.id}
-            externalId={user.externalId}
-            quotaPlans={quotaPlans}
-            userQuotaAssignments={userAssignments}
-            suppressInlineTitle
-          />
-        </section>
-      )}
+      <select
+        id="user-detail-tabs"
+        name="userDetailTabs"
+        className="tabs-dropdown mobile-tabs user-detail-tabs-mobile"
+        aria-label="User detail sections"
+        value={activeTab}
+        onChange={(e) => setActiveTab(parseUserDetailTab(e.target.value))}
+      >
+        {USER_DETAIL_TABS.map((tab) => (
+          <option key={tab.id} value={tab.id}>
+            {tab.label}
+          </option>
+        ))}
+      </select>
 
-      <UserVpnConnectionsSection externalId={user.externalId} />
-
-      <UserDnsQueriesSection externalId={user.externalId} vpnServerId={0} />
-
-      <section className="settings-card settings-card--mb">
-        <h3 className="settings-card__h3-with-icon">
-          <FaCog className="icon" aria-hidden />
-          <span>Admin actions</span>
-        </h3>
-        <p className="settings-item-description">
-          Request a one-time password reset code for this user. The code will be
-          written to the server console (if the account exists and supports password login).
-        </p>
-        <button
-          className="btn primary"
-          onClick={handleSendResetCode}
-          disabled={forgotPasswordMutation.isPending}
-        >
-          <FaKey className="icon" /> Send password reset code
-        </button>
-        <div className="mt-12">
-          <button
-            className="btn primary"
-            onClick={handleConfirmEmailManually}
-            disabled={confirmEmailMutation.isPending || !user.email || isEmailConfirmed === true}
+      <div className="user-detail-tab-content">
+        {activeTab === "profile" ? (
+          <div
+            role="tabpanel"
+            id="user-detail-panel-profile"
+            aria-labelledby="user-detail-tab-profile"
+            className="user-detail-tab-panel"
           >
-            <FaSave className="icon" /> Confirm email manually
-          </button>
-        </div>
-      </section>
+            <section className="settings-card settings-card--mb">
+              <h3 className="settings-card__h3-with-icon">
+                <FaUser className="icon" aria-hidden />
+                <span>Profile</span>
+              </h3>
+              <div className="user-detail-profile-banner">
+                <UserAvatar
+                  src={readOptionalAvatarUrl(user as object)}
+                  telegramPhotoTelegramId={telegramPhotoIdForProvider(user.provider, user.externalId)}
+                  name={user.displayName ?? user.email ?? `User #${user.id ?? ""}`}
+                  colorSeed={`${user.id ?? ""}|${user.email ?? ""}`}
+                  size={56}
+                />
+                <div className="user-detail-profile-banner__text">
+                  <p className="user-detail-profile-banner__name">{user.displayName?.trim() || "—"}</p>
+                  <p className="user-detail-profile-banner__sub">{user.email?.trim() || "No email"}</p>
+                </div>
+              </div>
+              <dl className="user-detail-dl">
+                <dt>ID</dt>
+                <dd>{user.id ?? "—"}</dd>
+                <dt>Display name</dt>
+                <dd>{user.displayName ?? "—"}</dd>
+                <dt>Email</dt>
+                <dd>{user.email ?? "—"}</dd>
+                <dt>Email confirmed</dt>
+                <dd>
+                  {!user.email
+                    ? "No email"
+                    : emailStatusLoading
+                      ? "Loading..."
+                      : isEmailConfirmed === true
+                        ? "Yes"
+                        : isEmailConfirmed === false
+                          ? "No"
+                          : "—"}
+                </dd>
+                <dt>Sign-in method</dt>
+                <dd>
+                  {user.provider
+                    ? isTelegramUser
+                      ? `Telegram${user.externalId != null ? ` (ID: ${user.externalId})` : ""}`
+                      : user.provider
+                    : "—"}
+                </dd>
+                <dt>Provider</dt>
+                <dd>{user.provider ?? "—"}</dd>
+                <dt>External ID</dt>
+                <dd>{user.externalId ?? "—"}</dd>
+                <dt>Provider row ID</dt>
+                <dd>{user.providerRowId ?? "—"}</dd>
+                <dt>Admin</dt>
+                <dd>{user.isAdmin ? "Yes" : "No"}</dd>
+                <dt>Blocked</dt>
+                <dd>{user.isBlocked ? "Yes" : "No"}</dd>
+                <dt>Dashboard access</dt>
+                <dd>{user.hasDashboardAccess ? "Yes" : "No"}</dd>
+                <dt>TV device linking</dt>
+                <dd>
+                  {tvSummaryQuery.isLoading
+                    ? "Loading..."
+                    : tvSummary?.hasUsedTvLogin
+                      ? [
+                          "Yes",
+                          tvSummary.approvedOrConsumedCount != null
+                            ? `(${tvSummary.approvedOrConsumedCount})`
+                            : null,
+                          [tvSummary.lastDeviceName, tvSummary.lastClient].filter(Boolean).join(" / ") ||
+                            null,
+                          tvSummary.lastUsedAt
+                            ? new Date(tvSummary.lastUsedAt).toLocaleString()
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")
+                      : "No"}
+                  {user.id != null ? (
+                    <>
+                      {" · "}
+                      <Link to={`/settings/tv-login?userId=${user.id}`}>Sessions</Link>
+                    </>
+                  ) : null}
+                </dd>
+                <dt>Created</dt>
+                <dd>
+                  {user.createDate
+                    ? new Date(user.createDate).toLocaleString()
+                    : "—"}
+                </dd>
+                <dt>Last update</dt>
+                <dd>
+                  {user.lastUpdate
+                    ? new Date(user.lastUpdate).toLocaleString()
+                    : "—"}
+                </dd>
+              </dl>
+            </section>
 
-      {canManageRoles && userIdValid && <UserPasswordAdminSection userId={id} />}
+            {canManageRoles && (
+              <section className="settings-card settings-card--mb">
+                <h3 className="settings-card__h3-with-icon">
+                  <FaShieldAlt className="icon" aria-hidden />
+                  <span>Access role</span>
+                </h3>
+                <p className="settings-item-description">
+                  Role used for authorization on the server. The &quot;Admin&quot; field in the profile above may still
+                  reflect legacy data.
+                </p>
+                {rolesCatalogLoading || userRoleLoading ? (
+                  <p className="text-muted">Loading role…</p>
+                ) : roleCatalog.length === 0 ? (
+                  <p className="error-message">No roles returned from the API. Check permissions or backend configuration.</p>
+                ) : (
+                  <div className="settings-item settings-item--col-top">
+                    <label htmlFor="user-role-select" className="settings-item-label--wide">
+                      Role
+                    </label>
+                    <div className="flex-wrap-gap-12">
+                      <select
+                        id="user-role-select"
+                        className="input select-min-220"
+                        value={pendingRoleId === "" ? "" : String(pendingRoleId)}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setPendingRoleId(v === "" ? "" : Number(v));
+                        }}
+                        disabled={setRoleMutation.isPending}
+                      >
+                        <option value="">— Select role —</option>
+                        {roleCatalog.map((r) => (
+                          <option key={r.id} value={r.id}>
+                            {r.name?.trim() || r.normalizedName || `Role #${r.id}`}
+                            {r.isSystem ? " (system)" : ""}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        className="btn primary"
+                        onClick={handleSaveRole}
+                        disabled={!roleDirty || setRoleMutation.isPending}
+                      >
+                        <FaSave className="icon" aria-hidden /> Save role
+                      </button>
+                    </div>
+                    {currentRoleAssignment?.roleName != null && (
+                      <p className="text-muted-sm">
+                        Current (from server): {currentRoleAssignment.roleName}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </section>
+            )}
 
-      {canManageRoles && (
-        <section className="settings-card settings-card--mb">
-          <h3 className="settings-card__h3-with-icon">
-            <FaShieldAlt className="icon" aria-hidden />
-            <span>Access role</span>
-          </h3>
-          <p className="settings-item-description">
-            Role used for authorization on the server. The &quot;Admin&quot; field in the profile above may still
-            reflect legacy data.
-          </p>
-          {rolesCatalogLoading || userRoleLoading ? (
-            <p className="text-muted">Loading role…</p>
-          ) : roleCatalog.length === 0 ? (
-            <p className="error-message">No roles returned from the API. Check permissions or backend configuration.</p>
-          ) : (
-            <div className="settings-item settings-item--col-top">
-              <label htmlFor="user-role-select" className="settings-item-label--wide">
-                Role
-              </label>
-              <div className="flex-wrap-gap-12">
-                <select
-                  id="user-role-select"
-                  className="input select-min-220"
-                  value={pendingRoleId === "" ? "" : String(pendingRoleId)}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setPendingRoleId(v === "" ? "" : Number(v));
-                  }}
-                  disabled={setRoleMutation.isPending}
-                >
-                  <option value="">— Select role —</option>
-                  {roleCatalog.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name?.trim() || r.normalizedName || `Role #${r.id}`}
-                      {r.isSystem ? " (system)" : ""}
-                    </option>
-                  ))}
-                </select>
+            <section className="settings-card settings-card--mb">
+              <h3 className="settings-card__h3-with-icon">
+                <FaCog className="icon" aria-hidden />
+                <span>Admin actions</span>
+              </h3>
+              <p className="settings-item-description">
+                Request a one-time password reset code for this user. The code will be
+                written to the server console (if the account exists and supports password login).
+              </p>
+              <button
+                className="btn primary"
+                onClick={handleSendResetCode}
+                disabled={forgotPasswordMutation.isPending}
+              >
+                <FaKey className="icon" /> Send password reset code
+              </button>
+              <div className="mt-12">
                 <button
-                  type="button"
                   className="btn primary"
-                  onClick={handleSaveRole}
-                  disabled={!roleDirty || setRoleMutation.isPending}
+                  onClick={handleConfirmEmailManually}
+                  disabled={confirmEmailMutation.isPending || !user.email || isEmailConfirmed === true}
                 >
-                  <FaSave className="icon" aria-hidden /> Save role
+                  <FaSave className="icon" /> Confirm email manually
                 </button>
               </div>
-              {currentRoleAssignment?.roleName != null && (
-                <p className="text-muted-sm">
-                  Current (from server): {currentRoleAssignment.roleName}
-                </p>
-              )}
-            </div>
-          )}
-        </section>
-      )}
+            </section>
 
-      {isTelegramUser && (
-        <section className="settings-card settings-card--mb">
-          <h3 className="settings-card__h3-with-icon">
-            <FaPaperPlane className="icon" aria-hidden />
-            <span>Telegram bot messages</span>
-          </h3>
-          <p className="settings-item-description">
-            Incoming messages from this user in the Telegram bot.
-          </p>
-          {telegramIdValid ? (
-            <>
-              <div className="header-bar header-bar--mb-8">
+            {canManageRoles && userIdValid && <UserPasswordAdminSection userId={id} />}
+          </div>
+        ) : null}
+
+        {activeTab === "quota" ? (
+          <div
+            role="tabpanel"
+            id="user-detail-panel-quota"
+            aria-labelledby="user-detail-tab-quota"
+            className="user-detail-tab-panel"
+          >
+            {user.id != null && (
+              <section className="settings-card settings-card--mb">
+                <h3 className="settings-card__h3-with-icon">
+                  <FaChartBar className="icon" aria-hidden />
+                  <span>Traffic quota</span>
+                </h3>
+                <UserTrafficQuotaProgress
+                  userId={user.id}
+                  externalId={user.externalId}
+                  quotaPlans={quotaPlans}
+                  userQuotaAssignments={userAssignments}
+                  suppressInlineTitle
+                />
+              </section>
+            )}
+
+            <section className="settings-card settings-card--mb">
+              <h3 className="settings-card__h3-with-icon">
+                <FaClipboardList className="icon" aria-hidden />
+                <span>User quota plan assignments</span>
+              </h3>
+              <p className="settings-item-description">
+                Assign quota plans to this user. Effective from/to define the period when the plan applies.
+              </p>
+              <div className="header-bar header-bar--mb-12">
                 <div className="left-buttons">
                   <button
                     type="button"
-                    className="btn secondary"
-                    onClick={() => refetchTelegramMessages()}
-                    disabled={telegramMessagesRefreshing}
+                    className="btn primary"
+                    onClick={() => {
+                      setEditingAssignment(null);
+                      setAssignmentModalOpen(true);
+                    }}
+                    disabled={
+                      quotaPlans.length === 0 ||
+                      createAssignmentMutation.isPending ||
+                      updateAssignmentMutation.isPending
+                    }
                   >
-                    <FaSync className={`icon ${telegramMessagesRefreshing ? "icon-spin" : ""}`} /> Refresh
+                    <FaPlus className="icon" /> Assign plan
                   </button>
                 </div>
               </div>
-              {telegramMessagesErrorMessage && (
-                <p className="error-message error-message--mb-8">❌ {telegramMessagesErrorMessage}</p>
-              )}
-              {!telegramMessagesLoading && telegramMessagesTotalCount === 0 ? (
-                <p className="text-muted">No messages.</p>
+              {userAssignments.length === 0 ? (
+                <p className="text-muted">No assignments. Click «Assign plan» to add one.</p>
               ) : (
-              <>
-              <GridFilterBar
-                gridId="user-telegram-messages"
-                fields={gridFilterFields("user-telegram-messages")}
-                values={tgMessageFilters.values}
-                onChange={tgMessageFilters.onChange}
-                onApply={tgMessageFilters.onApply}
-                onReset={tgMessageFilters.onReset}
-                pendingOrval
-                disabled={telegramMessagesLoading}
-              />
-              <div className="data-grid-wrap data-grid-wrap--inset">
-                <CustomThemeProvider>
-                  <Grid
-                    gridId="user-telegram-messages"
-                    rows={telegramMessages.map((msg, idx) => ({
-                      id: msg.id ?? `msg-${idx}`,
-                      date: msg.receivedAt ?? msg.createDate
-                        ? new Date((msg.receivedAt ?? msg.createDate) ?? "").toLocaleString()
-                        : "—",
-                      text: msg.messageText ?? "—",
-                      file: [msg.fileType, msg.fileName].filter(Boolean).join(" · ") || "—",
-                    }))}
-                    columns={[
-                      { field: "date", headerName: "Date", flex: 1, minWidth: 140 },
-                      { field: "text", headerName: "Text", flex: 2, minWidth: 120 },
-                      { field: "file", headerName: "File", flex: 1, minWidth: 100 },
-                    ] as GridColDef[]}
-                    pageSizeOptions={[5, 10, 20, 50, 100]}
-                    paginationMode="server"
-                    rowCount={telegramMessagesTotalCount}
-                    paginationModel={{
-                      page: telegramMessagesPage,
-                      pageSize: telegramMessagesPageSize,
-                    }}
-                    onPaginationModelChange={(model) => {
-                      setTelegramMessagesPage(model.page);
-                      setTelegramMessagesPageSize(model.pageSize);
-                    }}
-                    loading={telegramMessagesLoading || telegramMessagesFetching}
-                    slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-                    localeText={{ noRowsLabel: "📭 No messages" }}
-                  />
-                </CustomThemeProvider>
-              </div>
-              </>
+                <div className="table-container table-container--pad">
+                  <table className="user-quota-assignments-table">
+                    <thead>
+                      <tr>
+                        <th>Plan</th>
+                        <th>Effective from</th>
+                        <th>Effective to</th>
+                        <th>Note</th>
+                        <th className="th-actions">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {userAssignments.map((a) => {
+                        const plan = quotaPlans.find((p) => p.id === a.quotaPlanId);
+                        const planName = plan?.name ?? `Plan #${a.quotaPlanId ?? "?"}`;
+                        return (
+                          <tr key={a.id}>
+                            <td>{planName}</td>
+                            <td>
+                              {a.effectiveFrom
+                                ? new Date(a.effectiveFrom).toLocaleDateString()
+                                : "—"}
+                            </td>
+                            <td>
+                              {a.effectiveTo
+                                ? new Date(a.effectiveTo).toLocaleDateString()
+                                : "—"}
+                            </td>
+                            <td>{a.note ?? "—"}</td>
+                            <td>
+                              <GridRowActions>
+                                <RowActionButton
+                                  title="Edit"
+                                  disabled={
+                                    updateAssignmentMutation.isPending ||
+                                    deleteAssignmentMutation.isPending
+                                  }
+                                  onClick={() => {
+                                    setEditingAssignment(a);
+                                    setAssignmentModalOpen(true);
+                                  }}
+                                  icon={<FaEdit className="icon" />}
+                                />
+                                <RowActionButton
+                                  variant="danger"
+                                  title="Remove"
+                                  disabled={
+                                    updateAssignmentMutation.isPending ||
+                                    deleteAssignmentMutation.isPending
+                                  }
+                                  onClick={() => a.id != null && handleDeleteAssignment(a.id)}
+                                  icon={<FaTrash className="icon" />}
+                                />
+                              </GridRowActions>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               )}
-            </>
-          ) : (
-            <p className="text-muted">
-              Telegram ID not available; cannot load messages.
-            </p>
-          )}
-        </section>
-      )}
+            </section>
 
-      <section className="settings-card settings-card--mb">
-        <h3 className="settings-card__h3-with-icon">
-          <FaClipboardList className="icon" aria-hidden />
-          <span>User quota plan assignments</span>
-        </h3>
-        <p className="settings-item-description">
-          Assign quota plans to this user. Effective from/to define the period when the plan applies.
-        </p>
-        <div className="header-bar header-bar--mb-12">
-          <div className="left-buttons">
-            <button
-              type="button"
-              className="btn primary"
-              onClick={() => {
-                setEditingAssignment(null);
-                setAssignmentModalOpen(true);
-              }}
-              disabled={
-                quotaPlans.length === 0 ||
-                createAssignmentMutation.isPending ||
-                updateAssignmentMutation.isPending
-              }
-            >
-              <FaPlus className="icon" /> Assign plan
-            </button>
+            <section className="settings-card">
+              <h3 className="settings-card__h3-with-icon">
+                <FaListUl className="icon" aria-hidden />
+                <span>Available quota plans</span>
+              </h3>
+              <p className="settings-item-description">
+                All quota plans defined in the system. Assign them above. Server-side restrictions may apply.
+              </p>
+              {quotaPlans.length === 0 ? (
+                <p className="text-muted">No quota plans.</p>
+              ) : (
+                <ul className="quota-plan-list">
+                  {quotaPlans.map((p) => (
+                    <li key={p.id} className="quota-plan-item">
+                      <strong>{p.name ?? "—"}</strong>
+                      {p.isDefault && " (default)"}
+                      {p.description && ` — ${p.description}`}
+                      <span className="quota-plan-meta">
+                        Daily: {formatBytes(p.dailyQuotaBytes)} · Monthly:{" "}
+                        {formatBytes(p.monthlyQuotaBytes)}
+                        {p.upKbps != null && ` · Up: ${p.upKbps} Kbps`}
+                        {p.downKbps != null && ` · Down: ${p.downKbps} Kbps`}
+                        {!p.isActive && " · Inactive"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
           </div>
-        </div>
-        {userAssignments.length === 0 ? (
-          <p className="text-muted">No assignments. Click «Assign plan» to add one.</p>
-        ) : (
-          <div className="table-container table-container--pad">
-            <table className="user-quota-assignments-table">
-              <thead>
-                <tr>
-                  <th>Plan</th>
-                  <th>Effective from</th>
-                  <th>Effective to</th>
-                  <th>Note</th>
-                  <th className="th-actions">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {userAssignments.map((a) => {
-                  const plan = quotaPlans.find((p) => p.id === a.quotaPlanId);
-                  const planName = plan?.name ?? `Plan #${a.quotaPlanId ?? "?"}`;
-                  return (
-                    <tr key={a.id}>
-                      <td>{planName}</td>
-                      <td>
-                        {a.effectiveFrom
-                          ? new Date(a.effectiveFrom).toLocaleDateString()
-                          : "—"}
-                      </td>
-                      <td>
-                        {a.effectiveTo
-                          ? new Date(a.effectiveTo).toLocaleDateString()
-                          : "—"}
-                      </td>
-                      <td>{a.note ?? "—"}</td>
-                      <td>
-                        <GridRowActions>
-                          <RowActionButton
-                            title="Edit"
-                            disabled={
-                              updateAssignmentMutation.isPending ||
-                              deleteAssignmentMutation.isPending
-                            }
-                            onClick={() => {
-                              setEditingAssignment(a);
-                              setAssignmentModalOpen(true);
-                            }}
-                            icon={<FaEdit className="icon" />}
-                          />
-                          <RowActionButton
-                            variant="danger"
-                            title="Remove"
-                            disabled={
-                              updateAssignmentMutation.isPending ||
-                              deleteAssignmentMutation.isPending
-                            }
-                            onClick={() => a.id != null && handleDeleteAssignment(a.id)}
-                            icon={<FaTrash className="icon" />}
-                          />
-                        </GridRowActions>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        ) : null}
+
+        {activeTab === "servers" ? (
+          <div
+            role="tabpanel"
+            id="user-detail-panel-servers"
+            aria-labelledby="user-detail-tab-servers"
+            className="user-detail-tab-panel"
+          >
+            {userIdValid && (
+              <section className="settings-card settings-card--mb">
+                <h3 className="settings-card__h3-with-icon">
+                  <FaServer className="icon" aria-hidden />
+                  <span>Available servers</span>
+                </h3>
+                <p className="settings-item-description">
+                  Servers this user can reach right now: active quota plan allowlist, plus personal grants,
+                  minus personal blocks.
+                </p>
+                <UserAvailableServersChips userId={id} />
+              </section>
+            )}
+            {canManageRoles && userIdValid && <UserVpnServerAccessRulesSection userId={id} />}
+            {!canManageRoles && (
+              <p className="text-muted">Personal grant/block rules are visible to admins only.</p>
+            )}
           </div>
-        )}
-      </section>
+        ) : null}
 
-      {canManageRoles && userIdValid && <UserVpnServerAccessRulesSection userId={id} />}
+        {activeTab === "activity" ? (
+          <div
+            role="tabpanel"
+            id="user-detail-panel-activity"
+            aria-labelledby="user-detail-tab-activity"
+            className="user-detail-tab-panel"
+          >
+            <UserVpnConnectionsSection externalId={user.externalId} />
+            <UserDnsQueriesSection externalId={user.externalId} vpnServerId={0} />
 
-      <section className="settings-card">
-        <h3 className="settings-card__h3-with-icon">
-          <FaListUl className="icon" aria-hidden />
-          <span>Available quota plans</span>
-        </h3>
-        <p className="settings-item-description">
-          All quota plans defined in the system. Assign them above. Server-side restrictions may apply.
-        </p>
-        {quotaPlans.length === 0 ? (
-          <p className="text-muted">No quota plans.</p>
-        ) : (
-          <ul className="quota-plan-list">
-            {quotaPlans.map((p) => (
-              <li key={p.id} className="quota-plan-item">
-                <strong>{p.name ?? "—"}</strong>
-                {p.isDefault && " (default)"}
-                {p.description && ` — ${p.description}`}
-                <span className="quota-plan-meta">
-                  Daily: {formatBytes(p.dailyQuotaBytes)} · Monthly:{" "}
-                  {formatBytes(p.monthlyQuotaBytes)}
-                  {p.upKbps != null && ` · Up: ${p.upKbps} Kbps`}
-                  {p.downKbps != null && ` · Down: ${p.downKbps} Kbps`}
-                  {!p.isActive && " · Inactive"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+            {isTelegramUser && (
+              <section className="settings-card settings-card--mb">
+                <h3 className="settings-card__h3-with-icon">
+                  <FaPaperPlane className="icon" aria-hidden />
+                  <span>Telegram bot messages</span>
+                </h3>
+                <p className="settings-item-description">
+                  Incoming messages from this user in the Telegram bot.
+                </p>
+                {telegramIdValid ? (
+                  <>
+                    <div className="header-bar header-bar--mb-8">
+                      <div className="left-buttons">
+                        <button
+                          type="button"
+                          className="btn secondary"
+                          onClick={() => refetchTelegramMessages()}
+                          disabled={telegramMessagesRefreshing}
+                        >
+                          <FaSync className={`icon ${telegramMessagesRefreshing ? "icon-spin" : ""}`} /> Refresh
+                        </button>
+                      </div>
+                    </div>
+                    {telegramMessagesErrorMessage && (
+                      <p className="error-message error-message--mb-8">❌ {telegramMessagesErrorMessage}</p>
+                    )}
+                    {!telegramMessagesLoading && telegramMessagesTotalCount === 0 ? (
+                      <p className="text-muted">No messages.</p>
+                    ) : (
+                    <>
+                    <GridFilterBar
+                      gridId="user-telegram-messages"
+                      fields={gridFilterFields("user-telegram-messages")}
+                      values={tgMessageFilters.values}
+                      onChange={tgMessageFilters.onChange}
+                      onApply={tgMessageFilters.onApply}
+                      onReset={tgMessageFilters.onReset}
+                      pendingOrval
+                      disabled={telegramMessagesLoading}
+                    />
+                    <div className="data-grid-wrap data-grid-wrap--inset">
+                      <CustomThemeProvider>
+                        <Grid
+                          gridId="user-telegram-messages"
+                          rows={telegramMessages.map((msg, idx) => ({
+                            id: msg.id ?? `msg-${idx}`,
+                            date: msg.receivedAt ?? msg.createDate
+                              ? new Date((msg.receivedAt ?? msg.createDate) ?? "").toLocaleString()
+                              : "—",
+                            text: msg.messageText ?? "—",
+                            file: [msg.fileType, msg.fileName].filter(Boolean).join(" · ") || "—",
+                          }))}
+                          columns={[
+                            { field: "date", headerName: "Date", flex: 1, minWidth: 140 },
+                            { field: "text", headerName: "Text", flex: 2, minWidth: 120 },
+                            { field: "file", headerName: "File", flex: 1, minWidth: 100 },
+                          ] as GridColDef[]}
+                          pageSizeOptions={[5, 10, 20, 50, 100]}
+                          paginationMode="server"
+                          rowCount={telegramMessagesTotalCount}
+                          paginationModel={{
+                            page: telegramMessagesPage,
+                            pageSize: telegramMessagesPageSize,
+                          }}
+                          onPaginationModelChange={(model) => {
+                            setTelegramMessagesPage(model.page);
+                            setTelegramMessagesPageSize(model.pageSize);
+                          }}
+                          loading={telegramMessagesLoading || telegramMessagesFetching}
+                          slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
+                          localeText={{ noRowsLabel: "📭 No messages" }}
+                        />
+                      </CustomThemeProvider>
+                    </div>
+                    </>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-muted">
+                    Telegram ID not available; cannot load messages.
+                  </p>
+                )}
+              </section>
+            )}
+          </div>
+        ) : null}
+      </div>
 
       <UserQuotaPlanAssignmentModal
         isOpen={assignmentModalOpen}

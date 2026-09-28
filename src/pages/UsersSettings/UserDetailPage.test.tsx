@@ -139,7 +139,7 @@ describe("UserDetailPage telegram messages pagination", () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={client}>
-        <MemoryRouter initialEntries={["/settings/users/42"]}>
+        <MemoryRouter initialEntries={["/settings/users/42?tab=activity"]}>
           <Routes>
             <Route path="/settings/users/:userId" element={<UserDetailPage />} />
           </Routes>
