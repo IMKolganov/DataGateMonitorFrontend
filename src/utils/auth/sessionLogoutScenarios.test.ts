@@ -18,8 +18,8 @@
  * - missingToken / voluntary sign-out / SignalR no-logout / redirect race (below + signalRAccessToken.test)
  * - PrivateRoute must not overwrite first logout reason (PrivateRoute.test)
  * - Concurrent 401 → single-flight refresh (apirequest.test)
- * - Cross-tab storage clear → refreshRejected (authCrossTab.test)
- * - Startup silent refresh when access missing (authStartup.test)
+ * - Cross-tab full token clear → loggedOutElsewhere (authCrossTab.test)
+ * - Startup silent refresh when access missing (authStartup.test); PrivateRoute waits for bootstrap
  * - Backend refresh rotation / reuse / lost atomic claim (TokenServiceRefreshRotationTests)
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -63,6 +63,12 @@ const FORCED_LOGOUT_SCENARIOS: ReadonlyArray<{
     reason: "missingToken",
     messagePattern: /no active session/i,
     loginPath: "/login?reason=missingToken",
+    appliesTo: ["any"],
+  },
+  {
+    reason: "loggedOutElsewhere",
+    messagePattern: /another browser tab/i,
+    loginPath: "/login?reason=loggedOutElsewhere",
     appliesTo: ["any"],
   },
 ];

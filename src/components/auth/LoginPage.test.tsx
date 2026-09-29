@@ -101,6 +101,7 @@ describe("LoginPage", () => {
     ["refreshRejected", /no longer valid/i],
     ["missingToken", /no active session/i],
     ["sessionExpired", /session expired/i],
+    ["loggedOutElsewhere", /another browser tab/i],
   ] as const)("shows notice for ?reason=%s", (reason, pattern) => {
     vi.mocked(toast.info).mockClear();
     renderLoginPage(`/login?reason=${reason}`);

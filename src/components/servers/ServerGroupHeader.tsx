@@ -7,6 +7,7 @@ import {
   FaPen,
   FaPlus,
   FaTrash,
+  FaUser,
 } from "react-icons/fa";
 
 type Props = {
@@ -114,7 +115,7 @@ export const ServerGroupHeader: React.FC<Props> = ({
           type="button"
           className="server-group-header__main"
           aria-expanded={!collapsed}
-          aria-label={`${name}, ${connectedCount} connected, ${count} servers`}
+          aria-label={`${name}, ${count} servers, ${connectedCount} online users`}
           onClick={onToggleCollapse}
         >
           <span className="server-group-header__collapse" aria-hidden>
@@ -125,11 +126,17 @@ export const ServerGroupHeader: React.FC<Props> = ({
           <span className="server-group-header__icon">{FaFolder({ className: "icon" })}</span>
           <span className="server-group-header__title">
             <span className="server-group-header__name">{name}</span>
-            <span className="server-group-header__clients" title="Connected clients">
-              ({connectedCount})
+            <span
+              className="server-group-header__meta"
+              title={`${count} servers, ${connectedCount} online users`}
+            >
+              ({count})
+              <span className="server-group-header__online">
+                {FaUser({ className: "icon" })}
+                {connectedCount}
+              </span>
             </span>
           </span>
-          <span className="server-group-header__count" title="Servers in group">{count}</span>
         </button>
       )}
 

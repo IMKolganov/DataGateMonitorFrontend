@@ -7,13 +7,15 @@ export type LogoutReason =
   | "sessionExpired"
   | "refreshRejected"
   | "missingToken"
-  | "idleTimeout";
+  | "idleTimeout"
+  | "loggedOutElsewhere";
 
 const LOGOUT_REASONS: ReadonlySet<string> = new Set<LogoutReason>([
   "sessionExpired",
   "refreshRejected",
   "missingToken",
   "idleTimeout",
+  "loggedOutElsewhere",
 ]);
 
 export function isLogoutReason(value: string | null | undefined): value is LogoutReason {
@@ -55,6 +57,8 @@ export function logoutReasonMessage(reason: LogoutReason): string {
       return "You were redirected to sign in because no active session was found in this browser.";
     case "idleTimeout":
       return "You were signed out due to inactivity. Please sign in again to continue.";
+    case "loggedOutElsewhere":
+      return "You were signed out in another browser tab. Please sign in again to continue.";
   }
 }
 

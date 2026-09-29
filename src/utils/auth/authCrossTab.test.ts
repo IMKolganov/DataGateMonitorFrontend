@@ -26,7 +26,7 @@ describe("startAuthCrossTabSync", () => {
     localStorage.clear();
   });
 
-  it("signs out when another tab clears the access token", () => {
+  it("signs out when another tab clears both auth tokens", () => {
     localStorage.setItem(ACCESS_TOKEN_KEY, "access");
     localStorage.setItem(REFRESH_TOKEN_KEY, "refresh");
     const stop = startAuthCrossTabSync();
@@ -42,7 +42,26 @@ describe("startAuthCrossTabSync", () => {
       }),
     );
 
-    expect(logout).toHaveBeenCalledWith("refreshRejected");
+    expect(logout).toHaveBeenCalledWith("loggedOutElsewhere");
+    stop();
+  });
+
+  it("does not sign out when only access is cleared but refresh remains", () => {
+    localStorage.setItem(ACCESS_TOKEN_KEY, "access");
+    localStorage.setItem(REFRESH_TOKEN_KEY, "refresh");
+    const stop = startAuthCrossTabSync();
+
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    window.dispatchEvent(
+      new StorageEvent("storage", {
+        key: ACCESS_TOKEN_KEY,
+        oldValue: "access",
+        newValue: null,
+        storageArea: localStorage,
+      }),
+    );
+
+    expect(logout).not.toHaveBeenCalled();
     stop();
   });
 

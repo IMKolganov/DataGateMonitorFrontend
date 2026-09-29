@@ -125,6 +125,9 @@ const ServerItem: React.FC<Props> = ({
     const isDeleted = Boolean(vpnServer?.isDeleted);
     const isOnlineFromApi = !!vpnServer?.isOnline;
     // Soft-deleted rows are not polled; never show Online even if DB still has a stale flag.
+    // Backend composes Online = IsOnline && !IsDeleted && IsAvailableByExternalProbe;
+    // pollers only touch IsOnline, AvailabilityCheck owns IsAvailableByExternalProbe.
+    const isAvailableByExternalProbe = vpnServer?.isAvailableByExternalProbe !== false;
     const isOnline = isDeleted
         ? false
         : wsOnline === null
@@ -175,6 +178,14 @@ const ServerItem: React.FC<Props> = ({
                                 title="Background polling is off for this server; card stays clickable."
                             >
                                 Polling off
+                            </span>
+                        )}
+                        {!isDeleted && !isAvailableByExternalProbe && (
+                            <span
+                                className="server-disabled-pill"
+                                title="External availability probe reported this ApiUrl unreachable (e.g. status.rackot.ru)."
+                            >
+                                Externally blocked
                             </span>
                         )}
                         {server.isManagerUpdateAvailable && (

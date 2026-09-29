@@ -727,6 +727,8 @@ export function GeneralServerDetails() {
                                     <>
                                         <code>{trafficFlowHub.connectionState}</code>
                                         {trafficFlowHub.lastError ? ` (${trafficFlowHub.lastError})` : ""}
+                                        {" | Flows: "}
+                                        {trafficFlowHub.flows.length}
                                     </>
                                 ) : (
                                     <>{proxyTrafficFlowUnsupportedReason}</>

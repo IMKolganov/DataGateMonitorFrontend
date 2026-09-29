@@ -14,6 +14,7 @@ const ALL_REASONS: LogoutReason[] = [
   "refreshRejected",
   "missingToken",
   "idleTimeout",
+  "loggedOutElsewhere",
 ];
 
 describe("logoutReason", () => {

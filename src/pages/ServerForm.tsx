@@ -890,7 +890,7 @@ const ServerForm: React.FC = () => {
           serverName: String(serverData.serverName ?? "").trim(),
           apiUrl: serverData.apiUrl ?? null,
           isDefault: serverData.isDefault ?? false,
-          isOnline: serverData.isOnline ?? false,
+          // Do not send composed isOnline — backend owns manager IsOnline; probe owns IsAvailableByExternalProbe.
           isDisabled: serverData.isDisabled ?? false,
           latitude: serverData.latitude ?? null,
           longitude: serverData.longitude ?? null,
