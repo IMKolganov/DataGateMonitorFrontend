@@ -8,6 +8,7 @@ import {
   FaChartLine,
   FaCogs,
   FaFilter,
+  FaGlobe,
   FaKey,
   FaServer,
   FaTerminal,
@@ -102,6 +103,13 @@ export function ServerDetails() {
             base = [
                 ...base,
                 { label: "Pi-hole", path: "pi-hole", adminOnly: true, Icon: FaFilter, mobilePrefix: "🌐" },
+                {
+                    label: "Check available",
+                    path: "check-available",
+                    adminOnly: true,
+                    Icon: FaGlobe,
+                    mobilePrefix: "📡",
+                },
             ];
         }
         return base;

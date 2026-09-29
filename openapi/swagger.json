@@ -16611,6 +16611,117 @@
           }
         }
       }
+    },
+    "/api/rf-availability/status": {
+      "get": {
+        "tags": [
+          "RfAvailability"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rf-availability/settings": {
+      "put": {
+        "tags": [
+          "RfAvailability"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RfAvailability.Requests.UpdateRfAvailabilitySettingsRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RfAvailability.Requests.UpdateRfAvailabilitySettingsRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RfAvailability.Requests.UpdateRfAvailabilitySettingsRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RfAvailability.Requests.UpdateRfAvailabilitySettingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rf-availability/check": {
+      "post": {
+        "tags": [
+          "RfAvailability"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -26934,6 +27045,198 @@
           }
         },
         "additionalProperties": false
+      },
+      "Api.RfAvailability.Responses.RfAvailabilityStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/RfAvailability.Responses.RfAvailabilityStatusResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RfAvailability.Dto.RfAvailabilityDnsDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "latencyMs": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RfAvailability.Dto.RfAvailabilityPortDto": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "latencyMs": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RfAvailability.Dto.RfAvailabilityHttpDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "latencyMs": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "bytesRead": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "contentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "bodyPreview": {
+            "type": "string",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "responseSummary": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RfAvailability.Dto.RfAvailabilityProbeResultDto": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "string",
+            "nullable": true
+          },
+          "host": {
+            "type": "string",
+            "nullable": true
+          },
+          "reachable": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "probeFrom": {
+            "type": "string",
+            "nullable": true
+          },
+          "dns": {
+            "$ref": "#/components/schemas/RfAvailability.Dto.RfAvailabilityDnsDto"
+          },
+          "ports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RfAvailability.Dto.RfAvailabilityPortDto"
+            },
+            "nullable": true
+          },
+          "http": {
+            "$ref": "#/components/schemas/RfAvailability.Dto.RfAvailabilityHttpDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RfAvailability.Requests.UpdateRfAvailabilitySettingsRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "targetUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RfAvailability.Responses.RfAvailabilityStatusResponse": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "targetUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "probeBaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastCheckedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastDurationMs": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "lastError": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastResult": {
+            "$ref": "#/components/schemas/RfAvailability.Dto.RfAvailabilityProbeResultDto"
+          }
+        },
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
@@ -27076,6 +27379,9 @@
     },
     {
       "name": "XrayClientLinksV2"
+    },
+    {
+      "name": "RfAvailability"
     }
   ]
 }

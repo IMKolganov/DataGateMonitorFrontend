@@ -8,6 +8,16 @@ export function isXrayBlockedSubpath(relative: string): boolean {
 
 /** Admin-only server subpaths (non-admins are redirected to statistics). */
 export function isNonAdminBlockedSubpath(relative: string): boolean {
-  const keys = ["", "certificates", "console", "ovpn-file-config", "export-template", "events", "access", "pi-hole"];
+  const keys = [
+    "",
+    "certificates",
+    "console",
+    "ovpn-file-config",
+    "export-template",
+    "events",
+    "access",
+    "pi-hole",
+    "check-available",
+  ];
   return keys.some((k) => (k === "" ? relative === "" : relative === k || relative.startsWith(`${k}/`)));
 }
