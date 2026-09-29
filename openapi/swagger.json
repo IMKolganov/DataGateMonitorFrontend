@@ -24950,6 +24950,9 @@
           "totalBytesOut": {
             "type": "integer",
             "format": "int32"
+          },
+          "isOnline": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

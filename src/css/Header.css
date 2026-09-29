@@ -110,6 +110,21 @@
   display: none;
 }
 
+/* Wide desktop: Logout keeps a visible label; theme toggle stays icon-only. */
+@media (min-width: 1281px) {
+  .header nav .header-icon-btn:not(.theme-toggle) {
+    width: auto;
+    min-width: 0;
+    padding: 0 10px;
+    gap: 6px;
+    line-height: 1;
+  }
+
+  .header nav .header-icon-btn:not(.theme-toggle) .header-btn-label {
+    display: inline;
+  }
+}
+
 .nav-links li.user-info {
   display: flex;
   align-items: center;

@@ -16,4 +16,5 @@ export interface VpnServersDtoServiceStatusDto {
   countSessions?: number;
   totalBytesIn?: number;
   totalBytesOut?: number;
+  isOnline?: boolean;
 }
