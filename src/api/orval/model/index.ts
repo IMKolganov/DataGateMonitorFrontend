@@ -212,6 +212,7 @@ export * from './authResponsesTvLoginSessionPollResponse';
 export * from './authResponsesTvLoginSessionPreviewResponse';
 export * from './authResponsesUserSessionDto';
 export * from './authResponsesUserTvLoginSummaryResponse';
+export * from './availabilityCheckDtoAvailabilityCheckServerResultDto';
 export * from './availabilityCheckDtoAvailabilityDnsDto';
 export * from './availabilityCheckDtoAvailabilityHttpDto';
 export * from './availabilityCheckDtoAvailabilityPortDto';

@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FaGlobe, FaSave, FaSync } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
+import type { GridColDef } from "@mui/x-data-grid";
 import {
   getGetApiAvailabilityCheckStatusQueryKey,
   useGetApiAvailabilityCheckStatus,
@@ -9,25 +10,53 @@ import {
   usePutApiAvailabilityCheckSettings,
 } from "../api/orval/availability-check/availability-check";
 import type {
+  AvailabilityCheckServerResultDto,
   AvailabilityCheckStatusResponse,
   UpdateAvailabilityCheckSettingsRequest,
 } from "../api/orvalModelShim";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import { ServerAccessDenied } from "../components/ServerAccessDenied";
+import Grid from "../components/ui/TableStyle.tsx";
+import CustomThemeProvider from "../components/ui/ThemeProvider.tsx";
+import { useClientGridPagination } from "../hooks/useClientGridPagination";
 import { errorMessage } from "../utils/errorMessage";
 import { formatDateWithOffset } from "../utils/utils";
 import "../css/Settings.css";
 import "../css/ServerDetails.css";
+import "../css/Table.css";
 
-const DEFAULT_TARGET = "https://xs1-hel.datagateapp.com:9443/";
 const DEFAULT_PROBE = "https://status.rackot.ru/check.cgi";
+
+type ProbeRow = {
+  id: number;
+  server: string;
+  apiUrl: string;
+  probe: string;
+  probeOk: boolean;
+  summary: string;
+  checked: string;
+};
 
 function unwrapStatus(data: unknown): AvailabilityCheckStatusResponse | undefined {
   if (!data || typeof data !== "object") return undefined;
   const obj = data as { data?: AvailabilityCheckStatusResponse } & AvailabilityCheckStatusResponse;
   if (obj.data && typeof obj.data === "object") return obj.data;
-  if ("enabled" in obj || "targetUrl" in obj || "lastResult" in obj) return obj;
+  if ("enabled" in obj || "probeUrl" in obj || "servers" in obj) return obj;
   return undefined;
+}
+
+function probeLabel(s: AvailabilityCheckServerResultDto): { label: string; ok: boolean } {
+  if (s.error) return { label: "error", ok: false };
+  if (s.reachable == null) {
+    return {
+      label: s.isAvailableByExternalProbe ? "ok*" : "blocked",
+      ok: Boolean(s.isAvailableByExternalProbe),
+    };
+  }
+  return {
+    label: s.reachable ? "reachable" : "unreachable",
+    ok: Boolean(s.reachable),
+  };
 }
 
 export function AvailabilityCheckServerTab() {
@@ -36,7 +65,6 @@ export function AvailabilityCheckServerTab() {
   const queryClient = useQueryClient();
 
   const [enabled, setEnabled] = useState(true);
-  const [targetUrl, setTargetUrl] = useState(DEFAULT_TARGET);
   const [probeUrl, setProbeUrl] = useState(DEFAULT_PROBE);
 
   const statusQuery = useGetApiAvailabilityCheckStatus({
@@ -48,9 +76,8 @@ export function AvailabilityCheckServerTab() {
   useEffect(() => {
     if (!status) return;
     setEnabled(Boolean(status.enabled));
-    setTargetUrl(status.targetUrl?.trim() || DEFAULT_TARGET);
     setProbeUrl(status.probeUrl?.trim() || DEFAULT_PROBE);
-  }, [status?.enabled, status?.targetUrl, status?.probeUrl]);
+  }, [status?.enabled, status?.probeUrl]);
 
   const invalidate = () =>
     void queryClient.invalidateQueries({ queryKey: getGetApiAvailabilityCheckStatusQueryKey() });
@@ -75,16 +102,75 @@ export function AvailabilityCheckServerTab() {
     },
   });
 
+  const servers = status?.servers ?? [];
+  const { gridProps } = useClientGridPagination({
+    storageKey: "settings-availability-check-servers",
+    defaultPageSize: 25,
+    allowedKey: "10,25,50,100",
+  });
+
+  const rows: ProbeRow[] = useMemo(
+    () =>
+      servers.map((s) => {
+        const { label, ok } = probeLabel(s);
+        const checkedAt = s.checkedAtUtc
+          ? formatDateWithOffset(new Date(s.checkedAtUtc))
+          : "—";
+        const duration = s.durationMs != null ? ` (${s.durationMs} ms)` : "";
+        return {
+          id: s.vpnServerId ?? 0,
+          server: `#${s.vpnServerId ?? "?"} ${s.serverName ?? ""}`.trim(),
+          apiUrl: s.apiUrl?.trim() || "—",
+          probe: label,
+          probeOk: ok,
+          summary: s.summary || s.error || "—",
+          checked: `${checkedAt}${duration}`,
+        };
+      }),
+    [servers],
+  );
+
+  const columns: GridColDef<ProbeRow>[] = useMemo(
+    () => [
+      { field: "server", headerName: "Server", flex: 1, minWidth: 180 },
+      {
+        field: "apiUrl",
+        headerName: "ApiUrl",
+        flex: 1.4,
+        minWidth: 220,
+        renderCell: (params) => (
+          <span style={{ wordBreak: "break-all" }} title={String(params.value)}>
+            {String(params.value)}
+          </span>
+        ),
+      },
+      {
+        field: "probe",
+        headerName: "Probe",
+        width: 130,
+        renderCell: (params) => (
+          <strong
+            className={
+              params.row.probeOk ? "pihole-step-value--ok" : "pihole-step-value--error"
+            }
+          >
+            {params.value}
+          </strong>
+        ),
+      },
+      { field: "summary", headerName: "Summary", flex: 1.2, minWidth: 160 },
+      { field: "checked", headerName: "Checked", width: 220 },
+    ],
+    [],
+  );
+
   if (!admin) return <ServerAccessDenied />;
 
-  const result = status?.lastResult;
-  const reachable = result?.reachable === true && !status?.lastError;
   const busy = saveMutation.isPending || checkMutation.isPending;
 
   const save = () => {
     const body: UpdateAvailabilityCheckSettingsRequest = {
       enabled,
-      targetUrl: targetUrl.trim() || DEFAULT_TARGET,
       probeUrl: probeUrl.trim() || DEFAULT_PROBE,
     };
     saveMutation.mutate({ data: body });
@@ -99,12 +185,13 @@ export function AvailabilityCheckServerTab() {
       <div className="settings-divider" />
 
       <p className="settings-item-description">
-        Periodically probes a target URL through a compatible availability endpoint (default{" "}
+        Every 5 minutes (when enabled) each VPN server&apos;s <code>ApiUrl</code> is probed through a
+        compatible endpoint (default{" "}
         <a href="https://status.rackot.ru/" target="_blank" rel="noreferrer">
           status.rackot.ru
         </a>
-        ). The probe must accept <code>?target=</code> and return the shared JSON contract. Background
-        checks run every 5 minutes when enabled.
+        ). Results are stored as <code>IsAvailableByExternalProbe</code> and combined with manager{" "}
+        <code>IsOnline</code> for the dashboard Online badge — pollers never overwrite the probe flag.
       </p>
 
       <div className="settings-group">
@@ -133,21 +220,8 @@ export function AvailabilityCheckServerTab() {
           />
         </div>
         <p className="settings-item-description">
-          External checker endpoint (must return the availability probe JSON). Default: {DEFAULT_PROBE}
+          Must accept <code>?target=</code> and return the shared probe JSON. Default: {DEFAULT_PROBE}
         </p>
-        <div className="settings-item">
-          <label htmlFor="availability-check-target-url">Target URL</label>
-          <input
-            id="availability-check-target-url"
-            className="input"
-            type="url"
-            value={targetUrl}
-            onChange={(e) => setTargetUrl(e.target.value)}
-            disabled={busy}
-            placeholder={DEFAULT_TARGET}
-          />
-        </div>
-        <p className="settings-item-description">URL passed to the probe as <code>target</code>. Default: {DEFAULT_TARGET}</p>
         <div className="settings-item" style={{ gap: 8 }}>
           <button type="button" className="btn primary" disabled={busy} onClick={save}>
             <FaSave className="icon" aria-hidden /> Save
@@ -166,93 +240,37 @@ export function AvailabilityCheckServerTab() {
 
       <h3 className="settings-card__h3-with-icon" style={{ marginTop: 24 }}>
         <FaGlobe className="icon" aria-hidden />
-        <span>Last probe</span>
+        <span>Servers{rows.length > 0 ? ` (${rows.length})` : ""}</span>
       </h3>
       <div className="settings-divider" />
 
-      {statusQuery.isLoading ? (
-        <p className="settings-item-description">Loading…</p>
-      ) : statusQuery.isError ? (
-        <p className="settings-item-description">{errorMessage(statusQuery.error)}</p>
-      ) : (
-        <div className="settings-group">
-          <div className="settings-item">
-            <span>Status</span>
-            <strong className={reachable ? "pihole-step-value--ok" : "pihole-step-value--error"}>
-              {status?.lastError
-                ? "probe error"
-                : result
-                  ? reachable
-                    ? "reachable"
-                    : result.summary || "unreachable"
-                  : "no data yet"}
-            </strong>
-          </div>
-          <div className="settings-item">
-            <span>Checked at</span>
-            <span>
-              {status?.lastCheckedAtUtc
-                ? formatDateWithOffset(new Date(status.lastCheckedAtUtc))
-                : "—"}
-              {status?.lastDurationMs != null ? ` (${status.lastDurationMs} ms)` : ""}
-            </span>
-          </div>
-          <div className="settings-item">
-            <span>Probe from</span>
-            <span>{result?.probeFrom ?? "—"}</span>
-          </div>
-          {status?.lastError ? (
-            <div className="settings-item">
-              <span>Error</span>
-              <span className="pihole-step-value--error">{status.lastError}</span>
-            </div>
-          ) : null}
+      <p className="settings-item-description">
+        Last cycle:{" "}
+        {status?.lastCheckedAtUtc
+          ? formatDateWithOffset(new Date(status.lastCheckedAtUtc))
+          : "—"}
+      </p>
 
-          {result?.dns ? (
-            <div className="settings-item">
-              <span>DNS</span>
-              <span>
-                {result.dns.ok ? "ok" : "fail"}
-                {result.dns.addresses?.length ? `: ${result.dns.addresses.join(", ")}` : ""}
-                {result.dns.latencyMs != null ? ` (${result.dns.latencyMs} ms)` : ""}
-                {result.dns.error ? ` — ${result.dns.error}` : ""}
-              </span>
-            </div>
-          ) : null}
+      {statusQuery.isError ? (
+        <p className="error-message">{errorMessage(statusQuery.error)}</p>
+      ) : null}
 
-          {result?.ports?.length ? (
-            <div className="settings-item">
-              <span>Ports</span>
-              <span>
-                {result.ports
-                  .map(
-                    (p) =>
-                      `${p.port}: ${p.ok ? "ok" : "fail"}${
-                        p.latencyMs != null ? ` (${p.latencyMs} ms)` : ""
-                      }${p.error ? ` — ${p.error}` : ""}`,
-                  )
-                  .join("; ")}
-              </span>
-            </div>
-          ) : null}
-
-          {result?.http ? (
-            <div className="settings-item">
-              <span>HTTP</span>
-              <span>
-                {result.http.ok ? "ok" : "fail"}
-                {result.http.statusCode != null ? ` ${result.http.statusCode}` : ""}
-                {result.http.latencyMs != null ? ` (${result.http.latencyMs} ms)` : ""}
-                {result.http.responseSummary
-                  ? ` — ${result.http.responseSummary}`
-                  : result.http.error
-                    ? ` — ${result.http.error}`
-                    : ""}
-              </span>
-            </div>
-          ) : null}
+      <CustomThemeProvider>
+        <div
+          className="data-grid-wrap"
+          style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}
+        >
+          <Grid
+            gridId="availability-check-servers"
+            rows={rows}
+            columns={columns}
+            loading={statusQuery.isLoading || statusQuery.isFetching}
+            {...gridProps}
+            slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
+            localeText={{ noRowsLabel: "No servers probed yet." }}
+          />
         </div>
-      )}
+      </CustomThemeProvider>
     </div>
   );
 }

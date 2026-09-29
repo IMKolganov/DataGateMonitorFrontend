@@ -143,6 +143,7 @@ export type { CertExpiryDtoCertExpiryProfileResultDto as CertExpiryProfileResult
 export type { AvailabilityCheckResponsesAvailabilityCheckStatusResponse as AvailabilityCheckStatusResponse } from "./orval/model/availabilityCheckResponsesAvailabilityCheckStatusResponse";
 export type { AvailabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest as UpdateAvailabilityCheckSettingsRequest } from "./orval/model/availabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest";
 export type { AvailabilityCheckDtoAvailabilityProbeResultDto as AvailabilityProbeResultDto } from "./orval/model/availabilityCheckDtoAvailabilityProbeResultDto";
+export type { AvailabilityCheckDtoAvailabilityCheckServerResultDto as AvailabilityCheckServerResultDto } from "./orval/model/availabilityCheckDtoAvailabilityCheckServerResultDto";
 
 
 export { EnumsServiceStatus as ServiceStatus } from "./orval/model/enumsServiceStatus";

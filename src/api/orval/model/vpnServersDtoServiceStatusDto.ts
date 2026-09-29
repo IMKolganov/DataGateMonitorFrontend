@@ -17,4 +17,5 @@ export interface VpnServersDtoServiceStatusDto {
   totalBytesIn?: number;
   totalBytesOut?: number;
   isOnline?: boolean;
+  isAvailableByExternalProbe?: boolean;
 }

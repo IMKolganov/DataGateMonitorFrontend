@@ -4,19 +4,14 @@
  * OpenVPN Gate Monitor API
  * OpenAPI spec version: v1
  */
-import type { AvailabilityCheckDtoAvailabilityProbeResultDto } from './availabilityCheckDtoAvailabilityProbeResultDto';
+import type { AvailabilityCheckDtoAvailabilityCheckServerResultDto } from './availabilityCheckDtoAvailabilityCheckServerResultDto';
 
 export interface AvailabilityCheckResponsesAvailabilityCheckStatusResponse {
   enabled?: boolean;
   /** @nullable */
-  targetUrl?: string | null;
+  probeUrl?: string | null;
   /** @nullable */
   lastCheckedAtUtc?: string | null;
   /** @nullable */
-  lastDurationMs?: number | null;
-  /** @nullable */
-  lastError?: string | null;
-  lastResult?: AvailabilityCheckDtoAvailabilityProbeResultDto;
-  /** @nullable */
-  probeUrl?: string | null;
+  servers?: AvailabilityCheckDtoAvailabilityCheckServerResultDto[] | null;
 }

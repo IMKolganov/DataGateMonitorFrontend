@@ -13,6 +13,7 @@ export interface VpnServersDtoVpnServerV2Dto {
   /** @nullable */
   serverName?: string | null;
   isOnline?: boolean;
+  isAvailableByExternalProbe?: boolean;
   isDefault?: boolean;
   /** @nullable */
   apiUrl?: string | null;

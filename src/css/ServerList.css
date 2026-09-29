@@ -691,17 +691,25 @@
   white-space: nowrap;
 }
 
-.server-group-header__clients {
+.server-group-header__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   flex-shrink: 0;
   font-weight: 600;
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
-.server-group-header__count {
-  margin-left: 8px;
-  opacity: 0.75;
-  font-size: var(--font-size-md);
-  flex-shrink: 0;
+.server-group-header__online {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.server-group-header__online .icon {
+  font-size: 0.85em;
+  opacity: 0.85;
 }
 
 .server-group-header__rename,

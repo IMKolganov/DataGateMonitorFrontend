@@ -24953,6 +24953,9 @@
           },
           "isOnline": {
             "type": "boolean"
+          },
+          "isAvailableByExternalProbe": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -25171,6 +25174,9 @@
           "isOnline": {
             "type": "boolean"
           },
+          "isAvailableByExternalProbe": {
+            "type": "boolean"
+          },
           "isDefault": {
             "type": "boolean"
           },
@@ -25259,6 +25265,9 @@
             "nullable": true
           },
           "isOnline": {
+            "type": "boolean"
+          },
+          "isAvailableByExternalProbe": {
             "type": "boolean"
           },
           "isDefault": {
@@ -27200,10 +27209,6 @@
           "enabled": {
             "type": "boolean"
           },
-          "targetUrl": {
-            "type": "string",
-            "nullable": true
-          },
           "probeUrl": {
             "type": "string",
             "nullable": true
@@ -27217,7 +27222,7 @@
           "enabled": {
             "type": "boolean"
           },
-          "targetUrl": {
+          "probeUrl": {
             "type": "string",
             "nullable": true
           },
@@ -27226,21 +27231,58 @@
             "format": "date-time",
             "nullable": true
           },
-          "lastDurationMs": {
+          "servers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityCheck.Dto.AvailabilityCheckServerResultDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvailabilityCheck.Dto.AvailabilityCheckServerResultDto": {
+        "type": "object",
+        "properties": {
+          "vpnServerId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serverName": {
+            "type": "string",
+            "nullable": true
+          },
+          "apiUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAvailableByExternalProbe": {
+            "type": "boolean"
+          },
+          "reachable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "checkedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "durationMs": {
             "type": "integer",
             "format": "int64",
             "nullable": true
           },
-          "lastError": {
+          "error": {
             "type": "string",
             "nullable": true
           },
-          "lastResult": {
+          "result": {
             "$ref": "#/components/schemas/AvailabilityCheck.Dto.AvailabilityProbeResultDto"
-          },
-          "probeUrl": {
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false

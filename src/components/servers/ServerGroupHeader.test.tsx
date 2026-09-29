@@ -14,8 +14,7 @@ describe("ServerGroupHeader", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /EU, 7 connected, 3 servers/ })).toBeInTheDocument();
-    expect(screen.getByTitle("Connected clients")).toHaveTextContent("(7)");
-    expect(screen.getByTitle("Servers in group")).toHaveTextContent("3");
+    expect(screen.getByRole("button", { name: /EU, 3 servers, 7 online users/ })).toBeInTheDocument();
+    expect(screen.getByTitle("3 servers, 7 online users")).toHaveTextContent("(3)7");
   });
 });
