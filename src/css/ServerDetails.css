@@ -321,6 +321,18 @@
   min-width: 0;
 }
 
+.server-details__panel {
+  margin-top: 1.25rem;
+}
+
+.server-details__panel > h3.settings-card__h3-with-icon {
+  margin: 0 0 10px;
+}
+
+.server-details__muted {
+  color: var(--text-muted);
+}
+
 .server-details__auto-refresh-label {
   display: inline-flex;
   align-items: center;
@@ -348,7 +360,8 @@
 .server-details__traffic-hint {
   font-size: var(--font-size-sm);
   opacity: 0.88;
-  margin: 0 0 10px;
+  margin: 0 0 12px;
+  line-height: 1.45;
 }
 
 .server-details__alert {

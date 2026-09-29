@@ -705,19 +705,35 @@ const VpnMap: React.FC<VpnMapProps> = ({
     for (const flow of visibleTrafficFlows) {
       if (flow.state === "failed" || flow.state === "disconnected") continue;
 
-      const directions: Array<{ key: FlowDirection; delta: number }> = [
-        { key: "clientToServer", delta: Math.max(0, flow.clientToServerBytesDelta ?? 0) },
-        { key: "serverToClient", delta: Math.max(0, flow.serverToClientBytesDelta ?? 0) },
+      const directions: Array<{
+        key: FlowDirection;
+        delta: number;
+        total: number;
+      }> = [
+        {
+          key: "clientToServer",
+          delta: Math.max(0, flow.clientToServerBytesDelta ?? 0),
+          total: Math.max(0, flow.clientToServerBytesTotal ?? 0),
+        },
+        {
+          key: "serverToClient",
+          delta: Math.max(0, flow.serverToClientBytesDelta ?? 0),
+          total: Math.max(0, flow.serverToClientBytesTotal ?? 0),
+        },
       ];
 
       for (const d of directions) {
-        if (d.delta <= 0) continue;
+        // Keep a faint baseline when deltas are briefly 0 but the connection already
+        // moved bytes (hub tick can report totals without a fresh delta).
+        if (d.delta <= 0 && d.total <= 0) continue;
 
         const id = `${flow.connectionId}:${d.key}`;
-        const intensity = intensityFromDelta(d.delta, maxDelta);
+        const visualDelta = d.delta > 0 ? d.delta : 1;
+        const intensity = intensityFromDelta(visualDelta, maxDelta);
         const weight = 1.2 + intensity * 6.8;
         const opacityBase = 0.25 + intensity * 0.75;
-        const opacity = flow.isIdle ? opacityBase * 0.45 : opacityBase;
+        const opacity =
+          (flow.isIdle || d.delta <= 0 ? opacityBase * 0.45 : opacityBase);
         const color = d.key === "clientToServer" ? "#ff9800" : "#00e5ff";
         const mapPath = offsetPolylinePositions(
           flow.from,
@@ -738,7 +754,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
           weight,
           opacity,
           intensity,
-          isIdle: flow.isIdle,
+          isIdle: flow.isIdle || d.delta <= 0,
           state: flow.state,
           from: flow.from,
           to: flow.to,
@@ -756,8 +772,6 @@ const VpnMap: React.FC<VpnMapProps> = ({
   const [pulseCables, setPulseCables] = useState<TimedGlobeCable[]>([]);
   const pulseSeqRef = useRef(0);
   const lastPulseAtRef = useRef<Map<string, number>>(new Map());
-  const idleArcCacheRef = useRef<Map<string, GlobeArcDatum>>(new Map());
-  const idleCableCacheRef = useRef<Map<string, GlobeCableDatum>>(new Map());
   const lastFlowEmitRef = useRef<Map<string, string>>(new Map());
   const globeArcsListRef = useRef<{ sig: string; list: GlobeArcDatum[] }>({ sig: "", list: [] });
   const globeCablesListRef = useRef<{ sig: string; list: GlobeCableDatum[] }>({ sig: "", list: [] });
@@ -927,29 +941,18 @@ const VpnMap: React.FC<VpnMapProps> = ({
 
   const globeArcsData = useMemo(() => {
     const now = Date.now();
-    const idleCache = idleArcCacheRef.current;
-    const usedIdle = new Set<string>();
-    const idleArcs: GlobeArcDatum[] = [];
-
-    for (const segment of visibleTrafficSegments) {
-      if (!segment.isIdle) continue;
-      usedIdle.add(segment.id);
-      const cached = idleCache.get(segment.id);
-      if (cached) {
-        idleArcs.push(cached);
-        continue;
-      }
-      const created = buildGlobeArcFromSegment(segment, segment.id, true, 0);
-      idleCache.set(segment.id, created);
-      idleArcs.push(created);
-    }
-    for (const key of [...idleCache.keys()]) {
-      if (!usedIdle.has(key)) idleCache.delete(key);
-    }
-
+    // Static baseline for every matched segment; animated pulses layer on top.
+    const baseArcs = visibleTrafficSegments.map((segment) =>
+      buildGlobeArcFromSegment(segment, segment.id, true, 0)
+    );
     const activePulses = pulseArcs.filter((pulse) => pulse.expiresAt > now);
-    const built = [...idleArcs, ...activePulses];
-    const sig = built.map((a) => a.id).join("\n");
+    const built = [...baseArcs, ...activePulses];
+    const sig = [
+      ...baseArcs.map(
+        (a) => `${a.id}:${a.color}:${a.intensity}:${a.startLat}:${a.startLng}:${a.endLat}:${a.endLng}`
+      ),
+      ...activePulses.map((a) => a.id),
+    ].join("\n");
     if (sig === globeArcsListRef.current.sig) {
       return globeArcsListRef.current.list;
     }
@@ -959,29 +962,17 @@ const VpnMap: React.FC<VpnMapProps> = ({
 
   const globeCablePathsData = useMemo(() => {
     const now = Date.now();
-    const idleCache = idleCableCacheRef.current;
-    const usedIdle = new Set<string>();
-    const idleCables: GlobeCableDatum[] = [];
-
-    for (const segment of visibleTrafficSegments) {
-      if (!segment.isIdle) continue;
-      usedIdle.add(segment.id);
-      const cached = idleCache.get(segment.id);
-      if (cached) {
-        idleCables.push(cached);
-        continue;
-      }
-      const created = buildGlobeCableFromSegment(segment, segment.id, true, 0);
-      idleCache.set(segment.id, created);
-      idleCables.push(created);
-    }
-    for (const key of [...idleCache.keys()]) {
-      if (!usedIdle.has(key)) idleCache.delete(key);
-    }
-
+    const baseCables = visibleTrafficSegments.map((segment) =>
+      buildGlobeCableFromSegment(segment, segment.id, true, 0)
+    );
     const activePulses = pulseCables.filter((pulse) => pulse.expiresAt > now);
-    const built = [...idleCables, ...activePulses];
-    const sig = built.map((a) => a.id).join("\n");
+    const built = [...baseCables, ...activePulses];
+    const sig = [
+      ...baseCables.map(
+        (c) => `${c.id}:${c.color}:${c.intensity}:${c.width}:${c.points[0]?.lat}:${c.points[0]?.lng}`
+      ),
+      ...activePulses.map((c) => c.id),
+    ].join("\n");
     if (sig === globeCablesListRef.current.sig) {
       return globeCablesListRef.current.list;
     }
