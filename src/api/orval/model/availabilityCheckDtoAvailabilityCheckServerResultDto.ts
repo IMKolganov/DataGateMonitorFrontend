@@ -12,6 +12,8 @@ export interface AvailabilityCheckDtoAvailabilityCheckServerResultDto {
   serverName?: string | null;
   /** @nullable */
   apiUrl?: string | null;
+  /** When false, this server is skipped by the probe cycle. */
+  isAvailabilityCheckEnabled?: boolean;
   isAvailableByExternalProbe?: boolean;
   /** @nullable */
   reachable?: boolean | null;

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import { FaGlobe, FaSave, FaSync } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
@@ -7,12 +8,16 @@ import {
   getGetApiAvailabilityCheckStatusQueryKey,
   useGetApiAvailabilityCheckStatus,
   usePostApiAvailabilityCheckCheck,
+  usePutApiAvailabilityCheckServersVpnServerId,
   usePutApiAvailabilityCheckSettings,
 } from "../api/orval/availability-check/availability-check";
+import { useGetApiOpenVpnServersGetVpnServerId } from "../api/orval/vpn-servers/vpn-servers";
 import type {
   AvailabilityCheckServerResultDto,
   AvailabilityCheckStatusResponse,
+  UpdateAvailabilityCheckServerSettingsRequest,
   UpdateAvailabilityCheckSettingsRequest,
+  VpnServerResponse,
 } from "../api/orvalModelShim";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import { ServerAccessDenied } from "../components/ServerAccessDenied";
@@ -31,10 +36,12 @@ type ProbeRow = {
   id: number;
   server: string;
   apiUrl: string;
+  checkEnabled: string;
   probe: string;
   probeOk: boolean;
   summary: string;
   checked: string;
+  isCurrent: boolean;
 };
 
 function unwrapStatus(data: unknown): AvailabilityCheckStatusResponse | undefined {
@@ -46,6 +53,9 @@ function unwrapStatus(data: unknown): AvailabilityCheckStatusResponse | undefine
 }
 
 function probeLabel(s: AvailabilityCheckServerResultDto): { label: string; ok: boolean } {
+  if (s.isAvailabilityCheckEnabled === false) {
+    return { label: "skipped", ok: true };
+  }
   if (s.error) return { label: "error", ok: false };
   if (s.reachable == null) {
     return {
@@ -60,32 +70,74 @@ function probeLabel(s: AvailabilityCheckServerResultDto): { label: string; ok: b
 }
 
 export function AvailabilityCheckServerTab() {
+  const { vpnServerId = "" } = useParams<{ vpnServerId: string }>();
+  const id = Number(vpnServerId);
   const user = getCurrentUser();
   const admin = isAdmin(user);
   const queryClient = useQueryClient();
 
-  const [enabled, setEnabled] = useState(true);
+  const [serverCheckEnabled, setServerCheckEnabled] = useState(true);
+  const [globalEnabled, setGlobalEnabled] = useState(true);
   const [probeUrl, setProbeUrl] = useState(DEFAULT_PROBE);
+  const [intervalSeconds, setIntervalSeconds] = useState(300);
+
+  const serverQuery = useGetApiOpenVpnServersGetVpnServerId(id, {
+    query: {
+      enabled: admin && Number.isFinite(id) && id > 0,
+      staleTime: 10_000,
+    },
+  });
+  const serverPayload = serverQuery.data as VpnServerResponse | undefined;
+  const serverName = serverPayload?.vpnServer?.serverName ?? `#${vpnServerId}`;
 
   const statusQuery = useGetApiAvailabilityCheckStatus({
     query: { enabled: admin, staleTime: 15_000, refetchInterval: 60_000 },
   });
 
   const status = unwrapStatus(statusQuery.data);
+  const thisServer = useMemo(
+    () => status?.servers?.find((s) => s.vpnServerId === id),
+    [status?.servers, id],
+  );
 
   useEffect(() => {
     if (!status) return;
-    setEnabled(Boolean(status.enabled));
+    setGlobalEnabled(Boolean(status.enabled));
     setProbeUrl(status.probeUrl?.trim() || DEFAULT_PROBE);
-  }, [status?.enabled, status?.probeUrl]);
+    const interval = Number(status.intervalSeconds);
+    setIntervalSeconds(Number.isFinite(interval) && interval > 0 ? interval : 300);
+  }, [status?.enabled, status?.probeUrl, status?.intervalSeconds]);
+
+  useEffect(() => {
+    if (thisServer) {
+      setServerCheckEnabled(thisServer.isAvailabilityCheckEnabled !== false);
+      return;
+    }
+    // Until first probe cycle includes this row, default to enabled.
+    setServerCheckEnabled(true);
+  }, [thisServer?.vpnServerId, thisServer?.isAvailabilityCheckEnabled]);
 
   const invalidate = () =>
     void queryClient.invalidateQueries({ queryKey: getGetApiAvailabilityCheckStatusQueryKey() });
 
-  const saveMutation = usePutApiAvailabilityCheckSettings({
+  const saveGlobalMutation = usePutApiAvailabilityCheckSettings({
     mutation: {
       onSuccess: () => {
-        toast.success("Availability check settings saved.");
+        toast.success("Shared probe settings saved.");
+        invalidate();
+      },
+      onError: (err) => toast.error(errorMessage(err)),
+    },
+  });
+
+  const saveServerMutation = usePutApiAvailabilityCheckServersVpnServerId({
+    mutation: {
+      onSuccess: () => {
+        toast.success(
+          serverCheckEnabled
+            ? "Availability check enabled for this server."
+            : "Availability check disabled for this server.",
+        );
         invalidate();
       },
       onError: (err) => toast.error(errorMessage(err)),
@@ -104,7 +156,7 @@ export function AvailabilityCheckServerTab() {
 
   const servers = status?.servers ?? [];
   const { gridProps } = useClientGridPagination({
-    storageKey: "settings-availability-check-servers",
+    storageKey: `settings-availability-check-servers-${id || "all"}`,
     defaultPageSize: 25,
     allowedKey: "10,25,50,100",
   });
@@ -117,22 +169,30 @@ export function AvailabilityCheckServerTab() {
           ? formatDateWithOffset(new Date(s.checkedAtUtc))
           : "—";
         const duration = s.durationMs != null ? ` (${s.durationMs} ms)` : "";
+        const isCurrent = s.vpnServerId === id;
         return {
           id: s.vpnServerId ?? 0,
-          server: `#${s.vpnServerId ?? "?"} ${s.serverName ?? ""}`.trim(),
+          server: `${isCurrent ? "★ " : ""}#${s.vpnServerId ?? "?"} ${s.serverName ?? ""}`.trim(),
           apiUrl: s.apiUrl?.trim() || "—",
+          checkEnabled: s.isAvailabilityCheckEnabled === false ? "off" : "on",
           probe: label,
           probeOk: ok,
           summary: s.summary || s.error || "—",
           checked: `${checkedAt}${duration}`,
+          isCurrent,
         };
       }),
-    [servers],
+    [servers, id],
   );
 
   const columns: GridColDef<ProbeRow>[] = useMemo(
     () => [
       { field: "server", headerName: "Server", flex: 1, minWidth: 180 },
+      {
+        field: "checkEnabled",
+        headerName: "Check",
+        width: 90,
+      },
       {
         field: "apiUrl",
         headerName: "ApiUrl",
@@ -166,47 +226,123 @@ export function AvailabilityCheckServerTab() {
 
   if (!admin) return <ServerAccessDenied />;
 
-  const busy = saveMutation.isPending || checkMutation.isPending;
+  const busy =
+    saveGlobalMutation.isPending || saveServerMutation.isPending || checkMutation.isPending;
 
-  const save = () => {
-    const body: UpdateAvailabilityCheckSettingsRequest = {
-      enabled,
-      probeUrl: probeUrl.trim() || DEFAULT_PROBE,
+  const saveServer = () => {
+    if (!Number.isFinite(id) || id <= 0) {
+      toast.error("Invalid server id.");
+      return;
+    }
+    const body: UpdateAvailabilityCheckServerSettingsRequest = {
+      enabled: serverCheckEnabled,
     };
-    saveMutation.mutate({ data: body });
+    saveServerMutation.mutate({ vpnServerId: id, data: body });
+  };
+
+  const saveGlobal = () => {
+    const body: UpdateAvailabilityCheckSettingsRequest = {
+      enabled: globalEnabled,
+      probeUrl: probeUrl.trim() || DEFAULT_PROBE,
+      intervalSeconds: Math.max(60, Math.min(86_400, Number(intervalSeconds) || 300)),
+    };
+    saveGlobalMutation.mutate({ data: body });
   };
 
   return (
     <div>
       <h2 className="settings-page__h2-with-icon">
         <FaGlobe className="icon" aria-hidden />
-        <span>Check available service</span>
+        <span>Check available — {serverQuery.isLoading ? "…" : serverName}</span>
       </h2>
       <div className="settings-divider" />
 
       <p className="settings-item-description">
-        Every 5 minutes (when enabled) each VPN server&apos;s <code>ApiUrl</code> is probed through a
-        compatible endpoint (default{" "}
-        <a href="https://status.rackot.ru/" target="_blank" rel="noreferrer">
-          status.rackot.ru
-        </a>
-        ). Results are stored as <code>IsAvailableByExternalProbe</code> and combined with manager{" "}
-        <code>IsOnline</code> for the dashboard Online badge — pollers never overwrite the probe flag.
+        Toggle whether <strong>this server</strong> is included in the external availability probe.
+        Probe results are stored as <code>IsAvailableByExternalProbe</code> and combined with manager{" "}
+        <code>IsOnline</code> for the Online badge. Shared interval / probe URL apply to all servers.
       </p>
 
       <div className="settings-group">
-        <h4>Settings</h4>
+        <h4>This server</h4>
         <div className="settings-item">
           <label className="checkbox-label">
             <input
               type="checkbox"
-              checked={enabled}
-              onChange={(e) => setEnabled(e.target.checked)}
-              disabled={busy}
+              checked={serverCheckEnabled}
+              onChange={(e) => setServerCheckEnabled(e.target.checked)}
+              disabled={busy || !Number.isFinite(id) || id <= 0}
             />
-            <span className="checkbox-title">Enable availability checks</span>
+            <span className="checkbox-title">Enable availability check for this server</span>
           </label>
         </div>
+        {thisServer ? (
+          <p className="settings-item-description">
+            Last probe:{" "}
+            <strong
+              className={
+                probeLabel(thisServer).ok ? "pihole-step-value--ok" : "pihole-step-value--error"
+              }
+            >
+              {probeLabel(thisServer).label}
+            </strong>
+            {" — "}
+            {thisServer.summary || thisServer.error || "—"}
+            {thisServer.checkedAtUtc
+              ? ` (${formatDateWithOffset(new Date(thisServer.checkedAtUtc))})`
+              : ""}
+          </p>
+        ) : (
+          <p className="settings-item-description">
+            No probe row for this server yet — run Check now or wait for the next cycle.
+          </p>
+        )}
+        <div className="settings-item" style={{ gap: 8 }}>
+          <button type="button" className="btn primary" disabled={busy} onClick={saveServer}>
+            <FaSave className="icon" aria-hidden /> Save for this server
+          </button>
+          <button
+            type="button"
+            className="btn secondary"
+            disabled={busy}
+            onClick={() => checkMutation.mutate()}
+          >
+            <FaSync className={`icon${checkMutation.isPending ? " spin" : ""}`} aria-hidden /> Check
+            now
+          </button>
+        </div>
+      </div>
+
+      <div className="settings-group" style={{ marginTop: 24 }}>
+        <h4>Shared probe settings</h4>
+        <div className="settings-item">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={globalEnabled}
+              onChange={(e) => setGlobalEnabled(e.target.checked)}
+              disabled={busy}
+            />
+            <span className="checkbox-title">Global kill-switch (all servers)</span>
+          </label>
+        </div>
+        <div className="settings-item">
+          <label htmlFor="availability-check-interval">Interval (seconds)</label>
+          <input
+            id="availability-check-interval"
+            className="input"
+            type="number"
+            min={60}
+            max={86400}
+            step={30}
+            value={intervalSeconds}
+            onChange={(e) => setIntervalSeconds(Number(e.target.value))}
+            disabled={busy}
+          />
+        </div>
+        <p className="settings-item-description">
+          How often the background service runs probes. Allowed range: 60–86400 seconds (default 300).
+        </p>
         <div className="settings-item">
           <label htmlFor="availability-check-probe-url">Probe URL</label>
           <input
@@ -223,24 +359,15 @@ export function AvailabilityCheckServerTab() {
           Must accept <code>?target=</code> and return the shared probe JSON. Default: {DEFAULT_PROBE}
         </p>
         <div className="settings-item" style={{ gap: 8 }}>
-          <button type="button" className="btn primary" disabled={busy} onClick={save}>
-            <FaSave className="icon" aria-hidden /> Save
-          </button>
-          <button
-            type="button"
-            className="btn secondary"
-            disabled={busy}
-            onClick={() => checkMutation.mutate()}
-          >
-            <FaSync className={`icon${checkMutation.isPending ? " spin" : ""}`} aria-hidden /> Check
-            now
+          <button type="button" className="btn secondary" disabled={busy} onClick={saveGlobal}>
+            <FaSave className="icon" aria-hidden /> Save shared settings
           </button>
         </div>
       </div>
 
       <h3 className="settings-card__h3-with-icon" style={{ marginTop: 24 }}>
         <FaGlobe className="icon" aria-hidden />
-        <span>Servers{rows.length > 0 ? ` (${rows.length})` : ""}</span>
+        <span>All servers{rows.length > 0 ? ` (${rows.length})` : ""}</span>
       </h3>
       <div className="settings-divider" />
 
@@ -249,6 +376,7 @@ export function AvailabilityCheckServerTab() {
         {status?.lastCheckedAtUtc
           ? formatDateWithOffset(new Date(status.lastCheckedAtUtc))
           : "—"}
+        . Current server marked with ★.
       </p>
 
       {statusQuery.isError ? (
@@ -265,6 +393,7 @@ export function AvailabilityCheckServerTab() {
             rows={rows}
             columns={columns}
             loading={statusQuery.isLoading || statusQuery.isFetching}
+            getRowClassName={(params) => (params.row.isCurrent ? "row-current-server" : "")}
             {...gridProps}
             slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
             localeText={{ noRowsLabel: "No servers probed yet." }}

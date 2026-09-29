@@ -25,7 +25,8 @@ import type {
 
 import type {
   ApiAvailabilityCheckResponsesAvailabilityCheckStatusResponse,
-  AvailabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest
+  AvailabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest,
+  AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest
 } from '../model';
 
 import { ogmMutator } from '../../mutator';
@@ -255,4 +256,71 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostApiAvailabilityCheckCheckMutationOptions(options), queryClient);
+    }
+
+
+export const putApiAvailabilityCheckServersVpnServerId = (
+    vpnServerId: number,
+    availabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest?: AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAvailabilityCheckResponsesAvailabilityCheckStatusResponse>(
+      {url: `/api/availability-check/servers/${vpnServerId}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: availabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPutApiAvailabilityCheckServersVpnServerIdMutationKey = () => ['putApiAvailabilityCheckServersVpnServerId'] as const;
+
+export const getPutApiAvailabilityCheckServersVpnServerIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>, TError,PutApiAvailabilityCheckServersVpnServerIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>, TError,PutApiAvailabilityCheckServersVpnServerIdMutationVariables, TContext> => {
+
+const mutationKey = getPutApiAvailabilityCheckServersVpnServerIdMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>, PutApiAvailabilityCheckServersVpnServerIdMutationVariables> = (props) => {
+          const {vpnServerId, data} = props ?? {};
+
+          return  putApiAvailabilityCheckServersVpnServerId(vpnServerId, data, requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiAvailabilityCheckServersVpnServerIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>>
+    export type PutApiAvailabilityCheckServersVpnServerIdMutationBody = AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest | undefined
+    export type PutApiAvailabilityCheckServersVpnServerIdMutationError = unknown
+    export type PutApiAvailabilityCheckServersVpnServerIdMutationVariables = {
+      vpnServerId: number;
+      data?: AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest
+    }
+
+    export const usePutApiAvailabilityCheckServersVpnServerId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>, TError,PutApiAvailabilityCheckServersVpnServerIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>,
+        TError,
+        PutApiAvailabilityCheckServersVpnServerIdMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPutApiAvailabilityCheckServersVpnServerIdMutationOptions(options), queryClient);
     }

@@ -218,6 +218,7 @@ export * from './availabilityCheckDtoAvailabilityHttpDto';
 export * from './availabilityCheckDtoAvailabilityPortDto';
 export * from './availabilityCheckDtoAvailabilityProbeResultDto';
 export * from './availabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest';
+export * from './availabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest';
 export * from './availabilityCheckResponsesAvailabilityCheckStatusResponse';
 export * from './certExpiryDtoCertExpiryCheckSummaryDto';
 export * from './certExpiryDtoCertExpiryProfileResultDto';
