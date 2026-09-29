@@ -16612,10 +16612,10 @@
         }
       }
     },
-    "/api/rf-availability/status": {
+    "/api/availability-check/status": {
       "get": {
         "tags": [
-          "RfAvailability"
+          "AvailabilityCheck"
         ],
         "responses": {
           "200": {
@@ -16623,17 +16623,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
                 }
               }
             }
@@ -16641,31 +16641,31 @@
         }
       }
     },
-    "/api/rf-availability/settings": {
+    "/api/availability-check/settings": {
       "put": {
         "tags": [
-          "RfAvailability"
+          "AvailabilityCheck"
         ],
         "requestBody": {
           "content": {
             "application/json-patch+json": {
               "schema": {
-                "$ref": "#/components/schemas/RfAvailability.Requests.UpdateRfAvailabilitySettingsRequest"
+                "$ref": "#/components/schemas/AvailabilityCheck.Requests.UpdateAvailabilityCheckSettingsRequest"
               }
             },
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RfAvailability.Requests.UpdateRfAvailabilitySettingsRequest"
+                "$ref": "#/components/schemas/AvailabilityCheck.Requests.UpdateAvailabilityCheckSettingsRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/RfAvailability.Requests.UpdateRfAvailabilitySettingsRequest"
+                "$ref": "#/components/schemas/AvailabilityCheck.Requests.UpdateAvailabilityCheckSettingsRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/RfAvailability.Requests.UpdateRfAvailabilitySettingsRequest"
+                "$ref": "#/components/schemas/AvailabilityCheck.Requests.UpdateAvailabilityCheckSettingsRequest"
               }
             }
           }
@@ -16676,17 +16676,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
                 }
               }
             }
@@ -16694,10 +16694,10 @@
         }
       }
     },
-    "/api/rf-availability/check": {
+    "/api/availability-check/check": {
       "post": {
         "tags": [
-          "RfAvailability"
+          "AvailabilityCheck"
         ],
         "responses": {
           "200": {
@@ -16705,17 +16705,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Api.RfAvailability.Responses.RfAvailabilityStatusResponse"
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
                 }
               }
             }
@@ -27046,7 +27046,7 @@
         },
         "additionalProperties": false
       },
-      "Api.RfAvailability.Responses.RfAvailabilityStatusResponse": {
+      "Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse": {
         "type": "object",
         "properties": {
           "success": {
@@ -27057,12 +27057,12 @@
             "nullable": true
           },
           "data": {
-            "$ref": "#/components/schemas/RfAvailability.Responses.RfAvailabilityStatusResponse"
+            "$ref": "#/components/schemas/AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
           }
         },
         "additionalProperties": false
       },
-      "RfAvailability.Dto.RfAvailabilityDnsDto": {
+      "AvailabilityCheck.Dto.AvailabilityDnsDto": {
         "type": "object",
         "properties": {
           "ok": {
@@ -27087,7 +27087,7 @@
         },
         "additionalProperties": false
       },
-      "RfAvailability.Dto.RfAvailabilityPortDto": {
+      "AvailabilityCheck.Dto.AvailabilityPortDto": {
         "type": "object",
         "properties": {
           "port": {
@@ -27109,7 +27109,7 @@
         },
         "additionalProperties": false
       },
-      "RfAvailability.Dto.RfAvailabilityHttpDto": {
+      "AvailabilityCheck.Dto.AvailabilityHttpDto": {
         "type": "object",
         "properties": {
           "ok": {
@@ -27153,7 +27153,7 @@
         },
         "additionalProperties": false
       },
-      "RfAvailability.Dto.RfAvailabilityProbeResultDto": {
+      "AvailabilityCheck.Dto.AvailabilityProbeResultDto": {
         "type": "object",
         "properties": {
           "input": {
@@ -27176,35 +27176,22 @@
             "nullable": true
           },
           "dns": {
-            "$ref": "#/components/schemas/RfAvailability.Dto.RfAvailabilityDnsDto"
+            "$ref": "#/components/schemas/AvailabilityCheck.Dto.AvailabilityDnsDto"
           },
           "ports": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/RfAvailability.Dto.RfAvailabilityPortDto"
+              "$ref": "#/components/schemas/AvailabilityCheck.Dto.AvailabilityPortDto"
             },
             "nullable": true
           },
           "http": {
-            "$ref": "#/components/schemas/RfAvailability.Dto.RfAvailabilityHttpDto"
+            "$ref": "#/components/schemas/AvailabilityCheck.Dto.AvailabilityHttpDto"
           }
         },
         "additionalProperties": false
       },
-      "RfAvailability.Requests.UpdateRfAvailabilitySettingsRequest": {
-        "type": "object",
-        "properties": {
-          "enabled": {
-            "type": "boolean"
-          },
-          "targetUrl": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "RfAvailability.Responses.RfAvailabilityStatusResponse": {
+      "AvailabilityCheck.Requests.UpdateAvailabilityCheckSettingsRequest": {
         "type": "object",
         "properties": {
           "enabled": {
@@ -27214,7 +27201,20 @@
             "type": "string",
             "nullable": true
           },
-          "probeBaseUrl": {
+          "probeUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvailabilityCheck.Responses.AvailabilityCheckStatusResponse": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "targetUrl": {
             "type": "string",
             "nullable": true
           },
@@ -27233,7 +27233,11 @@
             "nullable": true
           },
           "lastResult": {
-            "$ref": "#/components/schemas/RfAvailability.Dto.RfAvailabilityProbeResultDto"
+            "$ref": "#/components/schemas/AvailabilityCheck.Dto.AvailabilityProbeResultDto"
+          },
+          "probeUrl": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -27381,7 +27385,7 @@
       "name": "XrayClientLinksV2"
     },
     {
-      "name": "RfAvailability"
+      "name": "AvailabilityCheck"
     }
   ]
 }

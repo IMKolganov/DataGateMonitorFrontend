@@ -44,7 +44,7 @@ const PendingServerDiscoveryReviewPage = lazy(
 );
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PiHoleServerTab = lazy(() => import("./pages/PiHoleServerTab"));
-const RfAvailabilityServerTab = lazy(() => import("./pages/RfAvailabilityServerTab"));
+const AvailabilityCheckServerTab = lazy(() => import("./pages/AvailabilityCheckServerTab"));
 const ServerAccessTab = lazy(() => import("./pages/ServerAccessTab"));
 const Settings = lazy(() => import("./pages/Settings"));
 const ApplicationSettings = lazy(() => import("./pages/ApplicationSettings"));
@@ -192,7 +192,7 @@ function App() {
                         <Route path="pi-hole" element={withSuspense(<PiHoleServerTab />)} />
                         <Route
                           path="check-available"
-                          element={withSuspense(<RfAvailabilityServerTab />)}
+                          element={withSuspense(<AvailabilityCheckServerTab />)}
                         />
                       </Route>
                     </Route>

@@ -5,7 +5,7 @@
  * OpenAPI spec version: v1
  */
 
-export interface RfAvailabilityDtoRfAvailabilityHttpDto {
+export interface AvailabilityCheckDtoAvailabilityHttpDto {
   ok?: boolean;
   /** @nullable */
   url?: string | null;

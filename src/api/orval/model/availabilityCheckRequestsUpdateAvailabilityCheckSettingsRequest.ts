@@ -5,8 +5,10 @@
  * OpenAPI spec version: v1
  */
 
-export interface RfAvailabilityRequestsUpdateRfAvailabilitySettingsRequest {
+export interface AvailabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest {
   enabled?: boolean;
   /** @nullable */
   targetUrl?: string | null;
+  /** @nullable */
+  probeUrl?: string | null;
 }

@@ -140,9 +140,10 @@ export type { CertExpiryResponsesGetCertExpiryRunsResponse as GetCertExpiryRunsR
 export type { CertExpiryDtoCertExpiryServerResultDto as CertExpiryServerResultDto } from "./orval/model/certExpiryDtoCertExpiryServerResultDto";
 export type { CertExpiryDtoCertExpiryProfileResultDto as CertExpiryProfileResultDto } from "./orval/model/certExpiryDtoCertExpiryProfileResultDto";
 
-export type { RfAvailabilityResponsesRfAvailabilityStatusResponse as RfAvailabilityStatusResponse } from "./orval/model/rfAvailabilityResponsesRfAvailabilityStatusResponse";
-export type { RfAvailabilityRequestsUpdateRfAvailabilitySettingsRequest as UpdateRfAvailabilitySettingsRequest } from "./orval/model/rfAvailabilityRequestsUpdateRfAvailabilitySettingsRequest";
-export type { RfAvailabilityDtoRfAvailabilityProbeResultDto as RfAvailabilityProbeResultDto } from "./orval/model/rfAvailabilityDtoRfAvailabilityProbeResultDto";
+export type { AvailabilityCheckResponsesAvailabilityCheckStatusResponse as AvailabilityCheckStatusResponse } from "./orval/model/availabilityCheckResponsesAvailabilityCheckStatusResponse";
+export type { AvailabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest as UpdateAvailabilityCheckSettingsRequest } from "./orval/model/availabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest";
+export type { AvailabilityCheckDtoAvailabilityProbeResultDto as AvailabilityProbeResultDto } from "./orval/model/availabilityCheckDtoAvailabilityProbeResultDto";
+
 
 export { EnumsServiceStatus as ServiceStatus } from "./orval/model/enumsServiceStatus";
 export { EnumsDisconnectReason as DisconnectReason } from "./orval/model/enumsDisconnectReason";

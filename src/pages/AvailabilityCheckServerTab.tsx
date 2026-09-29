@@ -3,14 +3,14 @@ import { FaGlobe, FaSave, FaSync } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  getGetApiRfAvailabilityStatusQueryKey,
-  useGetApiRfAvailabilityStatus,
-  usePostApiRfAvailabilityCheck,
-  usePutApiRfAvailabilitySettings,
-} from "../api/orval/rf-availability/rf-availability";
+  getGetApiAvailabilityCheckStatusQueryKey,
+  useGetApiAvailabilityCheckStatus,
+  usePostApiAvailabilityCheckCheck,
+  usePutApiAvailabilityCheckSettings,
+} from "../api/orval/availability-check/availability-check";
 import type {
-  RfAvailabilityStatusResponse,
-  UpdateRfAvailabilitySettingsRequest,
+  AvailabilityCheckStatusResponse,
+  UpdateAvailabilityCheckSettingsRequest,
 } from "../api/orvalModelShim";
 import { getCurrentUser, isAdmin } from "../utils/auth/authSelectors";
 import { ServerAccessDenied } from "../components/ServerAccessDenied";
@@ -20,24 +20,26 @@ import "../css/Settings.css";
 import "../css/ServerDetails.css";
 
 const DEFAULT_TARGET = "https://xs1-hel.datagateapp.com:9443/";
+const DEFAULT_PROBE = "https://status.rackot.ru/check.cgi";
 
-function unwrapStatus(data: unknown): RfAvailabilityStatusResponse | undefined {
+function unwrapStatus(data: unknown): AvailabilityCheckStatusResponse | undefined {
   if (!data || typeof data !== "object") return undefined;
-  const obj = data as { data?: RfAvailabilityStatusResponse } & RfAvailabilityStatusResponse;
+  const obj = data as { data?: AvailabilityCheckStatusResponse } & AvailabilityCheckStatusResponse;
   if (obj.data && typeof obj.data === "object") return obj.data;
   if ("enabled" in obj || "targetUrl" in obj || "lastResult" in obj) return obj;
   return undefined;
 }
 
-export function RfAvailabilityServerTab() {
+export function AvailabilityCheckServerTab() {
   const user = getCurrentUser();
   const admin = isAdmin(user);
   const queryClient = useQueryClient();
 
   const [enabled, setEnabled] = useState(true);
   const [targetUrl, setTargetUrl] = useState(DEFAULT_TARGET);
+  const [probeUrl, setProbeUrl] = useState(DEFAULT_PROBE);
 
-  const statusQuery = useGetApiRfAvailabilityStatus({
+  const statusQuery = useGetApiAvailabilityCheckStatus({
     query: { enabled: admin, staleTime: 15_000, refetchInterval: 60_000 },
   });
 
@@ -47,22 +49,23 @@ export function RfAvailabilityServerTab() {
     if (!status) return;
     setEnabled(Boolean(status.enabled));
     setTargetUrl(status.targetUrl?.trim() || DEFAULT_TARGET);
-  }, [status?.enabled, status?.targetUrl]);
+    setProbeUrl(status.probeUrl?.trim() || DEFAULT_PROBE);
+  }, [status?.enabled, status?.targetUrl, status?.probeUrl]);
 
   const invalidate = () =>
-    void queryClient.invalidateQueries({ queryKey: getGetApiRfAvailabilityStatusQueryKey() });
+    void queryClient.invalidateQueries({ queryKey: getGetApiAvailabilityCheckStatusQueryKey() });
 
-  const saveMutation = usePutApiRfAvailabilitySettings({
+  const saveMutation = usePutApiAvailabilityCheckSettings({
     mutation: {
       onSuccess: () => {
-        toast.success("RF availability settings saved.");
+        toast.success("Availability check settings saved.");
         invalidate();
       },
       onError: (err) => toast.error(errorMessage(err)),
     },
   });
 
-  const checkMutation = usePostApiRfAvailabilityCheck({
+  const checkMutation = usePostApiAvailabilityCheckCheck({
     mutation: {
       onSuccess: () => {
         toast.success("Probe completed.");
@@ -79,9 +82,10 @@ export function RfAvailabilityServerTab() {
   const busy = saveMutation.isPending || checkMutation.isPending;
 
   const save = () => {
-    const body: UpdateRfAvailabilitySettingsRequest = {
+    const body: UpdateAvailabilityCheckSettingsRequest = {
       enabled,
       targetUrl: targetUrl.trim() || DEFAULT_TARGET,
+      probeUrl: probeUrl.trim() || DEFAULT_PROBE,
     };
     saveMutation.mutate({ data: body });
   };
@@ -95,11 +99,12 @@ export function RfAvailabilityServerTab() {
       <div className="settings-divider" />
 
       <p className="settings-item-description">
-        Probes the target URL from Russia via{" "}
+        Periodically probes a target URL through a compatible availability endpoint (default{" "}
         <a href="https://status.rackot.ru/" target="_blank" rel="noreferrer">
           status.rackot.ru
         </a>
-        . Background checks run every 5 minutes when enabled.
+        ). The probe must accept <code>?target=</code> and return the shared JSON contract. Background
+        checks run every 5 minutes when enabled.
       </p>
 
       <div className="settings-group">
@@ -112,13 +117,28 @@ export function RfAvailabilityServerTab() {
               onChange={(e) => setEnabled(e.target.checked)}
               disabled={busy}
             />
-            <span className="checkbox-title">Enable RF availability checks</span>
+            <span className="checkbox-title">Enable availability checks</span>
           </label>
         </div>
         <div className="settings-item">
-          <label htmlFor="rf-availability-target-url">Target URL</label>
+          <label htmlFor="availability-check-probe-url">Probe URL</label>
           <input
-            id="rf-availability-target-url"
+            id="availability-check-probe-url"
+            className="input"
+            type="url"
+            value={probeUrl}
+            onChange={(e) => setProbeUrl(e.target.value)}
+            disabled={busy}
+            placeholder={DEFAULT_PROBE}
+          />
+        </div>
+        <p className="settings-item-description">
+          External checker endpoint (must return the availability probe JSON). Default: {DEFAULT_PROBE}
+        </p>
+        <div className="settings-item">
+          <label htmlFor="availability-check-target-url">Target URL</label>
+          <input
+            id="availability-check-target-url"
             className="input"
             type="url"
             value={targetUrl}
@@ -127,7 +147,7 @@ export function RfAvailabilityServerTab() {
             placeholder={DEFAULT_TARGET}
           />
         </div>
-        <p className="settings-item-description">Default: {DEFAULT_TARGET}</p>
+        <p className="settings-item-description">URL passed to the probe as <code>target</code>. Default: {DEFAULT_TARGET}</p>
         <div className="settings-item" style={{ gap: 8 }}>
           <button type="button" className="btn primary" disabled={busy} onClick={save}>
             <FaSave className="icon" aria-hidden /> Save
@@ -237,4 +257,4 @@ export function RfAvailabilityServerTab() {
   );
 }
 
-export default RfAvailabilityServerTab;
+export default AvailabilityCheckServerTab;

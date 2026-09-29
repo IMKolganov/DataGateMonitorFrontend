@@ -5,9 +5,10 @@
  * OpenAPI spec version: v1
  */
 
-export interface RfAvailabilityDtoRfAvailabilityPortDto {
-  port?: number;
+export interface AvailabilityCheckDtoAvailabilityDnsDto {
   ok?: boolean;
+  /** @nullable */
+  addresses?: string[] | null;
   /** @nullable */
   latencyMs?: number | null;
   /** @nullable */
