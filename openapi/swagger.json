@@ -16611,6 +16611,117 @@
           }
         }
       }
+    },
+    "/api/availability-check/status": {
+      "get": {
+        "tags": [
+          "AvailabilityCheck"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/availability-check/settings": {
+      "put": {
+        "tags": [
+          "AvailabilityCheck"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityCheck.Requests.UpdateAvailabilityCheckSettingsRequest"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityCheck.Requests.UpdateAvailabilityCheckSettingsRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityCheck.Requests.UpdateAvailabilityCheckSettingsRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityCheck.Requests.UpdateAvailabilityCheckSettingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/availability-check/check": {
+      "post": {
+        "tags": [
+          "AvailabilityCheck"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -24839,6 +24950,12 @@
           "totalBytesOut": {
             "type": "integer",
             "format": "int32"
+          },
+          "isOnline": {
+            "type": "boolean"
+          },
+          "isAvailableByExternalProbe": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -25057,6 +25174,9 @@
           "isOnline": {
             "type": "boolean"
           },
+          "isAvailableByExternalProbe": {
+            "type": "boolean"
+          },
           "isDefault": {
             "type": "boolean"
           },
@@ -25145,6 +25265,9 @@
             "nullable": true
           },
           "isOnline": {
+            "type": "boolean"
+          },
+          "isAvailableByExternalProbe": {
             "type": "boolean"
           },
           "isDefault": {
@@ -26934,6 +27057,235 @@
           }
         },
         "additionalProperties": false
+      },
+      "Api.AvailabilityCheck.Responses.AvailabilityCheckStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/AvailabilityCheck.Responses.AvailabilityCheckStatusResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvailabilityCheck.Dto.AvailabilityDnsDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "latencyMs": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvailabilityCheck.Dto.AvailabilityPortDto": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "latencyMs": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvailabilityCheck.Dto.AvailabilityHttpDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "latencyMs": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "bytesRead": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "contentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "bodyPreview": {
+            "type": "string",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "responseSummary": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvailabilityCheck.Dto.AvailabilityProbeResultDto": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "string",
+            "nullable": true
+          },
+          "host": {
+            "type": "string",
+            "nullable": true
+          },
+          "reachable": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "probeFrom": {
+            "type": "string",
+            "nullable": true
+          },
+          "dns": {
+            "$ref": "#/components/schemas/AvailabilityCheck.Dto.AvailabilityDnsDto"
+          },
+          "ports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityCheck.Dto.AvailabilityPortDto"
+            },
+            "nullable": true
+          },
+          "http": {
+            "$ref": "#/components/schemas/AvailabilityCheck.Dto.AvailabilityHttpDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvailabilityCheck.Requests.UpdateAvailabilityCheckSettingsRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "probeUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvailabilityCheck.Responses.AvailabilityCheckStatusResponse": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "probeUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastCheckedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "servers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityCheck.Dto.AvailabilityCheckServerResultDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AvailabilityCheck.Dto.AvailabilityCheckServerResultDto": {
+        "type": "object",
+        "properties": {
+          "vpnServerId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serverName": {
+            "type": "string",
+            "nullable": true
+          },
+          "apiUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAvailableByExternalProbe": {
+            "type": "boolean"
+          },
+          "reachable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "checkedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "result": {
+            "$ref": "#/components/schemas/AvailabilityCheck.Dto.AvailabilityProbeResultDto"
+          }
+        },
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
@@ -27076,6 +27428,9 @@
     },
     {
       "name": "XrayClientLinksV2"
+    },
+    {
+      "name": "AvailabilityCheck"
     }
   ]
 }

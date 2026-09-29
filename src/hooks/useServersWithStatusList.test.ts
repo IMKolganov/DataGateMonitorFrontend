@@ -4,6 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createElement, type ReactNode } from "react";
 
 const authState = vi.hoisted(() => ({ admin: true }));
+const signalRState = vi.hoisted(() => ({
+  serviceData: null as Record<number, unknown> | null,
+}));
 
 vi.mock("../utils/auth/authSelectors", () => ({
   getCurrentUser: () => ({ id: 1, roles: authState.admin ? ["Admin"] : ["VpnUser"] }),
@@ -12,7 +15,7 @@ vi.mock("../utils/auth/authSelectors", () => ({
 
 vi.mock("./useSignalRService", () => ({
   default: () => ({
-    serviceData: null,
+    serviceData: signalRState.serviceData,
     runServiceNow: vi.fn(),
     connectionState: "Disconnected",
     lastError: null,
@@ -154,6 +157,7 @@ describe("useServersWithStatusList helpers", () => {
 describe("useServersWithStatusList", () => {
   beforeEach(() => {
     authState.admin = true;
+    signalRState.serviceData = null;
     vi.clearAllMocks();
     try {
       localStorage.removeItem("datagate.serverList.showDeleted");
@@ -248,5 +252,26 @@ describe("useServersWithStatusList", () => {
       expect(alpha?.raw.vpnServerResponses?.vpnServer?.isDeleted).toBe(true);
     });
     confirmSpy.mockRestore();
+  });
+
+  it("applies hub isOnline onto wsOnline for live Online/Offline badges", async () => {
+    signalRState.serviceData = {
+      1: {
+        vpnServerId: 1,
+        status: 0 as ServiceStatus,
+        isOnline: false,
+        countConnectedClients: 9,
+      },
+    };
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { result } = renderHook(() => useServersWithStatusList(), {
+      wrapper: wrapper(queryClient),
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    const alpha = result.current.servers.find((s) => s.id === 1);
+    expect(alpha?.wsOnline).toBe(false);
+    expect(alpha?.wsCountConnectedClients).toBe(9);
+    expect(alpha?.serviceStatus).toBe(0 as ServiceStatus);
   });
 });

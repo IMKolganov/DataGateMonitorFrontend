@@ -140,6 +140,13 @@ export type { CertExpiryResponsesGetCertExpiryRunsResponse as GetCertExpiryRunsR
 export type { CertExpiryDtoCertExpiryServerResultDto as CertExpiryServerResultDto } from "./orval/model/certExpiryDtoCertExpiryServerResultDto";
 export type { CertExpiryDtoCertExpiryProfileResultDto as CertExpiryProfileResultDto } from "./orval/model/certExpiryDtoCertExpiryProfileResultDto";
 
+export type { AvailabilityCheckResponsesAvailabilityCheckStatusResponse as AvailabilityCheckStatusResponse } from "./orval/model/availabilityCheckResponsesAvailabilityCheckStatusResponse";
+export type { AvailabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest as UpdateAvailabilityCheckSettingsRequest } from "./orval/model/availabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest";
+export type { AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest as UpdateAvailabilityCheckServerSettingsRequest } from "./orval/model/availabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest";
+export type { AvailabilityCheckDtoAvailabilityProbeResultDto as AvailabilityProbeResultDto } from "./orval/model/availabilityCheckDtoAvailabilityProbeResultDto";
+export type { AvailabilityCheckDtoAvailabilityCheckServerResultDto as AvailabilityCheckServerResultDto } from "./orval/model/availabilityCheckDtoAvailabilityCheckServerResultDto";
+
+
 export { EnumsServiceStatus as ServiceStatus } from "./orval/model/enumsServiceStatus";
 export { EnumsDisconnectReason as DisconnectReason } from "./orval/model/enumsDisconnectReason";
 export { EnumsOverviewGrouping as OverviewGrouping } from "./orval/model/enumsOverviewGrouping";

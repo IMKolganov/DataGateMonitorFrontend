@@ -11,6 +11,7 @@ describe("serverDetailsPaths", () => {
   it("blocks admin-only subpaths for non-admin redirect", () => {
     expect(isNonAdminBlockedSubpath("")).toBe(true);
     expect(isNonAdminBlockedSubpath("pi-hole")).toBe(true);
+    expect(isNonAdminBlockedSubpath("check-available")).toBe(true);
     expect(isNonAdminBlockedSubpath("certificates")).toBe(true);
     expect(isNonAdminBlockedSubpath("access")).toBe(true);
     expect(isNonAdminBlockedSubpath("statistics")).toBe(false);
