@@ -1,4 +1,4 @@
-import { formatBytes } from "./helpers";
+import { formatBytes, type SeriesExtreme } from "./helpers";
 
 type Totals = {
   sessionsCount: number;
@@ -7,6 +7,10 @@ type Totals = {
   trafficInBytes: number;
   trafficOutBytes: number;
   trafficTotalBytes: number;
+  devicesPeak?: SeriesExtreme | null;
+  devicesLow?: SeriesExtreme | null;
+  sessionsPeak?: SeriesExtreme | null;
+  sessionsLow?: SeriesExtreme | null;
 };
 
 type Props = {
@@ -24,9 +28,23 @@ export default function StatsCards({ totals, loading }: Props) {
         marginBottom: 12,
       }}
     >
-      <Card title="Devices (unique externalId)" value={totals.devicesCount} />
+      <Card
+        title="Devices (unique externalId)"
+        value={totals.devicesCount}
+        extremes={[
+          { label: "Peak concurrent", extreme: totals.devicesPeak },
+          { label: "Low concurrent", extreme: totals.devicesLow },
+        ]}
+      />
       <Card title="Users (accounts)" value={totals.accountsCount} />
-      <Card title="Sessions" value={totals.sessionsCount} />
+      <Card
+        title="Sessions"
+        value={totals.sessionsCount}
+        extremes={[
+          { label: "Peak concurrent", extreme: totals.sessionsPeak },
+          { label: "Low concurrent", extreme: totals.sessionsLow },
+        ]}
+      />
       <Card title="Traffic IN (total)" value={formatBytes(totals.trafficInBytes)} />
       <Card title="Traffic OUT (total)" value={formatBytes(totals.trafficOutBytes)} />
       <Card title="Traffic TOTAL" value={formatBytes(totals.trafficTotalBytes)} />
@@ -36,7 +54,24 @@ export default function StatsCards({ totals, loading }: Props) {
   );
 }
 
-function Card({ title, value }: { title: string; value: string | number }) {
+function formatExtreme(extreme: SeriesExtreme | null | undefined): string | null {
+  if (!extreme) return null;
+  return `${extreme.count} · ${extreme.atLabel}`;
+}
+
+function Card({
+  title,
+  value,
+  extremes,
+}: {
+  title: string;
+  value: string | number;
+  extremes?: { label: string; extreme: SeriesExtreme | null | undefined }[];
+}) {
+  const rows = (extremes ?? [])
+    .map((e) => ({ label: e.label, text: formatExtreme(e.extreme) }))
+    .filter((e): e is { label: string; text: string } => e.text != null);
+
   return (
     <div
       style={{
@@ -54,6 +89,25 @@ function Card({ title, value }: { title: string; value: string | number }) {
       <div style={{ fontWeight: 700, fontSize: "var(--font-size-xl)", wordBreak: "break-word" }}>
         {value}
       </div>
+      {rows.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 2, marginTop: 4 }}>
+          {rows.map((row) => (
+            <div
+              key={row.label}
+              style={{
+                fontSize: "var(--font-size-sm)",
+                opacity: 0.85,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "0 6px",
+              }}
+            >
+              <span style={{ opacity: 0.7 }}>{row.label}</span>
+              <span style={{ fontWeight: 600 }}>{row.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

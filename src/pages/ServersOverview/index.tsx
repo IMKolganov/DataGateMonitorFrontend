@@ -14,8 +14,9 @@ import { StatisticsScopeBanner } from "./StatisticsScopeBanner";
 import { OverviewUserProfileCard } from "./OverviewUserProfileCard";
 import "../../css/Settings.css";
 import "../../css/ServersOverview.css";
-import { addDays, endOfToday, startOfToday, toChartPoints, toUsersSeriesChartPoints, mergeChartWithUsersSeries, buildFallbackOverviewResponse, normalizeGrouping } from "./helpers";
+import { addDays, endOfToday, startOfToday, toChartPoints, toUsersSeriesChartPoints, mergeChartWithUsersSeries, buildFallbackOverviewResponse, normalizeGrouping, extremeFromSummary } from "./helpers";
 import type { ChartPoint, MergedChartPoint } from "./types";
+import type { SeriesExtreme } from "./helpers";
 
 import { keepPreviousData, useQueries } from "@tanstack/react-query";
 import {
@@ -153,6 +154,10 @@ type SafeTotals = {
   trafficInBytes: number;
   trafficOutBytes: number;
   trafficTotalBytes: number;
+  devicesPeak?: SeriesExtreme | null;
+  devicesLow?: SeriesExtreme | null;
+  sessionsPeak?: SeriesExtreme | null;
+  sessionsLow?: SeriesExtreme | null;
 };
 
 function makeSafeTotals(resp?: OverviewTotalsResponse): SafeTotals {
@@ -422,7 +427,33 @@ export default function ServersOverview() {
     setGrouping(c.grouping);
   };
 
-  const totalsForCards = useMemo(() => safeTotals, [safeTotals]);
+  const totalsForCards = useMemo(() => {
+    const usersMode = normalizeGrouping(usersSeriesData?.meta?.grouping);
+    const seriesMode = normalizeGrouping(apiData?.meta?.grouping);
+    const usersSummary = usersSeriesData?.summary;
+    const seriesSummary = apiData?.summary;
+
+    const devicesPeak =
+      extremeFromSummary(usersSummary?.peakActiveUsers, usersSummary?.peakActiveUsersAt, usersMode) ??
+      extremeFromSummary(seriesSummary?.peakActiveClients, seriesSummary?.peakActiveClientsAt, seriesMode);
+    const devicesLow =
+      extremeFromSummary(usersSummary?.lowActiveUsers, usersSummary?.lowActiveUsersAt, usersMode) ??
+      extremeFromSummary(seriesSummary?.lowActiveClients, seriesSummary?.lowActiveClientsAt, seriesMode);
+    const sessionsPeak =
+      extremeFromSummary(usersSummary?.peakActiveSessions, usersSummary?.peakActiveSessionsAt, usersMode) ??
+      extremeFromSummary(seriesSummary?.peakActiveClients, seriesSummary?.peakActiveClientsAt, seriesMode);
+    const sessionsLow =
+      extremeFromSummary(usersSummary?.lowActiveSessions, usersSummary?.lowActiveSessionsAt, usersMode) ??
+      extremeFromSummary(seriesSummary?.lowActiveClients, seriesSummary?.lowActiveClientsAt, seriesMode);
+
+    return {
+      ...safeTotals,
+      devicesPeak,
+      devicesLow,
+      sessionsPeak,
+      sessionsLow,
+    };
+  }, [safeTotals, usersSeriesData, apiData]);
 
   const overviewLabelParams = useMemo(
     () => ({
