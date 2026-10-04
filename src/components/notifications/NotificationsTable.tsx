@@ -3,7 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import type { GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import Grid from "../ui/TableStyle.tsx";
 import CustomThemeProvider from "../ui/ThemeProvider.tsx";
-import type { NotificationItemDto } from "../../api/orvalModelShim";
+import type {
+  NotificationDeliveryDto,
+  NotificationItemDto,
+} from "../../api/orvalModelShim";
+import { EnumsDeliveryStatus } from "../../api/orval/model";
 import { FaCheck, FaExpandAlt, FaServer } from "react-icons/fa";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
 import "../../css/Table.css";
@@ -11,6 +15,37 @@ import "../../css/Settings.css";
 
 const MESSAGE_TRUNCATE_LENGTH = 80;
 const SERVER_DISCOVERED_TYPE = "server.discovered";
+
+const DELIVERY_STATUS_LABEL: Record<number, string> = {
+  [EnumsDeliveryStatus.NUMBER_0]: "Pending",
+  [EnumsDeliveryStatus.NUMBER_1]: "Sent",
+  [EnumsDeliveryStatus.NUMBER_2]: "Failed",
+  [EnumsDeliveryStatus.NUMBER_3]: "Read",
+};
+
+function deliveryStatusLabel(status: number | null | undefined): string {
+  if (status == null) return "—";
+  return DELIVERY_STATUS_LABEL[status] ?? `Status ${status}`;
+}
+
+function deliveryBadgeClass(status: number | null | undefined): string {
+  if (status === EnumsDeliveryStatus.NUMBER_2) return "notification-delivery-badge--failed";
+  if (status === EnumsDeliveryStatus.NUMBER_1 || status === EnumsDeliveryStatus.NUMBER_3) {
+    return "notification-delivery-badge--ok";
+  }
+  return "notification-delivery-badge--pending";
+}
+
+function formatDeliveriesSummary(deliveries: NotificationDeliveryDto[] | null | undefined): string {
+  if (!deliveries?.length) return "—";
+  return deliveries
+    .map((d) => {
+      const channel = (d.channel ?? "?").toLowerCase();
+      const status = deliveryStatusLabel(d.status);
+      return d.error ? `${channel}: ${status} (${d.error})` : `${channel}: ${status}`;
+    })
+    .join("\n");
+}
 
 function parseDiscoveryIdFromMessage(message: string): number | undefined {
   const match = /DiscoveryId=(\d+)/i.exec(message);
@@ -79,10 +114,10 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
   onMarkRead,
   markReadLoading,
 }) => {
-  const [detailsMessage, setDetailsMessage] = useState<string | null>(null);
+  const [detailsText, setDetailsText] = useState<string | null>(null);
   const navigate = useNavigate();
-  const openDetails = useCallback((message: string) => setDetailsMessage(message), []);
-  const closeDetails = useCallback(() => setDetailsMessage(null), []);
+  const openDetails = useCallback((text: string) => setDetailsText(text), []);
+  const closeDetails = useCallback(() => setDetailsText(null), []);
 
   const paginationModel: GridPaginationModel = useMemo(
     () => ({ page, pageSize }),
@@ -105,11 +140,23 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
         const discoveryId =
           type === SERVER_DISCOVERED_TYPE ? parseDiscoveryIdFromMessage(messageRaw) : undefined;
 
+        const deliveries = n.deliveries ?? [];
+        const deliveryFailed = deliveries.some((d) => d.status === EnumsDeliveryStatus.NUMBER_2);
+        const detailsParts = [
+          messageRaw || message,
+          deliveries.length
+            ? `\n\nDelivery:\n${formatDeliveriesSummary(deliveries)}`
+            : "\n\nDelivery:\n(no channel attempts recorded)",
+        ];
+
         return {
           id,
           notificationId,
           title: n.title ?? "-",
           message,
+          detailsText: detailsParts.join(""),
+          deliveries,
+          deliveryFailed,
           severityNum,
           severityLabel: severityCfg.label,
           severityBadgeClass: severityCfg.badgeClass,
@@ -135,24 +182,50 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
         const msg = params.value as string;
         const isLong = msg.length > MESSAGE_TRUNCATE_LENGTH;
         const display = isLong ? `${msg.slice(0, MESSAGE_TRUNCATE_LENGTH)}…` : msg;
+        const detailsText = params.row.detailsText as string;
+        const showDetails = isLong || Boolean(params.row.deliveryFailed);
         return (
           <div className="notification-message-cell">
             <span className="message-text" title={isLong ? msg : undefined}>
               {display}
             </span>
-            {isLong && (
+            {showDetails && (
               <button
                 type="button"
                 className="btn secondary notification-details-btn"
                 onClick={(e) => {
                   e.stopPropagation();
-                  openDetails(msg);
+                  openDetails(detailsText);
                 }}
-                title="Show full message"
+                title="Show full message and delivery status"
               >
                 <FaExpandAlt className="icon" /> Show details
               </button>
             )}
+          </div>
+        );
+      },
+    },
+    {
+      field: "deliveries",
+      headerName: "Delivery",
+      width: 170,
+      sortable: false,
+      renderCell: (params) => {
+        const deliveries = (params.row.deliveries ?? []) as NotificationDeliveryDto[];
+        if (!deliveries.length) {
+          return <span className="notification-delivery-empty">—</span>;
+        }
+        return (
+          <div className="notification-delivery-cell" title={formatDeliveriesSummary(deliveries)}>
+            {deliveries.map((d, idx) => (
+              <span
+                key={`${d.channel ?? "ch"}-${idx}`}
+                className={`notification-delivery-badge ${deliveryBadgeClass(d.status)}`}
+              >
+                {(d.channel ?? "?").toLowerCase()}: {deliveryStatusLabel(d.status)}
+              </span>
+            ))}
           </div>
         );
       },
@@ -255,14 +328,14 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
           slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
         />
 
-        {detailsMessage != null && (
+        {detailsText != null && (
           <div className="modal-overlay" onClick={closeDetails}>
             <div
               className="modal-content notification-details-modal"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="modal-header">
-                <h3>Message details</h3>
+                <h3>Message & delivery details</h3>
                 <button
                   type="button"
                   className="modal-close"
@@ -273,7 +346,7 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
                 </button>
               </div>
               <div className="notification-details-body">
-                <pre>{detailsMessage}</pre>
+                <pre>{detailsText}</pre>
               </div>
             </div>
           </div>

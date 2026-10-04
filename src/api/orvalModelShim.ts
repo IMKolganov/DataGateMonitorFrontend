@@ -64,6 +64,7 @@ export type { AuthRequestsTotpDisableRequest as TotpDisableRequest } from "./orv
 export type { TelegramBotIncomingMessageLogDtoMessageDto as MessageDto } from "./orval/model/telegramBotIncomingMessageLogDtoMessageDto";
 export type { VpnServerCertsResponsesDtoMonitorServerCertificate as MonitorServerCertificate } from "./orval/model/vpnServerCertsResponsesDtoMonitorServerCertificate";
 export type { NotificationsResponsesNotificationItemDto as NotificationItemDto } from "./orval/model/notificationsResponsesNotificationItemDto";
+export type { NotificationsResponsesNotificationDeliveryDto as NotificationDeliveryDto } from "./orval/model/notificationsResponsesNotificationDeliveryDto";
 export type { NotificationsRequestsNotifyAdminsRequest as NotificationRequest } from "./orval/model/notificationsRequestsNotifyAdminsRequest";
 export type { VpnServerClientsResponsesOverviewSeriesResponse as OverviewSeriesResponse } from "./orval/model/vpnServerClientsResponsesOverviewSeriesResponse";
 export type { VpnServerClientsDtoOverviewSeriesRowDto as OverviewSeriesRowDto } from "./orval/model/vpnServerClientsDtoOverviewSeriesRowDto";
