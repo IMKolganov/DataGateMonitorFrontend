@@ -5,6 +5,7 @@
  * OpenAPI spec version: v1
  */
 import type { EnumsNotificationSeverity } from './enumsNotificationSeverity';
+import type { NotificationsResponsesNotificationDeliveryDto } from './notificationsResponsesNotificationDeliveryDto';
 
 export interface NotificationsResponsesNotificationItemDto {
   id?: number;
@@ -19,4 +20,6 @@ export interface NotificationsResponsesNotificationItemDto {
   createdAt?: string;
   /** @nullable */
   readAt?: string | null;
+  /** @nullable */
+  deliveries?: NotificationsResponsesNotificationDeliveryDto[] | null;
 }

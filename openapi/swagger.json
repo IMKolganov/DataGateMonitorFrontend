@@ -21554,6 +21554,13 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "deliveries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Notifications.Responses.NotificationDeliveryDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -27283,6 +27290,39 @@
           },
           "result": {
             "$ref": "#/components/schemas/AvailabilityCheck.Dto.AvailabilityProbeResultDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Enums.DeliveryStatus": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32",
+        "description": "Pending=0, Sent=1, Failed=2, Read=3"
+      },
+      "Notifications.Responses.NotificationDeliveryDto": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/Enums.DeliveryStatus"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "deliveredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
