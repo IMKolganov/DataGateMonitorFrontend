@@ -7,6 +7,22 @@
   min-width: 0;
 }
 
+/**
+ * Fixed viewport for server-paginated grids. Prefer this over autoHeight on heavy
+ * settings pages — autoHeight disables row virtualization and can freeze the UI
+ * when remounting (rapid settings tab switches) or when cells contain long text.
+ */
+.data-grid-wrap--viewport {
+  height: 420px;
+  display: flex;
+  flex-direction: column;
+}
+
+.data-grid-wrap--viewport .MuiDataGrid-root {
+  flex: 1 1 auto;
+  width: 100%;
+}
+
 .table-container {
   width: 100%;
   max-width: 100%;

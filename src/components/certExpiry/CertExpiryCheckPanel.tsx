@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { GridColDef } from "@mui/x-data-grid";
 import { FaEye, FaPlay, FaSync } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -113,9 +113,12 @@ export function CertExpiryCheckPanel({
     });
   };
 
-  const openRunDetails = (runId: string) => {
-    navigate(certExpiryRunDetailPath(runId), { state: { returnTo } });
-  };
+  const openRunDetails = useCallback(
+    (runId: string) => {
+      navigate(certExpiryRunDetailPath(runId), { state: { returnTo } });
+    },
+    [navigate, returnTo],
+  );
 
   const historyRows = useMemo(() => {
     return (runsPage?.items ?? []).map((r: CertExpiryRunSummaryDto, idx: number) => ({
@@ -124,49 +127,52 @@ export function CertExpiryCheckPanel({
     }));
   }, [runsPage?.items]);
 
-  const historyColumns: GridColDef[] = [
-    {
-      field: "startedAtUtc",
-      headerName: "Started",
-      width: 170,
-      valueFormatter: (value) => (value ? formatDateWithOffset(new Date(String(value))) : "—"),
-    },
-    { field: "scopeLabel", headerName: "Scope", flex: 0.35, minWidth: 160 },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 130,
-      valueFormatter: (value) => certExpiryRunStatusLabel(value),
-    },
-    {
-      field: "durationMs",
-      headerName: "Duration",
-      width: 100,
-      valueFormatter: (value) => (value != null ? `${value} ms` : "—"),
-    },
-    { field: "profilesChecked", headerName: "Profiles", width: 90 },
-    { field: "expired", headerName: "Expired", width: 90 },
-    { field: "expiringSoon", headerName: "Expiring", width: 100 },
-    { field: "missingOnNode", headerName: "Missing", width: 100 },
-    { field: "serverFailures", headerName: "Server err.", width: 110 },
-    {
-      field: "actions",
-      headerName: "Details",
-      width: 100,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <button
-          type="button"
-          className="btn secondary"
-          style={{ padding: "2px 8px", minHeight: 28 }}
-          onClick={() => openRunDetails(String(params.row.runId))}
-        >
-          <FaEye className="icon" aria-hidden />
-        </button>
-      ),
-    },
-  ];
+  const historyColumns: GridColDef[] = useMemo(
+    () => [
+      {
+        field: "startedAtUtc",
+        headerName: "Started",
+        width: 170,
+        valueFormatter: (value) => (value ? formatDateWithOffset(new Date(String(value))) : "—"),
+      },
+      { field: "scopeLabel", headerName: "Scope", flex: 0.35, minWidth: 160 },
+      {
+        field: "status",
+        headerName: "Status",
+        width: 130,
+        valueFormatter: (value) => certExpiryRunStatusLabel(value),
+      },
+      {
+        field: "durationMs",
+        headerName: "Duration",
+        width: 100,
+        valueFormatter: (value) => (value != null ? `${value} ms` : "—"),
+      },
+      { field: "profilesChecked", headerName: "Profiles", width: 90 },
+      { field: "expired", headerName: "Expired", width: 90 },
+      { field: "expiringSoon", headerName: "Expiring", width: 100 },
+      { field: "missingOnNode", headerName: "Missing", width: 100 },
+      { field: "serverFailures", headerName: "Server err.", width: 110 },
+      {
+        field: "actions",
+        headerName: "Details",
+        width: 100,
+        sortable: false,
+        filterable: false,
+        renderCell: (params) => (
+          <button
+            type="button"
+            className="btn secondary"
+            style={{ padding: "2px 8px", minHeight: 28 }}
+            onClick={() => openRunDetails(String(params.row.runId))}
+          >
+            <FaEye className="icon" aria-hidden />
+          </button>
+        ),
+      },
+    ],
+    [openRunDetails],
+  );
 
   const resultBanner = lastResult?.runId ? (
     <div className={certExpiryRunHasIssues(lastResult) ? "message-error" : "message-success"} style={{ marginTop: 12 }}>
@@ -236,11 +242,15 @@ export function CertExpiryCheckPanel({
             </div>
           </div>
           <CustomThemeProvider>
-            <div className="data-grid-wrap" style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}>
+            <div
+              className="data-grid-wrap data-grid-wrap--viewport"
+              style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}
+            >
               <Grid
                 gridId={vpnServerId ? `cert-expiry-history-${vpnServerId}` : "cert-expiry-history-all"}
                 rows={historyRows}
                 columns={historyColumns}
+                autoHeight={false}
                 loading={historyQuery.isLoading}
                 {...paging.gridProps}
                 disableRowSelectionOnClick

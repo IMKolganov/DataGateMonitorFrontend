@@ -5,6 +5,7 @@ import {
   formatDeliveryLine,
   formatNotificationMessage,
   parseKvMessage,
+  truncateOneLine,
 } from "./notificationMessageFormat";
 
 describe("notificationMessageFormat", () => {
@@ -13,6 +14,14 @@ describe("notificationMessageFormat", () => {
       "Microsoft.AspNetCore.Server.Kestrel.Core.BadHttpRequestException: Unexpected end of request content.";
     expect(formatNotificationMessage("proxy.error", raw)).toBe(raw);
     expect(parseKvMessage(raw)).toEqual({});
+  });
+
+  it("truncateOneLine collapses whitespace and caps length (telegram/message cells)", () => {
+    const raw = `line1\n\nline2 ${"x".repeat(200)}`;
+    const out = truncateOneLine(raw, 40);
+    expect(out.includes("\n")).toBe(false);
+    expect(out.length).toBeLessThanOrEqual(40);
+    expect(out.endsWith("…")).toBe(true);
   });
 
   it("compacts exception stacks in delivery cells so autoHeight cannot explode", () => {

@@ -170,7 +170,7 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
   return (
     <CustomThemeProvider>
       <div
-        className="data-grid-wrap"
+        className="data-grid-wrap data-grid-wrap--viewport"
         style={{
           backgroundColor: "var(--bg-body)",
           padding: "10px",
@@ -181,6 +181,7 @@ const TelegramBotUsersTable: React.FC<TelegramBotUsersTableProps> = ({
           gridId="telegram-bot-users"
           rows={rows}
           columns={columns}
+          autoHeight={false}
           {...gridProps}
           localeText={{ noRowsLabel: "📭 No users found" }}
           loading={isGridLoading}

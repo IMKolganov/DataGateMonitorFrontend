@@ -14,17 +14,17 @@ type State = {
  * (e.g. a malformed notification row), instead of blanking the whole app.
  */
 export class SectionErrorBoundary extends Component<Props, State> {
-  state: State = { error: null };
+  override state: State = { error: null };
 
   static getDerivedStateFromError(error: Error): State {
     return { error };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo): void {
+  override componentDidCatch(error: Error, info: ErrorInfo): void {
     console.error("[SectionErrorBoundary]", error, info.componentStack);
   }
 
-  render() {
+  override render() {
     if (this.state.error) {
       return (
         <div className="error-message" role="alert" style={{ margin: "12px 0" }}>

@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./utils/auth/authSession.ts";
 import { installDomTranslationGuard } from "./utils/domTranslationGuard";
@@ -15,6 +16,7 @@ import { ThemeProvider } from "./contexts/ThemeContext.tsx";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { looksLikeChunkLoadError } from "./utils/chunkLoadError";
 
 installMockAuth();
 installDomTranslationGuard();
@@ -22,21 +24,6 @@ installToastDefaults();
 const CHUNK_RELOAD_KEY = "chunk-reload:last-attempt-ms";
 const CHUNK_RELOAD_COOLDOWN_MS = 30_000;
 const CHUNK_RELOAD_OVERLAY_ID = "chunk-reload-overlay";
-
-function looksLikeChunkLoadError(reason: unknown): boolean {
-  const text =
-    reason instanceof Error
-      ? `${reason.name} ${reason.message}`
-      : typeof reason === "string"
-      ? reason
-      : String(reason ?? "");
-
-  return (
-    /ChunkLoadError/i.test(text) ||
-    /Loading chunk [\d]+ failed/i.test(text) ||
-    /Failed to fetch dynamically imported module/i.test(text)
-  );
-}
 
 function tryReloadOnChunkError(trigger: unknown): void {
   if (!looksLikeChunkLoadError(trigger)) return;
@@ -106,11 +93,18 @@ const queryClient = new QueryClient({
   },
 });
 
-createRoot(document.getElementById("root")!).render(
+const rootEl = document.getElementById("root");
+if (!rootEl) {
+  throw new Error("Root element #root not found");
+}
+
+createRoot(rootEl).render(
+  <StrictMode>
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <App />
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </ThemeProvider>
+  </StrictMode>,
 );

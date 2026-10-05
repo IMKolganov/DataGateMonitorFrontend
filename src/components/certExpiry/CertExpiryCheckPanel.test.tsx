@@ -53,6 +53,12 @@ describe("CertExpiryCheckPanel", () => {
     expect(screen.getByTestId("grid-rows").textContent).toContain("run-0");
   });
 
+  it("keeps history grid virtualized (no autoHeight) inside a fixed viewport", () => {
+    const { container } = renderWithProviders(<CertExpiryCheckPanel />);
+    expect(container.querySelector(".data-grid-wrap--viewport")).toBeTruthy();
+    expect(screen.getByTestId("mock-grid")).toHaveAttribute("data-auto-height", "false");
+  });
+
   it("paginates check history via v2 Page params", async () => {
     const user = userEvent.setup();
     renderWithProviders(<CertExpiryCheckPanel />);

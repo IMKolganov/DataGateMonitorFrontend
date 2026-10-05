@@ -158,7 +158,8 @@ const Grid = React.forwardRef<HTMLDivElement, GridProps>(function Grid(props, re
   return (
     <StyledDataGrid
       ref={ref}
-      autoHeight={autoHeight ?? true}
+      // Default off: autoHeight disables virtualization and freezes heavy settings grids.
+      autoHeight={autoHeight ?? false}
       showToolbar
       slots={{ toolbar: GridToolbarWithExcelClipboard, ...slots }}
       columns={mergedColumns}
