@@ -26,6 +26,7 @@ import {
   OPEN_PENDING_SERVER_DISCOVERY_EVENT,
   type OpenPendingServerDiscoveryDetail,
 } from "./pendingServerDiscoveryEvents";
+import { useLockMainScroll } from "../../hooks/useLockMainScroll";
 import "../../css/Settings.css";
 
 const POLL_MS = 30_000;
@@ -162,7 +163,10 @@ export function PendingServerDiscoveryModal() {
     navigate("/servers/pending-discoveries");
   };
 
-  if (!admin || !current || snoozed || onPendingInbox) return null;
+  const visible = Boolean(admin && current && !snoozed && !onPendingInbox);
+  useLockMainScroll(visible);
+
+  if (!visible || !current) return null;
 
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pending-discovery-title">

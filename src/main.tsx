@@ -52,6 +52,10 @@ function tryReloadOnChunkError(trigger: unknown): void {
   sessionStorage.setItem(CHUNK_RELOAD_KEY, String(now));
   showReloadOverlay();
   window.setTimeout(() => window.location.reload(), 450);
+  // If navigation is blocked, do not leave a permanent click-blocking layer.
+  window.setTimeout(() => {
+    document.getElementById(CHUNK_RELOAD_OVERLAY_ID)?.remove();
+  }, 5_000);
 }
 
 function showReloadOverlay(): void {
@@ -72,6 +76,7 @@ function showReloadOverlay(): void {
   overlay.style.zIndex = "2147483647";
   overlay.style.padding = "16px";
   overlay.style.textAlign = "center";
+  overlay.style.cursor = "wait";
 
   document.body.appendChild(overlay);
 }

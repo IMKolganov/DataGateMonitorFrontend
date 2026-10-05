@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   useGetApiNotificationsGetAll,
   useGetApiNotificationsUnreadCount,
@@ -25,6 +25,10 @@ import { serializeNotificationsGetAllParams } from "../../utils/notificationsQue
 const DEFAULT_PAGE_SIZE = 10;
 
 export type NotificationReadFilter = "all" | "unread" | "read";
+
+function severitiesKey(value: NotificationSeverity[] | undefined): string {
+  return value?.join(",") ?? "";
+}
 
 export function useNotificationsList(params?: GetApiNotificationsGetAllParams) {
   return useGetApiNotificationsGetAll(params);
@@ -67,19 +71,20 @@ export function useNotifications() {
     if (selected.length === 0 || selected.length === 4) return undefined;
     return selected;
   }, [severityEnabled]);
+  const severitiesForApiKey = severitiesKey(severitiesForApi);
 
   const [pageState, setPageState] = useState({
     readFilter,
     typeFilter,
-    severitiesForApi,
+    severitiesKey: severitiesForApiKey,
     page: 0,
   });
   if (
     pageState.readFilter !== readFilter ||
     pageState.typeFilter !== typeFilter ||
-    pageState.severitiesForApi !== severitiesForApi
+    pageState.severitiesKey !== severitiesForApiKey
   ) {
-    setPageState({ readFilter, typeFilter, severitiesForApi, page: 0 });
+    setPageState({ readFilter, typeFilter, severitiesKey: severitiesForApiKey, page: 0 });
   }
   const page = pageState.page;
   const setPage = (next: number) => setPageState((s) => ({ ...s, page: next }));
@@ -104,6 +109,7 @@ export function useNotifications() {
 
   const countQuery = useGetApiNotificationsUnreadCount();
   const [refreshing, setRefreshing] = useState(false);
+  const refreshingRef = useRef(false);
 
   const mRead = usePostApiNotificationsNotificationIdRead();
   const mDelivered = usePostApiNotificationsNotificationIdDelivered();
@@ -115,14 +121,15 @@ export function useNotifications() {
   const notifications: NotificationItemDto[] = paged?.items ?? [];
   const totalCount = useStabilizedRowCount(
     paged?.totalCount,
-    `${readFilter}:${typeFilter}:${severitiesForApi ?? ""}`,
+    `${readFilter}:${typeFilter}:${severitiesForApiKey}`,
   );
   const totalPages = paged?.totalPages ?? 0;
   const unreadPayload = countQuery.data as unknown as UnreadCountResponse | undefined;
   const unreadCount = unreadPayload?.count ?? 0;
 
   const refresh = useCallback(async () => {
-    if (refreshing) return;
+    if (refreshingRef.current) return;
+    refreshingRef.current = true;
     setRefreshing(true);
     try {
       await Promise.all([
@@ -132,9 +139,10 @@ export function useNotifications() {
         queryClient.invalidateQueries({ queryKey: getGetApiNotificationsUnreadCountQueryKey() }),
       ]);
     } finally {
+      refreshingRef.current = false;
       setRefreshing(false);
     }
-  }, [queryClient, refreshing]);
+  }, [queryClient]);
 
   const markRead = useCallback(
     async (notificationId: number) => {
@@ -189,14 +197,10 @@ export function useNotifications() {
     [mNotifyAdmins, refresh]
   );
 
-  const anyLoading =
-    listQuery.isLoading ||
-    listQuery.isFetching ||
-    countQuery.isFetching ||
-    mRead.isPending ||
-    mDelivered.isPending ||
-    mMarkReadAll.isPending ||
-    mNotifyAdmins.isPending;
+  // Grid skeleton only for the list's first load. Background refetch (incl. unread-count
+  // shared with the header) must not keep MuiDataGrid's loading overlay mounted — that
+  // overlay intercepts clicks and can look like a stuck full-page pointer layer.
+  const anyLoading = listQuery.isLoading && !listQuery.data;
 
   const isAbortOrCancelError = (e: unknown): boolean => {
     if (!e || typeof e !== "object") return false;

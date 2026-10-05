@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCookieConsent } from "../../contexts/CookieConsentContext";
+import { useLockMainScroll } from "../../hooks/useLockMainScroll";
 import "../../css/CookieConsent.css";
 
 export const CookieSettingsPanel: React.FC = () => {
   const { consent, settingsOpen, strings, savePreferences, closeSettings } = useCookieConsent();
   const [functional, setFunctional] = useState(consent?.functional ?? false);
   const [thirdParty, setThirdParty] = useState(consent?.thirdParty ?? false);
+  useLockMainScroll(settingsOpen);
 
   useEffect(() => {
     if (!settingsOpen) return;
