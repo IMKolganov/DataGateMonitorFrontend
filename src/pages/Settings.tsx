@@ -1,5 +1,5 @@
-import { startTransition, useEffect, useMemo } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useEffect, useMemo } from "react";
+import { useNavigate, Link, useLocation, Outlet } from "react-router-dom";
 import type { IconType } from "react-icons";
 import {
   FaArrowLeft,
@@ -22,7 +22,6 @@ import {
   FaTv,
   FaTachometerAlt,
 } from "react-icons/fa";
-import { KeepAliveOutlet } from "../components/routing/KeepAliveOutlet";
 import "../css/Settings.css";
 
 type SettingsTab = {
@@ -57,8 +56,6 @@ export function Settings() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Warm the heavy adjacent tabs so rapid cert-expiry ↔ telegrambot does not
-  // abort in-flight dynamic imports (false "Failed to fetch module" → Reloading overlay).
   useEffect(() => {
     void import("./TelegramBotSettings");
     void import("./CertExpirySettings");
@@ -84,16 +81,8 @@ export function Settings() {
     );
   };
 
-  const goToTab = (path: string) => {
-    // Concurrent nav keeps the shell responsive while heavy DataGrid tabs remount
-    // (cert-expiry ↔ telegrambot) and while lazy chunks resolve.
-    startTransition(() => {
-      navigate(`/settings/${path}`);
-    });
-  };
-
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    goToTab(e.target.value);
+    navigate(`/settings/${e.target.value}`);
   };
 
   return (
@@ -124,20 +113,6 @@ export function Settings() {
                 <Link
                   key={tab.path}
                   to={`/settings/${tab.path}`}
-                  onClick={(e) => {
-                    if (
-                      e.defaultPrevented ||
-                      e.button !== 0 ||
-                      e.metaKey ||
-                      e.altKey ||
-                      e.ctrlKey ||
-                      e.shiftKey
-                    ) {
-                      return;
-                    }
-                    e.preventDefault();
-                    goToTab(tab.path);
-                  }}
                   className={
                     isTabActive(tab.path)
                       ? "settings-sidebar__link settings-sidebar__link--active"
@@ -169,7 +144,7 @@ export function Settings() {
           </select>
 
           <div className="settings-content__body tab-content">
-            <KeepAliveOutlet maxEntries={8} />
+            <Outlet />
           </div>
         </div>
       </div>

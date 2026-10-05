@@ -52,8 +52,15 @@ export function PendingServerDiscoveryModal() {
   const pendingQuery = useGetApiOpenVpnServersDiscoveriesPending({
     query: {
       enabled: admin,
-      refetchInterval: admin ? POLL_MS : false,
+      // Pause the 30s poll while the query is failing (e.g. gateway 502) so we
+      // do not keep hammering a dead upstream; resume on focus / next success path.
+      refetchInterval: (query) => {
+        if (!admin) return false;
+        if (query.state.error) return false;
+        return POLL_MS;
+      },
       refetchOnWindowFocus: admin,
+      retry: false,
     },
   });
   const refetchPending = pendingQuery.refetch;

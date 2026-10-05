@@ -1,5 +1,5 @@
 // src/pages/GeneralSettings.tsx
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FaSave, FaSlidersH } from "react-icons/fa";
 import "../css/Settings.css";
 
@@ -78,8 +78,7 @@ export function GeneralSettings() {
     error: loadIntervalErr,
   } = useGetApiSettingsGet(intervalParams, {
     query: {
-      // No v5 keepPreviousData; keep it simple and just fetch
-      staleTime: 0,
+      staleTime: 30_000,
       gcTime: 5 * 60 * 1000,
     },
   });
@@ -91,7 +90,7 @@ export function GeneralSettings() {
     error: loadUnitErr,
   } = useGetApiSettingsGet(unitParams, {
     query: {
-      staleTime: 0,
+      staleTime: 30_000,
       gcTime: 5 * 60 * 1000,
     },
   });
@@ -102,7 +101,7 @@ export function GeneralSettings() {
     error: loadRequireEmailConfirmationErr,
   } = useGetApiSettingsGet(requireEmailConfirmationParams, {
     query: {
-      staleTime: 0,
+      staleTime: 30_000,
       gcTime: 5 * 60 * 1000,
     },
   });
@@ -113,7 +112,7 @@ export function GeneralSettings() {
     error: loadEmailConfirmationCodeTtlMinutesErr,
   } = useGetApiSettingsGet(emailConfirmationCodeTtlMinutesParams, {
     query: {
-      staleTime: 0,
+      staleTime: 30_000,
       gcTime: 5 * 60 * 1000,
     },
   });
@@ -124,7 +123,7 @@ export function GeneralSettings() {
     error: loadAllowFreeTierGraceErr,
   } = useGetApiSettingsGet(allowFreeTierGraceParams, {
     query: {
-      staleTime: 0,
+      staleTime: 30_000,
       gcTime: 5 * 60 * 1000,
     },
   });
@@ -135,7 +134,7 @@ export function GeneralSettings() {
     error: loadFreeTierGraceMinutesErr,
   } = useGetApiSettingsGet(freeTierGraceMinutesParams, {
     query: {
-      staleTime: 0,
+      staleTime: 30_000,
       gcTime: 5 * 60 * 1000,
     },
   });
@@ -166,9 +165,10 @@ export function GeneralSettings() {
     });
   }, [intervalResp, unitResp, requireEmailConfirmationResp, emailConfirmationCodeTtlMinutesResp, allowFreeTierGraceResp, freeTierGraceMinutesResp]);
 
-  const [appliedSettingsKey, setAppliedSettingsKey] = useState("");
-  if (settingsSnapshotKey !== appliedSettingsKey && !initialLoading) {
-    setAppliedSettingsKey(settingsSnapshotKey);
+  // Apply server values in an effect — setState during render interrupts React Router's
+  // concurrent Link navigations and snaps the URL back to /settings/general.
+  useEffect(() => {
+    if (initialLoading) return;
 
     const intervalRaw = pickSettingValue(intervalResp);
     const val = Number(intervalRaw);
@@ -204,7 +204,16 @@ export function GeneralSettings() {
     if (!Number.isNaN(graceMinutesRaw)) {
       setFreeTierGraceMinutes(graceMinutesRaw);
     }
-  }
+  }, [
+    initialLoading,
+    settingsSnapshotKey,
+    intervalResp,
+    unitResp,
+    requireEmailConfirmationResp,
+    emailConfirmationCodeTtlMinutesResp,
+    allowFreeTierGraceResp,
+    freeTierGraceMinutesResp,
+  ]);
 
 
   // Orval mutation for setting values

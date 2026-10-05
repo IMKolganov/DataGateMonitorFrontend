@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./utils/auth/authSession.ts";
 import { installDomTranslationGuard } from "./utils/domTranslationGuard";
+import { installNativeDragGuard } from "./utils/nativeDragGuard";
 import { installToastDefaults } from "./utils/installToastDefaults";
 import { installMockAuth } from "./mocks/installMockAuth";
 import "./index.css";
@@ -20,6 +21,7 @@ import { looksLikeChunkLoadError } from "./utils/chunkLoadError";
 
 installMockAuth();
 installDomTranslationGuard();
+installNativeDragGuard();
 installToastDefaults();
 const CHUNK_RELOAD_KEY = "chunk-reload:last-attempt-ms";
 const CHUNK_RELOAD_COOLDOWN_MS = 30_000;

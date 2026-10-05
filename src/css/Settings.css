@@ -108,8 +108,10 @@
     border-right: 1px solid var(--border-color);
     position: sticky;
     top: 0.5rem;
-    max-height: calc(100vh - 10rem);
+    /* Stay inside main (header+footer), not full viewport — avoids covering .footer */
+    max-height: calc(100dvh - 11rem);
     overflow-y: auto;
+    z-index: 2;
   }
 
   .settings-content__mobile-picker {

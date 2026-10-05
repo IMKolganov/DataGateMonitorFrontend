@@ -23,6 +23,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Links/images are natively draggable in Chrome; an accidental drag on Linux/X11
+   can leave the tab in a pointer grab (dead clicks, stuck :hover, F12 ignored).
+   Only elements with draggable="true" (DataGrid columns) keep native drag. */
+a:not([draggable="true"]),
+img:not([draggable="true"]) {
+  -webkit-user-drag: none;
+}
+
 code,
 pre,
 .font-mono {

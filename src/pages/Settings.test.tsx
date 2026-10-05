@@ -1,23 +1,15 @@
-import { describe, expect, it, vi } from "vitest";
-import { startTransition } from "react";
+import { describe, expect, it } from "vitest";
 import { Route, Routes } from "react-router-dom";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../test/renderWithProviders";
 import { Settings } from "./Settings";
 
-vi.mock("react", async () => {
-  const actual = await vi.importActual<typeof import("react")>("react");
-  return {
-    ...actual,
-    startTransition: vi.fn((cb: () => void) => actual.startTransition(cb)),
-  };
-});
-
 function renderSettings(route = "/settings/general") {
   return renderWithProviders(
     <Routes>
       <Route path="/settings" element={<Settings />}>
+        <Route path="general" element={<div data-testid="settings-outlet-general">general</div>} />
         <Route path="cert-expiry" element={<div data-testid="settings-outlet-cert">cert</div>} />
         <Route path="telegrambot" element={<div data-testid="settings-outlet-tg">tg</div>} />
         <Route path=":tab" element={<div data-testid="settings-outlet">outlet</div>} />
@@ -44,27 +36,15 @@ describe("Settings shell", () => {
     expect(screen.getByTestId("home")).toBeInTheDocument();
   });
 
-  it("switches settings tabs via the mobile picker and keep-alive both panes", async () => {
+  it("leaves general for cert-expiry without snapping back", async () => {
     const user = userEvent.setup();
-    renderSettings("/settings/cert-expiry");
+    renderSettings("/settings/general");
+    expect(screen.getByTestId("settings-outlet-general")).toBeVisible();
+
     const picker = screen.getByRole("combobox", { name: /Settings section/i });
+    await user.selectOptions(picker, "cert-expiry");
     expect(screen.getByTestId("settings-outlet-cert")).toBeVisible();
-
-    await user.selectOptions(picker, "telegrambot");
-    expect(screen.getByRole("heading", { name: /^Settings$/i })).toBeInTheDocument();
-    expect(screen.getByTestId("settings-outlet-tg")).toBeVisible();
-    // Previous heavy tab stays mounted (hidden) — avoids DataGrid remount freeze.
-    expect(screen.getByTestId("settings-outlet-cert")).toBeInTheDocument();
-    expect(picker).toHaveValue("telegrambot");
-  });
-
-  it("navigates tab changes through startTransition (keeps shell interactive)", async () => {
-    vi.mocked(startTransition).mockClear();
-    const user = userEvent.setup();
-    renderSettings("/settings/cert-expiry");
-    const picker = screen.getByRole("combobox", { name: /Settings section/i });
-    await user.selectOptions(picker, "telegrambot");
-    expect(startTransition).toHaveBeenCalled();
-    expect(picker).toHaveValue("telegrambot");
+    expect(screen.queryByTestId("settings-outlet-general")).not.toBeInTheDocument();
+    expect(picker).toHaveValue("cert-expiry");
   });
 });
