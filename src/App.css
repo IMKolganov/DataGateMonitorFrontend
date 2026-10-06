@@ -17,6 +17,10 @@
   padding: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  /* Above footer: sticky settings sidebar can paint into the footer band and
+     otherwise loses clicks to .footer-line (Chrome hit-testing). */
+  position: relative;
+  z-index: 1;
 }
 
 .content-wrapper {

@@ -9148,6 +9148,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "ExcludeAdmins",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
           }
         ],
         "responses": {

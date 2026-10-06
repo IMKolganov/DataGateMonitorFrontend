@@ -7,6 +7,7 @@ import { useGetApiOpenVpnEventsAppVersions } from "../../api/orval/vpn-server-ev
 import type { VpnClientAppVersionSummaryItemDto } from "../../api/orvalModelShim";
 import { unwrapMaybeApiResponse } from "../../pages/TelegramBotSettings/unwrapApiResponse";
 import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
+import { errorMessage } from "../../utils/errorMessage";
 import { formatDateWithOffset } from "../../utils/utils";
 import { parseIvGuiVer } from "../../utils/openVpn/parseIvGuiVer";
 import "../../css/Settings.css";
@@ -99,8 +100,13 @@ export function UserClientAppVersionsSection({
       </div>
 
       <p className="server-details__intro" style={{ marginTop: 0, marginBottom: 12 }}>
-        Distinct VPN client versions from connect events (OpenVPN IV_GUI_VER).
+        Distinct VPN client versions from OpenVPN connect events (IV_GUI_VER / IV_VER).
+        Not available on Xray servers.
       </p>
+
+      {query.isError ? (
+        <p className="error-message">{errorMessage(query.error)}</p>
+      ) : null}
 
       <CustomThemeProvider>
         <div
@@ -118,7 +124,8 @@ export function UserClientAppVersionsSection({
             autoHeight
             slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
             localeText={{
-              noRowsLabel: "No client app versions recorded for this user on this server",
+              noRowsLabel:
+                "No OpenVPN client versions for this user on this server (no IV_GUI_VER/IV_VER on connect events)",
             }}
           />
         </div>

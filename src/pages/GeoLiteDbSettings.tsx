@@ -1,5 +1,5 @@
 // src/components/GeoLiteDbSettings.tsx
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import "../css/Settings.css";
 import { FaDatabase, FaSave } from "react-icons/fa";
@@ -67,9 +67,8 @@ export function GeoLiteDbSettings() {
     qAutoUpdateDays.data,
   ]);
 
-  const [appliedSettingsKey, setAppliedSettingsKey] = useState("");
-  if (settingsSnapshotKey && settingsSnapshotKey !== appliedSettingsKey) {
-    setAppliedSettingsKey(settingsSnapshotKey);
+  useEffect(() => {
+    if (!settingsSnapshotKey) return;
 
     const safeValue = (resp: SettingResponse | undefined): string =>
       String(resp?.value ?? "");
@@ -86,7 +85,14 @@ export function GeoLiteDbSettings() {
     setGeoIpLicenseKey(safeValue(qLicenseKey.data));
     setGeoIpAutoUpdateIntervalDays(safeInt(qAutoUpdateDays.data));
     setInitialLoading(false);
-  }
+  }, [
+    settingsSnapshotKey,
+    qDbPath.data,
+    qDownloadUrl.data,
+    qAccountId.data,
+    qLicenseKey.data,
+    qAutoUpdateDays.data,
+  ]);
 
   // Save handler
   const handleSave = async (

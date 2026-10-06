@@ -75,6 +75,7 @@ import { UserOpenVpnEventsSection } from "../../components/openvpn/UserOpenVpnEv
 import { UserClientAppVersionsSection } from "../../components/openvpn/UserClientAppVersionsSection";
 import { TopVisitedDomainsSection } from "../../components/pihole/TopVisitedDomainsSection";
 import { serverPiHoleEnabled, shouldShowUserDnsQueries } from "../../utils/pihole/serverPiHoleEnabled";
+import { isOpenVpnStack } from "../../constants/vpnServerType";
 
 
 
@@ -216,8 +217,15 @@ export default function ServersOverview() {
     scopedServerPiHole,
     viewerIsAdmin,
   );
-  const showUserOpenVpnEvents =
-    Boolean(statsExternalId && vpnServerId != null && vpnServerId > 0 && viewerIsAdmin);
+  // IV_GUI_VER / connect event logs exist only on the OpenVPN stack (not Xray).
+  const showUserOpenVpnEvents = Boolean(
+    statsExternalId &&
+      vpnServerId != null &&
+      vpnServerId > 0 &&
+      viewerIsAdmin &&
+      scopedServer != null &&
+      isOpenVpnStack(scopedServer.serverType),
+  );
 
   const showActivitySection = showUserOpenVpnEvents || showUserDnsQueries;
   const showDomainsSection = vpnServerId == null && !statsExternalId && viewerIsAdmin;

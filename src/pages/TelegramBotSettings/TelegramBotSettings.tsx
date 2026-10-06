@@ -30,6 +30,8 @@ export function TelegramBotSettings() {
         refreshing: messagesRefreshing,
         errorMessage: messagesError,
         handleRefresh: refreshMessages,
+        excludeAdmins,
+        onExcludeAdminsChange,
         messageFilterValues,
         onMessageFilterChange,
         onMessageFilterApply,
@@ -71,6 +73,8 @@ export function TelegramBotSettings() {
                 refreshing={messagesRefreshing}
                 errorMessage={messagesError}
                 handleRefresh={refreshMessages}
+                excludeAdmins={excludeAdmins}
+                onExcludeAdminsChange={onExcludeAdminsChange}
                 messageFilterValues={messageFilterValues}
                 onMessageFilterChange={onMessageFilterChange}
                 onMessageFilterApply={onMessageFilterApply}

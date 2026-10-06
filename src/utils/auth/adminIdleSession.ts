@@ -200,5 +200,10 @@ export function startAdminIdleSession(): () => void {
 
 export function requestStaySignedIn(): void {
   const fn = (window as unknown as { __datagateStaySignedIn?: () => void }).__datagateStaySignedIn;
-  fn?.();
+  if (fn) {
+    fn();
+    return;
+  }
+  // Session helper missing (HMR / race): still dismiss the warning UI so the overlay cannot stick.
+  notifyAdminIdleWarningCleared();
 }
