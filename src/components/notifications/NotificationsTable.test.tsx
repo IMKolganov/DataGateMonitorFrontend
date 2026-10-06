@@ -33,9 +33,9 @@ describe("NotificationsTable pagination", () => {
     expect(grid).toHaveAttribute("data-row-count", "100");
     expect(grid).toHaveAttribute("data-page", "2");
     expect(screen.getByTestId("row-7")).toHaveTextContent("Node down");
-    // Same freeze class as settings: virtualized viewport, not autoHeight.
-    expect(container.querySelector(".data-grid-wrap--viewport")).toBeTruthy();
-    expect(grid).toHaveAttribute("data-auto-height", "false");
+    // Grid grows with the selected page size; the page is the only scroller.
+    expect(container.querySelector(".data-grid-wrap")).toBeTruthy();
+    expect(grid).toHaveAttribute("data-auto-height", "default");
 
     await user.click(screen.getByTestId("next-page"));
     expect(onPaginationModelChange).toHaveBeenCalledWith({ page: 3, pageSize: 20 });

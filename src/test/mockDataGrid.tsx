@@ -12,7 +12,7 @@ export type MockGridProps = {
   onPaginationModelChange?: (model: GridPaginationModel) => void;
   pageSizeOptions?: number[];
   loading?: boolean;
-  /** Explicit false required on heavy settings grids (TableStyle defaults to true). */
+  /** TableStyle defaults to true (content-sized grid); false only inside a fixed-height parent. */
   autoHeight?: boolean;
   localeText?: { noRowsLabel?: string };
   rowSelectionModel?: GridRowSelectionModel;

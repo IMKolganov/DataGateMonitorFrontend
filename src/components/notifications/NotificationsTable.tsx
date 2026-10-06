@@ -284,7 +284,7 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
     <CustomThemeProvider>
       <SectionErrorBoundary title="Notifications table failed to render.">
         <div
-          className="data-grid-wrap data-grid-wrap--viewport notifications-table-wrapper"
+          className="data-grid-wrap notifications-table-wrapper"
           style={{
             backgroundColor: "var(--bg-body)",
             padding: "10px",
@@ -295,7 +295,6 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
             gridId="notifications"
             rows={rows}
             columns={columns}
-            autoHeight={false}
             rowCount={totalCount}
             paginationMode="server"
             paginationModel={paginationModel}

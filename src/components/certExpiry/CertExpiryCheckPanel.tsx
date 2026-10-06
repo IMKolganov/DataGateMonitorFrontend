@@ -243,14 +243,13 @@ export function CertExpiryCheckPanel({
           </div>
           <CustomThemeProvider>
             <div
-              className="data-grid-wrap data-grid-wrap--viewport"
+              className="data-grid-wrap"
               style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}
             >
               <Grid
                 gridId={vpnServerId ? `cert-expiry-history-${vpnServerId}` : "cert-expiry-history-all"}
                 rows={historyRows}
                 columns={historyColumns}
-                autoHeight={false}
                 loading={historyQuery.isLoading}
                 {...paging.gridProps}
                 disableRowSelectionOnClick

@@ -74,7 +74,7 @@ const TelegramBotMessagesTable: React.FC<TelegramBotMessagesTableProps> = ({
     return (
         <CustomThemeProvider>
             <div
-                className="data-grid-wrap data-grid-wrap--viewport"
+                className="data-grid-wrap"
                 style={{
                     backgroundColor: "var(--bg-body)",
                     padding: "10px",
@@ -85,7 +85,6 @@ const TelegramBotMessagesTable: React.FC<TelegramBotMessagesTableProps> = ({
                     gridId="telegram-bot-messages"
                     rows={rows}
                     columns={columns}
-                    autoHeight={false}
                     paginationMode="server"
                     rowCount={totalMessages}
                     paginationModel={{ page, pageSize }}

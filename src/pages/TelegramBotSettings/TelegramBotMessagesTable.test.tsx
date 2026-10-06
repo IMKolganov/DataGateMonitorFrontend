@@ -11,7 +11,7 @@ vi.mock("../../components/ui/ThemeProvider.tsx", () => themeProviderMock);
 vi.mock("../../components/ui/TableStyle.tsx", () => ({ default: MockDataGrid }));
 
 describe("TelegramBotMessagesTable", () => {
-  it("uses a fixed viewport and disables autoHeight (virtualization stays on)", () => {
+  it("grows with its rows (default autoHeight, page is the only scroller)", () => {
     const { container } = renderWithProviders(
       <TelegramBotMessagesTable
         messages={[]}
@@ -23,8 +23,8 @@ describe("TelegramBotMessagesTable", () => {
       />,
     );
 
-    expect(container.querySelector(".data-grid-wrap--viewport")).toBeTruthy();
-    expect(screen.getByTestId("mock-grid")).toHaveAttribute("data-auto-height", "false");
+    expect(container.querySelector(".data-grid-wrap")).toBeTruthy();
+    expect(screen.getByTestId("mock-grid")).toHaveAttribute("data-auto-height", "default");
     expect(screen.getByTestId("mock-grid")).toHaveAttribute("data-grid-id", "telegram-bot-messages");
   });
 

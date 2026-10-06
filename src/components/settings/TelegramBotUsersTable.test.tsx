@@ -14,7 +14,7 @@ vi.mock("../../api/orval/telegram-bot-user/telegram-bot-user.ts", () => ({
 }));
 
 describe("TelegramBotUsersTable", () => {
-  it("uses a fixed viewport and disables autoHeight", () => {
+  it("grows with its rows (default autoHeight)", () => {
     const { container } = renderWithProviders(
       <TelegramBotUsersTable
         users={[]}
@@ -30,8 +30,8 @@ describe("TelegramBotUsersTable", () => {
       />,
     );
 
-    expect(container.querySelector(".data-grid-wrap--viewport")).toBeTruthy();
-    expect(screen.getByTestId("mock-grid")).toHaveAttribute("data-auto-height", "false");
+    expect(container.querySelector(".data-grid-wrap")).toBeTruthy();
+    expect(screen.getByTestId("mock-grid")).toHaveAttribute("data-auto-height", "default");
     expect(screen.getByTestId("mock-grid")).toHaveAttribute("data-grid-id", "telegram-bot-users");
   });
 });
