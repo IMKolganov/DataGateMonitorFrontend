@@ -151,6 +151,7 @@ function readPayload<T>(value: T | { data?: T } | undefined): T | undefined {
 type SafeTotals = {
   sessionsCount: number;
   devicesCount: number;
+  usersCount: number;
   accountsCount: number;
   trafficInBytes: number;
   trafficOutBytes: number;
@@ -163,14 +164,23 @@ type SafeTotals = {
 
 function makeSafeTotals(resp?: OverviewTotalsResponse): SafeTotals {
   const sessionsCount = resp?.totals?.sessionsCount ?? 0;
-  const devicesCount = resp?.totals?.usersCount ?? 0;
+  const devicesCount = resp?.totals?.devicesCount ?? 0;
+  const usersCount = resp?.totals?.usersCount ?? 0;
   const accountsCount = resp?.totals?.accountsCount ?? 0;
   const trafficInBytes = resp?.totals?.trafficInBytes ?? 0;
   const trafficOutBytes = resp?.totals?.trafficOutBytes ?? 0;
   const trafficTotalBytes =
     resp?.totals?.trafficTotalBytes ?? (trafficInBytes + trafficOutBytes);
 
-  return { sessionsCount, devicesCount, accountsCount, trafficInBytes, trafficOutBytes, trafficTotalBytes };
+  return {
+    sessionsCount,
+    devicesCount,
+    usersCount,
+    accountsCount,
+    trafficInBytes,
+    trafficOutBytes,
+    trafficTotalBytes,
+  };
 }
 
 export default function ServersOverview() {
@@ -442,9 +452,11 @@ export default function ServersOverview() {
     const seriesSummary = apiData?.summary;
 
     const devicesPeak =
+      extremeFromSummary(usersSummary?.peakActiveDevices, usersSummary?.peakActiveDevicesAt, usersMode) ??
       extremeFromSummary(usersSummary?.peakActiveUsers, usersSummary?.peakActiveUsersAt, usersMode) ??
       extremeFromSummary(seriesSummary?.peakActiveClients, seriesSummary?.peakActiveClientsAt, seriesMode);
     const devicesLow =
+      extremeFromSummary(usersSummary?.lowActiveDevices, usersSummary?.lowActiveDevicesAt, usersMode) ??
       extremeFromSummary(usersSummary?.lowActiveUsers, usersSummary?.lowActiveUsersAt, usersMode) ??
       extremeFromSummary(seriesSummary?.lowActiveClients, seriesSummary?.lowActiveClientsAt, seriesMode);
     const sessionsPeak =

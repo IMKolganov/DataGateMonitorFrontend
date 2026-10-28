@@ -140,6 +140,7 @@ export type UseServersWithStatusListResult = {
   handleRefresh: () => void;
   invalidateServers: () => Promise<void>;
   serviceData: ReturnType<typeof useSignalRService>["serviceData"];
+  totalDevices: ReturnType<typeof useSignalRService>["totalDevices"];
   runServiceNow: ReturnType<typeof useSignalRService>["runServiceNow"];
   hubConnectionState: ReturnType<typeof useSignalRService>["connectionState"];
   hubLastError: ReturnType<typeof useSignalRService>["lastError"];
@@ -153,8 +154,13 @@ export function useServersWithStatusList(): UseServersWithStatusListResult {
   const fetchIncludeDeleted = canManage;
   const serversListKey = v3ServersWithStatusListKey(fetchIncludeDeleted);
 
-  const { serviceData, runServiceNow, connectionState: hubConnectionState, lastError: hubLastError } =
-    useSignalRService();
+  const {
+    serviceData,
+    totalDevices,
+    runServiceNow,
+    connectionState: hubConnectionState,
+    lastError: hubLastError,
+  } = useSignalRService();
 
   const [showDeleted, setShowDeleted] = useState(() => loadShowDeletedServers());
   const [searchQuery, setSearchQuery] = useState("");
@@ -403,6 +409,7 @@ export function useServersWithStatusList(): UseServersWithStatusListResult {
     handleRefresh,
     invalidateServers,
     serviceData,
+    totalDevices,
     runServiceNow,
     hubConnectionState,
     hubLastError,
