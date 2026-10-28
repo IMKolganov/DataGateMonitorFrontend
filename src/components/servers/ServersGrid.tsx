@@ -68,6 +68,7 @@ const ServersGrid: React.FC = () => {
     runServiceNow,
     hubConnectionState,
     hubLastError,
+    totalDevices,
     normalizedServiceControlsData,
     queryClient,
   } = useServersWithStatusList();
@@ -461,6 +462,7 @@ const ServersGrid: React.FC = () => {
         onOpenDetails={() => navigate("/servers/status-stream-logs")}
         hubConnectionState={hubConnectionState}
         hubLastError={hubLastError}
+        totalDevices={totalDevices}
       />
 
       <AddServersToGroupModal

@@ -11,6 +11,8 @@ type WsServiceStatusPayload = VpnServersDtoServiceStatusDto & {
   ErrorMessage?: string | null;
   NextRunTime?: string;
   CountConnectedClients?: number;
+  CountDevices?: number;
+  countDevices?: number;
   CountSessions?: number;
   TotalBytesIn?: number;
   TotalBytesOut?: number;
@@ -75,6 +77,7 @@ export function normalizeWsStatuses(input: unknown): Record<number, ServiceEntry
     const err = pickNullableString(raw.errorMessage, raw.ErrorMessage) ?? null;
 
     const cc = pickNumber(raw.countConnectedClients, raw.CountConnectedClients);
+    const cd = pickNumber(raw.countDevices, raw.CountDevices);
     const cs = pickNumber(raw.countSessions, raw.CountSessions);
 
     result[id] = {
@@ -82,6 +85,7 @@ export function normalizeWsStatuses(input: unknown): Record<number, ServiceEntry
       nextRunTime: nextRun,
       errorMessage: err,
       countConnectedClients: typeof cc === "number" ? cc : undefined,
+      countDevices: typeof cd === "number" ? cd : undefined,
       countSessions: typeof cs === "number" ? cs : undefined,
     };
   }

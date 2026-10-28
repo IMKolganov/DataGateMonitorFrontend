@@ -82,11 +82,12 @@ export function toUsersSeriesChartPoints(
         label: formatLabel(date, mode),
         activeSessions: r.activeSessions ?? 0,
         activeUsers: r.activeUsers ?? 0,
+        activeDevices: r.activeDevices ?? 0,
       };
     });
 }
 
-/** Merge main chart points with users series by index (same From/To/Grouping → same order). Adds activeUsers. */
+/** Merge main chart points with users series by index (same From/To/Grouping → same order). */
 export function mergeChartWithUsersSeries(
   base: ChartPoint[],
   usersSeries: UsersSeriesChartPoint[]
@@ -94,6 +95,7 @@ export function mergeChartWithUsersSeries(
   return base.map((p, i) => ({
     ...p,
     activeUsers: usersSeries[i]?.activeUsers ?? 0,
+    activeDevices: usersSeries[i]?.activeDevices ?? 0,
   }));
 }
 

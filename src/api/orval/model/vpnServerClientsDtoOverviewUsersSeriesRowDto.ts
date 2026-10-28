@@ -9,4 +9,6 @@ export interface VpnServerClientsDtoOverviewUsersSeriesRowDto {
   ts?: string;
   activeSessions?: number;
   activeUsers?: number;
+  /** Distinct CommonName (installation / device CN) in the bucket. */
+  activeDevices?: number;
 }

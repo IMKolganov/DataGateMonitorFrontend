@@ -16,6 +16,7 @@ vi.mock("../utils/auth/authSelectors", () => ({
 vi.mock("./useSignalRService", () => ({
   default: () => ({
     serviceData: signalRState.serviceData,
+    totalDevices: null,
     runServiceNow: vi.fn(),
     connectionState: "Disconnected",
     lastError: null,
