@@ -10,7 +10,6 @@ export interface AvailabilityCheckResponsesAvailabilityCheckStatusResponse {
   enabled?: boolean;
   /** @nullable */
   probeUrl?: string | null;
-  /** Background probe interval in seconds. */
   intervalSeconds?: number;
   /** @nullable */
   lastCheckedAtUtc?: string | null;

@@ -174,7 +174,187 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPostApiOpenVpnServersConflogFetchAndSaveByServerVpnServerIdMutationOptions(options), queryClient);
     }
-    export const getApiOpenVpnServersConflogGetPage = (
+    export const getApiOpenVpnServersConflogGetId = (
+    id: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServerConflogResponsesVpnServerConflogResponse>(
+      {url: `/api/open-vpn-servers/conflog/get/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiOpenVpnServersConflogGetIdQueryKey = (id: number,) => {
+    return [
+    `/api/open-vpn-servers/conflog/get/${id}`
+    ] as const;
+    }
+
+
+export const getGetApiOpenVpnServersConflogGetIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersConflogGetIdQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>> = ({ signal }) => getApiOpenVpnServersConflogGetId(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOpenVpnServersConflogGetIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>>
+export type GetApiOpenVpnServersConflogGetIdQueryError = unknown
+
+
+export function useGetApiOpenVpnServersConflogGetId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersConflogGetId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersConflogGetId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOpenVpnServersConflogGetId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOpenVpnServersConflogGetIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiOpenVpnServersConflogHistoryByServerVpnServerId = (
+    vpnServerId: number,
+    params?: GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServerConflogResponsesVpnServerConflogPageResponse>(
+      {url: `/api/open-vpn-servers/conflog/history-by-server/${vpnServerId}`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryKey = (vpnServerId: number,
+    params?: GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams,) => {
+    return [
+    `/api/open-vpn-servers/conflog/history-by-server/${vpnServerId}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError = unknown>(vpnServerId: number,
+    params?: GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryKey(vpnServerId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>> = ({ signal }) => getApiOpenVpnServersConflogHistoryByServerVpnServerId(vpnServerId,params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>>
+export type GetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryError = unknown
+
+
+export function useGetApiOpenVpnServersConflogHistoryByServerVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError = unknown>(
+ vpnServerId: number,
+    params: undefined |  GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersConflogHistoryByServerVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError = unknown>(
+ vpnServerId: number,
+    params?: GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersConflogHistoryByServerVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError = unknown>(
+ vpnServerId: number,
+    params?: GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOpenVpnServersConflogHistoryByServerVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError = unknown>(
+ vpnServerId: number,
+    params?: GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryOptions(vpnServerId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiOpenVpnServersConflogGetPage = (
     params?: GetApiOpenVpnServersConflogGetPageParams,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -250,92 +430,6 @@ export function useGetApiOpenVpnServersConflogGetPage<TData = Awaited<ReturnType
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiOpenVpnServersConflogGetPageQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export const getApiOpenVpnServersConflogGetId = (
-    id: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServerConflogResponsesVpnServerConflogResponse>(
-      {url: `/api/open-vpn-servers/conflog/get/${id}`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiOpenVpnServersConflogGetIdQueryKey = (id: number,) => {
-    return [
-    `/api/open-vpn-servers/conflog/get/${id}`
-    ] as const;
-    }
-
-
-export const getGetApiOpenVpnServersConflogGetIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersConflogGetIdQueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>> = ({ signal }) => getApiOpenVpnServersConflogGetId(id, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiOpenVpnServersConflogGetIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>>
-export type GetApiOpenVpnServersConflogGetIdQueryError = unknown
-
-
-export function useGetApiOpenVpnServersConflogGetId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError = unknown>(
- id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersConflogGetId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersConflogGetId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiOpenVpnServersConflogGetId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiOpenVpnServersConflogGetIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -513,103 +607,3 @@ export function useGetApiOpenVpnServersConflogHealthcheckWithJwt<TData = Awaited
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const getApiOpenVpnServersConflogHistoryByServerVpnServerId = (
-    vpnServerId: number,
-    params?: GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServerConflogResponsesVpnServerConflogPageResponse>(
-      {url: `/api/open-vpn-servers/conflog/history-by-server/${vpnServerId}`, method: 'GET',
-        params, signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryKey = (vpnServerId: number,
-    params?: GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams,) => {
-    return [
-    `/api/open-vpn-servers/conflog/history-by-server/${vpnServerId}`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError = unknown>(vpnServerId: number,
-    params?: GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryKey(vpnServerId,params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>> = ({ signal }) => getApiOpenVpnServersConflogHistoryByServerVpnServerId(vpnServerId,params, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>>
-export type GetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryError = unknown
-
-
-export function useGetApiOpenVpnServersConflogHistoryByServerVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError = unknown>(
- vpnServerId: number,
-    params: undefined |  GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersConflogHistoryByServerVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError = unknown>(
- vpnServerId: number,
-    params?: GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersConflogHistoryByServerVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError = unknown>(
- vpnServerId: number,
-    params?: GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiOpenVpnServersConflogHistoryByServerVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError = unknown>(
- vpnServerId: number,
-    params?: GetApiOpenVpnServersConflogHistoryByServerVpnServerIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersConflogHistoryByServerVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiOpenVpnServersConflogHistoryByServerVpnServerIdQueryOptions(vpnServerId,params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-

@@ -54,6 +54,92 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+export const getApiOpenVpnServersPiHoleConfigVpnServerId = (
+    vpnServerId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServerPiHoleResponsesVpnServerPiHoleConfigResponse>(
+      {url: `/api/open-vpn-servers/pi-hole-config/${vpnServerId}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiOpenVpnServersPiHoleConfigVpnServerIdQueryKey = (vpnServerId: number,) => {
+    return [
+    `/api/open-vpn-servers/pi-hole-config/${vpnServerId}`
+    ] as const;
+    }
+
+
+export const getGetApiOpenVpnServersPiHoleConfigVpnServerIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError = unknown>(vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersPiHoleConfigVpnServerIdQueryKey(vpnServerId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>> = ({ signal }) => getApiOpenVpnServersPiHoleConfigVpnServerId(vpnServerId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOpenVpnServersPiHoleConfigVpnServerIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>>
+export type GetApiOpenVpnServersPiHoleConfigVpnServerIdQueryError = unknown
+
+
+export function useGetApiOpenVpnServersPiHoleConfigVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError = unknown>(
+ vpnServerId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersPiHoleConfigVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersPiHoleConfigVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOpenVpnServersPiHoleConfigVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOpenVpnServersPiHoleConfigVpnServerIdQueryOptions(vpnServerId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 export const putApiOpenVpnServersPiHoleConfig = (
     vpnServerPiHoleRequestsUpsertVpnServerPiHoleConfigRequest?: VpnServerPiHoleRequestsUpsertVpnServerPiHoleConfigRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
@@ -115,7 +201,238 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPutApiOpenVpnServersPiHoleConfigMutationOptions(options), queryClient);
     }
-    export const getApiOpenVpnServersPiHoleConfigHealthcheck = (
+    export const postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime = (
+    vpnServerId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServerPiHoleResponsesApplyVpnServerPiHoleRuntimeResponse>(
+      {url: `/api/open-vpn-servers/pi-hole-config/${vpnServerId}/apply-runtime`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationKey = () => ['postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime'] as const;
+
+export const getPostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime>>, TError,PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime>>, TError,PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationVariables, TContext> => {
+
+const mutationKey = getPostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime>>, PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationVariables> = (props) => {
+          const {vpnServerId} = props ?? {};
+
+          return  postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime(vpnServerId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime>>>
+
+    export type PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationError = unknown
+    export type PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationVariables = {vpnServerId: number}
+
+    export const usePostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime>>, TError,PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime>>,
+        TError,
+        PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationOptions(options), queryClient);
+    }
+    export const getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics = (
+    vpnServerId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiDataGateOpenVpnManagerDiagnosticsResponsesPiHoleDiagnosticsResponse>(
+      {url: `/api/open-vpn-servers/pi-hole-config/${vpnServerId}/diagnostics`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnosticsQueryKey = (vpnServerId: number,) => {
+    return [
+    `/api/open-vpn-servers/pi-hole-config/${vpnServerId}/diagnostics`
+    ] as const;
+    }
+
+
+export const getGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnosticsQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError = unknown>(vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnosticsQueryKey(vpnServerId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>> = ({ signal }) => getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics(vpnServerId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnosticsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>>
+export type GetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnosticsQueryError = unknown
+
+
+export function useGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError = unknown>(
+ vpnServerId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnosticsQueryOptions(vpnServerId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId = (
+    vpnServerId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServerPiHoleResponsesVpnServerPiHoleRuntimeConfigResponse>(
+      {url: `/api/open-vpn-servers/pi-hole-config/runtime/${vpnServerId}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerIdQueryKey = (vpnServerId: number,) => {
+    return [
+    `/api/open-vpn-servers/pi-hole-config/runtime/${vpnServerId}`
+    ] as const;
+    }
+
+
+export const getGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError = unknown>(vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerIdQueryKey(vpnServerId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>> = ({ signal }) => getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId(vpnServerId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOpenVpnServersPiHoleConfigRuntimeVpnServerIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>>
+export type GetApiOpenVpnServersPiHoleConfigRuntimeVpnServerIdQueryError = unknown
+
+
+export function useGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError = unknown>(
+ vpnServerId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerIdQueryOptions(vpnServerId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiOpenVpnServersPiHoleConfigHealthcheck = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -281,326 +598,3 @@ export function useGetApiOpenVpnServersPiHoleConfigHealthcheckWithJwt<TData = Aw
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId = (
-    vpnServerId: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServerPiHoleResponsesVpnServerPiHoleRuntimeConfigResponse>(
-      {url: `/api/open-vpn-servers/pi-hole-config/runtime/${vpnServerId}`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerIdQueryKey = (vpnServerId: number,) => {
-    return [
-    `/api/open-vpn-servers/pi-hole-config/runtime/${vpnServerId}`
-    ] as const;
-    }
-
-
-export const getGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError = unknown>(vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerIdQueryKey(vpnServerId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>> = ({ signal }) => getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId(vpnServerId, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiOpenVpnServersPiHoleConfigRuntimeVpnServerIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>>
-export type GetApiOpenVpnServersPiHoleConfigRuntimeVpnServerIdQueryError = unknown
-
-
-export function useGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError = unknown>(
- vpnServerId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigRuntimeVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiOpenVpnServersPiHoleConfigRuntimeVpnServerIdQueryOptions(vpnServerId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export const getApiOpenVpnServersPiHoleConfigVpnServerId = (
-    vpnServerId: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServerPiHoleResponsesVpnServerPiHoleConfigResponse>(
-      {url: `/api/open-vpn-servers/pi-hole-config/${vpnServerId}`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiOpenVpnServersPiHoleConfigVpnServerIdQueryKey = (vpnServerId: number,) => {
-    return [
-    `/api/open-vpn-servers/pi-hole-config/${vpnServerId}`
-    ] as const;
-    }
-
-
-export const getGetApiOpenVpnServersPiHoleConfigVpnServerIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError = unknown>(vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersPiHoleConfigVpnServerIdQueryKey(vpnServerId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>> = ({ signal }) => getApiOpenVpnServersPiHoleConfigVpnServerId(vpnServerId, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiOpenVpnServersPiHoleConfigVpnServerIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>>
-export type GetApiOpenVpnServersPiHoleConfigVpnServerIdQueryError = unknown
-
-
-export function useGetApiOpenVpnServersPiHoleConfigVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError = unknown>(
- vpnServerId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersPiHoleConfigVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersPiHoleConfigVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiOpenVpnServersPiHoleConfigVpnServerId<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiOpenVpnServersPiHoleConfigVpnServerIdQueryOptions(vpnServerId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export const postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime = (
-    vpnServerId: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServerPiHoleResponsesApplyVpnServerPiHoleRuntimeResponse>(
-      {url: `/api/open-vpn-servers/pi-hole-config/${vpnServerId}/apply-runtime`, method: 'POST', signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationKey = () => ['postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime'] as const;
-
-export const getPostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime>>, TError,PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime>>, TError,PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationVariables, TContext> => {
-
-const mutationKey = getPostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime>>, PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationVariables> = (props) => {
-          const {vpnServerId} = props ?? {};
-
-          return  postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime(vpnServerId,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime>>>
-
-    export type PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationError = unknown
-    export type PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationVariables = {vpnServerId: number}
-
-    export const usePostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime>>, TError,PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntime>>,
-        TError,
-        PostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiOpenVpnServersPiHoleConfigVpnServerIdApplyRuntimeMutationOptions(options), queryClient);
-    }
-    export const getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics = (
-    vpnServerId: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiDataGateOpenVpnManagerDiagnosticsResponsesPiHoleDiagnosticsResponse>(
-      {url: `/api/open-vpn-servers/pi-hole-config/${vpnServerId}/diagnostics`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnosticsQueryKey = (vpnServerId: number,) => {
-    return [
-    `/api/open-vpn-servers/pi-hole-config/${vpnServerId}/diagnostics`
-    ] as const;
-    }
-
-
-export const getGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnosticsQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError = unknown>(vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnosticsQueryKey(vpnServerId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>> = ({ signal }) => getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics(vpnServerId, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnosticsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>>
-export type GetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnosticsQueryError = unknown
-
-
-export function useGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError = unknown>(
- vpnServerId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics<TData = Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersPiHoleConfigVpnServerIdDiagnostics>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiOpenVpnServersPiHoleConfigVpnServerIdDiagnosticsQueryOptions(vpnServerId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-

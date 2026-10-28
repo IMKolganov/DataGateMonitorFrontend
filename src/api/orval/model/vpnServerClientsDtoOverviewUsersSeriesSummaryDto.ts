@@ -6,28 +6,22 @@
  */
 
 export interface VpnServerClientsDtoOverviewUsersSeriesSummaryDto {
-  /** Max concurrent sessions in any series bucket that had samples. */
   peakActiveSessions?: number;
-  /** Bucket start (UTC) where peakActiveSessions occurred. */
+  /** @nullable */
   peakActiveSessionsAt?: string | null;
-  /** Min concurrent sessions among buckets that had samples (excludes zero-filled gaps). */
   lowActiveSessions?: number;
-  /** Bucket start (UTC) where lowActiveSessions occurred. */
+  /** @nullable */
   lowActiveSessionsAt?: string | null;
-  /** Max concurrent users (distinct ExternalId) in any series bucket that had samples. */
   peakActiveUsers?: number;
-  /** Bucket start (UTC) where peakActiveUsers occurred. */
+  /** @nullable */
   peakActiveUsersAt?: string | null;
-  /** Min concurrent users among buckets that had samples (excludes zero-filled gaps). */
   lowActiveUsers?: number;
-  /** Bucket start (UTC) where lowActiveUsers occurred. */
+  /** @nullable */
   lowActiveUsersAt?: string | null;
-  /** Max concurrent devices (distinct CommonName) in any series bucket that had samples. */
   peakActiveDevices?: number;
-  /** Bucket start (UTC) where peakActiveDevices occurred. */
+  /** @nullable */
   peakActiveDevicesAt?: string | null;
-  /** Min concurrent devices among buckets that had samples (excludes zero-filled gaps). */
   lowActiveDevices?: number;
-  /** Bucket start (UTC) where lowActiveDevices occurred. */
+  /** @nullable */
   lowActiveDevicesAt?: string | null;
 }

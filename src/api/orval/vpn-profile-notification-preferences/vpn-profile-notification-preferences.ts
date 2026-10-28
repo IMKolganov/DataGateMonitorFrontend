@@ -199,6 +199,67 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPutApiVpnProfileNotificationPreferencesMutationOptions(options), queryClient);
     }
+    export const postApiVpnProfileNotificationPreferencesSetAllCategories = (
+    vpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest?: VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnProfileNotificationPreferencesGetVpnProfileNotificationPreferencesResponse>(
+      {url: `/api/vpn-profile-notification-preferences/set-all-categories`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: vpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationKey = () => ['postApiVpnProfileNotificationPreferencesSetAllCategories'] as const;
+
+export const getPostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>>, TError,PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>>, TError,PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationVariables, TContext> => {
+
+const mutationKey = getPostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>>, PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiVpnProfileNotificationPreferencesSetAllCategories(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationResult = NonNullable<Awaited<ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>>>
+    export type PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationBody = VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest | undefined
+    export type PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationError = unknown
+    export type PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationVariables = {data?: VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest}
+
+    export const usePostApiVpnProfileNotificationPreferencesSetAllCategories = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>>, TError,PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>>,
+        TError,
+        PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationOptions(options), queryClient);
+    }
     export const getApiVpnProfileNotificationPreferencesHealthcheck = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
@@ -365,70 +426,3 @@ export function useGetApiVpnProfileNotificationPreferencesHealthcheckWithJwt<TDa
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const postApiVpnProfileNotificationPreferencesSetAllCategories = (
-    vpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest?: VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnProfileNotificationPreferencesGetVpnProfileNotificationPreferencesResponse>(
-      {url: `/api/vpn-profile-notification-preferences/set-all-categories`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: vpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationKey = () => ['postApiVpnProfileNotificationPreferencesSetAllCategories'] as const;
-
-export const getPostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>>, TError,PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>>, TError,PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationVariables, TContext> => {
-
-const mutationKey = getPostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>>, PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiVpnProfileNotificationPreferencesSetAllCategories(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationResult = NonNullable<Awaited<ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>>>
-    export type PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationBody = VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest | undefined
-    export type PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationError = unknown
-    export type PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationVariables = {data?: VpnProfileNotificationPreferencesSetAllVpnProfileNotificationCategoriesRequest}
-
-    export const usePostApiVpnProfileNotificationPreferencesSetAllCategories = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>>, TError,PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiVpnProfileNotificationPreferencesSetAllCategories>>,
-        TError,
-        PostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiVpnProfileNotificationPreferencesSetAllCategoriesMutationOptions(options), queryClient);
-    }

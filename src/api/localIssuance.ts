@@ -1,31 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
-import { ogmMutator } from "./mutator";
+import {
+  getApiOpenVpnFilesOriginsVpnServerId,
+  getGetApiOpenVpnFilesOriginsVpnServerIdQueryKey,
+} from "./orval/open-vpn-file-origins/open-vpn-file-origins";
+import { getApiOpenVpnServersDiscoveriesDiscoveryIdNodeKey } from "./orval/vpn-node-local-issuance/vpn-node-local-issuance";
+import type {
+  LocalIssuanceDtoIssuedOvpnFileOriginDto as IssuedOvpnFileOrigin,
+  LocalIssuanceResponsesNodeKeyStatusResponse as NodeKeyStatus,
+} from "./orval/model";
+import { orvalPayload } from "./orvalPayload";
 
-/**
- * Node-local ("reverse") OpenVPN issuance extras. Hand-written: these backend contracts are not in
- * SharedModels / the orval spec yet.
- */
-export type IssuedOvpnFileOrigin = {
-  issuedOvpnFileId: number;
-  /** "dashboard" | "local" */
-  origin: string;
-  isServiceProfile: boolean;
-  certSerialNumber?: string | null;
-  certFingerprintSha256?: string | null;
-};
-
-export type NodeKeyStatus = {
-  trustedFingerprint?: string | null;
-  pendingFingerprint?: string | null;
-};
-
-export const ovpnFileOriginsQueryKey = (vpnServerId: number) => ["api", "open-vpn-files", "origins", vpnServerId] as const;
+// Both contracts and HTTP calls are generated from the backend OpenAPI schema.
+export type { IssuedOvpnFileOrigin, NodeKeyStatus };
+export const ovpnFileOriginsQueryKey = getGetApiOpenVpnFilesOriginsVpnServerIdQueryKey;
 
 export function useOvpnFileOrigins(vpnServerId: number, enabled: boolean) {
   return useQuery({
     queryKey: ovpnFileOriginsQueryKey(vpnServerId),
-    queryFn: ({ signal }) =>
-      ogmMutator<IssuedOvpnFileOrigin[]>({ url: `/api/open-vpn-files/origins/${vpnServerId}`, method: "GET", signal }),
+    queryFn: async ({ signal }) => orvalPayload<IssuedOvpnFileOrigin[] | null>(
+      await getApiOpenVpnFilesOriginsVpnServerId(vpnServerId, undefined, signal),
+    ) ?? [],
     enabled,
     staleTime: 10_000,
     retry: 1,
@@ -35,12 +29,9 @@ export function useOvpnFileOrigins(vpnServerId: number, enabled: boolean) {
 export function useDiscoveryNodeKey(discoveryId: number, enabled: boolean) {
   return useQuery({
     queryKey: ["api", "open-vpn-servers", "discoveries", discoveryId, "node-key"] as const,
-    queryFn: ({ signal }) =>
-      ogmMutator<NodeKeyStatus>({
-        url: `/api/open-vpn-servers/discoveries/${discoveryId}/node-key`,
-        method: "GET",
-        signal,
-      }),
+    queryFn: async ({ signal }) => orvalPayload<NodeKeyStatus>(
+      await getApiOpenVpnServersDiscoveriesDiscoveryIdNodeKey(discoveryId, undefined, signal),
+    ),
     enabled,
     staleTime: 30_000,
     retry: 1,

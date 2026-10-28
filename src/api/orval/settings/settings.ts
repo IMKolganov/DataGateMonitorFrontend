@@ -139,7 +139,67 @@ export function useGetApiSettingsGet<TData = Awaited<ReturnType<typeof getApiSet
 
 
 
-export const getApiSettingsHealthcheck = (
+export const postApiSettingsSet = (
+    params: PostApiSettingsSetParams,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSettingsResponsesSettingResponse>(
+      {url: `/api/settings/set`, method: 'POST',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiSettingsSetMutationKey = () => ['postApiSettingsSet'] as const;
+
+export const getPostApiSettingsSetMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiSettingsSet>>, TError,PostApiSettingsSetMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiSettingsSet>>, TError,PostApiSettingsSetMutationVariables, TContext> => {
+
+const mutationKey = getPostApiSettingsSetMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiSettingsSet>>, PostApiSettingsSetMutationVariables> = (props) => {
+          const {params} = props ?? {};
+
+          return  postApiSettingsSet(params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiSettingsSetMutationResult = NonNullable<Awaited<ReturnType<typeof postApiSettingsSet>>>
+
+    export type PostApiSettingsSetMutationError = unknown
+    export type PostApiSettingsSetMutationVariables = {params: PostApiSettingsSetParams}
+
+    export const usePostApiSettingsSet = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiSettingsSet>>, TError,PostApiSettingsSetMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiSettingsSet>>,
+        TError,
+        PostApiSettingsSetMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiSettingsSetMutationOptions(options), queryClient);
+    }
+    export const getApiSettingsHealthcheck = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -305,69 +365,3 @@ export function useGetApiSettingsHealthcheckWithJwt<TData = Awaited<ReturnType<t
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const postApiSettingsSet = (
-    params: PostApiSettingsSetParams,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSettingsResponsesSettingResponse>(
-      {url: `/api/settings/set`, method: 'POST',
-        params, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiSettingsSetMutationKey = () => ['postApiSettingsSet'] as const;
-
-export const getPostApiSettingsSetMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiSettingsSet>>, TError,PostApiSettingsSetMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiSettingsSet>>, TError,PostApiSettingsSetMutationVariables, TContext> => {
-
-const mutationKey = getPostApiSettingsSetMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiSettingsSet>>, PostApiSettingsSetMutationVariables> = (props) => {
-          const {params} = props ?? {};
-
-          return  postApiSettingsSet(params,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiSettingsSetMutationResult = NonNullable<Awaited<ReturnType<typeof postApiSettingsSet>>>
-
-    export type PostApiSettingsSetMutationError = unknown
-    export type PostApiSettingsSetMutationVariables = {params: PostApiSettingsSetParams}
-
-    export const usePostApiSettingsSet = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiSettingsSet>>, TError,PostApiSettingsSetMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiSettingsSet>>,
-        TError,
-        PostApiSettingsSetMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiSettingsSetMutationOptions(options), queryClient);
-    }

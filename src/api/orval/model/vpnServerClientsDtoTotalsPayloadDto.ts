@@ -7,9 +7,7 @@
 
 export interface VpnServerClientsDtoTotalsPayloadDto {
   sessionsCount?: number;
-  /** Distinct ExternalId (account/provider identity) in the period. */
   usersCount?: number;
-  /** Distinct CommonName (device / installation CN) in the period. */
   devicesCount?: number;
   accountsCount?: number;
   trafficInBytes?: number;

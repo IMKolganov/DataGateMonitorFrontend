@@ -68,3 +68,13 @@ MIT
 | <img src="https://api.iconify.design/simple-icons/linkedin.svg?color=%230A66C2" width="16" height="16" alt="" /> **LinkedIn** | [linkedin.com/in/imkolganov](https://www.linkedin.com/in/imkolganov/?locale=en) |
 | <img src="https://cdn.simpleicons.org/telegram/26A5E4" width="16" height="16" alt="" /> **Telegram** | [@KolganovIvan](https://t.me/KolganovIvan) |
 | <img src="https://cdn.simpleicons.org/buymeacoffee/FFDD00" width="16" height="16" alt="" /> **Buy Me a Coffee** | [buymeacoffee.com/imkolganov](https://buymeacoffee.com/imkolganov) |
+
+### Обновление API-клиента
+
+Фронтенд обращается к бэкенду. HTTP-контракты бэкенда определены в NuGet-пакете `DataGateMonitor.SharedModels`; TypeScript-модели и запросы генерируются Orval из OpenAPI запущенного бэкенда:
+
+```sh
+OPENAPI_URL=http://127.0.0.1:5581/swagger/v1/swagger.yaml npm run gen:api
+```
+
+Адрес и порт должны соответствовать локально запущенному бэкенду. Снимок той же схемы в JSON хранится в `openapi/swagger.json`; для него доступна команда `npm run gen:api:offline`. Файлы в `src/api/orval/` обновляются генератором.

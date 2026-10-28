@@ -24,16 +24,16 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiOpenVpnFilesResponsesDownloadFileResponse,
+  ApiOpenVpnFilesResponsesOvpnFileResponse,
+  ApiOpenVpnFilesResponsesOvpnFileWithTokenResponse,
+  ApiOpenVpnFilesResponsesOvpnFilesResponse,
+  ApiOpenVpnFilesResponsesOvpnFilesWithTokensResponse,
   ApiSystemString,
-  ApiXrayClientLinksResponsesDownloadXrayClientLinkResponse,
-  ApiXrayClientLinksResponsesXrayClientLinkResponse,
-  ApiXrayClientLinksResponsesXrayClientLinkWithTokenResponse,
-  ApiXrayClientLinksResponsesXrayClientLinksResponse,
-  ApiXrayClientLinksResponsesXrayClientLinksWithTokensResponse,
-  XrayClientLinksRequestsAddXrayClientLinkRequest,
-  XrayClientLinksRequestsDownloadXrayClientLinkByCnRequest,
-  XrayClientLinksRequestsDownloadXrayClientLinkRequest,
-  XrayClientLinksRequestsRevokeXrayClientLinkRequest
+  OpenVpnFilesRequestsAddFileRequest,
+  OpenVpnFilesRequestsDownloadFileByCnRequest,
+  OpenVpnFilesRequestsDownloadFileRequest,
+  OpenVpnFilesRequestsRevokeFileRequest
 } from '../model';
 
 import { ogmMutator } from '../../mutator';
@@ -58,135 +58,13 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const postApiXrayClientLinksAdd = (
-    xrayClientLinksRequestsAddXrayClientLinkRequest?: XrayClientLinksRequestsAddXrayClientLinkRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiXrayClientLinksResponsesXrayClientLinkResponse>(
-      {url: `/api/xray-client-links/add`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: xrayClientLinksRequestsAddXrayClientLinkRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiXrayClientLinksAddMutationKey = () => ['postApiXrayClientLinksAdd'] as const;
-
-export const getPostApiXrayClientLinksAddMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>, TError,PostApiXrayClientLinksAddMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>, TError,PostApiXrayClientLinksAddMutationVariables, TContext> => {
-
-const mutationKey = getPostApiXrayClientLinksAddMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>, PostApiXrayClientLinksAddMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiXrayClientLinksAdd(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiXrayClientLinksAddMutationResult = NonNullable<Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>>
-    export type PostApiXrayClientLinksAddMutationBody = XrayClientLinksRequestsAddXrayClientLinkRequest | undefined
-    export type PostApiXrayClientLinksAddMutationError = unknown
-    export type PostApiXrayClientLinksAddMutationVariables = {data?: XrayClientLinksRequestsAddXrayClientLinkRequest}
-
-    export const usePostApiXrayClientLinksAdd = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>, TError,PostApiXrayClientLinksAddMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>,
-        TError,
-        PostApiXrayClientLinksAddMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiXrayClientLinksAddMutationOptions(options), queryClient);
-    }
-    export const postApiXrayClientLinksAddWithToken = (
-    xrayClientLinksRequestsAddXrayClientLinkRequest?: XrayClientLinksRequestsAddXrayClientLinkRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiXrayClientLinksResponsesXrayClientLinkWithTokenResponse>(
-      {url: `/api/xray-client-links/add-with-token`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: xrayClientLinksRequestsAddXrayClientLinkRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiXrayClientLinksAddWithTokenMutationKey = () => ['postApiXrayClientLinksAddWithToken'] as const;
-
-export const getPostApiXrayClientLinksAddWithTokenMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>, TError,PostApiXrayClientLinksAddWithTokenMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>, TError,PostApiXrayClientLinksAddWithTokenMutationVariables, TContext> => {
-
-const mutationKey = getPostApiXrayClientLinksAddWithTokenMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>, PostApiXrayClientLinksAddWithTokenMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiXrayClientLinksAddWithToken(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiXrayClientLinksAddWithTokenMutationResult = NonNullable<Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>>
-    export type PostApiXrayClientLinksAddWithTokenMutationBody = XrayClientLinksRequestsAddXrayClientLinkRequest | undefined
-    export type PostApiXrayClientLinksAddWithTokenMutationError = unknown
-    export type PostApiXrayClientLinksAddWithTokenMutationVariables = {data?: XrayClientLinksRequestsAddXrayClientLinkRequest}
-
-    export const usePostApiXrayClientLinksAddWithToken = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>, TError,PostApiXrayClientLinksAddWithTokenMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>,
-        TError,
-        PostApiXrayClientLinksAddWithTokenMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiXrayClientLinksAddWithTokenMutationOptions(options), queryClient);
-    }
-    export const getApiXrayClientLinksByTokenToken = (
+export const getApiXrayClientLinksByTokenToken = (
     token: string,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
 
-      return ogmMutator<ApiXrayClientLinksResponsesXrayClientLinkResponse>(
+      return ogmMutator<ApiOpenVpnFilesResponsesOvpnFileResponse>(
       {url: `/api/xray-client-links/by-token/${token}`, method: 'GET', signal
     },
       options);
@@ -266,314 +144,13 @@ export function useGetApiXrayClientLinksByTokenToken<TData = Awaited<ReturnType<
 
 
 
-export const postApiXrayClientLinksDownloadFile = (
-    xrayClientLinksRequestsDownloadXrayClientLinkRequest?: XrayClientLinksRequestsDownloadXrayClientLinkRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiXrayClientLinksResponsesDownloadXrayClientLinkResponse>(
-      {url: `/api/xray-client-links/download-file`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: xrayClientLinksRequestsDownloadXrayClientLinkRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiXrayClientLinksDownloadFileMutationKey = () => ['postApiXrayClientLinksDownloadFile'] as const;
-
-export const getPostApiXrayClientLinksDownloadFileMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>, TError,PostApiXrayClientLinksDownloadFileMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>, TError,PostApiXrayClientLinksDownloadFileMutationVariables, TContext> => {
-
-const mutationKey = getPostApiXrayClientLinksDownloadFileMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>, PostApiXrayClientLinksDownloadFileMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiXrayClientLinksDownloadFile(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiXrayClientLinksDownloadFileMutationResult = NonNullable<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>>
-    export type PostApiXrayClientLinksDownloadFileMutationBody = XrayClientLinksRequestsDownloadXrayClientLinkRequest | undefined
-    export type PostApiXrayClientLinksDownloadFileMutationError = unknown
-    export type PostApiXrayClientLinksDownloadFileMutationVariables = {data?: XrayClientLinksRequestsDownloadXrayClientLinkRequest}
-
-    export const usePostApiXrayClientLinksDownloadFile = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>, TError,PostApiXrayClientLinksDownloadFileMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>,
-        TError,
-        PostApiXrayClientLinksDownloadFileMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiXrayClientLinksDownloadFileMutationOptions(options), queryClient);
-    }
-    export const postApiXrayClientLinksDownloadFileByCn = (
-    xrayClientLinksRequestsDownloadXrayClientLinkByCnRequest?: XrayClientLinksRequestsDownloadXrayClientLinkByCnRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiXrayClientLinksResponsesDownloadXrayClientLinkResponse>(
-      {url: `/api/xray-client-links/download-file-by-cn`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: xrayClientLinksRequestsDownloadXrayClientLinkByCnRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiXrayClientLinksDownloadFileByCnMutationKey = () => ['postApiXrayClientLinksDownloadFileByCn'] as const;
-
-export const getPostApiXrayClientLinksDownloadFileByCnMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>, TError,PostApiXrayClientLinksDownloadFileByCnMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>, TError,PostApiXrayClientLinksDownloadFileByCnMutationVariables, TContext> => {
-
-const mutationKey = getPostApiXrayClientLinksDownloadFileByCnMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>, PostApiXrayClientLinksDownloadFileByCnMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiXrayClientLinksDownloadFileByCn(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiXrayClientLinksDownloadFileByCnMutationResult = NonNullable<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>>
-    export type PostApiXrayClientLinksDownloadFileByCnMutationBody = XrayClientLinksRequestsDownloadXrayClientLinkByCnRequest | undefined
-    export type PostApiXrayClientLinksDownloadFileByCnMutationError = unknown
-    export type PostApiXrayClientLinksDownloadFileByCnMutationVariables = {data?: XrayClientLinksRequestsDownloadXrayClientLinkByCnRequest}
-
-    export const usePostApiXrayClientLinksDownloadFileByCn = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>, TError,PostApiXrayClientLinksDownloadFileByCnMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>,
-        TError,
-        PostApiXrayClientLinksDownloadFileByCnMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiXrayClientLinksDownloadFileByCnMutationOptions(options), queryClient);
-    }
-    export const getApiXrayClientLinksGetAllWithTokenVpnServerId = (
-    vpnServerId: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiXrayClientLinksResponsesXrayClientLinksWithTokensResponse>(
-      {url: `/api/xray-client-links/get-all-with-token/${vpnServerId}`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiXrayClientLinksGetAllWithTokenVpnServerIdQueryKey = (vpnServerId: number,) => {
-    return [
-    `/api/xray-client-links/get-all-with-token/${vpnServerId}`
-    ] as const;
-    }
-
-
-export const getGetApiXrayClientLinksGetAllWithTokenVpnServerIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError = unknown>(vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiXrayClientLinksGetAllWithTokenVpnServerIdQueryKey(vpnServerId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>> = ({ signal }) => getApiXrayClientLinksGetAllWithTokenVpnServerId(vpnServerId, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiXrayClientLinksGetAllWithTokenVpnServerIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>>
-export type GetApiXrayClientLinksGetAllWithTokenVpnServerIdQueryError = unknown
-
-
-export function useGetApiXrayClientLinksGetAllWithTokenVpnServerId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError = unknown>(
- vpnServerId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiXrayClientLinksGetAllWithTokenVpnServerId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiXrayClientLinksGetAllWithTokenVpnServerId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiXrayClientLinksGetAllWithTokenVpnServerId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiXrayClientLinksGetAllWithTokenVpnServerIdQueryOptions(vpnServerId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export const getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId = (
-    vpnServerId: number,
-    externalId: string,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiXrayClientLinksResponsesXrayClientLinksWithTokensResponse>(
-      {url: `/api/xray-client-links/get-all-with-token/${vpnServerId}/${externalId}`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalIdQueryKey = (vpnServerId: number,
-    externalId: string,) => {
-    return [
-    `/api/xray-client-links/get-all-with-token/${vpnServerId}/${externalId}`
-    ] as const;
-    }
-
-
-export const getGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError = unknown>(vpnServerId: number,
-    externalId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalIdQueryKey(vpnServerId,externalId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>> = ({ signal }) => getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId(vpnServerId,externalId, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined && externalId !== null && externalId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>>
-export type GetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalIdQueryError = unknown
-
-
-export function useGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError = unknown>(
- vpnServerId: number,
-    externalId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError = unknown>(
- vpnServerId: number,
-    externalId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError = unknown>(
- vpnServerId: number,
-    externalId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError = unknown>(
- vpnServerId: number,
-    externalId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalIdQueryOptions(vpnServerId,externalId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
 export const getApiXrayClientLinksGetAllVpnServerId = (
     vpnServerId: number,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
 
-      return ogmMutator<ApiXrayClientLinksResponsesXrayClientLinksResponse>(
+      return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesResponse>(
       {url: `/api/xray-client-links/get-all/${vpnServerId}`, method: 'GET', signal
     },
       options);
@@ -660,7 +237,7 @@ export const getApiXrayClientLinksGetAllVpnServerIdExternalId = (
 ) => {
 
 
-      return ogmMutator<ApiXrayClientLinksResponsesXrayClientLinksResponse>(
+      return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesResponse>(
       {url: `/api/xray-client-links/get-all/${vpnServerId}/${externalId}`, method: 'GET', signal
     },
       options);
@@ -746,13 +323,192 @@ export function useGetApiXrayClientLinksGetAllVpnServerIdExternalId<TData = Awai
 
 
 
+export const getApiXrayClientLinksGetAllWithTokenVpnServerId = (
+    vpnServerId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesWithTokensResponse>(
+      {url: `/api/xray-client-links/get-all-with-token/${vpnServerId}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiXrayClientLinksGetAllWithTokenVpnServerIdQueryKey = (vpnServerId: number,) => {
+    return [
+    `/api/xray-client-links/get-all-with-token/${vpnServerId}`
+    ] as const;
+    }
+
+
+export const getGetApiXrayClientLinksGetAllWithTokenVpnServerIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError = unknown>(vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiXrayClientLinksGetAllWithTokenVpnServerIdQueryKey(vpnServerId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>> = ({ signal }) => getApiXrayClientLinksGetAllWithTokenVpnServerId(vpnServerId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiXrayClientLinksGetAllWithTokenVpnServerIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>>
+export type GetApiXrayClientLinksGetAllWithTokenVpnServerIdQueryError = unknown
+
+
+export function useGetApiXrayClientLinksGetAllWithTokenVpnServerId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError = unknown>(
+ vpnServerId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiXrayClientLinksGetAllWithTokenVpnServerId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiXrayClientLinksGetAllWithTokenVpnServerId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiXrayClientLinksGetAllWithTokenVpnServerId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiXrayClientLinksGetAllWithTokenVpnServerIdQueryOptions(vpnServerId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId = (
+    vpnServerId: number,
+    externalId: string,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesWithTokensResponse>(
+      {url: `/api/xray-client-links/get-all-with-token/${vpnServerId}/${externalId}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalIdQueryKey = (vpnServerId: number,
+    externalId: string,) => {
+    return [
+    `/api/xray-client-links/get-all-with-token/${vpnServerId}/${externalId}`
+    ] as const;
+    }
+
+
+export const getGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError = unknown>(vpnServerId: number,
+    externalId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalIdQueryKey(vpnServerId,externalId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>> = ({ signal }) => getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId(vpnServerId,externalId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined && externalId !== null && externalId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>>
+export type GetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalIdQueryError = unknown
+
+
+export function useGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError = unknown>(
+ vpnServerId: number,
+    externalId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError = unknown>(
+ vpnServerId: number,
+    externalId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError = unknown>(
+ vpnServerId: number,
+    externalId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId<TData = Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError = unknown>(
+ vpnServerId: number,
+    externalId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiXrayClientLinksGetAllWithTokenVpnServerIdExternalId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiXrayClientLinksGetAllWithTokenVpnServerIdExternalIdQueryOptions(vpnServerId,externalId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 export const getApiXrayClientLinksGetFilesExternalId = (
     externalId: string,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
 
-      return ogmMutator<ApiXrayClientLinksResponsesXrayClientLinksResponse>(
+      return ogmMutator<ApiOpenVpnFilesResponsesOvpnFilesResponse>(
       {url: `/api/xray-client-links/get-files/${externalId}`, method: 'GET', signal
     },
       options);
@@ -832,7 +588,312 @@ export function useGetApiXrayClientLinksGetFilesExternalId<TData = Awaited<Retur
 
 
 
-export const getApiXrayClientLinksHealthcheck = (
+export const postApiXrayClientLinksAdd = (
+    openVpnFilesRequestsAddFileRequest?: OpenVpnFilesRequestsAddFileRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiOpenVpnFilesResponsesOvpnFileResponse>(
+      {url: `/api/xray-client-links/add`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: openVpnFilesRequestsAddFileRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiXrayClientLinksAddMutationKey = () => ['postApiXrayClientLinksAdd'] as const;
+
+export const getPostApiXrayClientLinksAddMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>, TError,PostApiXrayClientLinksAddMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>, TError,PostApiXrayClientLinksAddMutationVariables, TContext> => {
+
+const mutationKey = getPostApiXrayClientLinksAddMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>, PostApiXrayClientLinksAddMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiXrayClientLinksAdd(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiXrayClientLinksAddMutationResult = NonNullable<Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>>
+    export type PostApiXrayClientLinksAddMutationBody = OpenVpnFilesRequestsAddFileRequest | undefined
+    export type PostApiXrayClientLinksAddMutationError = unknown
+    export type PostApiXrayClientLinksAddMutationVariables = {data?: OpenVpnFilesRequestsAddFileRequest}
+
+    export const usePostApiXrayClientLinksAdd = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>, TError,PostApiXrayClientLinksAddMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiXrayClientLinksAdd>>,
+        TError,
+        PostApiXrayClientLinksAddMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiXrayClientLinksAddMutationOptions(options), queryClient);
+    }
+    export const postApiXrayClientLinksAddWithToken = (
+    openVpnFilesRequestsAddFileRequest?: OpenVpnFilesRequestsAddFileRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiOpenVpnFilesResponsesOvpnFileWithTokenResponse>(
+      {url: `/api/xray-client-links/add-with-token`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: openVpnFilesRequestsAddFileRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiXrayClientLinksAddWithTokenMutationKey = () => ['postApiXrayClientLinksAddWithToken'] as const;
+
+export const getPostApiXrayClientLinksAddWithTokenMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>, TError,PostApiXrayClientLinksAddWithTokenMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>, TError,PostApiXrayClientLinksAddWithTokenMutationVariables, TContext> => {
+
+const mutationKey = getPostApiXrayClientLinksAddWithTokenMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>, PostApiXrayClientLinksAddWithTokenMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiXrayClientLinksAddWithToken(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiXrayClientLinksAddWithTokenMutationResult = NonNullable<Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>>
+    export type PostApiXrayClientLinksAddWithTokenMutationBody = OpenVpnFilesRequestsAddFileRequest | undefined
+    export type PostApiXrayClientLinksAddWithTokenMutationError = unknown
+    export type PostApiXrayClientLinksAddWithTokenMutationVariables = {data?: OpenVpnFilesRequestsAddFileRequest}
+
+    export const usePostApiXrayClientLinksAddWithToken = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>, TError,PostApiXrayClientLinksAddWithTokenMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiXrayClientLinksAddWithToken>>,
+        TError,
+        PostApiXrayClientLinksAddWithTokenMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiXrayClientLinksAddWithTokenMutationOptions(options), queryClient);
+    }
+    export const postApiXrayClientLinksRevokeFile = (
+    openVpnFilesRequestsRevokeFileRequest?: OpenVpnFilesRequestsRevokeFileRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiOpenVpnFilesResponsesOvpnFileResponse>(
+      {url: `/api/xray-client-links/revoke-file`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: openVpnFilesRequestsRevokeFileRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiXrayClientLinksRevokeFileMutationKey = () => ['postApiXrayClientLinksRevokeFile'] as const;
+
+export const getPostApiXrayClientLinksRevokeFileMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>, TError,PostApiXrayClientLinksRevokeFileMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>, TError,PostApiXrayClientLinksRevokeFileMutationVariables, TContext> => {
+
+const mutationKey = getPostApiXrayClientLinksRevokeFileMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>, PostApiXrayClientLinksRevokeFileMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiXrayClientLinksRevokeFile(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiXrayClientLinksRevokeFileMutationResult = NonNullable<Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>>
+    export type PostApiXrayClientLinksRevokeFileMutationBody = OpenVpnFilesRequestsRevokeFileRequest | undefined
+    export type PostApiXrayClientLinksRevokeFileMutationError = unknown
+    export type PostApiXrayClientLinksRevokeFileMutationVariables = {data?: OpenVpnFilesRequestsRevokeFileRequest}
+
+    export const usePostApiXrayClientLinksRevokeFile = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>, TError,PostApiXrayClientLinksRevokeFileMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>,
+        TError,
+        PostApiXrayClientLinksRevokeFileMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiXrayClientLinksRevokeFileMutationOptions(options), queryClient);
+    }
+    export const postApiXrayClientLinksDownloadFile = (
+    openVpnFilesRequestsDownloadFileRequest?: OpenVpnFilesRequestsDownloadFileRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiOpenVpnFilesResponsesDownloadFileResponse>(
+      {url: `/api/xray-client-links/download-file`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: openVpnFilesRequestsDownloadFileRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiXrayClientLinksDownloadFileMutationKey = () => ['postApiXrayClientLinksDownloadFile'] as const;
+
+export const getPostApiXrayClientLinksDownloadFileMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>, TError,PostApiXrayClientLinksDownloadFileMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>, TError,PostApiXrayClientLinksDownloadFileMutationVariables, TContext> => {
+
+const mutationKey = getPostApiXrayClientLinksDownloadFileMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>, PostApiXrayClientLinksDownloadFileMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiXrayClientLinksDownloadFile(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiXrayClientLinksDownloadFileMutationResult = NonNullable<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>>
+    export type PostApiXrayClientLinksDownloadFileMutationBody = OpenVpnFilesRequestsDownloadFileRequest | undefined
+    export type PostApiXrayClientLinksDownloadFileMutationError = unknown
+    export type PostApiXrayClientLinksDownloadFileMutationVariables = {data?: OpenVpnFilesRequestsDownloadFileRequest}
+
+    export const usePostApiXrayClientLinksDownloadFile = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>, TError,PostApiXrayClientLinksDownloadFileMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFile>>,
+        TError,
+        PostApiXrayClientLinksDownloadFileMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiXrayClientLinksDownloadFileMutationOptions(options), queryClient);
+    }
+    export const postApiXrayClientLinksDownloadFileByCn = (
+    openVpnFilesRequestsDownloadFileByCnRequest?: OpenVpnFilesRequestsDownloadFileByCnRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiOpenVpnFilesResponsesDownloadFileResponse>(
+      {url: `/api/xray-client-links/download-file-by-cn`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: openVpnFilesRequestsDownloadFileByCnRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiXrayClientLinksDownloadFileByCnMutationKey = () => ['postApiXrayClientLinksDownloadFileByCn'] as const;
+
+export const getPostApiXrayClientLinksDownloadFileByCnMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>, TError,PostApiXrayClientLinksDownloadFileByCnMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>, TError,PostApiXrayClientLinksDownloadFileByCnMutationVariables, TContext> => {
+
+const mutationKey = getPostApiXrayClientLinksDownloadFileByCnMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>, PostApiXrayClientLinksDownloadFileByCnMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiXrayClientLinksDownloadFileByCn(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiXrayClientLinksDownloadFileByCnMutationResult = NonNullable<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>>
+    export type PostApiXrayClientLinksDownloadFileByCnMutationBody = OpenVpnFilesRequestsDownloadFileByCnRequest | undefined
+    export type PostApiXrayClientLinksDownloadFileByCnMutationError = unknown
+    export type PostApiXrayClientLinksDownloadFileByCnMutationVariables = {data?: OpenVpnFilesRequestsDownloadFileByCnRequest}
+
+    export const usePostApiXrayClientLinksDownloadFileByCn = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>, TError,PostApiXrayClientLinksDownloadFileByCnMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiXrayClientLinksDownloadFileByCn>>,
+        TError,
+        PostApiXrayClientLinksDownloadFileByCnMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiXrayClientLinksDownloadFileByCnMutationOptions(options), queryClient);
+    }
+    export const getApiXrayClientLinksHealthcheck = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -998,70 +1059,3 @@ export function useGetApiXrayClientLinksHealthcheckWithJwt<TData = Awaited<Retur
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const postApiXrayClientLinksRevokeFile = (
-    xrayClientLinksRequestsRevokeXrayClientLinkRequest?: XrayClientLinksRequestsRevokeXrayClientLinkRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiXrayClientLinksResponsesXrayClientLinkResponse>(
-      {url: `/api/xray-client-links/revoke-file`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: xrayClientLinksRequestsRevokeXrayClientLinkRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiXrayClientLinksRevokeFileMutationKey = () => ['postApiXrayClientLinksRevokeFile'] as const;
-
-export const getPostApiXrayClientLinksRevokeFileMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>, TError,PostApiXrayClientLinksRevokeFileMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>, TError,PostApiXrayClientLinksRevokeFileMutationVariables, TContext> => {
-
-const mutationKey = getPostApiXrayClientLinksRevokeFileMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>, PostApiXrayClientLinksRevokeFileMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiXrayClientLinksRevokeFile(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiXrayClientLinksRevokeFileMutationResult = NonNullable<Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>>
-    export type PostApiXrayClientLinksRevokeFileMutationBody = XrayClientLinksRequestsRevokeXrayClientLinkRequest | undefined
-    export type PostApiXrayClientLinksRevokeFileMutationError = unknown
-    export type PostApiXrayClientLinksRevokeFileMutationVariables = {data?: XrayClientLinksRequestsRevokeXrayClientLinkRequest}
-
-    export const usePostApiXrayClientLinksRevokeFile = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>, TError,PostApiXrayClientLinksRevokeFileMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiXrayClientLinksRevokeFile>>,
-        TError,
-        PostApiXrayClientLinksRevokeFileMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiXrayClientLinksRevokeFileMutationOptions(options), queryClient);
-    }

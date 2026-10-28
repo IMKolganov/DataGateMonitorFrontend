@@ -204,92 +204,6 @@ export function useGetApiTgbotIncomingMessageLogsGetAll<TData = Awaited<ReturnTy
 
 
 
-export const getApiTgbotIncomingMessageLogsGetByIdId = (
-    id: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiTelegramBotIncomingMessageLogResponsesGetByIdMessageResponse>(
-      {url: `/api/tgbot-incoming-message-logs/get-by-id/${id}`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiTgbotIncomingMessageLogsGetByIdIdQueryKey = (id: number,) => {
-    return [
-    `/api/tgbot-incoming-message-logs/get-by-id/${id}`
-    ] as const;
-    }
-
-
-export const getGetApiTgbotIncomingMessageLogsGetByIdIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiTgbotIncomingMessageLogsGetByIdIdQueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>> = ({ signal }) => getApiTgbotIncomingMessageLogsGetByIdId(id, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiTgbotIncomingMessageLogsGetByIdIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>>
-export type GetApiTgbotIncomingMessageLogsGetByIdIdQueryError = unknown
-
-
-export function useGetApiTgbotIncomingMessageLogsGetByIdId<TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError = unknown>(
- id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiTgbotIncomingMessageLogsGetByIdId<TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiTgbotIncomingMessageLogsGetByIdId<TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiTgbotIncomingMessageLogsGetByIdId<TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiTgbotIncomingMessageLogsGetByIdIdQueryOptions(id,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
 export const getApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId = (
     telegramId: number,
     params?: GetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdParams,
@@ -373,6 +287,92 @@ export function useGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramId<T
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiTgbotIncomingMessageLogsGetByTelegramUseridTelegramIdQueryOptions(telegramId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiTgbotIncomingMessageLogsGetByIdId = (
+    id: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiTelegramBotIncomingMessageLogResponsesGetByIdMessageResponse>(
+      {url: `/api/tgbot-incoming-message-logs/get-by-id/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiTgbotIncomingMessageLogsGetByIdIdQueryKey = (id: number,) => {
+    return [
+    `/api/tgbot-incoming-message-logs/get-by-id/${id}`
+    ] as const;
+    }
+
+
+export const getGetApiTgbotIncomingMessageLogsGetByIdIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiTgbotIncomingMessageLogsGetByIdIdQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>> = ({ signal }) => getApiTgbotIncomingMessageLogsGetByIdId(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiTgbotIncomingMessageLogsGetByIdIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>>
+export type GetApiTgbotIncomingMessageLogsGetByIdIdQueryError = unknown
+
+
+export function useGetApiTgbotIncomingMessageLogsGetByIdId<TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiTgbotIncomingMessageLogsGetByIdId<TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiTgbotIncomingMessageLogsGetByIdId<TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiTgbotIncomingMessageLogsGetByIdId<TData = Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiTgbotIncomingMessageLogsGetByIdId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiTgbotIncomingMessageLogsGetByIdIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -550,9 +550,3 @@ export function useGetApiTgbotIncomingMessageLogsHealthcheckWithJwt<TData = Awai
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-

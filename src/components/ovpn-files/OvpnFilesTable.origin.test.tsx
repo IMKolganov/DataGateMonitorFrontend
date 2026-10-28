@@ -15,7 +15,7 @@ vi.mock("../../api/orval/open-vpn-files/open-vpn-files.ts", () => ({
   usePostApiOpenVpnFilesDownloadFile: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
 
-// Renders every column cell so the origin / static IP rendering is exercised.
+// Renders every column cell so the origin rendering and absence of the removed IP column is exercised.
 vi.mock("../ui/TableStyle.tsx", () => ({
   default: function MockGrid(props: { rows: Record<string, unknown>[]; columns: GridColDef[] }) {
     return (

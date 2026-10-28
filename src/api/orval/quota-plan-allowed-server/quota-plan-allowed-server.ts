@@ -55,127 +55,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const postApiQuotaPlanAllowedServersCreate = (
-    quotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest?: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiQuotaPlanAllowedServersResponsesQuotaPlanAllowedServerResponse>(
-      {url: `/api/quota-plan-allowed-servers/create`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: quotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiQuotaPlanAllowedServersCreateMutationKey = () => ['postApiQuotaPlanAllowedServersCreate'] as const;
-
-export const getPostApiQuotaPlanAllowedServersCreateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>, TError,PostApiQuotaPlanAllowedServersCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>, TError,PostApiQuotaPlanAllowedServersCreateMutationVariables, TContext> => {
-
-const mutationKey = getPostApiQuotaPlanAllowedServersCreateMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>, PostApiQuotaPlanAllowedServersCreateMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiQuotaPlanAllowedServersCreate(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiQuotaPlanAllowedServersCreateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>>
-    export type PostApiQuotaPlanAllowedServersCreateMutationBody = QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest | undefined
-    export type PostApiQuotaPlanAllowedServersCreateMutationError = unknown
-    export type PostApiQuotaPlanAllowedServersCreateMutationVariables = {data?: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest}
-
-    export const usePostApiQuotaPlanAllowedServersCreate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>, TError,PostApiQuotaPlanAllowedServersCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>,
-        TError,
-        PostApiQuotaPlanAllowedServersCreateMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiQuotaPlanAllowedServersCreateMutationOptions(options), queryClient);
-    }
-    export const deleteApiQuotaPlanAllowedServersDeleteId = (
-    id: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemString>(
-      {url: `/api/quota-plan-allowed-servers/delete/${id}`, method: 'DELETE', signal
-    },
-      options);
-    }
-
-
-
-
-export const getDeleteApiQuotaPlanAllowedServersDeleteIdMutationKey = () => ['deleteApiQuotaPlanAllowedServersDeleteId'] as const;
-
-export const getDeleteApiQuotaPlanAllowedServersDeleteIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiQuotaPlanAllowedServersDeleteId>>, TError,DeleteApiQuotaPlanAllowedServersDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteApiQuotaPlanAllowedServersDeleteId>>, TError,DeleteApiQuotaPlanAllowedServersDeleteIdMutationVariables, TContext> => {
-
-const mutationKey = getDeleteApiQuotaPlanAllowedServersDeleteIdMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiQuotaPlanAllowedServersDeleteId>>, DeleteApiQuotaPlanAllowedServersDeleteIdMutationVariables> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteApiQuotaPlanAllowedServersDeleteId(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteApiQuotaPlanAllowedServersDeleteIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiQuotaPlanAllowedServersDeleteId>>>
-
-    export type DeleteApiQuotaPlanAllowedServersDeleteIdMutationError = unknown
-    export type DeleteApiQuotaPlanAllowedServersDeleteIdMutationVariables = {id: number}
-
-    export const useDeleteApiQuotaPlanAllowedServersDeleteId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiQuotaPlanAllowedServersDeleteId>>, TError,DeleteApiQuotaPlanAllowedServersDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteApiQuotaPlanAllowedServersDeleteId>>,
-        TError,
-        DeleteApiQuotaPlanAllowedServersDeleteIdMutationVariables,
-        TContext
-      > => {
-      return useMutation(getDeleteApiQuotaPlanAllowedServersDeleteIdMutationOptions(options), queryClient);
-    }
-    export const getApiQuotaPlanAllowedServersGetAll = (
+export const getApiQuotaPlanAllowedServersGetAll = (
     params?: GetApiQuotaPlanAllowedServersGetAllParams,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -251,6 +131,92 @@ export function useGetApiQuotaPlanAllowedServersGetAll<TData = Awaited<ReturnTyp
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiQuotaPlanAllowedServersGetAllQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiQuotaPlanAllowedServersGetId = (
+    id: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiQuotaPlanAllowedServersResponsesQuotaPlanAllowedServerResponse>(
+      {url: `/api/quota-plan-allowed-servers/get/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiQuotaPlanAllowedServersGetIdQueryKey = (id: number,) => {
+    return [
+    `/api/quota-plan-allowed-servers/get/${id}`
+    ] as const;
+    }
+
+
+export const getGetApiQuotaPlanAllowedServersGetIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiQuotaPlanAllowedServersGetIdQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>> = ({ signal }) => getApiQuotaPlanAllowedServersGetId(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiQuotaPlanAllowedServersGetIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>>
+export type GetApiQuotaPlanAllowedServersGetIdQueryError = unknown
+
+
+export function useGetApiQuotaPlanAllowedServersGetId<TData = Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiQuotaPlanAllowedServersGetId<TData = Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiQuotaPlanAllowedServersGetId<TData = Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiQuotaPlanAllowedServersGetId<TData = Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiQuotaPlanAllowedServersGetIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -434,14 +400,16 @@ export function useGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerId<TDat
 
 
 
-export const getApiQuotaPlanAllowedServersGetId = (
-    id: number,
+export const postApiQuotaPlanAllowedServersCreate = (
+    quotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest?: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
 
       return ogmMutator<ApiQuotaPlanAllowedServersResponsesQuotaPlanAllowedServerResponse>(
-      {url: `/api/quota-plan-allowed-servers/get/${id}`, method: 'GET', signal
+      {url: `/api/quota-plan-allowed-servers/create`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: quotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest, signal
     },
       options);
     }
@@ -449,78 +417,171 @@ export const getApiQuotaPlanAllowedServersGetId = (
 
 
 
-export const getGetApiQuotaPlanAllowedServersGetIdQueryKey = (id: number,) => {
-    return [
-    `/api/quota-plan-allowed-servers/get/${id}`
-    ] as const;
+export const getPostApiQuotaPlanAllowedServersCreateMutationKey = () => ['postApiQuotaPlanAllowedServersCreate'] as const;
+
+export const getPostApiQuotaPlanAllowedServersCreateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>, TError,PostApiQuotaPlanAllowedServersCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>, TError,PostApiQuotaPlanAllowedServersCreateMutationVariables, TContext> => {
+
+const mutationKey = getPostApiQuotaPlanAllowedServersCreateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>, PostApiQuotaPlanAllowedServersCreateMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiQuotaPlanAllowedServersCreate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiQuotaPlanAllowedServersCreateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>>
+    export type PostApiQuotaPlanAllowedServersCreateMutationBody = QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest | undefined
+    export type PostApiQuotaPlanAllowedServersCreateMutationError = unknown
+    export type PostApiQuotaPlanAllowedServersCreateMutationVariables = {data?: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest}
+
+    export const usePostApiQuotaPlanAllowedServersCreate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>, TError,PostApiQuotaPlanAllowedServersCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiQuotaPlanAllowedServersCreate>>,
+        TError,
+        PostApiQuotaPlanAllowedServersCreateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiQuotaPlanAllowedServersCreateMutationOptions(options), queryClient);
+    }
+    export const putApiQuotaPlanAllowedServersUpdate = (
+    quotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest?: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/quota-plan-allowed-servers/update`, method: 'PUT',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: quotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest, signal
+    },
+      options);
     }
 
 
-export const getGetApiQuotaPlanAllowedServersGetIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+
+
+export const getPutApiQuotaPlanAllowedServersUpdateMutationKey = () => ['putApiQuotaPlanAllowedServersUpdate'] as const;
+
+export const getPutApiQuotaPlanAllowedServersUpdateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>, TError,PutApiQuotaPlanAllowedServersUpdateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>, TError,PutApiQuotaPlanAllowedServersUpdateMutationVariables, TContext> => {
+
+const mutationKey = getPutApiQuotaPlanAllowedServersUpdateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>, PutApiQuotaPlanAllowedServersUpdateMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiQuotaPlanAllowedServersUpdate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiQuotaPlanAllowedServersUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>>
+    export type PutApiQuotaPlanAllowedServersUpdateMutationBody = QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest | undefined
+    export type PutApiQuotaPlanAllowedServersUpdateMutationError = unknown
+    export type PutApiQuotaPlanAllowedServersUpdateMutationVariables = {data?: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest}
+
+    export const usePutApiQuotaPlanAllowedServersUpdate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>, TError,PutApiQuotaPlanAllowedServersUpdateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>,
+        TError,
+        PutApiQuotaPlanAllowedServersUpdateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPutApiQuotaPlanAllowedServersUpdateMutationOptions(options), queryClient);
+    }
+    export const deleteApiQuotaPlanAllowedServersDeleteId = (
+    id: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiQuotaPlanAllowedServersGetIdQueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>> = ({ signal }) => getApiQuotaPlanAllowedServersGetId(id, requestOptions, signal);
-
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/quota-plan-allowed-servers/delete/${id}`, method: 'DELETE', signal
+    },
+      options);
+    }
 
 
 
 
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
+export const getDeleteApiQuotaPlanAllowedServersDeleteIdMutationKey = () => ['deleteApiQuotaPlanAllowedServersDeleteId'] as const;
 
-export type GetApiQuotaPlanAllowedServersGetIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>>
-export type GetApiQuotaPlanAllowedServersGetIdQueryError = unknown
+export const getDeleteApiQuotaPlanAllowedServersDeleteIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiQuotaPlanAllowedServersDeleteId>>, TError,DeleteApiQuotaPlanAllowedServersDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiQuotaPlanAllowedServersDeleteId>>, TError,DeleteApiQuotaPlanAllowedServersDeleteIdMutationVariables, TContext> => {
+
+const mutationKey = getDeleteApiQuotaPlanAllowedServersDeleteIdMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
 
-export function useGetApiQuotaPlanAllowedServersGetId<TData = Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError = unknown>(
- id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiQuotaPlanAllowedServersGetId<TData = Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiQuotaPlanAllowedServersGetId<TData = Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetApiQuotaPlanAllowedServersGetId<TData = Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiQuotaPlanAllowedServersGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetApiQuotaPlanAllowedServersGetIdQueryOptions(id,options)
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiQuotaPlanAllowedServersDeleteId>>, DeleteApiQuotaPlanAllowedServersDeleteIdMutationVariables> = (props) => {
+          const {id} = props ?? {};
 
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
+          return  deleteApiQuotaPlanAllowedServersDeleteId(id,requestOptions)
+        }
 
 
 
 
 
 
-export const getApiQuotaPlanAllowedServersHealthcheck = (
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiQuotaPlanAllowedServersDeleteIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiQuotaPlanAllowedServersDeleteId>>>
+
+    export type DeleteApiQuotaPlanAllowedServersDeleteIdMutationError = unknown
+    export type DeleteApiQuotaPlanAllowedServersDeleteIdMutationVariables = {id: number}
+
+    export const useDeleteApiQuotaPlanAllowedServersDeleteId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiQuotaPlanAllowedServersDeleteId>>, TError,DeleteApiQuotaPlanAllowedServersDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiQuotaPlanAllowedServersDeleteId>>,
+        TError,
+        DeleteApiQuotaPlanAllowedServersDeleteIdMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteApiQuotaPlanAllowedServersDeleteIdMutationOptions(options), queryClient);
+    }
+    export const getApiQuotaPlanAllowedServersHealthcheck = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -686,70 +747,3 @@ export function useGetApiQuotaPlanAllowedServersHealthcheckWithJwt<TData = Await
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const putApiQuotaPlanAllowedServersUpdate = (
-    quotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest?: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemString>(
-      {url: `/api/quota-plan-allowed-servers/update`, method: 'PUT',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: quotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPutApiQuotaPlanAllowedServersUpdateMutationKey = () => ['putApiQuotaPlanAllowedServersUpdate'] as const;
-
-export const getPutApiQuotaPlanAllowedServersUpdateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>, TError,PutApiQuotaPlanAllowedServersUpdateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>, TError,PutApiQuotaPlanAllowedServersUpdateMutationVariables, TContext> => {
-
-const mutationKey = getPutApiQuotaPlanAllowedServersUpdateMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>, PutApiQuotaPlanAllowedServersUpdateMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  putApiQuotaPlanAllowedServersUpdate(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PutApiQuotaPlanAllowedServersUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>>
-    export type PutApiQuotaPlanAllowedServersUpdateMutationBody = QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest | undefined
-    export type PutApiQuotaPlanAllowedServersUpdateMutationError = unknown
-    export type PutApiQuotaPlanAllowedServersUpdateMutationVariables = {data?: QuotaPlanAllowedServersRequestsCreateOrUpdateQuotaPlanAllowedServerRequest}
-
-    export const usePutApiQuotaPlanAllowedServersUpdate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>, TError,PutApiQuotaPlanAllowedServersUpdateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof putApiQuotaPlanAllowedServersUpdate>>,
-        TError,
-        PutApiQuotaPlanAllowedServersUpdateMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPutApiQuotaPlanAllowedServersUpdateMutationOptions(options), queryClient);
-    }

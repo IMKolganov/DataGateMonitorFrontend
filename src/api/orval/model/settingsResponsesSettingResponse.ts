@@ -8,5 +8,5 @@
 export interface SettingsResponsesSettingResponse {
   /** @nullable */
   key?: string | null;
-  value?: unknown | null;
+  value?: unknown;
 }

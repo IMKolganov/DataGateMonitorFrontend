@@ -55,127 +55,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const postApiVpnServerGroupsCreate = (
-    vpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest?: VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServerGroupsResponsesVpnServerGroupResponse>(
-      {url: `/api/vpn-server-groups/create`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: vpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiVpnServerGroupsCreateMutationKey = () => ['postApiVpnServerGroupsCreate'] as const;
-
-export const getPostApiVpnServerGroupsCreateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiVpnServerGroupsCreate>>, TError,PostApiVpnServerGroupsCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiVpnServerGroupsCreate>>, TError,PostApiVpnServerGroupsCreateMutationVariables, TContext> => {
-
-const mutationKey = getPostApiVpnServerGroupsCreateMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiVpnServerGroupsCreate>>, PostApiVpnServerGroupsCreateMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiVpnServerGroupsCreate(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiVpnServerGroupsCreateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiVpnServerGroupsCreate>>>
-    export type PostApiVpnServerGroupsCreateMutationBody = VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest | undefined
-    export type PostApiVpnServerGroupsCreateMutationError = unknown
-    export type PostApiVpnServerGroupsCreateMutationVariables = {data?: VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest}
-
-    export const usePostApiVpnServerGroupsCreate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiVpnServerGroupsCreate>>, TError,PostApiVpnServerGroupsCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiVpnServerGroupsCreate>>,
-        TError,
-        PostApiVpnServerGroupsCreateMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiVpnServerGroupsCreateMutationOptions(options), queryClient);
-    }
-    export const deleteApiVpnServerGroupsDeleteId = (
-    id: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemBoolean>(
-      {url: `/api/vpn-server-groups/delete/${id}`, method: 'DELETE', signal
-    },
-      options);
-    }
-
-
-
-
-export const getDeleteApiVpnServerGroupsDeleteIdMutationKey = () => ['deleteApiVpnServerGroupsDeleteId'] as const;
-
-export const getDeleteApiVpnServerGroupsDeleteIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiVpnServerGroupsDeleteId>>, TError,DeleteApiVpnServerGroupsDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteApiVpnServerGroupsDeleteId>>, TError,DeleteApiVpnServerGroupsDeleteIdMutationVariables, TContext> => {
-
-const mutationKey = getDeleteApiVpnServerGroupsDeleteIdMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiVpnServerGroupsDeleteId>>, DeleteApiVpnServerGroupsDeleteIdMutationVariables> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteApiVpnServerGroupsDeleteId(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteApiVpnServerGroupsDeleteIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiVpnServerGroupsDeleteId>>>
-
-    export type DeleteApiVpnServerGroupsDeleteIdMutationError = unknown
-    export type DeleteApiVpnServerGroupsDeleteIdMutationVariables = {id: number}
-
-    export const useDeleteApiVpnServerGroupsDeleteId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiVpnServerGroupsDeleteId>>, TError,DeleteApiVpnServerGroupsDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteApiVpnServerGroupsDeleteId>>,
-        TError,
-        DeleteApiVpnServerGroupsDeleteIdMutationVariables,
-        TContext
-      > => {
-      return useMutation(getDeleteApiVpnServerGroupsDeleteIdMutationOptions(options), queryClient);
-    }
-    export const getApiVpnServerGroupsGetAll = (
+export const getApiVpnServerGroupsGetAll = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -347,7 +227,373 @@ export function useGetApiVpnServerGroupsGetId<TData = Awaited<ReturnType<typeof 
 
 
 
-export const getApiVpnServerGroupsHealthcheck = (
+export const postApiVpnServerGroupsCreate = (
+    vpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest?: VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServerGroupsResponsesVpnServerGroupResponse>(
+      {url: `/api/vpn-server-groups/create`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: vpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiVpnServerGroupsCreateMutationKey = () => ['postApiVpnServerGroupsCreate'] as const;
+
+export const getPostApiVpnServerGroupsCreateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiVpnServerGroupsCreate>>, TError,PostApiVpnServerGroupsCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiVpnServerGroupsCreate>>, TError,PostApiVpnServerGroupsCreateMutationVariables, TContext> => {
+
+const mutationKey = getPostApiVpnServerGroupsCreateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiVpnServerGroupsCreate>>, PostApiVpnServerGroupsCreateMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiVpnServerGroupsCreate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiVpnServerGroupsCreateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiVpnServerGroupsCreate>>>
+    export type PostApiVpnServerGroupsCreateMutationBody = VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest | undefined
+    export type PostApiVpnServerGroupsCreateMutationError = unknown
+    export type PostApiVpnServerGroupsCreateMutationVariables = {data?: VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest}
+
+    export const usePostApiVpnServerGroupsCreate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiVpnServerGroupsCreate>>, TError,PostApiVpnServerGroupsCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiVpnServerGroupsCreate>>,
+        TError,
+        PostApiVpnServerGroupsCreateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiVpnServerGroupsCreateMutationOptions(options), queryClient);
+    }
+    export const putApiVpnServerGroupsUpdateId = (
+    id: number,
+    vpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest?: VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServerGroupsResponsesVpnServerGroupResponse>(
+      {url: `/api/vpn-server-groups/update/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: vpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPutApiVpnServerGroupsUpdateIdMutationKey = () => ['putApiVpnServerGroupsUpdateId'] as const;
+
+export const getPutApiVpnServerGroupsUpdateIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsUpdateId>>, TError,PutApiVpnServerGroupsUpdateIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsUpdateId>>, TError,PutApiVpnServerGroupsUpdateIdMutationVariables, TContext> => {
+
+const mutationKey = getPutApiVpnServerGroupsUpdateIdMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiVpnServerGroupsUpdateId>>, PutApiVpnServerGroupsUpdateIdMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiVpnServerGroupsUpdateId(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiVpnServerGroupsUpdateIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiVpnServerGroupsUpdateId>>>
+    export type PutApiVpnServerGroupsUpdateIdMutationBody = VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest | undefined
+    export type PutApiVpnServerGroupsUpdateIdMutationError = unknown
+    export type PutApiVpnServerGroupsUpdateIdMutationVariables = {id: number;data?: VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest}
+
+    export const usePutApiVpnServerGroupsUpdateId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsUpdateId>>, TError,PutApiVpnServerGroupsUpdateIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiVpnServerGroupsUpdateId>>,
+        TError,
+        PutApiVpnServerGroupsUpdateIdMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPutApiVpnServerGroupsUpdateIdMutationOptions(options), queryClient);
+    }
+    export const deleteApiVpnServerGroupsDeleteId = (
+    id: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemBoolean>(
+      {url: `/api/vpn-server-groups/delete/${id}`, method: 'DELETE', signal
+    },
+      options);
+    }
+
+
+
+
+export const getDeleteApiVpnServerGroupsDeleteIdMutationKey = () => ['deleteApiVpnServerGroupsDeleteId'] as const;
+
+export const getDeleteApiVpnServerGroupsDeleteIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiVpnServerGroupsDeleteId>>, TError,DeleteApiVpnServerGroupsDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiVpnServerGroupsDeleteId>>, TError,DeleteApiVpnServerGroupsDeleteIdMutationVariables, TContext> => {
+
+const mutationKey = getDeleteApiVpnServerGroupsDeleteIdMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiVpnServerGroupsDeleteId>>, DeleteApiVpnServerGroupsDeleteIdMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteApiVpnServerGroupsDeleteId(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiVpnServerGroupsDeleteIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiVpnServerGroupsDeleteId>>>
+
+    export type DeleteApiVpnServerGroupsDeleteIdMutationError = unknown
+    export type DeleteApiVpnServerGroupsDeleteIdMutationVariables = {id: number}
+
+    export const useDeleteApiVpnServerGroupsDeleteId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiVpnServerGroupsDeleteId>>, TError,DeleteApiVpnServerGroupsDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiVpnServerGroupsDeleteId>>,
+        TError,
+        DeleteApiVpnServerGroupsDeleteIdMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteApiVpnServerGroupsDeleteIdMutationOptions(options), queryClient);
+    }
+    export const putApiVpnServerGroupsReorder = (
+    vpnServerGroupsRequestsReorderVpnServerGroupsRequest?: VpnServerGroupsRequestsReorderVpnServerGroupsRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemBoolean>(
+      {url: `/api/vpn-server-groups/reorder`, method: 'PUT',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: vpnServerGroupsRequestsReorderVpnServerGroupsRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPutApiVpnServerGroupsReorderMutationKey = () => ['putApiVpnServerGroupsReorder'] as const;
+
+export const getPutApiVpnServerGroupsReorderMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsReorder>>, TError,PutApiVpnServerGroupsReorderMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsReorder>>, TError,PutApiVpnServerGroupsReorderMutationVariables, TContext> => {
+
+const mutationKey = getPutApiVpnServerGroupsReorderMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiVpnServerGroupsReorder>>, PutApiVpnServerGroupsReorderMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiVpnServerGroupsReorder(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiVpnServerGroupsReorderMutationResult = NonNullable<Awaited<ReturnType<typeof putApiVpnServerGroupsReorder>>>
+    export type PutApiVpnServerGroupsReorderMutationBody = VpnServerGroupsRequestsReorderVpnServerGroupsRequest | undefined
+    export type PutApiVpnServerGroupsReorderMutationError = unknown
+    export type PutApiVpnServerGroupsReorderMutationVariables = {data?: VpnServerGroupsRequestsReorderVpnServerGroupsRequest}
+
+    export const usePutApiVpnServerGroupsReorder = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsReorder>>, TError,PutApiVpnServerGroupsReorderMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiVpnServerGroupsReorder>>,
+        TError,
+        PutApiVpnServerGroupsReorderMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPutApiVpnServerGroupsReorderMutationOptions(options), queryClient);
+    }
+    export const putApiVpnServerGroupsIdSetServers = (
+    id: number,
+    vpnServerGroupsRequestsSetVpnServerGroupServersRequest?: VpnServerGroupsRequestsSetVpnServerGroupServersRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServerGroupsResponsesVpnServerGroupResponse>(
+      {url: `/api/vpn-server-groups/${id}/set-servers`, method: 'PUT',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: vpnServerGroupsRequestsSetVpnServerGroupServersRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPutApiVpnServerGroupsIdSetServersMutationKey = () => ['putApiVpnServerGroupsIdSetServers'] as const;
+
+export const getPutApiVpnServerGroupsIdSetServersMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsIdSetServers>>, TError,PutApiVpnServerGroupsIdSetServersMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsIdSetServers>>, TError,PutApiVpnServerGroupsIdSetServersMutationVariables, TContext> => {
+
+const mutationKey = getPutApiVpnServerGroupsIdSetServersMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiVpnServerGroupsIdSetServers>>, PutApiVpnServerGroupsIdSetServersMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiVpnServerGroupsIdSetServers(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiVpnServerGroupsIdSetServersMutationResult = NonNullable<Awaited<ReturnType<typeof putApiVpnServerGroupsIdSetServers>>>
+    export type PutApiVpnServerGroupsIdSetServersMutationBody = VpnServerGroupsRequestsSetVpnServerGroupServersRequest | undefined
+    export type PutApiVpnServerGroupsIdSetServersMutationError = unknown
+    export type PutApiVpnServerGroupsIdSetServersMutationVariables = {id: number;data?: VpnServerGroupsRequestsSetVpnServerGroupServersRequest}
+
+    export const usePutApiVpnServerGroupsIdSetServers = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsIdSetServers>>, TError,PutApiVpnServerGroupsIdSetServersMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiVpnServerGroupsIdSetServers>>,
+        TError,
+        PutApiVpnServerGroupsIdSetServersMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPutApiVpnServerGroupsIdSetServersMutationOptions(options), queryClient);
+    }
+    export const putApiVpnServerGroupsUngroupedSetServers = (
+    vpnServerGroupsRequestsSetVpnServerGroupServersRequest?: VpnServerGroupsRequestsSetVpnServerGroupServersRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemBoolean>(
+      {url: `/api/vpn-server-groups/ungrouped/set-servers`, method: 'PUT',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: vpnServerGroupsRequestsSetVpnServerGroupServersRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPutApiVpnServerGroupsUngroupedSetServersMutationKey = () => ['putApiVpnServerGroupsUngroupedSetServers'] as const;
+
+export const getPutApiVpnServerGroupsUngroupedSetServersMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsUngroupedSetServers>>, TError,PutApiVpnServerGroupsUngroupedSetServersMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsUngroupedSetServers>>, TError,PutApiVpnServerGroupsUngroupedSetServersMutationVariables, TContext> => {
+
+const mutationKey = getPutApiVpnServerGroupsUngroupedSetServersMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiVpnServerGroupsUngroupedSetServers>>, PutApiVpnServerGroupsUngroupedSetServersMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiVpnServerGroupsUngroupedSetServers(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiVpnServerGroupsUngroupedSetServersMutationResult = NonNullable<Awaited<ReturnType<typeof putApiVpnServerGroupsUngroupedSetServers>>>
+    export type PutApiVpnServerGroupsUngroupedSetServersMutationBody = VpnServerGroupsRequestsSetVpnServerGroupServersRequest | undefined
+    export type PutApiVpnServerGroupsUngroupedSetServersMutationError = unknown
+    export type PutApiVpnServerGroupsUngroupedSetServersMutationVariables = {data?: VpnServerGroupsRequestsSetVpnServerGroupServersRequest}
+
+    export const usePutApiVpnServerGroupsUngroupedSetServers = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsUngroupedSetServers>>, TError,PutApiVpnServerGroupsUngroupedSetServersMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiVpnServerGroupsUngroupedSetServers>>,
+        TError,
+        PutApiVpnServerGroupsUngroupedSetServersMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPutApiVpnServerGroupsUngroupedSetServersMutationOptions(options), queryClient);
+    }
+    export const getApiVpnServerGroupsHealthcheck = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -513,255 +759,3 @@ export function useGetApiVpnServerGroupsHealthcheckWithJwt<TData = Awaited<Retur
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const putApiVpnServerGroupsReorder = (
-    vpnServerGroupsRequestsReorderVpnServerGroupsRequest?: VpnServerGroupsRequestsReorderVpnServerGroupsRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemBoolean>(
-      {url: `/api/vpn-server-groups/reorder`, method: 'PUT',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: vpnServerGroupsRequestsReorderVpnServerGroupsRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPutApiVpnServerGroupsReorderMutationKey = () => ['putApiVpnServerGroupsReorder'] as const;
-
-export const getPutApiVpnServerGroupsReorderMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsReorder>>, TError,PutApiVpnServerGroupsReorderMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsReorder>>, TError,PutApiVpnServerGroupsReorderMutationVariables, TContext> => {
-
-const mutationKey = getPutApiVpnServerGroupsReorderMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiVpnServerGroupsReorder>>, PutApiVpnServerGroupsReorderMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  putApiVpnServerGroupsReorder(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PutApiVpnServerGroupsReorderMutationResult = NonNullable<Awaited<ReturnType<typeof putApiVpnServerGroupsReorder>>>
-    export type PutApiVpnServerGroupsReorderMutationBody = VpnServerGroupsRequestsReorderVpnServerGroupsRequest | undefined
-    export type PutApiVpnServerGroupsReorderMutationError = unknown
-    export type PutApiVpnServerGroupsReorderMutationVariables = {data?: VpnServerGroupsRequestsReorderVpnServerGroupsRequest}
-
-    export const usePutApiVpnServerGroupsReorder = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsReorder>>, TError,PutApiVpnServerGroupsReorderMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof putApiVpnServerGroupsReorder>>,
-        TError,
-        PutApiVpnServerGroupsReorderMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPutApiVpnServerGroupsReorderMutationOptions(options), queryClient);
-    }
-    export const putApiVpnServerGroupsUngroupedSetServers = (
-    vpnServerGroupsRequestsSetVpnServerGroupServersRequest?: VpnServerGroupsRequestsSetVpnServerGroupServersRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemBoolean>(
-      {url: `/api/vpn-server-groups/ungrouped/set-servers`, method: 'PUT',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: vpnServerGroupsRequestsSetVpnServerGroupServersRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPutApiVpnServerGroupsUngroupedSetServersMutationKey = () => ['putApiVpnServerGroupsUngroupedSetServers'] as const;
-
-export const getPutApiVpnServerGroupsUngroupedSetServersMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsUngroupedSetServers>>, TError,PutApiVpnServerGroupsUngroupedSetServersMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsUngroupedSetServers>>, TError,PutApiVpnServerGroupsUngroupedSetServersMutationVariables, TContext> => {
-
-const mutationKey = getPutApiVpnServerGroupsUngroupedSetServersMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiVpnServerGroupsUngroupedSetServers>>, PutApiVpnServerGroupsUngroupedSetServersMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  putApiVpnServerGroupsUngroupedSetServers(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PutApiVpnServerGroupsUngroupedSetServersMutationResult = NonNullable<Awaited<ReturnType<typeof putApiVpnServerGroupsUngroupedSetServers>>>
-    export type PutApiVpnServerGroupsUngroupedSetServersMutationBody = VpnServerGroupsRequestsSetVpnServerGroupServersRequest | undefined
-    export type PutApiVpnServerGroupsUngroupedSetServersMutationError = unknown
-    export type PutApiVpnServerGroupsUngroupedSetServersMutationVariables = {data?: VpnServerGroupsRequestsSetVpnServerGroupServersRequest}
-
-    export const usePutApiVpnServerGroupsUngroupedSetServers = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsUngroupedSetServers>>, TError,PutApiVpnServerGroupsUngroupedSetServersMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof putApiVpnServerGroupsUngroupedSetServers>>,
-        TError,
-        PutApiVpnServerGroupsUngroupedSetServersMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPutApiVpnServerGroupsUngroupedSetServersMutationOptions(options), queryClient);
-    }
-    export const putApiVpnServerGroupsUpdateId = (
-    id: number,
-    vpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest?: VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServerGroupsResponsesVpnServerGroupResponse>(
-      {url: `/api/vpn-server-groups/update/${id}`, method: 'PUT',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: vpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPutApiVpnServerGroupsUpdateIdMutationKey = () => ['putApiVpnServerGroupsUpdateId'] as const;
-
-export const getPutApiVpnServerGroupsUpdateIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsUpdateId>>, TError,PutApiVpnServerGroupsUpdateIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsUpdateId>>, TError,PutApiVpnServerGroupsUpdateIdMutationVariables, TContext> => {
-
-const mutationKey = getPutApiVpnServerGroupsUpdateIdMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiVpnServerGroupsUpdateId>>, PutApiVpnServerGroupsUpdateIdMutationVariables> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  putApiVpnServerGroupsUpdateId(id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PutApiVpnServerGroupsUpdateIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiVpnServerGroupsUpdateId>>>
-    export type PutApiVpnServerGroupsUpdateIdMutationBody = VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest | undefined
-    export type PutApiVpnServerGroupsUpdateIdMutationError = unknown
-    export type PutApiVpnServerGroupsUpdateIdMutationVariables = {id: number;data?: VpnServerGroupsRequestsCreateOrUpdateVpnServerGroupRequest}
-
-    export const usePutApiVpnServerGroupsUpdateId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsUpdateId>>, TError,PutApiVpnServerGroupsUpdateIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof putApiVpnServerGroupsUpdateId>>,
-        TError,
-        PutApiVpnServerGroupsUpdateIdMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPutApiVpnServerGroupsUpdateIdMutationOptions(options), queryClient);
-    }
-    export const putApiVpnServerGroupsIdSetServers = (
-    id: number,
-    vpnServerGroupsRequestsSetVpnServerGroupServersRequest?: VpnServerGroupsRequestsSetVpnServerGroupServersRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServerGroupsResponsesVpnServerGroupResponse>(
-      {url: `/api/vpn-server-groups/${id}/set-servers`, method: 'PUT',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: vpnServerGroupsRequestsSetVpnServerGroupServersRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPutApiVpnServerGroupsIdSetServersMutationKey = () => ['putApiVpnServerGroupsIdSetServers'] as const;
-
-export const getPutApiVpnServerGroupsIdSetServersMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsIdSetServers>>, TError,PutApiVpnServerGroupsIdSetServersMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsIdSetServers>>, TError,PutApiVpnServerGroupsIdSetServersMutationVariables, TContext> => {
-
-const mutationKey = getPutApiVpnServerGroupsIdSetServersMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiVpnServerGroupsIdSetServers>>, PutApiVpnServerGroupsIdSetServersMutationVariables> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  putApiVpnServerGroupsIdSetServers(id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PutApiVpnServerGroupsIdSetServersMutationResult = NonNullable<Awaited<ReturnType<typeof putApiVpnServerGroupsIdSetServers>>>
-    export type PutApiVpnServerGroupsIdSetServersMutationBody = VpnServerGroupsRequestsSetVpnServerGroupServersRequest | undefined
-    export type PutApiVpnServerGroupsIdSetServersMutationError = unknown
-    export type PutApiVpnServerGroupsIdSetServersMutationVariables = {id: number;data?: VpnServerGroupsRequestsSetVpnServerGroupServersRequest}
-
-    export const usePutApiVpnServerGroupsIdSetServers = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiVpnServerGroupsIdSetServers>>, TError,PutApiVpnServerGroupsIdSetServersMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof putApiVpnServerGroupsIdSetServers>>,
-        TError,
-        PutApiVpnServerGroupsIdSetServersMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPutApiVpnServerGroupsIdSetServersMutationOptions(options), queryClient);
-    }

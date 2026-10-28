@@ -17,4 +17,6 @@ export interface VpnServersRequestsAnnounceVpnServerRequest {
   /** @nullable */
   version?: string | null;
   isEnableWss?: boolean;
+  /** @nullable */
+  nodePublicKeyPem?: string | null;
 }

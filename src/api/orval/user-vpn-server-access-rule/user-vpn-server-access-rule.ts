@@ -55,127 +55,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const postApiUserVpnServerAccessRulesCreate = (
-    userVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest?: UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiUserVpnServerAccessRulesResponsesUserVpnServerAccessRuleResponse>(
-      {url: `/api/user-vpn-server-access-rules/create`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: userVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiUserVpnServerAccessRulesCreateMutationKey = () => ['postApiUserVpnServerAccessRulesCreate'] as const;
-
-export const getPostApiUserVpnServerAccessRulesCreateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUserVpnServerAccessRulesCreate>>, TError,PostApiUserVpnServerAccessRulesCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiUserVpnServerAccessRulesCreate>>, TError,PostApiUserVpnServerAccessRulesCreateMutationVariables, TContext> => {
-
-const mutationKey = getPostApiUserVpnServerAccessRulesCreateMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiUserVpnServerAccessRulesCreate>>, PostApiUserVpnServerAccessRulesCreateMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiUserVpnServerAccessRulesCreate(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiUserVpnServerAccessRulesCreateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiUserVpnServerAccessRulesCreate>>>
-    export type PostApiUserVpnServerAccessRulesCreateMutationBody = UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest | undefined
-    export type PostApiUserVpnServerAccessRulesCreateMutationError = unknown
-    export type PostApiUserVpnServerAccessRulesCreateMutationVariables = {data?: UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest}
-
-    export const usePostApiUserVpnServerAccessRulesCreate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUserVpnServerAccessRulesCreate>>, TError,PostApiUserVpnServerAccessRulesCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiUserVpnServerAccessRulesCreate>>,
-        TError,
-        PostApiUserVpnServerAccessRulesCreateMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiUserVpnServerAccessRulesCreateMutationOptions(options), queryClient);
-    }
-    export const deleteApiUserVpnServerAccessRulesDeleteId = (
-    id: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemString>(
-      {url: `/api/user-vpn-server-access-rules/delete/${id}`, method: 'DELETE', signal
-    },
-      options);
-    }
-
-
-
-
-export const getDeleteApiUserVpnServerAccessRulesDeleteIdMutationKey = () => ['deleteApiUserVpnServerAccessRulesDeleteId'] as const;
-
-export const getDeleteApiUserVpnServerAccessRulesDeleteIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiUserVpnServerAccessRulesDeleteId>>, TError,DeleteApiUserVpnServerAccessRulesDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteApiUserVpnServerAccessRulesDeleteId>>, TError,DeleteApiUserVpnServerAccessRulesDeleteIdMutationVariables, TContext> => {
-
-const mutationKey = getDeleteApiUserVpnServerAccessRulesDeleteIdMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiUserVpnServerAccessRulesDeleteId>>, DeleteApiUserVpnServerAccessRulesDeleteIdMutationVariables> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteApiUserVpnServerAccessRulesDeleteId(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteApiUserVpnServerAccessRulesDeleteIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiUserVpnServerAccessRulesDeleteId>>>
-
-    export type DeleteApiUserVpnServerAccessRulesDeleteIdMutationError = unknown
-    export type DeleteApiUserVpnServerAccessRulesDeleteIdMutationVariables = {id: number}
-
-    export const useDeleteApiUserVpnServerAccessRulesDeleteId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiUserVpnServerAccessRulesDeleteId>>, TError,DeleteApiUserVpnServerAccessRulesDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteApiUserVpnServerAccessRulesDeleteId>>,
-        TError,
-        DeleteApiUserVpnServerAccessRulesDeleteIdMutationVariables,
-        TContext
-      > => {
-      return useMutation(getDeleteApiUserVpnServerAccessRulesDeleteIdMutationOptions(options), queryClient);
-    }
-    export const getApiUserVpnServerAccessRulesGetAll = (
+export const getApiUserVpnServerAccessRulesGetAll = (
     params?: GetApiUserVpnServerAccessRulesGetAllParams,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -251,6 +131,92 @@ export function useGetApiUserVpnServerAccessRulesGetAll<TData = Awaited<ReturnTy
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiUserVpnServerAccessRulesGetAllQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiUserVpnServerAccessRulesGetId = (
+    id: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiUserVpnServerAccessRulesResponsesUserVpnServerAccessRuleResponse>(
+      {url: `/api/user-vpn-server-access-rules/get/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiUserVpnServerAccessRulesGetIdQueryKey = (id: number,) => {
+    return [
+    `/api/user-vpn-server-access-rules/get/${id}`
+    ] as const;
+    }
+
+
+export const getGetApiUserVpnServerAccessRulesGetIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiUserVpnServerAccessRulesGetIdQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>> = ({ signal }) => getApiUserVpnServerAccessRulesGetId(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiUserVpnServerAccessRulesGetIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>>
+export type GetApiUserVpnServerAccessRulesGetIdQueryError = unknown
+
+
+export function useGetApiUserVpnServerAccessRulesGetId<TData = Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiUserVpnServerAccessRulesGetId<TData = Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiUserVpnServerAccessRulesGetId<TData = Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiUserVpnServerAccessRulesGetId<TData = Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiUserVpnServerAccessRulesGetIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -434,14 +400,16 @@ export function useGetApiUserVpnServerAccessRulesGetByVpnServerIdVpnServerId<TDa
 
 
 
-export const getApiUserVpnServerAccessRulesGetId = (
-    id: number,
+export const postApiUserVpnServerAccessRulesCreate = (
+    userVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest?: UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
 
       return ogmMutator<ApiUserVpnServerAccessRulesResponsesUserVpnServerAccessRuleResponse>(
-      {url: `/api/user-vpn-server-access-rules/get/${id}`, method: 'GET', signal
+      {url: `/api/user-vpn-server-access-rules/create`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: userVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest, signal
     },
       options);
     }
@@ -449,78 +417,171 @@ export const getApiUserVpnServerAccessRulesGetId = (
 
 
 
-export const getGetApiUserVpnServerAccessRulesGetIdQueryKey = (id: number,) => {
-    return [
-    `/api/user-vpn-server-access-rules/get/${id}`
-    ] as const;
+export const getPostApiUserVpnServerAccessRulesCreateMutationKey = () => ['postApiUserVpnServerAccessRulesCreate'] as const;
+
+export const getPostApiUserVpnServerAccessRulesCreateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUserVpnServerAccessRulesCreate>>, TError,PostApiUserVpnServerAccessRulesCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiUserVpnServerAccessRulesCreate>>, TError,PostApiUserVpnServerAccessRulesCreateMutationVariables, TContext> => {
+
+const mutationKey = getPostApiUserVpnServerAccessRulesCreateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiUserVpnServerAccessRulesCreate>>, PostApiUserVpnServerAccessRulesCreateMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiUserVpnServerAccessRulesCreate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiUserVpnServerAccessRulesCreateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiUserVpnServerAccessRulesCreate>>>
+    export type PostApiUserVpnServerAccessRulesCreateMutationBody = UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest | undefined
+    export type PostApiUserVpnServerAccessRulesCreateMutationError = unknown
+    export type PostApiUserVpnServerAccessRulesCreateMutationVariables = {data?: UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest}
+
+    export const usePostApiUserVpnServerAccessRulesCreate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiUserVpnServerAccessRulesCreate>>, TError,PostApiUserVpnServerAccessRulesCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiUserVpnServerAccessRulesCreate>>,
+        TError,
+        PostApiUserVpnServerAccessRulesCreateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiUserVpnServerAccessRulesCreateMutationOptions(options), queryClient);
+    }
+    export const putApiUserVpnServerAccessRulesUpdate = (
+    userVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest?: UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/user-vpn-server-access-rules/update`, method: 'PUT',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: userVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest, signal
+    },
+      options);
     }
 
 
-export const getGetApiUserVpnServerAccessRulesGetIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+
+
+export const getPutApiUserVpnServerAccessRulesUpdateMutationKey = () => ['putApiUserVpnServerAccessRulesUpdate'] as const;
+
+export const getPutApiUserVpnServerAccessRulesUpdateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiUserVpnServerAccessRulesUpdate>>, TError,PutApiUserVpnServerAccessRulesUpdateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiUserVpnServerAccessRulesUpdate>>, TError,PutApiUserVpnServerAccessRulesUpdateMutationVariables, TContext> => {
+
+const mutationKey = getPutApiUserVpnServerAccessRulesUpdateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiUserVpnServerAccessRulesUpdate>>, PutApiUserVpnServerAccessRulesUpdateMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiUserVpnServerAccessRulesUpdate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiUserVpnServerAccessRulesUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof putApiUserVpnServerAccessRulesUpdate>>>
+    export type PutApiUserVpnServerAccessRulesUpdateMutationBody = UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest | undefined
+    export type PutApiUserVpnServerAccessRulesUpdateMutationError = unknown
+    export type PutApiUserVpnServerAccessRulesUpdateMutationVariables = {data?: UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest}
+
+    export const usePutApiUserVpnServerAccessRulesUpdate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiUserVpnServerAccessRulesUpdate>>, TError,PutApiUserVpnServerAccessRulesUpdateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiUserVpnServerAccessRulesUpdate>>,
+        TError,
+        PutApiUserVpnServerAccessRulesUpdateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPutApiUserVpnServerAccessRulesUpdateMutationOptions(options), queryClient);
+    }
+    export const deleteApiUserVpnServerAccessRulesDeleteId = (
+    id: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetApiUserVpnServerAccessRulesGetIdQueryKey(id);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>> = ({ signal }) => getApiUserVpnServerAccessRulesGetId(id, requestOptions, signal);
-
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/user-vpn-server-access-rules/delete/${id}`, method: 'DELETE', signal
+    },
+      options);
+    }
 
 
 
 
-   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
+export const getDeleteApiUserVpnServerAccessRulesDeleteIdMutationKey = () => ['deleteApiUserVpnServerAccessRulesDeleteId'] as const;
 
-export type GetApiUserVpnServerAccessRulesGetIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>>
-export type GetApiUserVpnServerAccessRulesGetIdQueryError = unknown
+export const getDeleteApiUserVpnServerAccessRulesDeleteIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiUserVpnServerAccessRulesDeleteId>>, TError,DeleteApiUserVpnServerAccessRulesDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiUserVpnServerAccessRulesDeleteId>>, TError,DeleteApiUserVpnServerAccessRulesDeleteIdMutationVariables, TContext> => {
+
+const mutationKey = getDeleteApiUserVpnServerAccessRulesDeleteIdMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
 
-export function useGetApiUserVpnServerAccessRulesGetId<TData = Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError = unknown>(
- id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiUserVpnServerAccessRulesGetId<TData = Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiUserVpnServerAccessRulesGetId<TData = Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetApiUserVpnServerAccessRulesGetId<TData = Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError = unknown>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserVpnServerAccessRulesGetId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetApiUserVpnServerAccessRulesGetIdQueryOptions(id,options)
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiUserVpnServerAccessRulesDeleteId>>, DeleteApiUserVpnServerAccessRulesDeleteIdMutationVariables> = (props) => {
+          const {id} = props ?? {};
 
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
+          return  deleteApiUserVpnServerAccessRulesDeleteId(id,requestOptions)
+        }
 
 
 
 
 
 
-export const getApiUserVpnServerAccessRulesHealthcheck = (
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiUserVpnServerAccessRulesDeleteIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiUserVpnServerAccessRulesDeleteId>>>
+
+    export type DeleteApiUserVpnServerAccessRulesDeleteIdMutationError = unknown
+    export type DeleteApiUserVpnServerAccessRulesDeleteIdMutationVariables = {id: number}
+
+    export const useDeleteApiUserVpnServerAccessRulesDeleteId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiUserVpnServerAccessRulesDeleteId>>, TError,DeleteApiUserVpnServerAccessRulesDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiUserVpnServerAccessRulesDeleteId>>,
+        TError,
+        DeleteApiUserVpnServerAccessRulesDeleteIdMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteApiUserVpnServerAccessRulesDeleteIdMutationOptions(options), queryClient);
+    }
+    export const getApiUserVpnServerAccessRulesHealthcheck = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -686,70 +747,3 @@ export function useGetApiUserVpnServerAccessRulesHealthcheckWithJwt<TData = Awai
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const putApiUserVpnServerAccessRulesUpdate = (
-    userVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest?: UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemString>(
-      {url: `/api/user-vpn-server-access-rules/update`, method: 'PUT',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: userVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPutApiUserVpnServerAccessRulesUpdateMutationKey = () => ['putApiUserVpnServerAccessRulesUpdate'] as const;
-
-export const getPutApiUserVpnServerAccessRulesUpdateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiUserVpnServerAccessRulesUpdate>>, TError,PutApiUserVpnServerAccessRulesUpdateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof putApiUserVpnServerAccessRulesUpdate>>, TError,PutApiUserVpnServerAccessRulesUpdateMutationVariables, TContext> => {
-
-const mutationKey = getPutApiUserVpnServerAccessRulesUpdateMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiUserVpnServerAccessRulesUpdate>>, PutApiUserVpnServerAccessRulesUpdateMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  putApiUserVpnServerAccessRulesUpdate(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PutApiUserVpnServerAccessRulesUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof putApiUserVpnServerAccessRulesUpdate>>>
-    export type PutApiUserVpnServerAccessRulesUpdateMutationBody = UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest | undefined
-    export type PutApiUserVpnServerAccessRulesUpdateMutationError = unknown
-    export type PutApiUserVpnServerAccessRulesUpdateMutationVariables = {data?: UserVpnServerAccessRulesRequestsCreateOrUpdateUserVpnServerAccessRuleRequest}
-
-    export const usePutApiUserVpnServerAccessRulesUpdate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiUserVpnServerAccessRulesUpdate>>, TError,PutApiUserVpnServerAccessRulesUpdateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof putApiUserVpnServerAccessRulesUpdate>>,
-        TError,
-        PutApiUserVpnServerAccessRulesUpdateMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPutApiUserVpnServerAccessRulesUpdateMutationOptions(options), queryClient);
-    }
