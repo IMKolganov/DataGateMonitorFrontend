@@ -11,6 +11,8 @@ import type {
 } from "../../api/orvalModelShim";
 import { usePostApiOpenVpnFilesRevokeFile, usePostApiOpenVpnFilesDownloadFile } from "../../api/orval/open-vpn-files/open-vpn-files.ts";
 import { FaBan, FaDownload } from "react-icons/fa";
+import Chip from "@mui/material/Chip";
+import type { IssuedOvpnFileOrigin } from "../../api/localIssuance";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
 import { useClientGridPagination } from "../../hooks/useClientGridPagination";
@@ -38,6 +40,8 @@ interface Props {
   vpnServerId: string;
   onRevoke: (count?: number) => Promise<void> | void;
   loading: boolean;
+  /** Origin / service-profile extras by IssuedOvpnFile id (node-local issuance). */
+  origins?: Map<number, IssuedOvpnFileOrigin>;
 }
 
 type OvpnRow = {
@@ -55,6 +59,9 @@ type OvpnRow = {
   message: string;
   lastUpdate: string;
   createDate: string;
+  isLocal: boolean;
+  isServiceProfile: boolean;
+  staticIp: string;
 };
 
 function unwrapOvpnItem(x: OvpnRowInput): IssuedOvpnFileDto | null {
@@ -92,7 +99,33 @@ function revokeErrorMessage(err: unknown): string {
   return e.response?.data?.message || e.message || "Error revoking OVPN file.";
 }
 
-const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loading }) => {
+export function OvpnOriginLabels({ isLocal, isServiceProfile }: { isLocal: boolean; isServiceProfile: boolean }) {
+  if (!isLocal && !isServiceProfile) return <span style={{ color: "var(--text-muted)" }}>Dashboard</span>;
+  return (
+    <span style={{ display: "inline-flex", gap: 4, flexWrap: "wrap" }}>
+      {isLocal && (
+        <Chip
+          size="small"
+          color="info"
+          variant="outlined"
+          label="Issued locally"
+          title="Issued on the node itself (datagate-profile), not from the dashboard"
+        />
+      )}
+      {isServiceProfile && (
+        <Chip
+          size="small"
+          color="secondary"
+          variant="outlined"
+          label="Service"
+          title="Service profile: only VPN-internal traffic goes through the tunnel"
+        />
+      )}
+    </span>
+  );
+}
+
+const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loading, origins }) => {
   const { mutateAsync: revokeMutate, isPending: revokePending } = usePostApiOpenVpnFilesRevokeFile();
   const { mutateAsync: downloadMutate, isPending: downloadPending } = usePostApiOpenVpnFilesDownloadFile();
 
@@ -131,6 +164,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
   const rows: OvpnRow[] = useMemo(
     () =>
       filtered.map((issuedOvpnFile, index) => {
+        const origin = issuedOvpnFile.id != null ? origins?.get(Number(issuedOvpnFile.id)) : undefined;
         const id =
           issuedOvpnFile.id != null
             ? String(issuedOvpnFile.id)
@@ -151,9 +185,12 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           message: issuedOvpnFile.message || "",
           lastUpdate: safeFormatDate(issuedOvpnFile.lastUpdate),
           createDate: safeFormatDate(issuedOvpnFile.createDate),
+          isLocal: origin?.origin === "local",
+          isServiceProfile: origin?.isServiceProfile === true,
+          staticIp: origin?.staticIp ?? "",
         };
       }),
-    [filtered],
+    [filtered, origins],
   );
 
   const pageRows = useMemo(
@@ -290,6 +327,24 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
     { field: "commonName", headerName: "Common Name", flex: 1, minWidth: 160 },
     { field: "fileName", headerName: "File Name", flex: 1, minWidth: 160 },
     { field: "issuedAt", headerName: "Issued Date", flex: 0.8, minWidth: 140 },
+    {
+      field: "isLocal",
+      headerName: "Origin",
+      flex: 0.8,
+      minWidth: 150,
+      sortable: false,
+      renderCell: (params) => {
+        const row = params.row as OvpnRow;
+        return <OvpnOriginLabels isLocal={row.isLocal} isServiceProfile={row.isServiceProfile} />;
+      },
+    },
+    {
+      field: "staticIp",
+      headerName: "Static IP",
+      flex: 0.6,
+      minWidth: 120,
+      renderCell: (params) => (params.value ? String(params.value) : "—"),
+    },
     {
       field: "isRevoked",
       headerName: "Status",
