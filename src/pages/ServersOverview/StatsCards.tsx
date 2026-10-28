@@ -4,6 +4,7 @@ import {
   FaArrowUp,
   FaArrowsAltV,
   FaDesktop,
+  FaIdCard,
   FaInfoCircle,
   FaPlug,
   FaUsers,
@@ -13,6 +14,7 @@ import { formatBytes, type SeriesExtreme } from "./helpers";
 type Totals = {
   sessionsCount: number;
   devicesCount: number;
+  usersCount: number;
   accountsCount: number;
   trafficInBytes: number;
   trafficOutBytes: number;
@@ -40,17 +42,25 @@ export default function StatsCards({ totals, loading }: Props) {
     >
       <Card
         icon={FaDesktop}
-        title="Devices (unique externalId)"
+        title="Devices (CN)"
+        valueHint="unique over period (≠ concurrent)"
         value={totals.devicesCount}
         extremes={[
           { icon: FaArrowUp, label: "Peak concurrent", extreme: totals.devicesPeak },
           { icon: FaArrowDown, label: "Low concurrent", extreme: totals.devicesLow },
         ]}
       />
-      <Card icon={FaUsers} title="Users (accounts)" value={totals.accountsCount} />
+      <Card
+        icon={FaUsers}
+        title="Users (ExternalId)"
+        valueHint="unique over period"
+        value={totals.usersCount}
+      />
+      <Card icon={FaIdCard} title="Accounts" value={totals.accountsCount} />
       <Card
         icon={FaPlug}
         title="Sessions"
+        valueHint="started in period (≠ concurrent)"
         value={totals.sessionsCount}
         extremes={[
           { icon: FaArrowUp, label: "Peak concurrent", extreme: totals.sessionsPeak },
@@ -81,11 +91,13 @@ function Card({
   icon: Icon,
   title,
   value,
+  valueHint,
   extremes,
 }: {
   icon?: IconType;
   title: string;
   value: string | number;
+  valueHint?: string;
   extremes?: ExtremeRow[];
 }) {
   const rows = (extremes ?? []).flatMap((e) => {
@@ -121,6 +133,9 @@ function Card({
       <div style={{ fontWeight: 700, fontSize: "var(--font-size-xl)", wordBreak: "break-word" }}>
         {value}
       </div>
+      {valueHint && (
+        <div style={{ fontSize: "var(--font-size-sm)", opacity: 0.65 }}>{valueHint}</div>
+      )}
       {rows.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 2, marginTop: 4 }}>
           {rows.map((row) => (

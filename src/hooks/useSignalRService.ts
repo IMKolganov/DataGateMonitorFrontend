@@ -55,6 +55,7 @@ function toDtos(raw: unknown): ServiceStatusDto[] {
 
         const ccc = leaf["CountConnectedClients"] ?? leaf["countConnectedClients"];
         const cs = leaf["CountSessions"] ?? leaf["countSessions"];
+        const cd = leaf["CountDevices"] ?? leaf["countDevices"];
         const tbi = leaf["TotalBytesIn"] ?? leaf["totalBytesIn"];
         const tbo = leaf["TotalBytesOut"] ?? leaf["totalBytesOut"];
         const onlineRaw = leaf["IsOnline"] ?? leaf["isOnline"];
@@ -66,6 +67,7 @@ function toDtos(raw: unknown): ServiceStatusDto[] {
             nextRunTime,
             countConnectedClients: Number.isFinite(Number(ccc)) ? Number(ccc) : undefined,
             countSessions: Number.isFinite(Number(cs)) ? Number(cs) : undefined,
+            ...(Number.isFinite(Number(cd)) ? { countDevices: Number(cd) } : {}),
             totalBytesIn: Number.isFinite(Number(tbi)) ? Number(tbi) : undefined,
             totalBytesOut: Number.isFinite(Number(tbo)) ? Number(tbo) : undefined,
             ...(typeof onlineRaw === "boolean" ? { isOnline: onlineRaw } : {}),
@@ -77,6 +79,7 @@ function toDtos(raw: unknown): ServiceStatusDto[] {
 
 export default function useSignalRService() {
     const [serviceData, setServiceData] = useState<Record<number, ServiceStatusDto>>({});
+    const [totalDevices, setTotalDevices] = useState<number | null>(null);
     const [connectionState, setConnectionState] = useState<string>("init");
     const [lastError, setLastError] = useState<string | null>(null);
     /** Bumps when access token is refreshed so the hub reconnects with a new JWT. */
@@ -164,6 +167,11 @@ export default function useSignalRService() {
 
                     if (!alive || dtos.length === 0) return;
 
+                    const tdRaw = p?.["totalDevices"] ?? p?.["TotalDevices"];
+                    if (typeof tdRaw === "number" && Number.isFinite(tdRaw)) {
+                        setTotalDevices(Math.max(0, tdRaw));
+                    }
+
                     const patch: Record<number, ServiceStatusDto> = {};
                     for (const d of dtos) {
                         const id = Number(d.vpnServerId ?? 0);
@@ -221,5 +229,5 @@ export default function useSignalRService() {
         await postApiOpenVpnServersRunNow();
     };
 
-    return { serviceData, runServiceNow, connectionState, lastError };
+    return { serviceData, totalDevices, runServiceNow, connectionState, lastError };
 }
