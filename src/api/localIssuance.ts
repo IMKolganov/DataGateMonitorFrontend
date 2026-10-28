@@ -10,7 +10,6 @@ export type IssuedOvpnFileOrigin = {
   /** "dashboard" | "local" */
   origin: string;
   isServiceProfile: boolean;
-  staticIp?: string | null;
   certSerialNumber?: string | null;
   certFingerprintSha256?: string | null;
 };

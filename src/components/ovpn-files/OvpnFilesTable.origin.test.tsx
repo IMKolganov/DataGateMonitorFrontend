@@ -52,21 +52,20 @@ const cell = (rowId: string, field: string) =>
   );
 
 describe("OvpnFilesTable origin labels", () => {
-  it("marks locally issued service profiles and shows the static IP", () => {
+  it("marks locally issued service profiles", () => {
     const origins = indexOvpnFileOrigins([
       { issuedOvpnFileId: 1, origin: "dashboard", isServiceProfile: false },
-      { issuedOvpnFileId: 2, origin: "local", isServiceProfile: true, staticIp: "10.50.28.201" },
+      { issuedOvpnFileId: 2, origin: "local", isServiceProfile: true },
       { issuedOvpnFileId: 3, origin: "local", isServiceProfile: false },
     ]);
 
     render(<OvpnFilesTable ovpnFiles={files} vpnServerId="7" onRevoke={vi.fn()} loading={false} origins={origins} />);
 
     expect(cell("1", "isLocal").textContent).toBe("Dashboard");
-    expect(cell("1", "staticIp").textContent).toBe("—");
+    expect(document.querySelector('[data-field="staticIp"]')).toBeNull();
 
     expect(cell("2", "isLocal").textContent).toContain("Issued locally");
     expect(cell("2", "isLocal").textContent).toContain("Service");
-    expect(cell("2", "staticIp").textContent).toBe("10.50.28.201");
 
     expect(cell("3", "isLocal").textContent).toContain("Issued locally");
     expect(cell("3", "isLocal").textContent).not.toContain("Service");
@@ -76,7 +75,6 @@ describe("OvpnFilesTable origin labels", () => {
     render(<OvpnFilesTable ovpnFiles={files} vpnServerId="7" onRevoke={vi.fn()} loading={false} />);
 
     expect(cell("2", "isLocal").textContent).toBe("Dashboard");
-    expect(cell("2", "staticIp").textContent).toBe("—");
   });
 });
 

@@ -61,7 +61,6 @@ type OvpnRow = {
   createDate: string;
   isLocal: boolean;
   isServiceProfile: boolean;
-  staticIp: string;
 };
 
 function unwrapOvpnItem(x: OvpnRowInput): IssuedOvpnFileDto | null {
@@ -187,7 +186,6 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           createDate: safeFormatDate(issuedOvpnFile.createDate),
           isLocal: origin?.origin === "local",
           isServiceProfile: origin?.isServiceProfile === true,
-          staticIp: origin?.staticIp ?? "",
         };
       }),
     [filtered, origins],
@@ -337,13 +335,6 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
         const row = params.row as OvpnRow;
         return <OvpnOriginLabels isLocal={row.isLocal} isServiceProfile={row.isServiceProfile} />;
       },
-    },
-    {
-      field: "staticIp",
-      headerName: "Static IP",
-      flex: 0.6,
-      minWidth: 120,
-      renderCell: (params) => (params.value ? String(params.value) : "—"),
     },
     {
       field: "isRevoked",
