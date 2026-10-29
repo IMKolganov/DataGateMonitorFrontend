@@ -69,12 +69,12 @@ MIT
 | <img src="https://cdn.simpleicons.org/telegram/26A5E4" width="16" height="16" alt="" /> **Telegram** | [@KolganovIvan](https://t.me/KolganovIvan) |
 | <img src="https://cdn.simpleicons.org/buymeacoffee/FFDD00" width="16" height="16" alt="" /> **Buy Me a Coffee** | [buymeacoffee.com/imkolganov](https://buymeacoffee.com/imkolganov) |
 
-### Обновление API-клиента
+### Updating the API client
 
-Фронтенд обращается к бэкенду. HTTP-контракты бэкенда определены в NuGet-пакете `DataGateMonitor.SharedModels`; TypeScript-модели и запросы генерируются Orval из OpenAPI запущенного бэкенда:
+The frontend calls the backend. Backend HTTP contracts are defined in the `DataGateMonitor.SharedModels` NuGet package; Orval generates TypeScript models and requests from the running backend's OpenAPI schema:
 
 ```sh
 OPENAPI_URL=http://127.0.0.1:5581/swagger/v1/swagger.yaml npm run gen:api
 ```
 
-Адрес и порт должны соответствовать локально запущенному бэкенду. Снимок той же схемы в JSON хранится в `openapi/swagger.json`; для него доступна команда `npm run gen:api:offline`. Файлы в `src/api/orval/` обновляются генератором.
+Use the address and port of your running backend. A JSON snapshot of the same schema is stored in `openapi/swagger.json` and can be used with `npm run gen:api:offline`. Files under `src/api/orval/` are generated.

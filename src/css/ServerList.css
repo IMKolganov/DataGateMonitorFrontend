@@ -312,7 +312,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
   }
 
-  /* Selected state — тонкая оконтовка для тёмной и светлой темы */
+  /* Selected state: subtle outline for dark and light themes */
   .server-item.selected {
     background-color: var(--bg-content-alt);
     border: 2px solid var(--border-color-selected);
