@@ -50,7 +50,270 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck = (
+export const getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus = (
+    vpnServerId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiDataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse>(
+      {url: `/api/open-vpn-servers/${vpnServerId}/openvpn-process/status`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryKey = (vpnServerId: number,) => {
+    return [
+    `/api/open-vpn-servers/${vpnServerId}/openvpn-process/status`
+    ] as const;
+    }
+
+
+export const getGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError = unknown>(vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryKey(vpnServerId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>> = ({ signal }) => getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus(vpnServerId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>>
+export type GetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryError = unknown
+
+
+export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatus<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError = unknown>(
+ vpnServerId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatus<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatus<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatus<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryOptions(vpnServerId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const postApiOpenVpnServersVpnServerIdOpenvpnProcessStart = (
+    vpnServerId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiDataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse>(
+      {url: `/api/open-vpn-servers/${vpnServerId}/openvpn-process/start`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationKey = () => ['postApiOpenVpnServersVpnServerIdOpenvpnProcessStart'] as const;
+
+export const getPostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessStart>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessStart>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationVariables, TContext> => {
+
+const mutationKey = getPostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessStart>>, PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationVariables> = (props) => {
+          const {vpnServerId} = props ?? {};
+
+          return  postApiOpenVpnServersVpnServerIdOpenvpnProcessStart(vpnServerId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessStart>>>
+
+    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationError = unknown
+    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationVariables = {vpnServerId: number}
+
+    export const usePostApiOpenVpnServersVpnServerIdOpenvpnProcessStart = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessStart>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessStart>>,
+        TError,
+        PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationOptions(options), queryClient);
+    }
+    export const postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart = (
+    vpnServerId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiDataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse>(
+      {url: `/api/open-vpn-servers/${vpnServerId}/openvpn-process/restart`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationKey = () => ['postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart'] as const;
+
+export const getPostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationVariables, TContext> => {
+
+const mutationKey = getPostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart>>, PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationVariables> = (props) => {
+          const {vpnServerId} = props ?? {};
+
+          return  postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart(vpnServerId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart>>>
+
+    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationError = unknown
+    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationVariables = {vpnServerId: number}
+
+    export const usePostApiOpenVpnServersVpnServerIdOpenvpnProcessRestart = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart>>,
+        TError,
+        PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationOptions(options), queryClient);
+    }
+    export const postApiOpenVpnServersVpnServerIdOpenvpnProcessKill = (
+    vpnServerId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiDataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse>(
+      {url: `/api/open-vpn-servers/${vpnServerId}/openvpn-process/kill`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationKey = () => ['postApiOpenVpnServersVpnServerIdOpenvpnProcessKill'] as const;
+
+export const getPostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessKill>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessKill>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationVariables, TContext> => {
+
+const mutationKey = getPostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessKill>>, PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationVariables> = (props) => {
+          const {vpnServerId} = props ?? {};
+
+          return  postApiOpenVpnServersVpnServerIdOpenvpnProcessKill(vpnServerId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessKill>>>
+
+    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationError = unknown
+    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationVariables = {vpnServerId: number}
+
+    export const usePostApiOpenVpnServersVpnServerIdOpenvpnProcessKill = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessKill>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessKill>>,
+        TError,
+        PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationOptions(options), queryClient);
+    }
+    export const getApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheck = (
     vpnServerId: string,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -216,272 +479,3 @@ export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJ
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const postApiOpenVpnServersVpnServerIdOpenvpnProcessKill = (
-    vpnServerId: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiDataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse>(
-      {url: `/api/open-vpn-servers/${vpnServerId}/openvpn-process/kill`, method: 'POST', signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationKey = () => ['postApiOpenVpnServersVpnServerIdOpenvpnProcessKill'] as const;
-
-export const getPostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessKill>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessKill>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationVariables, TContext> => {
-
-const mutationKey = getPostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessKill>>, PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationVariables> = (props) => {
-          const {vpnServerId} = props ?? {};
-
-          return  postApiOpenVpnServersVpnServerIdOpenvpnProcessKill(vpnServerId,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessKill>>>
-
-    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationError = unknown
-    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationVariables = {vpnServerId: number}
-
-    export const usePostApiOpenVpnServersVpnServerIdOpenvpnProcessKill = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessKill>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessKill>>,
-        TError,
-        PostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiOpenVpnServersVpnServerIdOpenvpnProcessKillMutationOptions(options), queryClient);
-    }
-    export const postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart = (
-    vpnServerId: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiDataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse>(
-      {url: `/api/open-vpn-servers/${vpnServerId}/openvpn-process/restart`, method: 'POST', signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationKey = () => ['postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart'] as const;
-
-export const getPostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationVariables, TContext> => {
-
-const mutationKey = getPostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart>>, PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationVariables> = (props) => {
-          const {vpnServerId} = props ?? {};
-
-          return  postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart(vpnServerId,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart>>>
-
-    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationError = unknown
-    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationVariables = {vpnServerId: number}
-
-    export const usePostApiOpenVpnServersVpnServerIdOpenvpnProcessRestart = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessRestart>>,
-        TError,
-        PostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiOpenVpnServersVpnServerIdOpenvpnProcessRestartMutationOptions(options), queryClient);
-    }
-    export const postApiOpenVpnServersVpnServerIdOpenvpnProcessStart = (
-    vpnServerId: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiDataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse>(
-      {url: `/api/open-vpn-servers/${vpnServerId}/openvpn-process/start`, method: 'POST', signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationKey = () => ['postApiOpenVpnServersVpnServerIdOpenvpnProcessStart'] as const;
-
-export const getPostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessStart>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessStart>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationVariables, TContext> => {
-
-const mutationKey = getPostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessStart>>, PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationVariables> = (props) => {
-          const {vpnServerId} = props ?? {};
-
-          return  postApiOpenVpnServersVpnServerIdOpenvpnProcessStart(vpnServerId,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessStart>>>
-
-    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationError = unknown
-    export type PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationVariables = {vpnServerId: number}
-
-    export const usePostApiOpenVpnServersVpnServerIdOpenvpnProcessStart = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessStart>>, TError,PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiOpenVpnServersVpnServerIdOpenvpnProcessStart>>,
-        TError,
-        PostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiOpenVpnServersVpnServerIdOpenvpnProcessStartMutationOptions(options), queryClient);
-    }
-    export const getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus = (
-    vpnServerId: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiDataGateOpenVpnManagerOpenVpnProcessResponsesOpenVpnProcessStatusResponse>(
-      {url: `/api/open-vpn-servers/${vpnServerId}/openvpn-process/status`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryKey = (vpnServerId: number,) => {
-    return [
-    `/api/open-vpn-servers/${vpnServerId}/openvpn-process/status`
-    ] as const;
-    }
-
-
-export const getGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError = unknown>(vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryKey(vpnServerId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>> = ({ signal }) => getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus(vpnServerId, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>>
-export type GetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryError = unknown
-
-
-export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatus<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError = unknown>(
- vpnServerId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatus<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatus<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatus<TData = Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnServersVpnServerIdOpenvpnProcessStatus>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiOpenVpnServersVpnServerIdOpenvpnProcessStatusQueryOptions(vpnServerId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-

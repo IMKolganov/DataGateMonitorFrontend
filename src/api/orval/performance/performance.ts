@@ -53,14 +53,15 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const deleteApiPerformance = (
-
+export const getApiPerformanceHttpRequests = (
+    params?: GetApiPerformanceHttpRequestsParams,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
 
-      return ogmMutator<ApiSystemString>(
-      {url: `/api/performance`, method: 'DELETE', signal
+      return ogmMutator<ApiPerformancePerformanceHttpRequestsResponse>(
+      {url: `/api/performance/http-requests`, method: 'GET',
+        params, signal
     },
       options);
     }
@@ -68,13 +69,99 @@ export const deleteApiPerformance = (
 
 
 
-export const getDeleteApiPerformanceMutationKey = () => ['deleteApiPerformance'] as const;
+export const getGetApiPerformanceHttpRequestsQueryKey = (params?: GetApiPerformanceHttpRequestsParams,) => {
+    return [
+    `/api/performance/http-requests`, ...(params ? [params] : [])
+    ] as const;
+    }
 
-export const getDeleteApiPerformanceMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiPerformance>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteApiPerformance>>, TError,void, TContext> => {
 
-const mutationKey = getDeleteApiPerformanceMutationKey();
+export const getGetApiPerformanceHttpRequestsQueryOptions = <TData = Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError = unknown>(params?: GetApiPerformanceHttpRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiPerformanceHttpRequestsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>> = ({ signal }) => getApiPerformanceHttpRequests(params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiPerformanceHttpRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>>
+export type GetApiPerformanceHttpRequestsQueryError = unknown
+
+
+export function useGetApiPerformanceHttpRequests<TData = Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError = unknown>(
+ params: undefined |  GetApiPerformanceHttpRequestsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>,
+          TError,
+          Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiPerformanceHttpRequests<TData = Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError = unknown>(
+ params?: GetApiPerformanceHttpRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>,
+          TError,
+          Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiPerformanceHttpRequests<TData = Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError = unknown>(
+ params?: GetApiPerformanceHttpRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiPerformanceHttpRequests<TData = Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError = unknown>(
+ params?: GetApiPerformanceHttpRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiPerformanceHttpRequestsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const deleteApiPerformanceHttpRequests = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/performance/http-requests`, method: 'DELETE', signal
+    },
+      options);
+    }
+
+
+
+
+export const getDeleteApiPerformanceHttpRequestsMutationKey = () => ['deleteApiPerformanceHttpRequests'] as const;
+
+export const getDeleteApiPerformanceHttpRequestsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiPerformanceHttpRequests>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiPerformanceHttpRequests>>, TError,void, TContext> => {
+
+const mutationKey = getDeleteApiPerformanceHttpRequestsMutationKey();
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -84,10 +171,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiPerformance>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiPerformanceHttpRequests>>, void> = () => {
 
 
-          return  deleteApiPerformance(requestOptions)
+          return  deleteApiPerformanceHttpRequests(requestOptions)
         }
 
 
@@ -97,20 +184,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type DeleteApiPerformanceMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiPerformance>>>
+    export type DeleteApiPerformanceHttpRequestsMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiPerformanceHttpRequests>>>
 
-    export type DeleteApiPerformanceMutationError = unknown
+    export type DeleteApiPerformanceHttpRequestsMutationError = unknown
 
 
-    export const useDeleteApiPerformance = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiPerformance>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+    export const useDeleteApiPerformanceHttpRequests = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiPerformanceHttpRequests>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteApiPerformance>>,
+        Awaited<ReturnType<typeof deleteApiPerformanceHttpRequests>>,
         TError,
         void,
         TContext
       > => {
-      return useMutation(getDeleteApiPerformanceMutationOptions(options), queryClient);
+      return useMutation(getDeleteApiPerformanceHttpRequestsMutationOptions(options), queryClient);
     }
     export const getApiPerformanceDbQueries = (
     params?: GetApiPerformanceDbQueriesParams,
@@ -257,6 +344,65 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getDeleteApiPerformanceDbQueriesMutationOptions(options), queryClient);
+    }
+    export const deleteApiPerformance = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/performance`, method: 'DELETE', signal
+    },
+      options);
+    }
+
+
+
+
+export const getDeleteApiPerformanceMutationKey = () => ['deleteApiPerformance'] as const;
+
+export const getDeleteApiPerformanceMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiPerformance>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiPerformance>>, TError,void, TContext> => {
+
+const mutationKey = getDeleteApiPerformanceMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiPerformance>>, void> = () => {
+
+
+          return  deleteApiPerformance(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiPerformanceMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiPerformance>>>
+
+    export type DeleteApiPerformanceMutationError = unknown
+
+
+    export const useDeleteApiPerformance = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiPerformance>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiPerformance>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getDeleteApiPerformanceMutationOptions(options), queryClient);
     }
     export const getApiPerformanceHealthcheck = (
 
@@ -424,155 +570,3 @@ export function useGetApiPerformanceHealthcheckWithJwt<TData = Awaited<ReturnTyp
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const getApiPerformanceHttpRequests = (
-    params?: GetApiPerformanceHttpRequestsParams,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiPerformancePerformanceHttpRequestsResponse>(
-      {url: `/api/performance/http-requests`, method: 'GET',
-        params, signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiPerformanceHttpRequestsQueryKey = (params?: GetApiPerformanceHttpRequestsParams,) => {
-    return [
-    `/api/performance/http-requests`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetApiPerformanceHttpRequestsQueryOptions = <TData = Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError = unknown>(params?: GetApiPerformanceHttpRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiPerformanceHttpRequestsQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>> = ({ signal }) => getApiPerformanceHttpRequests(params, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiPerformanceHttpRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>>
-export type GetApiPerformanceHttpRequestsQueryError = unknown
-
-
-export function useGetApiPerformanceHttpRequests<TData = Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError = unknown>(
- params: undefined |  GetApiPerformanceHttpRequestsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>,
-          TError,
-          Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiPerformanceHttpRequests<TData = Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError = unknown>(
- params?: GetApiPerformanceHttpRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>,
-          TError,
-          Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiPerformanceHttpRequests<TData = Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError = unknown>(
- params?: GetApiPerformanceHttpRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiPerformanceHttpRequests<TData = Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError = unknown>(
- params?: GetApiPerformanceHttpRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiPerformanceHttpRequests>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiPerformanceHttpRequestsQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export const deleteApiPerformanceHttpRequests = (
-
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemString>(
-      {url: `/api/performance/http-requests`, method: 'DELETE', signal
-    },
-      options);
-    }
-
-
-
-
-export const getDeleteApiPerformanceHttpRequestsMutationKey = () => ['deleteApiPerformanceHttpRequests'] as const;
-
-export const getDeleteApiPerformanceHttpRequestsMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiPerformanceHttpRequests>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteApiPerformanceHttpRequests>>, TError,void, TContext> => {
-
-const mutationKey = getDeleteApiPerformanceHttpRequestsMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiPerformanceHttpRequests>>, void> = () => {
-
-
-          return  deleteApiPerformanceHttpRequests(requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteApiPerformanceHttpRequestsMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiPerformanceHttpRequests>>>
-
-    export type DeleteApiPerformanceHttpRequestsMutationError = unknown
-
-
-    export const useDeleteApiPerformanceHttpRequests = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiPerformanceHttpRequests>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteApiPerformanceHttpRequests>>,
-        TError,
-        void,
-        TContext
-      > => {
-      return useMutation(getDeleteApiPerformanceHttpRequestsMutationOptions(options), queryClient);
-    }

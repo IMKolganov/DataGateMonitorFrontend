@@ -54,6 +54,92 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+export const getApiOpenVpnCertsVpnServerIdGetAll = (
+    vpnServerId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServerCertsResponsesGetAllCertificatesResponse>(
+      {url: `/api/open-vpn-certs/${vpnServerId}/get-all`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiOpenVpnCertsVpnServerIdGetAllQueryKey = (vpnServerId: number,) => {
+    return [
+    `/api/open-vpn-certs/${vpnServerId}/get-all`
+    ] as const;
+    }
+
+
+export const getGetApiOpenVpnCertsVpnServerIdGetAllQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError = unknown>(vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnCertsVpnServerIdGetAllQueryKey(vpnServerId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>> = ({ signal }) => getApiOpenVpnCertsVpnServerIdGetAll(vpnServerId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiOpenVpnCertsVpnServerIdGetAllQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>>
+export type GetApiOpenVpnCertsVpnServerIdGetAllQueryError = unknown
+
+
+export function useGetApiOpenVpnCertsVpnServerIdGetAll<TData = Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError = unknown>(
+ vpnServerId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnCertsVpnServerIdGetAll<TData = Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>,
+          TError,
+          Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiOpenVpnCertsVpnServerIdGetAll<TData = Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiOpenVpnCertsVpnServerIdGetAll<TData = Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError = unknown>(
+ vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiOpenVpnCertsVpnServerIdGetAllQueryOptions(vpnServerId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 export const postApiOpenVpnCertsBuild = (
     vpnServerCertsRequestsBuildCertificateRequest?: VpnServerCertsRequestsBuildCertificateRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
@@ -114,6 +200,67 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostApiOpenVpnCertsBuildMutationOptions(options), queryClient);
+    }
+    export const postApiOpenVpnCertsRevoke = (
+    vpnServerCertsRequestsRevokeCertificateRequest?: VpnServerCertsRequestsRevokeCertificateRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiVpnServerCertsResponsesRevokeCertificateResponse>(
+      {url: `/api/open-vpn-certs/revoke`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: vpnServerCertsRequestsRevokeCertificateRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiOpenVpnCertsRevokeMutationKey = () => ['postApiOpenVpnCertsRevoke'] as const;
+
+export const getPostApiOpenVpnCertsRevokeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>, TError,PostApiOpenVpnCertsRevokeMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>, TError,PostApiOpenVpnCertsRevokeMutationVariables, TContext> => {
+
+const mutationKey = getPostApiOpenVpnCertsRevokeMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>, PostApiOpenVpnCertsRevokeMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiOpenVpnCertsRevoke(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiOpenVpnCertsRevokeMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>>
+    export type PostApiOpenVpnCertsRevokeMutationBody = VpnServerCertsRequestsRevokeCertificateRequest | undefined
+    export type PostApiOpenVpnCertsRevokeMutationError = unknown
+    export type PostApiOpenVpnCertsRevokeMutationVariables = {data?: VpnServerCertsRequestsRevokeCertificateRequest}
+
+    export const usePostApiOpenVpnCertsRevoke = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>, TError,PostApiOpenVpnCertsRevokeMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>,
+        TError,
+        PostApiOpenVpnCertsRevokeMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiOpenVpnCertsRevokeMutationOptions(options), queryClient);
     }
     export const getApiOpenVpnCertsHealthcheck = (
 
@@ -281,156 +428,3 @@ export function useGetApiOpenVpnCertsHealthcheckWithJwt<TData = Awaited<ReturnTy
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const postApiOpenVpnCertsRevoke = (
-    vpnServerCertsRequestsRevokeCertificateRequest?: VpnServerCertsRequestsRevokeCertificateRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServerCertsResponsesRevokeCertificateResponse>(
-      {url: `/api/open-vpn-certs/revoke`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: vpnServerCertsRequestsRevokeCertificateRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiOpenVpnCertsRevokeMutationKey = () => ['postApiOpenVpnCertsRevoke'] as const;
-
-export const getPostApiOpenVpnCertsRevokeMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>, TError,PostApiOpenVpnCertsRevokeMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>, TError,PostApiOpenVpnCertsRevokeMutationVariables, TContext> => {
-
-const mutationKey = getPostApiOpenVpnCertsRevokeMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>, PostApiOpenVpnCertsRevokeMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiOpenVpnCertsRevoke(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiOpenVpnCertsRevokeMutationResult = NonNullable<Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>>
-    export type PostApiOpenVpnCertsRevokeMutationBody = VpnServerCertsRequestsRevokeCertificateRequest | undefined
-    export type PostApiOpenVpnCertsRevokeMutationError = unknown
-    export type PostApiOpenVpnCertsRevokeMutationVariables = {data?: VpnServerCertsRequestsRevokeCertificateRequest}
-
-    export const usePostApiOpenVpnCertsRevoke = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>, TError,PostApiOpenVpnCertsRevokeMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiOpenVpnCertsRevoke>>,
-        TError,
-        PostApiOpenVpnCertsRevokeMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiOpenVpnCertsRevokeMutationOptions(options), queryClient);
-    }
-    export const getApiOpenVpnCertsVpnServerIdGetAll = (
-    vpnServerId: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiVpnServerCertsResponsesGetAllCertificatesResponse>(
-      {url: `/api/open-vpn-certs/${vpnServerId}/get-all`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiOpenVpnCertsVpnServerIdGetAllQueryKey = (vpnServerId: number,) => {
-    return [
-    `/api/open-vpn-certs/${vpnServerId}/get-all`
-    ] as const;
-    }
-
-
-export const getGetApiOpenVpnCertsVpnServerIdGetAllQueryOptions = <TData = Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError = unknown>(vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiOpenVpnCertsVpnServerIdGetAllQueryKey(vpnServerId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>> = ({ signal }) => getApiOpenVpnCertsVpnServerIdGetAll(vpnServerId, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: vpnServerId !== null && vpnServerId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiOpenVpnCertsVpnServerIdGetAllQueryResult = NonNullable<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>>
-export type GetApiOpenVpnCertsVpnServerIdGetAllQueryError = unknown
-
-
-export function useGetApiOpenVpnCertsVpnServerIdGetAll<TData = Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError = unknown>(
- vpnServerId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnCertsVpnServerIdGetAll<TData = Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>,
-          TError,
-          Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiOpenVpnCertsVpnServerIdGetAll<TData = Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiOpenVpnCertsVpnServerIdGetAll<TData = Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError = unknown>(
- vpnServerId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiOpenVpnCertsVpnServerIdGetAll>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiOpenVpnCertsVpnServerIdGetAllQueryOptions(vpnServerId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-

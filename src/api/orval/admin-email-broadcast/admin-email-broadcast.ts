@@ -58,178 +58,6 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getApiAdminEmailBroadcastHealthcheck = (
-
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemString>(
-      {url: `/api/admin/email-broadcast/healthcheck`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiAdminEmailBroadcastHealthcheckQueryKey = () => {
-    return [
-    `/api/admin/email-broadcast/healthcheck`
-    ] as const;
-    }
-
-
-export const getGetApiAdminEmailBroadcastHealthcheckQueryOptions = <TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiAdminEmailBroadcastHealthcheckQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>> = ({ signal }) => getApiAdminEmailBroadcastHealthcheck(requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiAdminEmailBroadcastHealthcheckQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>>
-export type GetApiAdminEmailBroadcastHealthcheckQueryError = unknown
-
-
-export function useGetApiAdminEmailBroadcastHealthcheck<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>,
-          TError,
-          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiAdminEmailBroadcastHealthcheck<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>,
-          TError,
-          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiAdminEmailBroadcastHealthcheck<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiAdminEmailBroadcastHealthcheck<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiAdminEmailBroadcastHealthcheckQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export const getApiAdminEmailBroadcastHealthcheckWithJwt = (
-
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemString>(
-      {url: `/api/admin/email-broadcast/healthcheck-with-jwt`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiAdminEmailBroadcastHealthcheckWithJwtQueryKey = () => {
-    return [
-    `/api/admin/email-broadcast/healthcheck-with-jwt`
-    ] as const;
-    }
-
-
-export const getGetApiAdminEmailBroadcastHealthcheckWithJwtQueryOptions = <TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiAdminEmailBroadcastHealthcheckWithJwtQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>> = ({ signal }) => getApiAdminEmailBroadcastHealthcheckWithJwt(requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiAdminEmailBroadcastHealthcheckWithJwtQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>>
-export type GetApiAdminEmailBroadcastHealthcheckWithJwtQueryError = unknown
-
-
-export function useGetApiAdminEmailBroadcastHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>,
-          TError,
-          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiAdminEmailBroadcastHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>,
-          TError,
-          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiAdminEmailBroadcastHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiAdminEmailBroadcastHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiAdminEmailBroadcastHealthcheckWithJwtQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
 export const getApiAdminEmailBroadcastHistory = (
     params?: GetApiAdminEmailBroadcastHistoryParams,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
@@ -732,3 +560,169 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDeleteApiAdminEmailBroadcastTemplatesIdMutationOptions(options), queryClient);
     }
+    export const getApiAdminEmailBroadcastHealthcheck = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/admin/email-broadcast/healthcheck`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiAdminEmailBroadcastHealthcheckQueryKey = () => {
+    return [
+    `/api/admin/email-broadcast/healthcheck`
+    ] as const;
+    }
+
+
+export const getGetApiAdminEmailBroadcastHealthcheckQueryOptions = <TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAdminEmailBroadcastHealthcheckQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>> = ({ signal }) => getApiAdminEmailBroadcastHealthcheck(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAdminEmailBroadcastHealthcheckQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>>
+export type GetApiAdminEmailBroadcastHealthcheckQueryError = unknown
+
+
+export function useGetApiAdminEmailBroadcastHealthcheck<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAdminEmailBroadcastHealthcheck<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAdminEmailBroadcastHealthcheck<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAdminEmailBroadcastHealthcheck<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAdminEmailBroadcastHealthcheckQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiAdminEmailBroadcastHealthcheckWithJwt = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/admin/email-broadcast/healthcheck-with-jwt`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiAdminEmailBroadcastHealthcheckWithJwtQueryKey = () => {
+    return [
+    `/api/admin/email-broadcast/healthcheck-with-jwt`
+    ] as const;
+    }
+
+
+export const getGetApiAdminEmailBroadcastHealthcheckWithJwtQueryOptions = <TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAdminEmailBroadcastHealthcheckWithJwtQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>> = ({ signal }) => getApiAdminEmailBroadcastHealthcheckWithJwt(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAdminEmailBroadcastHealthcheckWithJwtQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>>
+export type GetApiAdminEmailBroadcastHealthcheckWithJwtQueryError = unknown
+
+
+export function useGetApiAdminEmailBroadcastHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAdminEmailBroadcastHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAdminEmailBroadcastHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAdminEmailBroadcastHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminEmailBroadcastHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAdminEmailBroadcastHealthcheckWithJwtQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}

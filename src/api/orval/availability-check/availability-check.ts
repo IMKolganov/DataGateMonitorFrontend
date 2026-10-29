@@ -25,8 +25,9 @@ import type {
 
 import type {
   ApiAvailabilityCheckResponsesAvailabilityCheckStatusResponse,
-  AvailabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest,
-  AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest
+  ApiSystemString,
+  AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest,
+  AvailabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest
 } from '../model';
 
 import { ogmMutator } from '../../mutator';
@@ -198,6 +199,68 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPutApiAvailabilityCheckSettingsMutationOptions(options), queryClient);
     }
+    export const putApiAvailabilityCheckServersVpnServerId = (
+    vpnServerId: number,
+    availabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest?: AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiAvailabilityCheckResponsesAvailabilityCheckStatusResponse>(
+      {url: `/api/availability-check/servers/${vpnServerId}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: availabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPutApiAvailabilityCheckServersVpnServerIdMutationKey = () => ['putApiAvailabilityCheckServersVpnServerId'] as const;
+
+export const getPutApiAvailabilityCheckServersVpnServerIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>, TError,PutApiAvailabilityCheckServersVpnServerIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>, TError,PutApiAvailabilityCheckServersVpnServerIdMutationVariables, TContext> => {
+
+const mutationKey = getPutApiAvailabilityCheckServersVpnServerIdMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>, PutApiAvailabilityCheckServersVpnServerIdMutationVariables> = (props) => {
+          const {vpnServerId,data} = props ?? {};
+
+          return  putApiAvailabilityCheckServersVpnServerId(vpnServerId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiAvailabilityCheckServersVpnServerIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>>
+    export type PutApiAvailabilityCheckServersVpnServerIdMutationBody = AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest | undefined
+    export type PutApiAvailabilityCheckServersVpnServerIdMutationError = unknown
+    export type PutApiAvailabilityCheckServersVpnServerIdMutationVariables = {vpnServerId: number;data?: AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest}
+
+    export const usePutApiAvailabilityCheckServersVpnServerId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>, TError,PutApiAvailabilityCheckServersVpnServerIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>,
+        TError,
+        PutApiAvailabilityCheckServersVpnServerIdMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPutApiAvailabilityCheckServersVpnServerIdMutationOptions(options), queryClient);
+    }
     export const postApiAvailabilityCheckCheck = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
@@ -257,19 +320,14 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPostApiAvailabilityCheckCheckMutationOptions(options), queryClient);
     }
+    export const getApiAvailabilityCheckHealthcheck = (
 
-
-export const putApiAvailabilityCheckServersVpnServerId = (
-    vpnServerId: number,
-    availabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest?: AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
 
 
-      return ogmMutator<ApiAvailabilityCheckResponsesAvailabilityCheckStatusResponse>(
-      {url: `/api/availability-check/servers/${vpnServerId}`, method: 'PUT',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: availabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest, signal
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/availability-check/healthcheck`, method: 'GET', signal
     },
       options);
     }
@@ -277,50 +335,154 @@ export const putApiAvailabilityCheckServersVpnServerId = (
 
 
 
-export const getPutApiAvailabilityCheckServersVpnServerIdMutationKey = () => ['putApiAvailabilityCheckServersVpnServerId'] as const;
-
-export const getPutApiAvailabilityCheckServersVpnServerIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>, TError,PutApiAvailabilityCheckServersVpnServerIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>, TError,PutApiAvailabilityCheckServersVpnServerIdMutationVariables, TContext> => {
-
-const mutationKey = getPutApiAvailabilityCheckServersVpnServerIdMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>, PutApiAvailabilityCheckServersVpnServerIdMutationVariables> = (props) => {
-          const {vpnServerId, data} = props ?? {};
-
-          return  putApiAvailabilityCheckServersVpnServerId(vpnServerId, data, requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PutApiAvailabilityCheckServersVpnServerIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>>
-    export type PutApiAvailabilityCheckServersVpnServerIdMutationBody = AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest | undefined
-    export type PutApiAvailabilityCheckServersVpnServerIdMutationError = unknown
-    export type PutApiAvailabilityCheckServersVpnServerIdMutationVariables = {
-      vpnServerId: number;
-      data?: AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest
+export const getGetApiAvailabilityCheckHealthcheckQueryKey = () => {
+    return [
+    `/api/availability-check/healthcheck`
+    ] as const;
     }
 
-    export const usePutApiAvailabilityCheckServersVpnServerId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>, TError,PutApiAvailabilityCheckServersVpnServerIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof putApiAvailabilityCheckServersVpnServerId>>,
-        TError,
-        PutApiAvailabilityCheckServersVpnServerIdMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPutApiAvailabilityCheckServersVpnServerIdMutationOptions(options), queryClient);
+
+export const getGetApiAvailabilityCheckHealthcheckQueryOptions = <TData = Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAvailabilityCheckHealthcheckQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>> = ({ signal }) => getApiAvailabilityCheckHealthcheck(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAvailabilityCheckHealthcheckQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>>
+export type GetApiAvailabilityCheckHealthcheckQueryError = unknown
+
+
+export function useGetApiAvailabilityCheckHealthcheck<TData = Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAvailabilityCheckHealthcheck<TData = Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAvailabilityCheckHealthcheck<TData = Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAvailabilityCheckHealthcheck<TData = Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheck>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAvailabilityCheckHealthcheckQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getApiAvailabilityCheckHealthcheckWithJwt = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/availability-check/healthcheck-with-jwt`, method: 'GET', signal
+    },
+      options);
     }
+
+
+
+
+export const getGetApiAvailabilityCheckHealthcheckWithJwtQueryKey = () => {
+    return [
+    `/api/availability-check/healthcheck-with-jwt`
+    ] as const;
+    }
+
+
+export const getGetApiAvailabilityCheckHealthcheckWithJwtQueryOptions = <TData = Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiAvailabilityCheckHealthcheckWithJwtQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>> = ({ signal }) => getApiAvailabilityCheckHealthcheckWithJwt(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiAvailabilityCheckHealthcheckWithJwtQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>>
+export type GetApiAvailabilityCheckHealthcheckWithJwtQueryError = unknown
+
+
+export function useGetApiAvailabilityCheckHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAvailabilityCheckHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>,
+          TError,
+          Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiAvailabilityCheckHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiAvailabilityCheckHealthcheckWithJwt<TData = Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAvailabilityCheckHealthcheckWithJwt>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiAvailabilityCheckHealthcheckWithJwtQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}

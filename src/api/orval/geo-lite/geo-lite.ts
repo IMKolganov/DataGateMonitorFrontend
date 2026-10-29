@@ -54,92 +54,6 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getApiGeoLiteCheckNewVersion = (
-
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiGeoLiteResponsesGeoLiteVersionCheckResponse>(
-      {url: `/api/geo-lite/check-new-version`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiGeoLiteCheckNewVersionQueryKey = () => {
-    return [
-    `/api/geo-lite/check-new-version`
-    ] as const;
-    }
-
-
-export const getGetApiGeoLiteCheckNewVersionQueryOptions = <TData = Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiGeoLiteCheckNewVersionQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>> = ({ signal }) => getApiGeoLiteCheckNewVersion(requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiGeoLiteCheckNewVersionQueryResult = NonNullable<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>>
-export type GetApiGeoLiteCheckNewVersionQueryError = unknown
-
-
-export function useGetApiGeoLiteCheckNewVersion<TData = Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>,
-          TError,
-          Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiGeoLiteCheckNewVersion<TData = Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>,
-          TError,
-          Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiGeoLiteCheckNewVersion<TData = Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiGeoLiteCheckNewVersion<TData = Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiGeoLiteCheckNewVersionQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
 export const getApiGeoLiteGetDatabasePath = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
@@ -398,6 +312,151 @@ export function useGetApiGeoLiteGetVerionDb<TData = Awaited<ReturnType<typeof ge
 
 
 
+export const postApiGeoLiteUpdateDb = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiGeoLiteResponsesGeoLiteUpdateResponse>(
+      {url: `/api/geo-lite/update-db`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiGeoLiteUpdateDbMutationKey = () => ['postApiGeoLiteUpdateDb'] as const;
+
+export const getPostApiGeoLiteUpdateDbMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiGeoLiteUpdateDb>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiGeoLiteUpdateDb>>, TError,void, TContext> => {
+
+const mutationKey = getPostApiGeoLiteUpdateDbMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiGeoLiteUpdateDb>>, void> = () => {
+
+
+          return  postApiGeoLiteUpdateDb(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiGeoLiteUpdateDbMutationResult = NonNullable<Awaited<ReturnType<typeof postApiGeoLiteUpdateDb>>>
+
+    export type PostApiGeoLiteUpdateDbMutationError = unknown
+
+
+    export const usePostApiGeoLiteUpdateDb = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiGeoLiteUpdateDb>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiGeoLiteUpdateDb>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostApiGeoLiteUpdateDbMutationOptions(options), queryClient);
+    }
+    export const getApiGeoLiteCheckNewVersion = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiGeoLiteResponsesGeoLiteVersionCheckResponse>(
+      {url: `/api/geo-lite/check-new-version`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiGeoLiteCheckNewVersionQueryKey = () => {
+    return [
+    `/api/geo-lite/check-new-version`
+    ] as const;
+    }
+
+
+export const getGetApiGeoLiteCheckNewVersionQueryOptions = <TData = Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiGeoLiteCheckNewVersionQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>> = ({ signal }) => getApiGeoLiteCheckNewVersion(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiGeoLiteCheckNewVersionQueryResult = NonNullable<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>>
+export type GetApiGeoLiteCheckNewVersionQueryError = unknown
+
+
+export function useGetApiGeoLiteCheckNewVersion<TData = Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>,
+          TError,
+          Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiGeoLiteCheckNewVersion<TData = Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>,
+          TError,
+          Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiGeoLiteCheckNewVersion<TData = Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiGeoLiteCheckNewVersion<TData = Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiGeoLiteCheckNewVersion>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiGeoLiteCheckNewVersionQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 export const getApiGeoLiteHealthcheck = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
@@ -564,68 +623,3 @@ export function useGetApiGeoLiteHealthcheckWithJwt<TData = Awaited<ReturnType<ty
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const postApiGeoLiteUpdateDb = (
-
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiGeoLiteResponsesGeoLiteUpdateResponse>(
-      {url: `/api/geo-lite/update-db`, method: 'POST', signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiGeoLiteUpdateDbMutationKey = () => ['postApiGeoLiteUpdateDb'] as const;
-
-export const getPostApiGeoLiteUpdateDbMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiGeoLiteUpdateDb>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiGeoLiteUpdateDb>>, TError,void, TContext> => {
-
-const mutationKey = getPostApiGeoLiteUpdateDbMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiGeoLiteUpdateDb>>, void> = () => {
-
-
-          return  postApiGeoLiteUpdateDb(requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiGeoLiteUpdateDbMutationResult = NonNullable<Awaited<ReturnType<typeof postApiGeoLiteUpdateDb>>>
-
-    export type PostApiGeoLiteUpdateDbMutationError = unknown
-
-
-    export const usePostApiGeoLiteUpdateDb = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiGeoLiteUpdateDb>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiGeoLiteUpdateDb>>,
-        TError,
-        void,
-        TContext
-      > => {
-      return useMutation(getPostApiGeoLiteUpdateDbMutationOptions(options), queryClient);
-    }

@@ -51,7 +51,69 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const postApiVpnServersVpnServerIdXrayDisableUser = (
+export const postApiVpnServersVpnServerIdXrayKickUser = (
+    vpnServerId: number,
+    xrayNodeRequestsXrayNodeUserActionRequest?: XrayNodeRequestsXrayNodeUserActionRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiXrayNodeResponsesXrayNodeUserActionResponse>(
+      {url: `/api/vpn-servers/${vpnServerId}/xray/kick-user`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: xrayNodeRequestsXrayNodeUserActionRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiVpnServersVpnServerIdXrayKickUserMutationKey = () => ['postApiVpnServersVpnServerIdXrayKickUser'] as const;
+
+export const getPostApiVpnServersVpnServerIdXrayKickUserMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>, TError,PostApiVpnServersVpnServerIdXrayKickUserMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>, TError,PostApiVpnServersVpnServerIdXrayKickUserMutationVariables, TContext> => {
+
+const mutationKey = getPostApiVpnServersVpnServerIdXrayKickUserMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>, PostApiVpnServersVpnServerIdXrayKickUserMutationVariables> = (props) => {
+          const {vpnServerId,data} = props ?? {};
+
+          return  postApiVpnServersVpnServerIdXrayKickUser(vpnServerId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiVpnServersVpnServerIdXrayKickUserMutationResult = NonNullable<Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>>
+    export type PostApiVpnServersVpnServerIdXrayKickUserMutationBody = XrayNodeRequestsXrayNodeUserActionRequest | undefined
+    export type PostApiVpnServersVpnServerIdXrayKickUserMutationError = unknown
+    export type PostApiVpnServersVpnServerIdXrayKickUserMutationVariables = {vpnServerId: number;data?: XrayNodeRequestsXrayNodeUserActionRequest}
+
+    export const usePostApiVpnServersVpnServerIdXrayKickUser = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>, TError,PostApiVpnServersVpnServerIdXrayKickUserMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>,
+        TError,
+        PostApiVpnServersVpnServerIdXrayKickUserMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiVpnServersVpnServerIdXrayKickUserMutationOptions(options), queryClient);
+    }
+    export const postApiVpnServersVpnServerIdXrayDisableUser = (
     vpnServerId: number,
     xrayNodeRequestsXrayNodeUserActionRequest?: XrayNodeRequestsXrayNodeUserActionRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
@@ -279,71 +341,3 @@ export function useGetApiVpnServersVpnServerIdXrayHealthcheckWithJwt<TData = Awa
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const postApiVpnServersVpnServerIdXrayKickUser = (
-    vpnServerId: number,
-    xrayNodeRequestsXrayNodeUserActionRequest?: XrayNodeRequestsXrayNodeUserActionRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiXrayNodeResponsesXrayNodeUserActionResponse>(
-      {url: `/api/vpn-servers/${vpnServerId}/xray/kick-user`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: xrayNodeRequestsXrayNodeUserActionRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiVpnServersVpnServerIdXrayKickUserMutationKey = () => ['postApiVpnServersVpnServerIdXrayKickUser'] as const;
-
-export const getPostApiVpnServersVpnServerIdXrayKickUserMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>, TError,PostApiVpnServersVpnServerIdXrayKickUserMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>, TError,PostApiVpnServersVpnServerIdXrayKickUserMutationVariables, TContext> => {
-
-const mutationKey = getPostApiVpnServersVpnServerIdXrayKickUserMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>, PostApiVpnServersVpnServerIdXrayKickUserMutationVariables> = (props) => {
-          const {vpnServerId,data} = props ?? {};
-
-          return  postApiVpnServersVpnServerIdXrayKickUser(vpnServerId,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiVpnServersVpnServerIdXrayKickUserMutationResult = NonNullable<Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>>
-    export type PostApiVpnServersVpnServerIdXrayKickUserMutationBody = XrayNodeRequestsXrayNodeUserActionRequest | undefined
-    export type PostApiVpnServersVpnServerIdXrayKickUserMutationError = unknown
-    export type PostApiVpnServersVpnServerIdXrayKickUserMutationVariables = {vpnServerId: number;data?: XrayNodeRequestsXrayNodeUserActionRequest}
-
-    export const usePostApiVpnServersVpnServerIdXrayKickUser = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>, TError,PostApiVpnServersVpnServerIdXrayKickUserMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiVpnServersVpnServerIdXrayKickUser>>,
-        TError,
-        PostApiVpnServersVpnServerIdXrayKickUserMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiVpnServersVpnServerIdXrayKickUserMutationOptions(options), queryClient);
-    }

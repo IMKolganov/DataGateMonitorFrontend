@@ -57,7 +57,190 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getApiNotificationsGetAll = (
+export const postApiNotificationsNotifyAdmins = (
+    notificationsRequestsNotifyAdminsRequest?: NotificationsRequestsNotifyAdminsRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemInt32>(
+      {url: `/api/notifications/notify-admins`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: notificationsRequestsNotifyAdminsRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiNotificationsNotifyAdminsMutationKey = () => ['postApiNotificationsNotifyAdmins'] as const;
+
+export const getPostApiNotificationsNotifyAdminsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, TError,PostApiNotificationsNotifyAdminsMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, TError,PostApiNotificationsNotifyAdminsMutationVariables, TContext> => {
+
+const mutationKey = getPostApiNotificationsNotifyAdminsMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, PostApiNotificationsNotifyAdminsMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiNotificationsNotifyAdmins(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiNotificationsNotifyAdminsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>>
+    export type PostApiNotificationsNotifyAdminsMutationBody = NotificationsRequestsNotifyAdminsRequest | undefined
+    export type PostApiNotificationsNotifyAdminsMutationError = unknown
+    export type PostApiNotificationsNotifyAdminsMutationVariables = {data?: NotificationsRequestsNotifyAdminsRequest}
+
+    export const usePostApiNotificationsNotifyAdmins = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, TError,PostApiNotificationsNotifyAdminsMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>,
+        TError,
+        PostApiNotificationsNotifyAdminsMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiNotificationsNotifyAdminsMutationOptions(options), queryClient);
+    }
+    export const postApiNotificationsNotificationIdDelivered = (
+    notificationId: number,
+    params?: PostApiNotificationsNotificationIdDeliveredParams,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemBoolean>(
+      {url: `/api/notifications/${notificationId}/delivered`, method: 'POST',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiNotificationsNotificationIdDeliveredMutationKey = () => ['postApiNotificationsNotificationIdDelivered'] as const;
+
+export const getPostApiNotificationsNotificationIdDeliveredMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotificationIdDelivered>>, TError,PostApiNotificationsNotificationIdDeliveredMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotificationIdDelivered>>, TError,PostApiNotificationsNotificationIdDeliveredMutationVariables, TContext> => {
+
+const mutationKey = getPostApiNotificationsNotificationIdDeliveredMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiNotificationsNotificationIdDelivered>>, PostApiNotificationsNotificationIdDeliveredMutationVariables> = (props) => {
+          const {notificationId,params} = props ?? {};
+
+          return  postApiNotificationsNotificationIdDelivered(notificationId,params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiNotificationsNotificationIdDeliveredMutationResult = NonNullable<Awaited<ReturnType<typeof postApiNotificationsNotificationIdDelivered>>>
+
+    export type PostApiNotificationsNotificationIdDeliveredMutationError = unknown
+    export type PostApiNotificationsNotificationIdDeliveredMutationVariables = {notificationId: number;params?: PostApiNotificationsNotificationIdDeliveredParams}
+
+    export const usePostApiNotificationsNotificationIdDelivered = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotificationIdDelivered>>, TError,PostApiNotificationsNotificationIdDeliveredMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiNotificationsNotificationIdDelivered>>,
+        TError,
+        PostApiNotificationsNotificationIdDeliveredMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiNotificationsNotificationIdDeliveredMutationOptions(options), queryClient);
+    }
+    export const postApiNotificationsNotificationIdRead = (
+    notificationId: number,
+    params?: PostApiNotificationsNotificationIdReadParams,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemBoolean>(
+      {url: `/api/notifications/${notificationId}/read`, method: 'POST',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiNotificationsNotificationIdReadMutationKey = () => ['postApiNotificationsNotificationIdRead'] as const;
+
+export const getPostApiNotificationsNotificationIdReadMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotificationIdRead>>, TError,PostApiNotificationsNotificationIdReadMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotificationIdRead>>, TError,PostApiNotificationsNotificationIdReadMutationVariables, TContext> => {
+
+const mutationKey = getPostApiNotificationsNotificationIdReadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiNotificationsNotificationIdRead>>, PostApiNotificationsNotificationIdReadMutationVariables> = (props) => {
+          const {notificationId,params} = props ?? {};
+
+          return  postApiNotificationsNotificationIdRead(notificationId,params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiNotificationsNotificationIdReadMutationResult = NonNullable<Awaited<ReturnType<typeof postApiNotificationsNotificationIdRead>>>
+
+    export type PostApiNotificationsNotificationIdReadMutationError = unknown
+    export type PostApiNotificationsNotificationIdReadMutationVariables = {notificationId: number;params?: PostApiNotificationsNotificationIdReadParams}
+
+    export const usePostApiNotificationsNotificationIdRead = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotificationIdRead>>, TError,PostApiNotificationsNotificationIdReadMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiNotificationsNotificationIdRead>>,
+        TError,
+        PostApiNotificationsNotificationIdReadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiNotificationsNotificationIdReadMutationOptions(options), queryClient);
+    }
+    export const getApiNotificationsGetAll = (
     params?: GetApiNotificationsGetAllParams,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -133,6 +316,151 @@ export function useGetApiNotificationsGetAll<TData = Awaited<ReturnType<typeof g
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiNotificationsGetAllQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const postApiNotificationsMarkReadAll = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemBoolean>(
+      {url: `/api/notifications/mark-read-all`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiNotificationsMarkReadAllMutationKey = () => ['postApiNotificationsMarkReadAll'] as const;
+
+export const getPostApiNotificationsMarkReadAllMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>, TError,void, TContext> => {
+
+const mutationKey = getPostApiNotificationsMarkReadAllMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>, void> = () => {
+
+
+          return  postApiNotificationsMarkReadAll(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiNotificationsMarkReadAllMutationResult = NonNullable<Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>>
+
+    export type PostApiNotificationsMarkReadAllMutationError = unknown
+
+
+    export const usePostApiNotificationsMarkReadAll = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostApiNotificationsMarkReadAllMutationOptions(options), queryClient);
+    }
+    export const getApiNotificationsUnreadCount = (
+
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiNotificationsResponsesUnreadCountResponse>(
+      {url: `/api/notifications/unread-count`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiNotificationsUnreadCountQueryKey = () => {
+    return [
+    `/api/notifications/unread-count`
+    ] as const;
+    }
+
+
+export const getGetApiNotificationsUnreadCountQueryOptions = <TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiNotificationsUnreadCountQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>> = ({ signal }) => getApiNotificationsUnreadCount(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiNotificationsUnreadCountQueryResult = NonNullable<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>>
+export type GetApiNotificationsUnreadCountQueryError = unknown
+
+
+export function useGetApiNotificationsUnreadCount<TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+          TError,
+          Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiNotificationsUnreadCount<TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
+          TError,
+          Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiNotificationsUnreadCount<TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiNotificationsUnreadCount<TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiNotificationsUnreadCountQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -310,337 +638,3 @@ export function useGetApiNotificationsHealthcheckWithJwt<TData = Awaited<ReturnT
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const postApiNotificationsMarkReadAll = (
-
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemBoolean>(
-      {url: `/api/notifications/mark-read-all`, method: 'POST', signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiNotificationsMarkReadAllMutationKey = () => ['postApiNotificationsMarkReadAll'] as const;
-
-export const getPostApiNotificationsMarkReadAllMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>, TError,void, TContext> => {
-
-const mutationKey = getPostApiNotificationsMarkReadAllMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>, void> = () => {
-
-
-          return  postApiNotificationsMarkReadAll(requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiNotificationsMarkReadAllMutationResult = NonNullable<Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>>
-
-    export type PostApiNotificationsMarkReadAllMutationError = unknown
-
-
-    export const usePostApiNotificationsMarkReadAll = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>, TError,void, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiNotificationsMarkReadAll>>,
-        TError,
-        void,
-        TContext
-      > => {
-      return useMutation(getPostApiNotificationsMarkReadAllMutationOptions(options), queryClient);
-    }
-    export const postApiNotificationsNotifyAdmins = (
-    notificationsRequestsNotifyAdminsRequest?: NotificationsRequestsNotifyAdminsRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemInt32>(
-      {url: `/api/notifications/notify-admins`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: notificationsRequestsNotifyAdminsRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiNotificationsNotifyAdminsMutationKey = () => ['postApiNotificationsNotifyAdmins'] as const;
-
-export const getPostApiNotificationsNotifyAdminsMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, TError,PostApiNotificationsNotifyAdminsMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, TError,PostApiNotificationsNotifyAdminsMutationVariables, TContext> => {
-
-const mutationKey = getPostApiNotificationsNotifyAdminsMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, PostApiNotificationsNotifyAdminsMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiNotificationsNotifyAdmins(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiNotificationsNotifyAdminsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>>
-    export type PostApiNotificationsNotifyAdminsMutationBody = NotificationsRequestsNotifyAdminsRequest | undefined
-    export type PostApiNotificationsNotifyAdminsMutationError = unknown
-    export type PostApiNotificationsNotifyAdminsMutationVariables = {data?: NotificationsRequestsNotifyAdminsRequest}
-
-    export const usePostApiNotificationsNotifyAdmins = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>, TError,PostApiNotificationsNotifyAdminsMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiNotificationsNotifyAdmins>>,
-        TError,
-        PostApiNotificationsNotifyAdminsMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiNotificationsNotifyAdminsMutationOptions(options), queryClient);
-    }
-    export const getApiNotificationsUnreadCount = (
-
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiNotificationsResponsesUnreadCountResponse>(
-      {url: `/api/notifications/unread-count`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiNotificationsUnreadCountQueryKey = () => {
-    return [
-    `/api/notifications/unread-count`
-    ] as const;
-    }
-
-
-export const getGetApiNotificationsUnreadCountQueryOptions = <TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiNotificationsUnreadCountQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>> = ({ signal }) => getApiNotificationsUnreadCount(requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiNotificationsUnreadCountQueryResult = NonNullable<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>>
-export type GetApiNotificationsUnreadCountQueryError = unknown
-
-
-export function useGetApiNotificationsUnreadCount<TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
-          TError,
-          Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiNotificationsUnreadCount<TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>,
-          TError,
-          Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiNotificationsUnreadCount<TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiNotificationsUnreadCount<TData = Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiNotificationsUnreadCount>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiNotificationsUnreadCountQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export const postApiNotificationsNotificationIdDelivered = (
-    notificationId: number,
-    params?: PostApiNotificationsNotificationIdDeliveredParams,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemBoolean>(
-      {url: `/api/notifications/${notificationId}/delivered`, method: 'POST',
-        params, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiNotificationsNotificationIdDeliveredMutationKey = () => ['postApiNotificationsNotificationIdDelivered'] as const;
-
-export const getPostApiNotificationsNotificationIdDeliveredMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotificationIdDelivered>>, TError,PostApiNotificationsNotificationIdDeliveredMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotificationIdDelivered>>, TError,PostApiNotificationsNotificationIdDeliveredMutationVariables, TContext> => {
-
-const mutationKey = getPostApiNotificationsNotificationIdDeliveredMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiNotificationsNotificationIdDelivered>>, PostApiNotificationsNotificationIdDeliveredMutationVariables> = (props) => {
-          const {notificationId,params} = props ?? {};
-
-          return  postApiNotificationsNotificationIdDelivered(notificationId,params,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiNotificationsNotificationIdDeliveredMutationResult = NonNullable<Awaited<ReturnType<typeof postApiNotificationsNotificationIdDelivered>>>
-
-    export type PostApiNotificationsNotificationIdDeliveredMutationError = unknown
-    export type PostApiNotificationsNotificationIdDeliveredMutationVariables = {notificationId: number;params?: PostApiNotificationsNotificationIdDeliveredParams}
-
-    export const usePostApiNotificationsNotificationIdDelivered = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotificationIdDelivered>>, TError,PostApiNotificationsNotificationIdDeliveredMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiNotificationsNotificationIdDelivered>>,
-        TError,
-        PostApiNotificationsNotificationIdDeliveredMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiNotificationsNotificationIdDeliveredMutationOptions(options), queryClient);
-    }
-    export const postApiNotificationsNotificationIdRead = (
-    notificationId: number,
-    params?: PostApiNotificationsNotificationIdReadParams,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemBoolean>(
-      {url: `/api/notifications/${notificationId}/read`, method: 'POST',
-        params, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiNotificationsNotificationIdReadMutationKey = () => ['postApiNotificationsNotificationIdRead'] as const;
-
-export const getPostApiNotificationsNotificationIdReadMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotificationIdRead>>, TError,PostApiNotificationsNotificationIdReadMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotificationIdRead>>, TError,PostApiNotificationsNotificationIdReadMutationVariables, TContext> => {
-
-const mutationKey = getPostApiNotificationsNotificationIdReadMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiNotificationsNotificationIdRead>>, PostApiNotificationsNotificationIdReadMutationVariables> = (props) => {
-          const {notificationId,params} = props ?? {};
-
-          return  postApiNotificationsNotificationIdRead(notificationId,params,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiNotificationsNotificationIdReadMutationResult = NonNullable<Awaited<ReturnType<typeof postApiNotificationsNotificationIdRead>>>
-
-    export type PostApiNotificationsNotificationIdReadMutationError = unknown
-    export type PostApiNotificationsNotificationIdReadMutationVariables = {notificationId: number;params?: PostApiNotificationsNotificationIdReadParams}
-
-    export const usePostApiNotificationsNotificationIdRead = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiNotificationsNotificationIdRead>>, TError,PostApiNotificationsNotificationIdReadMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiNotificationsNotificationIdRead>>,
-        TError,
-        PostApiNotificationsNotificationIdReadMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiNotificationsNotificationIdReadMutationOptions(options), queryClient);
-    }

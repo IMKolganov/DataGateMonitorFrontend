@@ -53,127 +53,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const postApiQuotaPlansCreate = (
-    quotaPlansRequestsCreateOrUpdateQuotaPlanRequest?: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiQuotaPlansResponsesQuotaPlanResponse>(
-      {url: `/api/quota-plans/create`, method: 'POST',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: quotaPlansRequestsCreateOrUpdateQuotaPlanRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiQuotaPlansCreateMutationKey = () => ['postApiQuotaPlansCreate'] as const;
-
-export const getPostApiQuotaPlansCreateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlansCreate>>, TError,PostApiQuotaPlansCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlansCreate>>, TError,PostApiQuotaPlansCreateMutationVariables, TContext> => {
-
-const mutationKey = getPostApiQuotaPlansCreateMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiQuotaPlansCreate>>, PostApiQuotaPlansCreateMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  postApiQuotaPlansCreate(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiQuotaPlansCreateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiQuotaPlansCreate>>>
-    export type PostApiQuotaPlansCreateMutationBody = QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest | undefined
-    export type PostApiQuotaPlansCreateMutationError = unknown
-    export type PostApiQuotaPlansCreateMutationVariables = {data?: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest}
-
-    export const usePostApiQuotaPlansCreate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlansCreate>>, TError,PostApiQuotaPlansCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiQuotaPlansCreate>>,
-        TError,
-        PostApiQuotaPlansCreateMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiQuotaPlansCreateMutationOptions(options), queryClient);
-    }
-    export const deleteApiQuotaPlansDeleteId = (
-    id: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemString>(
-      {url: `/api/quota-plans/delete/${id}`, method: 'DELETE', signal
-    },
-      options);
-    }
-
-
-
-
-export const getDeleteApiQuotaPlansDeleteIdMutationKey = () => ['deleteApiQuotaPlansDeleteId'] as const;
-
-export const getDeleteApiQuotaPlansDeleteIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiQuotaPlansDeleteId>>, TError,DeleteApiQuotaPlansDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteApiQuotaPlansDeleteId>>, TError,DeleteApiQuotaPlansDeleteIdMutationVariables, TContext> => {
-
-const mutationKey = getDeleteApiQuotaPlansDeleteIdMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiQuotaPlansDeleteId>>, DeleteApiQuotaPlansDeleteIdMutationVariables> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteApiQuotaPlansDeleteId(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteApiQuotaPlansDeleteIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiQuotaPlansDeleteId>>>
-
-    export type DeleteApiQuotaPlansDeleteIdMutationError = unknown
-    export type DeleteApiQuotaPlansDeleteIdMutationVariables = {id: number}
-
-    export const useDeleteApiQuotaPlansDeleteId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiQuotaPlansDeleteId>>, TError,DeleteApiQuotaPlansDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteApiQuotaPlansDeleteId>>,
-        TError,
-        DeleteApiQuotaPlansDeleteIdMutationVariables,
-        TContext
-      > => {
-      return useMutation(getDeleteApiQuotaPlansDeleteIdMutationOptions(options), queryClient);
-    }
-    export const postApiQuotaPlansGetAll = (
+export const postApiQuotaPlansGetAll = (
     quotaPlansRequestsGetQuotaPlansRequest?: QuotaPlansRequestsGetQuotaPlansRequest,
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -320,7 +200,247 @@ export function useGetApiQuotaPlansGetId<TData = Awaited<ReturnType<typeof getAp
 
 
 
-export const getApiQuotaPlansHealthcheck = (
+export const postApiQuotaPlansCreate = (
+    quotaPlansRequestsCreateOrUpdateQuotaPlanRequest?: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiQuotaPlansResponsesQuotaPlanResponse>(
+      {url: `/api/quota-plans/create`, method: 'POST',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: quotaPlansRequestsCreateOrUpdateQuotaPlanRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiQuotaPlansCreateMutationKey = () => ['postApiQuotaPlansCreate'] as const;
+
+export const getPostApiQuotaPlansCreateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlansCreate>>, TError,PostApiQuotaPlansCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlansCreate>>, TError,PostApiQuotaPlansCreateMutationVariables, TContext> => {
+
+const mutationKey = getPostApiQuotaPlansCreateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiQuotaPlansCreate>>, PostApiQuotaPlansCreateMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiQuotaPlansCreate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiQuotaPlansCreateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiQuotaPlansCreate>>>
+    export type PostApiQuotaPlansCreateMutationBody = QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest | undefined
+    export type PostApiQuotaPlansCreateMutationError = unknown
+    export type PostApiQuotaPlansCreateMutationVariables = {data?: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest}
+
+    export const usePostApiQuotaPlansCreate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlansCreate>>, TError,PostApiQuotaPlansCreateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiQuotaPlansCreate>>,
+        TError,
+        PostApiQuotaPlansCreateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiQuotaPlansCreateMutationOptions(options), queryClient);
+    }
+    export const putApiQuotaPlansUpdate = (
+    quotaPlansRequestsCreateOrUpdateQuotaPlanRequest?: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/quota-plans/update`, method: 'PUT',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: quotaPlansRequestsCreateOrUpdateQuotaPlanRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPutApiQuotaPlansUpdateMutationKey = () => ['putApiQuotaPlansUpdate'] as const;
+
+export const getPutApiQuotaPlansUpdateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>, TError,PutApiQuotaPlansUpdateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>, TError,PutApiQuotaPlansUpdateMutationVariables, TContext> => {
+
+const mutationKey = getPutApiQuotaPlansUpdateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>, PutApiQuotaPlansUpdateMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiQuotaPlansUpdate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiQuotaPlansUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>>
+    export type PutApiQuotaPlansUpdateMutationBody = QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest | undefined
+    export type PutApiQuotaPlansUpdateMutationError = unknown
+    export type PutApiQuotaPlansUpdateMutationVariables = {data?: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest}
+
+    export const usePutApiQuotaPlansUpdate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>, TError,PutApiQuotaPlansUpdateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>,
+        TError,
+        PutApiQuotaPlansUpdateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPutApiQuotaPlansUpdateMutationOptions(options), queryClient);
+    }
+    export const deleteApiQuotaPlansDeleteId = (
+    id: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/quota-plans/delete/${id}`, method: 'DELETE', signal
+    },
+      options);
+    }
+
+
+
+
+export const getDeleteApiQuotaPlansDeleteIdMutationKey = () => ['deleteApiQuotaPlansDeleteId'] as const;
+
+export const getDeleteApiQuotaPlansDeleteIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiQuotaPlansDeleteId>>, TError,DeleteApiQuotaPlansDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiQuotaPlansDeleteId>>, TError,DeleteApiQuotaPlansDeleteIdMutationVariables, TContext> => {
+
+const mutationKey = getDeleteApiQuotaPlansDeleteIdMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiQuotaPlansDeleteId>>, DeleteApiQuotaPlansDeleteIdMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteApiQuotaPlansDeleteId(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiQuotaPlansDeleteIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiQuotaPlansDeleteId>>>
+
+    export type DeleteApiQuotaPlansDeleteIdMutationError = unknown
+    export type DeleteApiQuotaPlansDeleteIdMutationVariables = {id: number}
+
+    export const useDeleteApiQuotaPlansDeleteId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiQuotaPlansDeleteId>>, TError,DeleteApiQuotaPlansDeleteIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiQuotaPlansDeleteId>>,
+        TError,
+        DeleteApiQuotaPlansDeleteIdMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteApiQuotaPlansDeleteIdMutationOptions(options), queryClient);
+    }
+    export const postApiQuotaPlansSetDefaultId = (
+    id: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiSystemString>(
+      {url: `/api/quota-plans/set-default/${id}`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+
+export const getPostApiQuotaPlansSetDefaultIdMutationKey = () => ['postApiQuotaPlansSetDefaultId'] as const;
+
+export const getPostApiQuotaPlansSetDefaultIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlansSetDefaultId>>, TError,PostApiQuotaPlansSetDefaultIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlansSetDefaultId>>, TError,PostApiQuotaPlansSetDefaultIdMutationVariables, TContext> => {
+
+const mutationKey = getPostApiQuotaPlansSetDefaultIdMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiQuotaPlansSetDefaultId>>, PostApiQuotaPlansSetDefaultIdMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  postApiQuotaPlansSetDefaultId(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiQuotaPlansSetDefaultIdMutationResult = NonNullable<Awaited<ReturnType<typeof postApiQuotaPlansSetDefaultId>>>
+
+    export type PostApiQuotaPlansSetDefaultIdMutationError = unknown
+    export type PostApiQuotaPlansSetDefaultIdMutationVariables = {id: number}
+
+    export const usePostApiQuotaPlansSetDefaultId = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlansSetDefaultId>>, TError,PostApiQuotaPlansSetDefaultIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiQuotaPlansSetDefaultId>>,
+        TError,
+        PostApiQuotaPlansSetDefaultIdMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiQuotaPlansSetDefaultIdMutationOptions(options), queryClient);
+    }
+    export const getApiQuotaPlansHealthcheck = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -486,129 +606,3 @@ export function useGetApiQuotaPlansHealthcheckWithJwt<TData = Awaited<ReturnType
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const postApiQuotaPlansSetDefaultId = (
-    id: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemString>(
-      {url: `/api/quota-plans/set-default/${id}`, method: 'POST', signal
-    },
-      options);
-    }
-
-
-
-
-export const getPostApiQuotaPlansSetDefaultIdMutationKey = () => ['postApiQuotaPlansSetDefaultId'] as const;
-
-export const getPostApiQuotaPlansSetDefaultIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlansSetDefaultId>>, TError,PostApiQuotaPlansSetDefaultIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlansSetDefaultId>>, TError,PostApiQuotaPlansSetDefaultIdMutationVariables, TContext> => {
-
-const mutationKey = getPostApiQuotaPlansSetDefaultIdMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiQuotaPlansSetDefaultId>>, PostApiQuotaPlansSetDefaultIdMutationVariables> = (props) => {
-          const {id} = props ?? {};
-
-          return  postApiQuotaPlansSetDefaultId(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PostApiQuotaPlansSetDefaultIdMutationResult = NonNullable<Awaited<ReturnType<typeof postApiQuotaPlansSetDefaultId>>>
-
-    export type PostApiQuotaPlansSetDefaultIdMutationError = unknown
-    export type PostApiQuotaPlansSetDefaultIdMutationVariables = {id: number}
-
-    export const usePostApiQuotaPlansSetDefaultId = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiQuotaPlansSetDefaultId>>, TError,PostApiQuotaPlansSetDefaultIdMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postApiQuotaPlansSetDefaultId>>,
-        TError,
-        PostApiQuotaPlansSetDefaultIdMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPostApiQuotaPlansSetDefaultIdMutationOptions(options), queryClient);
-    }
-    export const putApiQuotaPlansUpdate = (
-    quotaPlansRequestsCreateOrUpdateQuotaPlanRequest?: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiSystemString>(
-      {url: `/api/quota-plans/update`, method: 'PUT',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: quotaPlansRequestsCreateOrUpdateQuotaPlanRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPutApiQuotaPlansUpdateMutationKey = () => ['putApiQuotaPlansUpdate'] as const;
-
-export const getPutApiQuotaPlansUpdateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>, TError,PutApiQuotaPlansUpdateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>, TError,PutApiQuotaPlansUpdateMutationVariables, TContext> => {
-
-const mutationKey = getPutApiQuotaPlansUpdateMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>, PutApiQuotaPlansUpdateMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  putApiQuotaPlansUpdate(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PutApiQuotaPlansUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>>
-    export type PutApiQuotaPlansUpdateMutationBody = QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest | undefined
-    export type PutApiQuotaPlansUpdateMutationError = unknown
-    export type PutApiQuotaPlansUpdateMutationVariables = {data?: QuotaPlansRequestsCreateOrUpdateQuotaPlanRequest}
-
-    export const usePutApiQuotaPlansUpdate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>, TError,PutApiQuotaPlansUpdateMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof putApiQuotaPlansUpdate>>,
-        TError,
-        PutApiQuotaPlansUpdateMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPutApiQuotaPlansUpdateMutationOptions(options), queryClient);
-    }

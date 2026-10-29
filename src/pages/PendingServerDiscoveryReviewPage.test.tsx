@@ -9,6 +9,13 @@ const approveMutateAsync = vi.hoisted(() =>
 );
 const denyMutateAsync = vi.hoisted(() => vi.fn(async () => ({})));
 
+const nodeKeyFingerprint = vi.hoisted(() => ({ value: null as string | null }));
+
+vi.mock("../api/localIssuance", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../api/localIssuance")>()),
+  useDiscoveryNodeKey: () => ({ data: { pendingFingerprint: nodeKeyFingerprint.value } }),
+}));
+
 vi.mock("react-toastify", () => ({
   toast: { error: vi.fn(), success: vi.fn(), info: vi.fn() },
 }));
@@ -72,6 +79,7 @@ describe("PendingServerDiscoveryReviewPage", () => {
   beforeEach(() => {
     approveMutateAsync.mockClear();
     denyMutateAsync.mockClear();
+    nodeKeyFingerprint.value = null;
     vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
@@ -107,6 +115,38 @@ describe("PendingServerDiscoveryReviewPage", () => {
     expect(call.data.apiUrl).toBe("https://xray.example.com:9443/");
     expect(call.data.isEnableWss).toBe(true);
     expect(await screen.findByText("Edited")).toBeInTheDocument();
+  });
+
+  it("shows the announced node key fingerprint for comparison before approve", async () => {
+    nodeKeyFingerprint.value = "a".repeat(8) + "b".repeat(56);
+    renderWithProviders(
+      <Routes>
+        <Route
+          path="/servers/pending-discoveries/:discoveryId"
+          element={<PendingServerDiscoveryReviewPage />}
+        />
+      </Routes>,
+      { route: "/servers/pending-discoveries/5" },
+    );
+
+    const key = await screen.findByTestId("discovery-node-key");
+    expect(key.textContent?.startsWith("aaaa aaaa bbbb")).toBe(true);
+    expect(screen.getByText(/datagate-profile node-id/)).toBeInTheDocument();
+  });
+
+  it("hides the node key row for nodes that announce no key", async () => {
+    renderWithProviders(
+      <Routes>
+        <Route
+          path="/servers/pending-discoveries/:discoveryId"
+          element={<PendingServerDiscoveryReviewPage />}
+        />
+      </Routes>,
+      { route: "/servers/pending-discoveries/5" },
+    );
+
+    expect(await screen.findByRole("heading", { name: /Review server request/i })).toBeInTheDocument();
+    expect(screen.queryByTestId("discovery-node-key")).toBeNull();
   });
 
   it("shows missing state for unknown discovery id", async () => {

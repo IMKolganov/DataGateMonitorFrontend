@@ -27,6 +27,7 @@ import { getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey } f
 import type { VpnServersRequestsApproveVpnServerDiscoveryRequest } from "../api/orval/model/vpnServersRequestsApproveVpnServerDiscoveryRequest";
 import type { QuotaPlanDto, QuotaPlansResponse } from "../api/orvalModelShim";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
+import { formatFingerprint, useDiscoveryNodeKey } from "../api/localIssuance";
 import "../css/ServerForm.css";
 import "../css/Settings.css";
 
@@ -50,6 +51,8 @@ export default function PendingServerDiscoveryReviewPage() {
     () => discoveries.find((d) => d.id === discoveryId) ?? null,
     [discoveries, discoveryId],
   );
+  const nodeKeyQuery = useDiscoveryNodeKey(discoveryId, Number.isFinite(discoveryId) && discoveryId > 0);
+  const nodeKeyFingerprint = nodeKeyQuery.data?.pendingFingerprint ?? null;
 
   const [serverName, setServerName] = useState("");
   const [apiUrl, setApiUrl] = useState("");
@@ -263,6 +266,20 @@ export default function PendingServerDiscoveryReviewPage() {
             <>
               <dt style={{ color: "var(--text-muted)" }}>Version</dt>
               <dd style={{ margin: 0 }}>{discovery.version}</dd>
+            </>
+          ) : null}
+          {nodeKeyFingerprint ? (
+            <>
+              <dt style={{ color: "var(--text-muted)" }}>Node key</dt>
+              <dd style={{ margin: 0 }}>
+                <code style={{ wordBreak: "break-all" }} data-testid="discovery-node-key">
+                  {formatFingerprint(nodeKeyFingerprint)}
+                </code>
+                <div style={{ color: "var(--text-muted)", fontSize: 12 }}>
+                  Approving trusts this key for locally issued profiles. Compare with{" "}
+                  <code>datagate-profile node-id</code> on the node.
+                </div>
+              </dd>
             </>
           ) : null}
         </dl>

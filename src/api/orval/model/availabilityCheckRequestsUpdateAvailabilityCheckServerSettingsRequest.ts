@@ -6,6 +6,5 @@
  */
 
 export interface AvailabilityCheckRequestsUpdateAvailabilityCheckServerSettingsRequest {
-  /** When false, this server is skipped by the external availability probe. */
   enabled?: boolean;
 }

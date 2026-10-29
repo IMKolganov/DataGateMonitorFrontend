@@ -5,9 +5,6 @@
  * OpenAPI spec version: v1
  */
 
-/**
- * Pending=0, Sent=1, Failed=2, Read=3
- */
 export type EnumsDeliveryStatus = typeof EnumsDeliveryStatus[keyof typeof EnumsDeliveryStatus];
 
 

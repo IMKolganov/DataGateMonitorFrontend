@@ -8,6 +8,8 @@
 export interface VpnServersRequestsApproveVpnServerDiscoveryRequest {
   /** @nullable */
   serverName?: string | null;
+  /** @nullable */
+  apiUrl?: string | null;
   isDefault?: boolean;
   isEnableWss?: boolean;
   isPiHoleEnabled?: boolean;
@@ -20,9 +22,4 @@ export interface VpnServersRequestsApproveVpnServerDiscoveryRequest {
   /** @nullable */
   tagIds?: number[] | null;
   isDisabled?: boolean;
-  /**
-     * Optional override for the manager ApiUrl. Falls back to the discovery ApiUrl.
-     * @nullable
-     */
-  apiUrl?: string | null;
 }

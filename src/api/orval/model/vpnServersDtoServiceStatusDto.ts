@@ -13,6 +13,7 @@ export interface VpnServersDtoServiceStatusDto {
   errorMessage?: string | null;
   nextRunTime?: string;
   countConnectedClients?: number;
+  countDevices?: number;
   countSessions?: number;
   totalBytesIn?: number;
   totalBytesOut?: number;

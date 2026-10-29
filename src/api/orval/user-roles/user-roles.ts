@@ -52,92 +52,6 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getApiUserRolesByUserUserId = (
-    userId: number,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiUserRolesResponsesUserRoleAssignmentResponse>(
-      {url: `/api/user-roles/by-user/${userId}`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getGetApiUserRolesByUserUserIdQueryKey = (userId: number,) => {
-    return [
-    `/api/user-roles/by-user/${userId}`
-    ] as const;
-    }
-
-
-export const getGetApiUserRolesByUserUserIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError = unknown>(userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiUserRolesByUserUserIdQueryKey(userId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>> = ({ signal }) => getApiUserRolesByUserUserId(userId, requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: userId !== null && userId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiUserRolesByUserUserIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>>
-export type GetApiUserRolesByUserUserIdQueryError = unknown
-
-
-export function useGetApiUserRolesByUserUserId<TData = Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError = unknown>(
- userId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiUserRolesByUserUserId<TData = Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError = unknown>(
- userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>,
-          TError,
-          Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiUserRolesByUserUserId<TData = Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError = unknown>(
- userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiUserRolesByUserUserId<TData = Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError = unknown>(
- userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiUserRolesByUserUserIdQueryOptions(userId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
 export const getApiUserRolesGetAllRoles = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
@@ -224,7 +138,154 @@ export function useGetApiUserRolesGetAllRoles<TData = Awaited<ReturnType<typeof 
 
 
 
-export const getApiUserRolesHealthcheck = (
+export const getApiUserRolesByUserUserId = (
+    userId: number,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiUserRolesResponsesUserRoleAssignmentResponse>(
+      {url: `/api/user-roles/by-user/${userId}`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getGetApiUserRolesByUserUserIdQueryKey = (userId: number,) => {
+    return [
+    `/api/user-roles/by-user/${userId}`
+    ] as const;
+    }
+
+
+export const getGetApiUserRolesByUserUserIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError = unknown>(userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiUserRolesByUserUserIdQueryKey(userId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>> = ({ signal }) => getApiUserRolesByUserUserId(userId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: userId !== null && userId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiUserRolesByUserUserIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>>
+export type GetApiUserRolesByUserUserIdQueryError = unknown
+
+
+export function useGetApiUserRolesByUserUserId<TData = Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError = unknown>(
+ userId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiUserRolesByUserUserId<TData = Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError = unknown>(
+ userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiUserRolesByUserUserId<TData = Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError = unknown>(
+ userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiUserRolesByUserUserId<TData = Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError = unknown>(
+ userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiUserRolesByUserUserId>>, TError, TData>>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiUserRolesByUserUserIdQueryOptions(userId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const putApiUserRolesSet = (
+    userRolesRequestsSetUserRoleRequest?: UserRolesRequestsSetUserRoleRequest,
+ options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
+) => {
+
+
+      return ogmMutator<ApiUserRolesResponsesUserRoleAssignmentResponse>(
+      {url: `/api/user-roles/set`, method: 'PUT',
+      headers: {'Content-Type': 'application/json-patch+json', },
+      data: userRolesRequestsSetUserRoleRequest, signal
+    },
+      options);
+    }
+
+
+
+
+export const getPutApiUserRolesSetMutationKey = () => ['putApiUserRolesSet'] as const;
+
+export const getPutApiUserRolesSetMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiUserRolesSet>>, TError,PutApiUserRolesSetMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiUserRolesSet>>, TError,PutApiUserRolesSetMutationVariables, TContext> => {
+
+const mutationKey = getPutApiUserRolesSetMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiUserRolesSet>>, PutApiUserRolesSetMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiUserRolesSet(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiUserRolesSetMutationResult = NonNullable<Awaited<ReturnType<typeof putApiUserRolesSet>>>
+    export type PutApiUserRolesSetMutationBody = UserRolesRequestsSetUserRoleRequest | undefined
+    export type PutApiUserRolesSetMutationError = unknown
+    export type PutApiUserRolesSetMutationVariables = {data?: UserRolesRequestsSetUserRoleRequest}
+
+    export const usePutApiUserRolesSet = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiUserRolesSet>>, TError,PutApiUserRolesSetMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiUserRolesSet>>,
+        TError,
+        PutApiUserRolesSetMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPutApiUserRolesSetMutationOptions(options), queryClient);
+    }
+    export const getApiUserRolesHealthcheck = (
 
  options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
 ) => {
@@ -390,70 +451,3 @@ export function useGetApiUserRolesHealthcheckWithJwt<TData = Awaited<ReturnType<
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-
-export const putApiUserRolesSet = (
-    userRolesRequestsSetUserRoleRequest?: UserRolesRequestsSetUserRoleRequest,
- options?: SecondParameter<typeof ogmMutator>,signal?: AbortSignal
-) => {
-
-
-      return ogmMutator<ApiUserRolesResponsesUserRoleAssignmentResponse>(
-      {url: `/api/user-roles/set`, method: 'PUT',
-      headers: {'Content-Type': 'application/json-patch+json', },
-      data: userRolesRequestsSetUserRoleRequest, signal
-    },
-      options);
-    }
-
-
-
-
-export const getPutApiUserRolesSetMutationKey = () => ['putApiUserRolesSet'] as const;
-
-export const getPutApiUserRolesSetMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiUserRolesSet>>, TError,PutApiUserRolesSetMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
-): UseMutationOptions<Awaited<ReturnType<typeof putApiUserRolesSet>>, TError,PutApiUserRolesSetMutationVariables, TContext> => {
-
-const mutationKey = getPutApiUserRolesSetMutationKey();
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiUserRolesSet>>, PutApiUserRolesSetMutationVariables> = (props) => {
-          const {data} = props ?? {};
-
-          return  putApiUserRolesSet(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type PutApiUserRolesSetMutationResult = NonNullable<Awaited<ReturnType<typeof putApiUserRolesSet>>>
-    export type PutApiUserRolesSetMutationBody = UserRolesRequestsSetUserRoleRequest | undefined
-    export type PutApiUserRolesSetMutationError = unknown
-    export type PutApiUserRolesSetMutationVariables = {data?: UserRolesRequestsSetUserRoleRequest}
-
-    export const usePutApiUserRolesSet = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiUserRolesSet>>, TError,PutApiUserRolesSetMutationVariables, TContext>, request?: SecondParameter<typeof ogmMutator>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof putApiUserRolesSet>>,
-        TError,
-        PutApiUserRolesSetMutationVariables,
-        TContext
-      > => {
-      return useMutation(getPutApiUserRolesSetMutationOptions(options), queryClient);
-    }
