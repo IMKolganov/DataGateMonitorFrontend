@@ -26,6 +26,7 @@ import {
   OPEN_PENDING_SERVER_DISCOVERY_EVENT,
   type OpenPendingServerDiscoveryDetail,
 } from "./pendingServerDiscoveryEvents";
+import { useLockMainScroll } from "../../hooks/useLockMainScroll";
 import "../../css/Settings.css";
 
 const POLL_MS = 30_000;
@@ -51,8 +52,15 @@ export function PendingServerDiscoveryModal() {
   const pendingQuery = useGetApiOpenVpnServersDiscoveriesPending({
     query: {
       enabled: admin,
-      refetchInterval: admin ? POLL_MS : false,
+      // Pause the 30s poll while the query is failing (e.g. gateway 502) so we
+      // do not keep hammering a dead upstream; resume on focus / next success path.
+      refetchInterval: (query) => {
+        if (!admin) return false;
+        if (query.state.error) return false;
+        return POLL_MS;
+      },
       refetchOnWindowFocus: admin,
+      retry: false,
     },
   });
   const refetchPending = pendingQuery.refetch;
@@ -162,7 +170,10 @@ export function PendingServerDiscoveryModal() {
     navigate("/servers/pending-discoveries");
   };
 
-  if (!admin || !current || snoozed || onPendingInbox) return null;
+  const visible = Boolean(admin && current && !snoozed && !onPendingInbox);
+  useLockMainScroll(visible);
+
+  if (!visible || !current) return null;
 
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pending-discovery-title">

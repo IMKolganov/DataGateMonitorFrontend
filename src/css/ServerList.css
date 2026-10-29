@@ -386,7 +386,11 @@
     opacity: 0.88;
   }
 
-  .server-disabled-pill {
+  .server-disabled-pill,
+  .server-deleted-pill,
+  .server-update-pill {
+    display: inline-block;
+    white-space: nowrap;
     margin-left: 8px;
     font-size: var(--font-size-2xs);
     font-weight: 700;
@@ -394,38 +398,25 @@
     letter-spacing: 0.04em;
     padding: 2px 7px;
     border-radius: 4px;
+    vertical-align: middle;
+  }
+
+  .server-disabled-pill {
     background: var(--bg-content-alt);
     color: var(--text-muted);
     border: 1px solid var(--border-color);
-    vertical-align: middle;
   }
 
   .server-deleted-pill {
-    margin-left: 8px;
-    font-size: var(--font-size-2xs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 2px 7px;
-    border-radius: 4px;
     background: rgba(255, 107, 90, 0.14);
     color: #ff9a8f;
     border: 1px solid rgba(255, 107, 90, 0.35);
-    vertical-align: middle;
   }
 
   .server-update-pill {
-    margin-left: 8px;
-    font-size: var(--font-size-2xs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 2px 7px;
-    border-radius: 4px;
     background: rgba(210, 168, 255, 0.18);
     color: #d2a8ff;
     border: 1px solid rgba(210, 168, 255, 0.45);
-    vertical-align: middle;
   }
 
 .server-list-hide-row {

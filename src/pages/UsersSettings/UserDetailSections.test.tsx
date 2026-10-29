@@ -6,6 +6,15 @@ import { MockDataGrid, themeProviderMock } from "../../test/mockDataGrid";
 vi.mock("../../components/ui/ThemeProvider.tsx", () => themeProviderMock);
 vi.mock("../../components/ui/TableStyle.tsx", () => ({ default: MockDataGrid }));
 vi.mock("react-toastify", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock("recharts", () => ({
+  ResponsiveContainer: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  AreaChart: ({ children }: { children?: React.ReactNode }) => <div data-testid="sessions-chart">{children}</div>,
+  Area: () => null,
+  XAxis: () => null,
+  YAxis: () => null,
+  CartesianGrid: () => null,
+  Tooltip: () => null,
+}));
 
 vi.mock("../../api/orval/user/user", () => ({
   getGetApiUsersIdPasswordHistoryQueryKey: (id: number) => ["pw-hist", id],
@@ -20,7 +29,14 @@ vi.mock("../../api/orval/user/user", () => ({
 
 vi.mock("../../api/orval/vpn-server-clients/vpn-server-clients", () => ({
   useGetApiOpenVpnClientsOverviewUsersSeries: () => ({
-    data: { series: [] },
+    data: {
+      meta: { grouping: "days" },
+      summary: { peakActiveSessions: 2 },
+      rows: [
+        { ts: "2026-10-03T00:00:00Z", activeSessions: 0 },
+        { ts: "2026-10-04T00:00:00Z", activeSessions: 2 },
+      ],
+    },
     isLoading: false,
     isFetching: false,
     error: null,
@@ -52,9 +68,11 @@ describe("UserVpnConnectionsSection", () => {
     expect(screen.getByText(/external ID/i)).toBeInTheDocument();
   });
 
-  it("shows session activity when external ID is present", () => {
+  it("shows session activity chart when external ID is present", () => {
     renderWithProviders(<UserVpnConnectionsSection externalId="ext-7" />);
-    expect(screen.getByText(/Session activity by period/i)).toBeInTheDocument();
+    expect(screen.getByText("Session activity")).toBeInTheDocument();
+    expect(screen.getByText(/Peak concurrent sessions: 2/i)).toBeInTheDocument();
+    expect(screen.getByTestId("sessions-chart")).toBeInTheDocument();
   });
 });
 

@@ -14,8 +14,9 @@ import { StatisticsScopeBanner } from "./StatisticsScopeBanner";
 import { OverviewUserProfileCard } from "./OverviewUserProfileCard";
 import "../../css/Settings.css";
 import "../../css/ServersOverview.css";
-import { addDays, endOfToday, startOfToday, toChartPoints, toUsersSeriesChartPoints, mergeChartWithUsersSeries, buildFallbackOverviewResponse, normalizeGrouping } from "./helpers";
+import { addDays, endOfToday, startOfToday, toChartPoints, toUsersSeriesChartPoints, mergeChartWithUsersSeries, buildFallbackOverviewResponse, normalizeGrouping, extremeFromSummary } from "./helpers";
 import type { ChartPoint, MergedChartPoint } from "./types";
+import type { SeriesExtreme } from "./helpers";
 
 import { keepPreviousData, useQueries } from "@tanstack/react-query";
 import {
@@ -74,6 +75,7 @@ import { UserOpenVpnEventsSection } from "../../components/openvpn/UserOpenVpnEv
 import { UserClientAppVersionsSection } from "../../components/openvpn/UserClientAppVersionsSection";
 import { TopVisitedDomainsSection } from "../../components/pihole/TopVisitedDomainsSection";
 import { serverPiHoleEnabled, shouldShowUserDnsQueries } from "../../utils/pihole/serverPiHoleEnabled";
+import { isOpenVpnStack } from "../../constants/vpnServerType";
 
 
 
@@ -149,22 +151,36 @@ function readPayload<T>(value: T | { data?: T } | undefined): T | undefined {
 type SafeTotals = {
   sessionsCount: number;
   devicesCount: number;
+  usersCount: number;
   accountsCount: number;
   trafficInBytes: number;
   trafficOutBytes: number;
   trafficTotalBytes: number;
+  devicesPeak?: SeriesExtreme | null;
+  devicesLow?: SeriesExtreme | null;
+  sessionsPeak?: SeriesExtreme | null;
+  sessionsLow?: SeriesExtreme | null;
 };
 
 function makeSafeTotals(resp?: OverviewTotalsResponse): SafeTotals {
   const sessionsCount = resp?.totals?.sessionsCount ?? 0;
-  const devicesCount = resp?.totals?.usersCount ?? 0;
+  const devicesCount = resp?.totals?.devicesCount ?? 0;
+  const usersCount = resp?.totals?.usersCount ?? 0;
   const accountsCount = resp?.totals?.accountsCount ?? 0;
   const trafficInBytes = resp?.totals?.trafficInBytes ?? 0;
   const trafficOutBytes = resp?.totals?.trafficOutBytes ?? 0;
   const trafficTotalBytes =
     resp?.totals?.trafficTotalBytes ?? (trafficInBytes + trafficOutBytes);
 
-  return { sessionsCount, devicesCount, accountsCount, trafficInBytes, trafficOutBytes, trafficTotalBytes };
+  return {
+    sessionsCount,
+    devicesCount,
+    usersCount,
+    accountsCount,
+    trafficInBytes,
+    trafficOutBytes,
+    trafficTotalBytes,
+  };
 }
 
 export default function ServersOverview() {
@@ -211,8 +227,15 @@ export default function ServersOverview() {
     scopedServerPiHole,
     viewerIsAdmin,
   );
-  const showUserOpenVpnEvents =
-    Boolean(statsExternalId && vpnServerId != null && vpnServerId > 0 && viewerIsAdmin);
+  // IV_GUI_VER / connect event logs exist only on the OpenVPN stack (not Xray).
+  const showUserOpenVpnEvents = Boolean(
+    statsExternalId &&
+      vpnServerId != null &&
+      vpnServerId > 0 &&
+      viewerIsAdmin &&
+      scopedServer != null &&
+      isOpenVpnStack(scopedServer.serverType),
+  );
 
   const showActivitySection = showUserOpenVpnEvents || showUserDnsQueries;
   const showDomainsSection = vpnServerId == null && !statsExternalId && viewerIsAdmin;
@@ -422,7 +445,35 @@ export default function ServersOverview() {
     setGrouping(c.grouping);
   };
 
-  const totalsForCards = useMemo(() => safeTotals, [safeTotals]);
+  const totalsForCards = useMemo(() => {
+    const usersMode = normalizeGrouping(usersSeriesData?.meta?.grouping);
+    const seriesMode = normalizeGrouping(apiData?.meta?.grouping);
+    const usersSummary = usersSeriesData?.summary;
+    const seriesSummary = apiData?.summary;
+
+    const devicesPeak =
+      extremeFromSummary(usersSummary?.peakActiveDevices, usersSummary?.peakActiveDevicesAt, usersMode) ??
+      extremeFromSummary(usersSummary?.peakActiveUsers, usersSummary?.peakActiveUsersAt, usersMode) ??
+      extremeFromSummary(seriesSummary?.peakActiveClients, seriesSummary?.peakActiveClientsAt, seriesMode);
+    const devicesLow =
+      extremeFromSummary(usersSummary?.lowActiveDevices, usersSummary?.lowActiveDevicesAt, usersMode) ??
+      extremeFromSummary(usersSummary?.lowActiveUsers, usersSummary?.lowActiveUsersAt, usersMode) ??
+      extremeFromSummary(seriesSummary?.lowActiveClients, seriesSummary?.lowActiveClientsAt, seriesMode);
+    const sessionsPeak =
+      extremeFromSummary(usersSummary?.peakActiveSessions, usersSummary?.peakActiveSessionsAt, usersMode) ??
+      extremeFromSummary(seriesSummary?.peakActiveClients, seriesSummary?.peakActiveClientsAt, seriesMode);
+    const sessionsLow =
+      extremeFromSummary(usersSummary?.lowActiveSessions, usersSummary?.lowActiveSessionsAt, usersMode) ??
+      extremeFromSummary(seriesSummary?.lowActiveClients, seriesSummary?.lowActiveClientsAt, seriesMode);
+
+    return {
+      ...safeTotals,
+      devicesPeak,
+      devicesLow,
+      sessionsPeak,
+      sessionsLow,
+    };
+  }, [safeTotals, usersSeriesData, apiData]);
 
   const overviewLabelParams = useMemo(
     () => ({

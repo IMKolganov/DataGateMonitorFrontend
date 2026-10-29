@@ -12,7 +12,8 @@ import { isAuthenticated } from "../utils/auth/authSelectors";
 import { formatSessionDebugLine, type SessionDebugSnapshot } from "../utils/auth/sessionDebugInfo";
 import { getTokenRemainingMs } from "../utils/auth/tokenExpiration";
 
-const TICK_MS = 250;
+/** 1s is enough for footer countdowns; 250ms re-rendered Footer 4×/s and added Chrome jank. */
+const TICK_MS = 1000;
 
 function readJwtRemainingMs(): number | null {
   const token = localStorage.getItem(ACCESS_TOKEN_KEY);

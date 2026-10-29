@@ -13,8 +13,9 @@ import type {
   VpnServersV3Response,
 } from "../../api/orvalModelShim";
 import {
+  namesForKnownVpnServers,
   pickActiveUserQuotaAssignment,
-  resolveEffectiveVpnServerIds,
+  resolveDisplayableVpnServerIds,
 } from "../../utils/userEffectiveVpnServers";
 
 export type UserAvailableServersChipsProps = {
@@ -66,14 +67,17 @@ export function UserAvailableServersChips({
   const servers = (serversRaw as VpnServersV3Response | undefined)?.vpnServers ?? [];
 
   const names = useMemo(() => {
-    const ids = resolveEffectiveVpnServerIds({ planAllowed, personalRules });
-    const byId = new Map(
-      servers
-        .filter((s) => s.id != null)
-        .map((s) => [s.id as number, s.serverName?.trim() || `Server #${s.id}`]),
-    );
-    return ids.map((id) => byId.get(id) ?? `Server #${id}`);
-  }, [planAllowed, personalRules, servers]);
+    const liveServerIds = servers
+      .filter((s) => s.id != null && !s.isDeleted)
+      .map((s) => s.id as number);
+    const ids = resolveDisplayableVpnServerIds({
+      hasActivePlan: active != null,
+      planAllowed,
+      personalRules,
+      liveServerIds,
+    });
+    return namesForKnownVpnServers(ids, servers);
+  }, [active, planAllowed, personalRules, servers]);
 
   const loading =
     assignmentsLoading ||

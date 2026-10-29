@@ -7,6 +7,7 @@ import {
   type AdminIdleWarningDetail,
 } from "../../utils/auth/adminIdleSessionEvents";
 import { requestStaySignedIn } from "../../utils/auth/adminIdleSession";
+import { useLockMainScroll } from "../../hooks/useLockMainScroll";
 import "../../css/Settings.css";
 
 /**
@@ -15,6 +16,8 @@ import "../../css/Settings.css";
 export function AdminIdleWarningModal() {
   const [logoutAtMs, setLogoutAtMs] = useState<number | null>(null);
   const [remainingMs, setRemainingMs] = useState(0);
+  const open = logoutAtMs != null;
+  useLockMainScroll(open);
 
   useEffect(() => {
     const onWarn = (ev: Event) => {
@@ -41,7 +44,16 @@ export function AdminIdleWarningModal() {
     return () => window.clearInterval(id);
   }, [logoutAtMs]);
 
-  if (logoutAtMs == null) return null;
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.key === "Escape") requestStaySignedIn();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  if (!open) return null;
 
   return (
     <div

@@ -29,12 +29,15 @@ interface Props {
   stack?: "openvpn" | "xray";
 }
 
-enum CertificateStatus {
-  Active = 0,
-  Revoked = 1,
-  Expired = 2,
-  Unknown = 3,
-}
+/** Const object (not `enum`) — erasableSyntaxOnly forbids TypeScript enums. */
+const CertificateStatus = {
+  Active: 0,
+  Revoked: 1,
+  Expired: 2,
+  Unknown: 3,
+} as const;
+
+type CertificateStatus = (typeof CertificateStatus)[keyof typeof CertificateStatus];
 
 const statusLabels: Record<CertificateStatus, string> = {
   [CertificateStatus.Active]: "Active",

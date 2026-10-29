@@ -888,8 +888,8 @@ export function UserDetailPage() {
                   <span>Available servers</span>
                 </h3>
                 <p className="settings-item-description">
-                  Servers this user can reach right now: active quota plan allowlist, plus personal grants,
-                  minus personal blocks.
+                  Servers this user can reach right now: active quota plan allowlist (or all servers if none),
+                  plus personal grants, minus personal blocks. Soft-deleted servers are omitted.
                 </p>
                 <UserAvailableServersChips userId={id} />
               </section>

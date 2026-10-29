@@ -18,17 +18,17 @@ export class VpnGlobeBoundary extends React.Component<
   VpnGlobeBoundaryProps,
   VpnGlobeBoundaryState
 > {
-  state: VpnGlobeBoundaryState = { error: null };
+  override state: VpnGlobeBoundaryState = { error: null };
 
   static getDerivedStateFromError(error: Error): VpnGlobeBoundaryState {
     return { error };
   }
 
-  componentDidCatch(error: Error) {
+  override componentDidCatch(error: Error) {
     this.props.onError?.(error);
   }
 
-  render() {
+  override render() {
     if (this.state.error) {
       return this.props.fallback;
     }

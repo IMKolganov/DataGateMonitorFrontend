@@ -158,6 +158,8 @@ const Grid = React.forwardRef<HTMLDivElement, GridProps>(function Grid(props, re
   return (
     <StyledDataGrid
       ref={ref}
+      // Default on: grid grows with the selected page size so the page is the only
+      // scroller. Pass autoHeight={false} only inside a parent with a definite height.
       autoHeight={autoHeight ?? true}
       showToolbar
       slots={{ toolbar: GridToolbarWithExcelClipboard, ...slots }}

@@ -19,4 +19,5 @@ PageSize?: number;
 TelegramId?: number;
 Username?: string;
 Search?: string;
+ExcludeAdmins?: boolean;
 };

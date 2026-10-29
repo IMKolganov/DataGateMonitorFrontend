@@ -7,6 +7,9 @@
   font-size: var(--font-size-sm);
   margin-top: auto;
   line-height: var(--line-height-body);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 0;
 }
 
 .footer-line {

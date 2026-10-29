@@ -12,6 +12,8 @@ export type MockGridProps = {
   onPaginationModelChange?: (model: GridPaginationModel) => void;
   pageSizeOptions?: number[];
   loading?: boolean;
+  /** TableStyle defaults to true (content-sized grid); false only inside a fixed-height parent. */
+  autoHeight?: boolean;
   localeText?: { noRowsLabel?: string };
   rowSelectionModel?: GridRowSelectionModel;
   onRowSelectionModelChange?: (model: GridRowSelectionModel) => void;
@@ -19,6 +21,7 @@ export type MockGridProps = {
   initialState?: { pagination?: { paginationModel?: GridPaginationModel } };
   columns?: unknown[];
   getRowId?: (row: AnyRow) => string | number;
+  gridId?: string;
 };
 
 /** Lightweight DataGrid stand-in for pagination RTL tests. */
@@ -62,11 +65,13 @@ export function MockDataGrid(props: MockGridProps) {
   return (
     <div
       data-testid="mock-grid"
+      data-grid-id={props.gridId ?? ""}
       data-pagination-mode={props.paginationMode ?? "client"}
       data-page={String(page)}
       data-page-size={String(pageSize)}
       data-row-count={String(props.rowCount ?? allRows.length)}
       data-loading={props.loading ? "true" : "false"}
+      data-auto-height={props.autoHeight === false ? "false" : props.autoHeight ? "true" : "default"}
       data-page-size-options={(props.pageSizeOptions ?? []).join(",")}
     >
       <button
@@ -102,7 +107,11 @@ export function MockDataGrid(props: MockGridProps) {
             (row.runId as string | undefined) ??
             String(id);
           return (
-            <li key={String(id)} data-testid={`row-${id}`}>
+            <li
+              key={String(id)}
+              data-testid={`row-${id}`}
+              data-text={typeof row.text === "string" ? row.text : undefined}
+            >
               {label}
             </li>
           );

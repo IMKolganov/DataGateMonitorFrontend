@@ -8,5 +8,12 @@
 export interface VpnServerClientsDtoOverviewSummaryDto {
   totalTrafficInBytes?: number;
   totalTrafficOutBytes?: number;
+  /** Max concurrent sessions in any series bucket that had samples. */
   peakActiveClients?: number;
+  /** Bucket start (UTC) where peakActiveClients occurred. */
+  peakActiveClientsAt?: string | null;
+  /** Min concurrent sessions among buckets that had samples (excludes zero-filled gaps). */
+  lowActiveClients?: number;
+  /** Bucket start (UTC) where lowActiveClients occurred. */
+  lowActiveClientsAt?: string | null;
 }

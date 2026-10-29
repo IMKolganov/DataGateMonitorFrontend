@@ -1,9 +1,15 @@
 import { useMemo, useState } from "react";
-import { FaGlobe, FaTable } from "react-icons/fa";
+import { FaChartLine, FaGlobe } from "react-icons/fa";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import DateRangeFilter, { type DateRangeChange, type Grouping } from "../../components/DateRangeFilter";
-import Grid from "../../components/ui/TableStyle.tsx";
-import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
-import type { GridColDef } from "@mui/x-data-grid";
 import { keepPreviousData } from "@tanstack/react-query";
 import { useGetApiOpenVpnClientsOverviewUsersSeries } from "../../api/orval/vpn-server-clients/vpn-server-clients";
 import { OverviewGrouping } from "../../api/orvalModelShim";
@@ -16,7 +22,14 @@ import type { ApiEnvelope } from "../TelegramBotSettings/unwrapApiResponse";
 import { unwrapMaybeApiResponse } from "../TelegramBotSettings/unwrapApiResponse";
 import { isCanceledError } from "../../utils/queryCanceled";
 import GeoMap from "../ServersOverview/GeoMap";
-import { addDays, endOfToday, startOfToday } from "../ServersOverview/helpers";
+import {
+  addDays,
+  endOfToday,
+  formatLabel,
+  normalizeGrouping,
+  startOfToday,
+  toUsersSeriesChartPoints,
+} from "../ServersOverview/helpers";
 
 const UI_TO_API_GROUPING: Record<
   Grouping,
@@ -33,6 +46,9 @@ const UI_TO_API_GROUPING: Record<
 function toApiGrouping(g: Grouping) {
   return UI_TO_API_GROUPING[g];
 }
+
+/** Fixed px height avoids Recharts measuring 0×0 in flex layouts. */
+const CHART_PX = 260;
 
 export type UserVpnConnectionsSectionProps = {
   externalId: string | null | undefined;
@@ -80,23 +96,49 @@ export function UserVpnConnectionsSection({ externalId }: UserVpnConnectionsSect
     return unwrapMaybeApiResponse<OverviewUsersSeriesResponse>(raw as never);
   }, [usersSeriesQuery.data]);
 
-  const gridRows = useMemo(() => {
-    const rows = seriesPayload?.rows ?? [];
-    const sorted = [...rows].sort((a, b) => {
+  const seriesMode = useMemo(
+    () => normalizeGrouping(seriesPayload?.meta?.grouping),
+    [seriesPayload?.meta?.grouping],
+  );
+
+  const chartPoints = useMemo(() => {
+    const rows = [...(seriesPayload?.rows ?? [])].sort((a, b) => {
       const ta = a.ts ? new Date(a.ts).getTime() : 0;
       const tb = b.ts ? new Date(b.ts).getTime() : 0;
-      return tb - ta;
+      return ta - tb;
     });
-    return sorted.map((r, idx) => ({
-      id: idx,
-      period:
-        r.ts && !Number.isNaN(new Date(r.ts).getTime())
-          ? new Date(r.ts).toLocaleString()
-          : "—",
-      activeSessions: r.activeSessions ?? 0,
-      activeUsers: r.activeUsers ?? 0,
-    }));
-  }, [seriesPayload?.rows]);
+    return toUsersSeriesChartPoints(rows, seriesMode);
+  }, [seriesPayload?.rows, seriesMode]);
+
+  const activitySummary = useMemo(() => {
+    const rows = seriesPayload?.rows ?? [];
+    let activePeriods = 0;
+    let lastActiveTs: string | null = null;
+    let lastActiveSessions = 0;
+
+    for (const r of rows) {
+      const sessions = r.activeSessions ?? 0;
+      if (sessions <= 0 || !r.ts) continue;
+      activePeriods += 1;
+      const t = new Date(r.ts).getTime();
+      if (Number.isNaN(t)) continue;
+      if (!lastActiveTs || t >= new Date(lastActiveTs).getTime()) {
+        lastActiveTs = r.ts;
+        lastActiveSessions = sessions;
+      }
+    }
+
+    return {
+      peakSessions: seriesPayload?.summary?.peakActiveSessions ?? null,
+      peakAt: seriesPayload?.summary?.peakActiveSessionsAt ?? null,
+      activePeriods,
+      lastActiveTs,
+      lastActiveSessions,
+    };
+  }, [seriesPayload?.rows, seriesPayload?.summary]);
+
+  const hasAnyActivity = activitySummary.activePeriods > 0;
+  const loading = usersSeriesQuery.isLoading || usersSeriesQuery.isFetching;
 
   const errMsg = isCanceledError(usersSeriesQuery.error)
     ? null
@@ -128,7 +170,7 @@ export function UserVpnConnectionsSection({ externalId }: UserVpnConnectionsSect
         <span>VPN connections</span>
       </h3>
       <p className="settings-item-description">
-        Approximate client locations (geo-IP) and aggregated session counts for OpenVPN external ID{" "}
+        Approximate client locations (geo-IP) and concurrent sessions for OpenVPN external ID{" "}
         <code>{ext}</code>, across all servers in the selected range.
       </p>
 
@@ -140,50 +182,106 @@ export function UserVpnConnectionsSection({ externalId }: UserVpnConnectionsSect
         <GeoMap from={from} to={to} vpnServerId={null} externalId={ext} />
       </div>
 
-      <h4 style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 0 }}>
-        <FaTable className="icon" />
-        Session activity by period
+      <h4 style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 0, marginBottom: 8 }}>
+        <FaChartLine className="icon" aria-hidden />
+        Session activity
       </h4>
       <p className="settings-item-description" style={{ marginTop: 0 }}>
-        Buckets follow the date range grouping (e.g. hours vs days). Values come from overview statistics, not raw
-        connection logs.
+        Concurrent sessions over time from overview statistics (not raw connection logs).
       </p>
+
       {errMsg && (
         <p className="error-message" style={{ marginBottom: 8 }}>
           {errMsg}
         </p>
       )}
-      {seriesPayload?.summary != null && (
-        <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 8 }}>
-          Peak in range: sessions {seriesPayload.summary.peakActiveSessions ?? "—"}, concurrent users{" "}
-          {seriesPayload.summary.peakActiveUsers ?? "—"}
+
+      {!errMsg && (
+        <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 10 }}>
+          {loading && !seriesPayload
+            ? "Loading session activity…"
+            : hasAnyActivity
+              ? [
+                  activitySummary.peakSessions != null
+                    ? `Peak concurrent sessions: ${activitySummary.peakSessions}${
+                        activitySummary.peakAt
+                          ? ` (${formatLabel(new Date(activitySummary.peakAt), seriesMode)})`
+                          : ""
+                      }`
+                    : null,
+                  `Active periods: ${activitySummary.activePeriods}`,
+                  activitySummary.lastActiveTs
+                    ? `Last active: ${formatLabel(new Date(activitySummary.lastActiveTs), seriesMode)} (${activitySummary.lastActiveSessions} session${activitySummary.lastActiveSessions === 1 ? "" : "s"})`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")
+              : "No session activity in this range."}
         </p>
       )}
-      <div
-        className="data-grid-wrap"
-        style={{ backgroundColor: "var(--bg-body)", padding: 10, borderRadius: 8 }}
-      >
-        <CustomThemeProvider>
-          <Grid
-            gridId="user-vpn-connections-series"
-            rows={gridRows}
-            columns={
-              [
-                { field: "period", headerName: "Period", flex: 1.2, minWidth: 160 },
-                { field: "activeSessions", headerName: "Sessions (bucket)", type: "number", width: 150 },
-                { field: "activeUsers", headerName: "Active users (bucket)", type: "number", width: 180 },
-              ] as GridColDef[]
-            }
-            pagination
-            pageSizeOptions={[10, 25, 50, 100]}
-            initialState={{ pagination: { paginationModel: { pageSize: 25, page: 0 } } }}
-            loading={usersSeriesQuery.isLoading || usersSeriesQuery.isFetching}
-            slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-            localeText={{ noRowsLabel: "No data in this range" }}
-            disableRowSelectionOnClick
-          />
-        </CustomThemeProvider>
-      </div>
+
+      {(hasAnyActivity || loading) && !errMsg && (
+        <div
+          className="user-vpn-sessions-chart"
+          style={{
+            border: "1px solid var(--border-color)",
+            borderRadius: 12,
+            background: "var(--bg-body)",
+            padding: 12,
+            minWidth: 0,
+          }}
+        >
+          <div style={{ width: "100%", height: CHART_PX, minWidth: 0, minHeight: CHART_PX }}>
+            {chartPoints.length > 0 ? (
+              <ResponsiveContainer width="100%" height={CHART_PX}>
+                <AreaChart data={chartPoints} margin={{ top: 10, right: 12, left: 0, bottom: 28 }}>
+                  <defs>
+                    <linearGradient id="userVpnFillSessions" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#58a6ff" stopOpacity={0.45} />
+                      <stop offset="100%" stopColor="#58a6ff" stopOpacity={0.06} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="var(--border-color)" strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="label"
+                    stroke="#8b949e"
+                    tick={{ fill: "#8b949e", fontSize: 12 }}
+                  />
+                  <YAxis
+                    stroke="#8b949e"
+                    tick={{ fill: "#8b949e", fontSize: 12 }}
+                    allowDecimals={false}
+                    width={40}
+                  />
+                  <Tooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="activeSessions"
+                    name="Sessions"
+                    stroke="#58a6ff"
+                    fill="url(#userVpnFillSessions)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "100%",
+                  color: "var(--text-muted)",
+                  fontSize: 13,
+                }}
+              >
+                {loading ? "Loading…" : "No session activity in this range."}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

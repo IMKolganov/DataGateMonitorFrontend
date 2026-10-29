@@ -1,12 +1,28 @@
-import { formatBytes } from "./helpers";
+import type { IconType } from "react-icons";
+import {
+  FaArrowDown,
+  FaArrowUp,
+  FaArrowsAltV,
+  FaDesktop,
+  FaIdCard,
+  FaInfoCircle,
+  FaPlug,
+  FaUsers,
+} from "react-icons/fa";
+import { formatBytes, type SeriesExtreme } from "./helpers";
 
 type Totals = {
   sessionsCount: number;
   devicesCount: number;
+  usersCount: number;
   accountsCount: number;
   trafficInBytes: number;
   trafficOutBytes: number;
   trafficTotalBytes: number;
+  devicesPeak?: SeriesExtreme | null;
+  devicesLow?: SeriesExtreme | null;
+  sessionsPeak?: SeriesExtreme | null;
+  sessionsLow?: SeriesExtreme | null;
 };
 
 type Props = {
@@ -24,19 +40,71 @@ export default function StatsCards({ totals, loading }: Props) {
         marginBottom: 12,
       }}
     >
-      <Card title="Devices (unique externalId)" value={totals.devicesCount} />
-      <Card title="Users (accounts)" value={totals.accountsCount} />
-      <Card title="Sessions" value={totals.sessionsCount} />
-      <Card title="Traffic IN (total)" value={formatBytes(totals.trafficInBytes)} />
-      <Card title="Traffic OUT (total)" value={formatBytes(totals.trafficOutBytes)} />
-      <Card title="Traffic TOTAL" value={formatBytes(totals.trafficTotalBytes)} />
+      <Card
+        icon={FaDesktop}
+        title="Devices (CN)"
+        valueHint="unique over period (≠ concurrent)"
+        value={totals.devicesCount}
+        extremes={[
+          { icon: FaArrowUp, label: "Peak concurrent", extreme: totals.devicesPeak },
+          { icon: FaArrowDown, label: "Low concurrent", extreme: totals.devicesLow },
+        ]}
+      />
+      <Card
+        icon={FaUsers}
+        title="Users (ExternalId)"
+        valueHint="unique over period"
+        value={totals.usersCount}
+      />
+      <Card icon={FaIdCard} title="Accounts" value={totals.accountsCount} />
+      <Card
+        icon={FaPlug}
+        title="Sessions"
+        valueHint="started in period (≠ concurrent)"
+        value={totals.sessionsCount}
+        extremes={[
+          { icon: FaArrowUp, label: "Peak concurrent", extreme: totals.sessionsPeak },
+          { icon: FaArrowDown, label: "Low concurrent", extreme: totals.sessionsLow },
+        ]}
+      />
+      <Card icon={FaArrowDown} title="Traffic IN (total)" value={formatBytes(totals.trafficInBytes)} />
+      <Card icon={FaArrowUp} title="Traffic OUT (total)" value={formatBytes(totals.trafficOutBytes)} />
+      <Card icon={FaArrowsAltV} title="Traffic TOTAL" value={formatBytes(totals.trafficTotalBytes)} />
 
-      {loading && <Card title="Status" value="Loading…" />}
+      {loading && <Card icon={FaInfoCircle} title="Status" value="Loading…" />}
     </div>
   );
 }
 
-function Card({ title, value }: { title: string; value: string | number }) {
+function formatExtreme(extreme: SeriesExtreme | null | undefined): string | null {
+  if (!extreme) return null;
+  return `${extreme.count} · ${extreme.atLabel}`;
+}
+
+type ExtremeRow = {
+  icon?: IconType;
+  label: string;
+  extreme: SeriesExtreme | null | undefined;
+};
+
+function Card({
+  icon: Icon,
+  title,
+  value,
+  valueHint,
+  extremes,
+}: {
+  icon?: IconType;
+  title: string;
+  value: string | number;
+  valueHint?: string;
+  extremes?: ExtremeRow[];
+}) {
+  const rows = (extremes ?? []).flatMap((e) => {
+    const text = formatExtreme(e.extreme);
+    return text == null ? [] : [{ icon: e.icon, label: e.label, text }];
+  });
+
   return (
     <div
       style={{
@@ -50,10 +118,45 @@ function Card({ title, value }: { title: string; value: string | number }) {
         gap: 4,
       }}
     >
-      <div style={{ fontSize: "var(--font-size-sm)", opacity: 0.7 }}>{title}</div>
+      <div
+        style={{
+          fontSize: "var(--font-size-sm)",
+          opacity: 0.7,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        {Icon && <Icon className="icon" aria-hidden />}
+        <span>{title}</span>
+      </div>
       <div style={{ fontWeight: 700, fontSize: "var(--font-size-xl)", wordBreak: "break-word" }}>
         {value}
       </div>
+      {valueHint && (
+        <div style={{ fontSize: "var(--font-size-sm)", opacity: 0.65 }}>{valueHint}</div>
+      )}
+      {rows.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 2, marginTop: 4 }}>
+          {rows.map((row) => (
+            <div
+              key={row.label}
+              style={{
+                fontSize: "var(--font-size-sm)",
+                opacity: 0.85,
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: "0 6px",
+              }}
+            >
+              {row.icon && <row.icon className="icon" aria-hidden style={{ opacity: 0.7 }} />}
+              <span style={{ opacity: 0.7 }}>{row.label}</span>
+              <span style={{ fontWeight: 600 }}>{row.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

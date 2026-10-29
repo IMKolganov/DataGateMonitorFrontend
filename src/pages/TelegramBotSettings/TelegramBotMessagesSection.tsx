@@ -18,6 +18,8 @@ interface Props {
     refreshing: boolean;
     errorMessage: string | null;
     handleRefresh: () => void;
+    excludeAdmins: boolean;
+    onExcludeAdminsChange: (value: boolean) => void;
     messageFilterValues: Record<string, string>;
     onMessageFilterChange: (id: string, value: string) => void;
     onMessageFilterApply: () => void;
@@ -34,6 +36,8 @@ export function TelegramBotMessagesSection({
                                                refreshing,
                                                errorMessage,
                                                handleRefresh,
+                                               excludeAdmins,
+                                               onExcludeAdminsChange,
                                                messageFilterValues,
                                                onMessageFilterChange,
                                                onMessageFilterApply,
@@ -54,6 +58,21 @@ export function TelegramBotMessagesSection({
                     <button className="btn secondary" onClick={handleRefresh} disabled={refreshing}>
                         <FaSync className={`icon ${refreshing ? "icon-spin" : ""}`} /> Refresh
                     </button>
+                    <label
+                        className="checkbox-label"
+                        style={{ display: "inline-flex", alignItems: "center", gap: 8, marginLeft: 12, cursor: "pointer" }}
+                    >
+                        <input
+                            id="telegram-messages-exclude-admins"
+                            name="excludeAdmins"
+                            type="checkbox"
+                            checked={excludeAdmins}
+                            disabled={anyLoading}
+                            onChange={(e) => onExcludeAdminsChange(e.target.checked)}
+                            aria-label="Hide messages from Telegram bot admins"
+                        />
+                        <span>Hide admin messages</span>
+                    </label>
                 </div>
             </div>
 

@@ -116,7 +116,9 @@ function EnforcementSettingsCard() {
     ],
   );
 
-  if (snapshotKey !== appliedKey && !initialLoading) {
+  useEffect(() => {
+    if (initialLoading) return;
+    if (snapshotKey === appliedKey) return;
     setAppliedKey(snapshotKey);
 
     const enforceRaw = (pickSettingValue(enforceQuery.data) ?? "").toLowerCase();
@@ -137,7 +139,16 @@ function EnforcementSettingsCard() {
     const digestRaw = (pickSettingValue(digestQuery.data) ?? "").toLowerCase();
     if (digestRaw === "true") setAdminDigestEnabled(true);
     else if (digestRaw === "false") setAdminDigestEnabled(false);
-  }
+  }, [
+    initialLoading,
+    snapshotKey,
+    appliedKey,
+    enforceQuery.data,
+    intervalQuery.data,
+    revokeQuery.data,
+    remindersQuery.data,
+    digestQuery.data,
+  ]);
 
   const setSettingMutation = usePostApiSettingsSet();
 

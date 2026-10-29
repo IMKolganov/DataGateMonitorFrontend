@@ -5,6 +5,10 @@ import Grid from "../../components/ui/TableStyle.tsx";
 import CustomThemeProvider from "../../components/ui/ThemeProvider.tsx";
 import "../../css/Table.css";
 import type { MessageDto } from "../../api/orvalModelShim";
+import { truncateOneLine } from "../../utils/notifications/notificationMessageFormat";
+
+/** Keep cells one-line — full message text + autoHeight freezes the settings page. */
+export const TELEGRAM_MESSAGE_PREVIEW_LENGTH = 120;
 
 interface TelegramBotMessagesTableProps {
     messages: MessageDto[];
@@ -25,23 +29,47 @@ const TelegramBotMessagesTable: React.FC<TelegramBotMessagesTableProps> = ({
 }) => {
     const rows = useMemo(
         () =>
-            (messages ?? []).map((m) => ({
-                id: m.id ?? `${m.telegramId ?? "no-tg"}-${m.createDate ?? ""}`,
-                telegramId: m.telegramId ?? null,
-                username: m.username ?? "-",
-                text: m.messageText ?? "",
-                date: m.createDate ? new Date(m.createDate).toLocaleString() : "-",
-            })),
+            (messages ?? []).map((m) => {
+                const fullText = m.messageText ?? "";
+                return {
+                    id: m.id ?? `${m.telegramId ?? "no-tg"}-${m.createDate ?? ""}`,
+                    telegramId: m.telegramId ?? null,
+                    username: m.username ?? "-",
+                    text: truncateOneLine(fullText, TELEGRAM_MESSAGE_PREVIEW_LENGTH),
+                    textFull: fullText,
+                    date: m.createDate ? new Date(m.createDate).toLocaleString() : "-",
+                };
+            }),
         [messages],
     );
 
-    const columns: GridColDef[] = [
-        { field: "id", headerName: "ID", width: 70 },
-        { field: "telegramId", headerName: "Telegram ID", flex: 0.8 },
-        { field: "username", headerName: "Username", flex: 1 },
-        { field: "text", headerName: "Message", flex: 2 },
-        { field: "date", headerName: "Date", flex: 1 },
-    ];
+    const columns: GridColDef[] = useMemo(
+        () => [
+            { field: "id", headerName: "ID", width: 70 },
+            { field: "telegramId", headerName: "Telegram ID", flex: 0.8 },
+            { field: "username", headerName: "Username", flex: 1 },
+            {
+                field: "text",
+                headerName: "Message",
+                flex: 2,
+                renderCell: (params) => (
+                    <span
+                        title={String(params.row.textFull ?? "")}
+                        style={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            minWidth: 0,
+                        }}
+                    >
+                        {String(params.value ?? "")}
+                    </span>
+                ),
+            },
+            { field: "date", headerName: "Date", flex: 1 },
+        ],
+        [],
+    );
 
     return (
         <CustomThemeProvider>

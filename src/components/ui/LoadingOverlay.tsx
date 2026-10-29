@@ -1,8 +1,16 @@
 // src/components/LoadingOverlay.tsx
 import React from "react";
 
+/** Positions the dimmed layer inside this box (avoids covering the viewport). */
+const hostStyle: React.CSSProperties = {
+  position: "relative",
+  width: "100%",
+  minHeight: 240,
+  flex: "1 1 auto",
+};
+
 const overlayStyle: React.CSSProperties = {
-  position: "absolute", // not fixed anymore
+  position: "absolute",
   top: 0,
   left: 0,
   right: 0,
@@ -37,9 +45,11 @@ const textStyle: React.CSSProperties = {
 };
 
 export const LoadingOverlay: React.FC = () => (
-  <div style={overlayStyle}>
-    <div style={spinnerStyle} />
-    <span style={textStyle}>Loading…</span>
+  <div style={hostStyle} role="status" aria-live="polite" aria-busy="true">
+    <div style={overlayStyle}>
+      <div style={spinnerStyle} />
+      <span style={textStyle}>Loading…</span>
+    </div>
 
     <style>
       {`

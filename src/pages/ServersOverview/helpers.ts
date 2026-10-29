@@ -82,11 +82,12 @@ export function toUsersSeriesChartPoints(
         label: formatLabel(date, mode),
         activeSessions: r.activeSessions ?? 0,
         activeUsers: r.activeUsers ?? 0,
+        activeDevices: r.activeDevices ?? 0,
       };
     });
 }
 
-/** Merge main chart points with users series by index (same From/To/Grouping → same order). Adds activeUsers. */
+/** Merge main chart points with users series by index (same From/To/Grouping → same order). */
 export function mergeChartWithUsersSeries(
   base: ChartPoint[],
   usersSeries: UsersSeriesChartPoint[]
@@ -94,7 +95,72 @@ export function mergeChartWithUsersSeries(
   return base.map((p, i) => ({
     ...p,
     activeUsers: usersSeries[i]?.activeUsers ?? 0,
+    activeDevices: usersSeries[i]?.activeDevices ?? 0,
   }));
+}
+
+/** Peak / trough of a concurrent metric over series buckets (with bucket start time). */
+export type SeriesExtreme = {
+  count: number;
+  at: Date;
+  atLabel: string;
+};
+
+export type SeriesExtremes = {
+  peak: SeriesExtreme | null;
+  low: SeriesExtreme | null;
+};
+
+/**
+ * Peak and low concurrent values for the selected period.
+ * Prefer API summary fields (sampled buckets only). This helper is a fallback and
+ * still skips future buckets, but Min over chart rows can hit zero-filled gaps.
+ */
+export function computeSeriesExtremes(
+  rows: ReadonlyArray<{ ts?: string | null; value?: number | null }>,
+  mode: Exclude<Grouping, "auto">,
+  now: Date = new Date()
+): SeriesExtremes {
+  const nowMs = now.getTime();
+  const points: { at: Date; value: number }[] = [];
+
+  for (const row of rows ?? []) {
+    if (typeof row.ts !== "string" || row.ts.length === 0) continue;
+    const at = new Date(row.ts);
+    const atMs = at.getTime();
+    if (!Number.isFinite(atMs) || atMs > nowMs) continue;
+    const value = Number(row.value ?? 0);
+    if (!Number.isFinite(value)) continue;
+    points.push({ at, value });
+  }
+
+  if (points.length === 0) return { peak: null, low: null };
+
+  let peak = points[0];
+  let low = points[0];
+  for (let i = 1; i < points.length; i++) {
+    const p = points[i];
+    if (p.value > peak.value) peak = p;
+    if (p.value < low.value) low = p;
+  }
+
+  return {
+    peak: { count: peak.value, at: peak.at, atLabel: formatLabel(peak.at, mode) },
+    low: { count: low.value, at: low.at, atLabel: formatLabel(low.at, mode) },
+  };
+}
+
+/** Build a UI extreme from API summary count + bucket timestamp. */
+export function extremeFromSummary(
+  count: number | null | undefined,
+  atIso: string | null | undefined,
+  mode: Exclude<Grouping, "auto">
+): SeriesExtreme | null {
+  if (count == null || !Number.isFinite(count)) return null;
+  if (typeof atIso !== "string" || atIso.length === 0) return null;
+  const at = new Date(atIso);
+  if (!Number.isFinite(at.getTime())) return null;
+  return { count, at, atLabel: formatLabel(at, mode) };
 }
 
 export function buildFallbackOverviewResponse(opts: {

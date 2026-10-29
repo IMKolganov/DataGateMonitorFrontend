@@ -1,5 +1,5 @@
 // src/components/GeoLiteDbSettings.tsx
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import "../css/Settings.css";
 import { FaDatabase, FaSave } from "react-icons/fa";
@@ -26,6 +26,7 @@ export function GeoLiteDbSettings() {
   const [geoIpDownloadUrl, setGeoIpDownloadUrl] = useState<string>("Fetching...");
   const [geoIpLicenseKey, setGeoIpLicenseKey] = useState<string>("Fetching...");
   const [geoIpAutoUpdateIntervalDays, setGeoIpAutoUpdateIntervalDays] = useState<number>(0);
+  const [geoIpMaxKeptVersions, setGeoIpMaxKeptVersions] = useState<number>(10);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
 
   // Use PascalCase keys in params and inner models for data type
@@ -35,6 +36,9 @@ export function GeoLiteDbSettings() {
     const qLicenseKey   = useGetApiSettingsGet<SettingResponse>({ Key: "GeoIp_License_Key" });
     const qAutoUpdateDays = useGetApiSettingsGet<SettingResponse>({
       Key: "GeoIp_Auto_Update_Interval_Days",
+    });
+    const qMaxKeptVersions = useGetApiSettingsGet<SettingResponse>({
+      Key: "GeoIp_Max_Kept_Versions",
     });
 
   // DB version (inner model)
@@ -47,7 +51,8 @@ export function GeoLiteDbSettings() {
     qDownloadUrl.isFetched &&
     qAccountId.isFetched &&
     qLicenseKey.isFetched &&
-    qAutoUpdateDays.isFetched;
+    qAutoUpdateDays.isFetched &&
+    qMaxKeptVersions.isFetched;
 
   const settingsSnapshotKey = useMemo(() => {
     if (!settingsReady) return "";
@@ -57,6 +62,7 @@ export function GeoLiteDbSettings() {
       accountId: qAccountId.data,
       licenseKey: qLicenseKey.data,
       autoUpdateDays: qAutoUpdateDays.data,
+      maxKeptVersions: qMaxKeptVersions.data,
     });
   }, [
     settingsReady,
@@ -65,11 +71,11 @@ export function GeoLiteDbSettings() {
     qAccountId.data,
     qLicenseKey.data,
     qAutoUpdateDays.data,
+    qMaxKeptVersions.data,
   ]);
 
-  const [appliedSettingsKey, setAppliedSettingsKey] = useState("");
-  if (settingsSnapshotKey && settingsSnapshotKey !== appliedSettingsKey) {
-    setAppliedSettingsKey(settingsSnapshotKey);
+  useEffect(() => {
+    if (!settingsSnapshotKey) return;
 
     const safeValue = (resp: SettingResponse | undefined): string =>
       String(resp?.value ?? "");
@@ -85,8 +91,18 @@ export function GeoLiteDbSettings() {
     setGeoIpAccountId(safeValue(qAccountId.data));
     setGeoIpLicenseKey(safeValue(qLicenseKey.data));
     setGeoIpAutoUpdateIntervalDays(safeInt(qAutoUpdateDays.data));
+    const kept = safeInt(qMaxKeptVersions.data);
+    setGeoIpMaxKeptVersions(kept > 0 ? kept : 10);
     setInitialLoading(false);
-  }
+  }, [
+    settingsSnapshotKey,
+    qDbPath.data,
+    qDownloadUrl.data,
+    qAccountId.data,
+    qLicenseKey.data,
+    qAutoUpdateDays.data,
+    qMaxKeptVersions.data,
+  ]);
 
   // Save handler
   const handleSave = async (
@@ -120,6 +136,9 @@ export function GeoLiteDbSettings() {
         case "GeoIp_Auto_Update_Interval_Days":
           qAutoUpdateDays.refetch();
           break;
+        case "GeoIp_Max_Kept_Versions":
+          qMaxKeptVersions.refetch();
+          break;
       }
     } catch (err: unknown) {
       const data = axios.isAxiosError(err) ? err.response?.data : undefined;
@@ -143,7 +162,8 @@ export function GeoLiteDbSettings() {
     qDownloadUrl.isLoading ||
     qAccountId.isLoading ||
     qLicenseKey.isLoading ||
-    qAutoUpdateDays.isLoading;
+    qAutoUpdateDays.isLoading ||
+    qMaxKeptVersions.isLoading;
 
   const versionText = qDbVersion.data?.databaseVersion ?? ""; // <-- correct field
 
@@ -282,6 +302,39 @@ export function GeoLiteDbSettings() {
             <p className="settings-item-description">
               0 disables automatic GeoLite2 checks. A positive value N lets the backend check for a
               newer database only when the local file is at least N days old (by modification time).
+            </p>
+
+            <h4>Max kept GeoLite versions:</h4>
+            <div className="settings-item">
+              <input
+                id="geoip-max-kept-versions"
+                name="geoIpMaxKeptVersions"
+                type="number"
+                min={1}
+                max={100}
+                step={1}
+                value={geoIpMaxKeptVersions}
+                onChange={(e) => setGeoIpMaxKeptVersions(Number(e.target.value))}
+                className="input"
+              />
+              <button
+                className="btn primary"
+                onClick={() => {
+                  const n = Math.floor(geoIpMaxKeptVersions);
+                  if (!Number.isFinite(n) || n < 1 || n > 100) {
+                    toast.error("Keep between 1 and 100 version folders.");
+                    return;
+                  }
+                  handleSave("GeoIp_Max_Kept_Versions", String(n), "int");
+                }}
+                disabled={mSetSetting.isPending}
+              >
+                {FaSave({ className: "icon" })} Save
+              </button>
+            </div>
+            <p className="settings-item-description">
+              How many <code>GeoLite2_*</code> extract folders to keep under the DB path (default 10).
+              Older copies are deleted before/after each update to avoid filling the monitor disk.
             </p>
           </div>
 

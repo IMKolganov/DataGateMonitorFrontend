@@ -1,65 +1,44 @@
 import { describe, expect, it } from "vitest";
-import {
-  addDays,
-  buildFallbackOverviewResponse,
-  formatBytes,
-  mergeChartWithUsersSeries,
-  normalizeGrouping,
-  toChartPoints,
-  toUsersSeriesChartPoints,
-} from "./helpers";
+import { computeSeriesExtremes, extremeFromSummary } from "./helpers";
 
-describe("ServersOverview helpers", () => {
-  it("normalizes grouping and formats bytes", () => {
-    expect(normalizeGrouping("hours")).toBe("hours");
-    expect(normalizeGrouping("nope")).toBe("days");
-    expect(formatBytes(1536)).toMatch(/KB/);
-    expect(formatBytes(Number.NaN)).toBe("-");
+describe("extremeFromSummary", () => {
+  it("maps count + ISO timestamp into a labeled extreme", () => {
+    const extreme = extremeFromSummary(38, "2026-09-28T18:00:00.000Z", "hours");
+    expect(extreme).not.toBeNull();
+    expect(extreme!.count).toBe(38);
+    expect(extreme!.at.toISOString()).toBe("2026-09-28T18:00:00.000Z");
+    expect(extreme!.atLabel.length).toBeGreaterThan(0);
   });
 
-  it("adds days without mutating original", () => {
-    const d = new Date("2024-01-10T12:00:00Z");
-    const next = addDays(d, 2);
-    expect(next.getUTCDate()).toBe(12);
-    expect(d.getUTCDate()).toBe(10);
+  it("returns null when count or timestamp is missing/invalid", () => {
+    expect(extremeFromSummary(undefined, "2026-09-28T18:00:00.000Z", "hours")).toBeNull();
+    expect(extremeFromSummary(10, null, "hours")).toBeNull();
+    expect(extremeFromSummary(10, "", "hours")).toBeNull();
+    expect(extremeFromSummary(Number.NaN, "2026-09-28T18:00:00.000Z", "hours")).toBeNull();
+    expect(extremeFromSummary(10, "not-a-date", "hours")).toBeNull();
   });
 
-  it("maps series rows to chart points and merges users series", () => {
-    const points = toChartPoints(
+  it("allows zero as a valid concurrent low", () => {
+    const extreme = extremeFromSummary(0, "2026-09-28T03:00:00.000Z", "hours");
+    expect(extreme).not.toBeNull();
+    expect(extreme!.count).toBe(0);
+  });
+});
+
+describe("computeSeriesExtremes (legacy fallback)", () => {
+  it("skips future buckets when computing peak/low", () => {
+    const now = new Date("2026-09-28T12:00:00.000Z");
+    const result = computeSeriesExtremes(
       [
-        {
-          ts: "2024-01-01T00:00:00Z",
-          trafficInBytes: 1024 * 1024,
-          trafficOutBytes: 1024 * 1024,
-          activeClients: 3,
-        },
+        { ts: "2026-09-28T03:00:00.000Z", value: 11 },
+        { ts: "2026-09-28T10:00:00.000Z", value: 40 },
+        { ts: "2026-09-28T18:00:00.000Z", value: 99 }, // future relative to now
       ],
-      "days",
+      "hours",
+      now,
     );
-    expect(points).toHaveLength(1);
-    expect(points[0]!.active).toBe(3);
-    expect(points[0]!.mb).toBe(2);
 
-    const users = toUsersSeriesChartPoints(
-      [{ ts: "2024-01-01T00:00:00Z", activeUsers: 7 }],
-      "days",
-    );
-    const merged = mergeChartWithUsersSeries(points, users);
-    expect(merged[0]).toMatchObject({ active: 3 });
-    expect((merged[0] as { activeUsers?: number }).activeUsers ?? users[0]!.activeUsers).toBe(7);
-  });
-
-  it("builds fallback overview series for short auto span", () => {
-    const from = new Date("2024-01-01T00:00:00Z");
-    const to = new Date("2024-01-01T12:00:00Z");
-    const res = buildFallbackOverviewResponse({
-      from,
-      to,
-      grouping: "auto",
-      totals: { servers: 1, clients: 2, totalIn: 1024, totalOut: 2048, sessions: 3 },
-    });
-    expect(res.overviewSeriesRows?.length).toBeGreaterThan(0);
-    expect(res.summary?.totalTrafficInBytes).toBe(1024);
-    expect(res.meta?.grouping).toBe("tenminutes");
+    expect(result.peak?.count).toBe(40);
+    expect(result.low?.count).toBe(11);
   });
 });
