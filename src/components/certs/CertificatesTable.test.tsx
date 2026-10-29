@@ -23,7 +23,8 @@ vi.mock("../../api/orval/vpn-server-certs/vpn-server-certs.ts", () => ({
 
 vi.mock("../ui/TableStyle.tsx", () => ({
   default: function MockGrid(props: {
-    rows: { id: string; commonName: string; status: number }[];
+    rows: { id: string; commonName: string; status: number; serialNumber: string }[];
+    columns: { field: string; renderCell?: (params: { row: unknown }) => React.ReactNode }[];
     rowSelectionModel: GridRowSelectionModel;
     onRowSelectionModelChange: (model: GridRowSelectionModel) => void;
     paginationModel: { page: number; pageSize: number };
@@ -70,7 +71,8 @@ vi.mock("../ui/TableStyle.tsx", () => ({
         <ul>
           {pageRows.map((row) => (
             <li key={row.id} data-testid={`row-${row.id}`}>
-              {row.commonName}
+              {row.commonName} {row.serialNumber}
+              {props.columns.find((c) => c.field === "actions")?.renderCell?.({ row })}
             </li>
           ))}
         </ul>
@@ -159,6 +161,28 @@ describe("CertificatesTable pagination + selection", () => {
 
     await user.type(screen.getByPlaceholderText(/search by common name/i), "user1");
     expect(screen.getByTestId("selection-size")).toHaveTextContent("0");
-    expect(within(screen.getByTestId("mock-grid")).getByTestId("row-user1")).toBeInTheDocument();
+    expect(within(screen.getByTestId("mock-grid")).getByTestId("row-s1")).toBeInTheDocument();
+  });
+
+  it("keys rows by serial when one CN has a revoked and a re-issued row", async () => {
+    const user = userEvent.setup();
+    const certs = [
+      { commonName: "router", serialNumber: "DD46", status: 1, expiryDate: "2030-01-01T00:00:00Z", revokeDate: "2026-10-28T00:00:00Z" },
+      { commonName: "router", serialNumber: "19FA", status: 0, expiryDate: "2030-01-01T00:00:00Z", revokeDate: null },
+    ] as MonitorServerCertificate[];
+    render(<CertificatesTable certificates={certs} vpnServerId={1} onRevoke={vi.fn()} />);
+
+    const revoked = screen.getByTestId("row-DD46");
+    const active = screen.getByTestId("row-19FA");
+    expect(revoked).toHaveTextContent("router DD46");
+    expect(active).toHaveTextContent("router 19FA");
+    expect(within(revoked).queryByTitle("Revoke")).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId("select-page-include"));
+    expect(screen.getByTestId("selection-size")).toHaveTextContent("1");
+
+    await user.click(within(active).getByTitle("Revoke"));
+    expect(revokeMock).toHaveBeenCalledTimes(1);
+    expect(revokeMock.mock.calls[0][0]).toEqual({ vpnServerId: 1, commonName: "router" });
   });
 });
