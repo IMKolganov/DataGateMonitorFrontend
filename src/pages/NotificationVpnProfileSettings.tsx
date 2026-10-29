@@ -20,7 +20,7 @@ import {
 import { errorMessage } from "../utils/errorMessage";
 import { usePersistedPageSize } from "../hooks/usePersistedPageSize";
 
-/** Matches backend ApplicationNotificationKind enum order (int values 0–28). */
+/** Matches backend ApplicationNotificationKind enum order (int values 0–33). */
 type NotificationKindRow = {
   kind: number;
   section: string;
@@ -203,6 +203,36 @@ const KIND_ROWS: NotificationKindRow[] = [
     title: "User password changed",
     description: "Password was changed via reset code or other auth flows (not successful login).",
   },
+  {
+    kind: 29,
+    section: "Traffic",
+    title: "Daily rollup succeeded",
+    description: "Daily traffic rollup completed successfully.",
+  },
+  {
+    kind: 30,
+    section: "Traffic",
+    title: "Daily rollup failed",
+    description: "Daily traffic rollup failed.",
+  },
+  {
+    kind: 31,
+    section: "Certificates",
+    title: "OpenVPN cert expiry warning",
+    description: "Issued OpenVPN client certificate expires within the configured warning window.",
+  },
+  {
+    kind: 32,
+    section: "Certificates",
+    title: "OpenVPN cert expired",
+    description: "Issued OpenVPN client certificate has expired on the node PKI.",
+  },
+  {
+    kind: 33,
+    section: "VPN servers (OpenVPN API)",
+    title: "Server discovered",
+    description: "A VPN node announced itself; admin should approve or deny adding it to the server list.",
+  },
 ];
 
 export default function NotificationVpnProfileSettings() {
@@ -355,9 +385,10 @@ export default function NotificationVpnProfileSettings() {
         <span>VPN profile notifications</span>
       </h2>
       <p className="settings-description" style={{ marginBottom: 16 }}>
-        Master switch turns off every admin notification covered below. When it is on, you can enable or disable each
-        notification kind separately, or use bulk actions for all kinds at once. Numeric{" "}
-        <code>kind</code> in the API matches the backend enum order (0–26).
+        Master switch turns off every admin notification covered below. When it is on, each <strong>Notify</strong>{" "}
+        checkbox enables or disables that kind for both the dashboard and Telegram DM (admins with a linked Telegram
+        account). Use bulk actions for all kinds at once. Numeric <code>kind</code> in the API matches the backend enum
+        order (0–33).
       </p>
 
       <div className="settings-group" style={{ marginBottom: 16 }}>
