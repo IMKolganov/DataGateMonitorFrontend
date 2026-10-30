@@ -535,6 +535,7 @@ export * from './vpnServersDtoVpnServerV2Dto';
 export * from './vpnServersDtoVpnServerWithStatusDto';
 export * from './vpnServersDtoVpnServerWithStatusV2Dto';
 export * from './vpnServersRequestsAddServerRequest';
+export * from './vpnServersRequestsAnnouncePiHoleConfig';
 export * from './vpnServersRequestsAnnounceVpnServerRequest';
 export * from './vpnServersRequestsApproveVpnServerDiscoveryRequest';
 export * from './vpnServersRequestsDenyVpnServerDiscoveryRequest';

@@ -26816,6 +26816,9 @@
           "isEnableWss": {
             "type": "boolean"
           },
+          "hasPiHole": {
+            "type": "boolean"
+          },
           "status": {
             "$ref": "#/components/schemas/Enums.VpnServerDiscoveryStatus"
           },
@@ -27187,6 +27190,49 @@
         },
         "additionalProperties": false
       },
+      "VpnServers.Requests.AnnouncePiHoleConfig": {
+        "required": [
+          "appPassword",
+          "baseUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "baseUrl": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "appPassword": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "pollIntervalSeconds": {
+            "maximum": 86400,
+            "minimum": 10,
+            "type": "integer",
+            "format": "int32"
+          },
+          "batchSize": {
+            "maximum": 10000,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "lookbackSeconds": {
+            "maximum": 86400,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "clientSubnetPrefix": {
+            "maxLength": 64,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "VpnServers.Requests.AnnounceVpnServerRequest": {
         "required": [
           "apiUrl"
@@ -27215,6 +27261,13 @@
           "isEnableWss": {
             "type": "boolean"
           },
+          "hasPiHole": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "piHole": {
+            "$ref": "#/components/schemas/VpnServers.Requests.AnnouncePiHoleConfig"
+          },
           "nodePublicKeyPem": {
             "type": "string",
             "nullable": true
@@ -27240,7 +27293,8 @@
             "type": "boolean"
           },
           "isPiHoleEnabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
           },
           "latitude": {
             "type": "number",

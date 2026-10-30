@@ -5,6 +5,7 @@
  * OpenAPI spec version: v1
  */
 import type { EnumsVpnServerType } from './enumsVpnServerType';
+import type { VpnServersRequestsAnnouncePiHoleConfig } from './vpnServersRequestsAnnouncePiHoleConfig';
 
 export interface VpnServersRequestsAnnounceVpnServerRequest {
   serverType?: EnumsVpnServerType;
@@ -17,6 +18,9 @@ export interface VpnServersRequestsAnnounceVpnServerRequest {
   /** @nullable */
   version?: string | null;
   isEnableWss?: boolean;
+  /** @nullable */
+  hasPiHole?: boolean | null;
+  piHole?: VpnServersRequestsAnnouncePiHoleConfig;
   /** @nullable */
   nodePublicKeyPem?: string | null;
 }
