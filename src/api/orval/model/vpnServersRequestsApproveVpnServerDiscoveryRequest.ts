@@ -12,7 +12,8 @@ export interface VpnServersRequestsApproveVpnServerDiscoveryRequest {
   apiUrl?: string | null;
   isDefault?: boolean;
   isEnableWss?: boolean;
-  isPiHoleEnabled?: boolean;
+  /** @nullable */
+  isPiHoleEnabled?: boolean | null;
   /** @nullable */
   latitude?: number | null;
   /** @nullable */

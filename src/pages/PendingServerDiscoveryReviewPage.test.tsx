@@ -9,6 +9,8 @@ const approveMutateAsync = vi.hoisted(() =>
 );
 const denyMutateAsync = vi.hoisted(() => vi.fn(async () => ({})));
 
+const announcedPiHole = vi.hoisted(() => ({ value: false }));
+
 const nodeKeyFingerprint = vi.hoisted(() => ({ value: null as string | null }));
 
 vi.mock("../api/localIssuance", async (importOriginal) => ({
@@ -31,6 +33,7 @@ vi.mock("../api/orval/vpn-servers/vpn-servers", () => ({
           publicIp: "203.0.113.10",
           serverType: 1,
           isEnableWss: true,
+          hasPiHole: announcedPiHole.value,
           version: "9.9.9",
         },
       ],
@@ -80,6 +83,7 @@ describe("PendingServerDiscoveryReviewPage", () => {
     approveMutateAsync.mockClear();
     denyMutateAsync.mockClear();
     nodeKeyFingerprint.value = null;
+    announcedPiHole.value = false;
     vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
@@ -115,6 +119,25 @@ describe("PendingServerDiscoveryReviewPage", () => {
     expect(call.data.apiUrl).toBe("https://xray.example.com:9443/");
     expect(call.data.isEnableWss).toBe(true);
     expect(await screen.findByText("Edited")).toBeInTheDocument();
+  });
+
+  it.each([true, false])("defaults detected Pi-hole to enabled and respects opt-out %s", async (keepEnabled) => {
+    announcedPiHole.value = true;
+    const user = userEvent.setup();
+    renderWithProviders(
+      <Routes>
+        <Route path="/servers/pending-discoveries/:discoveryId" element={<PendingServerDiscoveryReviewPage />} />
+        <Route path="/servers/edit/:serverId" element={<div>Edited</div>} />
+      </Routes>,
+      { route: "/servers/pending-discoveries/5" },
+    );
+    const toggle = await screen.findByRole("checkbox", { name: /Enable Pi-hole integration/i });
+    await waitFor(() => expect(toggle).toBeChecked());
+    expect(screen.getByText(/Pi-hole detected/i)).toBeInTheDocument();
+    if (!keepEnabled) await user.click(toggle);
+    await user.click(screen.getByRole("button", { name: /Approve & add/i }));
+    await waitFor(() => expect(approveMutateAsync).toHaveBeenCalled());
+    expect(approveMutateAsync.mock.calls[0][0].data.isPiHoleEnabled).toBe(keepEnabled);
   });
 
   it("shows the announced node key fingerprint for comparison before approve", async () => {

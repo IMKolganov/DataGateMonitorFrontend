@@ -19,6 +19,7 @@ export interface VpnServersDtoVpnServerDiscoveryDto {
   /** @nullable */
   version?: string | null;
   isEnableWss?: boolean;
+  hasPiHole?: boolean;
   status?: EnumsVpnServerDiscoveryStatus;
   createdAt?: string;
   lastSeenUtc?: string;

@@ -68,10 +68,11 @@ export default function PendingServerDiscoveryReviewPage() {
 
   useEffect(() => {
     if (!discovery?.id || hydratedId === discovery.id) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydrate once per discovery and preserve administrator edits during refetches.
     setServerName(discovery.suggestedName?.trim() || "");
     setApiUrl(discovery.apiUrl?.trim() || "");
     setIsEnableWss(Boolean(discovery.isEnableWss));
-    setIsPiHoleEnabled(false);
+    setIsPiHoleEnabled(Boolean(discovery.hasPiHole));
     setIsDefault(false);
     setIsDisabled(false);
     setLatitude("");
@@ -356,6 +357,11 @@ export default function PendingServerDiscoveryReviewPage() {
               />
               <div className="checkbox-content">
                 <span className="checkbox-title">Enable Pi-hole integration</span>
+                {discovery.hasPiHole && (
+                  <span className="checkbox-description">
+                    Pi-hole detected. Connection settings will be configured automatically.
+                  </span>
+                )}
               </div>
             </label>
           </div>
