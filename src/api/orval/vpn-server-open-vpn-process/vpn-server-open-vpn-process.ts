@@ -479,3 +479,9 @@ export function useGetApiOpenVpnServersVpnServerIdOpenvpnProcessHealthcheckWithJ
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

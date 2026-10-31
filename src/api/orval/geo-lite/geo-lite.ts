@@ -623,3 +623,9 @@ export function useGetApiGeoLiteHealthcheckWithJwt<TData = Awaited<ReturnType<ty
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

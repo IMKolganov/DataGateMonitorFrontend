@@ -759,3 +759,9 @@ export function useGetApiVpnServerGroupsHealthcheckWithJwt<TData = Awaited<Retur
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

@@ -172,6 +172,23 @@ describe("PendingServerDiscoveryReviewPage", () => {
     expect(screen.queryByTestId("discovery-node-key")).toBeNull();
   });
 
+  it("warns when Pi-hole is enabled for a node that announced no credentials", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <Routes>
+        <Route path="/servers/pending-discoveries/:discoveryId" element={<PendingServerDiscoveryReviewPage />} />
+      </Routes>,
+      { route: "/servers/pending-discoveries/5" },
+    );
+
+    const toggle = await screen.findByRole("checkbox", { name: /Enable Pi-hole integration/i });
+    expect(screen.queryByText(/did not announce Pi-hole credentials/i)).not.toBeInTheDocument();
+
+    await user.click(toggle);
+
+    expect(screen.getByText(/did not announce Pi-hole credentials/i)).toBeInTheDocument();
+  });
+
   it("shows missing state for unknown discovery id", async () => {
     renderWithProviders(
       <Routes>

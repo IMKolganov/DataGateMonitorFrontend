@@ -607,3 +607,9 @@ export function useGetApiOpenVpnServersConflogHealthcheckWithJwt<TData = Awaited
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

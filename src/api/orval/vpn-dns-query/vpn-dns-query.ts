@@ -478,3 +478,9 @@ export function useGetApiVpnDnsQueriesHealthcheckWithJwt<TData = Awaited<ReturnT
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

@@ -338,7 +338,6 @@ export * from './getApiV2VpnSessionsOverviewSummaryParams';
 export * from './getApiV2VpnSessionsOverviewUsersPagedParams';
 export * from './getApiV2VpnSessionsOverviewUsersParams';
 export * from './getApiV2VpnSessionsOverviewUsersSeriesParams';
-export * from './getApiV2XrayClientLinksParams';
 export * from './getApiV3OpenVpnServersGetAllParams';
 export * from './getApiV3OpenVpnServersGetAllWithStatusParams';
 export * from './getApiVpnDnsQueriesProfileSummaryParams';

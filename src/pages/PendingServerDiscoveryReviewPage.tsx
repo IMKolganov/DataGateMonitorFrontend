@@ -362,6 +362,12 @@ export default function PendingServerDiscoveryReviewPage() {
                     Pi-hole detected. Connection settings will be configured automatically.
                   </span>
                 )}
+                {!discovery.hasPiHole && isPiHoleEnabled && (
+                  <span className="checkbox-description" role="note">
+                    This node did not announce Pi-hole credentials. After approval, enter the connection settings on
+                    the server's Pi-hole tab.
+                  </span>
+                )}
               </div>
             </label>
           </div>

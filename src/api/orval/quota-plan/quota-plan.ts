@@ -606,3 +606,9 @@ export function useGetApiQuotaPlansHealthcheckWithJwt<TData = Awaited<ReturnType
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

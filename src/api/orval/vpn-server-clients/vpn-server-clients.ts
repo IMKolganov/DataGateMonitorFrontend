@@ -2452,3 +2452,9 @@ export function useGetApiV2VpnSessionsHealthcheckWithJwt<TData = Awaited<ReturnT
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

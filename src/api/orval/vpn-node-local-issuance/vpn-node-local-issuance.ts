@@ -341,3 +341,9 @@ export function useGetApiOpenVpnServersDiscoveriesDiscoveryIdNodeKey<TData = Awa
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

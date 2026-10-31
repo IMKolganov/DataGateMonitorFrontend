@@ -546,3 +546,9 @@ export function useGetApiTgbotLocalizationsHealthcheckWithJwt<TData = Awaited<Re
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

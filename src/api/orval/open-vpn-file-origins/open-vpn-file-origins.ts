@@ -125,3 +125,9 @@ export function useGetApiOpenVpnFilesOriginsVpnServerId<TData = Awaited<ReturnTy
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+
