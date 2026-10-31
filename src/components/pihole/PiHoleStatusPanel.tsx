@@ -17,6 +17,7 @@ import {
   type PiHolePipelineStep,
   type PiHolePipelineStepStatus,
 } from "../../utils/pihole/buildPiHolePipelineSteps";
+import { diagnosePiHoleCause } from "../../utils/pihole/diagnosePiHoleCause";
 import "../../css/ServerDetails.css";
 import "../../css/Settings.css";
 
@@ -110,6 +111,17 @@ export function PiHoleStatusPanel({
 
   const blocker = useMemo(() => firstPiHolePipelineIssue(steps), [steps]);
   const overall = useMemo(() => piHolePipelineOverallLabel(steps), [steps]);
+  const cause = useMemo(
+    () =>
+      diagnosePiHoleCause({
+        dashboardConfig,
+        serverPiHoleEnabled,
+        diagnostics,
+        diagnosticsFetchError: error,
+        stack,
+      }),
+    [dashboardConfig, serverPiHoleEnabled, diagnostics, error, stack],
+  );
   const showTroubleshooting = steps.some((s) => s.status === "error" || s.status === "warning" || s.fix);
 
   if (loading && !diagnostics) {
@@ -167,6 +179,13 @@ export function PiHoleStatusPanel({
             </strong>
             {blocker.error && <span> — {blocker.error}</span>}
             {!blocker.error && blocker.fix && <span> — {blocker.fix}</span>}
+          </div>
+        )}
+
+        {cause && (
+          <div className="server-details__alert" role="note">
+            <strong>Likely cause:</strong> {cause.message}
+            <span className="server-details__alert-detail">{cause.fix}</span>
           </div>
         )}
 

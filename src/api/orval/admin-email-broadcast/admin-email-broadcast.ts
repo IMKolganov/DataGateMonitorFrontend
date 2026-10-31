@@ -726,3 +726,9 @@ export function useGetApiAdminEmailBroadcastHealthcheckWithJwt<TData = Awaited<R
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

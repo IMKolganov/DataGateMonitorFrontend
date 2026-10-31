@@ -598,3 +598,9 @@ export function useGetApiOpenVpnServersPiHoleConfigHealthcheckWithJwt<TData = Aw
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

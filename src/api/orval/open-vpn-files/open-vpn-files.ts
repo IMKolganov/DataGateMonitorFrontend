@@ -1059,3 +1059,9 @@ export function useGetApiOpenVpnFilesHealthcheckWithJwt<TData = Awaited<ReturnTy
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

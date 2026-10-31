@@ -486,3 +486,9 @@ export function useGetApiAvailabilityCheckHealthcheckWithJwt<TData = Awaited<Ret
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

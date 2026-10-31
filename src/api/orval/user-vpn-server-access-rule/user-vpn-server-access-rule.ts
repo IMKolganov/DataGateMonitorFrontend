@@ -747,3 +747,9 @@ export function useGetApiUserVpnServerAccessRulesHealthcheckWithJwt<TData = Awai
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

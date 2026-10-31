@@ -429,3 +429,9 @@ export function useGetApiApplicationsHealthcheckWithJwt<TData = Awaited<ReturnTy
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

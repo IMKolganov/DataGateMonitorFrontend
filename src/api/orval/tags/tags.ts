@@ -573,3 +573,9 @@ export function useGetApiTagsHealthcheckWithJwt<TData = Awaited<ReturnType<typeo
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

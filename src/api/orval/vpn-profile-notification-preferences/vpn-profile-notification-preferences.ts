@@ -426,3 +426,9 @@ export function useGetApiVpnProfileNotificationPreferencesHealthcheckWithJwt<TDa
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

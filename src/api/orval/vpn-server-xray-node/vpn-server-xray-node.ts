@@ -341,3 +341,9 @@ export function useGetApiVpnServersVpnServerIdXrayHealthcheckWithJwt<TData = Awa
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

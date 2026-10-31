@@ -21286,6 +21286,14 @@
           "healthMessage": {
             "type": "string",
             "nullable": true
+          },
+          "credentialSource": {
+            "type": "string",
+            "nullable": true
+          },
+          "announceState": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
