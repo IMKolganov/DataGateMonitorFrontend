@@ -16,6 +16,13 @@ vi.mock("react-toastify", () => ({
   toast: { error: vi.fn(), success: vi.fn() },
 }));
 
+const authState = vi.hoisted(() => ({ admin: true }));
+
+vi.mock("../../utils/auth/authSelectors", () => ({
+  getCurrentUser: () => ({ id: 1 }),
+  isAdmin: () => authState.admin,
+}));
+
 const revokeMutate = vi.fn();
 const downloadMutate = vi.fn();
 
@@ -93,7 +100,78 @@ describe("OvpnFilesTable pagination + selection", () => {
   beforeEach(() => {
     revokeMutate.mockReset();
     revokeMutate.mockResolvedValue({});
+    authState.admin = true;
     vi.spyOn(window, "confirm").mockReturnValue(true);
+  });
+
+  it("revoke all covers every active file across pages, ignoring filters", async () => {
+    const user = userEvent.setup();
+    const onRevoke = vi.fn();
+    render(
+      <OvpnFilesTable
+        ovpnFiles={makeFiles(12)}
+        vpnServerId="1"
+        onRevoke={onRevoke}
+        loading={false}
+      />,
+    );
+
+    await user.type(screen.getByPlaceholderText(/search by issued to/i), "alice");
+    // 12 files minus cn0, cn5, cn10 already revoked → 9
+    await user.click(screen.getByRole("button", { name: /revoke all \(9\)/i }));
+
+    expect(revokeMutate).toHaveBeenCalledTimes(9);
+    expect(revokeMutate.mock.calls.map(([arg]) => arg.data.ovpnFileId)).toEqual([2, 3, 4, 5, 7, 8, 9, 10, 12]);
+    expect(onRevoke).toHaveBeenCalledWith(9);
+  });
+
+  it("revoke all does nothing when the confirmation is declined", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, "confirm").mockReturnValue(false);
+    render(
+      <OvpnFilesTable
+        ovpnFiles={makeFiles(12)}
+        vpnServerId="1"
+        onRevoke={vi.fn()}
+        loading={false}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /revoke all/i }));
+    expect(revokeMutate).not.toHaveBeenCalled();
+  });
+
+  it("revoke all reports partial failures and stays retryable", async () => {
+    const user = userEvent.setup();
+    const onRevoke = vi.fn();
+    revokeMutate.mockRejectedValueOnce(new Error("node down"));
+    render(
+      <OvpnFilesTable
+        ovpnFiles={makeFiles(12)}
+        vpnServerId="1"
+        onRevoke={onRevoke}
+        loading={false}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /revoke all \(9\)/i }));
+
+    expect(revokeMutate).toHaveBeenCalledTimes(9);
+    expect(onRevoke).toHaveBeenCalledWith(8);
+    expect(screen.getByRole("button", { name: /revoke all \(9\)/i })).toBeEnabled();
+  });
+
+  it("hides revoke all from non-admins", () => {
+    authState.admin = false;
+    render(
+      <OvpnFilesTable
+        ovpnFiles={makeFiles(12)}
+        vpnServerId="1"
+        onRevoke={vi.fn()}
+        loading={false}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: /revoke all/i })).not.toBeInTheDocument();
   });
 
   it("unwraps nested issuedOvpnFile payloads before paging", () => {
