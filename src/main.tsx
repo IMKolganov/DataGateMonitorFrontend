@@ -1,6 +1,8 @@
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./utils/auth/authSession.ts";
 import { installDomTranslationGuard } from "./utils/domTranslationGuard";
+import { installNativeDragGuard } from "./utils/nativeDragGuard";
 import { installToastDefaults } from "./utils/installToastDefaults";
 import { installMockAuth } from "./mocks/installMockAuth";
 import "./index.css";
@@ -15,28 +17,15 @@ import { ThemeProvider } from "./contexts/ThemeContext.tsx";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { looksLikeChunkLoadError } from "./utils/chunkLoadError";
 
 installMockAuth();
 installDomTranslationGuard();
+installNativeDragGuard();
 installToastDefaults();
 const CHUNK_RELOAD_KEY = "chunk-reload:last-attempt-ms";
 const CHUNK_RELOAD_COOLDOWN_MS = 30_000;
 const CHUNK_RELOAD_OVERLAY_ID = "chunk-reload-overlay";
-
-function looksLikeChunkLoadError(reason: unknown): boolean {
-  const text =
-    reason instanceof Error
-      ? `${reason.name} ${reason.message}`
-      : typeof reason === "string"
-      ? reason
-      : String(reason ?? "");
-
-  return (
-    /ChunkLoadError/i.test(text) ||
-    /Loading chunk [\d]+ failed/i.test(text) ||
-    /Failed to fetch dynamically imported module/i.test(text)
-  );
-}
 
 function tryReloadOnChunkError(trigger: unknown): void {
   if (!looksLikeChunkLoadError(trigger)) return;
@@ -52,6 +41,10 @@ function tryReloadOnChunkError(trigger: unknown): void {
   sessionStorage.setItem(CHUNK_RELOAD_KEY, String(now));
   showReloadOverlay();
   window.setTimeout(() => window.location.reload(), 450);
+  // If navigation is blocked, do not leave a permanent click-blocking layer.
+  window.setTimeout(() => {
+    document.getElementById(CHUNK_RELOAD_OVERLAY_ID)?.remove();
+  }, 5_000);
 }
 
 function showReloadOverlay(): void {
@@ -72,6 +65,7 @@ function showReloadOverlay(): void {
   overlay.style.zIndex = "2147483647";
   overlay.style.padding = "16px";
   overlay.style.textAlign = "center";
+  overlay.style.cursor = "wait";
 
   document.body.appendChild(overlay);
 }
@@ -101,11 +95,18 @@ const queryClient = new QueryClient({
   },
 });
 
-createRoot(document.getElementById("root")!).render(
+const rootEl = document.getElementById("root");
+if (!rootEl) {
+  throw new Error("Root element #root not found");
+}
+
+createRoot(rootEl).render(
+  <StrictMode>
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <App />
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </ThemeProvider>
+  </StrictMode>,
 );

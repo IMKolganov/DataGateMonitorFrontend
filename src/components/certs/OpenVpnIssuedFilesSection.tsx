@@ -7,6 +7,7 @@ import AddOvpnFile from "../ovpn-files/AddOvpnFile.tsx";
 import { useGetApiOpenVpnFilesGetAllVpnServerId } from "../../api/orval/open-vpn-files/open-vpn-files.ts";
 import type { OvpnFilesResponse } from "../../api/orvalModelShim";
 import { pickArray } from "../../utils/pickPayloadArray.ts";
+import { indexOvpnFileOrigins, useOvpnFileOrigins } from "../../api/localIssuance.ts";
 import { errorMessage as baseErrorMessage } from "../../utils/errorMessage";
 
 function getErrorMessage(err: unknown): string {
@@ -41,6 +42,10 @@ const OpenVpnIssuedFilesSection: React.FC<Props> = ({ vpnServerId }) => {
 
   const ovpnFiles = pickArray(filesQuery.data as OvpnFilesResponse) as OvpnRowInput[];
 
+  // Extras only: the list still works if this call fails (e.g. older backend).
+  const originsQuery = useOvpnFileOrigins(numericId, isValidId);
+  const origins = useMemo(() => indexOvpnFileOrigins(originsQuery.data), [originsQuery.data]);
+
   useEffect(() => {
     if (filesQuery.isError) {
       toast.error(`Failed to load OVPN files: ${getErrorMessage(filesQuery.error)}`, {
@@ -50,7 +55,7 @@ const OpenVpnIssuedFilesSection: React.FC<Props> = ({ vpnServerId }) => {
   }, [filesQuery.isError, filesQuery.error]);
 
   const refetchFiles = async () =>
-    toast.promise(filesQuery.refetch(), {
+    toast.promise(Promise.all([filesQuery.refetch(), originsQuery.refetch()]), {
       pending: "Refreshing OVPN files…",
       success: "OVPN files are up to date",
       error: {
@@ -66,7 +71,7 @@ const OpenVpnIssuedFilesSection: React.FC<Props> = ({ vpnServerId }) => {
 
   const silentRefetchFiles = async () => {
     try {
-      await filesQuery.refetch();
+      await Promise.all([filesQuery.refetch(), originsQuery.refetch()]);
     } catch (e) {
       toast.error(`Failed to refresh OVPN files: ${getErrorMessage(e)}`, { toastId: "openvpn-files-refetch-error" });
     }
@@ -103,6 +108,7 @@ const OpenVpnIssuedFilesSection: React.FC<Props> = ({ vpnServerId }) => {
         ovpnFiles={ovpnFiles}
         vpnServerId={vpnServerId}
         loading={filesQuery.isFetching}
+        origins={origins}
         onRevoke={async (count = 1) => {
           toast.success(
             count === 1 ? "OVPN file revoked" : `${count} OVPN files revoked`,

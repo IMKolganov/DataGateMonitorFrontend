@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaDesktop, FaSignOutAlt } from "react-icons/fa";
 import { logout } from "../../api/apirequest";
 import {
@@ -8,12 +8,33 @@ import {
   revokeOtherAdminSessions,
   type UserSessionDto,
 } from "../../utils/auth/adminSessionsApi";
+import {
+  formatRelativeTime,
+  formatSessionDeviceLabel,
+  getSessionActivityStatus,
+  type SessionActivityStatus,
+} from "../../utils/auth/formatSessionDevice";
 import { errorMessage } from "../../utils/errorMessage";
 
-function formatSessionLabel(session: UserSessionDto): string {
-  if (session.userAgent?.trim()) return session.userAgent.trim();
-  if (session.deviceId?.trim()) return `Device ${session.deviceId}`;
-  return `Session #${session.id}`;
+function statusLabel(status: SessionActivityStatus): string {
+  switch (status) {
+    case "current":
+      return "This device";
+    case "active":
+      return "Active";
+    case "idle":
+      return "Idle";
+  }
+}
+
+function sortSessions(sessions: UserSessionDto[]): UserSessionDto[] {
+  return [...sessions].sort((a, b) => {
+    if (a.isCurrent && !b.isCurrent) return -1;
+    if (!a.isCurrent && b.isCurrent) return 1;
+    const aMs = a.createdAt ? Date.parse(a.createdAt) : 0;
+    const bMs = b.createdAt ? Date.parse(b.createdAt) : 0;
+    return bMs - aMs;
+  });
 }
 
 export function AdminActiveSessions() {
@@ -26,7 +47,7 @@ export function AdminActiveSessions() {
     setError("");
     try {
       const data = await fetchAdminSessions();
-      setSessions(data.sessions ?? []);
+      setSessions(sortSessions(data.sessions ?? []));
     } catch (e: unknown) {
       setError(errorMessage(e));
     }
@@ -35,6 +56,22 @@ export function AdminActiveSessions() {
   useEffect(() => {
     void reload();
   }, [reload]);
+
+  const idleSessions = useMemo(
+    () => sessions.filter((s) => getSessionActivityStatus(s) === "idle" && s.id != null),
+    [sessions],
+  );
+
+  const summary = useMemo(() => {
+    let active = 0;
+    let idle = 0;
+    for (const s of sessions) {
+      const status = getSessionActivityStatus(s);
+      if (status === "idle") idle += 1;
+      else active += 1;
+    }
+    return { total: sessions.length, active, idle };
+  }, [sessions]);
 
   const runAction = async (action: () => Promise<void | number>, successMessage: string) => {
     setError("");
@@ -57,14 +94,41 @@ export function AdminActiveSessions() {
         <FaDesktop className="icon" aria-hidden />
         <span>Active sessions</span>
       </h3>
-      <p className="settings-item-description" style={{ marginBottom: 16, maxWidth: 720 }}>
-        Each sign-in creates a refresh token (browser or device). Revoke sessions you no longer use.
+      <p className="settings-item-description" style={{ marginBottom: 12, maxWidth: 720 }}>
+        Each sign-in keeps a refresh token until it expires or you revoke it.{" "}
+        <strong>Active</strong> means the token was used recently (sign-in or refresh);
+        <strong> Idle</strong> tokens are still valid but unused — revoke them if you do not
+        recognize the device.
       </p>
+
+      {summary.total > 0 ? (
+        <p className="settings-item-description admin-session-summary">
+          {summary.total} session{summary.total === 1 ? "" : "s"}
+          {" · "}
+          {summary.active} active
+          {" · "}
+          {summary.idle} idle
+        </p>
+      ) : null}
 
       {error ? <p className="error-message">{error}</p> : null}
       {info ? <p className="settings-item-description">{info}</p> : null}
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+        <button
+          type="button"
+          className="btn secondary"
+          disabled={loading || idleSessions.length === 0}
+          onClick={() =>
+            void runAction(async () => {
+              for (const session of idleSessions) {
+                if (session.id != null) await revokeAdminSession(session.id);
+              }
+            }, `Revoked ${idleSessions.length} idle session${idleSessions.length === 1 ? "" : "s"}.`)
+          }
+        >
+          <FaSignOutAlt className="icon" /> Revoke idle sessions
+        </button>
         <button
           type="button"
           className="btn secondary"
@@ -102,34 +166,42 @@ export function AdminActiveSessions() {
         <p className="settings-item-description">No active sessions.</p>
       ) : (
         <ul className="settings-item-description admin-session-list">
-          {sessions.map((session) => (
-            <li key={session.id} className="admin-session-row">
-              <div className="admin-session-row__meta">
-                <strong>{formatSessionLabel(session)}</strong>
-                {session.isCurrent ? (
-                  <span className="admin-session-row__current">(this device)</span>
-                ) : null}
-                <div className="admin-session-row__since">
-                  Since {session.createdAt ? new Date(session.createdAt).toLocaleString() : "—"}
+          {sessions.map((session) => {
+            const status = getSessionActivityStatus(session);
+            return (
+              <li key={session.id} className={`admin-session-row admin-session-row--${status}`}>
+                <div className="admin-session-row__meta">
+                  <div className="admin-session-row__title">
+                    <strong>{formatSessionDeviceLabel(session)}</strong>
+                    <span className={`admin-session-status admin-session-status--${status}`}>
+                      {statusLabel(status)}
+                    </span>
+                  </div>
+                  <div className="admin-session-row__since">
+                    Last active {formatRelativeTime(session.createdAt)}
+                    {session.expiresAt
+                      ? ` · Expires ${formatRelativeTime(session.expiresAt)}`
+                      : null}
+                  </div>
                 </div>
-              </div>
-              {!session.isCurrent && session.id != null ? (
-                <button
-                  type="button"
-                  className="btn secondary"
-                  disabled={loading}
-                  onClick={() =>
-                    void runAction(
-                      () => revokeAdminSession(session.id!),
-                      "Session revoked.",
-                    )
-                  }
-                >
-                  Revoke
-                </button>
-              ) : null}
-            </li>
-          ))}
+                {!session.isCurrent && session.id != null ? (
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    disabled={loading}
+                    onClick={() =>
+                      void runAction(
+                        () => revokeAdminSession(session.id!),
+                        "Session revoked.",
+                      )
+                    }
+                  >
+                    Revoke
+                  </button>
+                ) : null}
+              </li>
+            );
+          })}
         </ul>
       )}
     </>

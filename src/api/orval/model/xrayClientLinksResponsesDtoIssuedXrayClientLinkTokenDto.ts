@@ -7,6 +7,7 @@
 
 export interface XrayClientLinksResponsesDtoIssuedXrayClientLinkTokenDto {
   id?: number;
+  issuedXrayClientLinkId?: number;
   /** @nullable */
   token?: string | null;
   createdAt?: string;
@@ -17,5 +18,4 @@ export interface XrayClientLinksResponsesDtoIssuedXrayClientLinkTokenDto {
   purpose?: string | null;
   createDate?: string;
   lastUpdate?: string;
-  issuedXrayClientLinkId?: number;
 }

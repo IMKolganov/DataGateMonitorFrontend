@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useMemo } from "react";
+import { useNavigate, Link, useLocation, Outlet } from "react-router-dom";
 import type { IconType } from "react-icons";
 import {
   FaArrowLeft,
@@ -55,6 +55,11 @@ const ALL_SETTINGS_TABS: SettingsTab[] = [
 export function Settings() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    void import("./TelegramBotSettings");
+    void import("./CertExpirySettings");
+  }, []);
 
   const tabs = ALL_SETTINGS_TABS;
 

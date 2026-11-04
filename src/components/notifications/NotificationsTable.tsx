@@ -10,64 +10,18 @@ import type {
 import { EnumsDeliveryStatus } from "../../api/orval/model";
 import { FaCheck, FaExpandAlt, FaServer } from "react-icons/fa";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
+import { SectionErrorBoundary } from "../ui/SectionErrorBoundary.tsx";
+import {
+  MESSAGE_TRUNCATE_LENGTH,
+  SERVER_DISCOVERED_TYPE,
+  deliveryBadgeClass,
+  formatDeliveriesSummary,
+  formatDeliveryLine,
+  formatNotificationMessage,
+  parseDiscoveryIdFromMessage,
+} from "../../utils/notifications/notificationMessageFormat";
 import "../../css/Table.css";
 import "../../css/Settings.css";
-
-const MESSAGE_TRUNCATE_LENGTH = 80;
-const SERVER_DISCOVERED_TYPE = "server.discovered";
-
-const DELIVERY_STATUS_LABEL: Record<number, string> = {
-  [EnumsDeliveryStatus.NUMBER_0]: "Pending",
-  [EnumsDeliveryStatus.NUMBER_1]: "Sent",
-  [EnumsDeliveryStatus.NUMBER_2]: "Failed",
-  [EnumsDeliveryStatus.NUMBER_3]: "Read",
-};
-
-function deliveryStatusLabel(status: number | null | undefined): string {
-  if (status == null) return "—";
-  return DELIVERY_STATUS_LABEL[status] ?? `Status ${status}`;
-}
-
-function deliveryBadgeClass(status: number | null | undefined): string {
-  if (status === EnumsDeliveryStatus.NUMBER_2) return "notification-delivery-badge--failed";
-  if (status === EnumsDeliveryStatus.NUMBER_1 || status === EnumsDeliveryStatus.NUMBER_3) {
-    return "notification-delivery-badge--ok";
-  }
-  return "notification-delivery-badge--pending";
-}
-
-function formatDeliveriesSummary(deliveries: NotificationDeliveryDto[] | null | undefined): string {
-  if (!deliveries?.length) return "—";
-  return deliveries
-    .map((d) => {
-      const channel = (d.channel ?? "?").toLowerCase();
-      const status = deliveryStatusLabel(d.status);
-      return d.error ? `${channel}: ${status} (${d.error})` : `${channel}: ${status}`;
-    })
-    .join("\n");
-}
-
-function parseDiscoveryIdFromMessage(message: string): number | undefined {
-  const match = /DiscoveryId=(\d+)/i.exec(message);
-  if (!match) return undefined;
-  const id = Number(match[1]);
-  return Number.isFinite(id) ? id : undefined;
-}
-
-function formatServerDiscoveredMessage(message: string): string {
-  const discoveryId = parseDiscoveryIdFromMessage(message);
-  const nameMatch = /(?:^|;\s*)Name=([^;]*)/i.exec(message);
-  const apiUrlMatch = /(?:^|;\s*)ApiUrl=([^;]*)/i.exec(message);
-  const name = nameMatch?.[1]?.trim();
-  const apiUrl = apiUrlMatch?.[1]?.trim();
-  const parts = [
-    "A new VPN server was discovered and is waiting for admin approval.",
-    discoveryId != null ? `Discovery #${discoveryId}` : null,
-    name ? `Suggested name: ${name}` : null,
-    apiUrl ? `API URL: ${apiUrl}` : null,
-  ].filter(Boolean);
-  return parts.join(" ");
-}
 
 /** IDE-style severity: 0=Info, 1=Warning, 2=Error, 3=Critical */
 const SEVERITY_CONFIG: Record<
@@ -127,231 +81,259 @@ const NotificationsTable: React.FC<NotificationsTableProps> = ({
   const rows = useMemo(
     () =>
       (notifications ?? []).map((n, idx) => {
-        const id = n.id ?? idx + 1;
-        const notificationId = n.id ?? 0;
-        const type = n.type != null ? String(n.type) : "-";
-        const messageRaw = n.message ?? "";
-        const message =
-          type === SERVER_DISCOVERED_TYPE && messageRaw
-            ? formatServerDiscoveredMessage(messageRaw)
-            : messageRaw || "-";
-        const severityNum = n.severity ?? null;
-        const severityCfg = getSeverityConfig(severityNum);
-        const discoveryId =
-          type === SERVER_DISCOVERED_TYPE ? parseDiscoveryIdFromMessage(messageRaw) : undefined;
+        try {
+          const id = n.id ?? idx + 1;
+          const notificationId = n.id ?? 0;
+          const type = n.type != null ? String(n.type) : "-";
+          const messageRaw = n.message ?? "";
+          const message = formatNotificationMessage(type, messageRaw);
+          const severityNum = n.severity ?? null;
+          const severityCfg = getSeverityConfig(severityNum);
+          const discoveryId =
+            type === SERVER_DISCOVERED_TYPE ? parseDiscoveryIdFromMessage(messageRaw) : undefined;
 
-        const deliveries = n.deliveries ?? [];
-        const deliveryFailed = deliveries.some((d) => d.status === EnumsDeliveryStatus.NUMBER_2);
-        const detailsParts = [
-          messageRaw || message,
-          deliveries.length
-            ? `\n\nDelivery:\n${formatDeliveriesSummary(deliveries)}`
-            : "\n\nDelivery:\n(no channel attempts recorded)",
-        ];
+          const deliveries = n.deliveries ?? [];
+          const deliveryFailed = deliveries.some((d) => d.status === EnumsDeliveryStatus.NUMBER_2);
+          const detailsParts = [
+            messageRaw ? `${message}\n\nRaw: ${messageRaw}` : message,
+            deliveries.length
+              ? `\n\nDelivery:\n${formatDeliveriesSummary(deliveries)}`
+              : "\n\nDelivery:\n(no channel attempts recorded)",
+          ];
 
-        return {
-          id,
-          notificationId,
-          title: n.title ?? "-",
-          message,
-          detailsText: detailsParts.join(""),
-          deliveries,
-          deliveryFailed,
-          severityNum,
-          severityLabel: severityCfg.label,
-          severityBadgeClass: severityCfg.badgeClass,
-          severityRowClass: severityCfg.rowClass,
-          isRead: Boolean(n.isRead),
-          createDate: n.createdAt ? new Date(n.createdAt).toLocaleString() : "-",
-          type,
-          discoveryId,
-        };
+          return {
+            id,
+            notificationId,
+            title: n.title ?? "-",
+            message,
+            detailsText: detailsParts.join(""),
+            deliveries,
+            deliveryFailed,
+            severityNum,
+            severityLabel: severityCfg.label,
+            severityBadgeClass: severityCfg.badgeClass,
+            severityRowClass: severityCfg.rowClass,
+            isRead: Boolean(n.isRead),
+            createDate: n.createdAt ? new Date(n.createdAt).toLocaleString() : "-",
+            type,
+            discoveryId,
+          };
+        } catch {
+          const id = n.id ?? idx + 1;
+          return {
+            id,
+            notificationId: n.id ?? 0,
+            title: n.title ?? "-",
+            message: n.message ?? "-",
+            detailsText: n.message ?? "-",
+            deliveries: n.deliveries ?? [],
+            deliveryFailed: false,
+            severityNum: n.severity ?? null,
+            severityLabel: "—",
+            severityBadgeClass: "notification-severity-badge--unknown",
+            severityRowClass: "",
+            isRead: Boolean(n.isRead),
+            createDate: n.createdAt ? new Date(n.createdAt).toLocaleString() : "-",
+            type: n.type != null ? String(n.type) : "-",
+            discoveryId: undefined,
+          };
+        }
       }),
     [notifications],
   );
 
-  const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "title", headerName: "Title", flex: 1, minWidth: 140 },
-    {
-      field: "message",
-      headerName: "Message",
-      flex: 2,
-      minWidth: 200,
-      renderCell: (params) => {
-        const msg = params.value as string;
-        const isLong = msg.length > MESSAGE_TRUNCATE_LENGTH;
-        const display = isLong ? `${msg.slice(0, MESSAGE_TRUNCATE_LENGTH)}…` : msg;
-        const detailsText = params.row.detailsText as string;
-        const showDetails = isLong || Boolean(params.row.deliveryFailed);
-        return (
-          <div className="notification-message-cell">
-            <span className="message-text" title={isLong ? msg : undefined}>
-              {display}
-            </span>
-            {showDetails && (
-              <button
-                type="button"
-                className="btn secondary notification-details-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openDetails(detailsText);
-                }}
-                title="Show full message and delivery status"
-              >
-                <FaExpandAlt className="icon" /> Show details
-              </button>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      field: "deliveries",
-      headerName: "Delivery",
-      width: 170,
-      sortable: false,
-      renderCell: (params) => {
-        const deliveries = (params.row.deliveries ?? []) as NotificationDeliveryDto[];
-        if (!deliveries.length) {
-          return <span className="notification-delivery-empty">—</span>;
-        }
-        return (
-          <div className="notification-delivery-cell" title={formatDeliveriesSummary(deliveries)}>
-            {deliveries.map((d, idx) => (
-              <span
-                key={`${d.channel ?? "ch"}-${idx}`}
-                className={`notification-delivery-badge ${deliveryBadgeClass(d.status)}`}
-              >
-                {(d.channel ?? "?").toLowerCase()}: {deliveryStatusLabel(d.status)}
+  const columns: GridColDef[] = useMemo(
+    () => [
+      { field: "id", headerName: "ID", width: 70 },
+      { field: "title", headerName: "Title", flex: 1, minWidth: 140 },
+      {
+        field: "message",
+        headerName: "Message",
+        flex: 2,
+        minWidth: 220,
+        renderCell: (params) => {
+          const msg = params.value as string;
+          const isLong = msg.length > MESSAGE_TRUNCATE_LENGTH;
+          const display = isLong ? `${msg.slice(0, MESSAGE_TRUNCATE_LENGTH)}…` : msg;
+          const details = params.row.detailsText as string;
+          const showDetails = isLong || Boolean(params.row.deliveryFailed);
+          return (
+            <div className="notification-message-cell">
+              <span className="message-text" title={isLong ? msg : undefined}>
+                {display}
               </span>
-            ))}
-          </div>
-        );
+              {showDetails && (
+                <button
+                  type="button"
+                  className="btn secondary notification-details-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openDetails(details);
+                  }}
+                  title="Show full message and delivery status"
+                >
+                  <FaExpandAlt className="icon" /> Show details
+                </button>
+              )}
+            </div>
+          );
+        },
       },
-    },
-    {
-      field: "severityLabel",
-      headerName: "Severity",
-      width: 100,
-      renderCell: (params) => (
-        <span
-          className={`notification-severity-badge ${params.row.severityBadgeClass}`}
-          title={params.row.severityNum != null ? `Level ${params.row.severityNum}` : undefined}
-        >
-          {params.value}
-        </span>
-      ),
-    },
-    { field: "createDate", headerName: "Created", flex: 0.9, minWidth: 140 },
-    { field: "isRead", headerName: "Read", type: "boolean", width: 70 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: 150,
-      sortable: false,
-      filterable: false,
-      cellClassName: "grid-cell-actions",
-      renderCell: (params) => {
-        const notificationId: number = params.row.notificationId || 0;
-        const isRead: boolean = !!params.row.isRead;
-        const isDiscovered = params.row.type === SERVER_DISCOVERED_TYPE;
-        const discoveryId: number | undefined = params.row.discoveryId;
-        const disabled = markReadLoading || !notificationId || isRead;
+      {
+        field: "deliveries",
+        headerName: "Delivery",
+        width: 280,
+        sortable: false,
+        renderCell: (params) => {
+          const deliveries = (params.row.deliveries ?? []) as NotificationDeliveryDto[];
+          if (!deliveries.length) {
+            return <span className="notification-delivery-empty">—</span>;
+          }
+          return (
+            <div className="notification-delivery-cell" title={formatDeliveriesSummary(deliveries)}>
+              {deliveries.map((d, idx) => {
+                const hasError = Boolean(d.error);
+                return (
+                  <span
+                    key={`${d.channel ?? "ch"}-${idx}`}
+                    className={`notification-delivery-badge ${deliveryBadgeClass(d.status)}${
+                      hasError ? " notification-delivery-badge--with-error" : ""
+                    }`}
+                  >
+                    {formatDeliveryLine(d, "compact")}
+                  </span>
+                );
+              })}
+            </div>
+          );
+        },
+      },
+      {
+        field: "severityLabel",
+        headerName: "Severity",
+        width: 100,
+        renderCell: (params) => (
+          <span
+            className={`notification-severity-badge ${params.row.severityBadgeClass}`}
+            title={params.row.severityNum != null ? `Level ${params.row.severityNum}` : undefined}
+          >
+            {params.value}
+          </span>
+        ),
+      },
+      { field: "createDate", headerName: "Created", flex: 0.9, minWidth: 140 },
+      { field: "isRead", headerName: "Read", type: "boolean", width: 70 },
+      {
+        field: "actions",
+        headerName: "Actions",
+        width: 150,
+        sortable: false,
+        filterable: false,
+        cellClassName: "grid-cell-actions",
+        renderCell: (params) => {
+          const notificationId: number = params.row.notificationId || 0;
+          const isRead: boolean = !!params.row.isRead;
+          const isDiscovered = params.row.type === SERVER_DISCOVERED_TYPE;
+          const discoveryId: number | undefined = params.row.discoveryId;
+          const disabled = markReadLoading || !notificationId || isRead;
 
-        return (
-          <GridRowActions>
-            {isDiscovered && (
+          return (
+            <GridRowActions>
+              {isDiscovered && (
+                <RowActionButton
+                  title="Review discovered server"
+                  onClick={() => {
+                    if (discoveryId != null) {
+                      navigate(`/servers/pending-discoveries/${discoveryId}`);
+                    } else {
+                      navigate("/servers/pending-discoveries");
+                    }
+                  }}
+                  icon={<FaServer className="icon" />}
+                />
+              )}
+              {isDiscovered && (
+                <Link
+                  to="/servers/pending-discoveries"
+                  className="btn secondary"
+                  title="Open pending discoveries"
+                  style={{ padding: "4px 8px", fontSize: 12, textDecoration: "none" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Pending
+                </Link>
+              )}
               <RowActionButton
-                title="Review discovered server"
+                title={isRead ? "Already read" : "Mark read"}
+                disabled={disabled}
                 onClick={() => {
-                  if (discoveryId != null) {
-                    navigate(`/servers/pending-discoveries/${discoveryId}`);
-                  } else {
-                    navigate("/servers/pending-discoveries");
-                  }
+                  if (disabled) return;
+                  onMarkRead(notificationId);
                 }}
-                icon={<FaServer className="icon" />}
+                icon={<FaCheck className="icon" />}
               />
-            )}
-            {isDiscovered && (
-              <Link
-                to="/servers/pending-discoveries"
-                className="btn secondary"
-                title="Open pending discoveries"
-                style={{ padding: "4px 8px", fontSize: 12, textDecoration: "none" }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                Pending
-              </Link>
-            )}
-            <RowActionButton
-              title={isRead ? "Already read" : "Mark read"}
-              disabled={disabled}
-              onClick={() => {
-                if (disabled) return;
-                onMarkRead(notificationId);
-              }}
-              icon={<FaCheck className="icon" />}
-            />
-          </GridRowActions>
-        );
+            </GridRowActions>
+          );
+        },
       },
-    },
-  ];
+    ],
+    [markReadLoading, navigate, onMarkRead, openDetails],
+  );
 
   return (
     <CustomThemeProvider>
-      <div
-        className="data-grid-wrap notifications-table-wrapper"
-        style={{
-          backgroundColor: "var(--bg-body)",
-          padding: "10px",
-          borderRadius: "8px",
-        }}
-      >
-        <Grid
-          gridId="notifications"
-          rows={rows}
-          columns={columns}
-          rowCount={totalCount}
-          paginationMode="server"
-          paginationModel={paginationModel}
-          onPaginationModelChange={(model) => {
-            onPaginationModelChange(model);
+      <SectionErrorBoundary title="Notifications table failed to render.">
+        <div
+          className="data-grid-wrap notifications-table-wrapper"
+          style={{
+            backgroundColor: "var(--bg-body)",
+            padding: "10px",
+            borderRadius: "8px",
           }}
-          pageSizeOptions={[5, 10, 20, 50, 100]}
-          disableRowSelectionOnClick
-          getRowClassName={(params) => params.row.severityRowClass ?? ""}
-          localeText={{ noRowsLabel: "📭 No notifications" }}
-          loading={loading}
-          slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
-        />
+        >
+          <Grid
+            gridId="notifications"
+            rows={rows}
+            columns={columns}
+            rowCount={totalCount}
+            paginationMode="server"
+            paginationModel={paginationModel}
+            onPaginationModelChange={(model) => {
+              onPaginationModelChange(model);
+            }}
+            pageSizeOptions={[5, 10, 20, 50, 100]}
+            disableRowSelectionOnClick
+            getRowClassName={(params) => params.row.severityRowClass ?? ""}
+            localeText={{ noRowsLabel: "📭 No notifications" }}
+            loading={loading}
+            slotProps={{ loadingOverlay: { variant: "skeleton", noRowsVariant: "skeleton" } }}
+          />
 
-        {detailsText != null && (
-          <div className="modal-overlay" onClick={closeDetails}>
-            <div
-              className="modal-content notification-details-modal"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="modal-header">
-                <h3>Message & delivery details</h3>
-                <button
-                  type="button"
-                  className="modal-close"
-                  onClick={closeDetails}
-                  aria-label="Close"
-                >
-                  &times;
-                </button>
-              </div>
-              <div className="notification-details-body">
-                <pre>{detailsText}</pre>
+          {detailsText != null && (
+            <div className="modal-overlay" onClick={closeDetails}>
+              <div
+                className="modal-content notification-details-modal"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="modal-header">
+                  <h3>Message & delivery details</h3>
+                  <button
+                    type="button"
+                    className="modal-close"
+                    onClick={closeDetails}
+                    aria-label="Close"
+                  >
+                    &times;
+                  </button>
+                </div>
+                <div className="notification-details-body">
+                  <pre>{detailsText}</pre>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </SectionErrorBoundary>
     </CustomThemeProvider>
   );
 };

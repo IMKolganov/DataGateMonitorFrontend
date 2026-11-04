@@ -561,13 +561,13 @@ export default function EmailBroadcastSettings() {
       toast.error("HTML body is required.");
       return;
     }
-    const scopeRu =
+    const recipientScope =
       targetUserId == null
-        ? "всем пользователям панели, у кого в профиле указан email (массовая рассылка)"
-        : `только одному пользователю с ID ${targetUserId}`;
+        ? "all dashboard users with an email address (bulk broadcast)"
+        : `only the user with ID ${targetUserId}`;
     if (
       !window.confirm(
-        `Вы уверены?\n\nБудет отправлено: ${scopeRu}.\nТема: «${subject.trim()}»`,
+        `Are you sure?\n\nRecipients: ${recipientScope}.\nSubject: "${subject.trim()}"`,
       )
     ) {
       return;
@@ -674,7 +674,7 @@ export default function EmailBroadcastSettings() {
             autoComplete="off"
           />
           <p className="settings-item-description" style={{ marginTop: 8, marginBottom: 0 }}>
-            Один адресат — положительное целое число (ID пользователя в системе). Всем сразу — оставьте поле пустым.
+            For one recipient, enter a positive integer user ID. Leave the field empty to send to all users with email.
           </p>
         </div>
         <div className="form-row">

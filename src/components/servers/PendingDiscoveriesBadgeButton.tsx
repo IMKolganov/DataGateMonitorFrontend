@@ -16,8 +16,13 @@ export function PendingDiscoveriesBadgeButton() {
   const pendingQuery = useGetApiOpenVpnServersDiscoveriesPending({
     query: {
       enabled: admin,
-      refetchInterval: admin ? 30_000 : false,
+      refetchInterval: (query) => {
+        if (!admin) return false;
+        if (query.state.error) return false;
+        return 30_000;
+      },
       refetchOnWindowFocus: admin,
+      retry: false,
     },
   });
 

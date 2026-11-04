@@ -307,3 +307,16 @@ describe("adminIdleSessionEvents", () => {
     window.removeEventListener(ADMIN_IDLE_POLICY_CHANGED_EVENT, spy);
   });
 });
+
+describe("requestStaySignedIn", () => {
+  it("clears the warning UI when the stay-signed-in hook is missing", () => {
+    const spy = vi.fn();
+    window.addEventListener(ADMIN_IDLE_WARNING_CLEARED_EVENT, spy);
+    delete (window as unknown as { __datagateStaySignedIn?: () => void }).__datagateStaySignedIn;
+
+    requestStaySignedIn();
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    window.removeEventListener(ADMIN_IDLE_WARNING_CLEARED_EVENT, spy);
+  });
+});

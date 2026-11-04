@@ -9,4 +9,5 @@ export interface VpnServerClientsDtoOverviewUsersSeriesRowDto {
   ts?: string;
   activeSessions?: number;
   activeUsers?: number;
+  activeDevices?: number;
 }

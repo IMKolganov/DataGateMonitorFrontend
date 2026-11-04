@@ -24,7 +24,7 @@ describe("ServiceControls", () => {
 
     expect(screen.getByRole("heading", { name: /Service Control/i })).toBeInTheDocument();
     expect(screen.getByText("5")).toBeInTheDocument();
-    expect(screen.getByText(/Total Connected Clients:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Connected clients:/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /Details/i }));
     expect(onOpenDetails).toHaveBeenCalled();

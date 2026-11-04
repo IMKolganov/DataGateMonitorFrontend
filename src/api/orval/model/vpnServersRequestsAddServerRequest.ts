@@ -20,6 +20,7 @@ export interface VpnServersRequestsAddServerRequest {
   longitude?: number | null;
   isEnableWss?: boolean;
   isPiHoleEnabled?: boolean;
+  isAvailabilityCheckEnabled?: boolean;
   /** @nullable */
   quotaPlanIds?: number[] | null;
   /** @nullable */

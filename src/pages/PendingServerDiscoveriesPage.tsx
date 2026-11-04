@@ -94,7 +94,7 @@ export default function PendingServerDiscoveriesPage() {
 
   return (
     <div className="content-wrapper wide-table">
-      <div className="server-form-container" style={{ maxWidth: 960 }}>
+      <div className="pending-discoveries">
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
           <button
             type="button"
@@ -121,22 +121,22 @@ export default function PendingServerDiscoveriesPage() {
         ) : discoveries.length === 0 ? (
           <p className="settings-item-description">No pending discovery requests.</p>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="settings-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+          <div className="pending-discoveries__scroll">
+            <table className="settings-table pending-discoveries__table">
               <thead>
                 <tr>
-                  <th style={{ textAlign: "left", padding: "8px 10px" }}>Name</th>
-                  <th style={{ textAlign: "left", padding: "8px 10px" }}>Type</th>
-                  <th style={{ textAlign: "left", padding: "8px 10px" }}>API URL</th>
-                  <th style={{ textAlign: "left", padding: "8px 10px" }}>Public IP</th>
-                  <th style={{ textAlign: "left", padding: "8px 10px" }}>Last seen</th>
-                  <th style={{ textAlign: "right", padding: "8px 10px" }}>Actions</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>API URL</th>
+                  <th>Public IP</th>
+                  <th>Last seen</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {discoveries.map((item) => (
-                  <tr key={item.id} style={{ borderTop: "1px solid var(--border-color)" }}>
-                    <td style={{ padding: "10px", verticalAlign: "top" }}>
+                  <tr key={item.id}>
+                    <td>
                       {item.suggestedName || "—"}
                       {item.version ? (
                         <div className="settings-item-description" style={{ margin: 0 }}>
@@ -144,32 +144,12 @@ export default function PendingServerDiscoveriesPage() {
                         </div>
                       ) : null}
                     </td>
-                    <td style={{ padding: "10px", verticalAlign: "top" }}>
-                      {vpnServerTypeLabel(item.serverType)}
-                    </td>
-                    <td
-                      style={{
-                        padding: "10px",
-                        verticalAlign: "top",
-                        wordBreak: "break-all",
-                        maxWidth: 280,
-                      }}
-                    >
-                      {item.apiUrl || "—"}
-                    </td>
-                    <td style={{ padding: "10px", verticalAlign: "top" }}>{item.publicIp || "—"}</td>
-                    <td style={{ padding: "10px", verticalAlign: "top", whiteSpace: "nowrap" }}>
-                      {formatWhen(item.lastSeenUtc)}
-                    </td>
-                    <td style={{ padding: "10px", verticalAlign: "top" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: 6,
-                          justifyContent: "flex-end",
-                          flexWrap: "wrap",
-                        }}
-                      >
+                    <td>{vpnServerTypeLabel(item.serverType)}</td>
+                    <td className="pending-discoveries__url">{item.apiUrl || "—"}</td>
+                    <td>{item.publicIp || "—"}</td>
+                    <td>{formatWhen(item.lastSeenUtc)}</td>
+                    <td className="pending-discoveries__actions-cell">
+                      <div className="pending-discoveries__actions">
                         <Link
                           to={`/servers/pending-discoveries/${item.id}`}
                           className="btn secondary"

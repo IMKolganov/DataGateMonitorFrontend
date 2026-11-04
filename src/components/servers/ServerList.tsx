@@ -114,6 +114,7 @@ const ServerList: React.FC<ServerListProps> = ({ onHideList, hideServiceControls
     runServiceNow,
     hubConnectionState,
     hubLastError,
+    totalDevices,
     normalizedServiceControlsData,
     queryClient,
   } = useServersWithStatusList();
@@ -805,6 +806,7 @@ const ServerList: React.FC<ServerListProps> = ({ onHideList, hideServiceControls
           onOpenDetails={() => navigate("/servers/status-stream-logs")}
           hubConnectionState={hubConnectionState}
           hubLastError={hubLastError}
+          totalDevices={totalDevices}
         />
       )}
 

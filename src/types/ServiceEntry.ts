@@ -4,5 +4,6 @@ export type ServiceEntry = {
   errorMessage: string | null;
   nextRunTime: string; // ISO string or "N/A"
   countConnectedClients?: number;
+  countDevices?: number;
   countSessions?: number;
 };

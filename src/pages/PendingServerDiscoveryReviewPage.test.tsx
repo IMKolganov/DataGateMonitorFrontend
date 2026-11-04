@@ -9,6 +9,15 @@ const approveMutateAsync = vi.hoisted(() =>
 );
 const denyMutateAsync = vi.hoisted(() => vi.fn(async () => ({})));
 
+const announcedPiHole = vi.hoisted(() => ({ value: false }));
+
+const nodeKeyFingerprint = vi.hoisted(() => ({ value: null as string | null }));
+
+vi.mock("../api/localIssuance", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../api/localIssuance")>()),
+  useDiscoveryNodeKey: () => ({ data: { pendingFingerprint: nodeKeyFingerprint.value } }),
+}));
+
 vi.mock("react-toastify", () => ({
   toast: { error: vi.fn(), success: vi.fn(), info: vi.fn() },
 }));
@@ -24,6 +33,7 @@ vi.mock("../api/orval/vpn-servers/vpn-servers", () => ({
           publicIp: "203.0.113.10",
           serverType: 1,
           isEnableWss: true,
+          hasPiHole: announcedPiHole.value,
           version: "9.9.9",
         },
       ],
@@ -72,6 +82,8 @@ describe("PendingServerDiscoveryReviewPage", () => {
   beforeEach(() => {
     approveMutateAsync.mockClear();
     denyMutateAsync.mockClear();
+    nodeKeyFingerprint.value = null;
+    announcedPiHole.value = false;
     vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
@@ -107,6 +119,74 @@ describe("PendingServerDiscoveryReviewPage", () => {
     expect(call.data.apiUrl).toBe("https://xray.example.com:9443/");
     expect(call.data.isEnableWss).toBe(true);
     expect(await screen.findByText("Edited")).toBeInTheDocument();
+  });
+
+  it.each([true, false])("defaults detected Pi-hole to enabled and respects opt-out %s", async (keepEnabled) => {
+    announcedPiHole.value = true;
+    const user = userEvent.setup();
+    renderWithProviders(
+      <Routes>
+        <Route path="/servers/pending-discoveries/:discoveryId" element={<PendingServerDiscoveryReviewPage />} />
+        <Route path="/servers/edit/:serverId" element={<div>Edited</div>} />
+      </Routes>,
+      { route: "/servers/pending-discoveries/5" },
+    );
+    const toggle = await screen.findByRole("checkbox", { name: /Enable Pi-hole integration/i });
+    await waitFor(() => expect(toggle).toBeChecked());
+    expect(screen.getByText(/Pi-hole detected/i)).toBeInTheDocument();
+    if (!keepEnabled) await user.click(toggle);
+    await user.click(screen.getByRole("button", { name: /Approve & add/i }));
+    await waitFor(() => expect(approveMutateAsync).toHaveBeenCalled());
+    expect(approveMutateAsync.mock.calls[0][0].data.isPiHoleEnabled).toBe(keepEnabled);
+  });
+
+  it("shows the announced node key fingerprint for comparison before approve", async () => {
+    nodeKeyFingerprint.value = "a".repeat(8) + "b".repeat(56);
+    renderWithProviders(
+      <Routes>
+        <Route
+          path="/servers/pending-discoveries/:discoveryId"
+          element={<PendingServerDiscoveryReviewPage />}
+        />
+      </Routes>,
+      { route: "/servers/pending-discoveries/5" },
+    );
+
+    const key = await screen.findByTestId("discovery-node-key");
+    expect(key.textContent?.startsWith("aaaa aaaa bbbb")).toBe(true);
+    expect(screen.getByText(/datagate-profile node-id/)).toBeInTheDocument();
+  });
+
+  it("hides the node key row for nodes that announce no key", async () => {
+    renderWithProviders(
+      <Routes>
+        <Route
+          path="/servers/pending-discoveries/:discoveryId"
+          element={<PendingServerDiscoveryReviewPage />}
+        />
+      </Routes>,
+      { route: "/servers/pending-discoveries/5" },
+    );
+
+    expect(await screen.findByRole("heading", { name: /Review server request/i })).toBeInTheDocument();
+    expect(screen.queryByTestId("discovery-node-key")).toBeNull();
+  });
+
+  it("warns when Pi-hole is enabled for a node that announced no credentials", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(
+      <Routes>
+        <Route path="/servers/pending-discoveries/:discoveryId" element={<PendingServerDiscoveryReviewPage />} />
+      </Routes>,
+      { route: "/servers/pending-discoveries/5" },
+    );
+
+    const toggle = await screen.findByRole("checkbox", { name: /Enable Pi-hole integration/i });
+    expect(screen.queryByText(/did not announce Pi-hole credentials/i)).not.toBeInTheDocument();
+
+    await user.click(toggle);
+
+    expect(screen.getByText(/did not announce Pi-hole credentials/i)).toBeInTheDocument();
   });
 
   it("shows missing state for unknown discovery id", async () => {

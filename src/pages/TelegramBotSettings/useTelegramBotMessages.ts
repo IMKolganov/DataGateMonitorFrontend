@@ -24,15 +24,18 @@ export function useTelegramBotMessages() {
         "5,10,20,50,100",
     );
     const [manualRefreshing, setManualRefreshing] = useState(false);
+    /** Default: hide messages from Telegram bot admins. */
+    const [excludeAdmins, setExcludeAdmins] = useState(true);
     const messageFilters = useGridFilters("settings-telegram-bot-messages");
 
     const params = useMemo<GetApiTgbotIncomingMessageLogsGetAllParams>(
         () => ({
             Page: page + 1,
             PageSize: pageSize,
+            ExcludeAdmins: excludeAdmins,
             ...messageFilters.queryParams,
         }),
-        [page, pageSize, messageFilters.queryParams],
+        [page, pageSize, excludeAdmins, messageFilters.queryParams],
     );
 
     const qMessages = useGetApiTgbotIncomingMessageLogsGetAll(params, {
@@ -100,6 +103,14 @@ export function useTelegramBotMessages() {
         resetPage();
     }, [messageFilters.onReset, resetPage]);
 
+    const onExcludeAdminsChange = useCallback(
+        (value: boolean) => {
+            setExcludeAdmins(value);
+            resetPage();
+        },
+        [resetPage],
+    );
+
     return {
         messages,
         totalCount,
@@ -110,6 +121,8 @@ export function useTelegramBotMessages() {
         refreshing,
         errorMessage,
         handleRefresh,
+        excludeAdmins,
+        onExcludeAdminsChange,
         messageFilterValues: messageFilters.values,
         onMessageFilterChange: messageFilters.onChange,
         onMessageFilterApply,

@@ -302,6 +302,11 @@ select.input:focus {
   margin: 0;
 }
 
+.admin-session-summary {
+  margin: 0 0 16px;
+  opacity: 0.85;
+}
+
 .admin-session-row {
   display: flex;
   flex-wrap: wrap;
@@ -312,9 +317,20 @@ select.input:focus {
   border-bottom: 1px solid var(--border-color);
 }
 
+.admin-session-row--idle {
+  opacity: 0.72;
+}
+
 .admin-session-row__meta {
   min-width: 0;
   flex: 1 1 12rem;
+}
+
+.admin-session-row__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
 
 .admin-session-row__meta strong {
@@ -327,9 +343,28 @@ select.input:focus {
   margin-top: 4px;
 }
 
-.admin-session-row__current {
-  margin-left: 8px;
-  opacity: 0.85;
+.admin-session-status {
+  display: inline-block;
+  font-size: var(--font-size-sm, 0.8rem);
+  line-height: 1.2;
+  padding: 2px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  opacity: 0.95;
+}
+
+.admin-session-status--current {
+  border-color: var(--success-color, #2f8f4e);
+  color: var(--success-color, #2f8f4e);
+}
+
+.admin-session-status--active {
+  border-color: var(--link-color, #3b7dd8);
+  color: var(--link-color, #3b7dd8);
+}
+
+.admin-session-status--idle {
+  color: var(--text-muted, inherit);
 }
 
 .secret-copy-row {

@@ -11,10 +11,14 @@ type Props = {
   children: ReactNode;
 };
 
-/** Redirects admins without TOTP to the security settings page until enrollment completes. */
+/**
+ * Redirects admins without TOTP to the security settings page until enrollment completes.
+ * Fail-open on API errors; keep rendering children while the status check is in flight
+ * so a slow/502 totp endpoint cannot blank the whole admin shell.
+ */
 export function RequireAdminTotpSetup({ children }: Props) {
   const location = useLocation();
-  const [allowed, setAllowed] = useState<boolean | null>(null);
+  const [allowed, setAllowed] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,6 +43,7 @@ export function RequireAdminTotpSetup({ children }: Props) {
         if (cancelled) return;
         setAllowed(!(status?.isAdmin && status?.requiresTotpSetup));
       } catch {
+        // Gateway blips (502) must not lock admins out of the dashboard.
         if (!cancelled) setAllowed(true);
       }
     };
@@ -48,10 +53,6 @@ export function RequireAdminTotpSetup({ children }: Props) {
       cancelled = true;
     };
   }, [location.pathname]);
-
-  if (allowed === null) {
-    return null;
-  }
 
   if (!allowed) {
     return <Navigate to={ADMIN_TOTP_SETUP_PATH} replace />;

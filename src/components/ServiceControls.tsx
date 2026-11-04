@@ -12,6 +12,8 @@ type Props = {
   /** From useSignalRService — helps tell connection errors from “no snapshot yet”. */
   hubConnectionState?: string;
   hubLastError?: string | null;
+  /** Global unique CommonName among connected clients (from StatusStreamPayload.TotalDevices). */
+  totalDevices?: number | null;
 };
 
 type UiStatus = "Idle" | "Running" | "Error" | "Pending";
@@ -41,6 +43,7 @@ function toMs(v: unknown): number | null {
 /** SignalR may add fields not present on the OpenAPI DTO. */
 type ServiceStatusDtoLive = ServiceStatusDto & {
   nextRunInSeconds?: number;
+  countDevices?: number;
 };
 
 function getNextRunSeconds(entries: ServiceStatusDto[]): number | null {
@@ -69,6 +72,7 @@ export default function ServiceControls({
   onOpenDetails,
   hubConnectionState,
   hubLastError,
+  totalDevices,
 }: Props) {
   const entries = useMemo(
     () => Object.values(serviceData ?? {}).filter((s): s is ServiceStatusDto => s != null),
@@ -78,14 +82,22 @@ export default function ServiceControls({
   const totals = useMemo(() => {
     let clients = 0;
     let sessions = 0;
+    let devices = 0;
 
     for (const s of entries) {
       if (typeof s.countConnectedClients === "number") clients += s.countConnectedClients;
       if (typeof s.countSessions === "number") sessions += s.countSessions;
+      const d = (s as ServiceStatusDtoLive).countDevices;
+      if (typeof d === "number") devices += d;
     }
 
-    return { clients, sessions };
-  }, [entries]);
+    return {
+      clients,
+      sessions,
+      // Prefer global unique from hub payload; fall back to sum of per-server distincts.
+      devices: typeof totalDevices === "number" ? totalDevices : devices,
+    };
+  }, [entries, totalDevices]);
 
   const anyRunning = useMemo(
       () => entries.some((e) => normalizeStatus(e.status) === "Running"),
@@ -185,11 +197,18 @@ export default function ServiceControls({
         </p>
 
         <p className="service-status-container__meta">
-          <strong>Total Connected Clients:</strong> {totals.clients}
+          <strong>Connected clients:</strong> {totals.clients}
         </p>
 
         <p className="service-status-container__meta">
-          <strong>Total Sessions:</strong> {totals.sessions.toLocaleString()}
+          <strong>Unique CN</strong>{" "}
+          <span style={{ color: "var(--text-secondary)", fontWeight: 400 }}>(CommonName)</span>
+          {": "}
+          {totals.devices}
+        </p>
+
+        <p className="service-status-container__meta">
+          <strong>Sessions:</strong> {totals.sessions.toLocaleString()}
         </p>
 
         <div className="flex-wrap-gap-8 service-status-container__actions">

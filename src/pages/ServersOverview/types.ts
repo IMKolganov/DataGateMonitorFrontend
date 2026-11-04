@@ -4,10 +4,11 @@ export type UsersSeriesChartPoint = {
   label: string;
   activeSessions: number;
   activeUsers: number;
+  activeDevices: number;
 };
 
-/** Merged series: traffic + sessions + active users (one chart) */
-export type MergedChartPoint = ChartPoint & { activeUsers?: number };
+/** Merged series: traffic + sessions + users + devices (one chart) */
+export type MergedChartPoint = ChartPoint & { activeUsers?: number; activeDevices?: number };
 
 export type ServerInfo = {
   id: number;

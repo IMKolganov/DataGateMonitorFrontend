@@ -124,6 +124,7 @@ function unwrapServerDto(raw: GetByIdResult | undefined): VpnServerDto | null {
     longitude: (o["longitude"] as number | null | undefined) ?? null,
     isEnableWss: Boolean(o["isEnableWss"] ?? false),
     isPiHoleEnabled: Boolean(o["isPiHoleEnabled"] ?? false),
+    isDeleted: Boolean(o["isDeleted"] ?? false),
     createDate: o["createDate"] as string | undefined,
     lastUpdate: o["lastUpdate"] as string | undefined,
     tags: Array.isArray(o["tags"]) ? o["tags"] : (o["tags"] as string[] | null | undefined) ?? null,
@@ -495,6 +496,7 @@ const ServerForm: React.FC = () => {
     longitude: null,
     isEnableWss: false,
     isPiHoleEnabled: false,
+    isDeleted: false,
     createDate: new Date().toISOString(),
     lastUpdate: new Date().toISOString(),
   });
@@ -652,6 +654,7 @@ const ServerForm: React.FC = () => {
         isDefault: isDuplicate ? false : (dto.isDefault ?? false),
         isEnableWss: dto.isEnableWss ?? false,
         isPiHoleEnabled: dto.isPiHoleEnabled ?? false,
+        isDeleted: isDuplicate ? false : (dto.isDeleted ?? false),
         lastUpdate: isDuplicate ? new Date().toISOString() : (dto.lastUpdate ?? prev.lastUpdate),
         createDate: isDuplicate ? new Date().toISOString() : (dto.createDate ?? prev.createDate),
         groupId: dto.groupId ?? prev.groupId ?? null,
@@ -844,6 +847,9 @@ const ServerForm: React.FC = () => {
       setServerData((p) => ({ ...p, isPiHoleEnabled: checked }));
       return;
     }
+    if (name === "isDeleted") {
+      setServerData((p) => ({ ...p, isDeleted: checked }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -896,6 +902,7 @@ const ServerForm: React.FC = () => {
           longitude: serverData.longitude ?? null,
           isEnableWss: serverData.isEnableWss ?? false,
           isPiHoleEnabled: serverData.isPiHoleEnabled ?? false,
+          isDeleted: serverData.isDeleted ?? false,
           tagIds: selectedTagIds,
           quotaPlanIds: selectedQuotaPlanIds,
         };
@@ -1193,6 +1200,27 @@ const ServerForm: React.FC = () => {
                 </div>
               </label>
             </div>
+
+            {idNum > 0 && (
+              <div className="form-group checkbox-container">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="isDeleted"
+                    checked={Boolean(serverData.isDeleted)}
+                    onChange={handleCheckboxChange}
+                    disabled={isFetching}
+                  />
+                  <div className="checkbox-content">
+                    <span className="checkbox-title">Deleted</span>
+                    <span className="checkbox-description">
+                      Hide this server from the default list. Uncheck and save to restore it.
+                      If another active server already uses this name, restore is rejected.
+                    </span>
+                  </div>
+                </label>
+              </div>
+            )}
 
             <div className="form-group checkbox-container">
               <label className="checkbox-label">

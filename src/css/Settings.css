@@ -108,8 +108,10 @@
     border-right: 1px solid var(--border-color);
     position: sticky;
     top: 0.5rem;
-    max-height: calc(100vh - 10rem);
+    /* Stay inside main (header+footer), not full viewport — avoids covering .footer */
+    max-height: calc(100dvh - 11rem);
     overflow-y: auto;
+    z-index: 2;
   }
 
   .settings-content__mobile-picker {
@@ -263,6 +265,7 @@
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  cursor: default;
 }
 
 /* Idle warning must sit above header (1100), toasts (~9999), and cookie banner (12000). */
@@ -512,6 +515,7 @@ h2.settings-page__h2-with-icon > .icon {
 
 .user-quota-assignments-table {
   width: 100%;
+  min-width: 36rem;
   border-collapse: collapse;
   font-size: var(--font-size-base);
   color: var(--text-secondary);
@@ -522,6 +526,13 @@ h2.settings-page__h2-with-icon > .icon {
   padding: 8px 12px;
   text-align: left;
   border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.user-quota-assignments-table td:nth-child(4) {
+  white-space: normal;
+  min-width: 8rem;
+  max-width: 16rem;
 }
 
 .user-quota-assignments-table th {
@@ -931,5 +942,66 @@ button.tab.tab--with-icon {
 
 .users-table-quota-cell .traffic-quota-progress {
   width: 100%;
+}
+
+/* Pending discoveries inbox: fill the content card, columns size to content, URL takes the rest. */
+.pending-discoveries {
+  width: 100%;
+  max-width: none;
+}
+
+.pending-discoveries__scroll {
+  overflow-x: auto;
+}
+
+.pending-discoveries__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pending-discoveries__table th,
+.pending-discoveries__table td {
+  padding: 10px 12px;
+  vertical-align: top;
+  text-align: left;
+}
+
+.pending-discoveries__table thead th {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.pending-discoveries__table tbody tr {
+  border-top: 1px solid var(--border-color);
+}
+
+.pending-discoveries__table th:nth-child(1),
+.pending-discoveries__table td:nth-child(1),
+.pending-discoveries__table th:nth-child(2),
+.pending-discoveries__table td:nth-child(2),
+.pending-discoveries__table th:nth-child(4),
+.pending-discoveries__table td:nth-child(4),
+.pending-discoveries__table th:nth-child(5),
+.pending-discoveries__table td:nth-child(5),
+.pending-discoveries__table th:nth-child(6),
+.pending-discoveries__table td:nth-child(6) {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.pending-discoveries__url {
+  overflow-wrap: anywhere;
+}
+
+.pending-discoveries__table th:last-child,
+.pending-discoveries__actions-cell {
+  text-align: right;
+}
+
+.pending-discoveries__actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
 }
 

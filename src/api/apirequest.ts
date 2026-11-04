@@ -10,6 +10,7 @@ import { clearStoredProfileAvatarUrl } from "../utils/auth/storedProfileAvatar.t
 import { notifyAccessTokenRefreshed } from "../utils/auth/accessTokenEvents.ts";
 import { notifyAdminApiActivity } from "../utils/auth/adminIdleSessionEvents.ts";
 import { authErrFields, authLog } from "../utils/auth/authLog.ts";
+import { getOrCreateDeviceId } from "../utils/auth/deviceId.ts";
 import {
   buildLoginRedirectUrl,
   rememberLogoutReason,
@@ -68,6 +69,7 @@ export const apiRequest = async <T>(
 
   // Build headers safely: add Authorization only if token exists AND not skipAuth
   const authHeader = !skipAuth && token ? { Authorization: `Bearer ${token}` } : {};
+  const deviceHeader = { "X-Device-Id": getOrCreateDeviceId() };
 
   try {
     const response = await axios({
@@ -76,6 +78,7 @@ export const apiRequest = async <T>(
       ...config,
       headers: {
         ...config.headers,
+        ...deviceHeader,
         ...authHeader,
       },
     });
@@ -111,6 +114,7 @@ export const apiRequest = async <T>(
           ...config,
           headers: {
             ...config.headers,
+            "X-Device-Id": getOrCreateDeviceId(),
             Authorization: `Bearer ${newToken}`,
           },
         });
@@ -241,7 +245,7 @@ const refreshAccessToken = async (): Promise<string> => {
   const body: RefreshRequest = {
     refreshToken,
     userAgent: navigator.userAgent,
-    // deviceId: localStorage.getItem("deviceId") ?? null,
+    deviceId: getOrCreateDeviceId(),
   };
 
   try {
@@ -249,7 +253,12 @@ const refreshAccessToken = async (): Promise<string> => {
     const resp = await axios.post<ApiResponse<RefreshResponse>>(
         `${API_BASE_URL}/api/auth/refresh`,
         body,
-        { headers: { "Content-Type": "application/json" } },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-Device-Id": body.deviceId ?? getOrCreateDeviceId(),
+          },
+        },
     );
 
     const payload = resp.data;

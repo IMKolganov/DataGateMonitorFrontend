@@ -11,8 +11,11 @@ import type {
 } from "../../api/orvalModelShim";
 import { usePostApiOpenVpnFilesRevokeFile, usePostApiOpenVpnFilesDownloadFile } from "../../api/orval/open-vpn-files/open-vpn-files.ts";
 import { FaBan, FaDownload } from "react-icons/fa";
+import Chip from "@mui/material/Chip";
+import type { IssuedOvpnFileOrigin } from "../../api/localIssuance";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
+import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { useClientGridPagination } from "../../hooks/useClientGridPagination";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
 import {
@@ -38,6 +41,8 @@ interface Props {
   vpnServerId: string;
   onRevoke: (count?: number) => Promise<void> | void;
   loading: boolean;
+  /** Origin / service-profile extras by IssuedOvpnFile id (node-local issuance). */
+  origins?: Map<number, IssuedOvpnFileOrigin>;
 }
 
 type OvpnRow = {
@@ -55,6 +60,8 @@ type OvpnRow = {
   message: string;
   lastUpdate: string;
   createDate: string;
+  isLocal: boolean;
+  isServiceProfile: boolean;
 };
 
 function unwrapOvpnItem(x: OvpnRowInput): IssuedOvpnFileDto | null {
@@ -92,13 +99,41 @@ function revokeErrorMessage(err: unknown): string {
   return e.response?.data?.message || e.message || "Error revoking OVPN file.";
 }
 
-const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loading }) => {
+export function OvpnOriginLabels({ isLocal, isServiceProfile }: { isLocal: boolean; isServiceProfile: boolean }) {
+  if (!isLocal && !isServiceProfile) return <span style={{ color: "var(--text-muted)" }}>Dashboard</span>;
+  return (
+    <span style={{ display: "inline-flex", gap: 4, flexWrap: "wrap" }}>
+      {isLocal && (
+        <Chip
+          size="small"
+          color="info"
+          variant="outlined"
+          label="Issued locally"
+          title="Issued on the node itself (datagate-profile), not from the dashboard"
+        />
+      )}
+      {isServiceProfile && (
+        <Chip
+          size="small"
+          color="secondary"
+          variant="outlined"
+          label="Service"
+          title="Service profile: only VPN-internal traffic goes through the tunnel"
+        />
+      )}
+    </span>
+  );
+}
+
+const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loading, origins }) => {
   const { mutateAsync: revokeMutate, isPending: revokePending } = usePostApiOpenVpnFilesRevokeFile();
   const { mutateAsync: downloadMutate, isPending: downloadPending } = usePostApiOpenVpnFilesDownloadFile();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [issuedToFilter, setIssuedToFilter] = useState("");
-  const [bulkRevoking, setBulkRevoking] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+  const bulkRevoking = bulkProgress !== null;
+  const canRevokeAll = isAdmin(getCurrentUser());
   const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>(emptyGridSelection);
   const paging = useClientGridPagination({
     storageKey: `ovpn-files:${vpnServerId}`,
@@ -115,22 +150,14 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
       .filter((x): x is IssuedOvpnFileDto => !!x && (x.id != null || x.commonName != null));
   }, [ovpnFiles]);
 
-  const filtered = useMemo(() => {
-    return items.filter((x) => {
-      const byCN = (x.commonName ?? "").toLowerCase().includes(searchQuery.toLowerCase());
-      const byIssuedTo =
-        issuedToFilter === "" || (x.issuedTo ?? "").toLowerCase().includes(issuedToFilter.toLowerCase());
-      return byCN && byIssuedTo;
-    });
-  }, [items, searchQuery, issuedToFilter]);
-
   useEffect(() => {
     setRowSelectionModel(emptyGridSelection());
   }, [searchQuery, issuedToFilter, ovpnFilesGridPage, ovpnFilesPageSize, vpnServerId]);
 
-  const rows: OvpnRow[] = useMemo(
+  const allRows: OvpnRow[] = useMemo(
     () =>
-      filtered.map((issuedOvpnFile, index) => {
+      items.map((issuedOvpnFile, index) => {
+        const origin = issuedOvpnFile.id != null ? origins?.get(Number(issuedOvpnFile.id)) : undefined;
         const id =
           issuedOvpnFile.id != null
             ? String(issuedOvpnFile.id)
@@ -151,9 +178,25 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           message: issuedOvpnFile.message || "",
           lastUpdate: safeFormatDate(issuedOvpnFile.lastUpdate),
           createDate: safeFormatDate(issuedOvpnFile.createDate),
+          isLocal: origin?.origin === "local",
+          isServiceProfile: origin?.isServiceProfile === true,
         };
       }),
-    [filtered],
+    [items, origins],
+  );
+
+  const rows = useMemo(() => {
+    return allRows.filter((x) => {
+      const byCN = x.commonName.toLowerCase().includes(searchQuery.toLowerCase());
+      const byIssuedTo =
+        issuedToFilter === "" || x.issuedTo.toLowerCase().includes(issuedToFilter.toLowerCase());
+      return byCN && byIssuedTo;
+    });
+  }, [allRows, searchQuery, issuedToFilter]);
+
+  const activeRows = useMemo(
+    () => allRows.filter((row) => !row.isRevoked && row.numericId != null),
+    [allRows],
   );
 
   const pageRows = useMemo(
@@ -174,7 +217,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
   const clearSelection = useCallback(() => setRowSelectionModel(emptyGridSelection()), []);
 
   const handleRevokeMany = useCallback(
-    async (targets: OvpnRow[]) => {
+    async (targets: OvpnRow[], confirmMessage?: string) => {
       const unique = targets.filter((r) => r.numericId != null && !r.isRevoked);
       if (unique.length === 0) return;
 
@@ -184,13 +227,14 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           ? labels.join(", ")
           : `${labels.slice(0, 3).join(", ")} and ${labels.length - 3} more`;
       const confirmed = window.confirm(
-        unique.length === 1
-          ? `Are you sure you want to revoke OVPN file ${labels[0]}?`
-          : `Are you sure you want to revoke ${unique.length} OVPN files?\n\n${preview}\n\nThis cannot be undone.`,
+        confirmMessage ??
+          (unique.length === 1
+            ? `Are you sure you want to revoke OVPN file ${labels[0]}?`
+            : `Are you sure you want to revoke ${unique.length} OVPN files?\n\n${preview}\n\nThis cannot be undone.`),
       );
       if (!confirmed) return;
 
-      setBulkRevoking(true);
+      setBulkProgress({ done: 0, total: unique.length });
       try {
         const failures: string[] = [];
         for (const row of unique) {
@@ -204,6 +248,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           } catch (err: unknown) {
             failures.push(`${row.commonName || row.id}: ${revokeErrorMessage(err)}`);
           }
+          setBulkProgress((p) => p && { ...p, done: p.done + 1 });
         }
 
         const succeeded = unique.length - failures.length;
@@ -220,7 +265,7 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
           );
         }
       } finally {
-        setBulkRevoking(false);
+        setBulkProgress(null);
       }
     },
     [vpnServerId, revokeMutate, onRevoke, clearSelection],
@@ -236,6 +281,18 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
   const handleBulkRevoke = useCallback(async () => {
     await handleRevokeMany(selectedActiveRows);
   }, [handleRevokeMany, selectedActiveRows]);
+
+  // Uses allRows on purpose: search filters and paging must not leave anything active.
+  const handleRevokeAll = useCallback(async () => {
+    await handleRevokeMany(
+      activeRows,
+      `Revoke ALL ${activeRows.length} active OVPN files on this server?\n\n` +
+        "Every client, including profiles issued locally on the node, loses access until a new file is issued. " +
+        "Search filters are ignored.\n\n" +
+        "If the server IP changed, update it in the server settings first so new files use the new address.\n\n" +
+        "This cannot be undone.",
+    );
+  }, [handleRevokeMany, activeRows]);
 
   const handleDownload = useCallback(
     async (issuedOvpnFileId: number) => {
@@ -290,6 +347,17 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
     { field: "commonName", headerName: "Common Name", flex: 1, minWidth: 160 },
     { field: "fileName", headerName: "File Name", flex: 1, minWidth: 160 },
     { field: "issuedAt", headerName: "Issued Date", flex: 0.8, minWidth: 140 },
+    {
+      field: "isLocal",
+      headerName: "Origin",
+      flex: 0.8,
+      minWidth: 150,
+      sortable: false,
+      renderCell: (params) => {
+        const row = params.row as OvpnRow;
+        return <OvpnOriginLabels isLocal={row.isLocal} isServiceProfile={row.isServiceProfile} />;
+      },
+    },
     {
       field: "isRevoked",
       headerName: "Status",
@@ -377,6 +445,20 @@ const OvpnFilesTable: React.FC<Props> = ({ ovpnFiles, vpnServerId, onRevoke, loa
                 ? `Revoke selected (${selectedActiveRows.length})`
                 : "Revoke selected"}
           </button>
+          {canRevokeAll && (
+            <button
+              type="button"
+              className="btn danger"
+              disabled={busy || activeRows.length === 0}
+              onClick={() => void handleRevokeAll()}
+              title="Revoke every active OVPN file on this server, e.g. after its IP changed"
+            >
+              <FaBan className="icon" aria-hidden />
+              {bulkProgress
+                ? `Revoking… ${bulkProgress.done}/${bulkProgress.total}`
+                : `Revoke all (${activeRows.length})`}
+            </button>
+          )}
         </div>
 
         <Grid

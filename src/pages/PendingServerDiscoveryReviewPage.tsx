@@ -27,6 +27,7 @@ import { getGetApiQuotaPlanAllowedServersGetByVpnServerIdVpnServerIdQueryKey } f
 import type { VpnServersRequestsApproveVpnServerDiscoveryRequest } from "../api/orval/model/vpnServersRequestsApproveVpnServerDiscoveryRequest";
 import type { QuotaPlanDto, QuotaPlansResponse } from "../api/orvalModelShim";
 import { unwrapMaybeApiResponse } from "./TelegramBotSettings/unwrapApiResponse";
+import { formatFingerprint, useDiscoveryNodeKey } from "../api/localIssuance";
 import "../css/ServerForm.css";
 import "../css/Settings.css";
 
@@ -50,6 +51,8 @@ export default function PendingServerDiscoveryReviewPage() {
     () => discoveries.find((d) => d.id === discoveryId) ?? null,
     [discoveries, discoveryId],
   );
+  const nodeKeyQuery = useDiscoveryNodeKey(discoveryId, Number.isFinite(discoveryId) && discoveryId > 0);
+  const nodeKeyFingerprint = nodeKeyQuery.data?.pendingFingerprint ?? null;
 
   const [serverName, setServerName] = useState("");
   const [apiUrl, setApiUrl] = useState("");
@@ -65,10 +68,11 @@ export default function PendingServerDiscoveryReviewPage() {
 
   useEffect(() => {
     if (!discovery?.id || hydratedId === discovery.id) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydrate once per discovery and preserve administrator edits during refetches.
     setServerName(discovery.suggestedName?.trim() || "");
     setApiUrl(discovery.apiUrl?.trim() || "");
     setIsEnableWss(Boolean(discovery.isEnableWss));
-    setIsPiHoleEnabled(false);
+    setIsPiHoleEnabled(Boolean(discovery.hasPiHole));
     setIsDefault(false);
     setIsDisabled(false);
     setLatitude("");
@@ -265,6 +269,20 @@ export default function PendingServerDiscoveryReviewPage() {
               <dd style={{ margin: 0 }}>{discovery.version}</dd>
             </>
           ) : null}
+          {nodeKeyFingerprint ? (
+            <>
+              <dt style={{ color: "var(--text-muted)" }}>Node key</dt>
+              <dd style={{ margin: 0 }}>
+                <code style={{ wordBreak: "break-all" }} data-testid="discovery-node-key">
+                  {formatFingerprint(nodeKeyFingerprint)}
+                </code>
+                <div style={{ color: "var(--text-muted)", fontSize: 12 }}>
+                  Approving trusts this key for locally issued profiles. Compare with{" "}
+                  <code>datagate-profile node-id</code> on the node.
+                </div>
+              </dd>
+            </>
+          ) : null}
         </dl>
 
         <form
@@ -339,6 +357,17 @@ export default function PendingServerDiscoveryReviewPage() {
               />
               <div className="checkbox-content">
                 <span className="checkbox-title">Enable Pi-hole integration</span>
+                {discovery.hasPiHole && (
+                  <span className="checkbox-description">
+                    Pi-hole detected. Connection settings will be configured automatically.
+                  </span>
+                )}
+                {!discovery.hasPiHole && isPiHoleEnabled && (
+                  <span className="checkbox-description" role="note">
+                    This node did not announce Pi-hole credentials. After approval, enter the connection settings on
+                    the server's Pi-hole tab.
+                  </span>
+                )}
               </div>
             </label>
           </div>

@@ -5,7 +5,8 @@ import StatsCards from "./StatsCards";
 
 const totals = {
   sessionsCount: 12,
-  devicesCount: 3,
+  devicesCount: 5,
+  usersCount: 3,
   accountsCount: 2,
   trafficInBytes: 1024,
   trafficOutBytes: 2048,
@@ -16,9 +17,12 @@ describe("StatsCards", () => {
   it("renders totals from props", () => {
     renderWithProviders(<StatsCards totals={totals} />);
 
-    expect(screen.getByText("Devices (unique externalId)")).toBeInTheDocument();
+    expect(screen.getByText("Devices (CN)")).toBeInTheDocument();
+    expect(screen.getByText("unique over period (≠ concurrent)")).toBeInTheDocument();
+    expect(screen.getByText("5")).toBeInTheDocument();
+    expect(screen.getByText("Users (ExternalId)")).toBeInTheDocument();
     expect(screen.getByText("3")).toBeInTheDocument();
-    expect(screen.getByText("Users (accounts)")).toBeInTheDocument();
+    expect(screen.getByText("Accounts")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
     expect(screen.getByText("Sessions")).toBeInTheDocument();
     expect(screen.getByText("12")).toBeInTheDocument();

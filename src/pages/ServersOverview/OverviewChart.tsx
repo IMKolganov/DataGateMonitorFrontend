@@ -3,12 +3,13 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianG
 import type { MergedChartPoint } from "./types";
 import type { TooltipProps } from "recharts";
 
-export type OverviewChartMode = "combined" | "sessions" | "users" | "traffic";
+export type OverviewChartMode = "combined" | "sessions" | "users" | "devices" | "traffic";
 
 const MODE_OPTIONS: { id: OverviewChartMode; label: string; hint: string }[] = [
-  { id: "combined", label: "All together", hint: "Sessions, unique users, and traffic on one chart (two Y-axes)." },
+  { id: "combined", label: "All together", hint: "Sessions, users, devices (CN), and traffic on one chart (two Y-axes)." },
   { id: "sessions", label: "Sessions", hint: "Active client sessions over time." },
-  { id: "users", label: "Users", hint: "Active unique users (externalId) over time." },
+  { id: "users", label: "Users", hint: "Active unique users (ExternalId) over time." },
+  { id: "devices", label: "Devices (CN)", hint: "Active unique devices (CommonName / installation id) over time." },
   { id: "traffic", label: "Traffic", hint: "Total traffic per bucket (MB)." },
 ];
 
@@ -109,6 +110,10 @@ export default function OverviewChart({
               <stop offset="0%" stopColor="#a371f7" stopOpacity={0.35} />
               <stop offset="100%" stopColor="#a371f7" stopOpacity={0.05} />
             </linearGradient>
+            <linearGradient id="fillDevices" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#db6d28" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="#db6d28" stopOpacity={0.05} />
+            </linearGradient>
             <linearGradient id="fillMb" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#3fb950" stopOpacity={0.35} />
               <stop offset="100%" stopColor="#3fb950" stopOpacity={0.05} />
@@ -123,10 +128,7 @@ export default function OverviewChart({
               <YAxis yAxisId="right" orientation="right" stroke="#8b949e" tick={{ fill: "#8b949e", fontSize: 12 }} tickFormatter={(v) => `${v} MB`} width={64} />
             </>
           )}
-          {mode === "sessions" && (
-            <YAxis yAxisId="left" stroke="#8b949e" tick={{ fill: "#8b949e", fontSize: 12 }} allowDecimals={false} width={52} />
-          )}
-          {mode === "users" && (
+          {(mode === "sessions" || mode === "users" || mode === "devices") && (
             <YAxis yAxisId="left" stroke="#8b949e" tick={{ fill: "#8b949e", fontSize: 12 }} allowDecimals={false} width={52} />
           )}
           {mode === "traffic" && (
@@ -139,7 +141,8 @@ export default function OverviewChart({
           {mode === "combined" && (
             <>
               <Area yAxisId="left" type="monotone" dataKey="active" name="Sessions" stroke="#58a6ff" fill="url(#fillActive)" strokeWidth={2} dot={false} />
-              <Area yAxisId="left" type="monotone" dataKey="activeUsers" name="Active users" stroke="#a371f7" fill="url(#fillUsers)" strokeWidth={2} dot={false} />
+              <Area yAxisId="left" type="monotone" dataKey="activeUsers" name="Users" stroke="#a371f7" fill="url(#fillUsers)" strokeWidth={2} dot={false} />
+              <Area yAxisId="left" type="monotone" dataKey="activeDevices" name="Devices (CN)" stroke="#db6d28" fill="url(#fillDevices)" strokeWidth={2} dot={false} />
               <Area yAxisId="right" type="monotone" dataKey="mb" name="Traffic, MB" stroke="#3fb950" fill="url(#fillMb)" strokeWidth={2} dot={false} />
             </>
           )}
@@ -147,7 +150,10 @@ export default function OverviewChart({
             <Area yAxisId="left" type="monotone" dataKey="active" name="Sessions" stroke="#58a6ff" fill="url(#fillActive)" strokeWidth={2} dot={false} />
           )}
           {mode === "users" && (
-            <Area yAxisId="left" type="monotone" dataKey="activeUsers" name="Active users" stroke="#a371f7" fill="url(#fillUsers)" strokeWidth={2} dot={false} />
+            <Area yAxisId="left" type="monotone" dataKey="activeUsers" name="Users" stroke="#a371f7" fill="url(#fillUsers)" strokeWidth={2} dot={false} />
+          )}
+          {mode === "devices" && (
+            <Area yAxisId="left" type="monotone" dataKey="activeDevices" name="Devices (CN)" stroke="#db6d28" fill="url(#fillDevices)" strokeWidth={2} dot={false} />
           )}
           {mode === "traffic" && (
             <Area yAxisId="right" type="monotone" dataKey="mb" name="Traffic, MB" stroke="#3fb950" fill="url(#fillMb)" strokeWidth={2} dot={false} />

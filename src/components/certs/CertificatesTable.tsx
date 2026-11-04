@@ -110,10 +110,10 @@ const CertificatesTable: React.FC<CertificatesTableProps> = ({
         const statusNumeric = typeof cert.status === "number" ? cert.status : 3;
         const commonName = cert.commonName || "N/A";
         const serialNumber = cert.serialNumber || "N/A";
+        // easy-rsa keeps several index.txt rows per CN (revoked + re-issued), so key by serial.
         const id =
-          cert.commonName?.trim() ||
           cert.serialNumber?.trim() ||
-          `cert-row-${index}`;
+          `${cert.commonName?.trim() || "cert"}-row-${index}`;
         return {
           id,
           commonName,

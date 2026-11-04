@@ -16,6 +16,7 @@ import {
 import { FaBan, FaDownload } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { formatDateWithOffset } from "../../utils/utils.ts";
+import { getCurrentUser, isAdmin } from "../../utils/auth/authSelectors";
 import { usePersistedPageSize } from "../../hooks/usePersistedPageSize";
 import { unwrapXrayClientLinkRow, type XrayClientLinkRowInput } from "../../utils/xrayClientLinkRow";
 import { GridRowActions, RowActionButton } from "../ui/GridRowActions.tsx";
@@ -64,7 +65,9 @@ type LinkRow = {
 const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, loading }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [issuedToFilter, setIssuedToFilter] = useState("");
-  const [bulkRevoking, setBulkRevoking] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+  const bulkRevoking = bulkProgress !== null;
+  const canRevokeAll = isAdmin(getCurrentUser());
   const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>(emptyGridSelection);
   const [gridPage, setGridPage] = useState(0);
   const [pageSize, setPageSize] = usePersistedPageSize(`xray-client-links:${vpnServerId}`, 10, "5,10,20,100");
@@ -76,22 +79,13 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
       .filter((x): x is IssuedXrayClientLinkDto => !!x && (x.id != null || x.commonName != null));
   }, [links]);
 
-  const filtered = useMemo(() => {
-    return items.filter((x) => {
-      const byCN = (x.commonName ?? "").toLowerCase().includes(searchQuery.toLowerCase());
-      const byIssuedTo =
-        issuedToFilter === "" || (x.issuedTo ?? "").toLowerCase().includes(issuedToFilter.toLowerCase());
-      return byCN && byIssuedTo;
-    });
-  }, [items, searchQuery, issuedToFilter]);
-
   useEffect(() => {
     setRowSelectionModel(emptyGridSelection());
   }, [searchQuery, issuedToFilter, gridPage, pageSize, vpnServerId]);
 
-  const rows: LinkRow[] = useMemo(
+  const allRows: LinkRow[] = useMemo(
     () =>
-      filtered.map((row, index) => {
+      items.map((row, index) => {
         const id = row.id != null ? String(row.id) : `${row.commonName ?? "cn"}-${index}`;
         return {
           id,
@@ -110,7 +104,21 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
           createDate: safeFormatDate(row.createDate),
         };
       }),
-    [filtered],
+    [items],
+  );
+
+  const rows = useMemo(() => {
+    return allRows.filter((x) => {
+      const byCN = x.commonName.toLowerCase().includes(searchQuery.toLowerCase());
+      const byIssuedTo =
+        issuedToFilter === "" || x.issuedTo.toLowerCase().includes(issuedToFilter.toLowerCase());
+      return byCN && byIssuedTo;
+    });
+  }, [allRows, searchQuery, issuedToFilter]);
+
+  const activeRows = useMemo(
+    () => allRows.filter((row) => !row.isRevoked && row.numericId != null),
+    [allRows],
   );
 
   const pageRows = useMemo(() => slicePageRows(rows, gridPage, pageSize), [rows, gridPage, pageSize]);
@@ -128,7 +136,7 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
   const clearSelection = useCallback(() => setRowSelectionModel(emptyGridSelection()), []);
 
   const handleRevokeMany = useCallback(
-    async (targets: LinkRow[]) => {
+    async (targets: LinkRow[], confirmMessage?: string) => {
       const unique = targets.filter((r) => r.numericId != null && !r.isRevoked);
       if (unique.length === 0) return;
 
@@ -138,13 +146,14 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
           ? labels.join(", ")
           : `${labels.slice(0, 3).join(", ")} and ${labels.length - 3} more`;
       const confirmed = window.confirm(
-        unique.length === 1
-          ? `Revoke VLESS client link for ${labels[0]}?`
-          : `Revoke ${unique.length} VLESS client links?\n\n${preview}\n\nThis cannot be undone.`,
+        confirmMessage ??
+          (unique.length === 1
+            ? `Revoke VLESS client link for ${labels[0]}?`
+            : `Revoke ${unique.length} VLESS client links?\n\n${preview}\n\nThis cannot be undone.`),
       );
       if (!confirmed) return;
 
-      setBulkRevoking(true);
+      setBulkProgress({ done: 0, total: unique.length });
       try {
         const failures: string[] = [];
         for (const row of unique) {
@@ -158,6 +167,7 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
           } catch (err: unknown) {
             failures.push(`${row.commonName || row.id}: ${revokeErrorMessage(err)}`);
           }
+          setBulkProgress((p) => p && { ...p, done: p.done + 1 });
         }
 
         const succeeded = unique.length - failures.length;
@@ -174,7 +184,7 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
           );
         }
       } finally {
-        setBulkRevoking(false);
+        setBulkProgress(null);
       }
     },
     [vpnServerId, onRevoke, clearSelection],
@@ -190,6 +200,17 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
   const handleBulkRevoke = useCallback(async () => {
     await handleRevokeMany(selectedActiveRows);
   }, [handleRevokeMany, selectedActiveRows]);
+
+  // Uses allRows on purpose: search filters and paging must not leave anything active.
+  const handleRevokeAll = useCallback(async () => {
+    await handleRevokeMany(
+      activeRows,
+      `Revoke ALL ${activeRows.length} active VLESS client links on this server?\n\n` +
+        "Every client loses access until a new link is issued. Search filters are ignored.\n\n" +
+        "If the server IP changed, update it in the server settings first so new links use the new address.\n\n" +
+        "This cannot be undone.",
+    );
+  }, [handleRevokeMany, activeRows]);
 
   const handleDownload = useCallback(
     async (issuedFileId: number) => {
@@ -331,6 +352,20 @@ const XrayClientLinksTable: React.FC<Props> = ({ links, vpnServerId, onRevoke, l
                 ? `Revoke selected (${selectedActiveRows.length})`
                 : "Revoke selected"}
           </button>
+          {canRevokeAll && (
+            <button
+              type="button"
+              className="btn danger"
+              disabled={busy || activeRows.length === 0}
+              onClick={() => void handleRevokeAll()}
+              title="Revoke every active VLESS link on this server, e.g. after its IP changed"
+            >
+              <FaBan className="icon" aria-hidden />
+              {bulkProgress
+                ? `Revoking… ${bulkProgress.done}/${bulkProgress.total}`
+                : `Revoke all (${activeRows.length})`}
+            </button>
+          )}
         </div>
 
         <Grid

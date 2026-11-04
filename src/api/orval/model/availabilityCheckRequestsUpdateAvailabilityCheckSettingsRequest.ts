@@ -9,6 +9,5 @@ export interface AvailabilityCheckRequestsUpdateAvailabilityCheckSettingsRequest
   enabled?: boolean;
   /** @nullable */
   probeUrl?: string | null;
-  /** Background probe interval in seconds (60–86400). */
   intervalSeconds?: number;
 }

@@ -59,6 +59,27 @@ describe("PiHoleStatusPanel", () => {
     expect(alerts.some((el) => el.textContent?.includes("Upstream failed"))).toBe(true);
   });
 
+  it("names the likely cause when neither the dashboard nor the node has credentials", () => {
+    render(
+      <PiHoleStatusPanel
+        dashboardConfig={{ vpnServerId: 136, baseUrl: "", hasAppPassword: false }}
+        serverPiHoleEnabled
+        diagnostics={{ enabled: false, hasAppPassword: false, authenticated: false }}
+      />,
+    );
+
+    expect(screen.getByRole("note")).toHaveTextContent(/Likely cause:.*no Pi-hole credentials/);
+    expect(screen.queryByText(/Base URL is saved/)).not.toBeInTheDocument();
+  });
+
+  it("shows no cause for a healthy node", () => {
+    render(
+      <PiHoleStatusPanel dashboardConfig={dashboardConfig} serverPiHoleEnabled diagnostics={healthy} />,
+    );
+
+    expect(screen.queryByText(/Likely cause:/)).not.toBeInTheDocument();
+  });
+
   it("renders pipeline steps from diagnostics", () => {
     render(
       <PiHoleStatusPanel

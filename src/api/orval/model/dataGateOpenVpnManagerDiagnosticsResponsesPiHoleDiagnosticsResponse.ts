@@ -42,4 +42,8 @@ export interface DataGateOpenVpnManagerDiagnosticsResponsesPiHoleDiagnosticsResp
   health?: string | null;
   /** @nullable */
   healthMessage?: string | null;
+  /** @nullable */
+  credentialSource?: string | null;
+  /** @nullable */
+  announceState?: string | null;
 }

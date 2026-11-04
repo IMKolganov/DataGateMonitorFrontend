@@ -75,6 +75,7 @@ import { UserOpenVpnEventsSection } from "../../components/openvpn/UserOpenVpnEv
 import { UserClientAppVersionsSection } from "../../components/openvpn/UserClientAppVersionsSection";
 import { TopVisitedDomainsSection } from "../../components/pihole/TopVisitedDomainsSection";
 import { serverPiHoleEnabled, shouldShowUserDnsQueries } from "../../utils/pihole/serverPiHoleEnabled";
+import { isOpenVpnStack } from "../../constants/vpnServerType";
 
 
 
@@ -150,6 +151,7 @@ function readPayload<T>(value: T | { data?: T } | undefined): T | undefined {
 type SafeTotals = {
   sessionsCount: number;
   devicesCount: number;
+  usersCount: number;
   accountsCount: number;
   trafficInBytes: number;
   trafficOutBytes: number;
@@ -162,14 +164,23 @@ type SafeTotals = {
 
 function makeSafeTotals(resp?: OverviewTotalsResponse): SafeTotals {
   const sessionsCount = resp?.totals?.sessionsCount ?? 0;
-  const devicesCount = resp?.totals?.usersCount ?? 0;
+  const devicesCount = resp?.totals?.devicesCount ?? 0;
+  const usersCount = resp?.totals?.usersCount ?? 0;
   const accountsCount = resp?.totals?.accountsCount ?? 0;
   const trafficInBytes = resp?.totals?.trafficInBytes ?? 0;
   const trafficOutBytes = resp?.totals?.trafficOutBytes ?? 0;
   const trafficTotalBytes =
     resp?.totals?.trafficTotalBytes ?? (trafficInBytes + trafficOutBytes);
 
-  return { sessionsCount, devicesCount, accountsCount, trafficInBytes, trafficOutBytes, trafficTotalBytes };
+  return {
+    sessionsCount,
+    devicesCount,
+    usersCount,
+    accountsCount,
+    trafficInBytes,
+    trafficOutBytes,
+    trafficTotalBytes,
+  };
 }
 
 export default function ServersOverview() {
@@ -216,8 +227,15 @@ export default function ServersOverview() {
     scopedServerPiHole,
     viewerIsAdmin,
   );
-  const showUserOpenVpnEvents =
-    Boolean(statsExternalId && vpnServerId != null && vpnServerId > 0 && viewerIsAdmin);
+  // IV_GUI_VER / connect event logs exist only on the OpenVPN stack (not Xray).
+  const showUserOpenVpnEvents = Boolean(
+    statsExternalId &&
+      vpnServerId != null &&
+      vpnServerId > 0 &&
+      viewerIsAdmin &&
+      scopedServer != null &&
+      isOpenVpnStack(scopedServer.serverType),
+  );
 
   const showActivitySection = showUserOpenVpnEvents || showUserDnsQueries;
   const showDomainsSection = vpnServerId == null && !statsExternalId && viewerIsAdmin;
@@ -434,9 +452,11 @@ export default function ServersOverview() {
     const seriesSummary = apiData?.summary;
 
     const devicesPeak =
+      extremeFromSummary(usersSummary?.peakActiveDevices, usersSummary?.peakActiveDevicesAt, usersMode) ??
       extremeFromSummary(usersSummary?.peakActiveUsers, usersSummary?.peakActiveUsersAt, usersMode) ??
       extremeFromSummary(seriesSummary?.peakActiveClients, seriesSummary?.peakActiveClientsAt, seriesMode);
     const devicesLow =
+      extremeFromSummary(usersSummary?.lowActiveDevices, usersSummary?.lowActiveDevicesAt, usersMode) ??
       extremeFromSummary(usersSummary?.lowActiveUsers, usersSummary?.lowActiveUsersAt, usersMode) ??
       extremeFromSummary(seriesSummary?.lowActiveClients, seriesSummary?.lowActiveClientsAt, seriesMode);
     const sessionsPeak =
