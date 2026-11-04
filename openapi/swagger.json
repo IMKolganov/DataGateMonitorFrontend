@@ -27413,6 +27413,9 @@
           },
           "isDisabled": {
             "type": "boolean"
+          },
+          "isDeleted": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

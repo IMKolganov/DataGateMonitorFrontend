@@ -15,6 +15,7 @@ describe("buildUpdateServerRequest", () => {
         serverName: "Norway 2",
         apiUrl: "http://openvpn:5010/",
         isPiHoleEnabled: false,
+        isDeleted: true,
         tags: ["eu"],
       },
       { isPiHoleEnabled: true, tagIds: [1], quotaPlanIds: [2] },
@@ -22,6 +23,7 @@ describe("buildUpdateServerRequest", () => {
 
     expect(payload.id).toBe(5);
     expect(payload.isPiHoleEnabled).toBe(true);
+    expect(payload.isDeleted).toBe(true);
     expect(payload.tagIds).toEqual([1]);
     expect(payload.quotaPlanIds).toEqual([2]);
   });

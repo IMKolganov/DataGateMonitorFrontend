@@ -31,4 +31,5 @@ export interface VpnServersRequestsUpdateServerRequest {
   /** @nullable */
   tagIds?: number[] | null;
   isDisabled?: boolean;
+  isDeleted?: boolean;
 }
