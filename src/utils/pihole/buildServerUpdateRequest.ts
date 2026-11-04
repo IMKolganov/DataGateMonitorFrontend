@@ -26,6 +26,7 @@ export function buildUpdateServerRequest(
     longitude: server.longitude ?? null,
     isEnableWss: server.isEnableWss ?? false,
     isPiHoleEnabled: options.isPiHoleEnabled ?? server.isPiHoleEnabled ?? false,
+    isDeleted: server.isDeleted ?? false,
     tagIds: options.tagIds ?? [],
     quotaPlanIds: options.quotaPlanIds ?? [],
   };
