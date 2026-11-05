@@ -132,7 +132,7 @@ export function PendingServerDiscoveryModal() {
       const raw = await approveMutation.mutateAsync({
         discoveryId: current.id,
         data: {
-          isEnableWss: current.isEnableWss ?? false,
+          isEnableWss: true,
           serverName: current.suggestedName ?? undefined,
         },
       });

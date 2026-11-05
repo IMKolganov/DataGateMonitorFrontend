@@ -494,7 +494,7 @@ const ServerForm: React.FC = () => {
     apiUrl: null,
     latitude: null,
     longitude: null,
-    isEnableWss: false,
+    isEnableWss: true,
     isPiHoleEnabled: false,
     isDeleted: false,
     createDate: new Date().toISOString(),
