@@ -63,7 +63,7 @@ export default function PendingServerDiscoveriesPage() {
         discoveryId: item.id,
         data: {
           serverName: item.suggestedName ?? undefined,
-          isEnableWss: item.isEnableWss ?? false,
+          isEnableWss: true,
         },
       });
       const result = unwrapDiscoveryActionResult(raw);
