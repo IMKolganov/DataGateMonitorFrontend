@@ -56,7 +56,7 @@ export default function PendingServerDiscoveryReviewPage() {
 
   const [serverName, setServerName] = useState("");
   const [apiUrl, setApiUrl] = useState("");
-  const [isEnableWss, setIsEnableWss] = useState(false);
+  const [isEnableWss, setIsEnableWss] = useState(true);
   const [isPiHoleEnabled, setIsPiHoleEnabled] = useState(false);
   const [isDefault, setIsDefault] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
@@ -71,7 +71,8 @@ export default function PendingServerDiscoveryReviewPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydrate once per discovery and preserve administrator edits during refetches.
     setServerName(discovery.suggestedName?.trim() || "");
     setApiUrl(discovery.apiUrl?.trim() || "");
-    setIsEnableWss(Boolean(discovery.isEnableWss));
+    // Nodes never announce WSS; raw OpenVPN is cut by DPI in RF, so default to on.
+    setIsEnableWss(true);
     setIsPiHoleEnabled(Boolean(discovery.hasPiHole));
     setIsDefault(false);
     setIsDisabled(false);

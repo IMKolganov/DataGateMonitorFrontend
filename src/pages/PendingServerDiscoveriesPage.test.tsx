@@ -130,7 +130,7 @@ describe("PendingServerDiscoveriesPage", () => {
     await waitFor(() => {
       expect(approveMutateAsync).toHaveBeenCalledWith({
         discoveryId: 10,
-        data: { serverName: "alpha", isEnableWss: false },
+        data: { serverName: "alpha", isEnableWss: true },
       });
     });
     expect(await screen.findByText("Edit page")).toBeInTheDocument();

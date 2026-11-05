@@ -32,7 +32,7 @@ vi.mock("../api/orval/vpn-servers/vpn-servers", () => ({
           suggestedName: "xray-node",
           publicIp: "203.0.113.10",
           serverType: 1,
-          isEnableWss: true,
+          isEnableWss: false,
           hasPiHole: announcedPiHole.value,
           version: "9.9.9",
         },
