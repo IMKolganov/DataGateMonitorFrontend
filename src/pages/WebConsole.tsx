@@ -19,6 +19,7 @@ import {
 import { getSignalRUrl } from "../utils/signalr-url";
 import { resolveHubAccessToken } from "../utils/auth/signalRAccessToken";
 import { getSignalRPreferredTransport } from "../utils/signalrTransport.ts";
+import { withClientIdentityQuery } from "../utils/clientIdentity.ts";
 import { ACCESS_TOKEN_REFRESHED_EVENT } from "../utils/auth/accessTokenEvents.ts";
 import { highlightOvpMgmtLine } from "../utils/ovpMgmtHighlight";
 import { OVP_MGMT_COMMANDS } from "../utils/ovpMgmtCommands";
@@ -101,7 +102,7 @@ export function WebConsole() {
 
         const url = getSignalRUrl(vpnServerId);
         const connection = new HubConnectionBuilder()
-          .withUrl(url, {
+          .withUrl(withClientIdentityQuery(url), {
             transport: getSignalRPreferredTransport(),
             accessTokenFactory: async () => {
               const token = await resolveHubAccessToken();

@@ -4,6 +4,7 @@ import "./utils/auth/authSession.ts";
 import { installDomTranslationGuard } from "./utils/domTranslationGuard";
 import { installNativeDragGuard } from "./utils/nativeDragGuard";
 import { installToastDefaults } from "./utils/installToastDefaults";
+import { installClientIdentityHeaders } from "./utils/clientIdentity";
 import { installMockAuth } from "./mocks/installMockAuth";
 import "./index.css";
 import "./css/ui-patterns.css";
@@ -19,6 +20,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { looksLikeChunkLoadError } from "./utils/chunkLoadError";
 
+installClientIdentityHeaders();
 installMockAuth();
 installDomTranslationGuard();
 installNativeDragGuard();

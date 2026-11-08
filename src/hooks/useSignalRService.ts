@@ -13,6 +13,7 @@ import { ACCESS_TOKEN_KEY } from "../utils/const.ts";
 import { errorMessage } from "../utils/errorMessage.ts";
 import { getStatusStreamHubUrl } from "../utils/signalrHubUrl.ts";
 import { getSignalRPreferredTransport } from "../utils/signalrTransport.ts";
+import { withClientIdentityQuery } from "../utils/clientIdentity.ts";
 import { isMockApiEnabled } from "../mocks/isMockApi.ts";
 
 const MIN_ISO = /^0001-01-01T00:00:00/i;
@@ -130,7 +131,7 @@ export default function useSignalRService() {
                 }
 
                 const conn = new HubConnectionBuilder()
-                    .withUrl(hubUrl, {
+                    .withUrl(withClientIdentityQuery(hubUrl), {
                         accessTokenFactory: () => resolveHubAccessToken(),
                         transport: primaryTransport,
                     })

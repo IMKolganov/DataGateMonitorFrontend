@@ -6,6 +6,7 @@ import { ACCESS_TOKEN_KEY } from "../utils/const";
 import { errorMessage } from "../utils/errorMessage";
 import { getProxyTrafficFlowHubUrl } from "../utils/signalrHubUrl";
 import { getSignalRPreferredTransport } from "../utils/signalrTransport";
+import { withClientIdentityQuery } from "../utils/clientIdentity";
 import { isMockApiEnabled } from "../mocks/isMockApi";
 
 export type ProxyTrafficFlowState = "connected" | "disconnected" | "failed";
@@ -223,7 +224,7 @@ export function useProxyTrafficFlow(enabled: boolean, serverId?: number | null) 
 
         const hubUrl = `${getProxyTrafficFlowHubUrl()}?serverId=${encodeURIComponent(String(serverId))}`;
         const conn = new HubConnectionBuilder()
-          .withUrl(hubUrl, {
+          .withUrl(withClientIdentityQuery(hubUrl), {
             accessTokenFactory: () => resolveHubAccessToken(),
             transport: getSignalRPreferredTransport(),
           })
@@ -418,7 +419,7 @@ export function useProxyTrafficFlowMany(enabled: boolean, serverIds: number[]) {
 
             const hubUrl = `${getProxyTrafficFlowHubUrl()}?serverId=${encodeURIComponent(String(sid))}`;
             const conn = new HubConnectionBuilder()
-              .withUrl(hubUrl, {
+              .withUrl(withClientIdentityQuery(hubUrl), {
                 accessTokenFactory: () => resolveHubAccessToken(),
                 transport: getSignalRPreferredTransport(),
               })

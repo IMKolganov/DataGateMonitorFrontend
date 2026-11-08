@@ -7,6 +7,7 @@ import type { GetVersionDatabaseResponse } from "../api/orvalModelShim";
 import { getApiBaseUrl } from "../config/apiBase";
 import { errorMessage } from "../utils/errorMessage";
 import { getSignalRPreferredTransport } from "../utils/signalrTransport.ts";
+import { withClientIdentityQuery } from "../utils/clientIdentity.ts";
 import { resolveHubAccessToken } from "../utils/auth/signalRAccessToken.ts";
 import "../css/GeoLiteDbDownloader.css";
 
@@ -42,7 +43,7 @@ const idleProgressState: UpdateProgressState = {
 function buildGeoLiteHubConnection(): signalR.HubConnection {
   const hubUrl = `${getApiBaseUrl()}/hubs/geolite`;
   return new signalR.HubConnectionBuilder()
-    .withUrl(hubUrl, {
+    .withUrl(withClientIdentityQuery(hubUrl), {
       accessTokenFactory: () => resolveHubAccessToken(),
       transport: getSignalRPreferredTransport(),
     })
