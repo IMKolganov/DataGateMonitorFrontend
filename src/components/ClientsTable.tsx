@@ -20,6 +20,7 @@ import {
 } from "../api/orval/vpn-server-xray-node/vpn-server-xray-node";
 import { unwrapKillResponse } from "../utils/unwrapKillResponse";
 import { errorMessage } from "../utils/errorMessage";
+import { CountryFlag } from "./ui/CountryFlag.tsx";
 import { GridRowActions, RowActionButton } from "./ui/GridRowActions.tsx";
 
 type ClientDto = VpnClientInfoDto;
@@ -162,6 +163,7 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
                 ? formatDateWithOffset(new Date(client.connectedSince))
                 : "",
             country: [client.country, client.region, client.city].filter(Boolean).join(", "),
+            countryCode: client.country ?? "",
             _cn: commonName,
         };
     });
@@ -222,7 +224,17 @@ const ClientsTable: React.FC<ClientsTableProps> = ({
         { field: "bytesReceived", headerName: "Bytes Received", flex: 0.4 },
         { field: "bytesSent", headerName: "Bytes Sent", flex: 0.4 },
         { field: "connectedSince", headerName: "Connected Since", flex: 0.5 },
-        { field: "country", headerName: "Country", flex: 1 },
+        {
+            field: "country",
+            headerName: "Country",
+            flex: 1,
+            renderCell: (params) => (
+                <>
+                    <CountryFlag code={(params.row as { countryCode?: string }).countryCode} />
+                    {params.value as string}
+                </>
+            ),
+        },
         ];
         if (canXrayAdminActions) {
             return [

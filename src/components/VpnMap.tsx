@@ -1,3 +1,4 @@
+import { CountryFlag } from "./ui/CountryFlag.tsx";
 import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { getPreferenceCookie, setPreferenceCookie } from "../utils/gdpr/cookieConsent";
@@ -1160,6 +1161,7 @@ const VpnMap: React.FC<VpnMapProps> = ({
                     <Popup>
                       <strong>{client.commonName}</strong>
                       <br />
+                      <CountryFlag code={client.country} />
                       {client.city}, {client.country}
                       <br />
                       {client.remoteIp}

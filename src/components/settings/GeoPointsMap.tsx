@@ -1,4 +1,5 @@
 // src/components/GeoPointsMap.tsx
+import { CountryFlag } from "../ui/CountryFlag.tsx";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -474,6 +475,7 @@ export const GeoPointsMap: React.FC<GeoPointsMapProps> = ({
                         >
                             <Popup>
                                 <div className="geo-points-map__popup-content">
+                                    <CountryFlag code={p.country} />
                                     <strong>{p.country ?? "Unknown country"}</strong>
                                     <br />
                                     {p.region ?? "Unknown region"}
